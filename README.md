@@ -64,3 +64,4 @@ Le tableau de bord affiche les avis reçus par semaine, les notes positives et n
 ## Technologies
 
 React, Vite, TypeScript, Tailwind CSS, Supabase Auth/Database, React Router, Recharts, QRCode et Lucide React.
+TapMarrakech - Production
