@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { ReactNode } from 'react';
 import {
   Gift,
   Plus,
@@ -31,16 +30,28 @@ type LoyaltyCustomer = {
   created_at: string;
 };
 
+type LoyaltyProgramSettings = {
+  points_per_currency: number;
+  currency: string;
+  enabled: boolean;
+};
+
 export default function Loyalty() {
   const { user } = useAuth();
 
   const [establishments, setEstablishments] = useState<Establishment[]>([]);
   const [establishmentId, setEstablishmentId] = useState('');
   const [customers, setCustomers] = useState<LoyaltyCustomer[]>([]);
-
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  const [programSettings, setProgramSettings] =
+    useState<LoyaltyProgramSettings>({
+      points_per_currency: 1,
+      currency: 'MAD',
+      enabled: true,
+    });
 
   const [showNewCustomer, setShowNewCustomer] = useState(false);
   const [showPoints, setShowPoints] = useState<LoyaltyCustomer | null>(null);
@@ -56,6 +67,7 @@ export default function Loyalty() {
   useEffect(() => {
     if (establishmentId) {
       loadCustomers();
+      loadProgramSettings();
     }
   }, [establishmentId]);
 
@@ -70,16 +82,12 @@ export default function Loyalty() {
       .eq('user_id', user.id)
       .order('name');
 
-    if (error) {
-      alert(`Impossible de charger les établissements : ${error.message}`);
-      setLoading(false);
-      return;
-    }
+    if (!error) {
+      setEstablishments(data ?? []);
 
-    setEstablishments(data ?? []);
-
-    if (data && data.length > 0) {
-      setEstablishmentId(data[0].id);
+      if (data && data.length > 0) {
+        setEstablishmentId(data[0].id);
+      }
     }
 
     setLoading(false);
@@ -96,14 +104,36 @@ export default function Loyalty() {
       .eq('establishment_id', establishmentId)
       .order('created_at', { ascending: false });
 
-    if (error) {
-      alert(`Impossible de charger les clients : ${error.message}`);
-      setLoading(false);
-      return;
+    if (!error) {
+      setCustomers((data as LoyaltyCustomer[]) ?? []);
     }
 
-    setCustomers((data as LoyaltyCustomer[]) ?? []);
     setLoading(false);
+  }
+
+  async function loadProgramSettings() {
+    if (!establishmentId) return;
+
+    const { data, error } = await supabase
+      .from('loyalty_settings')
+      .select('points_per_currency, currency, enabled')
+      .eq('establishment_id', establishmentId)
+      .maybeSingle();
+
+    if (!error && data) {
+      setProgramSettings({
+        points_per_currency: Number(data.points_per_currency ?? 1),
+        currency: data.currency ?? 'MAD',
+        enabled: data.enabled ?? true,
+      });
+    } else {
+      // Valeurs par défaut si aucun réglage n'est encore enregistré.
+      setProgramSettings({
+        points_per_currency: 1,
+        currency: 'MAD',
+        enabled: true,
+      });
+    }
   }
 
   const filteredCustomers = useMemo(() => {
@@ -124,34 +154,25 @@ export default function Loyalty() {
   );
 
   async function createCustomer() {
-    if (!establishmentId) {
-      alert('Veuillez sélectionner un établissement.');
-      return;
-    }
-
-    const cleanFirstName = firstName.trim();
-    const cleanPhone = phone.trim();
-
-    if (!cleanPhone) {
-      alert('Veuillez saisir un numéro de téléphone.');
-      return;
-    }
+    if (!establishmentId || !phone.trim()) return;
 
     setSaving(true);
+
+    const cleanPhone = phone.trim();
 
     const { error } = await supabase
       .from('loyalty_customers')
       .insert({
         establishment_id: establishmentId,
         phone: cleanPhone,
-        first_name: cleanFirstName || 'Client',
+        first_name: firstName.trim(),
       });
 
     if (error) {
       if (error.code === '23505') {
-        alert('Un client avec ce numéro existe déjà dans cet établissement.');
+        alert('Un client avec ce numéro existe déjà.');
       } else {
-        alert(`Erreur lors de la création : ${error.message}`);
+        alert(error.message);
       }
 
       setSaving(false);
@@ -177,14 +198,32 @@ export default function Loyalty() {
       return;
     }
 
+    if (!programSettings.enabled) {
+      alert(
+        'Le programme de fidélité est actuellement désactivé pour cet établissement.'
+      );
+      return;
+    }
+
+    const rate = Number(programSettings.points_per_currency);
+
+    if (!Number.isFinite(rate) || rate <= 0) {
+      alert(
+        'Le taux de points est invalide. Vérifiez les paramètres du programme fidélité.'
+      );
+      return;
+    }
+
     setSaving(true);
 
-    // V1 :
-    // 1 MAD = 1 point
-    const points = Math.floor(purchaseAmount);
+    // Calcul réel selon la configuration de l'établissement.
+    // Exemple : 250 MAD × 2 points/MAD = 500 points.
+    const points = Math.floor(purchaseAmount * rate);
 
     if (points <= 0) {
-      alert('Le montant doit être supérieur ou égal à 1 MAD.');
+      alert(
+        'Le montant est trop faible pour générer des points avec le taux actuel.'
+      );
       setSaving(false);
       return;
     }
@@ -200,14 +239,12 @@ export default function Loyalty() {
         amount: purchaseAmount,
         points,
         type: 'EARN',
-        description: `Achat de ${purchaseAmount.toFixed(2)} MAD`,
+        description: `Achat de ${purchaseAmount.toFixed(2)} ${programSettings.currency}`,
         transaction_reference: transactionReference,
       });
 
     if (transactionError) {
-      alert(
-        `Impossible d'enregistrer la transaction : ${transactionError.message}`
-      );
+      alert(transactionError.message);
       setSaving(false);
       return;
     }
@@ -227,7 +264,6 @@ export default function Loyalty() {
       alert(
         `La transaction a été enregistrée mais la mise à jour du client a échoué : ${customerError.message}`
       );
-
       setSaving(false);
       return;
     }
@@ -239,6 +275,11 @@ export default function Loyalty() {
 
     setSaving(false);
   }
+
+  const calculatedPoints =
+    Number(amount) > 0
+      ? Math.floor(Number(amount) * programSettings.points_per_currency)
+      : 0;
 
   if (loading && establishments.length === 0) {
     return (
@@ -266,12 +307,51 @@ export default function Loyalty() {
 
         <button
           onClick={() => setShowNewCustomer(true)}
-          disabled={!establishmentId}
-          className="flex w-fit items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-forest-light disabled:opacity-40"
+          disabled={!establishmentId || !programSettings.enabled}
+          className="flex w-fit items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-forest-light disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Plus size={16} />
           Nouveau client
         </button>
+      </div>
+
+      {/* PROGRAM STATUS */}
+      <div
+        className={`mb-6 rounded-2xl border p-5 shadow-soft ${
+          programSettings.enabled
+            ? 'border-forest/10 bg-white'
+            : 'border-red-200 bg-red-50'
+        }`}
+      >
+        <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold">
+              Programme fidélité
+            </p>
+
+            <p className="mt-1 text-sm font-medium text-forest">
+              {programSettings.enabled
+                ? 'Programme actif'
+                : 'Programme désactivé'}
+            </p>
+
+            <p className="mt-1 text-xs text-ink/45">
+              {programSettings.enabled
+                ? `${programSettings.points_per_currency} point(s) par ${programSettings.currency}`
+                : 'Aucun nouveau point ne peut être attribué.'}
+            </p>
+          </div>
+
+          <div
+            className={`rounded-full px-3 py-1.5 text-[11px] font-semibold ${
+              programSettings.enabled
+                ? 'bg-[#e5eee9] text-forest'
+                : 'bg-red-100 text-red-700'
+            }`}
+          >
+            {programSettings.enabled ? 'ACTIF' : 'INACTIF'}
+          </div>
+        </div>
       </div>
 
       {/* ESTABLISHMENT */}
@@ -405,7 +485,8 @@ export default function Loyalty() {
                   <td className="px-6 py-4 text-right">
                     <button
                       onClick={() => setShowPoints(customer)}
-                      className="rounded-lg bg-forest px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-forest-light"
+                      disabled={!programSettings.enabled}
+                      className="rounded-lg bg-forest px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-forest-light disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       Ajouter des points
                     </button>
@@ -434,11 +515,7 @@ export default function Loyalty() {
       {showNewCustomer && (
         <Modal
           title="Nouveau client"
-          onClose={() => {
-            if (!saving) {
-              setShowNewCustomer(false);
-            }
-          }}
+          onClose={() => setShowNewCustomer(false)}
         >
           <div className="space-y-4">
             <div>
@@ -463,7 +540,6 @@ export default function Loyalty() {
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
                 placeholder="06 XX XX XX XX"
-                type="tel"
                 className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-gold"
               />
             </div>
@@ -483,11 +559,7 @@ export default function Loyalty() {
       {showPoints && (
         <Modal
           title="Ajouter des points"
-          onClose={() => {
-            if (!saving) {
-              setShowPoints(null);
-            }
-          }}
+          onClose={() => setShowPoints(null)}
         >
           <div className="space-y-5">
             <div className="rounded-xl bg-[#f7f7f3] p-4">
@@ -514,7 +586,7 @@ export default function Loyalty() {
               <div className="relative mt-2">
                 <input
                   type="number"
-                  min="1"
+                  min="0"
                   step="0.01"
                   value={amount}
                   onChange={e => setAmount(e.target.value)}
@@ -523,8 +595,19 @@ export default function Loyalty() {
                 />
 
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-ink/40">
-                  MAD
+                  {programSettings.currency}
                 </span>
+              </div>
+            </div>
+
+            {/* PROGRAM RULE */}
+            <div className="rounded-xl bg-[#f7f7f3] p-4">
+              <div className="flex justify-between text-xs text-ink/50">
+                <span>Règle du programme</span>
+                <strong className="text-forest">
+                  {programSettings.points_per_currency} pt /{' '}
+                  {programSettings.currency}
+                </strong>
               </div>
             </div>
 
@@ -532,18 +615,13 @@ export default function Loyalty() {
               <div className="rounded-xl border border-gold/30 bg-[#f4ead3] p-4">
                 <div className="flex justify-between text-xs">
                   <span>Points gagnés</span>
-
-                  <strong>
-                    +{Math.floor(Number(amount))}
-                  </strong>
+                  <strong>+{calculatedPoints}</strong>
                 </div>
 
                 <div className="mt-2 flex justify-between text-sm font-semibold text-forest">
                   <span>Nouveau solde</span>
-
                   <span>
-                    {showPoints.points_balance +
-                      Math.floor(Number(amount))}{' '}
+                    {showPoints.points_balance + calculatedPoints}{' '}
                     points
                   </span>
                 </div>
@@ -552,7 +630,11 @@ export default function Loyalty() {
 
             <button
               onClick={addPoints}
-              disabled={saving || Number(amount) <= 0}
+              disabled={
+                saving ||
+                Number(amount) <= 0 ||
+                !programSettings.enabled
+              }
               className="w-full rounded-xl bg-forest px-4 py-3 text-xs font-semibold text-white disabled:opacity-40"
             >
               {saving ? 'Validation...' : 'Valider les points'}
@@ -577,9 +659,7 @@ function Stat({
     <div className="rounded-2xl border border-ink/5 bg-white p-5 shadow-soft">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-medium text-ink/50">
-            {label}
-          </p>
+          <p className="text-xs font-medium text-ink/50">{label}</p>
 
           <p className="mt-3 font-display text-3xl text-forest">
             {value}
@@ -601,7 +681,7 @@ function Modal({
 }: {
   title: string;
   onClose: () => void;
-  children: ReactNode;
+  children: React.ReactNode;
 }) {
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-5">
