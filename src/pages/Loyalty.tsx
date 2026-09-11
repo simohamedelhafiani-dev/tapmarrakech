@@ -8,6 +8,7 @@ import {
   Phone,
   Coins,
   X,
+  CheckCircle2,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
@@ -36,15 +37,30 @@ type LoyaltyProgramSettings = {
   enabled: boolean;
 };
 
+type LoyaltyReward = {
+  id: string;
+  establishment_id: string;
+  name: string;
+  description: string | null;
+  points_required: number;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
 export default function Loyalty() {
   const { user } = useAuth();
 
   const [establishments, setEstablishments] = useState<Establishment[]>([]);
   const [establishmentId, setEstablishmentId] = useState('');
+
   const [customers, setCustomers] = useState<LoyaltyCustomer[]>([]);
+  const [rewards, setRewards] = useState<LoyaltyReward[]>([]);
+
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [redeeming, setRedeeming] = useState(false);
 
   const [programSettings, setProgramSettings] =
     useState<LoyaltyProgramSettings>({
@@ -55,6 +71,7 @@ export default function Loyalty() {
 
   const [showNewCustomer, setShowNewCustomer] = useState(false);
   const [showPoints, setShowPoints] = useState<LoyaltyCustomer | null>(null);
+  const [showRewards, setShowRewards] = useState<LoyaltyCustomer | null>(null);
 
   const [firstName, setFirstName] = useState('');
   const [phone, setPhone] = useState('');
@@ -68,6 +85,7 @@ export default function Loyalty() {
     if (establishmentId) {
       loadCustomers();
       loadProgramSettings();
+      loadRewards();
     }
   }, [establishmentId]);
 
@@ -96,8 +114,6 @@ export default function Loyalty() {
   async function loadCustomers() {
     if (!establishmentId) return;
 
-    setLoading(true);
-
     const { data, error } = await supabase
       .from('loyalty_customers')
       .select('*')
@@ -106,9 +122,9 @@ export default function Loyalty() {
 
     if (!error) {
       setCustomers((data as LoyaltyCustomer[]) ?? []);
+    } else {
+      console.error('Erreur chargement clients:', error);
     }
-
-    setLoading(false);
   }
 
   async function loadProgramSettings() {
@@ -127,12 +143,29 @@ export default function Loyalty() {
         enabled: data.enabled ?? true,
       });
     } else {
-      // Valeurs par défaut si aucun réglage n'est encore enregistré.
       setProgramSettings({
         points_per_currency: 1,
         currency: 'MAD',
         enabled: true,
       });
+    }
+  }
+
+  async function loadRewards() {
+    if (!establishmentId) return;
+
+    const { data, error } = await supabase
+      .from('loyalty_rewards')
+      .select('*')
+      .eq('establishment_id', establishmentId)
+      .eq('active', true)
+      .order('points_required', { ascending: true });
+
+    if (!error) {
+      setRewards((data as LoyaltyReward[]) ?? []);
+    } else {
+      console.error('Erreur chargement récompenses:', error);
+      setRewards([]);
     }
   }
 
@@ -214,19 +247,16 @@ export default function Loyalty() {
       return;
     }
 
-    setSaving(true);
-
-    // Calcul réel selon la configuration de l'établissement.
-    // Exemple : 250 MAD × 2 points/MAD = 500 points.
     const points = Math.floor(purchaseAmount * rate);
 
     if (points <= 0) {
       alert(
         'Le montant est trop faible pour générer des points avec le taux actuel.'
       );
-      setSaving(false);
       return;
     }
+
+    setSaving(true);
 
     const transactionReference = crypto.randomUUID();
 
@@ -276,10 +306,63 @@ export default function Loyalty() {
     setSaving(false);
   }
 
-  const calculatedPoints =
-    Number(amount) > 0
-      ? Math.floor(Number(amount) * programSettings.points_per_currency)
-      : 0;
+  async function redeemReward(
+    customer: LoyaltyCustomer,
+    reward: LoyaltyReward
+  ) {
+    if (!establishmentId) return;
+
+    if (!reward.active) {
+      alert('Cette récompense est inactive.');
+      return;
+    }
+
+    if (customer.points_balance < reward.points_required) {
+      alert(
+        `Ce client ne possède pas assez de points. Il lui manque ${
+          reward.points_required - customer.points_balance
+        } points.`
+      );
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Utiliser "${reward.name}" pour ${customer.first_name || 'ce client'} ?\n\n` +
+        `${reward.points_required} points seront déduits de son compte.`
+    );
+
+    if (!confirmed) return;
+
+    setRedeeming(true);
+
+    const { data, error } = await supabase.rpc(
+      'redeem_loyalty_reward',
+      {
+        p_establishment_id: establishmentId,
+        p_customer_id: customer.id,
+        p_reward_id: reward.id,
+      }
+    );
+
+    if (error) {
+      console.error('Erreur utilisation récompense:', error);
+      alert(error.message);
+      setRedeeming(false);
+      return;
+    }
+
+    const newBalance = Number(data);
+
+    setShowRewards(null);
+
+    await loadCustomers();
+
+    setRedeeming(false);
+
+    alert(
+      `Récompense utilisée avec succès !\n\nNouveau solde : ${newBalance} points.`
+    );
+  }
 
   if (loading && establishments.length === 0) {
     return (
@@ -398,8 +481,8 @@ export default function Loyalty() {
         />
 
         <Stat
-          label="Récompenses"
-          value="Bientôt"
+          label="Récompenses disponibles"
+          value={rewards.length}
           icon={Gift}
         />
       </div>
@@ -433,7 +516,7 @@ export default function Loyalty() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[700px] text-left">
+          <table className="w-full min-w-[900px] text-left">
             <thead>
               <tr className="border-b border-ink/5 text-[10px] uppercase tracking-wider text-ink/40">
                 <th className="px-6 py-4">Client</th>
@@ -441,7 +524,7 @@ export default function Loyalty() {
                 <th className="px-6 py-4">Points</th>
                 <th className="px-6 py-4">Visites</th>
                 <th className="px-6 py-4">Dernière visite</th>
-                <th className="px-6 py-4"></th>
+                <th className="px-6 py-4">Actions</th>
               </tr>
             </thead>
 
@@ -482,14 +565,24 @@ export default function Loyalty() {
                       : '—'}
                   </td>
 
-                  <td className="px-6 py-4 text-right">
-                    <button
-                      onClick={() => setShowPoints(customer)}
-                      disabled={!programSettings.enabled}
-                      className="rounded-lg bg-forest px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-forest-light disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      Ajouter des points
-                    </button>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setShowPoints(customer)}
+                        disabled={!programSettings.enabled}
+                        className="rounded-lg bg-forest px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-forest-light disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        Ajouter
+                      </button>
+
+                      <button
+                        onClick={() => setShowRewards(customer)}
+                        disabled={!programSettings.enabled || rewards.length === 0}
+                        className="rounded-lg border border-gold/30 bg-[#fdf9ef] px-3 py-2 text-[11px] font-semibold text-forest transition hover:bg-[#f4ead3] disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        Récompenses
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -600,10 +693,10 @@ export default function Loyalty() {
               </div>
             </div>
 
-            {/* PROGRAM RULE */}
             <div className="rounded-xl bg-[#f7f7f3] p-4">
               <div className="flex justify-between text-xs text-ink/50">
                 <span>Règle du programme</span>
+
                 <strong className="text-forest">
                   {programSettings.points_per_currency} pt /{' '}
                   {programSettings.currency}
@@ -615,13 +708,25 @@ export default function Loyalty() {
               <div className="rounded-xl border border-gold/30 bg-[#f4ead3] p-4">
                 <div className="flex justify-between text-xs">
                   <span>Points gagnés</span>
-                  <strong>+{calculatedPoints}</strong>
+
+                  <strong>
+                    +
+                    {Math.floor(
+                      Number(amount) *
+                        programSettings.points_per_currency
+                    )}
+                  </strong>
                 </div>
 
                 <div className="mt-2 flex justify-between text-sm font-semibold text-forest">
                   <span>Nouveau solde</span>
+
                   <span>
-                    {showPoints.points_balance + calculatedPoints}{' '}
+                    {showPoints.points_balance +
+                      Math.floor(
+                        Number(amount) *
+                          programSettings.points_per_currency
+                      )}{' '}
                     points
                   </span>
                 </div>
@@ -642,6 +747,107 @@ export default function Loyalty() {
           </div>
         </Modal>
       )}
+
+      {/* REWARDS MODAL */}
+      {showRewards && (
+        <Modal
+          title="Récompenses"
+          onClose={() => setShowRewards(null)}
+        >
+          <div className="space-y-5">
+            <div className="rounded-xl bg-[#f7f7f3] p-4">
+              <p className="text-xs text-ink/45">Client</p>
+
+              <p className="mt-1 font-semibold text-forest">
+                {showRewards.first_name || 'Client'}
+              </p>
+
+              <p className="mt-1 text-xs text-ink/50">
+                {showRewards.phone}
+              </p>
+
+              <div className="mt-3 flex items-center gap-2">
+                <Coins size={15} className="text-gold" />
+
+                <span className="text-sm font-semibold text-gold">
+                  {showRewards.points_balance} points disponibles
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-gold">
+                Récompenses disponibles
+              </p>
+
+              <div className="space-y-3">
+                {rewards.map(reward => {
+                  const canRedeem =
+                    showRewards.points_balance >= reward.points_required;
+
+                  return (
+                    <div
+                      key={reward.id}
+                      className="rounded-xl border border-ink/5 bg-[#fafaf7] p-4"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#f4ead3] text-gold">
+                          <Gift size={18} />
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold text-forest">
+                            {reward.name}
+                          </p>
+
+                          {reward.description && (
+                            <p className="mt-1 text-xs leading-5 text-ink/45">
+                              {reward.description}
+                            </p>
+                          )}
+
+                          <p className="mt-2 text-xs font-semibold text-gold">
+                            ⭐ {reward.points_required} points
+                          </p>
+
+                          {!canRedeem && (
+                            <p className="mt-1 text-[11px] text-red-500">
+                              Il manque{' '}
+                              {reward.points_required -
+                                showRewards.points_balance}{' '}
+                              points
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          redeemReward(showRewards, reward)
+                        }
+                        disabled={!canRedeem || redeeming}
+                        className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-forest-light disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        {redeeming ? (
+                          'Validation...'
+                        ) : canRedeem ? (
+                          <>
+                            <CheckCircle2 size={15} />
+                            Utiliser la récompense
+                          </>
+                        ) : (
+                          'Points insuffisants'
+                        )}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
@@ -659,7 +865,9 @@ function Stat({
     <div className="rounded-2xl border border-ink/5 bg-white p-5 shadow-soft">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-medium text-ink/50">{label}</p>
+          <p className="text-xs font-medium text-ink/50">
+            {label}
+          </p>
 
           <p className="mt-3 font-display text-3xl text-forest">
             {value}
@@ -692,6 +900,7 @@ function Modal({
           </h2>
 
           <button
+            type="button"
             onClick={onClose}
             className="grid h-9 w-9 place-items-center rounded-full bg-[#f7f7f3] text-ink/50"
           >
