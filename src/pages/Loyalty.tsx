@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 import {
   Gift,
   Plus,
@@ -36,6 +37,7 @@ export default function Loyalty() {
   const [establishments, setEstablishments] = useState<Establishment[]>([]);
   const [establishmentId, setEstablishmentId] = useState('');
   const [customers, setCustomers] = useState<LoyaltyCustomer[]>([]);
+
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -68,12 +70,16 @@ export default function Loyalty() {
       .eq('user_id', user.id)
       .order('name');
 
-    if (!error) {
-      setEstablishments(data ?? []);
+    if (error) {
+      alert(`Impossible de charger les établissements : ${error.message}`);
+      setLoading(false);
+      return;
+    }
 
-      if (data && data.length > 0) {
-        setEstablishmentId(data[0].id);
-      }
+    setEstablishments(data ?? []);
+
+    if (data && data.length > 0) {
+      setEstablishmentId(data[0].id);
     }
 
     setLoading(false);
@@ -90,10 +96,13 @@ export default function Loyalty() {
       .eq('establishment_id', establishmentId)
       .order('created_at', { ascending: false });
 
-    if (!error) {
-      setCustomers((data as LoyaltyCustomer[]) ?? []);
+    if (error) {
+      alert(`Impossible de charger les clients : ${error.message}`);
+      setLoading(false);
+      return;
     }
 
+    setCustomers((data as LoyaltyCustomer[]) ?? []);
     setLoading(false);
   }
 
@@ -115,25 +124,34 @@ export default function Loyalty() {
   );
 
   async function createCustomer() {
-    if (!establishmentId || !phone.trim()) return;
+    if (!establishmentId) {
+      alert('Veuillez sélectionner un établissement.');
+      return;
+    }
+
+    const cleanFirstName = firstName.trim();
+    const cleanPhone = phone.trim();
+
+    if (!cleanPhone) {
+      alert('Veuillez saisir un numéro de téléphone.');
+      return;
+    }
 
     setSaving(true);
-
-    const cleanPhone = phone.trim();
 
     const { error } = await supabase
       .from('loyalty_customers')
       .insert({
         establishment_id: establishmentId,
         phone: cleanPhone,
-        first_name: firstName.trim(),
+        first_name: cleanFirstName || 'Client',
       });
 
     if (error) {
       if (error.code === '23505') {
-        alert('Un client avec ce numéro existe déjà.');
+        alert('Un client avec ce numéro existe déjà dans cet établissement.');
       } else {
-        alert(error.message);
+        alert(`Erreur lors de la création : ${error.message}`);
       }
 
       setSaving(false);
@@ -161,9 +179,15 @@ export default function Loyalty() {
 
     setSaving(true);
 
-    // V1 : 1 DH = 1 point.
-    // Le taux sera configurable depuis les paramètres de fidélité dans une prochaine étape.
+    // V1 :
+    // 1 MAD = 1 point
     const points = Math.floor(purchaseAmount);
+
+    if (points <= 0) {
+      alert('Le montant doit être supérieur ou égal à 1 MAD.');
+      setSaving(false);
+      return;
+    }
 
     const transactionReference = crypto.randomUUID();
 
@@ -181,7 +205,9 @@ export default function Loyalty() {
       });
 
     if (transactionError) {
-      alert(transactionError.message);
+      alert(
+        `Impossible d'enregistrer la transaction : ${transactionError.message}`
+      );
       setSaving(false);
       return;
     }
@@ -201,6 +227,7 @@ export default function Loyalty() {
       alert(
         `La transaction a été enregistrée mais la mise à jour du client a échoué : ${customerError.message}`
       );
+
       setSaving(false);
       return;
     }
@@ -407,7 +434,11 @@ export default function Loyalty() {
       {showNewCustomer && (
         <Modal
           title="Nouveau client"
-          onClose={() => setShowNewCustomer(false)}
+          onClose={() => {
+            if (!saving) {
+              setShowNewCustomer(false);
+            }
+          }}
         >
           <div className="space-y-4">
             <div>
@@ -432,6 +463,7 @@ export default function Loyalty() {
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
                 placeholder="06 XX XX XX XX"
+                type="tel"
                 className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-gold"
               />
             </div>
@@ -451,7 +483,11 @@ export default function Loyalty() {
       {showPoints && (
         <Modal
           title="Ajouter des points"
-          onClose={() => setShowPoints(null)}
+          onClose={() => {
+            if (!saving) {
+              setShowPoints(null);
+            }
+          }}
         >
           <div className="space-y-5">
             <div className="rounded-xl bg-[#f7f7f3] p-4">
@@ -478,7 +514,7 @@ export default function Loyalty() {
               <div className="relative mt-2">
                 <input
                   type="number"
-                  min="0"
+                  min="1"
                   step="0.01"
                   value={amount}
                   onChange={e => setAmount(e.target.value)}
@@ -496,11 +532,15 @@ export default function Loyalty() {
               <div className="rounded-xl border border-gold/30 bg-[#f4ead3] p-4">
                 <div className="flex justify-between text-xs">
                   <span>Points gagnés</span>
-                  <strong>+{Math.floor(Number(amount))}</strong>
+
+                  <strong>
+                    +{Math.floor(Number(amount))}
+                  </strong>
                 </div>
 
                 <div className="mt-2 flex justify-between text-sm font-semibold text-forest">
                   <span>Nouveau solde</span>
+
                   <span>
                     {showPoints.points_balance +
                       Math.floor(Number(amount))}{' '}
@@ -537,7 +577,10 @@ function Stat({
     <div className="rounded-2xl border border-ink/5 bg-white p-5 shadow-soft">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-medium text-ink/50">{label}</p>
+          <p className="text-xs font-medium text-ink/50">
+            {label}
+          </p>
+
           <p className="mt-3 font-display text-3xl text-forest">
             {value}
           </p>
@@ -558,13 +601,15 @@ function Modal({
 }: {
   title: string;
   onClose: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-5">
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="font-display text-2xl text-forest">{title}</h2>
+          <h2 className="font-display text-2xl text-forest">
+            {title}
+          </h2>
 
           <button
             onClick={onClose}
