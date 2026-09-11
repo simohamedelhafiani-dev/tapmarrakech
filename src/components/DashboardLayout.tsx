@@ -7,6 +7,7 @@ import {
   LogOut,
   Menu,
   MessageSquare,
+  Settings2,
   X,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -38,6 +39,11 @@ const links = [
     to: '/dashboard/loyalty',
     label: 'Fidélité',
     icon: Gift,
+  },
+  {
+    to: '/dashboard/loyalty/settings',
+    label: 'Programme fidélité',
+    icon: Settings2,
   },
 ];
 
