@@ -9,6 +9,7 @@ import {
   Coins,
   X,
   CheckCircle2,
+  LockKeyhole,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
@@ -70,8 +71,16 @@ export default function Loyalty() {
     });
 
   const [showNewCustomer, setShowNewCustomer] = useState(false);
-  const [showPoints, setShowPoints] = useState<LoyaltyCustomer | null>(null);
-  const [showRewards, setShowRewards] = useState<LoyaltyCustomer | null>(null);
+  const [showPoints, setShowPoints] =
+    useState<LoyaltyCustomer | null>(null);
+  const [showRewards, setShowRewards] =
+    useState<LoyaltyCustomer | null>(null);
+
+  const [selectedReward, setSelectedReward] =
+    useState<LoyaltyReward | null>(null);
+
+  const [showRewardCode, setShowRewardCode] = useState(false);
+  const [rewardCode, setRewardCode] = useState('');
 
   const [firstName, setFirstName] = useState('');
   const [phone, setPhone] = useState('');
@@ -106,6 +115,8 @@ export default function Loyalty() {
       if (data && data.length > 0) {
         setEstablishmentId(data[0].id);
       }
+    } else {
+      console.error('Erreur chargement établissements:', error);
     }
 
     setLoading(false);
@@ -269,7 +280,9 @@ export default function Loyalty() {
         amount: purchaseAmount,
         points,
         type: 'EARN',
-        description: `Achat de ${purchaseAmount.toFixed(2)} ${programSettings.currency}`,
+        description: `Achat de ${purchaseAmount.toFixed(
+          2
+        )} ${programSettings.currency}`,
         transaction_reference: transactionReference,
       });
 
@@ -283,7 +296,8 @@ export default function Loyalty() {
       .from('loyalty_customers')
       .update({
         points_balance: showPoints.points_balance + points,
-        total_points_earned: showPoints.total_points_earned + points,
+        total_points_earned:
+          showPoints.total_points_earned + points,
         visit_count: showPoints.visit_count + 1,
         last_visit_at: new Date().toISOString(),
       })
@@ -306,12 +320,10 @@ export default function Loyalty() {
     setSaving(false);
   }
 
-  async function redeemReward(
+  function selectReward(
     customer: LoyaltyCustomer,
     reward: LoyaltyReward
   ) {
-    if (!establishmentId) return;
-
     if (!reward.active) {
       alert('Cette récompense est inactive.');
       return;
@@ -326,12 +338,35 @@ export default function Loyalty() {
       return;
     }
 
-    const confirmed = window.confirm(
-      `Utiliser "${reward.name}" pour ${customer.first_name || 'ce client'} ?\n\n` +
-        `${reward.points_required} points seront déduits de son compte.`
-    );
+    setSelectedReward(reward);
+    setRewardCode('');
+    setShowRewardCode(true);
+  }
 
-    if (!confirmed) return;
+  async function redeemReward() {
+    if (!establishmentId) return;
+    if (!showRewards) return;
+    if (!selectedReward) return;
+
+    const code = rewardCode.trim();
+
+    if (!code) {
+      alert('Veuillez saisir le code de validation.');
+      return;
+    }
+
+    if (code.length < 4) {
+      alert('Le code doit contenir au moins 4 caractères.');
+      return;
+    }
+
+    if (
+      showRewards.points_balance <
+      selectedReward.points_required
+    ) {
+      alert('Ce client ne possède pas assez de points.');
+      return;
+    }
 
     setRedeeming(true);
 
@@ -339,20 +374,34 @@ export default function Loyalty() {
       'redeem_loyalty_reward',
       {
         p_establishment_id: establishmentId,
-        p_customer_id: customer.id,
-        p_reward_id: reward.id,
+        p_customer_id: showRewards.id,
+        p_reward_id: selectedReward.id,
+        p_reward_code: code,
       }
     );
 
     if (error) {
       console.error('Erreur utilisation récompense:', error);
-      alert(error.message);
+
+      if (
+        error.message
+          .toLowerCase()
+          .includes('code récompense incorrect')
+      ) {
+        alert('❌ Code récompense incorrect.');
+      } else {
+        alert(error.message);
+      }
+
       setRedeeming(false);
       return;
     }
 
     const newBalance = Number(data);
 
+    setRewardCode('');
+    setSelectedReward(null);
+    setShowRewardCode(false);
     setShowRewards(null);
 
     await loadCustomers();
@@ -360,8 +409,25 @@ export default function Loyalty() {
     setRedeeming(false);
 
     alert(
-      `Récompense utilisée avec succès !\n\nNouveau solde : ${newBalance} points.`
+      `✅ Récompense utilisée avec succès !\n\nNouveau solde : ${newBalance} points.`
     );
+  }
+
+  function closeRewards() {
+    if (redeeming) return;
+
+    setRewardCode('');
+    setSelectedReward(null);
+    setShowRewardCode(false);
+    setShowRewards(null);
+  }
+
+  function closeRewardCode() {
+    if (redeeming) return;
+
+    setRewardCode('');
+    setSelectedReward(null);
+    setShowRewardCode(false);
   }
 
   if (loading && establishments.length === 0) {
@@ -450,7 +516,10 @@ export default function Loyalty() {
             className="mt-2 w-full max-w-md rounded-xl border border-ink/10 bg-[#fafaf7] px-4 py-3 text-sm text-ink outline-none"
           >
             {establishments.map(establishment => (
-              <option key={establishment.id} value={establishment.id}>
+              <option
+                key={establishment.id}
+                value={establishment.id}
+              >
                 {establishment.name}
               </option>
             ))}
@@ -475,7 +544,9 @@ export default function Loyalty() {
         <Stat
           label="Clients actifs"
           value={
-            customers.filter(customer => customer.visit_count > 0).length
+            customers.filter(
+              customer => customer.visit_count > 0
+            ).length
           }
           icon={Star}
         />
@@ -576,8 +647,16 @@ export default function Loyalty() {
                       </button>
 
                       <button
-                        onClick={() => setShowRewards(customer)}
-                        disabled={!programSettings.enabled || rewards.length === 0}
+                        onClick={() => {
+                          setShowRewards(customer);
+                          setSelectedReward(null);
+                          setRewardCode('');
+                          setShowRewardCode(false);
+                        }}
+                        disabled={
+                          !programSettings.enabled ||
+                          rewards.length === 0
+                        }
                         className="rounded-lg border border-gold/30 bg-[#fdf9ef] px-3 py-2 text-[11px] font-semibold text-forest transition hover:bg-[#f4ead3] disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         Récompenses
@@ -749,10 +828,10 @@ export default function Loyalty() {
       )}
 
       {/* REWARDS MODAL */}
-      {showRewards && (
+      {showRewards && !showRewardCode && (
         <Modal
           title="Récompenses"
-          onClose={() => setShowRewards(null)}
+          onClose={closeRewards}
         >
           <div className="space-y-5">
             <div className="rounded-xl bg-[#f7f7f3] p-4">
@@ -783,7 +862,8 @@ export default function Loyalty() {
               <div className="space-y-3">
                 {rewards.map(reward => {
                   const canRedeem =
-                    showRewards.points_balance >= reward.points_required;
+                    showRewards.points_balance >=
+                    reward.points_required;
 
                   return (
                     <div
@@ -824,21 +904,16 @@ export default function Loyalty() {
                       <button
                         type="button"
                         onClick={() =>
-                          redeemReward(showRewards, reward)
+                          selectReward(showRewards, reward)
                         }
                         disabled={!canRedeem || redeeming}
                         className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-forest-light disabled:cursor-not-allowed disabled:opacity-40"
                       >
-                        {redeeming ? (
-                          'Validation...'
-                        ) : canRedeem ? (
-                          <>
-                            <CheckCircle2 size={15} />
-                            Utiliser la récompense
-                          </>
-                        ) : (
-                          'Points insuffisants'
-                        )}
+                        <CheckCircle2 size={15} />
+
+                        {canRedeem
+                          ? 'Utiliser la récompense'
+                          : 'Points insuffisants'}
                       </button>
                     </div>
                   );
@@ -848,6 +923,121 @@ export default function Loyalty() {
           </div>
         </Modal>
       )}
+
+      {/* REWARD CODE MODAL */}
+      {showRewardCode &&
+        showRewards &&
+        selectedReward && (
+          <Modal
+            title="Validation de la récompense"
+            onClose={closeRewardCode}
+          >
+            <div className="space-y-5">
+              <div className="rounded-xl border border-gold/30 bg-[#fdf9ef] p-4">
+                <div className="flex items-center gap-3">
+                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#f4ead3] text-gold">
+                    <LockKeyhole size={18} />
+                  </div>
+
+                  <div>
+                    <p className="font-semibold text-forest">
+                      Code de validation
+                    </p>
+
+                    <p className="mt-1 text-xs text-ink/50">
+                      Saisissez le code remis par le responsable.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl bg-[#f7f7f3] p-4">
+                <p className="text-xs text-ink/45">
+                  Récompense sélectionnée
+                </p>
+
+                <p className="mt-1 font-semibold text-forest">
+                  {selectedReward.name}
+                </p>
+
+                <p className="mt-2 text-xs font-semibold text-gold">
+                  ⭐ {selectedReward.points_required} points
+                </p>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-ink/60">
+                  Code récompense
+                </label>
+
+                <input
+                  type="password"
+                  value={rewardCode}
+                  onChange={e => setRewardCode(e.target.value)}
+                  placeholder="Entrez le code"
+                  autoFocus
+                  disabled={redeeming}
+                  className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-center text-lg tracking-[0.25em] outline-none focus:border-gold disabled:opacity-50"
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      redeemReward();
+                    }
+                  }}
+                />
+              </div>
+
+              <div className="rounded-xl bg-[#f7f7f3] p-4">
+                <div className="flex justify-between text-xs">
+                  <span className="text-ink/50">
+                    Client
+                  </span>
+
+                  <strong className="text-forest">
+                    {showRewards.first_name || 'Client'}
+                  </strong>
+                </div>
+
+                <div className="mt-2 flex justify-between text-xs">
+                  <span className="text-ink/50">
+                    Solde actuel
+                  </span>
+
+                  <strong className="text-gold">
+                    {showRewards.points_balance} points
+                  </strong>
+                </div>
+
+                <div className="mt-2 flex justify-between text-xs">
+                  <span className="text-ink/50">
+                    Nouveau solde
+                  </span>
+
+                  <strong className="text-forest">
+                    {showRewards.points_balance -
+                      selectedReward.points_required}{' '}
+                    points
+                  </strong>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={redeemReward}
+                disabled={
+                  redeeming ||
+                  !rewardCode.trim()
+                }
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest px-4 py-3 text-xs font-semibold text-white transition hover:bg-forest-light disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <CheckCircle2 size={16} />
+
+                {redeeming
+                  ? 'Validation...'
+                  : 'Valider la récompense'}
+              </button>
+            </div>
+          </Modal>
+        )}
     </div>
   );
 }
