@@ -1,5 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { DashboardLayout } from '@/components/DashboardLayout';
 
@@ -38,10 +38,22 @@ function App() {
           <Route element={<ProtectedRoute allowedRoles={['responsible']} />}>
             <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/dashboard/establishments" element={<Establishments />} />
-              <Route path="/dashboard/reviews" element={<Reviews />} />
-              <Route path="/dashboard/analytics" element={<Analytics />} />
-              <Route path="/dashboard/loyalty" element={<Loyalty />} />
+              <Route
+                path="/dashboard/establishments"
+                element={<Establishments />}
+              />
+              <Route
+                path="/dashboard/reviews"
+                element={<Reviews />}
+              />
+              <Route
+                path="/dashboard/analytics"
+                element={<Analytics />}
+              />
+              <Route
+                path="/dashboard/loyalty"
+                element={<Loyalty />}
+              />
               <Route
                 path="/dashboard/loyalty/settings"
                 element={<LoyaltySettings />}
@@ -56,7 +68,7 @@ function App() {
             <Route path="/employee" element={<EmployeePlaceholder />} />
           </Route>
 
-          {/* Redirection générale */}
+          {/* Redirection automatique selon le rôle */}
           <Route path="*" element={<RoleRedirect />} />
 
         </Routes>
@@ -66,19 +78,20 @@ function App() {
 }
 
 
-/*
-  Écran temporaire Admin.
-  On va le remplacer par le vrai dashboard Admin
-  dans l'étape suivante.
-*/
+/* =========================================
+   PAGE ADMIN TEMPORAIRE
+========================================= */
+
 function AdminPlaceholder() {
   return (
     <div className="min-h-screen bg-[#f7f7f3] grid place-items-center p-6">
       <div className="text-center">
         <div className="mb-4 text-5xl">👑</div>
+
         <h1 className="font-display text-3xl text-forest">
           Administration TapMarrakech
         </h1>
+
         <p className="mt-2 text-sm text-ink/50">
           Espace administrateur
         </p>
@@ -88,19 +101,20 @@ function AdminPlaceholder() {
 }
 
 
-/*
-  Écran temporaire Employé.
-  On va créer le véritable espace employé
-  après l'espace Admin.
-*/
+/* =========================================
+   PAGE EMPLOYÉ TEMPORAIRE
+========================================= */
+
 function EmployeePlaceholder() {
   return (
     <div className="min-h-screen bg-[#f7f7f3] grid place-items-center p-6">
       <div className="text-center">
         <div className="mb-4 text-5xl">👨‍💼</div>
+
         <h1 className="font-display text-3xl text-forest">
           Espace Employé
         </h1>
+
         <p className="mt-2 text-sm text-ink/50">
           Espace employé TapMarrakech
         </p>
@@ -110,21 +124,38 @@ function EmployeePlaceholder() {
 }
 
 
-/*
-  Redirection automatique selon le rôle.
-*/
-function RoleRedirect() {
-  const storedRole = localStorage.getItem('tapmarrakech_role');
+/* =========================================
+   REDIRECTION SELON LE RÔLE
+========================================= */
 
-  if (storedRole === 'admin') {
+function RoleRedirect() {
+  const { user, role, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen grid place-items-center bg-[#f7f7f3]">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (role === 'admin') {
     return <Navigate to="/admin" replace />;
   }
 
-  if (storedRole === 'employee') {
+  if (role === 'employee') {
     return <Navigate to="/employee" replace />;
   }
 
-  return <Navigate to="/dashboard" replace />;
+  if (role === 'responsible') {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <Navigate to="/login" replace />;
 }
 
 
