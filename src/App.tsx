@@ -12,6 +12,7 @@ import Reviews from '@/pages/Reviews';
 import Analytics from '@/pages/Analytics';
 import Loyalty from '@/pages/Loyalty';
 import LoyaltySettings from '@/pages/LoyaltySettings';
+import Admin from '@/pages/Admin';
 
 function App() {
   return (
@@ -29,7 +30,7 @@ function App() {
               ESPACE ADMIN TAPMARRAKECH
           ========================================= */}
           <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
-            <Route path="/admin" element={<AdminPlaceholder />} />
+            <Route path="/admin" element={<Admin />} />
           </Route>
 
           {/* =========================================
@@ -74,29 +75,6 @@ function App() {
         </Routes>
       </AuthProvider>
     </BrowserRouter>
-  );
-}
-
-
-/* =========================================
-   PAGE ADMIN TEMPORAIRE
-========================================= */
-
-function AdminPlaceholder() {
-  return (
-    <div className="min-h-screen bg-[#f7f7f3] grid place-items-center p-6">
-      <div className="text-center">
-        <div className="mb-4 text-5xl">👑</div>
-
-        <h1 className="font-display text-3xl text-forest">
-          Administration TapMarrakech
-        </h1>
-
-        <p className="mt-2 text-sm text-ink/50">
-          Espace administrateur
-        </p>
-      </div>
-    </div>
   );
 }
 
