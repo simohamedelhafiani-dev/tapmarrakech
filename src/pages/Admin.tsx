@@ -14,6 +14,7 @@ import {
   Power,
   LockKeyhole,
   RefreshCw,
+  MessageSquare,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -43,7 +44,8 @@ type AdminSection =
   | 'establishments'
   | 'responsibles'
   | 'employees'
-  | 'codes';
+  | 'codes'
+  | 'reviews';
 
 export default function Admin() {
   const { user, signOut } = useAuth();
@@ -190,6 +192,11 @@ export default function Admin() {
       id: 'employees',
       label: 'Employés',
       icon: Users,
+    },
+    {
+      id: 'reviews',
+      label: 'Avis reçus',
+      icon: MessageSquare,
     },
     {
       id: 'codes',
@@ -342,6 +349,10 @@ export default function Admin() {
               loading={staffLoading}
               reload={loadStaff}
             />
+          )}
+
+          {section === 'reviews' && (
+            <ReviewsSection establishments={establishments} />
           )}
 
           {section === 'codes' && (
@@ -1482,6 +1493,326 @@ function RewardCodesSection({
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   REVIEWS
+========================================================= */
+
+type AdminReview = {
+  id: string;
+  establishment_id: string;
+  rating: number;
+  type: 'positive' | 'negative';
+  comment: string | null;
+  name: string | null;
+  phone: string | null;
+  email: string | null;
+  status: 'Nouveau' | 'En cours' | 'Traité';
+  created_at: string;
+};
+
+function ReviewsSection({
+  establishments,
+}: {
+  establishments: Establishment[];
+}) {
+  const [reviews, setReviews] = useState<AdminReview[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedEstablishment, setSelectedEstablishment] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState('all');
+
+  const loadReviews = async () => {
+    setLoading(true);
+
+    const { data, error } = await supabase
+      .from('reviews')
+      .select(
+        'id, establishment_id, rating, type, comment, name, phone, email, status, created_at'
+      )
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Erreur avis:', error);
+      setReviews([]);
+    } else {
+      setReviews(data ?? []);
+    }
+
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadReviews();
+  }, []);
+
+  const establishmentMap = useMemo(
+    () =>
+      new Map(
+        establishments.map((establishment) => [
+          establishment.id,
+          establishment.name,
+        ])
+      ),
+    [establishments]
+  );
+
+  const filteredReviews = useMemo(() => {
+    return reviews.filter((review) => {
+      const establishmentMatch =
+        selectedEstablishment === 'all' ||
+        review.establishment_id === selectedEstablishment;
+
+      const statusMatch =
+        selectedStatus === 'all' || review.status === selectedStatus;
+
+      return establishmentMatch && statusMatch;
+    });
+  }, [reviews, selectedEstablishment, selectedStatus]);
+
+  const newCount = reviews.filter(
+    (review) => review.status === 'Nouveau'
+  ).length;
+
+  const positiveCount = reviews.filter(
+    (review) => review.type === 'positive'
+  ).length;
+
+  const averageRating =
+    reviews.length > 0
+      ? (
+          reviews.reduce((total, review) => total + review.rating, 0) /
+          reviews.length
+        ).toFixed(1)
+      : '0.0';
+
+  const formatDate = (date: string) =>
+    new Intl.DateTimeFormat('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(new Date(date));
+
+  return (
+    <div>
+      <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
+            Réputation
+          </p>
+
+          <h2 className="font-display text-3xl text-forest md:text-4xl">
+            Avis reçus
+          </h2>
+
+          <p className="mt-2 max-w-2xl text-sm text-ink/50">
+            Consultez les avis reçus par tous les établissements TapMarrakech.
+          </p>
+        </div>
+
+        <button
+          onClick={loadReviews}
+          className="inline-flex items-center justify-center gap-2 rounded-xl border border-ink/10 bg-white px-4 py-3 text-xs font-semibold transition hover:bg-[#f7f7f3]"
+        >
+          <RefreshCw size={14} />
+          Actualiser
+        </button>
+      </div>
+
+      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          icon={MessageSquare}
+          label="Total avis"
+          value={loading ? '—' : reviews.length}
+        />
+
+        <StatCard
+          icon={CheckCircle2}
+          label="Nouveaux"
+          value={loading ? '—' : newCount}
+        />
+
+        <StatCard
+          icon={BarChart3}
+          label="Note moyenne"
+          value={loading ? '—' : `${averageRating} ★`}
+        />
+
+        <StatCard
+          icon={MessageSquare}
+          label="Avis positifs"
+          value={loading ? '—' : positiveCount}
+        />
+      </div>
+
+      <div className="mb-6 rounded-2xl border border-ink/5 bg-white p-5 shadow-sm">
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="mb-2 block text-xs font-semibold">
+              Établissement
+            </label>
+
+            <select
+              value={selectedEstablishment}
+              onChange={(e) => setSelectedEstablishment(e.target.value)}
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+            >
+              <option value="all">Tous les établissements</option>
+
+              {establishments.map((establishment) => (
+                <option key={establishment.id} value={establishment.id}>
+                  {establishment.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-xs font-semibold">
+              Statut
+            </label>
+
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+            >
+              <option value="all">Tous les statuts</option>
+              <option value="Nouveau">Nouveau</option>
+              <option value="En cours">En cours</option>
+              <option value="Traité">Traité</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div className="overflow-hidden rounded-2xl border border-ink/5 bg-white shadow-sm">
+        {loading ? (
+          <div className="p-10 text-center text-sm text-ink/40">
+            Chargement des avis...
+          </div>
+        ) : filteredReviews.length === 0 ? (
+          <div className="p-12 text-center">
+            <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-forest/10 text-forest">
+              <MessageSquare size={25} />
+            </div>
+
+            <h3 className="mt-5 text-base font-semibold">Aucun avis</h3>
+
+            <p className="mx-auto mt-2 max-w-md text-sm text-ink/45">
+              Aucun avis ne correspond aux filtres sélectionnés.
+            </p>
+          </div>
+        ) : (
+          <div className="divide-y divide-ink/5">
+            {filteredReviews.map((review) => {
+              const establishmentName =
+                establishmentMap.get(review.establishment_id) ??
+                'Établissement inconnu';
+
+              return (
+                <div
+                  key={review.id}
+                  className="p-5 transition hover:bg-[#fdfdfb]"
+                >
+                  <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="rounded-lg bg-forest/10 px-3 py-1.5 text-xs font-semibold text-forest">
+                          {establishmentName}
+                        </span>
+
+                        <span
+                          className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${
+                            review.type === 'positive'
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-red-100 text-red-700'
+                          }`}
+                        >
+                          {review.type === 'positive' ? 'POSITIF' : 'NÉGATIF'}
+                        </span>
+
+                        <span
+                          className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${
+                            review.status === 'Nouveau'
+                              ? 'bg-blue-100 text-blue-700'
+                              : review.status === 'En cours'
+                              ? 'bg-amber-100 text-amber-700'
+                              : 'bg-green-100 text-green-700'
+                          }`}
+                        >
+                          {review.status}
+                        </span>
+                      </div>
+
+                      <div className="mt-4 flex items-center gap-2">
+                        <div className="flex gap-0.5">
+                          {Array.from({ length: 5 }).map((_, index) => (
+                            <span
+                              key={index}
+                              className={
+                                index < review.rating
+                                  ? 'text-gold'
+                                  : 'text-ink/15'
+                              }
+                            >
+                              ★
+                            </span>
+                          ))}
+                        </div>
+
+                        <span className="text-xs font-semibold text-ink/60">
+                          {review.rating}/5
+                        </span>
+                      </div>
+
+                      {review.comment && (
+                        <p className="mt-4 max-w-3xl whitespace-pre-wrap text-sm leading-6 text-ink/70">
+                          « {review.comment} »
+                        </p>
+                      )}
+
+                      <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs text-ink/40">
+                        {review.name && (
+                          <span>
+                            Client :{' '}
+                            <strong className="font-medium text-ink/60">
+                              {review.name}
+                            </strong>
+                          </span>
+                        )}
+
+                        {review.phone && <span>Tél : {review.phone}</span>}
+
+                        {review.email && <span>Email : {review.email}</span>}
+
+                        <span>{formatDate(review.created_at)}</span>
+                      </div>
+                    </div>
+
+                    <div className="shrink-0">
+                      <span className="text-[11px] text-ink/30">
+                        Avis #{review.id.slice(0, 8)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {reviews.length > 0 && (
+        <p className="mt-4 text-xs text-ink/35">
+          {filteredReviews.length} avis affiché
+          {filteredReviews.length > 1 ? 's' : ''} sur {reviews.length}.
+        </p>
+      )}
     </div>
   );
 }
