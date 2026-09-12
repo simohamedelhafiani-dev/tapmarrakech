@@ -1,9 +1,61 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Search, SlidersHorizontal } from 'lucide-react';
+import {
+  AlertTriangle,
+  Brain,
+  CheckCircle2,
+  Lightbulb,
+  Search,
+  SlidersHorizontal,
+  Sparkles,
+  Target,
+} from 'lucide-react';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import type { Review } from '@/lib/types';
 import { Stars } from '@/components/Stars';
+
+type AIRecurringIssue = {
+  topic: string;
+  frequency: string;
+  priority: string;
+  explanation: string;
+};
+
+type AIRecommendation = {
+  priority: string;
+  action: string;
+  reason: string;
+};
+
+type AIAnalysis = {
+  summary: string;
+  sentiment: string;
+  satisfaction_score: number;
+  strengths: string[];
+  weaknesses: string[];
+  recurring_issues: AIRecurringIssue[];
+  recommendations: AIRecommendation[];
+};
+
+type AIResponse = {
+  success: boolean;
+  statistics?: {
+    total_reviews: number;
+    average_rating: number;
+    positive_reviews: number;
+    negative_reviews: number;
+    rating_distribution: {
+      1: number;
+      2: number;
+      3: number;
+      4: number;
+      5: number;
+    };
+  };
+  analysis?: AIAnalysis;
+  error?: string;
+};
 
 export default function Reviews() {
   const { user } = useAuth();
@@ -12,7 +64,15 @@ export default function Reviews() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('Tous');
   const [rating, setRating] = useState('Tous');
+
   const [loading, setLoading] = useState(true);
+
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState('');
+  const [aiAnalysis, setAiAnalysis] =
+    useState<AIAnalysis | null>(null);
+  const [aiStatistics, setAiStatistics] =
+    useState<AIResponse['statistics'] | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -25,11 +85,11 @@ export default function Reviews() {
 
       try {
         /*
-         * On récupère les établissements auxquels
-         * l'utilisateur connecté a réellement accès.
+         * Récupère les établissements accessibles
+         * à l'utilisateur connecté.
          *
          * Admin       → tous les établissements
-         * Responsable → ses établissements liés
+         * Responsable → établissements liés
          */
         const { data: places, error: placesError } =
           await supabase.rpc('get_my_establishments');
@@ -39,6 +99,7 @@ export default function Reviews() {
             'Erreur récupération établissements:',
             placesError
           );
+
           setReviews([]);
           return;
         }
@@ -67,6 +128,7 @@ export default function Reviews() {
             'Erreur récupération avis:',
             error
           );
+
           setReviews([]);
           return;
         }
@@ -98,7 +160,9 @@ export default function Reviews() {
         }`.toLowerCase();
 
       const matchesSearch =
-        searchText.includes(search.toLowerCase());
+        searchText.includes(
+          search.toLowerCase()
+        );
 
       return (
         matchesStatus &&
@@ -134,6 +198,78 @@ export default function Reviews() {
     );
   };
 
+  const analyzeReviews = async () => {
+    if (!reviews.length) {
+      setAiError(
+        'Il faut au moins un avis pour lancer une analyse.'
+      );
+      return;
+    }
+
+    setAiLoading(true);
+    setAiError('');
+    setAiAnalysis(null);
+    setAiStatistics(null);
+
+    try {
+      /*
+       * Aucun avis ni donnée personnelle n'est envoyé
+       * directement depuis le navigateur.
+       *
+       * L'Edge Function récupère elle-même les avis
+       * selon les droits de l'utilisateur connecté.
+       */
+      const { data, error } =
+        await supabase.functions.invoke(
+          'analyze-reviews',
+          {
+            body: {},
+          }
+        );
+
+      if (error) {
+        console.error(
+          'Erreur appel analyse IA:',
+          error
+        );
+
+        setAiError(
+          `Impossible de lancer l'analyse IA : ${error.message}`
+        );
+
+        return;
+      }
+
+      const result =
+        data as AIResponse;
+
+      if (!result?.success || !result.analysis) {
+        setAiError(
+          result?.error ||
+            'La réponse de l’IA est invalide.'
+        );
+
+        return;
+      }
+
+      setAiAnalysis(result.analysis);
+      setAiStatistics(
+        result.statistics ?? null
+      );
+    } catch (error) {
+      console.error(
+        'Erreur analyse IA:',
+        error
+      );
+
+      setAiError(
+        'Une erreur est survenue pendant l’analyse IA.'
+      );
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="grid min-h-[400px] place-items-center">
@@ -144,20 +280,350 @@ export default function Reviews() {
 
   return (
     <div>
+      {/* HEADER */}
       <div className="mb-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">
-          Relation client
-        </p>
+        <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">
+              Relation client
+            </p>
 
-        <h1 className="mt-2 font-display text-4xl text-forest">
-          Avis reçus
-        </h1>
+            <h1 className="mt-2 font-display text-4xl text-forest">
+              Avis reçus
+            </h1>
 
-        <p className="mt-2 text-sm text-ink/50">
-          Lisez et traitez chaque retour de vos clients.
-        </p>
+            <p className="mt-2 text-sm text-ink/50">
+              Lisez, traitez et analysez les retours de
+              vos clients.
+            </p>
+          </div>
+
+          <button
+            onClick={analyzeReviews}
+            disabled={
+              aiLoading || reviews.length === 0
+            }
+            className="flex items-center justify-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-forest-light disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {aiLoading ? (
+              <>
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                Analyse en cours...
+              </>
+            ) : (
+              <>
+                <Brain size={17} />
+                Analyser mes avis avec l’IA
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
+      {/* ERREUR IA */}
+      {aiError && (
+        <div className="mb-5 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <AlertTriangle
+            size={18}
+            className="mt-0.5 shrink-0"
+          />
+
+          <div>
+            <p className="font-semibold">
+              Analyse IA impossible
+            </p>
+
+            <p className="mt-1">
+              {aiError}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* ANALYSE IA */}
+      {aiAnalysis && (
+        <div className="mb-7 overflow-hidden rounded-3xl border border-ink/5 bg-white shadow-soft">
+          {/* ENTÊTE IA */}
+          <div className="bg-forest p-6 text-white md:p-8">
+            <div className="flex flex-col justify-between gap-5 md:flex-row md:items-center">
+              <div>
+                <div className="flex items-center gap-2 text-gold">
+                  <Sparkles size={18} />
+
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em]">
+                    Analyse intelligente
+                  </span>
+                </div>
+
+                <h2 className="mt-2 font-display text-3xl">
+                  Votre réputation en résumé
+                </h2>
+
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-white/60">
+                  Analyse automatique des avis clients
+                  accessibles à votre établissement.
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-white/10 px-6 py-4 text-center">
+                <p className="text-xs uppercase tracking-wider text-white/50">
+                  Satisfaction
+                </p>
+
+                <p className="mt-1 text-3xl font-semibold text-gold">
+                  {Math.round(
+                    aiAnalysis.satisfaction_score
+                  )}
+                  %
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* STATISTIQUES */}
+          {aiStatistics && (
+            <div className="grid border-b border-ink/5 md:grid-cols-4">
+              <div className="p-5 md:border-r border-ink/5">
+                <p className="text-xs text-ink/40">
+                  Avis analysés
+                </p>
+
+                <p className="mt-1 text-2xl font-semibold text-forest">
+                  {aiStatistics.total_reviews}
+                </p>
+              </div>
+
+              <div className="p-5 md:border-r border-ink/5">
+                <p className="text-xs text-ink/40">
+                  Note moyenne
+                </p>
+
+                <p className="mt-1 text-2xl font-semibold text-forest">
+                  ⭐ {aiStatistics.average_rating}/5
+                </p>
+              </div>
+
+              <div className="p-5 md:border-r border-ink/5">
+                <p className="text-xs text-ink/40">
+                  Avis positifs
+                </p>
+
+                <p className="mt-1 text-2xl font-semibold text-forest">
+                  {aiStatistics.positive_reviews}
+                </p>
+              </div>
+
+              <div className="p-5">
+                <p className="text-xs text-ink/40">
+                  Avis à surveiller
+                </p>
+
+                <p className="mt-1 text-2xl font-semibold text-forest">
+                  {aiStatistics.negative_reviews}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* RÉSUMÉ */}
+          <div className="p-6 md:p-8">
+            <div className="rounded-2xl bg-[#f7f7f3] p-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
+                Synthèse
+              </p>
+
+              <p className="mt-3 text-sm leading-7 text-ink/70">
+                {aiAnalysis.summary}
+              </p>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                <span className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-forest shadow-sm">
+                  Sentiment :{' '}
+                  {aiAnalysis.sentiment}
+                </span>
+              </div>
+            </div>
+
+            {/* POINTS FORTS / FAIBLES */}
+            <div className="mt-5 grid gap-5 md:grid-cols-2">
+              <div className="rounded-2xl border border-ink/5 p-5">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2
+                    size={18}
+                    className="text-forest"
+                  />
+
+                  <h3 className="font-semibold text-forest">
+                    Ce que vos clients apprécient
+                  </h3>
+                </div>
+
+                {aiAnalysis.strengths.length ? (
+                  <ul className="mt-4 space-y-3">
+                    {aiAnalysis.strengths.map(
+                      (item, index) => (
+                        <li
+                          key={index}
+                          className="flex gap-2 text-sm leading-6 text-ink/65"
+                        >
+                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-gold" />
+
+                          <span>{item}</span>
+                        </li>
+                      )
+                    )}
+                  </ul>
+                ) : (
+                  <p className="mt-4 text-sm text-ink/40">
+                    Pas assez de données.
+                  </p>
+                )}
+              </div>
+
+              <div className="rounded-2xl border border-ink/5 p-5">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle
+                    size={18}
+                    className="text-[#a15c50]"
+                  />
+
+                  <h3 className="font-semibold text-forest">
+                    Ce qui peut être amélioré
+                  </h3>
+                </div>
+
+                {aiAnalysis.weaknesses.length ? (
+                  <ul className="mt-4 space-y-3">
+                    {aiAnalysis.weaknesses.map(
+                      (item, index) => (
+                        <li
+                          key={index}
+                          className="flex gap-2 text-sm leading-6 text-ink/65"
+                        >
+                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#a15c50]" />
+
+                          <span>{item}</span>
+                        </li>
+                      )
+                    )}
+                  </ul>
+                ) : (
+                  <p className="mt-4 text-sm text-ink/40">
+                    Aucun problème majeur détecté.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* PROBLÈMES RÉCURRENTS */}
+            <div className="mt-5 rounded-2xl border border-ink/5 p-5">
+              <div className="flex items-center gap-2">
+                <Target
+                  size={18}
+                  className="text-gold"
+                />
+
+                <h3 className="font-semibold text-forest">
+                  Problèmes récurrents
+                </h3>
+              </div>
+
+              {aiAnalysis.recurring_issues.length ? (
+                <div className="mt-4 space-y-3">
+                  {aiAnalysis.recurring_issues.map(
+                    (issue, index) => (
+                      <div
+                        key={index}
+                        className="rounded-xl bg-[#f7f7f3] p-4"
+                      >
+                        <div className="flex flex-col justify-between gap-2 md:flex-row">
+                          <p className="font-semibold text-forest">
+                            {issue.topic}
+                          </p>
+
+                          <div className="flex flex-wrap gap-2">
+                            <span className="rounded-full bg-white px-2.5 py-1 text-[11px] text-ink/55">
+                              {issue.frequency}
+                            </span>
+
+                            <span className="rounded-full bg-[#f4e4e1] px-2.5 py-1 text-[11px] font-semibold text-[#a15c50]">
+                              Priorité {issue.priority}
+                            </span>
+                          </div>
+                        </div>
+
+                        <p className="mt-2 text-sm leading-6 text-ink/60">
+                          {issue.explanation}
+                        </p>
+                      </div>
+                    )
+                  )}
+                </div>
+              ) : (
+                <p className="mt-4 text-sm text-ink/40">
+                  Aucun problème récurrent clairement
+                  identifié.
+                </p>
+              )}
+            </div>
+
+            {/* RECOMMANDATIONS */}
+            <div className="mt-5 rounded-2xl bg-[#f7f7f3] p-5">
+              <div className="flex items-center gap-2">
+                <Lightbulb
+                  size={18}
+                  className="text-gold"
+                />
+
+                <h3 className="font-semibold text-forest">
+                  Recommandations IA
+                </h3>
+              </div>
+
+              {aiAnalysis.recommendations.length ? (
+                <div className="mt-4 space-y-3">
+                  {aiAnalysis.recommendations.map(
+                    (recommendation, index) => (
+                      <div
+                        key={index}
+                        className="rounded-xl bg-white p-4 shadow-sm"
+                      >
+                        <div className="flex gap-3">
+                          <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-forest text-xs font-semibold text-white">
+                            {index + 1}
+                          </div>
+
+                          <div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <p className="font-semibold text-forest">
+                                {recommendation.action}
+                              </p>
+
+                              <span className="rounded-full bg-[#f4ead3] px-2.5 py-1 text-[11px] font-semibold text-[#8b6b2c]">
+                                {recommendation.priority}
+                              </span>
+                            </div>
+
+                            <p className="mt-1 text-sm leading-6 text-ink/55">
+                              {recommendation.reason}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  )}
+                </div>
+              ) : (
+                <p className="mt-4 text-sm text-ink/40">
+                  Aucune recommandation disponible.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* FILTRES */}
       <div className="rounded-2xl border border-ink/5 bg-white p-4 shadow-soft">
         <div className="flex flex-col gap-3 md:flex-row">
           <div className="relative flex-1">
@@ -221,6 +687,7 @@ export default function Reviews() {
         </div>
       </div>
 
+      {/* LISTE DES AVIS */}
       <div className="mt-5 space-y-3">
         {filtered.map((review) => (
           <div
