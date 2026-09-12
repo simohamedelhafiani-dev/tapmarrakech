@@ -96,6 +96,7 @@ export default function Dashboard() {
 
   const [places, setPlaces] = useState<Establishment[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [profileName, setProfileName] = useState<string>('');
   const [period, setPeriod] = useState('8w');
   const [loading, setLoading] = useState(true);
 
@@ -103,6 +104,7 @@ export default function Dashboard() {
     if (!user) {
       setPlaces([]);
       setReviews([]);
+      setProfileName('');
       setLoading(false);
       return;
     }
@@ -112,19 +114,37 @@ export default function Dashboard() {
 
       try {
         /*
-         * ADMIN + RESPONSABLE
-         *
-         * get_my_establishments() retourne :
+         * Charger le profil
+         */
+        const { data: profile, error: profileError } =
+          await supabase
+            .from('profiles')
+            .select('name')
+            .eq('id', user.id)
+            .maybeSingle();
+
+        if (profileError) {
+          console.error(
+            'Erreur chargement profil:',
+            profileError
+          );
+        }
+
+        setProfileName(
+          profile?.name ||
+            user.user_metadata?.name ||
+            user.email?.split('@')[0] ||
+            'Utilisateur'
+        );
+
+        /*
+         * Charger les établissements accessibles
          *
          * ADMIN :
          * → tous les établissements
          *
          * RESPONSABLE :
-         * → uniquement les établissements
-         *   auxquels il est rattaché
-         *
-         * Exemple :
-         * Anas → kissko uniquement
+         * → uniquement ses établissements rattachés
          */
         const {
           data: establishments,
@@ -151,8 +171,8 @@ export default function Dashboard() {
         );
 
         /*
-         * Charger les avis uniquement pour les établissements
-         * auxquels l'utilisateur a accès.
+         * Charger uniquement les avis des établissements
+         * accessibles à l'utilisateur.
          */
         let reviewsData: Review[] = [];
 
@@ -277,6 +297,22 @@ export default function Dashboard() {
 
   const latest = reviews.slice(0, 4);
 
+  const isResponsible = role === 'responsible';
+
+  const establishmentName =
+    isResponsible && places.length === 1
+      ? places[0].name
+      : null;
+
+  const roleLabel =
+    role === 'admin'
+      ? 'Administrateur'
+      : role === 'responsible'
+        ? 'Responsable'
+        : role === 'employee'
+          ? 'Employé'
+          : 'Compte';
+
   if (loading) {
     return (
       <div className="h-72 animate-pulse rounded-2xl bg-ink/5" />
@@ -290,15 +326,20 @@ export default function Dashboard() {
       <div className="mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-end">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">
-            Tableau de bord
+            {roleLabel}
+            {establishmentName
+              ? ` · ${establishmentName}`
+              : ''}
           </p>
 
           <h1 className="mt-2 font-display text-4xl text-forest">
-            Bonjour, bienvenue.
+            Bonjour {profileName} 👋
           </h1>
 
           <p className="mt-2 text-sm text-ink/50">
-            Voici ce qui se passe dans vos établissements.
+            {establishmentName
+              ? `Voici ce qui se passe dans votre établissement ${establishmentName}.`
+              : 'Voici ce qui se passe dans vos établissements.'}
           </p>
         </div>
 
@@ -527,15 +568,18 @@ export default function Dashboard() {
         <div className="flex flex-col justify-between gap-5 md:flex-row md:items-center">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
-              Votre réseau
+              {isResponsible
+                ? 'Votre établissement'
+                : 'Votre réseau'}
             </p>
 
             <h2 className="mt-2 font-display text-2xl">
-              {places.length}{' '}
-              établissement
-              {places.length > 1 ? 's' : ''}{' '}
-              connecté
-              {places.length > 1 ? 's' : ''}
+              {establishmentName ||
+                `${places.length} établissement${
+                  places.length > 1 ? 's' : ''
+                } connecté${
+                  places.length > 1 ? 's' : ''
+                }`}
             </h2>
 
             <p className="mt-1 text-sm text-white/50">
