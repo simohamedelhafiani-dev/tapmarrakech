@@ -33,10 +33,6 @@ export default function Establishments() {
   const [qr, setQr] = useState<Establishment | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // --------------------------------------------------
-  // Charger les établissements
-  // --------------------------------------------------
-
   useEffect(() => {
     if (!user) {
       setPlaces([]);
@@ -49,96 +45,38 @@ export default function Establishments() {
       setMessage('');
 
       try {
-        // ADMIN :
-        // Il voit tous les établissements.
-        if (role === 'admin') {
-          const { data, error } = await supabase
-            .from('establishments')
-            .select('*')
-            .order('created_at');
+        /*
+         * ADMIN + RESPONSABLE
+         *
+         * La fonction SQL get_my_establishments()
+         * retourne automatiquement :
+         *
+         * - Admin : tous les établissements
+         * - Responsable : uniquement les établissements
+         *   auxquels il est rattaché
+         * - Employé : uniquement les établissements
+         *   auxquels il est rattaché
+         */
+        const { data, error } = await supabase.rpc(
+          'get_my_establishments'
+        );
 
-          if (error) {
-            console.error(
-              'Erreur chargement établissements admin:',
-              error
-            );
+        if (error) {
+          console.error(
+            'Erreur chargement établissements:',
+            error
+          );
 
-            setMessage(
-              'Impossible de charger les établissements.'
-            );
-
-            setPlaces([]);
-          } else {
-            setPlaces((data ?? []) as Establishment[]);
-          }
-
-          setLoading(false);
-          return;
-        }
-
-        // RESPONSABLE :
-        // Il voit uniquement les établissements auxquels
-        // il est rattaché dans establishment_staff.
-        if (role === 'responsible') {
-          const { data: staffRows, error: staffError } =
-            await supabase
-              .from('establishment_staff')
-              .select('establishment_id')
-              .eq('user_id', user.id)
-              .eq('active', true);
-
-          if (staffError) {
-            console.error(
-              'Erreur chargement rattachements:',
-              staffError
-            );
-
-            setMessage(
-              'Impossible de charger vos établissements.'
-            );
-
-            setPlaces([]);
-            setLoading(false);
-            return;
-          }
-
-          const establishmentIds =
-            (staffRows ?? []).map(
-              (row) => row.establishment_id
-            );
-
-          if (establishmentIds.length === 0) {
-            setPlaces([]);
-            setLoading(false);
-            return;
-          }
-
-          const { data, error } = await supabase
-            .from('establishments')
-            .select('*')
-            .in('id', establishmentIds)
-            .order('created_at');
-
-          if (error) {
-            console.error(
-              'Erreur chargement établissements responsable:',
-              error
-            );
-
-            setMessage(
-              'Impossible de charger vos établissements.'
-            );
-
-            setPlaces([]);
-          } else {
-            setPlaces((data ?? []) as Establishment[]);
-          }
+          setPlaces([]);
+          setMessage(
+            'Impossible de charger vos établissements.'
+          );
 
           setLoading(false);
           return;
         }
 
-        setPlaces([]);
+        setPlaces((data ?? []) as Establishment[]);
         setLoading(false);
       } catch (error) {
         console.error(
@@ -146,11 +84,11 @@ export default function Establishments() {
           error
         );
 
+        setPlaces([]);
         setMessage(
           'Une erreur est survenue lors du chargement.'
         );
 
-        setPlaces([]);
         setLoading(false);
       }
     };
@@ -158,16 +96,8 @@ export default function Establishments() {
     loadEstablishments();
   }, [user, role]);
 
-  // --------------------------------------------------
-  // URL publique
-  // --------------------------------------------------
-
   const publicUrl = (slug: string) =>
     `${window.location.origin}/r/${slug}`;
-
-  // --------------------------------------------------
-  // Enregistrer
-  // --------------------------------------------------
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -181,14 +111,15 @@ export default function Establishments() {
       .trim()
       .replace(/\s+/g, '-');
 
-    // --------------------------------------------------
-    // RESPONSABLE
-    // --------------------------------------------------
-
+    /*
+     * RESPONSABLE
+     *
+     * Il peut uniquement modifier un établissement
+     * auquel il a accès.
+     *
+     * Il ne peut pas en créer.
+     */
     if (role === 'responsible') {
-      // Un responsable ne peut pas créer un nouvel
-      // établissement. Il peut uniquement modifier
-      // celui auquel il est rattaché.
       if (!editing) {
         setMessage(
           'Un responsable ne peut pas créer un établissement.'
@@ -196,8 +127,6 @@ export default function Establishments() {
         return;
       }
 
-      // Vérification supplémentaire :
-      // l'établissement doit bien appartenir à sa liste.
       const authorizedPlace = places.find(
         (place) => place.id === editing
       );
@@ -255,10 +184,12 @@ export default function Establishments() {
       return;
     }
 
-    // --------------------------------------------------
-    // ADMIN
-    // --------------------------------------------------
-
+    /*
+     * ADMIN
+     *
+     * Seul l'Admin TapMarrakech peut créer
+     * de nouveaux établissements.
+     */
     if (role === 'admin') {
       const payload = {
         ...form,
@@ -313,18 +244,10 @@ export default function Establishments() {
     }
   };
 
-  // --------------------------------------------------
-  // Copier
-  // --------------------------------------------------
-
   const copy = async (url: string) => {
     await navigator.clipboard.writeText(url);
     setMessage('Lien copié dans le presse-papiers.');
   };
-
-  // --------------------------------------------------
-  // Télécharger QR
-  // --------------------------------------------------
 
   const download = async (place: Establishment) => {
     const data = await QRCode.toDataURL(
@@ -345,10 +268,6 @@ export default function Establishments() {
     a.click();
   };
 
-  // --------------------------------------------------
-  // Modifier
-  // --------------------------------------------------
-
   const openEdit = (place: Establishment) => {
     setEditing(place.id);
 
@@ -363,10 +282,6 @@ export default function Establishments() {
     setShow(true);
   };
 
-  // --------------------------------------------------
-  // Chargement
-  // --------------------------------------------------
-
   if (loading) {
     return (
       <div className="grid min-h-[400px] place-items-center">
@@ -377,9 +292,7 @@ export default function Establishments() {
 
   return (
     <div>
-      {/* --------------------------------------------------
-          HEADER
-      -------------------------------------------------- */}
+      {/* HEADER */}
 
       <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
@@ -411,9 +324,7 @@ export default function Establishments() {
         )}
       </div>
 
-      {/* --------------------------------------------------
-          MESSAGE
-      -------------------------------------------------- */}
+      {/* MESSAGE */}
 
       {message && (
         <div className="mb-5 rounded-xl bg-[#e5eee9] px-4 py-3 text-sm text-forest">
@@ -421,9 +332,7 @@ export default function Establishments() {
         </div>
       )}
 
-      {/* --------------------------------------------------
-          RESPONSABLE SANS ÉTABLISSEMENT
-      -------------------------------------------------- */}
+      {/* RESPONSABLE SANS ÉTABLISSEMENT */}
 
       {places.length === 0 && role === 'responsible' && (
         <div className="rounded-2xl border border-dashed border-ink/15 bg-white px-6 py-20 text-center">
@@ -443,9 +352,7 @@ export default function Establishments() {
         </div>
       )}
 
-      {/* --------------------------------------------------
-          ADMIN SANS ÉTABLISSEMENT
-      -------------------------------------------------- */}
+      {/* ADMIN SANS ÉTABLISSEMENT */}
 
       {places.length === 0 && role === 'admin' && (
         <div className="rounded-2xl border border-dashed border-ink/15 bg-white px-6 py-20 text-center">
@@ -476,9 +383,7 @@ export default function Establishments() {
         </div>
       )}
 
-      {/* --------------------------------------------------
-          LISTE DES ÉTABLISSEMENTS
-      -------------------------------------------------- */}
+      {/* LISTE */}
 
       {places.length > 0 && (
         <div className="grid gap-5 lg:grid-cols-2">
@@ -552,9 +457,7 @@ export default function Establishments() {
         </div>
       )}
 
-      {/* --------------------------------------------------
-          MODALE CRÉATION / MODIFICATION
-      -------------------------------------------------- */}
+      {/* MODALE */}
 
       {show && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-5">
@@ -661,9 +564,7 @@ export default function Establishments() {
         </div>
       )}
 
-      {/* --------------------------------------------------
-          QR CODE
-      -------------------------------------------------- */}
+      {/* QR CODE */}
 
       {qr && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-5">
@@ -709,10 +610,6 @@ export default function Establishments() {
     </div>
   );
 }
-
-// --------------------------------------------------
-// QR CODE PREVIEW
-// --------------------------------------------------
 
 function QRCodePreview({ url }: { url: string }) {
   const [src, setSrc] = useState('');
