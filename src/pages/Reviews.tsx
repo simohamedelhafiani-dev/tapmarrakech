@@ -8,6 +8,7 @@ import {
   SlidersHorizontal,
   Sparkles,
   Target,
+  Zap,
 } from 'lucide-react';
 
 import { useAuth } from '@/contexts/AuthContext';
@@ -28,6 +29,13 @@ type AIRecommendation = {
   reason: string;
 };
 
+type AIPriorityAction = {
+  priority: string;
+  action: string;
+  reason: string;
+  impact: string;
+};
+
 type AIAnalysis = {
   summary: string;
   sentiment: string;
@@ -36,6 +44,7 @@ type AIAnalysis = {
   weaknesses: string[];
   recurring_issues: AIRecurringIssue[];
   recommendations: AIRecommendation[];
+  actions_prioritaires: AIPriorityAction[];
 };
 
 type AIResponse = {
@@ -91,8 +100,12 @@ export default function Reviews() {
          * Admin       → tous les établissements
          * Responsable → établissements liés
          */
-        const { data: places, error: placesError } =
-          await supabase.rpc('get_my_establishments');
+        const {
+          data: places,
+          error: placesError,
+        } = await supabase.rpc(
+          'get_my_establishments'
+        );
 
         if (placesError) {
           console.error(
@@ -186,6 +199,7 @@ export default function Reviews() {
         'Erreur mise à jour statut:',
         error
       );
+
       return;
     }
 
@@ -203,6 +217,7 @@ export default function Reviews() {
       setAiError(
         'Il faut au moins un avis pour lancer une analyse.'
       );
+
       return;
     }
 
@@ -219,13 +234,15 @@ export default function Reviews() {
        * L'Edge Function récupère elle-même les avis
        * selon les droits de l'utilisateur connecté.
        */
-      const { data, error } =
-        await supabase.functions.invoke(
-          'analyze-reviews',
-          {
-            body: {},
-          }
-        );
+      const {
+        data,
+        error,
+      } = await supabase.functions.invoke(
+        'analyze-reviews',
+        {
+          body: {},
+        }
+      );
 
       if (error) {
         console.error(
@@ -243,7 +260,10 @@ export default function Reviews() {
       const result =
         data as AIResponse;
 
-      if (!result?.success || !result.analysis) {
+      if (
+        !result?.success ||
+        !result.analysis
+      ) {
         setAiError(
           result?.error ||
             'La réponse de l’IA est invalide.'
@@ -253,6 +273,7 @@ export default function Reviews() {
       }
 
       setAiAnalysis(result.analysis);
+
       setAiStatistics(
         result.statistics ?? null
       );
@@ -268,6 +289,30 @@ export default function Reviews() {
     } finally {
       setAiLoading(false);
     }
+  };
+
+  const getPriorityClass = (
+    priority: string
+  ) => {
+    const value =
+      priority.toLowerCase();
+
+    if (
+      value.includes('haute') ||
+      value.includes('high') ||
+      value.includes('urgent')
+    ) {
+      return 'bg-[#f4e4e1] text-[#a15c50]';
+    }
+
+    if (
+      value.includes('moyenne') ||
+      value.includes('medium')
+    ) {
+      return 'bg-[#f4ead3] text-[#8b6b2c]';
+    }
+
+    return 'bg-[#e5eee9] text-forest';
   };
 
   if (loading) {
@@ -301,7 +346,8 @@ export default function Reviews() {
           <button
             onClick={analyzeReviews}
             disabled={
-              aiLoading || reviews.length === 0
+              aiLoading ||
+              reviews.length === 0
             }
             className="flex items-center justify-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-forest-light disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -425,8 +471,8 @@ export default function Reviews() {
             </div>
           )}
 
-          {/* RÉSUMÉ */}
           <div className="p-6 md:p-8">
+            {/* SYNTHÈSE */}
             <div className="rounded-2xl bg-[#f7f7f3] p-5">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
                 Synthèse
@@ -442,6 +488,98 @@ export default function Reviews() {
                   {aiAnalysis.sentiment}
                 </span>
               </div>
+            </div>
+
+            {/* =====================================================
+                NOUVEAU : 3 ACTIONS PRIORITAIRES
+            ====================================================== */}
+            <div className="mt-5 overflow-hidden rounded-2xl border border-gold/20 bg-[#fbfaf7]">
+              <div className="border-b border-ink/5 bg-white p-5">
+                <div className="flex items-center gap-3">
+                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-forest text-gold">
+                    <Zap size={20} />
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
+                      Plan d’action
+                    </p>
+
+                    <h3 className="mt-1 text-lg font-semibold text-forest">
+                      Vos 3 actions prioritaires
+                    </h3>
+
+                    <p className="mt-1 text-sm text-ink/50">
+                      Les actions à mettre en place en priorité
+                      cette semaine.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {aiAnalysis.actions_prioritaires?.length ? (
+                <div className="grid gap-3 p-5">
+                  {aiAnalysis.actions_prioritaires
+                    .slice(0, 3)
+                    .map((action, index) => (
+                      <div
+                        key={index}
+                        className="rounded-2xl bg-white p-5 shadow-sm"
+                      >
+                        <div className="flex items-start gap-4">
+                          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-forest text-sm font-semibold text-gold">
+                            {index + 1}
+                          </div>
+
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                              <h4 className="font-semibold text-forest">
+                                {action.action}
+                              </h4>
+
+                              <span
+                                className={`w-fit rounded-full px-2.5 py-1 text-[11px] font-semibold ${getPriorityClass(
+                                  action.priority
+                                )}`}
+                              >
+                                Priorité {action.priority}
+                              </span>
+                            </div>
+
+                            <div className="mt-3 grid gap-3 md:grid-cols-2">
+                              <div className="rounded-xl bg-[#f7f7f3] p-3">
+                                <p className="text-[10px] font-semibold uppercase tracking-wider text-ink/35">
+                                  Pourquoi ?
+                                </p>
+
+                                <p className="mt-1 text-sm leading-6 text-ink/60">
+                                  {action.reason}
+                                </p>
+                              </div>
+
+                              <div className="rounded-xl bg-[#f7f7f3] p-3">
+                                <p className="text-[10px] font-semibold uppercase tracking-wider text-ink/35">
+                                  Impact attendu
+                                </p>
+
+                                <p className="mt-1 text-sm leading-6 text-ink/60">
+                                  {action.impact}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              ) : (
+                <div className="p-6 text-center">
+                  <p className="text-sm text-ink/40">
+                    Les données disponibles ne permettent pas
+                    encore d’identifier 3 actions prioritaires.
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* POINTS FORTS / FAIBLES */}
@@ -719,7 +857,8 @@ export default function Reviews() {
 
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-ink/5 pt-3">
               <div className="text-xs text-ink/45">
-                {review.name || 'Client anonyme'}
+                {review.name ||
+                  'Client anonyme'}
 
                 {review.email &&
                   ` · ${review.email}`}
@@ -733,7 +872,8 @@ export default function Reviews() {
                 onChange={(e) =>
                   update(
                     review.id,
-                    e.target.value as Review['status']
+                    e.target
+                      .value as Review['status']
                   )
                 }
                 className={`rounded-lg border-0 px-3 py-2 text-xs font-semibold outline-none ${
