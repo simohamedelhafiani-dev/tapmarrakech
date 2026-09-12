@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   BarChart3,
   Building2,
@@ -8,6 +8,12 @@ import {
   Users,
   UserRound,
   X,
+  Copy,
+  CheckCircle2,
+  UserPlus,
+  Power,
+  LockKeyhole,
+  RefreshCw,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,6 +24,18 @@ type Establishment = {
   name: string;
   slug: string;
   created_at: string;
+};
+
+type StaffMember = {
+  id: string;
+  establishment_id: string;
+  user_id: string;
+  role: 'OWNER' | 'MANAGER' | 'STAFF';
+  active: boolean;
+  created_at: string;
+  email: string;
+  name: string;
+  profileRole: 'admin' | 'responsible' | 'employee' | null;
 };
 
 type AdminSection =
@@ -35,7 +53,10 @@ export default function Admin() {
   const [open, setOpen] = useState(false);
 
   const [establishments, setEstablishments] = useState<Establishment[]>([]);
+  const [staff, setStaff] = useState<StaffMember[]>([]);
+
   const [loading, setLoading] = useState(true);
+  const [staffLoading, setStaffLoading] = useState(true);
 
   const loadEstablishments = async () => {
     setLoading(true);
@@ -55,14 +76,95 @@ export default function Admin() {
     setLoading(false);
   };
 
+  const loadStaff = async () => {
+    setStaffLoading(true);
+
+    const { data: staffRows, error: staffError } = await supabase
+      .from('establishment_staff')
+      .select('id, establishment_id, user_id, role, active, created_at')
+      .order('created_at', { ascending: false });
+
+    if (staffError) {
+      console.error('Erreur équipe:', staffError);
+      setStaff([]);
+      setStaffLoading(false);
+      return;
+    }
+
+    const rows = staffRows ?? [];
+    const userIds = rows.map((row) => row.user_id);
+
+    if (userIds.length === 0) {
+      setStaff([]);
+      setStaffLoading(false);
+      return;
+    }
+
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id, email, name, role')
+      .in('id', userIds);
+
+    if (profilesError) {
+      console.error('Erreur profils:', profilesError);
+      setStaff([]);
+      setStaffLoading(false);
+      return;
+    }
+
+    const profileMap = new Map(
+      (profiles ?? []).map((profile) => [
+        profile.id,
+        profile,
+      ])
+    );
+
+    const result: StaffMember[] = rows.map((row) => {
+      const profile = profileMap.get(row.user_id);
+
+      return {
+        id: row.id,
+        establishment_id: row.establishment_id,
+        user_id: row.user_id,
+        role: row.role,
+        active: row.active,
+        created_at: row.created_at,
+        email: profile?.email ?? '—',
+        name: profile?.name ?? 'Utilisateur',
+        profileRole: profile?.role ?? null,
+      };
+    });
+
+    setStaff(result);
+    setStaffLoading(false);
+  };
+
   useEffect(() => {
     loadEstablishments();
+    loadStaff();
   }, []);
+
+  const reloadAll = async () => {
+    await Promise.all([
+      loadEstablishments(),
+      loadStaff(),
+    ]);
+  };
 
   const logout = async () => {
     await signOut();
     navigate('/login');
   };
+
+  const responsibleMembers = useMemo(
+    () => staff.filter((member) => member.role === 'MANAGER'),
+    [staff]
+  );
+
+  const employeeMembers = useMemo(
+    () => staff.filter((member) => member.role === 'STAFF'),
+    [staff]
+  );
 
   const menuItems: {
     id: AdminSection;
@@ -197,13 +299,22 @@ export default function Admin() {
               {currentLabel}
             </h1>
           </div>
+
+          <button
+            onClick={reloadAll}
+            className="flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-3 py-2 text-xs font-medium text-ink transition hover:bg-[#f7f7f3]"
+          >
+            <RefreshCw size={14} />
+            Actualiser
+          </button>
         </header>
 
         <main className="mx-auto max-w-[1440px] p-5 md:p-10">
           {section === 'overview' && (
             <Overview
               establishments={establishments}
-              loading={loading}
+              staff={staff}
+              loading={loading || staffLoading}
             />
           )}
 
@@ -216,26 +327,26 @@ export default function Admin() {
           )}
 
           {section === 'responsibles' && (
-            <EmptySection
-              icon={UserRound}
-              title="Responsables"
-              description="La gestion des responsables sera disponible ici."
+            <ResponsiblesSection
+              establishments={establishments}
+              staff={responsibleMembers}
+              loading={staffLoading}
+              reload={loadStaff}
             />
           )}
 
           {section === 'employees' && (
-            <EmptySection
-              icon={Users}
-              title="Employés"
-              description="La gestion des employés sera disponible ici."
+            <EmployeesSection
+              establishments={establishments}
+              staff={employeeMembers}
+              loading={staffLoading}
+              reload={loadStaff}
             />
           )}
 
           {section === 'codes' && (
-            <EmptySection
-              icon={Gift}
-              title="Codes récompenses"
-              description="La gestion des codes de récompenses sera disponible ici."
+            <RewardCodesSection
+              establishments={establishments}
             />
           )}
         </main>
@@ -244,13 +355,27 @@ export default function Admin() {
   );
 }
 
+/* =========================================================
+   OVERVIEW
+========================================================= */
+
 function Overview({
   establishments,
+  staff,
   loading,
 }: {
   establishments: Establishment[];
+  staff: StaffMember[];
   loading: boolean;
 }) {
+  const responsibles = staff.filter(
+    (member) => member.role === 'MANAGER'
+  );
+
+  const employees = staff.filter(
+    (member) => member.role === 'STAFF'
+  );
+
   return (
     <div>
       <div className="mb-8">
@@ -278,13 +403,13 @@ function Overview({
         <StatCard
           icon={UserRound}
           label="Responsables"
-          value="—"
+          value={loading ? '—' : responsibles.length}
         />
 
         <StatCard
           icon={Users}
           label="Employés"
-          value="—"
+          value={loading ? '—' : employees.length}
         />
       </div>
 
@@ -303,38 +428,59 @@ function Overview({
           </p>
         ) : (
           <div className="mt-5 space-y-3">
-            {establishments.slice(0, 5).map((establishment) => (
-              <div
-                key={establishment.id}
-                className="flex items-center justify-between rounded-xl bg-[#f7f7f3] px-4 py-3"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="grid h-9 w-9 place-items-center rounded-lg bg-forest text-white">
-                    <Building2 size={17} />
+            {establishments.slice(0, 5).map((establishment) => {
+              const establishmentStaff = staff.filter(
+                (member) =>
+                  member.establishment_id === establishment.id
+              );
+
+              const manager = establishmentStaff.find(
+                (member) => member.role === 'MANAGER'
+              );
+
+              return (
+                <div
+                  key={establishment.id}
+                  className="flex flex-col gap-4 rounded-xl bg-[#f7f7f3] px-4 py-4 md:flex-row md:items-center md:justify-between"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="grid h-9 w-9 place-items-center rounded-lg bg-forest text-white">
+                      <Building2 size={17} />
+                    </div>
+
+                    <div>
+                      <p className="text-sm font-medium">
+                        {establishment.name}
+                      </p>
+
+                      <p className="text-xs text-ink/40">
+                        /{establishment.slug}
+                      </p>
+                    </div>
                   </div>
 
-                  <div>
-                    <p className="text-sm font-medium">
-                      {establishment.name}
+                  <div className="text-right">
+                    <p className="text-xs text-ink/45">
+                      Responsable
                     </p>
 
-                    <p className="text-xs text-ink/40">
-                      /{establishment.slug}
+                    <p className="mt-1 text-xs font-semibold text-forest">
+                      {manager?.name ?? 'Non défini'}
                     </p>
                   </div>
                 </div>
-
-                <span className="rounded-full bg-green-100 px-3 py-1 text-[10px] font-semibold text-green-700">
-                  Actif
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
     </div>
   );
 }
+
+/* =========================================================
+   ESTABLISHMENTS
+========================================================= */
 
 function EstablishmentsSection({
   establishments,
@@ -397,45 +543,55 @@ function EstablishmentsSection({
           </div>
         ) : (
           <div className="divide-y divide-ink/5">
-            {establishments.map((establishment) => (
-              <div
-                key={establishment.id}
-                className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="grid h-11 w-11 place-items-center rounded-xl bg-forest text-white">
-                    <Building2 size={19} />
+            {establishments.map((establishment) => {
+              const accessLink = `${window.location.origin}/c/${establishment.slug}`;
+
+              return (
+                <div
+                  key={establishment.id}
+                  className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="grid h-11 w-11 place-items-center rounded-xl bg-forest text-white">
+                      <Building2 size={19} />
+                    </div>
+
+                    <div>
+                      <h3 className="text-sm font-semibold">
+                        {establishment.name}
+                      </h3>
+
+                      <p className="mt-1 text-xs text-ink/40">
+                        Slug : {establishment.slug}
+                      </p>
+
+                      <p className="mt-1 text-[11px] text-ink/35 break-all">
+                        {accessLink}
+                      </p>
+                    </div>
                   </div>
 
-                  <div>
-                    <h3 className="text-sm font-semibold">
-                      {establishment.name}
-                    </h3>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={async () => {
+                        await navigator.clipboard.writeText(
+                          accessLink
+                        );
+                        alert('Lien copié.');
+                      }}
+                      className="inline-flex items-center gap-2 rounded-lg border border-ink/10 px-3 py-2 text-xs font-medium transition hover:bg-[#f7f7f3]"
+                    >
+                      <Copy size={14} />
+                      Copier le lien
+                    </button>
 
-                    <p className="mt-1 text-xs text-ink/40">
-                      Slug : {establishment.slug}
-                    </p>
+                    <span className="rounded-lg bg-green-100 px-3 py-2 text-xs font-semibold text-green-700">
+                      Actif
+                    </span>
                   </div>
                 </div>
-
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() =>
-                      navigator.clipboard.writeText(
-                        `${window.location.origin}/c/${establishment.slug}`
-                      )
-                    }
-                    className="rounded-lg border border-ink/10 px-3 py-2 text-xs font-medium transition hover:bg-[#f7f7f3]"
-                  >
-                    🔗 Copier le lien
-                  </button>
-
-                  <span className="rounded-lg bg-green-100 px-3 py-2 text-xs font-semibold text-green-700">
-                    Actif
-                  </span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -509,8 +665,8 @@ function CreateEstablishmentForm({
           </h3>
 
           <p className="mt-1 text-xs text-ink/40">
-            Créez d’abord l’établissement. Nous ajouterons ensuite son
-            responsable et ses employés.
+            Créez d’abord l’établissement. Vous pourrez ensuite
+            créer son responsable et ses employés.
           </p>
         </div>
 
@@ -543,7 +699,9 @@ function CreateEstablishmentForm({
 
           <input
             value={slug}
-            onChange={(e) => setSlug(generateSlug(e.target.value))}
+            onChange={(e) =>
+              setSlug(generateSlug(e.target.value))
+            }
             placeholder="restaurant-atlas"
             className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none transition focus:border-forest"
           />
@@ -570,6 +728,798 @@ function CreateEstablishmentForm({
   );
 }
 
+/* =========================================================
+   RESPONSIBLES
+========================================================= */
+
+function ResponsiblesSection({
+  establishments,
+  staff,
+  loading,
+  reload,
+}: {
+  establishments: Establishment[];
+  staff: StaffMember[];
+  loading: boolean;
+  reload: () => Promise<void>;
+}) {
+  const [showForm, setShowForm] = useState(false);
+
+  const establishmentMap = useMemo(
+    () =>
+      new Map(
+        establishments.map((establishment) => [
+          establishment.id,
+          establishment,
+        ])
+      ),
+    [establishments]
+  );
+
+  return (
+    <div>
+      <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
+            Administration
+          </p>
+
+          <h2 className="font-display text-3xl text-forest md:text-4xl">
+            Responsables
+          </h2>
+
+          <p className="mt-2 text-sm text-ink/50">
+            Créez et gérez les responsables de chaque établissement.
+          </p>
+        </div>
+
+        <button
+          onClick={() => setShowForm(true)}
+          disabled={establishments.length === 0}
+          className="inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white transition hover:bg-forest-light disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <UserPlus size={16} />
+          Nouveau responsable
+        </button>
+      </div>
+
+      {showForm && (
+        <CreateStaffForm
+          role="responsible"
+          establishments={establishments}
+          close={() => setShowForm(false)}
+          reload={reload}
+        />
+      )}
+
+      <div className="overflow-hidden rounded-2xl border border-ink/5 bg-white shadow-sm">
+        {loading ? (
+          <div className="p-8 text-sm text-ink/40">
+            Chargement...
+          </div>
+        ) : staff.length === 0 ? (
+          <EmptyStaff
+            icon={UserRound}
+            title="Aucun responsable"
+            description="Créez le premier responsable d’un établissement."
+          />
+        ) : (
+          <div className="divide-y divide-ink/5">
+            {staff.map((member) => {
+              const establishment =
+                establishmentMap.get(member.establishment_id);
+
+              return (
+                <StaffRow
+                  key={member.id}
+                  member={member}
+                  establishmentName={
+                    establishment?.name ?? 'Établissement inconnu'
+                  }
+                  reload={reload}
+                />
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   EMPLOYEES
+========================================================= */
+
+function EmployeesSection({
+  establishments,
+  staff,
+  loading,
+  reload,
+}: {
+  establishments: Establishment[];
+  staff: StaffMember[];
+  loading: boolean;
+  reload: () => Promise<void>;
+}) {
+  const [showForm, setShowForm] = useState(false);
+
+  const establishmentMap = useMemo(
+    () =>
+      new Map(
+        establishments.map((establishment) => [
+          establishment.id,
+          establishment,
+        ])
+      ),
+    [establishments]
+  );
+
+  return (
+    <div>
+      <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
+            Administration
+          </p>
+
+          <h2 className="font-display text-3xl text-forest md:text-4xl">
+            Employés
+          </h2>
+
+          <p className="mt-2 text-sm text-ink/50">
+            Créez et gérez les employés rattachés aux établissements.
+          </p>
+        </div>
+
+        <button
+          onClick={() => setShowForm(true)}
+          disabled={establishments.length === 0}
+          className="inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white transition hover:bg-forest-light disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <UserPlus size={16} />
+          Nouvel employé
+        </button>
+      </div>
+
+      {showForm && (
+        <CreateStaffForm
+          role="employee"
+          establishments={establishments}
+          close={() => setShowForm(false)}
+          reload={reload}
+        />
+      )}
+
+      <div className="overflow-hidden rounded-2xl border border-ink/5 bg-white shadow-sm">
+        {loading ? (
+          <div className="p-8 text-sm text-ink/40">
+            Chargement...
+          </div>
+        ) : staff.length === 0 ? (
+          <EmptyStaff
+            icon={Users}
+            title="Aucun employé"
+            description="Créez le premier employé d’un établissement."
+          />
+        ) : (
+          <div className="divide-y divide-ink/5">
+            {staff.map((member) => {
+              const establishment =
+                establishmentMap.get(member.establishment_id);
+
+              return (
+                <StaffRow
+                  key={member.id}
+                  member={member}
+                  establishmentName={
+                    establishment?.name ?? 'Établissement inconnu'
+                  }
+                  reload={reload}
+                />
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   CREATE STAFF
+========================================================= */
+
+function CreateStaffForm({
+  role,
+  establishments,
+  close,
+  reload,
+}: {
+  role: 'responsible' | 'employee';
+  establishments: Establishment[];
+  close: () => void;
+  reload: () => Promise<void>;
+}) {
+  const [establishmentId, setEstablishmentId] = useState(
+    establishments[0]?.id ?? ''
+  );
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const roleLabel =
+    role === 'responsible' ? 'Responsable' : 'Employé';
+
+  const createAccount = async () => {
+    if (!establishmentId) {
+      alert('Veuillez sélectionner un établissement.');
+      return;
+    }
+
+    if (!name.trim()) {
+      alert('Veuillez saisir le nom.');
+      return;
+    }
+
+    if (!email.trim()) {
+      alert('Veuillez saisir l’email.');
+      return;
+    }
+
+    if (password.length < 6) {
+      alert(
+        'Le mot de passe doit contenir au moins 6 caractères.'
+      );
+      return;
+    }
+
+    setSaving(true);
+
+    const { data, error } =
+      await supabase.functions.invoke(
+        'create-staff-account',
+        {
+          body: {
+            establishment_id: establishmentId,
+            email: email.trim().toLowerCase(),
+            password,
+            name: name.trim(),
+            role,
+          },
+        }
+      );
+
+    setSaving(false);
+
+    if (error) {
+      console.error(
+        'Erreur création compte:',
+        error
+      );
+
+      alert(
+        `Impossible de créer le compte : ${error.message}`
+      );
+
+      return;
+    }
+
+    if (!data?.success) {
+      alert(
+        data?.error ??
+          'Impossible de créer le compte.'
+      );
+      return;
+    }
+
+    alert(
+      `${roleLabel} créé avec succès.\n\nEmail : ${email.trim().toLowerCase()}\nMot de passe : ${password}`
+    );
+
+    setName('');
+    setEmail('');
+    setPassword('');
+
+    close();
+    await reload();
+  };
+
+  return (
+    <div className="mb-6 rounded-2xl border border-gold/20 bg-white p-6 shadow-sm">
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
+            Nouveau compte
+          </p>
+
+          <h3 className="mt-1 font-display text-2xl text-forest">
+            Créer un {roleLabel.toLowerCase()}
+          </h3>
+
+          <p className="mt-1 text-xs text-ink/40">
+            Le compte sera automatiquement rattaché à l’établissement.
+          </p>
+        </div>
+
+        <button
+          onClick={close}
+          className="text-ink/40 hover:text-ink"
+        >
+          <X size={20} />
+        </button>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="md:col-span-2">
+          <label className="mb-2 block text-xs font-semibold">
+            Établissement
+          </label>
+
+          <select
+            value={establishmentId}
+            onChange={(e) =>
+              setEstablishmentId(e.target.value)
+            }
+            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+          >
+            {establishments.map((establishment) => (
+              <option
+                key={establishment.id}
+                value={establishment.id}
+              >
+                {establishment.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-xs font-semibold">
+            Nom complet
+          </label>
+
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder={
+              role === 'responsible'
+                ? 'Ex : Ahmed Alaoui'
+                : 'Ex : Yassine Benali'
+            }
+            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+          />
+        </div>
+
+        <div>
+          <label className="mb-2 block text-xs font-semibold">
+            Email
+          </label>
+
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="email@exemple.com"
+            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+          />
+        </div>
+
+        <div className="md:col-span-2">
+          <label className="mb-2 block text-xs font-semibold">
+            Mot de passe initial
+          </label>
+
+          <input
+            type="text"
+            value={password}
+            onChange={(e) =>
+              setPassword(e.target.value)
+            }
+            placeholder="Minimum 6 caractères"
+            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+          />
+
+          <p className="mt-2 text-[11px] text-ink/35">
+            Tu peux donner ce mot de passe au responsable ou à
+            l’employé.
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-6 flex justify-end gap-3">
+        <button
+          onClick={close}
+          disabled={saving}
+          className="rounded-xl border border-ink/10 px-5 py-3 text-sm font-medium"
+        >
+          Annuler
+        </button>
+
+        <button
+          onClick={createAccount}
+          disabled={saving}
+          className="inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+        >
+          <UserPlus size={16} />
+
+          {saving
+            ? 'Création du compte...'
+            : `Créer le ${roleLabel.toLowerCase()}`}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   STAFF ROW
+========================================================= */
+
+function StaffRow({
+  member,
+  establishmentName,
+  reload,
+}: {
+  member: StaffMember;
+  establishmentName: string;
+  reload: () => Promise<void>;
+}) {
+  const [saving, setSaving] = useState(false);
+
+  const toggleActive = async () => {
+    setSaving(true);
+
+    const { error } = await supabase
+      .from('establishment_staff')
+      .update({
+        active: !member.active,
+      })
+      .eq('id', member.id);
+
+    setSaving(false);
+
+    if (error) {
+      console.error(error);
+      alert(
+        `Impossible de modifier le compte : ${error.message}`
+      );
+      return;
+    }
+
+    await reload();
+  };
+
+  return (
+    <div className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
+      <div className="flex min-w-0 items-center gap-4">
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-forest text-white">
+          {member.role === 'MANAGER' ? (
+            <UserRound size={19} />
+          ) : (
+            <Users size={19} />
+          )}
+        </div>
+
+        <div className="min-w-0">
+          <h3 className="truncate text-sm font-semibold text-forest">
+            {member.name}
+          </h3>
+
+          <p className="mt-1 truncate text-xs text-ink/45">
+            {member.email}
+          </p>
+
+          <p className="mt-1 text-xs text-ink/40">
+            {establishmentName}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="rounded-full bg-[#f4ead3] px-3 py-1.5 text-[10px] font-semibold text-forest">
+          {member.role === 'MANAGER'
+            ? 'RESPONSABLE'
+            : 'EMPLOYÉ'}
+        </span>
+
+        <span
+          className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${
+            member.active
+              ? 'bg-green-100 text-green-700'
+              : 'bg-red-100 text-red-700'
+          }`}
+        >
+          {member.active ? 'ACTIF' : 'DÉSACTIVÉ'}
+        </span>
+
+        <button
+          onClick={toggleActive}
+          disabled={saving}
+          className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium transition ${
+            member.active
+              ? 'border-red-200 text-red-600 hover:bg-red-50'
+              : 'border-green-200 text-green-700 hover:bg-green-50'
+          } disabled:opacity-40`}
+        >
+          <Power size={14} />
+
+          {saving
+            ? '...'
+            : member.active
+            ? 'Désactiver'
+            : 'Activer'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   REWARD CODES
+========================================================= */
+
+function RewardCodesSection({
+  establishments,
+}: {
+  establishments: Establishment[];
+}) {
+  const [selectedEstablishment, setSelectedEstablishment] =
+    useState(establishments[0]?.id ?? '');
+
+  const [code, setCode] = useState('');
+  const [confirmCode, setConfirmCode] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (
+      !selectedEstablishment &&
+      establishments.length > 0
+    ) {
+      setSelectedEstablishment(
+        establishments[0].id
+      );
+    }
+  }, [establishments, selectedEstablishment]);
+
+  const selectedName =
+    establishments.find(
+      (establishment) =>
+        establishment.id === selectedEstablishment
+    )?.name ?? '';
+
+  const saveCode = async () => {
+    if (!selectedEstablishment) {
+      alert('Veuillez sélectionner un établissement.');
+      return;
+    }
+
+    if (code.trim().length < 4) {
+      alert(
+        'Le code doit contenir au moins 4 caractères.'
+      );
+      return;
+    }
+
+    if (code !== confirmCode) {
+      alert('Les deux codes ne correspondent pas.');
+      return;
+    }
+
+    setSaving(true);
+
+    const { data, error } = await supabase.rpc(
+      'set_loyalty_admin_code',
+      {
+        target_establishment_id:
+          selectedEstablishment,
+        new_code: code,
+      }
+    );
+
+    setSaving(false);
+
+    if (error) {
+      console.error(
+        'Erreur code récompense:',
+        error
+      );
+
+      alert(
+        `Impossible d'enregistrer le code : ${error.message}`
+      );
+
+      return;
+    }
+
+    if (data !== true) {
+      alert(
+        "Le code n'a pas pu être enregistré."
+      );
+      return;
+    }
+
+    setCode('');
+    setConfirmCode('');
+
+    alert(
+      `Code récompense enregistré pour ${selectedName}.`
+    );
+  };
+
+  if (establishments.length === 0) {
+    return (
+      <div>
+        <div className="mb-8">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
+            Fidélité
+          </p>
+
+          <h2 className="font-display text-3xl text-forest md:text-4xl">
+            Codes récompenses
+          </h2>
+        </div>
+
+        <EmptyStaff
+          icon={Gift}
+          title="Aucun établissement"
+          description="Créez d’abord un établissement avant de configurer son code récompense."
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="mb-8">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
+          Fidélité
+        </p>
+
+        <h2 className="font-display text-3xl text-forest md:text-4xl">
+          Codes récompenses
+        </h2>
+
+        <p className="mt-2 max-w-2xl text-sm text-ink/50">
+          Le code est utilisé uniquement lorsqu’une récompense
+          est consommée. Il ne sert pas à se connecter.
+        </p>
+      </div>
+
+      <div className="max-w-2xl rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
+        <div className="mb-6 flex items-start gap-4 rounded-xl border border-gold/20 bg-[#fdf9ef] p-4">
+          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#f4ead3] text-gold">
+            <LockKeyhole size={18} />
+          </div>
+
+          <div>
+            <p className="text-sm font-semibold text-forest">
+              Code sécurisé
+            </p>
+
+            <p className="mt-1 text-xs leading-5 text-ink/50">
+              Tu définis ici le code de validation et tu le
+              transmets au responsable de l’établissement.
+              Le code n’est jamais affiché dans l’application
+              après son enregistrement.
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-5">
+          <div>
+            <label className="mb-2 block text-xs font-semibold">
+              Établissement
+            </label>
+
+            <select
+              value={selectedEstablishment}
+              onChange={(e) =>
+                setSelectedEstablishment(
+                  e.target.value
+                )
+              }
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+            >
+              {establishments.map((establishment) => (
+                <option
+                  key={establishment.id}
+                  value={establishment.id}
+                >
+                  {establishment.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-xs font-semibold">
+              Nouveau code récompense
+            </label>
+
+            <input
+              type="password"
+              value={code}
+              onChange={(e) =>
+                setCode(e.target.value)
+              }
+              placeholder="Ex : 4829"
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-center text-lg tracking-[0.2em] outline-none focus:border-forest"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-xs font-semibold">
+              Confirmer le code
+            </label>
+
+            <input
+              type="password"
+              value={confirmCode}
+              onChange={(e) =>
+                setConfirmCode(e.target.value)
+              }
+              placeholder="Retapez le code"
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-center text-lg tracking-[0.2em] outline-none focus:border-forest"
+            />
+          </div>
+
+          <button
+            onClick={saveCode}
+            disabled={
+              saving ||
+              !code.trim() ||
+              !confirmCode.trim()
+            }
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-40"
+          >
+            <CheckCircle2 size={16} />
+
+            {saving
+              ? 'Enregistrement...'
+              : 'Enregistrer le code'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   EMPTY
+========================================================= */
+
+function EmptyStaff({
+  icon: Icon,
+  title,
+  description,
+}: {
+  icon: typeof Users;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-ink/5 bg-white p-12 text-center shadow-sm">
+      <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-forest/10 text-forest">
+        <Icon size={25} />
+      </div>
+
+      <h3 className="mt-5 text-base font-semibold">
+        {title}
+      </h3>
+
+      <p className="mx-auto mt-2 max-w-md text-sm text-ink/45">
+        {description}
+      </p>
+    </div>
+  );
+}
+
+/* =========================================================
+   STAT
+========================================================= */
+
 function StatCard({
   icon: Icon,
   label,
@@ -594,44 +1544,6 @@ function StatCard({
       <p className="mt-5 text-xs font-medium text-ink/50">
         {label}
       </p>
-    </div>
-  );
-}
-
-function EmptySection({
-  icon: Icon,
-  title,
-  description,
-}: {
-  icon: typeof Users;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div>
-      <div className="mb-8">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
-          Administration
-        </p>
-
-        <h2 className="font-display text-3xl text-forest md:text-4xl">
-          {title}
-        </h2>
-      </div>
-
-      <div className="rounded-2xl border border-ink/5 bg-white p-12 text-center shadow-sm">
-        <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-forest/10 text-forest">
-          <Icon size={25} />
-        </div>
-
-        <h3 className="mt-5 text-base font-semibold">
-          {title}
-        </h3>
-
-        <p className="mx-auto mt-2 max-w-md text-sm text-ink/45">
-          {description}
-        </p>
-      </div>
     </div>
   );
 }
