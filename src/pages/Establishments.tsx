@@ -1,10 +1,740 @@
 import { useEffect, useState } from 'react';
-import { Building2, Copy, ExternalLink, Link2, Plus, QrCode, Save, X } from 'lucide-react';
+import {
+  Building2,
+  Copy,
+  ExternalLink,
+  Link2,
+  Plus,
+  QrCode,
+  Save,
+  X,
+} from 'lucide-react';
 import QRCode from 'qrcode';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import type { Establishment } from '@/lib/types';
 
-const empty = { name: '', slug: '', logo_url: '', google_review_url: '', redirect_threshold: 4 };
-export default function Establishments() { const { user } = useAuth(); const [places, setPlaces] = useState<Establishment[]>([]); const [form, setForm] = useState(empty); const [editing, setEditing] = useState<string | null>(null); const [show, setShow] = useState(false); const [message, setMessage] = useState(''); const [qr, setQr] = useState<Establishment | null>(null); useEffect(() => { if (user) supabase.from('establishments').select('*').eq('user_id', user.id).order('created_at').then(({ data }) => setPlaces(data ?? [])); }, [user]); const publicUrl = (slug: string) => `${window.location.origin}/r/${slug}`; const save = async (e: React.FormEvent) => { e.preventDefault(); if (!user) return; const payload = { ...form, slug: form.slug.toLowerCase().trim().replace(/\s+/g, '-'), user_id: user.id }; const result = editing ? await supabase.from('establishments').update(payload).eq('id', editing).select().maybeSingle() : await supabase.from('establishments').insert(payload).select().maybeSingle(); if (result.error) { setMessage(result.error.code === '23505' ? 'Ce slug est déjà utilisé.' : 'Impossible d’enregistrer cet établissement.'); return; } if (result.data) setPlaces(editing ? places.map(p => p.id === editing ? result.data as Establishment : p) : [...places, result.data as Establishment]); setShow(false); setEditing(null); setForm(empty); setMessage('Établissement enregistré.'); }; const copy = async (url: string) => { await navigator.clipboard.writeText(url); setMessage('Lien copié dans le presse-papiers.'); }; const download = async (place: Establishment) => { const data = await QRCode.toDataURL(publicUrl(place.slug), { width: 900, margin: 2, color: { dark: '#17352a', light: '#ffffff' } }); const a = document.createElement('a'); a.href = data; a.download = `${place.slug}-qr.png`; a.click(); }; const openEdit = (place: Establishment) => { setEditing(place.id); setForm({ name: place.name, slug: place.slug, logo_url: place.logo_url ?? '', google_review_url: place.google_review_url, redirect_threshold: place.redirect_threshold }); setShow(true); }; return <div><div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">Réseau</p><h1 className="mt-2 font-display text-4xl text-forest">Établissements</h1><p className="mt-2 text-sm text-ink/50">Gérez vos lieux et leurs liens de collecte.</p></div><button onClick={() => { setForm(empty); setEditing(null); setShow(true); }} className="flex w-fit items-center gap-2 rounded-xl bg-forest px-4 py-3 text-xs font-semibold text-white transition hover:bg-forest-light"><Plus size={16} /> Nouvel établissement</button></div>{message && <div className="mb-5 rounded-xl bg-[#e5eee9] px-4 py-3 text-sm text-forest">{message}</div>}{places.length === 0 ? <div className="rounded-2xl border border-dashed border-ink/15 bg-white px-6 py-20 text-center"><Building2 className="mx-auto text-gold" size={36} /><h2 className="mt-4 font-display text-2xl text-forest">Votre réseau commence ici</h2><p className="mx-auto mt-2 max-w-sm text-sm text-ink/50">Créez votre premier établissement pour obtenir votre lien QR et NFC.</p><button onClick={() => setShow(true)} className="mt-6 rounded-xl bg-forest px-5 py-3 text-xs font-semibold text-white">Créer un établissement</button></div> : <div className="grid gap-5 lg:grid-cols-2">{places.map(place => <div key={place.id} className="rounded-2xl border border-ink/5 bg-white p-5 shadow-soft"><div className="flex items-start gap-4"><div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-forest font-display text-2xl text-gold">{place.logo_url ? <img src={place.logo_url} alt="" className="h-full w-full object-cover" /> : place.name[0]}</div><div className="min-w-0 flex-1"><h2 className="font-display text-xl text-forest">{place.name}</h2><p className="mt-1 truncate text-xs text-ink/40">{publicUrl(place.slug)}</p></div><button onClick={() => openEdit(place)} className="text-xs font-semibold text-gold">Modifier</button></div><div className="mt-5 flex flex-wrap gap-2 border-t border-ink/5 pt-4"><button onClick={() => copy(publicUrl(place.slug))} className="flex items-center gap-1.5 rounded-lg bg-[#f7f7f3] px-3 py-2 text-[11px] font-semibold text-forest"><Copy size={13} /> Copier le lien</button><a href={`/r/${place.slug}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 rounded-lg bg-[#f7f7f3] px-3 py-2 text-[11px] font-semibold text-forest"><ExternalLink size={13} /> Voir la page</a><button onClick={() => setQr(place)} className="flex items-center gap-1.5 rounded-lg bg-[#f7f7f3] px-3 py-2 text-[11px] font-semibold text-forest"><QrCode size={13} /> QR Code</button></div></div>)}</div>}{show && <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-5"><form onSubmit={save} className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl"><div className="flex justify-between"><h2 className="font-display text-2xl text-forest">{editing ? 'Modifier l’établissement' : 'Nouvel établissement'}</h2><button type="button" onClick={() => setShow(false)}><X size={20} /></button></div><div className="mt-6 space-y-4">{[['name','Nom de l’établissement','Riad Atlas Marrakech'],['slug','Slug public','riad-atlas'],['logo_url','URL du logo (facultatif)','https://...'],['google_review_url','Lien Google Reviews','https://search.google.com/local/writereview?...']].map(([key, label, placeholder]) => <label key={key} className="block text-xs font-semibold text-ink/65">{label}<input required={key === 'name' || key === 'slug' || key === 'google_review_url'} value={String(form[key as keyof typeof form])} onChange={e => setForm({ ...form, [key]: e.target.value })} placeholder={placeholder} className="mt-2 w-full rounded-xl border border-ink/10 bg-[#fbfaf7] p-3 text-sm font-normal outline-none focus:ring-2 focus:ring-gold" /></label>)}<label className="block text-xs font-semibold text-ink/65">Seuil de redirection vers Google<select value={form.redirect_threshold} onChange={e => setForm({ ...form, redirect_threshold: Number(e.target.value) })} className="mt-2 w-full rounded-xl border border-ink/10 bg-[#fbfaf7] p-3 text-sm font-normal outline-none focus:ring-2 focus:ring-gold">{[1,2,3,4,5].map(n => <option key={n} value={n}>{n} étoile{n > 1 ? 's' : ''} et plus</option>)}</select></label></div><button className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3 text-sm font-semibold text-white"><Save size={16} /> Enregistrer</button></form></div>}{qr && <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-5"><div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center"><div className="flex justify-end"><button onClick={() => setQr(null)}><X size={20} /></button></div><h2 className="font-display text-2xl text-forest">QR Code</h2><p className="mt-1 text-xs text-ink/50">{qr.name}</p><QRCodePreview url={publicUrl(qr.slug)} /><button onClick={() => download(qr)} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3 text-xs font-semibold text-white"><QrCode size={16} /> Télécharger le PNG</button><button onClick={() => copy(publicUrl(qr.slug))} className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#f7f7f3] py-3 text-xs font-semibold text-forest"><Link2 size={16} /> Copier l’URL</button></div></div>}</div>; }
-function QRCodePreview({ url }: { url: string }) { const [src, setSrc] = useState(''); useEffect(() => { QRCode.toDataURL(url, { width: 240, margin: 2, color: { dark: '#17352a', light: '#ffffff' } }).then(setSrc); }, [url]); return src ? <img src={src} alt="QR Code de l'établissement" className="mx-auto mt-5 h-56 w-56" /> : <div className="mx-auto mt-5 h-56 w-56 animate-pulse rounded-xl bg-ink/5" />; }
+const empty = {
+  name: '',
+  slug: '',
+  logo_url: '',
+  google_review_url: '',
+  redirect_threshold: 4,
+};
+
+export default function Establishments() {
+  const { user, role } = useAuth();
+
+  const [places, setPlaces] = useState<Establishment[]>([]);
+  const [form, setForm] = useState(empty);
+  const [editing, setEditing] = useState<string | null>(null);
+  const [show, setShow] = useState(false);
+  const [message, setMessage] = useState('');
+  const [qr, setQr] = useState<Establishment | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // --------------------------------------------------
+  // Charger les établissements
+  // --------------------------------------------------
+
+  useEffect(() => {
+    if (!user) {
+      setPlaces([]);
+      setLoading(false);
+      return;
+    }
+
+    const loadEstablishments = async () => {
+      setLoading(true);
+      setMessage('');
+
+      try {
+        // ADMIN :
+        // Il voit tous les établissements.
+        if (role === 'admin') {
+          const { data, error } = await supabase
+            .from('establishments')
+            .select('*')
+            .order('created_at');
+
+          if (error) {
+            console.error(
+              'Erreur chargement établissements admin:',
+              error
+            );
+
+            setMessage(
+              'Impossible de charger les établissements.'
+            );
+
+            setPlaces([]);
+          } else {
+            setPlaces((data ?? []) as Establishment[]);
+          }
+
+          setLoading(false);
+          return;
+        }
+
+        // RESPONSABLE :
+        // Il voit uniquement les établissements auxquels
+        // il est rattaché dans establishment_staff.
+        if (role === 'responsible') {
+          const { data: staffRows, error: staffError } =
+            await supabase
+              .from('establishment_staff')
+              .select('establishment_id')
+              .eq('user_id', user.id)
+              .eq('active', true);
+
+          if (staffError) {
+            console.error(
+              'Erreur chargement rattachements:',
+              staffError
+            );
+
+            setMessage(
+              'Impossible de charger vos établissements.'
+            );
+
+            setPlaces([]);
+            setLoading(false);
+            return;
+          }
+
+          const establishmentIds =
+            (staffRows ?? []).map(
+              (row) => row.establishment_id
+            );
+
+          if (establishmentIds.length === 0) {
+            setPlaces([]);
+            setLoading(false);
+            return;
+          }
+
+          const { data, error } = await supabase
+            .from('establishments')
+            .select('*')
+            .in('id', establishmentIds)
+            .order('created_at');
+
+          if (error) {
+            console.error(
+              'Erreur chargement établissements responsable:',
+              error
+            );
+
+            setMessage(
+              'Impossible de charger vos établissements.'
+            );
+
+            setPlaces([]);
+          } else {
+            setPlaces((data ?? []) as Establishment[]);
+          }
+
+          setLoading(false);
+          return;
+        }
+
+        setPlaces([]);
+        setLoading(false);
+      } catch (error) {
+        console.error(
+          'Erreur inattendue chargement établissements:',
+          error
+        );
+
+        setMessage(
+          'Une erreur est survenue lors du chargement.'
+        );
+
+        setPlaces([]);
+        setLoading(false);
+      }
+    };
+
+    loadEstablishments();
+  }, [user, role]);
+
+  // --------------------------------------------------
+  // URL publique
+  // --------------------------------------------------
+
+  const publicUrl = (slug: string) =>
+    `${window.location.origin}/r/${slug}`;
+
+  // --------------------------------------------------
+  // Enregistrer
+  // --------------------------------------------------
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!user) return;
+
+    setMessage('');
+
+    const normalizedSlug = form.slug
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-');
+
+    // --------------------------------------------------
+    // RESPONSABLE
+    // --------------------------------------------------
+
+    if (role === 'responsible') {
+      // Un responsable ne peut pas créer un nouvel
+      // établissement. Il peut uniquement modifier
+      // celui auquel il est rattaché.
+      if (!editing) {
+        setMessage(
+          'Un responsable ne peut pas créer un établissement.'
+        );
+        return;
+      }
+
+      // Vérification supplémentaire :
+      // l'établissement doit bien appartenir à sa liste.
+      const authorizedPlace = places.find(
+        (place) => place.id === editing
+      );
+
+      if (!authorizedPlace) {
+        setMessage(
+          'Vous n’êtes pas autorisé à modifier cet établissement.'
+        );
+        return;
+      }
+
+      const payload = {
+        name: form.name,
+        slug: normalizedSlug,
+        logo_url: form.logo_url,
+        google_review_url: form.google_review_url,
+        redirect_threshold: form.redirect_threshold,
+      };
+
+      const result = await supabase
+        .from('establishments')
+        .update(payload)
+        .eq('id', editing)
+        .select()
+        .maybeSingle();
+
+      if (result.error) {
+        console.error(
+          'Erreur modification établissement:',
+          result.error
+        );
+
+        setMessage(
+          'Impossible de modifier cet établissement. Vérifiez vos droits.'
+        );
+
+        return;
+      }
+
+      if (result.data) {
+        setPlaces((current) =>
+          current.map((place) =>
+            place.id === editing
+              ? (result.data as Establishment)
+              : place
+          )
+        );
+      }
+
+      setShow(false);
+      setEditing(null);
+      setForm(empty);
+      setMessage('Établissement enregistré.');
+
+      return;
+    }
+
+    // --------------------------------------------------
+    // ADMIN
+    // --------------------------------------------------
+
+    if (role === 'admin') {
+      const payload = {
+        ...form,
+        slug: normalizedSlug,
+        user_id: user.id,
+      };
+
+      const result = editing
+        ? await supabase
+            .from('establishments')
+            .update(payload)
+            .eq('id', editing)
+            .select()
+            .maybeSingle()
+        : await supabase
+            .from('establishments')
+            .insert(payload)
+            .select()
+            .maybeSingle();
+
+      if (result.error) {
+        console.error(
+          'Erreur enregistrement établissement:',
+          result.error
+        );
+
+        setMessage(
+          result.error.code === '23505'
+            ? 'Ce slug est déjà utilisé.'
+            : 'Impossible d’enregistrer cet établissement.'
+        );
+
+        return;
+      }
+
+      if (result.data) {
+        setPlaces((current) =>
+          editing
+            ? current.map((place) =>
+                place.id === editing
+                  ? (result.data as Establishment)
+                  : place
+              )
+            : [...current, result.data as Establishment]
+        );
+      }
+
+      setShow(false);
+      setEditing(null);
+      setForm(empty);
+      setMessage('Établissement enregistré.');
+    }
+  };
+
+  // --------------------------------------------------
+  // Copier
+  // --------------------------------------------------
+
+  const copy = async (url: string) => {
+    await navigator.clipboard.writeText(url);
+    setMessage('Lien copié dans le presse-papiers.');
+  };
+
+  // --------------------------------------------------
+  // Télécharger QR
+  // --------------------------------------------------
+
+  const download = async (place: Establishment) => {
+    const data = await QRCode.toDataURL(
+      publicUrl(place.slug),
+      {
+        width: 900,
+        margin: 2,
+        color: {
+          dark: '#17352a',
+          light: '#ffffff',
+        },
+      }
+    );
+
+    const a = document.createElement('a');
+    a.href = data;
+    a.download = `${place.slug}-qr.png`;
+    a.click();
+  };
+
+  // --------------------------------------------------
+  // Modifier
+  // --------------------------------------------------
+
+  const openEdit = (place: Establishment) => {
+    setEditing(place.id);
+
+    setForm({
+      name: place.name,
+      slug: place.slug,
+      logo_url: place.logo_url ?? '',
+      google_review_url: place.google_review_url,
+      redirect_threshold: place.redirect_threshold,
+    });
+
+    setShow(true);
+  };
+
+  // --------------------------------------------------
+  // Chargement
+  // --------------------------------------------------
+
+  if (loading) {
+    return (
+      <div className="grid min-h-[400px] place-items-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      {/* --------------------------------------------------
+          HEADER
+      -------------------------------------------------- */}
+
+      <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">
+            Réseau
+          </p>
+
+          <h1 className="mt-2 font-display text-4xl text-forest">
+            Établissements
+          </h1>
+
+          <p className="mt-2 text-sm text-ink/50">
+            Gérez vos lieux et leurs liens de collecte.
+          </p>
+        </div>
+
+        {role === 'admin' && (
+          <button
+            onClick={() => {
+              setForm(empty);
+              setEditing(null);
+              setShow(true);
+            }}
+            className="flex w-fit items-center gap-2 rounded-xl bg-forest px-4 py-3 text-xs font-semibold text-white transition hover:bg-forest-light"
+          >
+            <Plus size={16} />
+            Nouvel établissement
+          </button>
+        )}
+      </div>
+
+      {/* --------------------------------------------------
+          MESSAGE
+      -------------------------------------------------- */}
+
+      {message && (
+        <div className="mb-5 rounded-xl bg-[#e5eee9] px-4 py-3 text-sm text-forest">
+          {message}
+        </div>
+      )}
+
+      {/* --------------------------------------------------
+          RESPONSABLE SANS ÉTABLISSEMENT
+      -------------------------------------------------- */}
+
+      {places.length === 0 && role === 'responsible' && (
+        <div className="rounded-2xl border border-dashed border-ink/15 bg-white px-6 py-20 text-center">
+          <Building2
+            className="mx-auto text-gold"
+            size={36}
+          />
+
+          <h2 className="mt-4 font-display text-2xl text-forest">
+            Aucun établissement
+          </h2>
+
+          <p className="mx-auto mt-2 max-w-sm text-sm text-ink/50">
+            Aucun établissement actif ne vous est actuellement
+            rattaché.
+          </p>
+        </div>
+      )}
+
+      {/* --------------------------------------------------
+          ADMIN SANS ÉTABLISSEMENT
+      -------------------------------------------------- */}
+
+      {places.length === 0 && role === 'admin' && (
+        <div className="rounded-2xl border border-dashed border-ink/15 bg-white px-6 py-20 text-center">
+          <Building2
+            className="mx-auto text-gold"
+            size={36}
+          />
+
+          <h2 className="mt-4 font-display text-2xl text-forest">
+            Votre réseau commence ici
+          </h2>
+
+          <p className="mx-auto mt-2 max-w-sm text-sm text-ink/50">
+            Créez votre premier établissement pour obtenir
+            votre lien QR et NFC.
+          </p>
+
+          <button
+            onClick={() => {
+              setForm(empty);
+              setEditing(null);
+              setShow(true);
+            }}
+            className="mt-6 rounded-xl bg-forest px-5 py-3 text-xs font-semibold text-white"
+          >
+            Créer un établissement
+          </button>
+        </div>
+      )}
+
+      {/* --------------------------------------------------
+          LISTE DES ÉTABLISSEMENTS
+      -------------------------------------------------- */}
+
+      {places.length > 0 && (
+        <div className="grid gap-5 lg:grid-cols-2">
+          {places.map((place) => (
+            <div
+              key={place.id}
+              className="rounded-2xl border border-ink/5 bg-white p-5 shadow-soft"
+            >
+              <div className="flex items-start gap-4">
+                <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-forest font-display text-2xl text-gold">
+                  {place.logo_url ? (
+                    <img
+                      src={place.logo_url}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    place.name[0]
+                  )}
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <h2 className="font-display text-xl text-forest">
+                    {place.name}
+                  </h2>
+
+                  <p className="mt-1 truncate text-xs text-ink/40">
+                    {publicUrl(place.slug)}
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => openEdit(place)}
+                  className="text-xs font-semibold text-gold"
+                >
+                  Modifier
+                </button>
+              </div>
+
+              <div className="mt-5 flex flex-wrap gap-2 border-t border-ink/5 pt-4">
+                <button
+                  onClick={() =>
+                    copy(publicUrl(place.slug))
+                  }
+                  className="flex items-center gap-1.5 rounded-lg bg-[#f7f7f3] px-3 py-2 text-[11px] font-semibold text-forest"
+                >
+                  <Copy size={13} />
+                  Copier le lien
+                </button>
+
+                <a
+                  href={`/r/${place.slug}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-1.5 rounded-lg bg-[#f7f7f3] px-3 py-2 text-[11px] font-semibold text-forest"
+                >
+                  <ExternalLink size={13} />
+                  Voir la page
+                </a>
+
+                <button
+                  onClick={() => setQr(place)}
+                  className="flex items-center gap-1.5 rounded-lg bg-[#f7f7f3] px-3 py-2 text-[11px] font-semibold text-forest"
+                >
+                  <QrCode size={13} />
+                  QR Code
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* --------------------------------------------------
+          MODALE CRÉATION / MODIFICATION
+      -------------------------------------------------- */}
+
+      {show && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-5">
+          <form
+            onSubmit={save}
+            className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl"
+          >
+            <div className="flex justify-between">
+              <h2 className="font-display text-2xl text-forest">
+                {editing
+                  ? 'Modifier l’établissement'
+                  : 'Nouvel établissement'}
+              </h2>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShow(false);
+                  setEditing(null);
+                  setForm(empty);
+                }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="mt-6 space-y-4">
+              {[
+                [
+                  'name',
+                  'Nom de l’établissement',
+                  'Riad Atlas Marrakech',
+                ],
+                ['slug', 'Slug public', 'riad-atlas'],
+                [
+                  'logo_url',
+                  'URL du logo (facultatif)',
+                  'https://...',
+                ],
+                [
+                  'google_review_url',
+                  'Lien Google Reviews',
+                  'https://search.google.com/local/writereview?...',
+                ],
+              ].map(([key, label, placeholder]) => (
+                <label
+                  key={key}
+                  className="block text-xs font-semibold text-ink/65"
+                >
+                  {label}
+
+                  <input
+                    required={
+                      key === 'name' ||
+                      key === 'slug' ||
+                      key === 'google_review_url'
+                    }
+                    value={String(
+                      form[key as keyof typeof form]
+                    )}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        [key]: e.target.value,
+                      })
+                    }
+                    placeholder={placeholder}
+                    className="mt-2 w-full rounded-xl border border-ink/10 bg-[#fbfaf7] p-3 text-sm font-normal outline-none focus:ring-2 focus:ring-gold"
+                  />
+                </label>
+              ))}
+
+              <label className="block text-xs font-semibold text-ink/65">
+                Seuil de redirection vers Google
+
+                <select
+                  value={form.redirect_threshold}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      redirect_threshold: Number(
+                        e.target.value
+                      ),
+                    })
+                  }
+                  className="mt-2 w-full rounded-xl border border-ink/10 bg-[#fbfaf7] p-3 text-sm font-normal outline-none focus:ring-2 focus:ring-gold"
+                >
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <option key={n} value={n}>
+                      {n} étoile{n > 1 ? 's' : ''} et plus
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            <button
+              className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3 text-sm font-semibold text-white"
+            >
+              <Save size={16} />
+              Enregistrer
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* --------------------------------------------------
+          QR CODE
+      -------------------------------------------------- */}
+
+      {qr && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-5">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center">
+            <div className="flex justify-end">
+              <button onClick={() => setQr(null)}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <h2 className="font-display text-2xl text-forest">
+              QR Code
+            </h2>
+
+            <p className="mt-1 text-xs text-ink/50">
+              {qr.name}
+            </p>
+
+            <QRCodePreview
+              url={publicUrl(qr.slug)}
+            />
+
+            <button
+              onClick={() => download(qr)}
+              className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3 text-xs font-semibold text-white"
+            >
+              <QrCode size={16} />
+              Télécharger le PNG
+            </button>
+
+            <button
+              onClick={() =>
+                copy(publicUrl(qr.slug))
+              }
+              className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#f7f7f3] py-3 text-xs font-semibold text-forest"
+            >
+              <Link2 size={16} />
+              Copier l’URL
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// --------------------------------------------------
+// QR CODE PREVIEW
+// --------------------------------------------------
+
+function QRCodePreview({ url }: { url: string }) {
+  const [src, setSrc] = useState('');
+
+  useEffect(() => {
+    QRCode.toDataURL(url, {
+      width: 240,
+      margin: 2,
+      color: {
+        dark: '#17352a',
+        light: '#ffffff',
+      },
+    }).then(setSrc);
+  }, [url]);
+
+  return src ? (
+    <img
+      src={src}
+      alt="QR Code de l'établissement"
+      className="mx-auto mt-5 h-56 w-56"
+    />
+  ) : (
+    <div className="mx-auto mt-5 h-56 w-56 animate-pulse rounded-xl bg-ink/5" />
+  );
+}
