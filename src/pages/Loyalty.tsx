@@ -104,16 +104,20 @@ export default function Loyalty() {
     setLoading(true);
 
     const { data, error } = await supabase
-      .from('establishments')
-      .select('id, name')
-      .eq('user_id', user.id)
-      .order('name');
+      .rpc('get_my_establishments');
+
+    const establishmentsData = (data ?? []).map(
+      (establishment: { id: string; name: string }) => ({
+        id: establishment.id,
+        name: establishment.name,
+      })
+    );
 
     if (!error) {
-      setEstablishments(data ?? []);
+      setEstablishments(establishmentsData);
 
-      if (data && data.length > 0) {
-        setEstablishmentId(data[0].id);
+      if (establishmentsData.length > 0) {
+        setEstablishmentId(establishmentsData[0].id);
       }
     } else {
       console.error('Erreur chargement établissements:', error);
