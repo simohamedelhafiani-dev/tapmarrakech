@@ -80,6 +80,8 @@ export default function Employee() {
   const [birthDate, setBirthDate] = useState('');
 
   const [purchaseAmount, setPurchaseAmount] = useState('');
+  const [pointsInvoiceNumber, setPointsInvoiceNumber] = useState('');
+  const [pointsResponsibleCode, setPointsResponsibleCode] = useState('');
 
   const [rewardCode, setRewardCode] = useState('');
   const [invoiceNumber, setInvoiceNumber] = useState('');
@@ -247,6 +249,8 @@ export default function Employee() {
     if (!showPoints || !establishmentId) return;
 
     const amount = Number(purchaseAmount);
+    const invoice = pointsInvoiceNumber.trim();
+    const code = pointsResponsibleCode.trim();
 
     if (!settings.enabled) {
       alert('Le programme de fidélité est désactivé pour cet établissement.');
@@ -258,12 +262,24 @@ export default function Employee() {
       return;
     }
 
+    if (!invoice) {
+      alert('Le numéro de facture est obligatoire.');
+      return;
+    }
+
+    if (code.length < 4) {
+      alert('Le code responsable est obligatoire.');
+      return;
+    }
+
     setSaving(true);
 
     const { data, error } = await supabase.rpc('add_loyalty_points', {
       p_establishment_id: establishmentId,
       p_customer_id: showPoints.id,
       p_amount: amount,
+      p_invoice_number: invoice,
+      p_responsible_code: code,
       p_description: `Achat de ${amount.toFixed(2)} ${settings.currency}`,
     });
 
@@ -280,6 +296,8 @@ export default function Employee() {
     alert(`+${earned} points ajoutés. Nouveau solde : ${newBalance} points.`);
 
     setPurchaseAmount('');
+    setPointsInvoiceNumber('');
+    setPointsResponsibleCode('');
     setShowPoints(null);
     await loadCustomers();
   }
@@ -587,6 +605,8 @@ export default function Employee() {
             if (!saving) {
               setShowPoints(null);
               setPurchaseAmount('');
+              setPointsInvoiceNumber('');
+              setPointsResponsibleCode('');
             }
           }}
         >
@@ -603,18 +623,35 @@ export default function Employee() {
             </div>
           </div>
 
-          <div className="mt-5">
+          <div className="mt-5 space-y-4">
             <Field
               icon={<Receipt size={16} />}
-              label={`Montant de l'achat (${settings.currency})`}
+              label={`Montant de la facture (${settings.currency})`}
               value={purchaseAmount}
               onChange={setPurchaseAmount}
               placeholder="500"
               type="number"
             />
 
+            <Field
+              icon={<Receipt size={16} />}
+              label="Numéro de facture"
+              value={pointsInvoiceNumber}
+              onChange={setPointsInvoiceNumber}
+              placeholder="FAC-00125"
+            />
+
+            <Field
+              icon={<LockKeyhole size={16} />}
+              label="Code responsable"
+              value={pointsResponsibleCode}
+              onChange={setPointsResponsibleCode}
+              placeholder="Code"
+              type="password"
+            />
+
             {purchaseAmount && Number(purchaseAmount) > 0 && (
-              <div className="mt-3 rounded-xl border border-forest/10 bg-forest/5 p-3 text-sm text-forest">
+              <div className="rounded-xl border border-forest/10 bg-forest/5 p-3 text-sm text-forest">
                 Cet achat générera environ{' '}
                 <strong>
                   {Math.floor(
