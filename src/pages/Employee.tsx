@@ -432,6 +432,12 @@ export default function Employee() {
               className="absolute left-4 top-1/2 -translate-y-1/2 text-ink/30"
             />
             <input
+              type="search"
+              name="customer-search"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="none"
+              spellCheck={false}
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Rechercher par téléphone, prénom ou nom..."
