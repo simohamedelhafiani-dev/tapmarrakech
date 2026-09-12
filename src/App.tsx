@@ -13,98 +13,43 @@ import Analytics from '@/pages/Analytics';
 import Loyalty from '@/pages/Loyalty';
 import LoyaltySettings from '@/pages/LoyaltySettings';
 import Admin from '@/pages/Admin';
+import Employee from '@/pages/Employee';
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-
-          {/* Pages publiques */}
           <Route path="/r/:slug" element={<PublicReview />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
 
-          {/* =========================================
-              ESPACE ADMIN TAPMARRAKECH
-          ========================================= */}
           <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
             <Route path="/admin" element={<Admin />} />
           </Route>
 
-          {/* =========================================
-              ESPACE RESPONSABLE
-          ========================================= */}
           <Route element={<ProtectedRoute allowedRoles={['responsible']} />}>
             <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route
-                path="/dashboard/establishments"
-                element={<Establishments />}
-              />
-              <Route
-                path="/dashboard/reviews"
-                element={<Reviews />}
-              />
-              <Route
-                path="/dashboard/analytics"
-                element={<Analytics />}
-              />
-              <Route
-                path="/dashboard/loyalty"
-                element={<Loyalty />}
-              />
-              <Route
-                path="/dashboard/loyalty/settings"
-                element={<LoyaltySettings />}
-              />
+              <Route path="/dashboard/establishments" element={<Establishments />} />
+              <Route path="/dashboard/reviews" element={<Reviews />} />
+              <Route path="/dashboard/analytics" element={<Analytics />} />
+              <Route path="/dashboard/loyalty" element={<Loyalty />} />
+              <Route path="/dashboard/loyalty/settings" element={<LoyaltySettings />} />
             </Route>
           </Route>
 
-          {/* =========================================
-              ESPACE EMPLOYÉ
-          ========================================= */}
           <Route element={<ProtectedRoute allowedRoles={['employee']} />}>
-            <Route path="/employee" element={<EmployeePlaceholder />} />
+            <Route path="/employee" element={<Employee />} />
           </Route>
 
-          {/* Redirection automatique selon le rôle */}
           <Route path="*" element={<RoleRedirect />} />
-
         </Routes>
       </AuthProvider>
     </BrowserRouter>
   );
 }
-
-
-/* =========================================
-   PAGE EMPLOYÉ TEMPORAIRE
-========================================= */
-
-function EmployeePlaceholder() {
-  return (
-    <div className="min-h-screen bg-[#f7f7f3] grid place-items-center p-6">
-      <div className="text-center">
-        <div className="mb-4 text-5xl">👨‍💼</div>
-
-        <h1 className="font-display text-3xl text-forest">
-          Espace Employé
-        </h1>
-
-        <p className="mt-2 text-sm text-ink/50">
-          Espace employé TapMarrakech
-        </p>
-      </div>
-    </div>
-  );
-}
-
-
-/* =========================================
-   REDIRECTION SELON LE RÔLE
-========================================= */
 
 function RoleRedirect() {
   const { user, role, loading } = useAuth();
@@ -135,6 +80,5 @@ function RoleRedirect() {
 
   return <Navigate to="/login" replace />;
 }
-
 
 export default App;
