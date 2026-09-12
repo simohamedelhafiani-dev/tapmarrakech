@@ -334,7 +334,8 @@ export default function LoyaltySettings() {
       </div>
 
       {/* ÉTABLISSEMENT */}
-      <section className="rounded-2xl border border-ink/5 bg-white p-6 shadow-soft md:p-8">
+      {establishments.length > 1 && (
+        <section className="rounded-2xl border border-ink/5 bg-white p-6 shadow-soft md:p-8">
         <div className="flex items-start gap-4">
           <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#e5eee9] text-forest">
             <Settings2 size={20} />
@@ -368,7 +369,8 @@ export default function LoyaltySettings() {
             ))}
           </select>
         </div>
-      </section>
+        </section>
+      )}
 
       {/* PROGRAMME ACTIF */}
       <section className="mt-6 rounded-2xl border border-ink/5 bg-white p-6 shadow-soft md:p-8">
