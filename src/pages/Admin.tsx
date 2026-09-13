@@ -284,7 +284,13 @@ export default function Admin() {
     'Vue d’ensemble';
 
   return (
-    <div className="min-h-screen bg-[#f7f7f3] text-ink">
+    <div className="relative min-h-screen overflow-x-hidden bg-[#f7f7f3] text-ink">
+      <img
+        src="/tapmarrakech-logo.png"
+        alt=""
+        aria-hidden="true"
+        className="pointer-events-none fixed left-1/2 top-1/2 z-0 w-[min(720px,70vw)] -translate-x-1/2 -translate-y-1/2 select-none opacity-[0.035] mix-blend-multiply"
+      />
       {open && (
         <button
           aria-label="Fermer le menu"
@@ -390,7 +396,7 @@ export default function Admin() {
           </button>
         </header>
 
-        <main className="mx-auto max-w-[1440px] p-5 md:p-10">
+        <main className="relative z-10 mx-auto max-w-[1440px] p-5 md:p-10">
           {section === 'overview' && (
             <Overview
               establishments={establishments}
@@ -1656,6 +1662,7 @@ function StaffRow({
   member,
   establishmentName,
   reload,
+  onEdit,
 }: {
   member: StaffMember;
   establishmentName: string;
