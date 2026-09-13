@@ -154,7 +154,6 @@ export default function Employee() {
   useEffect(() => {
     if (!session || !employeeSupabase) return;
     setEstablishmentId(session.establishment_id);
-    loadEstablishments();
   }, [session, employeeSupabase]);
 
   useEffect(() => {
@@ -182,7 +181,6 @@ export default function Employee() {
           headers: {
             'Content-Type': 'application/json',
             apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
           },
           body: JSON.stringify({ code }),
         }
@@ -510,8 +508,7 @@ export default function Employee() {
     await loadCustomers();
   }
 
-  const selectedEstablishmentName =
-    establishments.find(item => item.id === establishmentId)?.name ?? '';
+  const selectedEstablishmentName = session?.establishment_name ?? '';
 
   if (loginLoading) {
     return (
@@ -584,22 +581,6 @@ export default function Employee() {
     return (
       <div className="min-h-screen grid place-items-center bg-[#f7f7f3]">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
-      </div>
-    );
-  }
-
-  if (establishments.length === 0) {
-    return (
-      <div className="min-h-screen bg-[#f7f7f3] p-6">
-        <div className="mx-auto max-w-4xl rounded-3xl border border-ink/5 bg-white p-10 text-center shadow-sm">
-          <Building2 className="mx-auto mb-4 text-forest" size={42} />
-          <h1 className="font-display text-3xl text-forest">
-            Aucun établissement
-          </h1>
-          <p className="mt-2 text-sm text-ink/50">
-            Votre compte n’est rattaché à aucun établissement.
-          </p>
-        </div>
       </div>
     );
   }
