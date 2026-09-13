@@ -458,7 +458,7 @@ export default function Employee() {
       return;
     }
 
-    const establishment = session?.establishment_name ?? 'TapMarrakech';
+    const establishment = session?.establishment_name ?? 'Votre établissement';
     const fullName = `${customer.first_name} ${customer.last_name ?? ''}`.trim();
 
     popup.document.write(`
@@ -471,8 +471,6 @@ export default function Employee() {
             * { box-sizing: border-box; }
             body { margin: 0; padding: 40px; background: #f7f7f3; font-family: Arial, sans-serif; }
             .card { width: 640px; max-width: 100%; margin: 0 auto; padding: 34px; border-radius: 28px; background: #173f35; color: white; box-shadow: 0 20px 50px rgba(0,0,0,.16); }
-            .brand { font-size: 28px; font-weight: 800; letter-spacing: -.5px; }
-            .brand span { color: #d3a84c; }
             .small { margin-top: 8px; color: rgba(255,255,255,.65); font-size: 12px; text-transform: uppercase; letter-spacing: 2px; }
             .establishment { margin-top: 18px; font-size: 22px; font-weight: 700; color: #ffffff; }
             .name { margin-top: 55px; font-size: 26px; font-weight: 700; }
@@ -484,13 +482,12 @@ export default function Employee() {
         </head>
         <body>
           <div class="card">
-            <div class="brand">Tap<span>Marrakech</span></div>
             <div class="small">Carte de fidélité</div>
             <div class="establishment">${establishment}</div>
             <div class="name">${fullName}</div>
             <div class="number-label">Numéro de fidélité</div>
             <div class="number">${customer.loyalty_number}</div>
-            <div class="footer"><span>Présentez cette carte à chaque visite</span><span>${customer.phone}</span></div>
+            <div class="footer"><span>Présentez cette carte à chaque visite</span><span>by Tap Marrakech</span></div>
           </div>
           <script>window.onload = () => { window.print(); };</script>
         </body>
