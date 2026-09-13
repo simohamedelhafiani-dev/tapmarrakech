@@ -92,7 +92,6 @@ export default function Employee() {
     );
   }, [session]);
 
-  const [establishments, setEstablishments] = useState<Establishment[]>([]);
   const [establishmentId, setEstablishmentId] = useState('');
   const [customers, setCustomers] = useState<LoyaltyCustomer[]>([]);
   const [rewards, setRewards] = useState<LoyaltyReward[]>([]);
@@ -181,6 +180,7 @@ export default function Employee() {
           headers: {
             'Content-Type': 'application/json',
             apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
           },
           body: JSON.stringify({ code }),
         }
@@ -228,38 +228,10 @@ export default function Employee() {
       localStorage.removeItem(EMPLOYEE_SESSION_KEY);
       setSession(null);
       setEstablishmentId('');
-      setEstablishments([]);
       setCustomers([]);
       setRewards([]);
       setEmployeeCode('');
     }
-  }
-
-  async function loadEstablishments() {
-    if (!employeeSupabase) return;
-
-    setLoading(true);
-
-    const { data, error } = await employeeSupabase.rpc('get_my_establishments');
-
-    if (error) {
-      console.error(error);
-      setLoading(false);
-      return;
-    }
-
-    const places = (data ?? []).map((item: { id: string; name: string }) => ({
-      id: item.id,
-      name: item.name,
-    }));
-
-    setEstablishments(places);
-
-    if (places.length > 0) {
-      setEstablishmentId(prev => prev || places[0].id);
-    }
-
-    setLoading(false);
   }
 
   async function loadCustomers() {
