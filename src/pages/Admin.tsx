@@ -284,13 +284,7 @@ export default function Admin() {
     'Vue d’ensemble';
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#f7f7f3] text-ink">
-      <img
-        src="/tapmarrakech-logo.png"
-        alt=""
-        aria-hidden="true"
-        className="pointer-events-none fixed left-1/2 top-1/2 z-0 w-[min(720px,70vw)] -translate-x-1/2 -translate-y-1/2 select-none opacity-[0.035] mix-blend-multiply"
-      />
+    <div className="min-h-screen bg-[#f7f7f3] text-ink">
       {open && (
         <button
           aria-label="Fermer le menu"
@@ -300,13 +294,13 @@ export default function Admin() {
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-[270px] flex-col bg-forest px-5 py-6 text-white transition-transform lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 flex w-[270px] flex-col bg-[#5A2F18] px-5 py-6 text-white transition-transform lg:translate-x-0 ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="mb-12 flex items-center justify-between px-3">
           <div className="font-display text-2xl tracking-tight">
-            Tap<span className="text-gold">Marrakech</span>
+            Tap<span className="text-[#B8733F]">Marrakech</span>
           </div>
 
           <button
@@ -331,7 +325,7 @@ export default function Admin() {
               }}
               className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm transition ${
                 section === id
-                  ? 'bg-white text-forest shadow-lg'
+                  ? 'bg-white text-[#5A2F18] shadow-lg'
                   : 'text-white/65 hover:bg-white/10 hover:text-white'
               }`}
             >
@@ -343,7 +337,7 @@ export default function Admin() {
 
         <div className="mt-auto border-t border-white/10 pt-5">
           <div className="mb-4 flex items-center gap-3 px-2">
-            <div className="grid h-9 w-9 place-items-center rounded-full bg-gold font-semibold text-forest">
+            <div className="grid h-9 w-9 place-items-center rounded-full bg-[#B8733F] font-semibold text-[#5A2F18]">
               {user?.email?.[0]?.toUpperCase()}
             </div>
 
@@ -396,7 +390,7 @@ export default function Admin() {
           </button>
         </header>
 
-        <main className="relative z-10 mx-auto max-w-[1440px] p-5 md:p-10">
+        <main className="mx-auto max-w-[1440px] p-5 md:p-10">
           {section === 'overview' && (
             <Overview
               establishments={establishments}
@@ -484,11 +478,11 @@ function Overview({
   return (
     <div>
       <div className="mb-8">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#5A2F18]/50">
           Administration
         </p>
 
-        <h2 className="font-display text-3xl text-forest md:text-4xl">
+        <h2 className="font-display text-3xl text-[#5A2F18] md:text-4xl">
           Bienvenue dans votre espace Admin
         </h2>
 
@@ -549,7 +543,7 @@ function Overview({
                   className="flex flex-col gap-4 rounded-xl bg-[#f7f7f3] px-4 py-4 md:flex-row md:items-center md:justify-between"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="grid h-9 w-9 place-items-center rounded-lg bg-forest text-white">
+                    <div className="grid h-9 w-9 place-items-center rounded-lg bg-[#5A2F18] text-white">
                       <Building2 size={17} />
                     </div>
 
@@ -569,7 +563,7 @@ function Overview({
                       Responsable
                     </p>
 
-                    <p className="mt-1 text-xs font-semibold text-forest">
+                    <p className="mt-1 text-xs font-semibold text-[#5A2F18]">
                       {manager?.name ?? 'Non défini'}
                     </p>
                   </div>
@@ -606,11 +600,11 @@ function EstablishmentsSection({
     <div>
       <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#5A2F18]/50">
             Gestion
           </p>
 
-          <h2 className="font-display text-3xl text-forest md:text-4xl">
+          <h2 className="font-display text-3xl text-[#5A2F18] md:text-4xl">
             Établissements
           </h2>
 
@@ -621,7 +615,7 @@ function EstablishmentsSection({
 
         <button
           onClick={() => setShowForm(true)}
-          className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white transition hover:bg-forest-light"
+          className="rounded-xl bg-[#5A2F18] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#7A4324]"
         >
           + Ajouter un établissement
         </button>
@@ -671,7 +665,7 @@ function EstablishmentsSection({
                   className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-xl bg-forest text-white">
+                    <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-xl bg-[#5A2F18] text-white">
                       {establishment.logo_url ? (
                         <img
                           src={establishment.logo_url}
@@ -721,7 +715,7 @@ function EstablishmentsSection({
 
                             await reload();
                           }}
-                          className="w-full max-w-[280px] rounded-lg border border-ink/10 bg-[#f7f7f3] px-3 py-2 text-xs outline-none focus:border-forest"
+                          className="w-full max-w-[280px] rounded-lg border border-ink/10 bg-[#f7f7f3] px-3 py-2 text-xs outline-none focus:border-[#7A4324]"
                         >
                           <option value="">Sélectionner un type</option>
                           {businessTypes.filter((type) => type.active).map((type) => (
@@ -897,10 +891,10 @@ function EditEstablishmentModal({
       <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl md:p-8">
         <div className="mb-7 flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#B8733F]">
               Administration
             </p>
-            <h3 className="mt-1 font-display text-3xl text-forest">
+            <h3 className="mt-1 font-display text-3xl text-[#5A2F18]">
               Modifier l’établissement
             </h3>
             <p className="mt-2 text-sm text-ink/45">
@@ -924,7 +918,7 @@ function EditEstablishmentModal({
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-[#7A4324]"
             />
           </div>
 
@@ -935,7 +929,7 @@ function EditEstablishmentModal({
             <input
               value={slug}
               onChange={(e) => setSlug(generateSlug(e.target.value))}
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-[#7A4324]"
             />
           </div>
 
@@ -946,7 +940,7 @@ function EditEstablishmentModal({
             <select
               value={aiBusinessTypeId}
               onChange={(e) => setAIBusinessTypeId(e.target.value)}
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-[#7A4324]"
             >
               <option value="">Sélectionner un type</option>
               {businessTypes
@@ -979,7 +973,7 @@ function EditEstablishmentModal({
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-forest">
+                  <p className="text-sm font-semibold text-[#5A2F18]">
                     Logo de {name || 'l’établissement'}
                   </p>
                   <p className="mt-1 text-xs leading-5 text-ink/40">
@@ -987,7 +981,7 @@ function EditEstablishmentModal({
                   </p>
 
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white hover:bg-forest-light">
+                    <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#5A2F18] px-4 py-2.5 text-xs font-semibold text-white hover:bg-[#7A4324]">
                       <ImageIcon size={15} />
                       Choisir un logo
                       <input
@@ -1031,7 +1025,7 @@ function EditEstablishmentModal({
           <button
             onClick={save}
             disabled={saving || uploading}
-            className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+            className="rounded-xl bg-[#5A2F18] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
           >
             {uploading
               ? 'Envoi du logo...'
@@ -1144,7 +1138,7 @@ function CreateEstablishmentForm({
             value={name}
             onChange={(e) => handleNameChange(e.target.value)}
             placeholder="Ex : Restaurant Atlas"
-            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none transition focus:border-forest"
+            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none transition focus:border-[#7A4324]"
           />
         </div>
 
@@ -1159,7 +1153,7 @@ function CreateEstablishmentForm({
               setSlug(generateSlug(e.target.value))
             }
             placeholder="restaurant-atlas"
-            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none transition focus:border-forest"
+            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none transition focus:border-[#7A4324]"
           />
         </div>
 
@@ -1171,7 +1165,7 @@ function CreateEstablishmentForm({
           <select
             value={aiBusinessTypeId}
             onChange={(e) => setAIBusinessTypeId(e.target.value)}
-            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-[#7A4324]"
           >
             <option value="">Sélectionner le type de commerce</option>
             {businessTypes.filter((type) => type.active).map((type) => (
@@ -1198,7 +1192,7 @@ function CreateEstablishmentForm({
         <button
           onClick={create}
           disabled={saving}
-          className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+          className="rounded-xl bg-[#5A2F18] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
         >
           {saving ? 'Création...' : 'Créer l’établissement'}
         </button>
@@ -1240,11 +1234,11 @@ function ResponsiblesSection({
     <div>
       <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#5A2F18]/50">
             Administration
           </p>
 
-          <h2 className="font-display text-3xl text-forest md:text-4xl">
+          <h2 className="font-display text-3xl text-[#5A2F18] md:text-4xl">
             Responsables
           </h2>
 
@@ -1256,7 +1250,7 @@ function ResponsiblesSection({
         <button
           onClick={() => setShowForm(true)}
           disabled={establishments.length === 0}
-          className="inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white transition hover:bg-forest-light disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex items-center gap-2 rounded-xl bg-[#5A2F18] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#7A4324] disabled:cursor-not-allowed disabled:opacity-40"
         >
           <UserPlus size={16} />
           Nouveau responsable
@@ -1350,11 +1344,11 @@ function EmployeesSection({
     <div>
       <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#5A2F18]/50">
             Administration
           </p>
 
-          <h2 className="font-display text-3xl text-forest md:text-4xl">
+          <h2 className="font-display text-3xl text-[#5A2F18] md:text-4xl">
             Employés
           </h2>
 
@@ -1366,7 +1360,7 @@ function EmployeesSection({
         <button
           onClick={() => setShowForm(true)}
           disabled={establishments.length === 0}
-          className="inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white transition hover:bg-forest-light disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex items-center gap-2 rounded-xl bg-[#5A2F18] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#7A4324] disabled:cursor-not-allowed disabled:opacity-40"
         >
           <UserPlus size={16} />
           Nouvel employé
@@ -1528,14 +1522,14 @@ function CreateStaffForm({
   };
 
   return (
-    <div className="mb-6 rounded-2xl border border-gold/20 bg-white p-6 shadow-sm">
+    <div className="mb-6 rounded-2xl border border-[#B8733F]/20 bg-white p-6 shadow-sm">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#B8733F]">
             Nouveau compte
           </p>
 
-          <h3 className="mt-1 font-display text-2xl text-forest">
+          <h3 className="mt-1 font-display text-2xl text-[#5A2F18]">
             Créer un {roleLabel.toLowerCase()}
           </h3>
 
@@ -1563,7 +1557,7 @@ function CreateStaffForm({
             onChange={(e) =>
               setEstablishmentId(e.target.value)
             }
-            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-[#7A4324]"
           >
             {establishments.map((establishment) => (
               <option
@@ -1589,7 +1583,7 @@ function CreateStaffForm({
                 ? 'Ex : Ahmed Alaoui'
                 : 'Ex : Yassine Benali'
             }
-            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-[#7A4324]"
           />
         </div>
 
@@ -1603,7 +1597,7 @@ function CreateStaffForm({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="email@exemple.com"
-            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-[#7A4324]"
           />
         </div>
 
@@ -1619,7 +1613,7 @@ function CreateStaffForm({
               setPassword(e.target.value)
             }
             placeholder="Minimum 6 caractères"
-            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-[#7A4324]"
           />
 
           <p className="mt-2 text-[11px] text-ink/35">
@@ -1641,7 +1635,7 @@ function CreateStaffForm({
         <button
           onClick={createAccount}
           disabled={saving}
-          className="inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-xl bg-[#5A2F18] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
         >
           <UserPlus size={16} />
 
@@ -1662,7 +1656,6 @@ function StaffRow({
   member,
   establishmentName,
   reload,
-  onEdit,
 }: {
   member: StaffMember;
   establishmentName: string;
@@ -1697,7 +1690,7 @@ function StaffRow({
   return (
     <div className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
       <div className="flex min-w-0 items-center gap-4">
-        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-forest text-white">
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#5A2F18] text-white">
           {member.role === 'MANAGER' ? (
             <UserRound size={19} />
           ) : (
@@ -1706,7 +1699,7 @@ function StaffRow({
         </div>
 
         <div className="min-w-0">
-          <h3 className="truncate text-sm font-semibold text-forest">
+          <h3 className="truncate text-sm font-semibold text-[#5A2F18]">
             {member.name}
           </h3>
 
@@ -1721,7 +1714,7 @@ function StaffRow({
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <span className="rounded-full bg-[#f4ead3] px-3 py-1.5 text-[10px] font-semibold text-forest">
+        <span className="rounded-full bg-[#F3E2D1] px-3 py-1.5 text-[10px] font-semibold text-[#5A2F18]">
           {member.role === 'MANAGER'
             ? 'RESPONSABLE'
             : 'EMPLOYÉ'}
@@ -1835,10 +1828,10 @@ function EditStaffModal({
       <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl md:p-8">
         <div className="mb-7 flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#B8733F]">
               Administration
             </p>
-            <h3 className="mt-1 font-display text-3xl text-forest">
+            <h3 className="mt-1 font-display text-3xl text-[#5A2F18]">
               Modifier le {member.role === 'MANAGER' ? 'responsable' : 'employé'}
             </h3>
             <p className="mt-2 text-sm text-ink/45">
@@ -1860,7 +1853,7 @@ function EditStaffModal({
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-[#7A4324]"
             />
           </div>
 
@@ -1870,7 +1863,7 @@ function EditStaffModal({
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-[#7A4324]"
             />
           </div>
 
@@ -1879,7 +1872,7 @@ function EditStaffModal({
             <select
               value={establishmentId}
               onChange={(e) => setEstablishmentId(e.target.value)}
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-[#7A4324]"
             >
               {establishments.map((establishment) => (
                 <option key={establishment.id} value={establishment.id}>
@@ -1896,7 +1889,7 @@ function EditStaffModal({
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Laisser vide pour conserver l’actuel"
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-[#7A4324]"
             />
           </div>
 
@@ -1905,10 +1898,10 @@ function EditStaffModal({
               type="checkbox"
               checked={active}
               onChange={(e) => setActive(e.target.checked)}
-              className="h-4 w-4 accent-[#173d32]"
+              className="h-4 w-4 accent-[#5A2F18]"
             />
             <span>
-              <span className="block text-sm font-semibold text-forest">Compte actif</span>
+              <span className="block text-sm font-semibold text-[#5A2F18]">Compte actif</span>
               <span className="mt-1 block text-xs text-ink/40">
                 Un compte désactivé ne doit plus être utilisé par son titulaire.
               </span>
@@ -1927,7 +1920,7 @@ function EditStaffModal({
           <button
             onClick={save}
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#5A2F18] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
           >
             <Save size={16} />
             {saving ? 'Enregistrement...' : 'Enregistrer les modifications'}
@@ -2034,11 +2027,11 @@ function RewardCodesSection({
     return (
       <div>
         <div className="mb-8">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#5A2F18]/50">
             Fidélité
           </p>
 
-          <h2 className="font-display text-3xl text-forest md:text-4xl">
+          <h2 className="font-display text-3xl text-[#5A2F18] md:text-4xl">
             Codes récompenses
           </h2>
         </div>
@@ -2055,11 +2048,11 @@ function RewardCodesSection({
   return (
     <div>
       <div className="mb-8">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#5A2F18]/50">
           Fidélité
         </p>
 
-        <h2 className="font-display text-3xl text-forest md:text-4xl">
+        <h2 className="font-display text-3xl text-[#5A2F18] md:text-4xl">
           Codes récompenses
         </h2>
 
@@ -2070,13 +2063,13 @@ function RewardCodesSection({
       </div>
 
       <div className="max-w-2xl rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
-        <div className="mb-6 flex items-start gap-4 rounded-xl border border-gold/20 bg-[#fdf9ef] p-4">
-          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#f4ead3] text-gold">
+        <div className="mb-6 flex items-start gap-4 rounded-xl border border-[#B8733F]/20 bg-[#fdf9ef] p-4">
+          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#F3E2D1] text-[#B8733F]">
             <LockKeyhole size={18} />
           </div>
 
           <div>
-            <p className="text-sm font-semibold text-forest">
+            <p className="text-sm font-semibold text-[#5A2F18]">
               Code sécurisé
             </p>
 
@@ -2102,7 +2095,7 @@ function RewardCodesSection({
                   e.target.value
                 )
               }
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-[#7A4324]"
             >
               {establishments.map((establishment) => (
                 <option
@@ -2127,7 +2120,7 @@ function RewardCodesSection({
                 setCode(e.target.value)
               }
               placeholder="Ex : 4829"
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-center text-lg tracking-[0.2em] outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-center text-lg tracking-[0.2em] outline-none focus:border-[#7A4324]"
             />
           </div>
 
@@ -2143,7 +2136,7 @@ function RewardCodesSection({
                 setConfirmCode(e.target.value)
               }
               placeholder="Retapez le code"
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-center text-lg tracking-[0.2em] outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-center text-lg tracking-[0.2em] outline-none focus:border-[#7A4324]"
             />
           </div>
 
@@ -2154,7 +2147,7 @@ function RewardCodesSection({
               !code.trim() ||
               !confirmCode.trim()
             }
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-40"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#5A2F18] px-5 py-3 text-sm font-semibold text-white disabled:opacity-40"
           >
             <CheckCircle2 size={16} />
 
@@ -2268,11 +2261,11 @@ function ReviewAnalysisSection({
     <div>
       <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#5A2F18]/50">
             Intelligence artificielle
           </p>
 
-          <h2 className="font-display text-3xl text-forest md:text-4xl">
+          <h2 className="font-display text-3xl text-[#5A2F18] md:text-4xl">
             Analyse des avis
           </h2>
 
@@ -2297,7 +2290,7 @@ function ReviewAnalysisSection({
                 setResult(null);
                 setError('');
               }}
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-[#7A4324]"
             >
               <option value="all">Tous les établissements</option>
               {establishments.map((establishment) => (
@@ -2311,7 +2304,7 @@ function ReviewAnalysisSection({
           <button
             onClick={analyzeReviews}
             disabled={loading || establishments.length === 0}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#5A2F18] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Brain size={17} />
             {loading ? 'Analyse en cours...' : 'Analyser avec l’IA'}
@@ -2327,7 +2320,7 @@ function ReviewAnalysisSection({
 
       {!result && !loading && !error && (
         <div className="rounded-2xl border border-dashed border-ink/10 bg-white p-10 text-center">
-          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-forest/10 text-forest">
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#5A2F18]/10 text-[#5A2F18]">
             <Brain size={25} />
           </div>
           <h3 className="mt-5 text-base font-semibold">
@@ -2342,7 +2335,7 @@ function ReviewAnalysisSection({
 
       {loading && (
         <div className="rounded-2xl border border-ink/5 bg-white p-12 text-center shadow-sm">
-          <div className="mx-auto h-9 w-9 animate-spin rounded-full border-2 border-forest border-t-transparent" />
+          <div className="mx-auto h-9 w-9 animate-spin rounded-full border-2 border-[#5A2F18] border-t-transparent" />
           <p className="mt-4 text-sm font-medium text-ink/60">
             L’IA analyse les avis de {selectedName}...
           </p>
@@ -2380,10 +2373,10 @@ function ReviewAnalysisSection({
           <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
             <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-forest/45">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#5A2F18]/45">
                   Synthèse IA
                 </p>
-                <h3 className="mt-2 text-xl font-semibold text-forest">
+                <h3 className="mt-2 text-xl font-semibold text-[#5A2F18]">
                   {selectedName}
                 </h3>
               </div>
@@ -2392,7 +2385,7 @@ function ReviewAnalysisSection({
                 <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink/35">
                   Satisfaction
                 </p>
-                <p className="mt-1 text-2xl font-semibold text-forest">
+                <p className="mt-1 text-2xl font-semibold text-[#5A2F18]">
                   {result.analysis.satisfaction_score}/100
                 </p>
               </div>
@@ -2403,7 +2396,7 @@ function ReviewAnalysisSection({
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">
-              <span className="rounded-full bg-forest/10 px-3 py-1.5 text-xs font-semibold text-forest">
+              <span className="rounded-full bg-[#5A2F18]/10 px-3 py-1.5 text-xs font-semibold text-[#5A2F18]">
                 Sentiment : {result.analysis.sentiment}
               </span>
               <span className="rounded-full bg-ink/5 px-3 py-1.5 text-xs font-semibold text-ink/55">
@@ -2427,10 +2420,10 @@ function ReviewAnalysisSection({
 
           <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-forest/45">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#5A2F18]/45">
                 Thèmes récurrents
               </p>
-              <h3 className="mt-2 text-xl font-semibold text-forest">
+              <h3 className="mt-2 text-xl font-semibold text-[#5A2F18]">
                 Ce qui ressort des avis
               </h3>
             </div>
@@ -2466,10 +2459,10 @@ function ReviewAnalysisSection({
 
           <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-forest/45">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#5A2F18]/45">
                 Plan d’action
               </p>
-              <h3 className="mt-2 text-xl font-semibold text-forest">
+              <h3 className="mt-2 text-xl font-semibold text-[#5A2F18]">
                 3 actions prioritaires
               </h3>
               <p className="mt-2 text-sm text-ink/45">
@@ -2485,7 +2478,7 @@ function ReviewAnalysisSection({
                   className="rounded-2xl border border-ink/5 bg-[#fdfdfb] p-5"
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <span className="grid h-9 w-9 place-items-center rounded-xl bg-forest text-sm font-semibold text-white">
+                    <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#5A2F18] text-sm font-semibold text-white">
                       {index + 1}
                     </span>
                     <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-semibold text-amber-700">
@@ -2513,7 +2506,7 @@ function ReviewAnalysisSection({
 
           {result.analysis.recommendations.length > 0 && (
             <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-forest/45">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#5A2F18]/45">
                 Recommandations complémentaires
               </p>
               <div className="mt-4 space-y-3">
@@ -2523,7 +2516,7 @@ function ReviewAnalysisSection({
                     className="rounded-xl border border-ink/5 bg-[#fdfdfb] p-4"
                   >
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="rounded-full bg-forest/10 px-2.5 py-1 text-[10px] font-semibold text-forest">
+                      <span className="rounded-full bg-[#5A2F18]/10 px-2.5 py-1 text-[10px] font-semibold text-[#5A2F18]">
                         {recommendation.priority}
                       </span>
                       <h4 className="font-semibold text-ink">
@@ -2566,7 +2559,7 @@ function AnalysisListCard({
 }) {
   return (
     <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-forest/45">
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#5A2F18]/45">
         {title}
       </p>
 
@@ -2579,7 +2572,7 @@ function AnalysisListCard({
               key={`${item}-${index}`}
               className="flex gap-3 rounded-xl bg-[#fdfdfb] p-4"
             >
-              <span className="mt-0.5 text-sm font-semibold text-forest">
+              <span className="mt-0.5 text-sm font-semibold text-[#5A2F18]">
                 ✓
               </span>
               <p className="text-sm leading-6 text-ink/65">{item}</p>
@@ -2695,11 +2688,11 @@ function ReviewsSection({
     <div>
       <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#5A2F18]/50">
             Réputation
           </p>
 
-          <h2 className="font-display text-3xl text-forest md:text-4xl">
+          <h2 className="font-display text-3xl text-[#5A2F18] md:text-4xl">
             Avis reçus
           </h2>
 
@@ -2753,7 +2746,7 @@ function ReviewsSection({
             <select
               value={selectedEstablishment}
               onChange={(e) => setSelectedEstablishment(e.target.value)}
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-[#7A4324]"
             >
               <option value="all">Tous les établissements</option>
 
@@ -2773,7 +2766,7 @@ function ReviewsSection({
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-[#7A4324]"
             >
               <option value="all">Tous les statuts</option>
               <option value="Nouveau">Nouveau</option>
@@ -2791,7 +2784,7 @@ function ReviewsSection({
           </div>
         ) : filteredReviews.length === 0 ? (
           <div className="p-12 text-center">
-            <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-forest/10 text-forest">
+            <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#5A2F18]/10 text-[#5A2F18]">
               <MessageSquare size={25} />
             </div>
 
@@ -2816,7 +2809,7 @@ function ReviewsSection({
                   <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-lg bg-forest/10 px-3 py-1.5 text-xs font-semibold text-forest">
+                        <span className="rounded-lg bg-[#5A2F18]/10 px-3 py-1.5 text-xs font-semibold text-[#5A2F18]">
                           {establishmentName}
                         </span>
 
@@ -2850,7 +2843,7 @@ function ReviewsSection({
                               key={index}
                               className={
                                 index < review.rating
-                                  ? 'text-gold'
+                                  ? 'text-[#B8733F]'
                                   : 'text-ink/15'
                               }
                             >
@@ -3107,13 +3100,13 @@ function AIConfigurationSection({
 
   return (
     <div>
-      <div className="mb-8 rounded-2xl border border-gold/20 bg-white p-6 shadow-sm">
+      <div className="mb-8 rounded-2xl border border-[#B8733F]/20 bg-white p-6 shadow-sm">
         <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#B8733F]">
               Moteur IA global
             </p>
-            <h3 className="mt-1 font-display text-2xl text-forest">
+            <h3 className="mt-1 font-display text-2xl text-[#5A2F18]">
               Paramètres du moteur IA
             </h3>
             <p className="mt-2 max-w-3xl text-xs leading-5 text-ink/45">
@@ -3131,7 +3124,7 @@ function AIConfigurationSection({
             <input
               value={globalProvider}
               onChange={(e) => setGlobalProvider(e.target.value)}
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-[#7A4324]"
             />
           </div>
 
@@ -3141,7 +3134,7 @@ function AIConfigurationSection({
               value={globalModel}
               onChange={(e) => setGlobalModel(e.target.value)}
               placeholder="gpt-5.6-luna"
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-[#7A4324]"
             />
             <p className="mt-2 text-[11px] text-ink/35">Exemple actuel : gpt-5.6-luna.</p>
           </div>
@@ -3154,7 +3147,7 @@ function AIConfigurationSection({
               onChange={(e) => setApiKey(e.target.value)}
               placeholder={globalSettings?.has_api_key ? 'Laisser vide pour conserver la clé actuelle' : 'sk-...'}
               autoComplete="new-password"
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-[#7A4324]"
             />
           </div>
 
@@ -3167,7 +3160,7 @@ function AIConfigurationSection({
               step="0.1"
               value={globalTemperature}
               onChange={(e) => setGlobalTemperature(e.target.value)}
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-[#7A4324]"
             />
           </div>
 
@@ -3180,7 +3173,7 @@ function AIConfigurationSection({
               step="256"
               value={globalMaxTokens}
               onChange={(e) => setGlobalMaxTokens(e.target.value)}
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-[#7A4324]"
             />
           </div>
 
@@ -3189,10 +3182,10 @@ function AIConfigurationSection({
               type="checkbox"
               checked={globalEnabled}
               onChange={(e) => setGlobalEnabled(e.target.checked)}
-              className="h-4 w-4 accent-[#173d32]"
+              className="h-4 w-4 accent-[#5A2F18]"
             />
             <span>
-              <span className="block text-sm font-semibold text-forest">IA activée</span>
+              <span className="block text-sm font-semibold text-[#5A2F18]">IA activée</span>
               <span className="mt-1 block text-xs text-ink/40">Autorise les analyses IA depuis les espaces autorisés.</span>
             </span>
           </label>
@@ -3204,7 +3197,7 @@ function AIConfigurationSection({
               onChange={(e) => setGlobalInstructions(e.target.value)}
               rows={5}
               placeholder="Ex : Répondre en français, être concret, ne jamais inventer d’information..."
-              className="w-full resize-y rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm leading-6 outline-none focus:border-forest"
+              className="w-full resize-y rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm leading-6 outline-none focus:border-[#7A4324]"
             />
           </div>
         </div>
@@ -3213,7 +3206,7 @@ function AIConfigurationSection({
           <button
             onClick={saveGlobalSettings}
             disabled={savingGlobal}
-            className="inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#5A2F18] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
           >
             <Save size={16} />
             {savingGlobal ? 'Enregistrement...' : 'Enregistrer les paramètres IA'}
@@ -3223,11 +3216,11 @@ function AIConfigurationSection({
 
       <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#5A2F18]/50">
             Intelligence artificielle
           </p>
 
-          <h2 className="font-display text-3xl text-forest md:text-4xl">
+          <h2 className="font-display text-3xl text-[#5A2F18] md:text-4xl">
             Configuration IA
           </h2>
 
@@ -3242,7 +3235,7 @@ function AIConfigurationSection({
             resetForm();
             setShowForm(true);
           }}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white transition hover:bg-forest-light"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#5A2F18] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#7A4324]"
         >
           <Plus size={16} />
           Nouveau type
@@ -3250,13 +3243,13 @@ function AIConfigurationSection({
       </div>
 
       {showForm && (
-        <div className="mb-6 rounded-2xl border border-gold/20 bg-white p-6 shadow-sm">
+        <div className="mb-6 rounded-2xl border border-[#B8733F]/20 bg-white p-6 shadow-sm">
           <div className="mb-6 flex items-start justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#B8733F]">
                 {editingId ? 'Modification' : 'Nouveau type'}
               </p>
-              <h3 className="mt-1 font-display text-2xl text-forest">
+              <h3 className="mt-1 font-display text-2xl text-[#5A2F18]">
                 {editingId ? 'Modifier le type IA' : 'Créer un type IA'}
               </h3>
             </div>
@@ -3278,7 +3271,7 @@ function AIConfigurationSection({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Ex : Restaurant"
-                className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+                className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-[#7A4324]"
               />
             </div>
 
@@ -3290,7 +3283,7 @@ function AIConfigurationSection({
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Ex : Restaurants, cafés et lounges"
-                className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+                className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-[#7A4324]"
               />
             </div>
 
@@ -3303,7 +3296,7 @@ function AIConfigurationSection({
                 onChange={(e) => setPrompt(e.target.value)}
                 rows={9}
                 placeholder="Décris comment l’IA doit analyser ce type d’établissement..."
-                className="w-full resize-y rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm leading-6 outline-none focus:border-forest"
+                className="w-full resize-y rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm leading-6 outline-none focus:border-[#7A4324]"
               />
               <p className="mt-2 text-[11px] text-ink/35">
                 Ce prompt reste dans l’espace Admin et sert de base métier à l’analyse.
@@ -3315,10 +3308,10 @@ function AIConfigurationSection({
                 type="checkbox"
                 checked={active}
                 onChange={(e) => setActive(e.target.checked)}
-                className="h-4 w-4 accent-[#173d32]"
+                className="h-4 w-4 accent-[#5A2F18]"
               />
               <span>
-                <span className="block text-sm font-semibold text-forest">
+                <span className="block text-sm font-semibold text-[#5A2F18]">
                   Type actif
                 </span>
                 <span className="mt-1 block text-xs text-ink/40">
@@ -3340,7 +3333,7 @@ function AIConfigurationSection({
             <button
               onClick={save}
               disabled={saving}
-              className="inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#5A2F18] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
             >
               <Save size={16} />
               {saving ? 'Enregistrement...' : 'Enregistrer'}
@@ -3358,12 +3351,12 @@ function AIConfigurationSection({
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-forest text-gold">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#5A2F18] text-[#B8733F]">
                     <Brain size={18} />
                   </div>
 
                   <div>
-                    <h3 className="text-base font-semibold text-forest">
+                    <h3 className="text-base font-semibold text-[#5A2F18]">
                       {type.name}
                     </h3>
                     <p className="text-xs text-ink/40">
@@ -3452,7 +3445,7 @@ function EmptyStaff({
 }) {
   return (
     <div className="rounded-2xl border border-ink/5 bg-white p-12 text-center shadow-sm">
-      <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-forest/10 text-forest">
+      <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#5A2F18]/10 text-[#5A2F18]">
         <Icon size={25} />
       </div>
 
@@ -3483,11 +3476,11 @@ function StatCard({
   return (
     <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
       <div className="flex items-center justify-between">
-        <div className="grid h-10 w-10 place-items-center rounded-xl bg-forest/10 text-forest">
+        <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#5A2F18]/10 text-[#5A2F18]">
           <Icon size={19} />
         </div>
 
-        <span className="text-2xl font-semibold text-forest">
+        <span className="text-2xl font-semibold text-[#5A2F18]">
           {value}
         </span>
       </div>
