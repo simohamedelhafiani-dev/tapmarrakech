@@ -48,9 +48,15 @@ const links = [
   },
 ];
 
+type Establishment = {
+  id: string;
+  name: string;
+};
+
 export function DashboardLayout() {
   const [open, setOpen] = useState(false);
   const [profileName, setProfileName] = useState<string | null>(null);
+  const [establishmentName, setEstablishmentName] = useState<string | null>(null);
 
   const { signOut, user, role } = useAuth();
   const navigate = useNavigate();
@@ -71,10 +77,7 @@ export function DashboardLayout() {
         .maybeSingle();
 
       if (error) {
-        console.error(
-          'Erreur chargement du profil:',
-          error
-        );
+        console.error('Erreur chargement du profil:', error);
 
         if (active) {
           setProfileName(null);
@@ -94,6 +97,44 @@ export function DashboardLayout() {
       active = false;
     };
   }, [user?.id]);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadEstablishment = async () => {
+      if (role !== 'responsible' || !user?.id) {
+        setEstablishmentName(null);
+        return;
+      }
+
+      const { data, error } = await supabase.rpc('get_my_establishments');
+
+      if (error) {
+        console.error(
+          'Erreur chargement de l’établissement du responsable:',
+          error
+        );
+
+        if (active) {
+          setEstablishmentName(null);
+        }
+
+        return;
+      }
+
+      const establishments = (data ?? []) as Establishment[];
+
+      if (active) {
+        setEstablishmentName(establishments[0]?.name ?? null);
+      }
+    };
+
+    loadEstablishment();
+
+    return () => {
+      active = false;
+    };
+  }, [role, user?.id]);
 
   const logout = async () => {
     await signOut();
@@ -129,6 +170,13 @@ export function DashboardLayout() {
     formattedDate.charAt(0).toUpperCase() +
     formattedDate.slice(1);
 
+  const sidebarTitle =
+    role === 'admin'
+      ? 'TapMarrakech'
+      : role === 'responsible'
+        ? establishmentName || 'Mon établissement'
+        : 'Mon espace';
+
   return (
     <div className="min-h-screen bg-[#f7f7f3] text-ink">
       {open && (
@@ -145,8 +193,13 @@ export function DashboardLayout() {
         }`}
       >
         <div className="mb-12 flex items-center justify-between px-3">
-          <div className="font-display text-2xl tracking-tight">
-            Tap<span className="text-gold">Marrakech</span>
+          <div
+            className={`max-w-[205px] truncate font-display tracking-tight ${
+              role === 'admin' ? 'text-2xl' : 'text-xl'
+            }`}
+            title={sidebarTitle}
+          >
+            {sidebarTitle}
           </div>
 
           <button
@@ -236,6 +289,10 @@ export function DashboardLayout() {
         <main className="mx-auto max-w-[1440px] p-5 md:p-10">
           <Outlet />
         </main>
+
+        <footer className="px-5 pb-6 text-center text-xs font-medium text-ink/35 md:px-10">
+          {role === 'admin' ? 'TapMarrakech' : 'by Tap Marrakech'}
+        </footer>
       </div>
     </div>
   );
