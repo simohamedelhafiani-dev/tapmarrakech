@@ -671,7 +671,8 @@ export default function Employee() {
 
   if (!session) {
     return (
-      <div className="min-h-screen bg-[#f7f7f3] px-4 py-8">
+      <div className="relative min-h-screen overflow-x-hidden bg-[#f7f7f3] px-4 py-8">
+        <img src="/tapmarrakech-logo.png" alt="" aria-hidden="true" className="pointer-events-none fixed left-1/2 top-1/2 z-0 w-[min(680px,75vw)] -translate-x-1/2 -translate-y-1/2 select-none opacity-[0.035] mix-blend-multiply" />
         <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md items-center justify-center">
           <div className="w-full rounded-[2rem] border border-ink/5 bg-white p-7 shadow-2xl md:p-9">
             <div className="mb-8 text-center">
@@ -737,8 +738,9 @@ export default function Employee() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f7f3] p-4 md:p-8">
-      <div className="mx-auto max-w-6xl">
+    <div className="relative min-h-screen overflow-x-hidden bg-[#f7f7f3] p-4 md:p-8">
+      <img src="/tapmarrakech-logo.png" alt="" aria-hidden="true" className="pointer-events-none fixed left-1/2 top-1/2 z-0 w-[min(720px,70vw)] -translate-x-1/2 -translate-y-1/2 select-none opacity-[0.035] mix-blend-multiply" />
+      <div className="relative z-10 mx-auto max-w-6xl">
         <div className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div className="flex items-center gap-4">
             {establishmentLogoUrl && (
