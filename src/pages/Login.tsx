@@ -113,35 +113,35 @@ export default function Login() {
     const isAdmin = selectedRole === 'admin';
 
     return (
-      <div className="min-h-screen bg-[#f7f7f3] px-4 py-8">
+      <div className="relative min-h-screen overflow-hidden bg-[#f7f7f3] px-4 py-8">
+        <img
+          src="/tapmarrakech-logo.png"
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-0 h-full w-full scale-[1.35] object-contain opacity-[0.08]"
+        />
+        <div className="pointer-events-none absolute inset-0 z-[1] bg-white/45" />
+
         <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md items-center justify-center">
           <div className="w-full rounded-[2rem] border border-ink/5 bg-white p-7 shadow-2xl md:p-9">
             <button
               onClick={() => selectRole(null)}
-              className="mb-8 inline-flex items-center gap-2 text-xs font-semibold text-ink/40 transition hover:text-forest"
+              className="mb-8 inline-flex items-center gap-2 text-xs font-semibold text-ink/40 transition hover:text-[#5A2F18]"
             >
               <ArrowLeft size={15} />
               Changer d’accès
             </button>
 
             <div className="mb-8">
-              <div className="mb-7 flex justify-center">
-                <img
-                  src="/tapmarrakech-logo.png"
-                  alt="TapMarrakech"
-                  className="h-16 w-auto max-w-[220px] object-contain"
-                />
-              </div>
-
               <div className="mt-7 flex items-center gap-3">
-                <div className="grid h-11 w-11 place-items-center rounded-xl bg-forest text-white">
+                <div className="grid h-11 w-11 place-items-center rounded-xl bg-[#5A2F18] text-white">
                   {isAdmin ? <ShieldCheck size={21} /> : <UserRound size={21} />}
                 </div>
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#B8733F]">
                     Connexion
                   </p>
-                  <h1 className="font-display text-2xl text-forest">
+                  <h1 className="font-display text-2xl text-[#5A2F18]">
                     {isAdmin ? 'Administrateur' : 'Responsable'}
                   </h1>
                 </div>
@@ -173,7 +173,7 @@ export default function Login() {
                       if (e.key === 'Enter') handleLogin();
                     }}
                     placeholder="vous@exemple.com"
-                    className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] py-3.5 pl-11 pr-4 text-sm outline-none focus:border-forest"
+                    className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] py-3.5 pl-11 pr-4 text-sm outline-none focus:border-[#7A4324]"
                   />
                 </div>
               </div>
@@ -196,12 +196,12 @@ export default function Login() {
                       if (e.key === 'Enter') handleLogin();
                     }}
                     placeholder="Votre mot de passe"
-                    className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] py-3.5 pl-11 pr-11 text-sm outline-none focus:border-forest"
+                    className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] py-3.5 pl-11 pr-11 text-sm outline-none focus:border-[#7A4324]"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(value => !value)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-ink/30 hover:text-forest"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-ink/30 hover:text-[#5A2F18]"
                   >
                     {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                   </button>
@@ -211,7 +211,7 @@ export default function Login() {
               <button
                 onClick={handleLogin}
                 disabled={saving}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white transition hover:bg-forest-light disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#5A2F18] py-3.5 text-sm font-semibold text-white transition hover:bg-[#5A2F18]-light disabled:opacity-50"
               >
                 {saving ? 'Connexion...' : 'Se connecter'}
                 {!saving && <ArrowRight size={17} />}
@@ -221,7 +221,7 @@ export default function Login() {
             <div className="mt-6 flex flex-col gap-2 text-center text-xs">
               <Link
                 to="/forgot-password"
-                className="font-medium text-ink/40 hover:text-forest"
+                className="font-medium text-ink/40 hover:text-[#5A2F18]"
               >
                 Mot de passe oublié ?
               </Link>
@@ -237,17 +237,10 @@ export default function Login() {
       <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-5xl items-center justify-center">
         <div className="w-full">
           <div className="mx-auto mb-10 max-w-2xl text-center">
-            <div className="mb-7 flex justify-center">
-              <img
-                src="/tapmarrakech-logo.png"
-                alt="TapMarrakech"
-                className="h-24 w-auto max-w-[320px] object-contain md:h-28"
-              />
-            </div>
-            <p className="mt-5 text-xs font-semibold uppercase tracking-[0.24em] text-gold">
+            <p className="mt-5 text-xs font-semibold uppercase tracking-[0.24em] text-[#B8733F]">
               Espace professionnel
             </p>
-            <h1 className="mt-3 font-display text-3xl text-forest md:text-5xl">
+            <h1 className="mt-3 font-display text-3xl text-[#5A2F18] md:text-5xl">
               Comment souhaitez-vous accéder à TapMarrakech ?
             </h1>
             <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-ink/45 md:text-base">
@@ -258,42 +251,42 @@ export default function Login() {
           <div className="grid gap-5 md:grid-cols-3">
             <button
               onClick={() => selectRole('admin')}
-              className="group rounded-[2rem] border border-ink/5 bg-white p-7 text-left shadow-sm transition duration-200 hover:-translate-y-1 hover:border-forest/20 hover:shadow-xl"
+              className="group rounded-[2rem] border border-ink/5 bg-white p-7 text-left shadow-sm transition duration-200 hover:-translate-y-1 hover:border-[#7A4324]/20 hover:shadow-xl"
             >
               <div className="flex items-start justify-between">
-                <div className="grid h-14 w-14 place-items-center rounded-2xl bg-forest text-white shadow-lg">
+                <div className="grid h-14 w-14 place-items-center rounded-2xl bg-[#5A2F18] text-white shadow-lg">
                   <ShieldCheck size={27} />
                 </div>
-                <ArrowRight size={19} className="text-ink/20 transition group-hover:translate-x-1 group-hover:text-forest" />
+                <ArrowRight size={19} className="text-ink/20 transition group-hover:translate-x-1 group-hover:text-[#5A2F18]" />
               </div>
-              <p className="mt-8 text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">
+              <p className="mt-8 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#B8733F]">
                 Accès principal
               </p>
-              <h2 className="mt-2 font-display text-3xl text-forest">Admin</h2>
+              <h2 className="mt-2 font-display text-3xl text-[#5A2F18]">Admin</h2>
               <p className="mt-3 text-sm leading-6 text-ink/45">
                 Administration de TapMarrakech, établissements, équipes et configuration.
               </p>
-              <p className="mt-6 text-xs font-semibold text-forest">Email + mot de passe</p>
+              <p className="mt-6 text-xs font-semibold text-[#5A2F18]">Email + mot de passe</p>
             </button>
 
             <button
               onClick={() => selectRole('responsible')}
-              className="group rounded-[2rem] border border-ink/5 bg-white p-7 text-left shadow-sm transition duration-200 hover:-translate-y-1 hover:border-forest/20 hover:shadow-xl"
+              className="group rounded-[2rem] border border-ink/5 bg-white p-7 text-left shadow-sm transition duration-200 hover:-translate-y-1 hover:border-[#7A4324]/20 hover:shadow-xl"
             >
               <div className="flex items-start justify-between">
-                <div className="grid h-14 w-14 place-items-center rounded-2xl bg-[#f4ead3] text-forest shadow-sm">
+                <div className="grid h-14 w-14 place-items-center rounded-2xl bg-[#F3E2D1] text-[#5A2F18] shadow-sm">
                   <UserRound size={27} />
                 </div>
-                <ArrowRight size={19} className="text-ink/20 transition group-hover:translate-x-1 group-hover:text-forest" />
+                <ArrowRight size={19} className="text-ink/20 transition group-hover:translate-x-1 group-hover:text-[#5A2F18]" />
               </div>
-              <p className="mt-8 text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">
+              <p className="mt-8 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#B8733F]">
                 Gestion établissement
               </p>
-              <h2 className="mt-2 font-display text-3xl text-forest">Responsable</h2>
+              <h2 className="mt-2 font-display text-3xl text-[#5A2F18]">Responsable</h2>
               <p className="mt-3 text-sm leading-6 text-ink/45">
                 Pilotage de votre établissement, réputation, fidélité et performances.
               </p>
-              <p className="mt-6 text-xs font-semibold text-forest">Email + mot de passe</p>
+              <p className="mt-6 text-xs font-semibold text-[#5A2F18]">Email + mot de passe</p>
             </button>
 
             <button
@@ -302,31 +295,31 @@ export default function Login() {
                 await supabase.auth.signOut();
                 navigate('/employee');
               }}
-              className="group rounded-[2rem] border border-forest/10 bg-forest p-7 text-left text-white shadow-xl transition duration-200 hover:-translate-y-1 hover:shadow-2xl"
+              className="group rounded-[2rem] border border-[#5A2F18]/10 bg-[#5A2F18] p-7 text-left text-white shadow-xl transition duration-200 hover:-translate-y-1 hover:shadow-2xl"
             >
               <div className="flex items-start justify-between">
-                <div className="grid h-14 w-14 place-items-center rounded-2xl bg-white/10 text-gold ring-1 ring-white/10">
+                <div className="grid h-14 w-14 place-items-center rounded-2xl bg-white/10 text-[#B8733F] ring-1 ring-white/10">
                   <KeyRound size={27} />
                 </div>
                 <ArrowRight size={19} className="text-white/40 transition group-hover:translate-x-1 group-hover:text-white" />
               </div>
-              <p className="mt-8 text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">
+              <p className="mt-8 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#B8733F]">
                 Accès rapide
               </p>
               <h2 className="mt-2 font-display text-3xl">Employé</h2>
               <p className="mt-3 text-sm leading-6 text-white/60">
                 Entrez simplement votre code. TapMarrakech retrouve automatiquement votre établissement.
               </p>
-              <p className="mt-6 text-xs font-semibold text-gold">Code employé uniquement</p>
+              <p className="mt-6 text-xs font-semibold text-[#B8733F]">Code employé uniquement</p>
             </button>
           </div>
 
           <div className="mt-8 flex justify-center gap-5 text-xs text-ink/35">
-            <Link to="/register" className="hover:text-forest">
+            <Link to="/register" className="hover:text-[#5A2F18]">
               Créer un compte
             </Link>
             <span>•</span>
-            <Link to="/forgot-password" className="hover:text-forest">
+            <Link to="/forgot-password" className="hover:text-[#5A2F18]">
               Mot de passe oublié
             </Link>
           </div>
