@@ -474,6 +474,7 @@ export default function Employee() {
             .brand { font-size: 28px; font-weight: 800; letter-spacing: -.5px; }
             .brand span { color: #d3a84c; }
             .small { margin-top: 8px; color: rgba(255,255,255,.65); font-size: 12px; text-transform: uppercase; letter-spacing: 2px; }
+            .establishment { margin-top: 18px; font-size: 22px; font-weight: 700; color: #ffffff; }
             .name { margin-top: 55px; font-size: 26px; font-weight: 700; }
             .number-label { margin-top: 30px; color: rgba(255,255,255,.6); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; }
             .number { margin-top: 6px; font-size: 30px; font-weight: 800; letter-spacing: 3px; color: #d3a84c; }
@@ -484,7 +485,8 @@ export default function Employee() {
         <body>
           <div class="card">
             <div class="brand">Tap<span>Marrakech</span></div>
-            <div class="small">Carte de fidélité · ${establishment}</div>
+            <div class="small">Carte de fidélité</div>
+            <div class="establishment">${establishment}</div>
             <div class="name">${fullName}</div>
             <div class="number-label">Numéro de fidélité</div>
             <div class="number">${customer.loyalty_number}</div>
@@ -703,8 +705,11 @@ export default function Employee() {
               Espace employé
             </p>
             <h1 className="mt-2 font-display text-3xl text-forest md:text-4xl">
-              Fidélité
+              {session.establishment_name || selectedEstablishmentName}
             </h1>
+            <p className="mt-1 text-sm font-medium text-gold">
+              Fidélité
+            </p>
             <p className="mt-2 text-sm text-ink/50">
               Recherchez un client, ajoutez ses points ou utilisez une récompense.
             </p>
@@ -1222,6 +1227,7 @@ export default function Employee() {
           </div>
         </Modal>
       )}
+      <footer className="mt-10 pb-4 text-center text-xs font-medium text-ink/35">by Tap Marrakech</footer>
     </div>
   );
 }
