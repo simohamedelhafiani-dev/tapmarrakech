@@ -188,7 +188,7 @@ export function DashboardLayout() {
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-[270px] flex-col bg-[#5A2F18] px-5 py-6 text-white transition-transform lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 flex w-[270px] flex-col bg-forest px-5 py-6 text-white transition-transform lg:translate-x-0 ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -224,7 +224,7 @@ export function DashboardLayout() {
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition ${
                   isActive
-                    ? 'bg-white text-[#5A2F18] shadow-lg'
+                    ? 'bg-white text-forest shadow-lg'
                     : 'text-white/65 hover:bg-white/10 hover:text-white'
                 }`
               }
@@ -237,7 +237,7 @@ export function DashboardLayout() {
 
         <div className="mt-auto border-t border-white/10 pt-5">
           <div className="mb-4 flex items-center gap-3 px-2">
-            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#B8733F] font-semibold text-[#5A2F18]">
+            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gold font-semibold text-forest">
               {avatarLetter}
             </div>
 
@@ -279,7 +279,7 @@ export function DashboardLayout() {
             onClick={() =>
               navigate('/dashboard/establishments')
             }
-            className="ml-auto flex items-center gap-2 rounded-full bg-[#5A2F18] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#7A4324]"
+            className="ml-auto flex items-center gap-2 rounded-full bg-forest px-4 py-2 text-xs font-semibold text-white transition hover:bg-forest-light"
           >
             <Building2 size={15} />
             Gérer mes établissements
