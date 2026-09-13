@@ -1012,15 +1012,29 @@ export default function Employee() {
         >
           <div className="overflow-hidden rounded-[1.75rem] bg-forest p-6 text-white shadow-xl">
             <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-2xl font-bold tracking-tight">
-                  Carte de fidélité
-                </p>
-                <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/55">
-                  {session.establishment_name}
-                </p>
+              <div className="flex min-w-0 items-center gap-4">
+                {establishmentLogoUrl ? (
+                  <img
+                    src={establishmentLogoUrl}
+                    alt={`Logo ${session.establishment_name}`}
+                    className="h-14 w-14 rounded-xl bg-white object-contain p-1.5"
+                  />
+                ) : (
+                  <div className="grid h-14 w-14 place-items-center rounded-xl bg-white/10">
+                    <Building2 size={24} className="text-gold" />
+                  </div>
+                )}
+
+                <div className="min-w-0">
+                  <p className="text-2xl font-bold tracking-tight">
+                    Carte de fidélité
+                  </p>
+                  <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/55">
+                    {session.establishment_name}
+                  </p>
+                </div>
               </div>
-              <CreditCard size={28} className="text-gold/80" />
+              <CreditCard size={28} className="shrink-0 text-gold/80" />
             </div>
 
             <div className="mt-12">
