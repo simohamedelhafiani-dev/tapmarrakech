@@ -156,11 +156,32 @@ export default function Employee() {
   }, [session, employeeSupabase]);
 
   useEffect(() => {
-    if (!establishmentId || !employeeSupabase) return;
-    loadCustomers();
-    loadRewards();
-    loadSettings();
-  }, [establishmentId, employeeSupabase]);
+    if (!establishmentId || !employeeSupabase) {
+      if (!session) setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadEmployeeData() {
+      setLoading(true);
+      try {
+        await Promise.all([
+          loadCustomers(),
+          loadRewards(),
+          loadSettings(),
+        ]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    loadEmployeeData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [establishmentId, employeeSupabase, session]);
 
   async function loginEmployee() {
     const code = employeeCode.trim();
@@ -299,7 +320,7 @@ export default function Employee() {
     return customers.filter(customer => {
       const fullName = `${customer.first_name} ${customer.last_name ?? ''}`.toLowerCase();
       return (
-        customer.loyalty_number.toLowerCase().includes(value) ||
+        String(customer.loyalty_number ?? '').toLowerCase().includes(value) ||
         fullName.includes(value) ||
         customer.phone.toLowerCase().includes(value)
       );
@@ -356,6 +377,13 @@ export default function Employee() {
     setBirthDate('');
     setShowNewCustomer(false);
     setSearch(data.phone);
+
+    const loyaltyNumber = String(data.loyalty_number ?? '').trim();
+    if (loyaltyNumber) {
+      alert(`Client créé avec succès.\n\nNuméro de fidélité : ${loyaltyNumber}`);
+    } else {
+      alert('Client créé, mais le numéro de fidélité n’a pas été généré par la base de données.');
+    }
 
     await loadCustomers();
   }
