@@ -15,6 +15,9 @@ import {
   WalletCards,
   LogOut,
   KeyRound,
+  CreditCard,
+  Pencil,
+  Printer,
 } from 'lucide-react';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
@@ -108,12 +111,18 @@ export default function Employee() {
   const [showNewCustomer, setShowNewCustomer] = useState(false);
   const [showPoints, setShowPoints] = useState<LoyaltyCustomer | null>(null);
   const [showRewards, setShowRewards] = useState<LoyaltyCustomer | null>(null);
+  const [showCard, setShowCard] = useState<LoyaltyCustomer | null>(null);
+  const [editCustomer, setEditCustomer] = useState<LoyaltyCustomer | null>(null);
   const [selectedReward, setSelectedReward] = useState<LoyaltyReward | null>(null);
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
   const [birthDate, setBirthDate] = useState('');
+  const [editFirstName, setEditFirstName] = useState('');
+  const [editLastName, setEditLastName] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [editBirthDate, setEditBirthDate] = useState('');
 
   const [purchaseAmount, setPurchaseAmount] = useState('');
   const [pointsResponsibleCode, setPointsResponsibleCode] = useState('');
@@ -379,13 +388,113 @@ export default function Employee() {
     setSearch(data.phone);
 
     const loyaltyNumber = String(data.loyalty_number ?? '').trim();
-    if (loyaltyNumber) {
-      alert(`Client créé avec succès.\n\nNuméro de fidélité : ${loyaltyNumber}`);
-    } else {
-      alert('Client créé, mais le numéro de fidélité n’a pas été généré par la base de données.');
+    if (!loyaltyNumber) {
+      alert('Le client a été créé mais son numéro de fidélité est absent. Exécute d’abord le SQL de génération du numéro que je t’ai donné.');
+      await loadCustomers();
+      return;
     }
 
+    alert(`Client créé avec succès.\n\nNuméro de fidélité : ${loyaltyNumber}`);
+    setShowCard(data as LoyaltyCustomer);
     await loadCustomers();
+  }
+
+  function openEditCustomer(customer: LoyaltyCustomer) {
+    setEditCustomer(customer);
+    setEditFirstName(customer.first_name ?? '');
+    setEditLastName(customer.last_name ?? '');
+    setEditPhone(customer.phone ?? '');
+    setEditBirthDate(customer.birth_date ?? '');
+  }
+
+  async function updateCustomer() {
+    if (!employeeSupabase || !editCustomer) return;
+
+    if (!editFirstName.trim() || !editLastName.trim() || !editPhone.trim()) {
+      alert('Prénom, nom et téléphone sont obligatoires.');
+      return;
+    }
+
+    setSaving(true);
+
+    const { data, error } = await employeeSupabase.rpc('update_loyalty_customer', {
+      p_customer_id: editCustomer.id,
+      p_first_name: editFirstName.trim(),
+      p_last_name: editLastName.trim(),
+      p_phone: editPhone.trim(),
+      p_birth_date: editBirthDate || null,
+    });
+
+    setSaving(false);
+
+    if (error) {
+      if (error.code === '23505') {
+        alert('Un client avec ce numéro existe déjà dans cet établissement.');
+      } else {
+        alert(error.message);
+      }
+      return;
+    }
+
+    const updated = Array.isArray(data) ? data[0] : data;
+    setEditCustomer(null);
+    setEditFirstName('');
+    setEditLastName('');
+    setEditPhone('');
+    setEditBirthDate('');
+    await loadCustomers();
+
+    if (updated) {
+      setShowCard(updated as LoyaltyCustomer);
+    }
+
+    alert('Informations du client mises à jour.');
+  }
+
+  function printLoyaltyCard(customer: LoyaltyCustomer) {
+    const popup = window.open('', '_blank', 'width=700,height=520');
+    if (!popup) {
+      alert("Autorisez les fenêtres pop-up pour imprimer la carte.");
+      return;
+    }
+
+    const establishment = session?.establishment_name ?? 'TapMarrakech';
+    const fullName = `${customer.first_name} ${customer.last_name ?? ''}`.trim();
+
+    popup.document.write(`
+      <!doctype html>
+      <html lang="fr">
+        <head>
+          <meta charset="utf-8" />
+          <title>Carte fidélité ${customer.loyalty_number}</title>
+          <style>
+            * { box-sizing: border-box; }
+            body { margin: 0; padding: 40px; background: #f7f7f3; font-family: Arial, sans-serif; }
+            .card { width: 640px; max-width: 100%; margin: 0 auto; padding: 34px; border-radius: 28px; background: #173f35; color: white; box-shadow: 0 20px 50px rgba(0,0,0,.16); }
+            .brand { font-size: 28px; font-weight: 800; letter-spacing: -.5px; }
+            .brand span { color: #d3a84c; }
+            .small { margin-top: 8px; color: rgba(255,255,255,.65); font-size: 12px; text-transform: uppercase; letter-spacing: 2px; }
+            .name { margin-top: 55px; font-size: 26px; font-weight: 700; }
+            .number-label { margin-top: 30px; color: rgba(255,255,255,.6); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; }
+            .number { margin-top: 6px; font-size: 30px; font-weight: 800; letter-spacing: 3px; color: #d3a84c; }
+            .footer { margin-top: 28px; display: flex; justify-content: space-between; color: rgba(255,255,255,.55); font-size: 11px; }
+            @media print { body { padding: 0; background: white; } .card { box-shadow: none; } }
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <div class="brand">Tap<span>Marrakech</span></div>
+            <div class="small">Carte de fidélité · ${establishment}</div>
+            <div class="name">${fullName}</div>
+            <div class="number-label">Numéro de fidélité</div>
+            <div class="number">${customer.loyalty_number}</div>
+            <div class="footer"><span>Présentez cette carte à chaque visite</span><span>${customer.phone}</span></div>
+          </div>
+          <script>window.onload = () => { window.print(); };</script>
+        </body>
+      </html>
+    `);
+    popup.document.close();
   }
 
   async function addPoints() {
@@ -722,6 +831,22 @@ export default function Employee() {
                     </button>
 
                     <button
+                      onClick={() => openEditCustomer(customer)}
+                      className="inline-flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-4 py-2.5 text-xs font-semibold text-ink/60 hover:border-forest/20 hover:text-forest"
+                    >
+                      <Pencil size={16} />
+                      Modifier
+                    </button>
+
+                    <button
+                      onClick={() => setShowCard(customer)}
+                      className="inline-flex items-center gap-2 rounded-xl border border-gold/30 bg-white px-4 py-2.5 text-xs font-semibold text-forest hover:bg-gold/5"
+                    >
+                      <CreditCard size={16} />
+                      Carte
+                    </button>
+
+                    <button
                       onClick={() => openRewards(customer)}
                       className="inline-flex items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white hover:bg-forest-light"
                     >
@@ -776,6 +901,92 @@ export default function Employee() {
             >
               <UserPlus size={17} />
               {saving ? 'Création...' : 'Créer le client'}
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {editCustomer && (
+        <Modal
+          title="Modifier le client"
+          onClose={() => {
+            if (!saving) setEditCustomer(null);
+          }}
+        >
+          <div className="mb-5 rounded-2xl bg-[#f7f7f3] p-4">
+            <p className="text-xs text-ink/40">Numéro de fidélité</p>
+            <p className="mt-1 text-xl font-bold tracking-wider text-forest">
+              {editCustomer.loyalty_number}
+            </p>
+            <p className="mt-2 text-xs text-ink/40">Le numéro reste inchangé.</p>
+          </div>
+
+          <div className="space-y-4">
+            <Field icon={<User size={16} />} label="Prénom" value={editFirstName} onChange={setEditFirstName} placeholder="Prénom" />
+            <Field icon={<User size={16} />} label="Nom" value={editLastName} onChange={setEditLastName} placeholder="Nom" />
+            <Field icon={<Phone size={16} />} label="Téléphone" value={editPhone} onChange={setEditPhone} placeholder="06 XX XX XX XX" type="tel" />
+            <Field icon={<CalendarDays size={16} />} label="Date de naissance" value={editBirthDate} onChange={setEditBirthDate} type="date" />
+
+            <button
+              disabled={saving}
+              onClick={updateCustomer}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white disabled:opacity-50"
+            >
+              <CheckCircle2 size={17} />
+              {saving ? 'Enregistrement...' : 'Enregistrer les modifications'}
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {showCard && (
+        <Modal
+          title="Carte de fidélité"
+          onClose={() => setShowCard(null)}
+        >
+          <div className="overflow-hidden rounded-[1.75rem] bg-forest p-6 text-white shadow-xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-2xl font-bold tracking-tight">
+                  Tap<span className="text-gold">Marrakech</span>
+                </p>
+                <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/55">
+                  Carte de fidélité
+                </p>
+              </div>
+              <CreditCard size={28} className="text-gold/80" />
+            </div>
+
+            <div className="mt-12">
+              <p className="text-xl font-bold">
+                {showCard.first_name} {showCard.last_name ?? ''}
+              </p>
+              <p className="mt-1 text-xs text-white/55">{session.establishment_name}</p>
+            </div>
+
+            <div className="mt-7 rounded-2xl bg-white/10 p-4">
+              <p className="text-[10px] uppercase tracking-[0.18em] text-white/50">
+                Numéro de fidélité
+              </p>
+              <p className="mt-1 text-2xl font-bold tracking-[0.18em] text-gold">
+                {showCard.loyalty_number}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-5 flex gap-3">
+            <button
+              onClick={() => printLoyaltyCard(showCard)}
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white"
+            >
+              <Printer size={17} />
+              Imprimer / PDF
+            </button>
+            <button
+              onClick={() => setShowCard(null)}
+              className="rounded-xl border border-ink/10 px-5 py-3.5 text-sm font-semibold text-ink/60"
+            >
+              Fermer
             </button>
           </div>
         </Modal>
