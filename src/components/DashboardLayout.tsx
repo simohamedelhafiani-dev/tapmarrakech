@@ -51,12 +51,14 @@ const links = [
 type Establishment = {
   id: string;
   name: string;
+  logo_url: string | null;
 };
 
 export function DashboardLayout() {
   const [open, setOpen] = useState(false);
   const [profileName, setProfileName] = useState<string | null>(null);
   const [establishmentName, setEstablishmentName] = useState<string | null>(null);
+  const [establishmentLogoUrl, setEstablishmentLogoUrl] = useState<string | null>(null);
 
   const { signOut, user, role } = useAuth();
   const navigate = useNavigate();
@@ -104,6 +106,7 @@ export function DashboardLayout() {
     const loadEstablishment = async () => {
       if (role !== 'responsible' || !user?.id) {
         setEstablishmentName(null);
+        setEstablishmentLogoUrl(null);
         return;
       }
 
@@ -117,6 +120,7 @@ export function DashboardLayout() {
 
         if (active) {
           setEstablishmentName(null);
+          setEstablishmentLogoUrl(null);
         }
 
         return;
@@ -126,6 +130,7 @@ export function DashboardLayout() {
 
       if (active) {
         setEstablishmentName(establishments[0]?.name ?? null);
+        setEstablishmentLogoUrl(establishments[0]?.logo_url ?? null);
       }
     };
 
@@ -199,7 +204,15 @@ export function DashboardLayout() {
             }`}
             title={sidebarTitle}
           >
-            {sidebarTitle}
+            {role === 'responsible' && establishmentLogoUrl ? (
+              <img
+                src={establishmentLogoUrl}
+                alt={`Logo ${sidebarTitle}`}
+                className="h-10 max-w-[170px] object-contain"
+              />
+            ) : (
+              sidebarTitle
+            )}
           </div>
 
           <button
