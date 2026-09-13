@@ -636,6 +636,7 @@ export default function Employee() {
             <p className="mt-2 text-sm text-ink/50">
               Recherchez un client, ajoutez ses points ou utilisez une récompense.
             </p>
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center justify-end gap-3">
