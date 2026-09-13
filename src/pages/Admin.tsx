@@ -15,6 +15,12 @@ import {
   LockKeyhole,
   RefreshCw,
   MessageSquare,
+  Brain,
+  Plus,
+  Save,
+  Pencil,
+  Image as ImageIcon,
+  Trash2,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -24,7 +30,19 @@ type Establishment = {
   id: string;
   name: string;
   slug: string;
+  ai_business_type_id: string | null;
+  logo_url: string | null;
   created_at: string;
+};
+
+type AIBusinessType = {
+  id: string;
+  name: string;
+  description: string | null;
+  ai_prompt: string;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
 };
 
 type StaffMember = {
@@ -45,7 +63,9 @@ type AdminSection =
   | 'responsibles'
   | 'employees'
   | 'codes'
-  | 'reviews';
+  | 'reviews'
+  | 'analysis'
+  | 'ai';
 
 export default function Admin() {
   const { user, signOut } = useAuth();
@@ -56,6 +76,7 @@ export default function Admin() {
 
   const [establishments, setEstablishments] = useState<Establishment[]>([]);
   const [staff, setStaff] = useState<StaffMember[]>([]);
+  const [aiBusinessTypes, setAIBusinessTypes] = useState<AIBusinessType[]>([]);
 
   const [loading, setLoading] = useState(true);
   const [staffLoading, setStaffLoading] = useState(true);
@@ -65,7 +86,7 @@ export default function Admin() {
 
     const { data, error } = await supabase
       .from('establishments')
-      .select('id, name, slug, created_at')
+      .select('id, name, slug, ai_business_type_id, logo_url, created_at')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -141,15 +162,32 @@ export default function Admin() {
     setStaffLoading(false);
   };
 
+  const loadAIBusinessTypes = async () => {
+    const { data, error } = await supabase
+      .from('ai_business_types')
+      .select('id, name, description, ai_prompt, active, created_at, updated_at')
+      .order('name', { ascending: true });
+
+    if (error) {
+      console.error('Erreur types IA:', error);
+      setAIBusinessTypes([]);
+      return;
+    }
+
+    setAIBusinessTypes(data ?? []);
+  };
+
   useEffect(() => {
     loadEstablishments();
     loadStaff();
+    loadAIBusinessTypes();
   }, []);
 
   const reloadAll = async () => {
     await Promise.all([
       loadEstablishments(),
       loadStaff(),
+      loadAIBusinessTypes(),
     ]);
   };
 
@@ -199,9 +237,19 @@ export default function Admin() {
       icon: MessageSquare,
     },
     {
+      id: 'analysis',
+      label: 'Analyse des avis',
+      icon: Brain,
+    },
+    {
       id: 'codes',
       label: 'Codes récompenses',
       icon: Gift,
+    },
+    {
+      id: 'ai',
+      label: 'Configuration IA',
+      icon: Brain,
     },
   ];
 
@@ -330,6 +378,7 @@ export default function Admin() {
               establishments={establishments}
               loading={loading}
               reload={loadEstablishments}
+              businessTypes={aiBusinessTypes}
             />
           )}
 
@@ -355,14 +404,23 @@ export default function Admin() {
             <ReviewsSection establishments={establishments} />
           )}
 
+          {section === 'analysis' && (
+            <ReviewAnalysisSection establishments={establishments} />
+          )}
+
           {section === 'codes' && (
             <RewardCodesSection
               establishments={establishments}
             />
           )}
-        </main>
 
-        <footer className="px-5 pb-6 text-center text-xs font-medium text-ink/30 md:px-10">TapMarrakech</footer>
+          {section === 'ai' && (
+            <AIConfigurationSection
+              businessTypes={aiBusinessTypes}
+              reload={loadAIBusinessTypes}
+            />
+          )}
+        </main>
       </div>
     </div>
   );
@@ -499,12 +557,16 @@ function EstablishmentsSection({
   establishments,
   loading,
   reload,
+  businessTypes,
 }: {
   establishments: Establishment[];
   loading: boolean;
   reload: () => Promise<void>;
+  businessTypes: AIBusinessType[];
 }) {
   const [showForm, setShowForm] = useState(false);
+  const [editingEstablishment, setEditingEstablishment] =
+    useState<Establishment | null>(null);
 
   return (
     <div>
@@ -535,6 +597,16 @@ function EstablishmentsSection({
         <CreateEstablishmentForm
           close={() => setShowForm(false)}
           reload={reload}
+          businessTypes={businessTypes}
+        />
+      )}
+
+      {editingEstablishment && (
+        <EditEstablishmentModal
+          establishment={editingEstablishment}
+          businessTypes={businessTypes}
+          close={() => setEditingEstablishment(null)}
+          reload={reload}
         />
       )}
 
@@ -557,7 +629,7 @@ function EstablishmentsSection({
         ) : (
           <div className="divide-y divide-ink/5">
             {establishments.map((establishment) => {
-              const accessLink = `${window.location.origin}/c/${establishment.slug}`;
+              const accessLink = `${window.location.origin}/r/${establishment.slug}`;
 
               return (
                 <div
@@ -565,8 +637,16 @@ function EstablishmentsSection({
                   className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="grid h-11 w-11 place-items-center rounded-xl bg-forest text-white">
-                      <Building2 size={19} />
+                    <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-xl bg-forest text-white">
+                      {establishment.logo_url ? (
+                        <img
+                          src={establishment.logo_url}
+                          alt={`Logo ${establishment.name}`}
+                          className="h-full w-full object-contain bg-white p-1"
+                        />
+                      ) : (
+                        <Building2 size={19} />
+                      )}
                     </div>
 
                     <div>
@@ -581,10 +661,51 @@ function EstablishmentsSection({
                       <p className="mt-1 text-[11px] text-ink/35 break-all">
                         {accessLink}
                       </p>
+
+                      <div className="mt-3">
+                        <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-ink/35">
+                          Type d’établissement / IA
+                        </label>
+                        <select
+                          value={establishment.ai_business_type_id ?? ''}
+                          onChange={async (e) => {
+                            const value = e.target.value || null;
+
+                            const { error } = await supabase
+                              .from('establishments')
+                              .update({ ai_business_type_id: value })
+                              .eq('id', establishment.id);
+
+                            if (error) {
+                              console.error('Erreur type IA:', error);
+                              alert(`Impossible de modifier le type IA : ${error.message}`);
+                              return;
+                            }
+
+                            await reload();
+                          }}
+                          className="w-full max-w-[280px] rounded-lg border border-ink/10 bg-[#f7f7f3] px-3 py-2 text-xs outline-none focus:border-forest"
+                        >
+                          <option value="">Sélectionner un type</option>
+                          {businessTypes.filter((type) => type.active).map((type) => (
+                            <option key={type.id} value={type.id}>
+                              {type.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
                   </div>
 
                   <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => setEditingEstablishment(establishment)}
+                      className="inline-flex items-center gap-2 rounded-lg border border-ink/10 px-3 py-2 text-xs font-medium transition hover:bg-[#f7f7f3]"
+                    >
+                      <Pencil size={14} />
+                      Modifier
+                    </button>
+
                     <button
                       onClick={async () => {
                         await navigator.clipboard.writeText(
@@ -612,15 +733,293 @@ function EstablishmentsSection({
   );
 }
 
-function CreateEstablishmentForm({
+
+function EditEstablishmentModal({
+  establishment,
+  businessTypes,
   close,
   reload,
 }: {
+  establishment: Establishment;
+  businessTypes: AIBusinessType[];
   close: () => void;
   reload: () => Promise<void>;
 }) {
+  const [name, setName] = useState(establishment.name);
+  const [slug, setSlug] = useState(establishment.slug);
+  const [aiBusinessTypeId, setAIBusinessTypeId] = useState(
+    establishment.ai_business_type_id ?? ''
+  );
+  const [logoUrl, setLogoUrl] = useState(establishment.logo_url ?? '');
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const generateSlug = (value: string) => {
+    return value
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
+
+  const save = async () => {
+    if (!name.trim() || !slug.trim()) {
+      alert('Veuillez remplir le nom et le slug.');
+      return;
+    }
+
+    setSaving(true);
+
+    let finalLogoUrl = logoUrl || null;
+
+    if (logoFile) {
+      setUploading(true);
+
+      const extension =
+        logoFile.name.split('.').pop()?.toLowerCase() || 'png';
+      const path = `establishments/${establishment.id}/logo.${extension}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('establishment-logos')
+        .upload(path, logoFile, {
+          upsert: true,
+          cacheControl: '3600',
+          contentType: logoFile.type || undefined,
+        });
+
+      setUploading(false);
+
+      if (uploadError) {
+        setSaving(false);
+        alert(`Impossible d’envoyer le logo : ${uploadError.message}`);
+        return;
+      }
+
+      const { data } = supabase.storage
+        .from('establishment-logos')
+        .getPublicUrl(path);
+
+      finalLogoUrl = `${data.publicUrl}?v=${Date.now()}`;
+    }
+
+    const { error } = await supabase
+      .from('establishments')
+      .update({
+        name: name.trim(),
+        slug: slug.trim(),
+        ai_business_type_id: aiBusinessTypeId || null,
+        logo_url: finalLogoUrl,
+      })
+      .eq('id', establishment.id);
+
+    setSaving(false);
+
+    if (error) {
+      console.error(error);
+      alert(`Impossible de modifier l’établissement : ${error.message}`);
+      return;
+    }
+
+    alert('Établissement modifié avec succès.');
+    await reload();
+    close();
+  };
+
+  const removeLogo = async () => {
+    if (!establishment.logo_url) {
+      setLogoUrl('');
+      setLogoFile(null);
+      return;
+    }
+
+    const confirmed = window.confirm(
+      'Supprimer le logo de cet établissement ?'
+    );
+
+    if (!confirmed) return;
+
+    const { error } = await supabase
+      .from('establishments')
+      .update({ logo_url: null })
+      .eq('id', establishment.id);
+
+    if (error) {
+      alert(`Impossible de supprimer le logo : ${error.message}`);
+      return;
+    }
+
+    setLogoUrl('');
+    setLogoFile(null);
+    await reload();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl md:p-8">
+        <div className="mb-7 flex items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
+              Administration
+            </p>
+            <h3 className="mt-1 font-display text-3xl text-forest">
+              Modifier l’établissement
+            </h3>
+            <p className="mt-2 text-sm text-ink/45">
+              Les modifications seront visibles automatiquement dans les espaces Responsable et Employé.
+            </p>
+          </div>
+
+          <button
+            onClick={close}
+            className="rounded-xl p-2 text-ink/40 hover:bg-[#f7f7f3] hover:text-ink"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="grid gap-5">
+          <div>
+            <label className="mb-2 block text-xs font-semibold">
+              Nom de l’établissement
+            </label>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-xs font-semibold">
+              Slug
+            </label>
+            <input
+              value={slug}
+              onChange={(e) => setSlug(generateSlug(e.target.value))}
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-xs font-semibold">
+              Type d’établissement / IA
+            </label>
+            <select
+              value={aiBusinessTypeId}
+              onChange={(e) => setAIBusinessTypeId(e.target.value)}
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+            >
+              <option value="">Sélectionner un type</option>
+              {businessTypes
+                .filter((type) => type.active)
+                .map((type) => (
+                  <option key={type.id} value={type.id}>
+                    {type.name}
+                  </option>
+                ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-xs font-semibold">
+              Logo de l’établissement
+            </label>
+
+            <div className="rounded-2xl border border-dashed border-ink/15 bg-[#f7f7f3] p-5">
+              <div className="flex flex-col gap-5 md:flex-row md:items-center">
+                <div className="grid h-28 w-28 shrink-0 place-items-center overflow-hidden rounded-2xl border border-ink/10 bg-white">
+                  {logoUrl ? (
+                    <img
+                      src={logoUrl}
+                      alt={`Logo ${name}`}
+                      className="h-full w-full object-contain p-3"
+                    />
+                  ) : (
+                    <ImageIcon size={30} className="text-ink/20" />
+                  )}
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-forest">
+                    Logo de {name || 'l’établissement'}
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-ink/40">
+                    PNG, JPG, WEBP ou SVG recommandé. Le logo sera utilisé dans les espaces Responsable et Employé.
+                  </p>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white hover:bg-forest-light">
+                      <ImageIcon size={15} />
+                      Choisir un logo
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] ?? null;
+                          if (!file) return;
+                          setLogoFile(file);
+                          setLogoUrl(URL.createObjectURL(file));
+                        }}
+                      />
+                    </label>
+
+                    {(logoUrl || logoFile) && (
+                      <button
+                        type="button"
+                        onClick={removeLogo}
+                        className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2.5 text-xs font-semibold text-red-600 hover:bg-red-50"
+                      >
+                        <Trash2 size={15} />
+                        Supprimer
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-7 flex justify-end gap-3">
+          <button
+            onClick={close}
+            className="rounded-xl border border-ink/10 px-5 py-3 text-sm font-medium"
+          >
+            Annuler
+          </button>
+
+          <button
+            onClick={save}
+            disabled={saving || uploading}
+            className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+          >
+            {uploading
+              ? 'Envoi du logo...'
+              : saving
+                ? 'Enregistrement...'
+                : 'Enregistrer'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CreateEstablishmentForm({
+  close,
+  reload,
+  businessTypes,
+}: {
+  close: () => void;
+  reload: () => Promise<void>;
+  businessTypes: AIBusinessType[];
+}) {
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
+  const [aiBusinessTypeId, setAIBusinessTypeId] = useState('');
   const [saving, setSaving] = useState(false);
 
   const generateSlug = (value: string) => {
@@ -643,6 +1042,11 @@ function CreateEstablishmentForm({
       return;
     }
 
+    if (!aiBusinessTypeId) {
+      alert('Veuillez sélectionner le type de l’établissement.');
+      return;
+    }
+
     setSaving(true);
 
     const { error } = await supabase
@@ -650,6 +1054,7 @@ function CreateEstablishmentForm({
       .insert({
         name: name.trim(),
         slug: slug.trim(),
+        ai_business_type_id: aiBusinessTypeId,
       });
 
     setSaving(false);
@@ -664,6 +1069,7 @@ function CreateEstablishmentForm({
 
     setName('');
     setSlug('');
+    setAIBusinessTypeId('');
 
     close();
     await reload();
@@ -718,6 +1124,29 @@ function CreateEstablishmentForm({
             placeholder="restaurant-atlas"
             className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none transition focus:border-forest"
           />
+        </div>
+
+        <div className="md:col-span-2">
+          <label className="mb-2 block text-xs font-semibold">
+            Type d’établissement
+          </label>
+
+          <select
+            value={aiBusinessTypeId}
+            onChange={(e) => setAIBusinessTypeId(e.target.value)}
+            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+          >
+            <option value="">Sélectionner le type de commerce</option>
+            {businessTypes.filter((type) => type.active).map((type) => (
+              <option key={type.id} value={type.id}>
+                {type.name}
+              </option>
+            ))}
+          </select>
+
+          <p className="mt-2 text-[11px] text-ink/35">
+            Ce choix détermine le comportement de l’analyse IA pour cet établissement.
+          </p>
         </div>
       </div>
 
@@ -1500,6 +1929,429 @@ function RewardCodesSection({
 }
 
 /* =========================================================
+   ANALYSE DES AVIS
+========================================================= */
+
+type ReviewAnalysis = {
+  summary: string;
+  sentiment: string;
+  satisfaction_score: number;
+  strengths: string[];
+  weaknesses: string[];
+  recurring_issues: {
+    topic: string;
+    frequency: string;
+    priority: string;
+    explanation: string;
+  }[];
+  recommendations: {
+    priority: string;
+    action: string;
+    reason: string;
+  }[];
+  actions_prioritaires: {
+    priority: string;
+    action: string;
+    reason: string;
+    impact: string;
+  }[];
+};
+
+type ReviewAnalysisResponse = {
+  success: boolean;
+  statistics: {
+    total_reviews: number;
+    average_rating: number;
+    positive_reviews: number;
+    negative_reviews: number;
+    rating_distribution: Record<string, number>;
+  };
+  analysis: ReviewAnalysis;
+};
+
+function ReviewAnalysisSection({
+  establishments,
+}: {
+  establishments: Establishment[];
+}) {
+  const [selectedEstablishment, setSelectedEstablishment] = useState('all');
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<ReviewAnalysisResponse | null>(null);
+  const [error, setError] = useState('');
+
+  const analyzeReviews = async () => {
+    setLoading(true);
+    setError('');
+    setResult(null);
+
+    const { data, error: functionError } = await supabase.functions.invoke(
+      'analyze-reviews',
+      {
+        body:
+          selectedEstablishment === 'all'
+            ? {}
+            : { establishment_id: selectedEstablishment },
+      }
+    );
+
+    if (functionError) {
+      console.error('Erreur analyse IA:', functionError);
+      setError(
+        functionError.message ||
+          'Impossible de lancer l’analyse des avis.'
+      );
+      setLoading(false);
+      return;
+    }
+
+    if (!data?.success || !data?.analysis) {
+      console.error('Réponse analyse IA invalide:', data);
+      setError(
+        data?.error ||
+          'La réponse de l’IA est invalide.'
+      );
+      setLoading(false);
+      return;
+    }
+
+    setResult(data as ReviewAnalysisResponse);
+    setLoading(false);
+  };
+
+  const selectedName =
+    selectedEstablishment === 'all'
+      ? 'Tous les établissements'
+      : establishments.find((item) => item.id === selectedEstablishment)?.name ??
+        'Établissement';
+
+  return (
+    <div>
+      <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
+            Intelligence artificielle
+          </p>
+
+          <h2 className="font-display text-3xl text-forest md:text-4xl">
+            Analyse des avis
+          </h2>
+
+          <p className="mt-2 max-w-2xl text-sm text-ink/50">
+            Analyse automatiquement les avis clients et transforme les retours en
+            actions concrètes adaptées au secteur de l’établissement.
+          </p>
+        </div>
+      </div>
+
+      <div className="mb-6 rounded-2xl border border-ink/5 bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end">
+          <div className="flex-1">
+            <label className="mb-2 block text-xs font-semibold">
+              Établissement à analyser
+            </label>
+
+            <select
+              value={selectedEstablishment}
+              onChange={(e) => {
+                setSelectedEstablishment(e.target.value);
+                setResult(null);
+                setError('');
+              }}
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+            >
+              <option value="all">Tous les établissements</option>
+              {establishments.map((establishment) => (
+                <option key={establishment.id} value={establishment.id}>
+                  {establishment.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <button
+            onClick={analyzeReviews}
+            disabled={loading || establishments.length === 0}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <Brain size={17} />
+            {loading ? 'Analyse en cours...' : 'Analyser avec l’IA'}
+          </button>
+        </div>
+
+        {error && (
+          <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
+      </div>
+
+      {!result && !loading && !error && (
+        <div className="rounded-2xl border border-dashed border-ink/10 bg-white p-10 text-center">
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-forest/10 text-forest">
+            <Brain size={25} />
+          </div>
+          <h3 className="mt-5 text-base font-semibold">
+            Prêt à analyser les avis
+          </h3>
+          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-ink/45">
+            Choisis un établissement ou tous les établissements, puis lance
+            l’analyse IA.
+          </p>
+        </div>
+      )}
+
+      {loading && (
+        <div className="rounded-2xl border border-ink/5 bg-white p-12 text-center shadow-sm">
+          <div className="mx-auto h-9 w-9 animate-spin rounded-full border-2 border-forest border-t-transparent" />
+          <p className="mt-4 text-sm font-medium text-ink/60">
+            L’IA analyse les avis de {selectedName}...
+          </p>
+          <p className="mt-1 text-xs text-ink/35">
+            Cela peut prendre quelques secondes.
+          </p>
+        </div>
+      )}
+
+      {result && !loading && (
+        <div className="space-y-6">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <StatCard
+              icon={MessageSquare}
+              label="Avis analysés"
+              value={result.statistics.total_reviews}
+            />
+            <StatCard
+              icon={BarChart3}
+              label="Note moyenne"
+              value={`${result.statistics.average_rating.toFixed(1)} ★`}
+            />
+            <StatCard
+              icon={CheckCircle2}
+              label="Avis positifs"
+              value={result.statistics.positive_reviews}
+            />
+            <StatCard
+              icon={MessageSquare}
+              label="Avis négatifs / moyens"
+              value={result.statistics.negative_reviews}
+            />
+          </div>
+
+          <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
+            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-forest/45">
+                  Synthèse IA
+                </p>
+                <h3 className="mt-2 text-xl font-semibold text-forest">
+                  {selectedName}
+                </h3>
+              </div>
+
+              <div className="rounded-xl bg-[#f7f7f3] px-4 py-3 text-center">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink/35">
+                  Satisfaction
+                </p>
+                <p className="mt-1 text-2xl font-semibold text-forest">
+                  {result.analysis.satisfaction_score}/100
+                </p>
+              </div>
+            </div>
+
+            <p className="mt-5 text-sm leading-7 text-ink/70">
+              {result.analysis.summary}
+            </p>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              <span className="rounded-full bg-forest/10 px-3 py-1.5 text-xs font-semibold text-forest">
+                Sentiment : {result.analysis.sentiment}
+              </span>
+              <span className="rounded-full bg-ink/5 px-3 py-1.5 text-xs font-semibold text-ink/55">
+                {result.statistics.total_reviews} avis analysés
+              </span>
+            </div>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-2">
+            <AnalysisListCard
+              title="Points forts"
+              items={result.analysis.strengths}
+              emptyText="Aucun point fort clairement identifié."
+            />
+            <AnalysisListCard
+              title="Points à améliorer"
+              items={result.analysis.weaknesses}
+              emptyText="Aucun point faible clairement identifié."
+            />
+          </div>
+
+          <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-forest/45">
+                Thèmes récurrents
+              </p>
+              <h3 className="mt-2 text-xl font-semibold text-forest">
+                Ce qui ressort des avis
+              </h3>
+            </div>
+
+            {result.analysis.recurring_issues.length === 0 ? (
+              <p className="mt-5 text-sm text-ink/45">
+                Aucun thème récurrent suffisamment clair n’a été identifié.
+              </p>
+            ) : (
+              <div className="mt-5 space-y-3">
+                {result.analysis.recurring_issues.map((issue, index) => (
+                  <div
+                    key={`${issue.topic}-${index}`}
+                    className="rounded-xl border border-ink/5 bg-[#fdfdfb] p-4"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h4 className="font-semibold text-ink">{issue.topic}</h4>
+                      <span className="rounded-full bg-ink/5 px-2.5 py-1 text-[10px] font-semibold text-ink/50">
+                        {issue.frequency}
+                      </span>
+                      <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-semibold text-amber-700">
+                        Priorité : {issue.priority}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-ink/60">
+                      {issue.explanation}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-forest/45">
+                Plan d’action
+              </p>
+              <h3 className="mt-2 text-xl font-semibold text-forest">
+                3 actions prioritaires
+              </h3>
+              <p className="mt-2 text-sm text-ink/45">
+                Les actions proposées sont basées sur les avis analysés et le
+                secteur de l’établissement.
+              </p>
+            </div>
+
+            <div className="mt-5 grid gap-4 lg:grid-cols-3">
+              {result.analysis.actions_prioritaires.map((action, index) => (
+                <div
+                  key={`${action.action}-${index}`}
+                  className="rounded-2xl border border-ink/5 bg-[#fdfdfb] p-5"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="grid h-9 w-9 place-items-center rounded-xl bg-forest text-sm font-semibold text-white">
+                      {index + 1}
+                    </span>
+                    <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-semibold text-amber-700">
+                      {action.priority}
+                    </span>
+                  </div>
+
+                  <h4 className="mt-4 font-semibold leading-6 text-ink">
+                    {action.action}
+                  </h4>
+
+                  <p className="mt-3 text-sm leading-6 text-ink/55">
+                    <strong className="text-ink/70">Pourquoi :</strong>{' '}
+                    {action.reason}
+                  </p>
+
+                  <p className="mt-3 text-sm leading-6 text-ink/55">
+                    <strong className="text-ink/70">Impact attendu :</strong>{' '}
+                    {action.impact}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {result.analysis.recommendations.length > 0 && (
+            <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-forest/45">
+                Recommandations complémentaires
+              </p>
+              <div className="mt-4 space-y-3">
+                {result.analysis.recommendations.map((recommendation, index) => (
+                  <div
+                    key={`${recommendation.action}-${index}`}
+                    className="rounded-xl border border-ink/5 bg-[#fdfdfb] p-4"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="rounded-full bg-forest/10 px-2.5 py-1 text-[10px] font-semibold text-forest">
+                        {recommendation.priority}
+                      </span>
+                      <h4 className="font-semibold text-ink">
+                        {recommendation.action}
+                      </h4>
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-ink/55">
+                      {recommendation.reason}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-end">
+            <button
+              onClick={analyzeReviews}
+              disabled={loading}
+              className="inline-flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-4 py-3 text-xs font-semibold text-ink transition hover:bg-[#f7f7f3] disabled:opacity-40"
+            >
+              <RefreshCw size={14} />
+              Relancer l’analyse
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AnalysisListCard({
+  title,
+  items,
+  emptyText,
+}: {
+  title: string;
+  items: string[];
+  emptyText: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-forest/45">
+        {title}
+      </p>
+
+      {items.length === 0 ? (
+        <p className="mt-5 text-sm text-ink/45">{emptyText}</p>
+      ) : (
+        <div className="mt-5 space-y-3">
+          {items.map((item, index) => (
+            <div
+              key={`${item}-${index}`}
+              className="flex gap-3 rounded-xl bg-[#fdfdfb] p-4"
+            >
+              <span className="mt-0.5 text-sm font-semibold text-forest">
+                ✓
+              </span>
+              <p className="text-sm leading-6 text-ink/65">{item}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* =========================================================
    REVIEWS
 ========================================================= */
 
@@ -1815,6 +2667,344 @@ function ReviewsSection({
           {filteredReviews.length > 1 ? 's' : ''} sur {reviews.length}.
         </p>
       )}
+    </div>
+  );
+}
+
+/* =========================================================
+   CONFIGURATION IA
+========================================================= */
+
+function AIConfigurationSection({
+  businessTypes,
+  reload,
+}: {
+  businessTypes: AIBusinessType[];
+  reload: () => Promise<void>;
+}) {
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [prompt, setPrompt] = useState('');
+  const [active, setActive] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const resetForm = () => {
+    setShowForm(false);
+    setEditingId(null);
+    setName('');
+    setDescription('');
+    setPrompt('');
+    setActive(true);
+  };
+
+  const startEdit = (type: AIBusinessType) => {
+    setEditingId(type.id);
+    setName(type.name);
+    setDescription(type.description ?? '');
+    setPrompt(type.ai_prompt);
+    setActive(type.active);
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const save = async () => {
+    if (!name.trim()) {
+      alert('Veuillez saisir le nom du type.');
+      return;
+    }
+
+    if (!prompt.trim()) {
+      alert('Veuillez saisir le prompt IA.');
+      return;
+    }
+
+    setSaving(true);
+
+    const payload = {
+      name: name.trim(),
+      description: description.trim() || null,
+      ai_prompt: prompt.trim(),
+      active,
+      updated_at: new Date().toISOString(),
+    };
+
+    const result = editingId
+      ? await supabase
+          .from('ai_business_types')
+          .update(payload)
+          .eq('id', editingId)
+      : await supabase
+          .from('ai_business_types')
+          .insert(payload);
+
+    setSaving(false);
+
+    if (result.error) {
+      console.error('Erreur type IA:', result.error);
+      alert(`Impossible d'enregistrer le type : ${result.error.message}`);
+      return;
+    }
+
+    alert(editingId ? 'Type IA modifié avec succès.' : 'Type IA créé avec succès.');
+    resetForm();
+    await reload();
+  };
+
+  const toggleActive = async (type: AIBusinessType) => {
+    const { error } = await supabase
+      .from('ai_business_types')
+      .update({
+        active: !type.active,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', type.id);
+
+    if (error) {
+      console.error('Erreur activation type IA:', error);
+      alert(`Impossible de modifier le type : ${error.message}`);
+      return;
+    }
+
+    await reload();
+  };
+
+  const deleteType = async (type: AIBusinessType) => {
+    if (!window.confirm(
+      `Supprimer le type « ${type.name} » ? Les établissements qui l'utilisent conserveront leur lien mais leur type IA deviendra vide.`
+    )) {
+      return;
+    }
+
+    const { error } = await supabase
+      .from('ai_business_types')
+      .delete()
+      .eq('id', type.id);
+
+    if (error) {
+      console.error('Erreur suppression type IA:', error);
+      alert(`Impossible de supprimer le type : ${error.message}`);
+      return;
+    }
+
+    await reload();
+  };
+
+  return (
+    <div>
+      <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
+            Intelligence artificielle
+          </p>
+
+          <h2 className="font-display text-3xl text-forest md:text-4xl">
+            Configuration IA
+          </h2>
+
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-ink/50">
+            Configure les comportements métier de l’IA. Chaque établissement utilise
+            automatiquement le prompt correspondant au type que tu lui attribues.
+          </p>
+        </div>
+
+        <button
+          onClick={() => {
+            resetForm();
+            setShowForm(true);
+          }}
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white transition hover:bg-forest-light"
+        >
+          <Plus size={16} />
+          Nouveau type
+        </button>
+      </div>
+
+      {showForm && (
+        <div className="mb-6 rounded-2xl border border-gold/20 bg-white p-6 shadow-sm">
+          <div className="mb-6 flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
+                {editingId ? 'Modification' : 'Nouveau type'}
+              </p>
+              <h3 className="mt-1 font-display text-2xl text-forest">
+                {editingId ? 'Modifier le type IA' : 'Créer un type IA'}
+              </h3>
+            </div>
+
+            <button
+              onClick={resetForm}
+              className="text-ink/40 hover:text-ink"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-2">
+            <div>
+              <label className="mb-2 block text-xs font-semibold">
+                Nom du type
+              </label>
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Ex : Restaurant"
+                className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-xs font-semibold">
+                Description
+              </label>
+              <input
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Ex : Restaurants, cafés et lounges"
+                className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="mb-2 block text-xs font-semibold">
+                Prompt métier de l’IA
+              </label>
+              <textarea
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                rows={9}
+                placeholder="Décris comment l’IA doit analyser ce type d’établissement..."
+                className="w-full resize-y rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm leading-6 outline-none focus:border-forest"
+              />
+              <p className="mt-2 text-[11px] text-ink/35">
+                Ce prompt reste dans l’espace Admin et sert de base métier à l’analyse.
+              </p>
+            </div>
+
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-[#f7f7f3] p-4 md:col-span-2">
+              <input
+                type="checkbox"
+                checked={active}
+                onChange={(e) => setActive(e.target.checked)}
+                className="h-4 w-4 accent-[#173d32]"
+              />
+              <span>
+                <span className="block text-sm font-semibold text-forest">
+                  Type actif
+                </span>
+                <span className="mt-1 block text-xs text-ink/40">
+                  Un type désactivé ne sera pas proposé lors de l’attribution à un établissement.
+                </span>
+              </span>
+            </label>
+          </div>
+
+          <div className="mt-6 flex justify-end gap-3">
+            <button
+              onClick={resetForm}
+              disabled={saving}
+              className="rounded-xl border border-ink/10 px-5 py-3 text-sm font-medium"
+            >
+              Annuler
+            </button>
+
+            <button
+              onClick={save}
+              disabled={saving}
+              className="inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+            >
+              <Save size={16} />
+              {saving ? 'Enregistrement...' : 'Enregistrer'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="grid gap-4">
+        {businessTypes.map((type) => (
+          <div
+            key={type.id}
+            className="rounded-2xl border border-ink/5 bg-white p-5 shadow-sm"
+          >
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-forest text-gold">
+                    <Brain size={18} />
+                  </div>
+
+                  <div>
+                    <h3 className="text-base font-semibold text-forest">
+                      {type.name}
+                    </h3>
+                    <p className="text-xs text-ink/40">
+                      {type.description || 'Aucune description'}
+                    </p>
+                  </div>
+
+                  <span
+                    className={`rounded-full px-3 py-1 text-[10px] font-semibold ${
+                      type.active
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-red-100 text-red-700'
+                    }`}
+                  >
+                    {type.active ? 'ACTIF' : 'DÉSACTIVÉ'}
+                  </span>
+                </div>
+
+                <div className="mt-4 rounded-xl bg-[#f7f7f3] p-4">
+                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-ink/35">
+                    Prompt métier
+                  </p>
+                  <p className="whitespace-pre-wrap text-sm leading-6 text-ink/60">
+                    {type.ai_prompt}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex shrink-0 flex-wrap gap-2">
+                <button
+                  onClick={() => startEdit(type)}
+                  className="inline-flex items-center gap-2 rounded-lg border border-ink/10 px-3 py-2 text-xs font-medium transition hover:bg-[#f7f7f3]"
+                >
+                  <Pencil size={14} />
+                  Modifier
+                </button>
+
+                <button
+                  onClick={() => toggleActive(type)}
+                  className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium transition ${
+                    type.active
+                      ? 'border-red-200 text-red-600 hover:bg-red-50'
+                      : 'border-green-200 text-green-700 hover:bg-green-50'
+                  }`}
+                >
+                  <Power size={14} />
+                  {type.active ? 'Désactiver' : 'Activer'}
+                </button>
+
+                <button
+                  onClick={() => deleteType(type)}
+                  className="inline-flex items-center gap-2 rounded-lg border border-red-200 px-3 py-2 text-xs font-medium text-red-600 transition hover:bg-red-50"
+                >
+                  Supprimer
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {businessTypes.length === 0 && (
+          <div className="rounded-2xl border border-dashed border-ink/15 bg-white p-12 text-center">
+            <Brain size={32} className="mx-auto text-ink/20" />
+            <p className="mt-4 text-sm text-ink/45">
+              Aucun type IA configuré.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
