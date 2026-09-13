@@ -51,16 +51,12 @@ const links = [
 type Establishment = {
   id: string;
   name: string;
-  logo_url: string | null;
 };
 
 export function DashboardLayout() {
   const [open, setOpen] = useState(false);
   const [profileName, setProfileName] = useState<string | null>(null);
   const [establishmentName, setEstablishmentName] = useState<string | null>(null);
-  const [establishmentLogoUrl, setEstablishmentLogoUrl] = useState<string | null>(null);
-  const [accessibleEstablishments, setAccessibleEstablishments] = useState<Establishment[]>([]);
-  const [selectedEstablishmentId, setSelectedEstablishmentId] = useState<string>('');
 
   const { signOut, user, role } = useAuth();
   const navigate = useNavigate();
@@ -108,9 +104,6 @@ export function DashboardLayout() {
     const loadEstablishment = async () => {
       if (role !== 'responsible' || !user?.id) {
         setEstablishmentName(null);
-        setEstablishmentLogoUrl(null);
-        setAccessibleEstablishments([]);
-        setSelectedEstablishmentId('');
         return;
       }
 
@@ -130,15 +123,9 @@ export function DashboardLayout() {
       }
 
       const establishments = (data ?? []) as Establishment[];
-      const storedId = window.sessionStorage.getItem('tapmarrakech_selected_establishment');
-      const selected = establishments.find((item) => item.id === storedId) ?? establishments[0];
 
       if (active) {
-        setAccessibleEstablishments(establishments);
-        setSelectedEstablishmentId(selected?.id ?? '');
-        setEstablishmentName(selected?.name ?? null);
-        setEstablishmentLogoUrl(selected?.logo_url ?? null);
-        if (selected?.id) window.sessionStorage.setItem('tapmarrakech_selected_establishment', selected.id);
+        setEstablishmentName(establishments[0]?.name ?? null);
       }
     };
 
@@ -148,16 +135,6 @@ export function DashboardLayout() {
       active = false;
     };
   }, [role, user?.id]);
-
-  const changeEstablishment = (id: string) => {
-    const selected = accessibleEstablishments.find((item) => item.id === id);
-    if (!selected) return;
-    setSelectedEstablishmentId(id);
-    setEstablishmentName(selected.name);
-    setEstablishmentLogoUrl(selected.logo_url ?? null);
-    window.sessionStorage.setItem('tapmarrakech_selected_establishment', id);
-    window.location.reload();
-  };
 
   const logout = async () => {
     await signOut();
@@ -201,13 +178,7 @@ export function DashboardLayout() {
         : 'Mon espace';
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#f7f7f3] text-ink">
-      <img
-        src="/tapmarrakech-logo.png"
-        alt=""
-        aria-hidden="true"
-        className="pointer-events-none fixed left-1/2 top-1/2 z-0 w-[min(720px,70vw)] -translate-x-1/2 -translate-y-1/2 select-none opacity-[0.035] mix-blend-multiply"
-      />
+    <div className="min-h-screen bg-[#f7f7f3] text-ink">
       {open && (
         <button
           aria-label="Fermer le menu"
@@ -217,33 +188,18 @@ export function DashboardLayout() {
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-[270px] flex-col bg-forest px-5 py-6 text-white transition-transform lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 flex w-[270px] flex-col bg-[#5A2F18] px-5 py-6 text-white transition-transform lg:translate-x-0 ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="mb-12 flex items-center justify-between px-3">
-          <div className="flex min-w-0 items-center gap-3">
-            {role === 'responsible' && establishmentLogoUrl ? (
-              <img
-                src={establishmentLogoUrl}
-                alt={`Logo ${sidebarTitle}`}
-                className="h-11 w-11 shrink-0 rounded-xl bg-white object-contain p-1.5 shadow-sm"
-              />
-            ) : (
-              <img
-                src="/tapmarrakech-logo.png"
-                alt="TapMarrakech"
-                className="h-11 w-11 shrink-0 rounded-xl bg-white object-contain p-1.5 shadow-sm"
-              />
-            )}
-            <div
-              className={`min-w-0 max-w-[160px] truncate font-display tracking-tight ${
-                role === 'admin' ? 'text-2xl' : 'text-xl'
-              }`}
-              title={sidebarTitle}
-            >
-              {sidebarTitle}
-            </div>
+          <div
+            className={`max-w-[205px] truncate font-display tracking-tight ${
+              role === 'admin' ? 'text-2xl' : 'text-xl'
+            }`}
+            title={sidebarTitle}
+          >
+            {sidebarTitle}
           </div>
 
           <button
@@ -268,7 +224,7 @@ export function DashboardLayout() {
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition ${
                   isActive
-                    ? 'bg-white text-forest shadow-lg'
+                    ? 'bg-white text-[#5A2F18] shadow-lg'
                     : 'text-white/65 hover:bg-white/10 hover:text-white'
                 }`
               }
@@ -281,7 +237,7 @@ export function DashboardLayout() {
 
         <div className="mt-auto border-t border-white/10 pt-5">
           <div className="mb-4 flex items-center gap-3 px-2">
-            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gold font-semibold text-forest">
+            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#B8733F] font-semibold text-[#5A2F18]">
               {avatarLetter}
             </div>
 
@@ -319,49 +275,18 @@ export function DashboardLayout() {
             {capitalizedDate}
           </div>
 
-          {role === 'responsible' && accessibleEstablishments.length > 1 && (
-            <select
-              value={selectedEstablishmentId}
-              onChange={(e) => changeEstablishment(e.target.value)}
-              className="mr-3 rounded-full border border-ink/10 bg-white px-4 py-2 text-xs font-semibold text-forest outline-none"
-            >
-              {accessibleEstablishments.map((establishment) => (
-                <option key={establishment.id} value={establishment.id}>
-                  {establishment.name}
-                </option>
-              ))}
-            </select>
-          )}
-
-          {role === 'responsible' && (
-            <div className="hidden items-center gap-2 rounded-full border border-ink/10 bg-white px-3 py-2 sm:flex">
-              {establishmentLogoUrl ? (
-                <img
-                  src={establishmentLogoUrl}
-                  alt={`Logo ${establishmentName ?? ''}`}
-                  className="h-7 w-7 rounded-full object-contain"
-                />
-              ) : (
-                <Building2 size={15} className="text-forest/60" />
-              )}
-              <div className="max-w-[180px] truncate text-xs font-semibold text-forest">
-                {establishmentName || 'Mon établissement'}
-              </div>
-            </div>
-          )}
-
           <button
             onClick={() =>
               navigate('/dashboard/establishments')
             }
-            className="ml-auto flex items-center gap-2 rounded-full bg-forest px-4 py-2 text-xs font-semibold text-white transition hover:bg-forest-light"
+            className="ml-auto flex items-center gap-2 rounded-full bg-[#5A2F18] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#7A4324]"
           >
             <Building2 size={15} />
             Gérer mes établissements
           </button>
         </header>
 
-        <main className="relative z-10 mx-auto max-w-[1440px] p-5 md:p-10">
+        <main className="mx-auto max-w-[1440px] p-5 md:p-10">
           <Outlet />
         </main>
 
