@@ -4,7 +4,8 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { DashboardLayout } from '@/components/DashboardLayout';
 
 import PublicReview from '@/pages/PublicReview';
-import { ForgotPassword, Login, Register } from '@/pages/AuthPages';
+import Login from '@/pages/Login';
+import { ForgotPassword, Register } from '@/pages/AuthPages';
 
 import Dashboard from '@/pages/Dashboard';
 import Establishments from '@/pages/Establishments';
@@ -20,126 +21,35 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
+          <Route path="/r/:slug" element={<PublicReview />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
-          {/* =====================================================
-              PAGES PUBLIQUES
-          ===================================================== */}
-
-          <Route
-            path="/r/:slug"
-            element={<PublicReview />}
-          />
-
-          <Route
-            path="/login"
-            element={<Login />}
-          />
-
-          <Route
-            path="/register"
-            element={<Register />}
-          />
-
-          <Route
-            path="/forgot-password"
-            element={<ForgotPassword />}
-          />
-
-          {/* =====================================================
-              ESPACE ADMIN TAPMARRAKECH
-          ===================================================== */}
-
-          <Route
-            element={
-              <ProtectedRoute allowedRoles={['admin']} />
-            }
-          >
-            <Route
-              path="/admin"
-              element={<Admin />}
-            />
+          <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+            <Route path="/admin" element={<Admin />} />
           </Route>
 
-          {/* =====================================================
-              ESPACE RESPONSABLE
-          ===================================================== */}
-
-          <Route
-            element={
-              <ProtectedRoute allowedRoles={['responsible']} />
-            }
-          >
+          <Route element={<ProtectedRoute allowedRoles={['responsible']} />}>
             <Route element={<DashboardLayout />}>
-
-              <Route
-                path="/dashboard"
-                element={<Dashboard />}
-              />
-
-              <Route
-                path="/dashboard/establishments"
-                element={<Establishments />}
-              />
-
-              <Route
-                path="/dashboard/reviews"
-                element={<Reviews />}
-              />
-
-              <Route
-                path="/dashboard/analytics"
-                element={<Analytics />}
-              />
-
-              <Route
-                path="/dashboard/loyalty"
-                element={<Loyalty />}
-              />
-
-              <Route
-                path="/dashboard/loyalty/settings"
-                element={<LoyaltySettings />}
-              />
-
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard/establishments" element={<Establishments />} />
+              <Route path="/dashboard/reviews" element={<Reviews />} />
+              <Route path="/dashboard/analytics" element={<Analytics />} />
+              <Route path="/dashboard/loyalty" element={<Loyalty />} />
+              <Route path="/dashboard/loyalty/settings" element={<LoyaltySettings />} />
             </Route>
           </Route>
 
-          {/* =====================================================
-              ESPACE EMPLOYÉ
-              
-              IMPORTANT :
-              Cette route est volontairement PUBLIQUE au niveau
-              de React Router.
+          {/* L'employé possède sa propre session par code. */}
+          <Route path="/employee" element={<Employee />} />
 
-              L'employé se sécurise ensuite avec son code dans
-              Employee.tsx + employee-login.
-          ===================================================== */}
-
-          <Route
-            path="/employee"
-            element={<Employee />}
-          />
-
-          {/* =====================================================
-              REDIRECTION PAR RÔLE
-          ===================================================== */}
-
-          <Route
-            path="*"
-            element={<RoleRedirect />}
-          />
-
+          <Route path="*" element={<RoleRedirect />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
   );
 }
-
-/*
- * =============================================================
- * REDIRECTION
- * =============================================================
- */
 
 function RoleRedirect() {
   const { user, role, loading } = useAuth();
@@ -152,40 +62,14 @@ function RoleRedirect() {
     );
   }
 
-  /*
-   * Pas connecté :
-   * on garde le login classique pour Admin / Responsable.
-   */
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  /*
-   * Admin
-   */
-  if (role === 'admin') {
-    return <Navigate to="/admin" replace />;
-  }
+  if (role === 'admin') return <Navigate to="/admin" replace />;
+  if (role === 'responsible') return <Navigate to="/dashboard" replace />;
+  if (role === 'employee') return <Navigate to="/employee" replace />;
 
-  /*
-   * Responsable
-   */
-  if (role === 'responsible') {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  /*
-   * Employé connecté via l'ancien système Auth :
-   * on le renvoie vers son espace.
-   */
-  if (role === 'employee') {
-    return <Navigate to="/employee" replace />;
-  }
-
-  /*
-   * Sécurité :
-   * si aucun rôle reconnu.
-   */
   return <Navigate to="/login" replace />;
 }
 
