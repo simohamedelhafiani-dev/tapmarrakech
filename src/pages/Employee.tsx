@@ -14,31 +14,13 @@ import {
   LockKeyhole,
   WalletCards,
   LogOut,
+  KeyRound,
 } from 'lucide-react';
-import { createClient } from '@supabase/supabase-js';
-
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-const supabase = createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
-
-const EMPLOYEE_SESSION_KEY = 'tapmarrakech_employee_session';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 type Establishment = {
   id: string;
   name: string;
-};
-
-type EmployeeSession = {
-  access_token: string;
-  employee_id: string;
-  employee_name: string;
-  establishment_id: string;
-  establishment_name: string;
-  expires_at: string;
 };
 
 type LoyaltyCustomer = {
@@ -72,88 +54,48 @@ type ProgramSettings = {
   enabled: boolean;
 };
 
-function getStoredSession(): EmployeeSession | null {
-  try {
-    const raw = localStorage.getItem(EMPLOYEE_SESSION_KEY);
+type EmployeeSession = {
+  access_token: string;
+  session_token: string;
+  employee_id: string;
+  employee_name: string;
+  establishment_id: string;
+  establishment_name: string;
+  expires_at: string;
+};
 
-    if (!raw) return null;
-
-    const session = JSON.parse(raw) as EmployeeSession;
-
-    if (!session.access_token || !session.employee_id) {
-      localStorage.removeItem(EMPLOYEE_SESSION_KEY);
-      return null;
-    }
-
-    if (
-      session.expires_at &&
-      new Date(session.expires_at).getTime() <= Date.now()
-    ) {
-      localStorage.removeItem(EMPLOYEE_SESSION_KEY);
-      return null;
-    }
-
-    return session;
-  } catch {
-    localStorage.removeItem(EMPLOYEE_SESSION_KEY);
-    return null;
-  }
-}
-
-function saveSession(session: EmployeeSession) {
-  localStorage.setItem(
-    EMPLOYEE_SESSION_KEY,
-    JSON.stringify(session)
-  );
-}
-
-function clearSession() {
-  localStorage.removeItem(EMPLOYEE_SESSION_KEY);
-}
-
-function createEmployeeClient(token: string) {
-  return createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY,
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-      global: {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    }
-  );
-}
+const EMPLOYEE_SESSION_KEY = 'tapmarrakech_employee_session';
 
 export default function Employee() {
-  const [session, setSession] = useState<EmployeeSession | null>(
-    getStoredSession
-  );
+  const [session, setSession] = useState<EmployeeSession | null>(null);
+  const [employeeCode, setEmployeeCode] = useState('');
+  const [loginLoading, setLoginLoading] = useState(true);
+  const [loginSaving, setLoginSaving] = useState(false);
 
-  const [loginEstablishments, setLoginEstablishments] = useState<
-    Establishment[]
-  >([]);
+  const employeeSupabase = useMemo<SupabaseClient | null>(() => {
+    if (!session?.access_token) return null;
 
-  const [loginEstablishmentId, setLoginEstablishmentId] =
-    useState('');
+    return createClient(
+      import.meta.env.VITE_SUPABASE_URL,
+      import.meta.env.VITE_SUPABASE_ANON_KEY,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        },
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      }
+    );
+  }, [session]);
 
-  const [loginCode, setLoginCode] = useState('');
-  const [loginLoading, setLoginLoading] = useState(false);
-  const [loginError, setLoginError] = useState('');
-
-  const [establishments, setEstablishments] = useState<
-    Establishment[]
-  >([]);
-
+  const [establishments, setEstablishments] = useState<Establishment[]>([]);
   const [establishmentId, setEstablishmentId] = useState('');
-
   const [customers, setCustomers] = useState<LoyaltyCustomer[]>([]);
   const [rewards, setRewards] = useState<LoyaltyReward[]>([]);
-
   const [settings, setSettings] = useState<ProgramSettings>({
     points_per_currency: 1,
     currency: 'MAD',
@@ -161,20 +103,13 @@ export default function Employee() {
   });
 
   const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const [showNewCustomer, setShowNewCustomer] =
-    useState(false);
-
-  const [showPoints, setShowPoints] =
-    useState<LoyaltyCustomer | null>(null);
-
-  const [showRewards, setShowRewards] =
-    useState<LoyaltyCustomer | null>(null);
-
-  const [selectedReward, setSelectedReward] =
-    useState<LoyaltyReward | null>(null);
+  const [showNewCustomer, setShowNewCustomer] = useState(false);
+  const [showPoints, setShowPoints] = useState<LoyaltyCustomer | null>(null);
+  const [showRewards, setShowRewards] = useState<LoyaltyCustomer | null>(null);
+  const [selectedReward, setSelectedReward] = useState<LoyaltyReward | null>(null);
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -182,108 +117,86 @@ export default function Employee() {
   const [birthDate, setBirthDate] = useState('');
 
   const [purchaseAmount, setPurchaseAmount] = useState('');
-  const [pointsResponsibleCode, setPointsResponsibleCode] =
-    useState('');
+  const [pointsResponsibleCode, setPointsResponsibleCode] = useState('');
 
   const [rewardCode, setRewardCode] = useState('');
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [invoiceAmount, setInvoiceAmount] = useState('');
-
-  const [paymentMethod, setPaymentMethod] = useState<
-    'CASH' | 'CARD' | 'OTHER'
-  >('CASH');
-
-  /*
-   * ----------------------------------------------------------
-   * CHARGEMENT DES ÉTABLISSEMENTS POUR LA CONNEXION
-   * ----------------------------------------------------------
-   */
+  const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'CARD' | 'OTHER'>('CASH');
 
   useEffect(() => {
-    if (!session) {
-      loadLoginEstablishments();
+    try {
+      const raw = localStorage.getItem(EMPLOYEE_SESSION_KEY);
+      if (!raw) {
+        setLoginLoading(false);
+        return;
+      }
+
+      const stored = JSON.parse(raw) as EmployeeSession;
+      const expiresAt = new Date(stored.expires_at).getTime();
+
+      if (!stored.access_token || !stored.session_token || !expiresAt || expiresAt <= Date.now()) {
+        localStorage.removeItem(EMPLOYEE_SESSION_KEY);
+        setLoginLoading(false);
+        return;
+      }
+
+      setSession(stored);
+      setEstablishmentId(stored.establishment_id);
+    } catch (error) {
+      console.error('Session employé invalide:', error);
+      localStorage.removeItem(EMPLOYEE_SESSION_KEY);
+    } finally {
+      setLoginLoading(false);
     }
-  }, [session]);
+  }, []);
 
-  async function loadLoginEstablishments() {
-    setLoginLoading(true);
-    setLoginError('');
+  useEffect(() => {
+    if (!session || !employeeSupabase) return;
+    setEstablishmentId(session.establishment_id);
+    loadEstablishments();
+  }, [session, employeeSupabase]);
 
-    const { data, error } = await supabase.rpc(
-      'get_employee_login_establishments'
-    );
-
-    setLoginLoading(false);
-
-    if (error) {
-      console.error(error);
-      setLoginError(
-        'Impossible de charger les établissements.'
-      );
-      return;
-    }
-
-    const places = (data ?? []).map(
-      (item: { id: string; name: string }) => ({
-        id: item.id,
-        name: item.name,
-      })
-    );
-
-    setLoginEstablishments(places);
-
-    if (places.length === 1) {
-      setLoginEstablishmentId(places[0].id);
-    }
-  }
-
-  /*
-   * ----------------------------------------------------------
-   * CONNEXION PAR CODE
-   * ----------------------------------------------------------
-   */
+  useEffect(() => {
+    if (!establishmentId || !employeeSupabase) return;
+    loadCustomers();
+    loadRewards();
+    loadSettings();
+  }, [establishmentId, employeeSupabase]);
 
   async function loginEmployee() {
-    setLoginError('');
+    const code = employeeCode.trim();
 
-    if (!loginEstablishmentId) {
-      setLoginError('Veuillez sélectionner votre établissement.');
+    if (code.length < 4) {
+      alert('Veuillez saisir votre code employé.');
       return;
     }
 
-    if (!loginCode.trim()) {
-      setLoginError('Veuillez saisir votre code employé.');
-      return;
-    }
-
-    setLoginLoading(true);
+    setLoginSaving(true);
 
     try {
       const response = await fetch(
-        `${SUPABASE_URL}/functions/v1/employee-login`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/employee-login`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            apikey: SUPABASE_ANON_KEY,
+            apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
           },
-          body: JSON.stringify({
-            establishment_id: loginEstablishmentId,
-            code: loginCode.trim(),
-          }),
+          body: JSON.stringify({ code }),
         }
       );
 
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          result?.error || 'Code employé incorrect.'
-        );
+        alert(result?.error ?? 'Code employé incorrect.');
+        return;
       }
 
-      const newSession: EmployeeSession = {
+      const nextSession: EmployeeSession = {
         access_token: result.access_token,
+        session_token: result.refresh_token,
         employee_id: result.employee_id,
         employee_name: result.employee_name,
         establishment_id: result.establishment_id,
@@ -291,156 +204,93 @@ export default function Employee() {
         expires_at: result.expires_at,
       };
 
-      saveSession(newSession);
-      setSession(newSession);
-
-      setLoginCode('');
-      setEstablishmentId(result.establishment_id);
+      localStorage.setItem(EMPLOYEE_SESSION_KEY, JSON.stringify(nextSession));
+      setEmployeeCode('');
+      setSession(nextSession);
+      setEstablishmentId(nextSession.establishment_id);
     } catch (error) {
-      console.error(error);
-
-      setLoginError(
-        error instanceof Error
-          ? error.message
-          : 'Impossible de se connecter.'
-      );
+      console.error('Erreur connexion employé:', error);
+      alert('Impossible de se connecter pour le moment.');
     } finally {
-      setLoginLoading(false);
+      setLoginSaving(false);
     }
   }
-
-  /*
-   * ----------------------------------------------------------
-   * DÉCONNEXION
-   * ----------------------------------------------------------
-   */
 
   async function logoutEmployee() {
-    if (session?.access_token) {
-      try {
-        await supabase.rpc('logout_employee', {
-          p_session_token: session.access_token,
+    try {
+      if (employeeSupabase && session?.session_token) {
+        await employeeSupabase.rpc('logout_employee', {
+          p_session_token: session.session_token,
         });
-      } catch (error) {
-        console.error(error);
       }
-    }
-
-    clearSession();
-
-    setSession(null);
-    setEstablishments([]);
-    setCustomers([]);
-    setRewards([]);
-    setEstablishmentId('');
-    setSearch('');
-  }
-
-  /*
-   * ----------------------------------------------------------
-   * CHARGEMENT DU DASHBOARD
-   * ----------------------------------------------------------
-   */
-
-  useEffect(() => {
-    if (!session) return;
-
-    if (
-      session.expires_at &&
-      new Date(session.expires_at).getTime() <= Date.now()
-    ) {
-      logoutEmployee();
-      return;
-    }
-
-    setEstablishmentId(session.establishment_id);
-    loadEstablishments(session.access_token);
-  }, [session]);
-
-  useEffect(() => {
-    if (!session || !establishmentId) return;
-
-    loadCustomers();
-    loadRewards();
-    loadSettings();
-  }, [session, establishmentId]);
-
-  async function loadEstablishments(token: string) {
-    const client = createEmployeeClient(token);
-
-    const { data, error } = await client.rpc(
-      'get_my_establishments'
-    );
-
-    if (error) {
-      console.error(error);
-      return;
-    }
-
-    const places = (data ?? []).map(
-      (item: { id: string; name: string }) => ({
-        id: item.id,
-        name: item.name,
-      })
-    );
-
-    setEstablishments(places);
-
-    if (places.length === 1) {
-      setEstablishmentId(places[0].id);
+    } catch (error) {
+      console.error('Erreur déconnexion employé:', error);
+    } finally {
+      localStorage.removeItem(EMPLOYEE_SESSION_KEY);
+      setSession(null);
+      setEstablishmentId('');
+      setEstablishments([]);
+      setCustomers([]);
+      setRewards([]);
+      setEmployeeCode('');
     }
   }
 
-  /*
-   * ----------------------------------------------------------
-   * CLIENTS
-   * ----------------------------------------------------------
-   */
-
-  async function loadCustomers() {
-    if (!session || !establishmentId) return;
-
-    const client = createEmployeeClient(
-      session.access_token
-    );
+  async function loadEstablishments() {
+    if (!employeeSupabase) return;
 
     setLoading(true);
 
-    const { data, error } = await client
+    const { data, error } = await employeeSupabase.rpc('get_my_establishments');
+
+    if (error) {
+      console.error(error);
+      setLoading(false);
+      return;
+    }
+
+    const places = (data ?? []).map((item: { id: string; name: string }) => ({
+      id: item.id,
+      name: item.name,
+    }));
+
+    setEstablishments(places);
+
+    if (places.length > 0) {
+      setEstablishmentId(prev => prev || places[0].id);
+    }
+
+    setLoading(false);
+  }
+
+  async function loadCustomers() {
+    if (!employeeSupabase) return;
+    if (!establishmentId) return;
+
+    const { data, error } = await employeeSupabase
       .from('loyalty_customers')
       .select('*')
       .eq('establishment_id', establishmentId)
       .order('created_at', { ascending: false });
 
-    setLoading(false);
-
     if (error) {
       console.error(error);
       return;
     }
 
-    setCustomers(
-      (data as LoyaltyCustomer[]) ?? []
-    );
+    setCustomers((data as LoyaltyCustomer[]) ?? []);
   }
 
   async function loadRewards() {
-    if (!session || !establishmentId) return;
+    if (!employeeSupabase) return;
+    if (!establishmentId) return;
 
-    const client = createEmployeeClient(
-      session.access_token
-    );
-
-    const { data, error } = await client
+    const { data, error } = await employeeSupabase
       .from('loyalty_rewards')
-      .select(
-        'id, establishment_id, name, description, points_required, active'
-      )
+      .select('id, establishment_id, name, description, points_required, active')
       .eq('establishment_id', establishmentId)
       .eq('active', true)
-      .order('points_required', {
-        ascending: true,
-      });
+      .order('points_required', { ascending: true });
 
     if (error) {
       console.error(error);
@@ -448,75 +298,46 @@ export default function Employee() {
       return;
     }
 
-    setRewards(
-      (data as LoyaltyReward[]) ?? []
-    );
+    setRewards((data as LoyaltyReward[]) ?? []);
   }
 
   async function loadSettings() {
-    if (!session || !establishmentId) return;
+    if (!employeeSupabase) return;
+    if (!establishmentId) return;
 
-    const client = createEmployeeClient(
-      session.access_token
-    );
-
-    const { data, error } = await client
+    const { data, error } = await employeeSupabase
       .from('loyalty_settings')
-      .select(
-        'points_per_currency, currency, enabled'
-      )
+      .select('points_per_currency, currency, enabled')
       .eq('establishment_id', establishmentId)
       .maybeSingle();
 
     if (!error && data) {
       setSettings({
-        points_per_currency: Number(
-          data.points_per_currency ?? 1
-        ),
+        points_per_currency: Number(data.points_per_currency ?? 1),
         currency: data.currency ?? 'MAD',
         enabled: data.enabled ?? true,
       });
     }
   }
 
-  /*
-   * ----------------------------------------------------------
-   * RECHERCHE CLIENT
-   * ----------------------------------------------------------
-   */
-
   const filteredCustomers = useMemo(() => {
     const value = search.trim().toLowerCase();
 
-    if (!value) {
-      return customers.slice(0, 20);
-    }
+    if (!value) return customers.slice(0, 20);
 
     return customers.filter(customer => {
-      const fullName =
-        `${customer.first_name} ${customer.last_name ?? ''}`
-          .toLowerCase();
-
+      const fullName = `${customer.first_name} ${customer.last_name ?? ''}`.toLowerCase();
       return (
-        customer.loyalty_number
-          .toLowerCase()
-          .includes(value) ||
+        customer.loyalty_number.toLowerCase().includes(value) ||
         fullName.includes(value) ||
-        customer.phone
-          .toLowerCase()
-          .includes(value)
+        customer.phone.toLowerCase().includes(value)
       );
     });
   }, [customers, search]);
 
-  /*
-   * ----------------------------------------------------------
-   * CRÉATION CLIENT
-   * ----------------------------------------------------------
-   */
-
   async function createCustomer() {
-    if (!session || !establishmentId) return;
+    if (!employeeSupabase) return;
+    if (!establishmentId) return;
 
     if (!firstName.trim()) {
       alert('Veuillez saisir le prénom.');
@@ -535,11 +356,7 @@ export default function Employee() {
 
     setSaving(true);
 
-    const client = createEmployeeClient(
-      session.access_token
-    );
-
-    const { data, error } = await client
+    const { data, error } = await employeeSupabase
       .from('loyalty_customers')
       .insert({
         establishment_id: establishmentId,
@@ -555,13 +372,10 @@ export default function Employee() {
 
     if (error) {
       if (error.code === '23505') {
-        alert(
-          'Un client avec ce numéro existe déjà dans cet établissement.'
-        );
+        alert('Un client avec ce numéro existe déjà dans cet établissement.');
       } else {
         alert(error.message);
       }
-
       return;
     }
 
@@ -569,39 +383,21 @@ export default function Employee() {
     setLastName('');
     setPhone('');
     setBirthDate('');
-
     setShowNewCustomer(false);
-
-    // Ne pas remplir automatiquement la recherche
-    setSearch('');
+    setSearch(data.phone);
 
     await loadCustomers();
-
-    if (data?.loyalty_number) {
-      alert(
-        `Client créé avec succès.\n\nN° fidélité : ${data.loyalty_number}`
-      );
-    }
   }
 
-  /*
-   * ----------------------------------------------------------
-   * AJOUT DE POINTS
-   * ----------------------------------------------------------
-   */
-
   async function addPoints() {
-    if (!session || !showPoints || !establishmentId) {
-      return;
-    }
+    if (!employeeSupabase) return;
+    if (!showPoints || !establishmentId) return;
 
     const amount = Number(purchaseAmount);
     const code = pointsResponsibleCode.trim();
 
     if (!settings.enabled) {
-      alert(
-        'Le programme de fidélité est désactivé pour cet établissement.'
-      );
+      alert('Le programme de fidélité est désactivé pour cet établissement.');
       return;
     }
 
@@ -617,22 +413,13 @@ export default function Employee() {
 
     setSaving(true);
 
-    const client = createEmployeeClient(
-      session.access_token
-    );
-
-    const { data, error } = await client.rpc(
-      'add_loyalty_points',
-      {
-        p_establishment_id: establishmentId,
-        p_customer_id: showPoints.id,
-        p_amount: amount,
-        p_responsible_code: code,
-        p_description: `Achat de ${amount.toFixed(
-          2
-        )} ${settings.currency}`,
-      }
-    );
+    const { data, error } = await employeeSupabase.rpc('add_loyalty_points', {
+      p_establishment_id: establishmentId,
+      p_customer_id: showPoints.id,
+      p_amount: amount,
+      p_responsible_code: code,
+      p_description: `Achat de ${amount.toFixed(2)} ${settings.currency}`,
+    });
 
     setSaving(false);
 
@@ -642,29 +429,15 @@ export default function Employee() {
     }
 
     const newBalance = Number(data ?? 0);
+    const earned = Math.floor(amount * Number(settings.points_per_currency));
 
-    const earned = Math.floor(
-      amount * Number(
-        settings.points_per_currency
-      )
-    );
-
-    alert(
-      `+${earned} points ajoutés.\n\nNouveau solde : ${newBalance} points.`
-    );
+    alert(`+${earned} points ajoutés. Nouveau solde : ${newBalance} points.`);
 
     setPurchaseAmount('');
     setPointsResponsibleCode('');
     setShowPoints(null);
-
     await loadCustomers();
   }
-
-  /*
-   * ----------------------------------------------------------
-   * RÉCOMPENSES
-   * ----------------------------------------------------------
-   */
 
   function openRewards(customer: LoyaltyCustomer) {
     setShowRewards(customer);
@@ -676,66 +449,42 @@ export default function Employee() {
   }
 
   async function redeemReward() {
-    if (
-      !session ||
-      !showRewards ||
-      !selectedReward ||
-      !establishmentId
-    ) {
-      return;
-    }
+    if (!employeeSupabase) return;
+    if (!showRewards || !selectedReward || !establishmentId) return;
 
-    if (
-      showRewards.points_balance <
-      selectedReward.points_required
-    ) {
-      alert(
-        'Le client ne possède pas assez de points.'
-      );
+    if (showRewards.points_balance < selectedReward.points_required) {
+      alert('Le client ne possède pas assez de points.');
       return;
     }
 
     if (rewardCode.trim().length < 4) {
-      alert(
-        'Le code responsable est obligatoire.'
-      );
+      alert('Le code responsable est obligatoire.');
       return;
     }
 
     if (!invoiceNumber.trim()) {
-      alert(
-        'Le numéro de facture est obligatoire.'
-      );
+      alert('Le numéro de facture est obligatoire.');
       return;
     }
 
     const amount = Number(invoiceAmount);
 
     if (!Number.isFinite(amount) || amount <= 0) {
-      alert(
-        'Veuillez saisir un montant de facture valide.'
-      );
+      alert('Veuillez saisir un montant de facture valide.');
       return;
     }
 
     setSaving(true);
 
-    const client = createEmployeeClient(
-      session.access_token
-    );
-
-    const { data, error } = await client.rpc(
-      'redeem_loyalty_reward',
-      {
-        p_establishment_id: establishmentId,
-        p_customer_id: showRewards.id,
-        p_reward_id: selectedReward.id,
-        p_reward_code: rewardCode.trim(),
-        p_invoice_number: invoiceNumber.trim(),
-        p_invoice_amount: amount,
-        p_payment_method: paymentMethod,
-      }
-    );
+    const { data, error } = await employeeSupabase.rpc('redeem_loyalty_reward', {
+      p_establishment_id: establishmentId,
+      p_customer_id: showRewards.id,
+      p_reward_id: selectedReward.id,
+      p_reward_code: rewardCode.trim(),
+      p_invoice_number: invoiceNumber.trim(),
+      p_invoice_amount: amount,
+      p_payment_method: paymentMethod,
+    });
 
     setSaving(false);
 
@@ -744,9 +493,7 @@ export default function Employee() {
       return;
     }
 
-    const result = Array.isArray(data)
-      ? data[0]
-      : data;
+    const result = Array.isArray(data) ? data[0] : data;
 
     alert(
       `Récompense validée.\n\n${selectedReward.name}\nNouveau solde : ${Number(
@@ -759,260 +506,132 @@ export default function Employee() {
     setRewardCode('');
     setInvoiceNumber('');
     setInvoiceAmount('');
-
     await loadCustomers();
   }
 
-  /*
-   * ----------------------------------------------------------
-   * ÉCRAN DE CONNEXION
-   * ----------------------------------------------------------
-   */
+  const selectedEstablishmentName =
+    establishments.find(item => item.id === establishmentId)?.name ?? '';
+
+  if (loginLoading) {
+    return (
+      <div className="min-h-screen grid place-items-center bg-[#f7f7f3]">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
+      </div>
+    );
+  }
 
   if (!session) {
     return (
       <div className="min-h-screen bg-[#f7f7f3] px-4 py-8">
-        <div className="mx-auto flex min-h-[90vh] max-w-md items-center justify-center">
-          <div className="w-full rounded-3xl border border-ink/5 bg-white p-7 shadow-sm md:p-9">
-
+        <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md items-center justify-center">
+          <div className="w-full rounded-[2rem] border border-ink/5 bg-white p-7 shadow-2xl md:p-9">
             <div className="mb-8 text-center">
-              <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-forest/10 text-forest">
-                <WalletCards size={30} />
+              <div className="font-display text-3xl tracking-tight text-forest">
+                Tap<span className="text-gold">Marrakech</span>
               </div>
-
-              <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
-                TapMarrakech
-              </p>
-
-              <h1 className="mt-2 font-display text-3xl text-forest">
+              <p className="mt-6 text-xs font-semibold uppercase tracking-[0.2em] text-gold">
                 Espace employé
+              </p>
+              <h1 className="mt-2 font-display text-3xl text-forest">
+                Entrez votre code
               </h1>
-
-              <p className="mt-2 text-sm text-ink/50">
-                Connectez-vous avec votre code employé.
+              <p className="mt-2 text-sm leading-6 text-ink/45">
+                Votre code suffit pour retrouver automatiquement votre établissement.
               </p>
             </div>
 
-            {loginEstablishments.length === 0 &&
-            !loginLoading ? (
-              <div className="rounded-2xl border border-ink/5 bg-[#f7f7f3] p-5 text-center">
-                <Building2
-                  size={32}
-                  className="mx-auto text-forest/50"
-                />
+            <div className="relative">
+              <KeyRound size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-ink/30" />
+              <input
+                autoFocus
+                type="password"
+                inputMode="numeric"
+                value={employeeCode}
+                onChange={e => setEmployeeCode(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') loginEmployee();
+                }}
+                placeholder="Code de connexion"
+                className="w-full rounded-2xl border border-ink/10 bg-[#f7f7f3] py-4 pl-12 pr-4 text-center text-lg tracking-[0.25em] outline-none focus:border-forest"
+              />
+            </div>
 
-                <p className="mt-3 text-sm font-semibold text-forest">
-                  Aucun accès employé disponible
-                </p>
+            <button
+              onClick={loginEmployee}
+              disabled={loginSaving}
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-forest py-4 text-sm font-semibold text-white transition hover:bg-forest-light disabled:opacity-50"
+            >
+              <KeyRound size={17} />
+              {loginSaving ? 'Connexion...' : 'Accéder à mon espace'}
+            </button>
 
-                <p className="mt-1 text-xs text-ink/45">
-                  Demandez à votre responsable de créer votre accès.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-5">
-
-                <div>
-                  <label className="mb-2 block text-xs font-semibold text-ink/50">
-                    Établissement
-                  </label>
-
-                  <div className="relative">
-                    <Building2
-                      size={17}
-                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink/30"
-                    />
-
-                    <select
-                      value={loginEstablishmentId}
-                      onChange={e =>
-                        setLoginEstablishmentId(
-                          e.target.value
-                        )
-                      }
-                      className="w-full appearance-none rounded-xl border border-ink/10 bg-white py-3 pl-10 pr-4 text-sm outline-none focus:border-forest"
-                    >
-                      <option value="">
-                        Sélectionner votre établissement
-                      </option>
-
-                      {loginEstablishments.map(
-                        place => (
-                          <option
-                            key={place.id}
-                            value={place.id}
-                          >
-                            {place.name}
-                          </option>
-                        )
-                      )}
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-xs font-semibold text-ink/50">
-                    Code employé
-                  </label>
-
-                  <div className="relative">
-                    <LockKeyhole
-                      size={17}
-                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink/30"
-                    />
-
-                    <input
-                      type="password"
-                      inputMode="numeric"
-                      autoComplete="off"
-                      value={loginCode}
-                      onChange={e =>
-                        setLoginCode(
-                          e.target.value
-                        )
-                      }
-                      onKeyDown={e => {
-                        if (e.key === 'Enter') {
-                          loginEmployee();
-                        }
-                      }}
-                      placeholder="Votre code"
-                      className="w-full rounded-xl border border-ink/10 bg-white py-3 pl-10 pr-4 text-sm outline-none focus:border-forest"
-                    />
-                  </div>
-                </div>
-
-                {loginError && (
-                  <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-                    {loginError}
-                  </div>
-                )}
-
-                <button
-                  disabled={loginLoading}
-                  onClick={loginEmployee}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white transition hover:bg-forest-light disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <CheckCircle2 size={17} />
-
-                  {loginLoading
-                    ? 'Connexion...'
-                    : 'Accéder au dashboard'}
-                </button>
-
-                <p className="text-center text-xs text-ink/35">
-                  Aucun email ni mot de passe nécessaire.
-                </p>
-              </div>
-            )}
+            <button
+              onClick={() => {
+                window.location.href = '/login';
+              }}
+              className="mt-5 w-full text-center text-xs font-medium text-ink/40 hover:text-forest"
+            >
+              ← Retour aux accès TapMarrakech
+            </button>
           </div>
         </div>
       </div>
     );
   }
 
-  /*
-   * ----------------------------------------------------------
-   * ÉTABLISSEMENT ACTUEL
-   * ----------------------------------------------------------
-   */
-
-  const selectedEstablishmentName =
-    establishments.find(
-      item => item.id === establishmentId
-    )?.name ??
-    session.establishment_name;
-
-  /*
-   * ----------------------------------------------------------
-   * CHARGEMENT
-   * ----------------------------------------------------------
-   */
-
-  if (loading && customers.length === 0) {
+  if (loading) {
     return (
       <div className="min-h-screen grid place-items-center bg-[#f7f7f3]">
-        <div className="text-center">
-          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
+      </div>
+    );
+  }
 
-          <p className="mt-4 text-sm text-ink/40">
-            Chargement...
+  if (establishments.length === 0) {
+    return (
+      <div className="min-h-screen bg-[#f7f7f3] p-6">
+        <div className="mx-auto max-w-4xl rounded-3xl border border-ink/5 bg-white p-10 text-center shadow-sm">
+          <Building2 className="mx-auto mb-4 text-forest" size={42} />
+          <h1 className="font-display text-3xl text-forest">
+            Aucun établissement
+          </h1>
+          <p className="mt-2 text-sm text-ink/50">
+            Votre compte n’est rattaché à aucun établissement.
           </p>
         </div>
       </div>
     );
   }
 
-  /*
-   * ----------------------------------------------------------
-   * DASHBOARD EMPLOYÉ
-   * ----------------------------------------------------------
-   */
-
   return (
     <div className="min-h-screen bg-[#f7f7f3] p-4 md:p-8">
       <div className="mx-auto max-w-6xl">
-
-        {/* HEADER */}
-
         <div className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
               Espace employé
             </p>
-
             <h1 className="mt-2 font-display text-3xl text-forest md:text-4xl">
-              Bonjour {session.employee_name} 👋
+              Fidélité
             </h1>
-
             <p className="mt-2 text-sm text-ink/50">
-              Gérez les clients et leurs avantages fidélité.
+              Recherchez un client, ajoutez ses points ou utilisez une récompense.
             </p>
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-
-            {establishments.length > 1 ? (
-              <div className="w-full md:w-64">
-                <label className="mb-2 block text-xs font-semibold text-ink/50">
-                  Établissement
-                </label>
-
-                <select
-                  value={establishmentId}
-                  onChange={e =>
-                    setEstablishmentId(
-                      e.target.value
-                    )
-                  }
-                  className="w-full rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm text-ink outline-none focus:border-forest"
-                >
-                  {establishments.map(place => (
-                    <option
-                      key={place.id}
-                      value={place.id}
-                    >
-                      {place.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            ) : (
-              <div className="rounded-xl border border-ink/5 bg-white px-4 py-3">
-                <p className="text-[11px] uppercase tracking-wide text-ink/40">
-                  Établissement
-                </p>
-
-                <p className="mt-1 text-sm font-semibold text-forest">
-                  {selectedEstablishmentName}
-                </p>
-              </div>
-            )}
+          <div className="flex flex-wrap items-center justify-end gap-3">
+            <div className="rounded-xl border border-ink/5 bg-white px-4 py-3">
+              <p className="text-[11px] uppercase tracking-wide text-ink/40">
+                Établissement
+              </p>
+              <p className="mt-1 text-sm font-semibold text-forest">
+                {session.establishment_name || selectedEstablishmentName}
+              </p>
+            </div>
 
             <button
               onClick={logoutEmployee}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm font-semibold text-ink/60 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+              className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
             >
               <LogOut size={17} />
               Déconnexion
@@ -1020,16 +639,12 @@ export default function Employee() {
           </div>
         </div>
 
-        {/* RECHERCHE */}
-
         <div className="mb-6 grid gap-4 md:grid-cols-[1fr_auto]">
-
           <div className="relative">
             <Search
               size={19}
               className="absolute left-4 top-1/2 -translate-y-1/2 text-ink/30"
             />
-
             <input
               type="search"
               name="customer-search"
@@ -1038,18 +653,14 @@ export default function Employee() {
               autoCapitalize="none"
               spellCheck={false}
               value={search}
-              onChange={e =>
-                setSearch(e.target.value)
-              }
+              onChange={e => setSearch(e.target.value)}
               placeholder="N° fidélité, téléphone, prénom ou nom..."
               className="w-full rounded-2xl border border-ink/10 bg-white py-4 pl-12 pr-4 text-sm outline-none focus:border-forest"
             />
           </div>
 
           <button
-            onClick={() =>
-              setShowNewCustomer(true)
-            }
+            onClick={() => setShowNewCustomer(true)}
             className="inline-flex items-center justify-center gap-2 rounded-2xl bg-forest px-5 py-4 text-sm font-semibold text-white transition hover:bg-forest-light"
           >
             <UserPlus size={18} />
@@ -1057,146 +668,95 @@ export default function Employee() {
           </button>
         </div>
 
-        {/* PROGRAMME */}
-
         <div className="mb-6 rounded-2xl border border-ink/5 bg-white p-4 shadow-sm">
           <div className="flex items-center justify-between gap-4">
-
             <div>
-              <p className="text-xs text-ink/40">
-                Programme fidélité
-              </p>
-
+              <p className="text-xs text-ink/40">Programme fidélité</p>
               <p className="mt-1 text-sm font-semibold text-forest">
                 {settings.enabled
                   ? `${settings.points_per_currency} point(s) / ${settings.currency}`
                   : 'Désactivé'}
               </p>
             </div>
-
-            <Coins
-              size={25}
-              className="text-forest/50"
-            />
+            <Coins size={25} className="text-forest/50" />
           </div>
         </div>
 
-        {/* CLIENTS */}
-
         <div className="overflow-hidden rounded-2xl border border-ink/5 bg-white shadow-sm">
-
           {filteredCustomers.length === 0 ? (
             <div className="p-12 text-center">
-
-              <User
-                size={38}
-                className="mx-auto text-ink/20"
-              />
-
+              <User size={38} className="mx-auto text-ink/20" />
               <h2 className="mt-4 font-display text-2xl text-forest">
                 Aucun client trouvé
               </h2>
-
               <p className="mt-2 text-sm text-ink/40">
                 Recherchez un autre numéro ou créez un nouveau client.
               </p>
             </div>
           ) : (
             <div className="divide-y divide-ink/5">
-
-              {filteredCustomers.map(
-                customer => (
-                  <div
-                    key={customer.id}
-                    className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between"
-                  >
-
-                    <div className="flex min-w-0 items-center gap-4">
-
-                      <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-forest/10 text-forest">
-                        <User size={21} />
-                      </div>
-
-                      <div className="min-w-0">
-
-                        <p className="truncate font-semibold text-forest">
-                          {customer.first_name}{' '}
-                          {customer.last_name ?? ''}
-                        </p>
-
-                        <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink/45">
-
-                          <span className="inline-flex items-center gap-1">
-                            <Phone size={13} />
-                            {customer.phone}
-                          </span>
-
-                          <span className="font-medium text-forest/60">
-                            N° {customer.loyalty_number}
-                          </span>
-
-                        </p>
-
-                        <p className="mt-1 text-xs text-ink/35">
-                          {customer.visit_count}{' '}
-                          visite(s)
-                        </p>
-                      </div>
+              {filteredCustomers.map(customer => (
+                <div
+                  key={customer.id}
+                  className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between"
+                >
+                  <div className="flex min-w-0 items-center gap-4">
+                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-forest/10 text-forest">
+                      <User size={21} />
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-3">
-
-                      <div className="rounded-xl bg-[#f7f7f3] px-4 py-2 text-center">
-                        <p className="text-[10px] uppercase tracking-wide text-ink/40">
-                          Points
-                        </p>
-
-                        <p className="font-semibold text-forest">
-                          {customer.points_balance}
-                        </p>
-                      </div>
-
-                      <button
-                        onClick={() =>
-                          setShowPoints(customer)
-                        }
-                        className="inline-flex items-center gap-2 rounded-xl border border-forest/15 px-4 py-2.5 text-xs font-semibold text-forest hover:bg-forest/5"
-                      >
-                        <Coins size={16} />
-                        Ajouter points
-                      </button>
-
-                      <button
-                        onClick={() =>
-                          openRewards(customer)
-                        }
-                        className="inline-flex items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white hover:bg-forest-light"
-                      >
-                        <Gift size={16} />
-                        Récompenses
-                      </button>
-
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-forest">
+                        {customer.first_name} {customer.last_name ?? ''}
+                      </p>
+                      <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink/45">
+                        <span className="inline-flex items-center gap-1">
+                          <Phone size={13} />
+                          {customer.phone}
+                        </span>
+                        <span className="font-medium text-forest/60">
+                          N° {customer.loyalty_number}
+                        </span>
+                      </p>
                     </div>
                   </div>
-                )
-              )}
 
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="rounded-xl bg-[#f7f7f3] px-4 py-2 text-center">
+                      <p className="text-[10px] uppercase tracking-wide text-ink/40">
+                        Points
+                      </p>
+                      <p className="font-semibold text-forest">
+                        {customer.points_balance}
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => setShowPoints(customer)}
+                      className="inline-flex items-center gap-2 rounded-xl border border-forest/15 px-4 py-2.5 text-xs font-semibold text-forest hover:bg-forest/5"
+                    >
+                      <Coins size={16} />
+                      Ajouter points
+                    </button>
+
+                    <button
+                      onClick={() => openRewards(customer)}
+                      className="inline-flex items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white hover:bg-forest-light"
+                    >
+                      <Gift size={16} />
+                      Récompenses
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
       </div>
 
-      {/* NOUVEAU CLIENT */}
-
       {showNewCustomer && (
-        <Modal
-          title="Nouveau client"
-          onClose={() =>
-            setShowNewCustomer(false)
-          }
-        >
+        <Modal title="Nouveau client" onClose={() => setShowNewCustomer(false)}>
           <div className="space-y-4">
-
             <Field
               icon={<User size={16} />}
               label="Prénom"
@@ -1204,7 +764,6 @@ export default function Employee() {
               onChange={setFirstName}
               placeholder="Prénom"
             />
-
             <Field
               icon={<User size={16} />}
               label="Nom"
@@ -1212,7 +771,6 @@ export default function Employee() {
               onChange={setLastName}
               placeholder="Nom"
             />
-
             <Field
               icon={<Phone size={16} />}
               label="Téléphone"
@@ -1221,7 +779,6 @@ export default function Employee() {
               placeholder="06 XX XX XX XX"
               type="tel"
             />
-
             <Field
               icon={<CalendarDays size={16} />}
               label="Date de naissance (optionnel)"
@@ -1236,16 +793,11 @@ export default function Employee() {
               className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white disabled:opacity-50"
             >
               <UserPlus size={17} />
-
-              {saving
-                ? 'Création...'
-                : 'Créer le client'}
+              {saving ? 'Création...' : 'Créer le client'}
             </button>
           </div>
         </Modal>
       )}
-
-      {/* AJOUT POINTS */}
 
       {showPoints && (
         <Modal
@@ -1254,42 +806,25 @@ export default function Employee() {
             if (!saving) {
               setShowPoints(null);
               setPurchaseAmount('');
-              setPointsResponsibleCode('');
+                        setPointsResponsibleCode('');
             }
           }}
         >
           <div className="rounded-2xl bg-[#f7f7f3] p-4">
-
             <p className="font-semibold text-forest">
-              {showPoints.first_name}{' '}
-              {showPoints.last_name ?? ''}
+              {showPoints.first_name} {showPoints.last_name ?? ''}
             </p>
-
-            <p className="mt-1 text-xs text-ink/45">
-              {showPoints.phone}
-            </p>
-
-            <p className="mt-1 text-xs font-medium text-forest/60">
-              N° fidélité :{' '}
-              {showPoints.loyalty_number}
-            </p>
-
+            <p className="mt-1 text-xs text-ink/45">{showPoints.phone}</p>
+            <p className="mt-1 text-xs font-medium text-forest/60">N° fidélité : {showPoints.loyalty_number}</p>
             <div className="mt-4 flex items-center justify-between border-t border-ink/5 pt-3">
-
-              <span className="text-xs text-ink/45">
-                Solde actuel
-              </span>
-
+              <span className="text-xs text-ink/45">Solde actuel</span>
               <span className="font-bold text-forest">
-                {showPoints.points_balance}{' '}
-                points
+                {showPoints.points_balance} points
               </span>
-
             </div>
           </div>
 
           <div className="mt-5 space-y-4">
-
             <Field
               icon={<Receipt size={16} />}
               label={`Montant de la facture (${settings.currency})`}
@@ -1308,19 +843,17 @@ export default function Employee() {
               type="password"
             />
 
-            {purchaseAmount &&
-              Number(purchaseAmount) > 0 && (
-                <div className="rounded-xl border border-forest/10 bg-forest/5 p-3 text-sm text-forest">
-                  Cet achat générera environ{' '}
-                  <strong>
-                    {Math.floor(
-                      Number(purchaseAmount) *
-                        settings.points_per_currency
-                    )}
-                  </strong>{' '}
-                  points.
-                </div>
-              )}
+            {purchaseAmount && Number(purchaseAmount) > 0 && (
+              <div className="rounded-xl border border-forest/10 bg-forest/5 p-3 text-sm text-forest">
+                Cet achat générera environ{' '}
+                <strong>
+                  {Math.floor(
+                    Number(purchaseAmount) * settings.points_per_currency
+                  )}
+                </strong>{' '}
+                points.
+              </div>
+            )}
           </div>
 
           <button
@@ -1329,15 +862,10 @@ export default function Employee() {
             className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white disabled:opacity-50"
           >
             <CheckCircle2 size={17} />
-
-            {saving
-              ? 'Validation...'
-              : 'Valider les points'}
+            {saving ? 'Validation...' : 'Valider les points'}
           </button>
         </Modal>
       )}
-
-      {/* RÉCOMPENSE */}
 
       {showRewards && (
         <Modal
@@ -1351,149 +879,88 @@ export default function Employee() {
           wide
         >
           <div className="grid gap-5 md:grid-cols-[1fr_1fr]">
-
             <div>
-
               <div className="rounded-2xl bg-[#f7f7f3] p-4">
-
-                <p className="text-xs text-ink/40">
-                  Client
-                </p>
-
+                <p className="text-xs text-ink/40">Client</p>
                 <p className="mt-1 font-semibold text-forest">
-                  {showRewards.first_name}{' '}
-                  {showRewards.last_name ?? ''}
+                  {showRewards.first_name} {showRewards.last_name ?? ''}
                 </p>
-
-                <p className="mt-1 text-xs text-ink/45">
-                  {showRewards.phone}
-                </p>
-
-                <p className="mt-1 text-xs font-medium text-forest/60">
-                  N° fidélité :{' '}
-                  {showRewards.loyalty_number}
-                </p>
-
+                <p className="mt-1 text-xs text-ink/45">{showRewards.phone}</p>
+                <p className="mt-1 text-xs font-medium text-forest/60">N° fidélité : {showRewards.loyalty_number}</p>
                 <div className="mt-4 flex items-center justify-between border-t border-ink/5 pt-3">
-
-                  <span className="text-xs text-ink/45">
-                    Solde
-                  </span>
-
+                  <span className="text-xs text-ink/45">Solde</span>
                   <span className="font-bold text-forest">
-                    {showRewards.points_balance}{' '}
-                    points
+                    {showRewards.points_balance} points
                   </span>
-
                 </div>
               </div>
 
               <div className="mt-4 space-y-2">
-
                 {rewards.length === 0 ? (
                   <div className="rounded-xl border border-ink/5 p-5 text-center text-sm text-ink/45">
                     Aucune récompense active.
                   </div>
                 ) : (
                   rewards.map(reward => {
-
                     const available =
-                      showRewards.points_balance >=
-                      reward.points_required;
+                      showRewards.points_balance >= reward.points_required;
 
                     return (
                       <button
                         key={reward.id}
                         disabled={!available}
-                        onClick={() =>
-                          setSelectedReward(
-                            reward
-                          )
-                        }
+                        onClick={() => setSelectedReward(reward)}
                         className={`w-full rounded-xl border p-4 text-left transition ${
-                          selectedReward?.id ===
-                          reward.id
+                          selectedReward?.id === reward.id
                             ? 'border-forest bg-forest/5'
                             : 'border-ink/10 bg-white'
-                        } ${
-                          !available
-                            ? 'cursor-not-allowed opacity-40'
-                            : 'hover:border-forest/30'
-                        }`}
+                        } ${!available ? 'cursor-not-allowed opacity-40' : 'hover:border-forest/30'}`}
                       >
                         <div className="flex items-center justify-between gap-3">
-
                           <div>
-
                             <p className="font-semibold text-forest">
                               {reward.name}
                             </p>
-
                             {reward.description && (
                               <p className="mt-1 text-xs text-ink/45">
                                 {reward.description}
                               </p>
                             )}
-
                           </div>
-
                           <span className="shrink-0 rounded-lg bg-[#f7f7f3] px-2.5 py-1 text-xs font-semibold text-forest">
-                            {reward.points_required}{' '}
-                            pts
+                            {reward.points_required} pts
                           </span>
-
                         </div>
                       </button>
                     );
                   })
                 )}
-
               </div>
             </div>
 
             <div className="rounded-2xl border border-ink/5 bg-white p-5">
-
               {!selectedReward ? (
                 <div className="grid min-h-[280px] place-items-center text-center">
-
                   <div>
-
-                    <Gift
-                      size={38}
-                      className="mx-auto text-ink/20"
-                    />
-
+                    <Gift size={38} className="mx-auto text-ink/20" />
                     <p className="mt-4 text-sm text-ink/45">
                       Sélectionnez une récompense.
                     </p>
-
                   </div>
                 </div>
               ) : (
                 <>
                   <div className="rounded-xl bg-forest p-4 text-white">
-
-                    <p className="text-xs text-white/60">
-                      Récompense sélectionnée
-                    </p>
-
-                    <p className="mt-1 font-semibold">
-                      {selectedReward.name}
-                    </p>
-
+                    <p className="text-xs text-white/60">Récompense sélectionnée</p>
+                    <p className="mt-1 font-semibold">{selectedReward.name}</p>
                     <p className="mt-1 text-xs text-white/70">
-                      {selectedReward.points_required}{' '}
-                      points seront débités.
+                      {selectedReward.points_required} points seront débités.
                     </p>
-
                   </div>
 
                   <div className="mt-5 space-y-4">
-
                     <Field
-                      icon={
-                        <LockKeyhole size={16} />
-                      }
+                      icon={<LockKeyhole size={16} />}
                       label="Code responsable"
                       value={rewardCode}
                       onChange={setRewardCode}
@@ -1519,47 +986,31 @@ export default function Employee() {
                     />
 
                     <div>
-
                       <label className="mb-2 block text-xs font-semibold text-ink/50">
                         Paiement
                       </label>
-
                       <div className="grid grid-cols-3 gap-2">
-
                         {[
                           ['CASH', 'Espèces'],
                           ['CARD', 'Carte'],
                           ['OTHER', 'Autre'],
-                        ].map(
-                          ([value, label]) => (
-                            <button
-                              key={value}
-                              type="button"
-                              onClick={() =>
-                                setPaymentMethod(
-                                  value as
-                                    | 'CASH'
-                                    | 'CARD'
-                                    | 'OTHER'
-                                )
-                              }
-                              className={`rounded-xl border px-2 py-2.5 text-xs font-semibold ${
-                                paymentMethod ===
-                                value
-                                  ? 'border-forest bg-forest/5 text-forest'
-                                  : 'border-ink/10 text-ink/50'
-                              }`}
-                            >
-                              <WalletCards
-                                size={14}
-                                className="mx-auto mb-1"
-                              />
-
-                              {label}
-                            </button>
-                          )
-                        )}
-
+                        ].map(([value, label]) => (
+                          <button
+                            key={value}
+                            type="button"
+                            onClick={() =>
+                              setPaymentMethod(value as 'CASH' | 'CARD' | 'OTHER')
+                            }
+                            className={`rounded-xl border px-2 py-2.5 text-xs font-semibold ${
+                              paymentMethod === value
+                                ? 'border-forest bg-forest/5 text-forest'
+                                : 'border-ink/10 text-ink/50'
+                            }`}
+                          >
+                            <WalletCards size={14} className="mx-auto mb-1" />
+                            {label}
+                          </button>
+                        ))}
                       </div>
                     </div>
 
@@ -1569,16 +1020,11 @@ export default function Employee() {
                       className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white disabled:opacity-50"
                     >
                       <CheckCircle2 size={17} />
-
-                      {saving
-                        ? 'Validation...'
-                        : 'Valider la récompense'}
+                      {saving ? 'Validation...' : 'Valider la récompense'}
                     </button>
-
                   </div>
                 </>
               )}
-
             </div>
           </div>
         </Modal>
@@ -1586,12 +1032,6 @@ export default function Employee() {
     </div>
   );
 }
-
-/*
- * ============================================================
- * MODAL
- * ============================================================
- */
 
 function Modal({
   title,
@@ -1606,40 +1046,25 @@ function Modal({
 }) {
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-4">
-
       <div
         className={`max-h-[92vh] w-full overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl ${
           wide ? 'max-w-4xl' : 'max-w-md'
         }`}
       >
-
         <div className="mb-5 flex items-center justify-between">
-
-          <h2 className="font-display text-2xl text-forest">
-            {title}
-          </h2>
-
+          <h2 className="font-display text-2xl text-forest">{title}</h2>
           <button
             onClick={onClose}
             className="rounded-lg p-2 text-ink/40 hover:bg-[#f7f7f3]"
           >
             <X size={20} />
           </button>
-
         </div>
-
         {children}
-
       </div>
     </div>
   );
 }
-
-/*
- * ============================================================
- * CHAMP
- * ============================================================
- */
 
 function Field({
   icon,
@@ -1658,27 +1083,20 @@ function Field({
 }) {
   return (
     <div>
-
       <label className="mb-2 block text-xs font-semibold text-ink/50">
         {label}
       </label>
-
       <div className="relative">
-
         <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink/30">
           {icon}
         </span>
-
         <input
           type={type}
           value={value}
-          onChange={e =>
-            onChange(e.target.value)
-          }
+          onChange={e => onChange(e.target.value)}
           placeholder={placeholder}
           className="w-full rounded-xl border border-ink/10 bg-white py-3 pl-10 pr-3 text-sm outline-none focus:border-forest"
         />
-
       </div>
     </div>
   );
