@@ -16,6 +16,8 @@ import { supabase } from '@/lib/supabase';
 
 type LoginRole = 'admin' | 'responsible' | null;
 
+const EMPLOYEE_SESSION_KEY = 'tapmarrakech_employee_session';
+
 export default function Login() {
   const navigate = useNavigate();
   const { user, role, loading } = useAuth();
@@ -40,6 +42,12 @@ export default function Login() {
     setEmail('');
     setPassword('');
     setSelectedRole(nextRole);
+
+    // A regular Supabase login must never leave an old employee
+    // code-session active in the browser.
+    if (nextRole === 'admin' || nextRole === 'responsible') {
+      localStorage.removeItem(EMPLOYEE_SESSION_KEY);
+    }
   }
 
   async function handleLogin() {
@@ -51,6 +59,10 @@ export default function Login() {
     }
 
     setSaving(true);
+
+    // Make sure an old employee code-session cannot coexist with
+    // an Admin/Responsable session.
+    localStorage.removeItem(EMPLOYEE_SESSION_KEY);
 
     const { data, error: loginError } = await supabase.auth.signInWithPassword({
       email: email.trim().toLowerCase(),
@@ -113,8 +125,12 @@ export default function Login() {
             </button>
 
             <div className="mb-8">
-              <div className="font-display text-3xl tracking-tight text-forest">
-                Tap<span className="text-gold">Marrakech</span>
+              <div className="mb-7 flex justify-center">
+                <img
+                  src="/tapmarrakech-logo.png"
+                  alt="TapMarrakech"
+                  className="h-16 w-auto max-w-[220px] object-contain"
+                />
               </div>
 
               <div className="mt-7 flex items-center gap-3">
@@ -221,8 +237,12 @@ export default function Login() {
       <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-5xl items-center justify-center">
         <div className="w-full">
           <div className="mx-auto mb-10 max-w-2xl text-center">
-            <div className="font-display text-4xl tracking-tight text-forest md:text-5xl">
-              Tap<span className="text-gold">Marrakech</span>
+            <div className="mb-7 flex justify-center">
+              <img
+                src="/tapmarrakech-logo.png"
+                alt="TapMarrakech"
+                className="h-24 w-auto max-w-[320px] object-contain md:h-28"
+              />
             </div>
             <p className="mt-5 text-xs font-semibold uppercase tracking-[0.24em] text-gold">
               Espace professionnel
@@ -277,7 +297,11 @@ export default function Login() {
             </button>
 
             <button
-              onClick={() => navigate('/employee')}
+              onClick={async () => {
+                localStorage.removeItem(EMPLOYEE_SESSION_KEY);
+                await supabase.auth.signOut();
+                navigate('/employee');
+              }}
               className="group rounded-[2rem] border border-forest/10 bg-forest p-7 text-left text-white shadow-xl transition duration-200 hover:-translate-y-1 hover:shadow-2xl"
             >
               <div className="flex items-start justify-between">
