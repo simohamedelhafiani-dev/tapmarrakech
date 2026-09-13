@@ -1084,6 +1084,7 @@ function CreateStaffForm({
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [code, setCode] = useState('');
   const [saving, setSaving] = useState(false);
 
   const roleLabel =
@@ -1100,6 +1101,59 @@ function CreateStaffForm({
       return;
     }
 
+    // Les employés utilisent uniquement un code pour se connecter.
+    if (role === 'employee') {
+      if (code.trim().length < 4) {
+        alert('Le code employé doit contenir au moins 4 caractères.');
+        return;
+      }
+
+      setSaving(true);
+
+      const { data, error } = await supabase.functions.invoke(
+        'create-employee',
+        {
+          body: {
+            establishment_id: establishmentId,
+            name: name.trim(),
+            code: code.trim(),
+          },
+        }
+      );
+
+      setSaving(false);
+
+      if (error) {
+        console.error('Erreur création employé:', error);
+        alert(`Impossible de créer l’employé : ${error.message}`);
+        return;
+      }
+
+      if (!data?.success) {
+        alert(
+          data?.error ??
+            'Impossible de créer l’employé.'
+        );
+        return;
+      }
+
+      const establishmentName =
+        establishments.find((item) => item.id === establishmentId)?.name ??
+        'Établissement';
+
+      alert(
+        `Employé créé avec succès.\n\nNom : ${name.trim()}\nÉtablissement : ${establishmentName}\nCode de connexion : ${code.trim()}\n\nConserve bien ce code : il sera utilisé par l’employé pour accéder à son espace.`
+      );
+
+      setName('');
+      setCode('');
+
+      close();
+      await reload();
+      return;
+    }
+
+    // Les responsables conservent la connexion classique email + mot de passe.
     if (!email.trim()) {
       alert('Veuillez saisir l’email.');
       return;
@@ -1114,19 +1168,18 @@ function CreateStaffForm({
 
     setSaving(true);
 
-    const { data, error } =
-      await supabase.functions.invoke(
-        'create-staff-account',
-        {
-          body: {
-            establishment_id: establishmentId,
-            email: email.trim().toLowerCase(),
-            password,
-            name: name.trim(),
-            role,
-          },
-        }
-      );
+    const { data, error } = await supabase.functions.invoke(
+      'create-staff-account',
+      {
+        body: {
+          establishment_id: establishmentId,
+          email: email.trim().toLowerCase(),
+          password,
+          name: name.trim(),
+          role,
+        },
+      }
+    );
 
     setSaving(false);
 
@@ -1176,13 +1229,16 @@ function CreateStaffForm({
           </h3>
 
           <p className="mt-1 text-xs text-ink/40">
-            Le compte sera automatiquement rattaché à l’établissement.
+            {role === 'employee'
+              ? 'L’employé se connectera uniquement avec son code.'
+              : 'Le responsable se connectera avec son email et son mot de passe.'}
           </p>
         </div>
 
         <button
           onClick={close}
-          className="text-ink/40 hover:text-ink"
+          disabled={saving}
+          className="text-ink/40 hover:text-ink disabled:opacity-40"
         >
           <X size={20} />
         </button>
@@ -1199,7 +1255,8 @@ function CreateStaffForm({
             onChange={(e) =>
               setEstablishmentId(e.target.value)
             }
-            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+            disabled={saving}
+            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest disabled:opacity-50"
           >
             {establishments.map((establishment) => (
               <option
@@ -1212,7 +1269,7 @@ function CreateStaffForm({
           </select>
         </div>
 
-        <div>
+        <div className={role === 'employee' ? 'md:col-span-2' : ''}>
           <label className="mb-2 block text-xs font-semibold">
             Nom complet
           </label>
@@ -1220,56 +1277,82 @@ function CreateStaffForm({
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
+            disabled={saving}
             placeholder={
               role === 'responsible'
                 ? 'Ex : Ahmed Alaoui'
                 : 'Ex : Yassine Benali'
             }
-            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest disabled:opacity-50"
           />
         </div>
 
-        <div>
-          <label className="mb-2 block text-xs font-semibold">
-            Email
-          </label>
+        {role === 'responsible' && (
+          <>
+            <div>
+              <label className="mb-2 block text-xs font-semibold">
+                Email
+              </label>
 
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="email@exemple.com"
-            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
-          />
-        </div>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={saving}
+                placeholder="email@exemple.com"
+                className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest disabled:opacity-50"
+              />
+            </div>
 
-        <div className="md:col-span-2">
-          <label className="mb-2 block text-xs font-semibold">
-            Mot de passe initial
-          </label>
+            <div className="md:col-span-2">
+              <label className="mb-2 block text-xs font-semibold">
+                Mot de passe initial
+              </label>
 
-          <input
-            type="text"
-            value={password}
-            onChange={(e) =>
-              setPassword(e.target.value)
-            }
-            placeholder="Minimum 6 caractères"
-            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
-          />
+              <input
+                type="text"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={saving}
+                placeholder="Minimum 6 caractères"
+                className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest disabled:opacity-50"
+              />
 
-          <p className="mt-2 text-[11px] text-ink/35">
-            Tu peux donner ce mot de passe au responsable ou à
-            l’employé.
-          </p>
-        </div>
+              <p className="mt-2 text-[11px] text-ink/35">
+                Tu peux donner ce mot de passe au responsable.
+              </p>
+            </div>
+          </>
+        )}
+
+        {role === 'employee' && (
+          <div className="md:col-span-2">
+            <label className="mb-2 block text-xs font-semibold">
+              Code de connexion employé
+            </label>
+
+            <input
+              type="text"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              disabled={saving}
+              placeholder="Ex : 4829"
+              autoComplete="off"
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-center text-lg font-semibold tracking-[0.25em] outline-none focus:border-forest disabled:opacity-50"
+            />
+
+            <p className="mt-2 text-[11px] text-ink/35">
+              Minimum 4 caractères. Le code est enregistré sous forme sécurisée et ne sera pas affiché dans l’application après la création.
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="mt-6 flex justify-end gap-3">
         <button
           onClick={close}
           disabled={saving}
-          className="rounded-xl border border-ink/10 px-5 py-3 text-sm font-medium"
+          className="rounded-xl border border-ink/10 px-5 py-3 text-sm font-medium disabled:opacity-40"
         >
           Annuler
         </button>
@@ -1282,7 +1365,9 @@ function CreateStaffForm({
           <UserPlus size={16} />
 
           {saving
-            ? 'Création du compte...'
+            ? role === 'employee'
+              ? 'Création de l’employé...'
+              : 'Création du compte...'
             : `Créer le ${roleLabel.toLowerCase()}`}
         </button>
       </div>
