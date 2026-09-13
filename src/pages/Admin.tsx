@@ -779,7 +779,7 @@ function EditEstablishmentModal({
 
       const extension =
         logoFile.name.split('.').pop()?.toLowerCase() || 'png';
-      const path = `establishments/${establishment.id}/logo.${extension}`;
+      const path = `establishments/${establishment.id}/logo-${Date.now()}.${extension}`;
 
       const { error: uploadError } = await supabase.storage
         .from('establishment-logos')
