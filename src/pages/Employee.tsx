@@ -950,10 +950,10 @@ export default function Employee() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-2xl font-bold tracking-tight">
-                  Tap<span className="text-gold">Marrakech</span>
+                  Carte de fidélité
                 </p>
                 <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/55">
-                  Carte de fidélité
+                  {session.establishment_name}
                 </p>
               </div>
               <CreditCard size={28} className="text-gold/80" />
