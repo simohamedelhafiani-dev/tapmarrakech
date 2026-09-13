@@ -35,6 +35,17 @@ type Establishment = {
   created_at: string;
 };
 
+type AIGlobalSettings = {
+  provider: string;
+  model: string;
+  enabled: boolean;
+  temperature: number;
+  max_output_tokens: number;
+  system_instructions: string;
+  has_api_key: boolean;
+  updated_at: string | null;
+};
+
 type AIBusinessType = {
   id: string;
   name: string;
@@ -77,6 +88,7 @@ export default function Admin() {
   const [establishments, setEstablishments] = useState<Establishment[]>([]);
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [aiBusinessTypes, setAIBusinessTypes] = useState<AIBusinessType[]>([]);
+  const [aiGlobalSettings, setAIGlobalSettings] = useState<AIGlobalSettings | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [staffLoading, setStaffLoading] = useState(true);
@@ -177,10 +189,23 @@ export default function Admin() {
     setAIBusinessTypes(data ?? []);
   };
 
+  const loadAIGlobalSettings = async () => {
+    const { data, error } = await supabase.rpc('admin_get_ai_settings');
+
+    if (error) {
+      console.error('Erreur configuration IA globale:', error);
+      setAIGlobalSettings(null);
+      return;
+    }
+
+    setAIGlobalSettings((data?.[0] as AIGlobalSettings | undefined) ?? null);
+  };
+
   useEffect(() => {
     loadEstablishments();
     loadStaff();
     loadAIBusinessTypes();
+    loadAIGlobalSettings();
   }, []);
 
   const reloadAll = async () => {
@@ -188,6 +213,7 @@ export default function Admin() {
       loadEstablishments(),
       loadStaff(),
       loadAIBusinessTypes(),
+      loadAIGlobalSettings(),
     ]);
   };
 
@@ -417,7 +443,9 @@ export default function Admin() {
           {section === 'ai' && (
             <AIConfigurationSection
               businessTypes={aiBusinessTypes}
+              globalSettings={aiGlobalSettings}
               reload={loadAIBusinessTypes}
+              reloadGlobalSettings={loadAIGlobalSettings}
             />
           )}
         </main>
@@ -671,10 +699,13 @@ function EstablishmentsSection({
                           onChange={async (e) => {
                             const value = e.target.value || null;
 
-                            const { error } = await supabase
-                              .from('establishments')
-                              .update({ ai_business_type_id: value })
-                              .eq('id', establishment.id);
+                            const { error } = await supabase.rpc(
+                              'admin_update_establishment_ai_type',
+                              {
+                                p_establishment_id: establishment.id,
+                                p_ai_business_type_id: value,
+                              }
+                            );
 
                             if (error) {
                               console.error('Erreur type IA:', error);
@@ -1186,6 +1217,7 @@ function ResponsiblesSection({
   reload: () => Promise<void>;
 }) {
   const [showForm, setShowForm] = useState(false);
+  const [editingMember, setEditingMember] = useState<StaffMember | null>(null);
 
   const establishmentMap = useMemo(
     () =>
@@ -1234,6 +1266,15 @@ function ResponsiblesSection({
         />
       )}
 
+      {editingMember && (
+        <EditStaffModal
+          member={editingMember}
+          establishments={establishments}
+          close={() => setEditingMember(null)}
+          reload={reload}
+        />
+      )}
+
       <div className="overflow-hidden rounded-2xl border border-ink/5 bg-white shadow-sm">
         {loading ? (
           <div className="p-8 text-sm text-ink/40">
@@ -1259,6 +1300,7 @@ function ResponsiblesSection({
                     establishment?.name ?? 'Établissement inconnu'
                   }
                   reload={reload}
+                  onEdit={() => setEditingMember(member)}
                 />
               );
             })}
@@ -1285,6 +1327,7 @@ function EmployeesSection({
   reload: () => Promise<void>;
 }) {
   const [showForm, setShowForm] = useState(false);
+  const [editingMember, setEditingMember] = useState<StaffMember | null>(null);
 
   const establishmentMap = useMemo(
     () =>
@@ -1333,6 +1376,15 @@ function EmployeesSection({
         />
       )}
 
+      {editingMember && (
+        <EditStaffModal
+          member={editingMember}
+          establishments={establishments}
+          close={() => setEditingMember(null)}
+          reload={reload}
+        />
+      )}
+
       <div className="overflow-hidden rounded-2xl border border-ink/5 bg-white shadow-sm">
         {loading ? (
           <div className="p-8 text-sm text-ink/40">
@@ -1358,6 +1410,7 @@ function EmployeesSection({
                     establishment?.name ?? 'Établissement inconnu'
                   }
                   reload={reload}
+                  onEdit={() => setEditingMember(member)}
                 />
               );
             })}
@@ -1607,6 +1660,7 @@ function StaffRow({
   member: StaffMember;
   establishmentName: string;
   reload: () => Promise<void>;
+  onEdit: () => void;
 }) {
   const [saving, setSaving] = useState(false);
 
@@ -1677,6 +1731,15 @@ function StaffRow({
         </span>
 
         <button
+          onClick={onEdit}
+          disabled={saving}
+          className="inline-flex items-center gap-2 rounded-lg border border-ink/10 px-3 py-2 text-xs font-medium transition hover:bg-[#f7f7f3] disabled:opacity-40"
+        >
+          <Pencil size={14} />
+          Modifier
+        </button>
+
+        <button
           onClick={toggleActive}
           disabled={saving}
           className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium transition ${
@@ -1693,6 +1756,176 @@ function StaffRow({
             ? 'Désactiver'
             : 'Activer'}
         </button>
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   EDIT STAFF
+========================================================= */
+
+function EditStaffModal({
+  member,
+  establishments,
+  close,
+  reload,
+}: {
+  member: StaffMember;
+  establishments: Establishment[];
+  close: () => void;
+  reload: () => Promise<void>;
+}) {
+  const [name, setName] = useState(member.name);
+  const [email, setEmail] = useState(member.email === '—' ? '' : member.email);
+  const [establishmentId, setEstablishmentId] = useState(member.establishment_id);
+  const [password, setPassword] = useState('');
+  const [active, setActive] = useState(member.active);
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    if (!name.trim() || !email.trim() || !establishmentId) {
+      alert('Veuillez remplir le nom, l’email et l’établissement.');
+      return;
+    }
+
+    setSaving(true);
+
+    const { data, error } = await supabase.functions.invoke(
+      'admin-update-staff-account',
+      {
+        body: {
+          staff_id: member.id,
+          establishment_id: establishmentId,
+          name: name.trim(),
+          email: email.trim().toLowerCase(),
+          password: password.trim(),
+          active,
+        },
+      }
+    );
+
+    setSaving(false);
+
+    if (error) {
+      console.error(error);
+      alert(`Impossible de modifier le compte : ${error.message}`);
+      return;
+    }
+
+    if (!data?.success) {
+      alert(data?.error ?? 'Impossible de modifier le compte.');
+      return;
+    }
+
+    alert('Compte modifié avec succès.');
+    await reload();
+    close();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl md:p-8">
+        <div className="mb-7 flex items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
+              Administration
+            </p>
+            <h3 className="mt-1 font-display text-3xl text-forest">
+              Modifier le {member.role === 'MANAGER' ? 'responsable' : 'employé'}
+            </h3>
+            <p className="mt-2 text-sm text-ink/45">
+              Tu peux modifier ses informations, son établissement, son mot de passe et son statut.
+            </p>
+          </div>
+
+          <button
+            onClick={close}
+            className="rounded-xl p-2 text-ink/40 hover:bg-[#f7f7f3] hover:text-ink"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="grid gap-5 md:grid-cols-2">
+          <div>
+            <label className="mb-2 block text-xs font-semibold">Nom complet</label>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-xs font-semibold">Email de connexion</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="mb-2 block text-xs font-semibold">Établissement</label>
+            <select
+              value={establishmentId}
+              onChange={(e) => setEstablishmentId(e.target.value)}
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+            >
+              {establishments.map((establishment) => (
+                <option key={establishment.id} value={establishment.id}>
+                  {establishment.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="mb-2 block text-xs font-semibold">Nouveau mot de passe (optionnel)</label>
+            <input
+              type="text"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Laisser vide pour conserver l’actuel"
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+            />
+          </div>
+
+          <label className="md:col-span-2 flex cursor-pointer items-center gap-3 rounded-xl bg-[#f7f7f3] p-4">
+            <input
+              type="checkbox"
+              checked={active}
+              onChange={(e) => setActive(e.target.checked)}
+              className="h-4 w-4 accent-[#173d32]"
+            />
+            <span>
+              <span className="block text-sm font-semibold text-forest">Compte actif</span>
+              <span className="mt-1 block text-xs text-ink/40">
+                Un compte désactivé ne doit plus être utilisé par son titulaire.
+              </span>
+            </span>
+          </label>
+        </div>
+
+        <div className="mt-7 flex justify-end gap-3">
+          <button
+            onClick={close}
+            disabled={saving}
+            className="rounded-xl border border-ink/10 px-5 py-3 text-sm font-medium"
+          >
+            Annuler
+          </button>
+          <button
+            onClick={save}
+            disabled={saving}
+            className="inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+          >
+            <Save size={16} />
+            {saving ? 'Enregistrement...' : 'Enregistrer les modifications'}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -2677,10 +2910,14 @@ function ReviewsSection({
 
 function AIConfigurationSection({
   businessTypes,
+  globalSettings,
   reload,
+  reloadGlobalSettings,
 }: {
   businessTypes: AIBusinessType[];
+  globalSettings: AIGlobalSettings | null;
   reload: () => Promise<void>;
+  reloadGlobalSettings: () => Promise<void>;
 }) {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -2689,6 +2926,76 @@ function AIConfigurationSection({
   const [prompt, setPrompt] = useState('');
   const [active, setActive] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [savingGlobal, setSavingGlobal] = useState(false);
+  const [globalModel, setGlobalModel] = useState(globalSettings?.model ?? 'gpt-5.6-luna');
+  const [globalProvider, setGlobalProvider] = useState(globalSettings?.provider ?? 'openai');
+  const [globalEnabled, setGlobalEnabled] = useState(globalSettings?.enabled ?? true);
+  const [globalTemperature, setGlobalTemperature] = useState(String(globalSettings?.temperature ?? 0.2));
+  const [globalMaxTokens, setGlobalMaxTokens] = useState(String(globalSettings?.max_output_tokens ?? 4000));
+  const [globalInstructions, setGlobalInstructions] = useState(globalSettings?.system_instructions ?? '');
+  const [apiKey, setApiKey] = useState('');
+
+  useEffect(() => {
+    if (!globalSettings) return;
+    setGlobalModel(globalSettings.model);
+    setGlobalProvider(globalSettings.provider);
+    setGlobalEnabled(globalSettings.enabled);
+    setGlobalTemperature(String(globalSettings.temperature));
+    setGlobalMaxTokens(String(globalSettings.max_output_tokens));
+    setGlobalInstructions(globalSettings.system_instructions ?? '');
+  }, [globalSettings]);
+
+  const saveGlobalSettings = async () => {
+    const temperature = Number(globalTemperature);
+    const maxTokens = Number(globalMaxTokens);
+
+    if (!globalModel.trim()) {
+      alert('Veuillez saisir le modèle IA.');
+      return;
+    }
+
+    if (!Number.isFinite(temperature) || temperature < 0 || temperature > 2) {
+      alert('La température doit être comprise entre 0 et 2.');
+      return;
+    }
+
+    if (!Number.isInteger(maxTokens) || maxTokens < 256 || maxTokens > 128000) {
+      alert('Le nombre de tokens doit être compris entre 256 et 128000.');
+      return;
+    }
+
+    setSavingGlobal(true);
+
+    const { data, error } = await supabase.rpc('admin_save_ai_settings', {
+      p_provider: globalProvider.trim() || 'openai',
+      p_model: globalModel.trim(),
+      p_enabled: globalEnabled,
+      p_temperature: temperature,
+      p_max_output_tokens: maxTokens,
+      p_system_instructions: globalInstructions,
+      p_api_key: apiKey.trim() || null,
+    });
+
+    setSavingGlobal(false);
+
+    if (error) {
+      console.error(error);
+      alert(`Impossible d’enregistrer la configuration IA : ${error.message}`);
+      return;
+    }
+
+    setApiKey('');
+    if (data?.[0]) {
+      setGlobalModel(data[0].model);
+      setGlobalProvider(data[0].provider);
+      setGlobalEnabled(data[0].enabled);
+      setGlobalTemperature(String(data[0].temperature));
+      setGlobalMaxTokens(String(data[0].max_output_tokens));
+      setGlobalInstructions(data[0].system_instructions ?? '');
+    }
+    await reloadGlobalSettings();
+    alert('Configuration IA enregistrée.');
+  };
 
   const resetForm = () => {
     setShowForm(false);
@@ -2793,6 +3100,120 @@ function AIConfigurationSection({
 
   return (
     <div>
+      <div className="mb-8 rounded-2xl border border-gold/20 bg-white p-6 shadow-sm">
+        <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
+              Moteur IA global
+            </p>
+            <h3 className="mt-1 font-display text-2xl text-forest">
+              Paramètres du moteur IA
+            </h3>
+            <p className="mt-2 max-w-3xl text-xs leading-5 text-ink/45">
+              Ces paramètres contrôlent le moteur utilisé par l’analyse des avis. La clé API n’est jamais réaffichée après enregistrement.
+            </p>
+          </div>
+          <span className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${globalSettings?.has_api_key ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+            {globalSettings?.has_api_key ? 'CLÉ API CONFIGURÉE' : 'CLÉ API MANQUANTE'}
+          </span>
+        </div>
+
+        <div className="mt-6 grid gap-5 md:grid-cols-2">
+          <div>
+            <label className="mb-2 block text-xs font-semibold">Fournisseur</label>
+            <input
+              value={globalProvider}
+              onChange={(e) => setGlobalProvider(e.target.value)}
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-xs font-semibold">Modèle IA</label>
+            <input
+              value={globalModel}
+              onChange={(e) => setGlobalModel(e.target.value)}
+              placeholder="gpt-5.6-luna"
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+            />
+            <p className="mt-2 text-[11px] text-ink/35">Exemple actuel : gpt-5.6-luna.</p>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-xs font-semibold">Nouvelle clé API</label>
+            <input
+              type="password"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              placeholder={globalSettings?.has_api_key ? 'Laisser vide pour conserver la clé actuelle' : 'sk-...'}
+              autoComplete="new-password"
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-xs font-semibold">Température</label>
+            <input
+              type="number"
+              min="0"
+              max="2"
+              step="0.1"
+              value={globalTemperature}
+              onChange={(e) => setGlobalTemperature(e.target.value)}
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-xs font-semibold">Maximum de tokens de sortie</label>
+            <input
+              type="number"
+              min="256"
+              max="128000"
+              step="256"
+              value={globalMaxTokens}
+              onChange={(e) => setGlobalMaxTokens(e.target.value)}
+              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+            />
+          </div>
+
+          <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-[#f7f7f3] p-4">
+            <input
+              type="checkbox"
+              checked={globalEnabled}
+              onChange={(e) => setGlobalEnabled(e.target.checked)}
+              className="h-4 w-4 accent-[#173d32]"
+            />
+            <span>
+              <span className="block text-sm font-semibold text-forest">IA activée</span>
+              <span className="mt-1 block text-xs text-ink/40">Autorise les analyses IA depuis les espaces autorisés.</span>
+            </span>
+          </label>
+
+          <div className="md:col-span-2">
+            <label className="mb-2 block text-xs font-semibold">Instructions globales IA</label>
+            <textarea
+              value={globalInstructions}
+              onChange={(e) => setGlobalInstructions(e.target.value)}
+              rows={5}
+              placeholder="Ex : Répondre en français, être concret, ne jamais inventer d’information..."
+              className="w-full resize-y rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm leading-6 outline-none focus:border-forest"
+            />
+          </div>
+        </div>
+
+        <div className="mt-5 flex justify-end">
+          <button
+            onClick={saveGlobalSettings}
+            disabled={savingGlobal}
+            className="inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+          >
+            <Save size={16} />
+            {savingGlobal ? 'Enregistrement...' : 'Enregistrer les paramètres IA'}
+          </button>
+        </div>
+      </div>
+
       <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
