@@ -118,11 +118,10 @@ export default function Login() {
           src="/tapmarrakech-logo.png"
           alt=""
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-0 h-full w-full scale-[1.35] object-contain opacity-[0.10]"
+          className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[620px] w-[620px] -translate-x-1/2 -translate-y-1/2 object-contain opacity-[0.15]"
         />
-        <div className="pointer-events-none absolute inset-0 z-[1] bg-white/45" />
 
-        <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md items-center justify-center">
+        <div className="relative z-10 mx-auto flex min-h-[calc(100vh-4rem)] max-w-md items-center justify-center">
           <div className="w-full rounded-[2rem] border border-ink/5 bg-white p-7 shadow-2xl md:p-9">
             <button
               onClick={() => selectRole(null)}
@@ -238,9 +237,8 @@ export default function Login() {
         src="/tapmarrakech-logo.png"
         alt=""
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-0 h-full w-full scale-[1.12] object-contain opacity-[0.13]"
+        className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[620px] w-[620px] -translate-x-1/2 -translate-y-1/2 object-contain opacity-[0.15]"
       />
-      <div className="pointer-events-none absolute inset-0 z-[1] bg-[#f7f7f3]/30" />
 
       <div className="relative z-10 mx-auto flex min-h-[calc(100vh-4rem)] max-w-5xl items-center justify-center">
         <div className="relative z-10 w-full">
