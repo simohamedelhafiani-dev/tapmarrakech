@@ -506,14 +506,14 @@ export default function Employee() {
           <style>
             * { box-sizing: border-box; }
             body { margin: 0; padding: 40px; background: #f7f7f3; font-family: Arial, sans-serif; }
-            .card { width: 640px; max-width: 100%; margin: 0 auto; padding: 34px; border-radius: 28px; background: #5A2F18; color: white; box-shadow: 0 20px 50px rgba(0,0,0,.16); }
+            .card { width: 640px; max-width: 100%; margin: 0 auto; padding: 34px; border-radius: 28px; background: #173f35; color: white; box-shadow: 0 20px 50px rgba(0,0,0,.16); }
             .small { margin-top: 8px; color: rgba(255,255,255,.65); font-size: 12px; text-transform: uppercase; letter-spacing: 2px; }
             .brand { display: flex; align-items: center; gap: 14px; }
             .brand img { width: 58px; height: 58px; object-fit: contain; border-radius: 12px; background: #ffffff; padding: 5px; }
             .establishment { margin-top: 18px; font-size: 22px; font-weight: 700; color: #ffffff; }
             .name { margin-top: 55px; font-size: 26px; font-weight: 700; }
             .number-label { margin-top: 30px; color: rgba(255,255,255,.6); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; }
-            .number { margin-top: 6px; font-size: 30px; font-weight: 800; letter-spacing: 3px; color: #B8733F; }
+            .number { margin-top: 6px; font-size: 30px; font-weight: 800; letter-spacing: 3px; color: #d3a84c; }
             .footer { margin-top: 28px; display: flex; justify-content: space-between; color: rgba(255,255,255,.55); font-size: 11px; }
             @media print { body { padding: 0; background: white; } .card { box-shadow: none; } }
           </style>
@@ -664,7 +664,7 @@ export default function Employee() {
   if (loginLoading) {
     return (
       <div className="min-h-screen grid place-items-center bg-[#f7f7f3]">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#5A2F18] border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
       </div>
     );
   }
@@ -675,13 +675,17 @@ export default function Employee() {
         <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md items-center justify-center">
           <div className="w-full rounded-[2rem] border border-ink/5 bg-white p-7 shadow-2xl md:p-9">
             <div className="mb-8 text-center">
-              <div className="font-display text-3xl tracking-tight text-[#5A2F18]">
-                Tap<span className="text-[#B8733F]">Marrakech</span>
+              <div className="mb-4 flex justify-center">
+                <img
+                  src="/tapmarrakech-logo.png"
+                  alt="TapMarrakech"
+                  className="h-16 w-16 object-contain"
+                />
               </div>
-              <p className="mt-6 text-xs font-semibold uppercase tracking-[0.2em] text-[#B8733F]">
+              <p className="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-gold">
                 Espace employé
               </p>
-              <h1 className="mt-2 font-display text-3xl text-[#5A2F18]">
+              <h1 className="mt-2 font-display text-3xl text-forest">
                 Entrez votre code
               </h1>
               <p className="mt-2 text-sm leading-6 text-ink/45">
@@ -701,14 +705,14 @@ export default function Employee() {
                   if (e.key === 'Enter') loginEmployee();
                 }}
                 placeholder="Code de connexion"
-                className="w-full rounded-2xl border border-ink/10 bg-[#f7f7f3] py-4 pl-12 pr-4 text-center text-lg tracking-[0.25em] outline-none focus:border-[#7A4324]"
+                className="w-full rounded-2xl border border-ink/10 bg-[#f7f7f3] py-4 pl-12 pr-4 text-center text-lg tracking-[0.25em] outline-none focus:border-forest"
               />
             </div>
 
             <button
               onClick={loginEmployee}
               disabled={loginSaving}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#5A2F18] py-4 text-sm font-semibold text-white transition hover:bg-[#7A4324] disabled:opacity-50"
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-forest py-4 text-sm font-semibold text-white transition hover:bg-forest-light disabled:opacity-50"
             >
               <KeyRound size={17} />
               {loginSaving ? 'Connexion...' : 'Accéder à mon espace'}
@@ -718,7 +722,7 @@ export default function Employee() {
               onClick={() => {
                 window.location.href = '/login';
               }}
-              className="mt-5 w-full text-center text-xs font-medium text-ink/40 hover:text-[#7A4324]"
+              className="mt-5 w-full text-center text-xs font-medium text-ink/40 hover:text-forest"
             >
               ← Retour aux accès TapMarrakech
             </button>
@@ -731,7 +735,7 @@ export default function Employee() {
   if (loading) {
     return (
       <div className="min-h-screen grid place-items-center bg-[#f7f7f3]">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#5A2F18] border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
       </div>
     );
   }
@@ -739,61 +743,53 @@ export default function Employee() {
   return (
     <div className="min-h-screen bg-[#f7f7f3] p-4 md:p-8">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-          <div className="flex items-center gap-4">
-            {establishmentLogoUrl && (
-              <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl border border-ink/5 bg-white shadow-sm">
+        <div className="mb-8 flex justify-center">
+          <div className="flex items-center gap-3 rounded-2xl border border-ink/5 bg-white px-5 py-3 shadow-sm">
+            {establishmentLogoUrl ? (
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-ink/10 bg-white p-1.5">
                 <img
                   src={establishmentLogoUrl}
                   alt={`Logo ${session.establishment_name}`}
-                  className="h-full w-full object-contain p-2"
+                  className="h-full w-full object-contain"
                 />
+              </div>
+            ) : (
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border border-ink/10 bg-white text-forest">
+                <Building2 size={24} />
               </div>
             )}
 
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#5A2F18]/50">
-                Espace employé
-              </p>
-              <h1 className="mt-2 font-display text-3xl text-[#5A2F18] md:text-4xl">
+            <div className="min-w-0 max-w-[300px] text-center">
+              <p className="truncate text-base font-semibold text-forest md:text-lg">
                 {session.establishment_name || selectedEstablishmentName}
-              </h1>
-              <p className="mt-1 text-sm font-medium text-[#B8733F]">
-                Fidélité
               </p>
-              <p className="mt-2 text-sm text-ink/50">
-                Recherchez un client, ajoutez ses points ou utilisez une récompense.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-end gap-3">
-            <div className="rounded-xl border border-ink/5 bg-white px-4 py-3">
-              <p className="text-[11px] uppercase tracking-wide text-ink/40">
+              <p className="mt-0.5 text-[10px] font-medium uppercase tracking-[0.18em] text-gold">
                 Établissement
               </p>
-              <div className="mt-1 flex items-center gap-2">
-                {establishmentLogoUrl && (
-                  <img
-                    src={establishmentLogoUrl}
-                    alt=""
-                    className="h-7 w-7 rounded-md object-contain bg-white"
-                  />
-                )}
-                <p className="text-sm font-semibold text-[#5A2F18]">
-                  {session.establishment_name || selectedEstablishmentName}
-                </p>
-              </div>
             </div>
-
-            <button
-              onClick={logoutEmployee}
-              className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
-            >
-              <LogOut size={17} />
-              Déconnexion
-            </button>
           </div>
+        </div>
+
+        <div className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
+              Espace employé
+            </p>
+            <h1 className="mt-2 font-display text-3xl text-forest md:text-4xl">
+              Fidélité
+            </h1>
+            <p className="mt-2 text-sm text-ink/50">
+              Recherchez un client, ajoutez ses points ou utilisez une récompense.
+            </p>
+          </div>
+
+          <button
+            onClick={logoutEmployee}
+            className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+          >
+            <LogOut size={17} />
+            Déconnexion
+          </button>
         </div>
 
         <div className="mb-6 grid gap-4 md:grid-cols-[1fr_auto]">
@@ -812,13 +808,13 @@ export default function Employee() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="N° fidélité, téléphone, prénom ou nom..."
-              className="w-full rounded-2xl border border-ink/10 bg-white py-4 pl-12 pr-4 text-sm outline-none focus:border-[#7A4324]"
+              className="w-full rounded-2xl border border-ink/10 bg-white py-4 pl-12 pr-4 text-sm outline-none focus:border-forest"
             />
           </div>
 
           <button
             onClick={() => setShowNewCustomer(true)}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#5A2F18] px-5 py-4 text-sm font-semibold text-white transition hover:bg-[#7A4324]"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-forest px-5 py-4 text-sm font-semibold text-white transition hover:bg-forest-light"
           >
             <UserPlus size={18} />
             Nouveau client
@@ -829,13 +825,13 @@ export default function Employee() {
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-xs text-ink/40">Programme fidélité</p>
-              <p className="mt-1 text-sm font-semibold text-[#5A2F18]">
+              <p className="mt-1 text-sm font-semibold text-forest">
                 {settings.enabled
                   ? `${settings.points_per_currency} point(s) / ${settings.currency}`
                   : 'Désactivé'}
               </p>
             </div>
-            <Coins size={25} className="text-[#5A2F18]/50" />
+            <Coins size={25} className="text-forest/50" />
           </div>
         </div>
 
@@ -843,7 +839,7 @@ export default function Employee() {
           {filteredCustomers.length === 0 ? (
             <div className="p-12 text-center">
               <User size={38} className="mx-auto text-ink/20" />
-              <h2 className="mt-4 font-display text-2xl text-[#5A2F18]">
+              <h2 className="mt-4 font-display text-2xl text-forest">
                 Aucun client trouvé
               </h2>
               <p className="mt-2 text-sm text-ink/40">
@@ -858,12 +854,12 @@ export default function Employee() {
                   className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between"
                 >
                   <div className="flex min-w-0 items-center gap-4">
-                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#5A2F18]/10 text-[#5A2F18]">
+                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-forest/10 text-forest">
                       <User size={21} />
                     </div>
 
                     <div className="min-w-0">
-                      <p className="truncate font-semibold text-[#5A2F18]">
+                      <p className="truncate font-semibold text-forest">
                         {customer.first_name} {customer.last_name ?? ''}
                       </p>
                       <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink/45">
@@ -871,7 +867,7 @@ export default function Employee() {
                           <Phone size={13} />
                           {customer.phone}
                         </span>
-                        <span className="font-medium text-[#5A2F18]/60">
+                        <span className="font-medium text-forest/60">
                           N° {customer.loyalty_number}
                         </span>
                       </p>
@@ -883,14 +879,14 @@ export default function Employee() {
                       <p className="text-[10px] uppercase tracking-wide text-ink/40">
                         Points
                       </p>
-                      <p className="font-semibold text-[#5A2F18]">
+                      <p className="font-semibold text-forest">
                         {customer.points_balance}
                       </p>
                     </div>
 
                     <button
                       onClick={() => setShowPoints(customer)}
-                      className="inline-flex items-center gap-2 rounded-xl border border-[#5A2F18]/15 px-4 py-2.5 text-xs font-semibold text-[#5A2F18] hover:bg-[#5A2F18]/5"
+                      className="inline-flex items-center gap-2 rounded-xl border border-forest/15 px-4 py-2.5 text-xs font-semibold text-forest hover:bg-forest/5"
                     >
                       <Coins size={16} />
                       Ajouter points
@@ -898,7 +894,7 @@ export default function Employee() {
 
                     <button
                       onClick={() => openEditCustomer(customer)}
-                      className="inline-flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-4 py-2.5 text-xs font-semibold text-ink/60 hover:border-[#5A2F18]/20 hover:text-[#7A4324]"
+                      className="inline-flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-4 py-2.5 text-xs font-semibold text-ink/60 hover:border-forest/20 hover:text-forest"
                     >
                       <Pencil size={16} />
                       Modifier
@@ -906,7 +902,7 @@ export default function Employee() {
 
                     <button
                       onClick={() => setShowCard(customer)}
-                      className="inline-flex items-center gap-2 rounded-xl border border-[#B8733F]/30 bg-white px-4 py-2.5 text-xs font-semibold text-[#5A2F18] hover:bg-[#B8733F]/5"
+                      className="inline-flex items-center gap-2 rounded-xl border border-gold/30 bg-white px-4 py-2.5 text-xs font-semibold text-forest hover:bg-gold/5"
                     >
                       <CreditCard size={16} />
                       Carte
@@ -914,7 +910,7 @@ export default function Employee() {
 
                     <button
                       onClick={() => openRewards(customer)}
-                      className="inline-flex items-center gap-2 rounded-xl bg-[#5A2F18] px-4 py-2.5 text-xs font-semibold text-white hover:bg-[#7A4324]"
+                      className="inline-flex items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white hover:bg-forest-light"
                     >
                       <Gift size={16} />
                       Récompenses
@@ -963,7 +959,7 @@ export default function Employee() {
             <button
               disabled={saving}
               onClick={createCustomer}
-              className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#5A2F18] py-3.5 text-sm font-semibold text-white disabled:opacity-50"
+              className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white disabled:opacity-50"
             >
               <UserPlus size={17} />
               {saving ? 'Création...' : 'Créer le client'}
@@ -981,7 +977,7 @@ export default function Employee() {
         >
           <div className="mb-5 rounded-2xl bg-[#f7f7f3] p-4">
             <p className="text-xs text-ink/40">Numéro de fidélité</p>
-            <p className="mt-1 text-xl font-bold tracking-wider text-[#5A2F18]">
+            <p className="mt-1 text-xl font-bold tracking-wider text-forest">
               {editCustomer.loyalty_number}
             </p>
             <p className="mt-2 text-xs text-ink/40">Le numéro reste inchangé.</p>
@@ -996,7 +992,7 @@ export default function Employee() {
             <button
               disabled={saving}
               onClick={updateCustomer}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#5A2F18] py-3.5 text-sm font-semibold text-white disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white disabled:opacity-50"
             >
               <CheckCircle2 size={17} />
               {saving ? 'Enregistrement...' : 'Enregistrer les modifications'}
@@ -1010,7 +1006,7 @@ export default function Employee() {
           title="Carte de fidélité"
           onClose={() => setShowCard(null)}
         >
-          <div className="overflow-hidden rounded-[1.75rem] bg-[#5A2F18] p-6 text-white shadow-xl">
+          <div className="overflow-hidden rounded-[1.75rem] bg-forest p-6 text-white shadow-xl">
             <div className="flex items-start justify-between gap-4">
               <div className="flex min-w-0 items-center gap-4">
                 {establishmentLogoUrl ? (
@@ -1021,7 +1017,7 @@ export default function Employee() {
                   />
                 ) : (
                   <div className="grid h-14 w-14 place-items-center rounded-xl bg-white/10">
-                    <Building2 size={24} className="text-[#B8733F]" />
+                    <Building2 size={24} className="text-gold" />
                   </div>
                 )}
 
@@ -1034,7 +1030,7 @@ export default function Employee() {
                   </p>
                 </div>
               </div>
-              <CreditCard size={28} className="shrink-0 text-[#B8733F]/80" />
+              <CreditCard size={28} className="shrink-0 text-gold/80" />
             </div>
 
             <div className="mt-12">
@@ -1048,7 +1044,7 @@ export default function Employee() {
               <p className="text-[10px] uppercase tracking-[0.18em] text-white/50">
                 Numéro de fidélité
               </p>
-              <p className="mt-1 text-2xl font-bold tracking-[0.18em] text-[#B8733F]">
+              <p className="mt-1 text-2xl font-bold tracking-[0.18em] text-gold">
                 {showCard.loyalty_number}
               </p>
             </div>
@@ -1057,7 +1053,7 @@ export default function Employee() {
           <div className="mt-5 flex gap-3">
             <button
               onClick={() => printLoyaltyCard(showCard)}
-              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#5A2F18] py-3.5 text-sm font-semibold text-white"
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white"
             >
               <Printer size={17} />
               Imprimer / PDF
@@ -1084,14 +1080,14 @@ export default function Employee() {
           }}
         >
           <div className="rounded-2xl bg-[#f7f7f3] p-4">
-            <p className="font-semibold text-[#5A2F18]">
+            <p className="font-semibold text-forest">
               {showPoints.first_name} {showPoints.last_name ?? ''}
             </p>
             <p className="mt-1 text-xs text-ink/45">{showPoints.phone}</p>
-            <p className="mt-1 text-xs font-medium text-[#5A2F18]/60">N° fidélité : {showPoints.loyalty_number}</p>
+            <p className="mt-1 text-xs font-medium text-forest/60">N° fidélité : {showPoints.loyalty_number}</p>
             <div className="mt-4 flex items-center justify-between border-t border-ink/5 pt-3">
               <span className="text-xs text-ink/45">Solde actuel</span>
-              <span className="font-bold text-[#5A2F18]">
+              <span className="font-bold text-forest">
                 {showPoints.points_balance} points
               </span>
             </div>
@@ -1117,7 +1113,7 @@ export default function Employee() {
             />
 
             {purchaseAmount && Number(purchaseAmount) > 0 && (
-              <div className="rounded-xl border border-[#5A2F18]/10 bg-[#5A2F18]/5 p-3 text-sm text-[#5A2F18]">
+              <div className="rounded-xl border border-forest/10 bg-forest/5 p-3 text-sm text-forest">
                 Cet achat générera environ{' '}
                 <strong>
                   {Math.floor(
@@ -1132,7 +1128,7 @@ export default function Employee() {
           <button
             disabled={saving}
             onClick={addPoints}
-            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#5A2F18] py-3.5 text-sm font-semibold text-white disabled:opacity-50"
+            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white disabled:opacity-50"
           >
             <CheckCircle2 size={17} />
             {saving ? 'Validation...' : 'Valider les points'}
@@ -1155,14 +1151,14 @@ export default function Employee() {
             <div>
               <div className="rounded-2xl bg-[#f7f7f3] p-4">
                 <p className="text-xs text-ink/40">Client</p>
-                <p className="mt-1 font-semibold text-[#5A2F18]">
+                <p className="mt-1 font-semibold text-forest">
                   {showRewards.first_name} {showRewards.last_name ?? ''}
                 </p>
                 <p className="mt-1 text-xs text-ink/45">{showRewards.phone}</p>
-                <p className="mt-1 text-xs font-medium text-[#5A2F18]/60">N° fidélité : {showRewards.loyalty_number}</p>
+                <p className="mt-1 text-xs font-medium text-forest/60">N° fidélité : {showRewards.loyalty_number}</p>
                 <div className="mt-4 flex items-center justify-between border-t border-ink/5 pt-3">
                   <span className="text-xs text-ink/45">Solde</span>
-                  <span className="font-bold text-[#5A2F18]">
+                  <span className="font-bold text-forest">
                     {showRewards.points_balance} points
                   </span>
                 </div>
@@ -1185,13 +1181,13 @@ export default function Employee() {
                         onClick={() => setSelectedReward(reward)}
                         className={`w-full rounded-xl border p-4 text-left transition ${
                           selectedReward?.id === reward.id
-                            ? 'border-[#5A2F18] bg-[#5A2F18]/5'
+                            ? 'border-forest bg-forest/5'
                             : 'border-ink/10 bg-white'
-                        } ${!available ? 'cursor-not-allowed opacity-40' : 'hover:border-[#5A2F18]/30'}`}
+                        } ${!available ? 'cursor-not-allowed opacity-40' : 'hover:border-forest/30'}`}
                       >
                         <div className="flex items-center justify-between gap-3">
                           <div>
-                            <p className="font-semibold text-[#5A2F18]">
+                            <p className="font-semibold text-forest">
                               {reward.name}
                             </p>
                             {reward.description && (
@@ -1200,7 +1196,7 @@ export default function Employee() {
                               </p>
                             )}
                           </div>
-                          <span className="shrink-0 rounded-lg bg-[#f7f7f3] px-2.5 py-1 text-xs font-semibold text-[#5A2F18]">
+                          <span className="shrink-0 rounded-lg bg-[#f7f7f3] px-2.5 py-1 text-xs font-semibold text-forest">
                             {reward.points_required} pts
                           </span>
                         </div>
@@ -1223,7 +1219,7 @@ export default function Employee() {
                 </div>
               ) : (
                 <>
-                  <div className="rounded-xl bg-[#5A2F18] p-4 text-white">
+                  <div className="rounded-xl bg-forest p-4 text-white">
                     <p className="text-xs text-white/60">Récompense sélectionnée</p>
                     <p className="mt-1 font-semibold">{selectedReward.name}</p>
                     <p className="mt-1 text-xs text-white/70">
@@ -1276,7 +1272,7 @@ export default function Employee() {
                             }
                             className={`rounded-xl border px-2 py-2.5 text-xs font-semibold ${
                               paymentMethod === value
-                                ? 'border-[#5A2F18] bg-[#5A2F18]/5 text-[#5A2F18]'
+                                ? 'border-forest bg-forest/5 text-forest'
                                 : 'border-ink/10 text-ink/50'
                             }`}
                           >
@@ -1290,7 +1286,7 @@ export default function Employee() {
                     <button
                       disabled={saving}
                       onClick={redeemReward}
-                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#5A2F18] py-3.5 text-sm font-semibold text-white disabled:opacity-50"
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white disabled:opacity-50"
                     >
                       <CheckCircle2 size={17} />
                       {saving ? 'Validation...' : 'Valider la récompense'}
@@ -1326,7 +1322,7 @@ function Modal({
         }`}
       >
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="font-display text-2xl text-[#5A2F18]">{title}</h2>
+          <h2 className="font-display text-2xl text-forest">{title}</h2>
           <button
             onClick={onClose}
             className="rounded-lg p-2 text-ink/40 hover:bg-[#f7f7f3]"
@@ -1369,7 +1365,7 @@ function Field({
           value={value}
           onChange={e => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full rounded-xl border border-ink/10 bg-white py-3 pl-10 pr-3 text-sm outline-none focus:border-[#7A4324]"
+          className="w-full rounded-xl border border-ink/10 bg-white py-3 pl-10 pr-3 text-sm outline-none focus:border-forest"
         />
       </div>
     </div>
