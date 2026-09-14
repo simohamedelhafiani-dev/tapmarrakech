@@ -192,15 +192,23 @@ export function DashboardLayout() {
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="mb-12 flex items-center justify-between px-3">
-          <div
-            className={`max-w-[205px] truncate font-display tracking-tight ${
-              role === 'admin' ? 'text-2xl' : 'text-xl'
-            }`}
-            title={sidebarTitle}
-          >
-            {sidebarTitle}
-          </div>
+        <div className="mb-10 flex items-center justify-between px-3">
+          {role === 'admin' ? (
+            <div className="flex min-h-[64px] flex-1 items-center justify-center">
+              <img
+                src="/tapmarrakech-logo.png"
+                alt="TapMarrakech"
+                className="h-16 w-16 object-contain"
+              />
+            </div>
+          ) : (
+            <div
+              className="max-w-[205px] truncate font-display text-xl tracking-tight"
+              title={sidebarTitle}
+            >
+              {sidebarTitle}
+            </div>
+          )}
 
           <button
             className="lg:hidden"
@@ -263,7 +271,7 @@ export function DashboardLayout() {
       </aside>
 
       <div className="lg:pl-[270px]">
-        <header className="sticky top-0 z-20 flex h-[76px] items-center justify-between border-b border-ink/5 bg-[#f7f7f3]/90 px-5 backdrop-blur md:px-10">
+        <header className="sticky top-0 z-20 flex h-[104px] items-center justify-between border-b border-ink/5 bg-[#f7f7f3]/95 px-5 md:px-10">
           <button
             onClick={() => setOpen(true)}
             className="text-ink lg:hidden"
@@ -273,6 +281,30 @@ export function DashboardLayout() {
 
           <div className="hidden text-sm text-ink/50 lg:block">
             {capitalizedDate}
+          </div>
+
+          <div className="pointer-events-none absolute left-1/2 top-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center gap-3">
+            {establishmentLogoUrl ? (
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-ink/10 bg-white p-1.5 shadow-sm">
+                <img
+                  src={establishmentLogoUrl}
+                  alt={`Logo ${establishmentName || 'établissement'}`}
+                  className="h-full w-full object-contain"
+                />
+              </div>
+            ) : (
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-ink/10 bg-white text-forest shadow-sm">
+                <Building2 size={22} />
+              </div>
+            )}
+            <div className="max-w-[260px] text-center">
+              <p className="truncate text-sm font-semibold text-forest md:text-base">
+                {establishmentName || 'Mon établissement'}
+              </p>
+              <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-gold">
+                Établissement
+              </p>
+            </div>
           </div>
 
           <button
