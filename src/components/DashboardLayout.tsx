@@ -198,26 +198,18 @@ export function DashboardLayout() {
         }`}
       >
         <div className="mb-12 flex items-center justify-between px-3">
-          <div
-            className={`max-w-[205px] truncate font-display tracking-tight ${
-              role === 'admin' ? 'text-2xl' : 'text-xl'
-            }`}
-            title={sidebarTitle}
-          >
-            {role === 'responsible' && establishmentLogoUrl ? (
-              <img
-                src={establishmentLogoUrl}
-                alt={`Logo ${sidebarTitle}`}
-                className="h-10 max-w-[170px] object-contain"
-              />
-            ) : (
-              sidebarTitle
-            )}
+          <div className="flex min-h-[64px] flex-1 items-center justify-center">
+            <img
+              src="/tapmarrakech-logo.png"
+              alt="TapMarrakech"
+              className="h-16 w-16 object-contain"
+            />
           </div>
 
           <button
             className="lg:hidden"
             onClick={() => setOpen(false)}
+            aria-label="Fermer le menu"
           >
             <X size={20} />
           </button>
