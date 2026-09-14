@@ -51,12 +51,14 @@ const links = [
 type Establishment = {
   id: string;
   name: string;
+  logo_url: string | null;
 };
 
 export function DashboardLayout() {
   const [open, setOpen] = useState(false);
   const [profileName, setProfileName] = useState<string | null>(null);
   const [establishmentName, setEstablishmentName] = useState<string | null>(null);
+  const [establishmentLogoUrl, setEstablishmentLogoUrl] = useState<string | null>(null);
 
   const { signOut, user, role } = useAuth();
   const navigate = useNavigate();
@@ -104,6 +106,7 @@ export function DashboardLayout() {
     const loadEstablishment = async () => {
       if (role !== 'responsible' || !user?.id) {
         setEstablishmentName(null);
+        setEstablishmentLogoUrl(null);
         return;
       }
 
@@ -117,6 +120,7 @@ export function DashboardLayout() {
 
         if (active) {
           setEstablishmentName(null);
+          setEstablishmentLogoUrl(null);
         }
 
         return;
@@ -126,6 +130,7 @@ export function DashboardLayout() {
 
       if (active) {
         setEstablishmentName(establishments[0]?.name ?? null);
+        setEstablishmentLogoUrl(establishments[0]?.logo_url ?? null);
       }
     };
 
@@ -192,23 +197,23 @@ export function DashboardLayout() {
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="mb-10 flex items-center justify-between px-3">
-          {role === 'admin' ? (
-            <div className="flex min-h-[64px] flex-1 items-center justify-center">
+        <div className="mb-12 flex items-center justify-between px-3">
+          <div
+            className={`max-w-[205px] truncate font-display tracking-tight ${
+              role === 'admin' ? 'text-2xl' : 'text-xl'
+            }`}
+            title={sidebarTitle}
+          >
+            {role === 'responsible' && establishmentLogoUrl ? (
               <img
-                src="/tapmarrakech-logo.png"
-                alt="TapMarrakech"
-                className="h-16 w-16 object-contain"
+                src={establishmentLogoUrl}
+                alt={`Logo ${sidebarTitle}`}
+                className="h-10 max-w-[170px] object-contain"
               />
-            </div>
-          ) : (
-            <div
-              className="max-w-[205px] truncate font-display text-xl tracking-tight"
-              title={sidebarTitle}
-            >
-              {sidebarTitle}
-            </div>
-          )}
+            ) : (
+              sidebarTitle
+            )}
+          </div>
 
           <button
             className="lg:hidden"
@@ -275,6 +280,7 @@ export function DashboardLayout() {
           <button
             onClick={() => setOpen(true)}
             className="text-ink lg:hidden"
+            aria-label="Ouvrir le menu"
           >
             <Menu />
           </button>
@@ -297,6 +303,7 @@ export function DashboardLayout() {
                 <Building2 size={22} />
               </div>
             )}
+
             <div className="max-w-[260px] text-center">
               <p className="truncate text-sm font-semibold text-forest md:text-base">
                 {establishmentName || 'Mon établissement'}
