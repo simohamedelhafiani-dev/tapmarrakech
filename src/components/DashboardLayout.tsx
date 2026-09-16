@@ -5,9 +5,10 @@ import {
   Gift,
   LayoutDashboard,
   LogOut,
-  Menu,
+  Menu as MenuIcon,
   MessageSquare,
   Settings2,
+  UtensilsCrossed,
   X,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -35,6 +36,11 @@ const links = [
     to: '/dashboard/analytics',
     label: 'Analytics',
     icon: BarChart3,
+  },
+  {
+    to: '/dashboard/menu',
+    label: 'Menu',
+    icon: UtensilsCrossed,
   },
   {
     to: '/dashboard/loyalty',
@@ -274,7 +280,7 @@ export function DashboardLayout() {
             className="text-ink lg:hidden"
             aria-label="Ouvrir le menu"
           >
-            <Menu />
+            <MenuIcon />
           </button>
 
           <div className="hidden text-sm text-ink/50 lg:block">

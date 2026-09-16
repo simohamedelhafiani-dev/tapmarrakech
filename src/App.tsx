@@ -13,6 +13,7 @@ import Reviews from '@/pages/Reviews';
 import Analytics from '@/pages/Analytics';
 import Loyalty from '@/pages/Loyalty';
 import LoyaltySettings from '@/pages/LoyaltySettings';
+import Menu from '@/pages/Menu';
 import Admin from '@/pages/Admin';
 import Employee from '@/pages/Employee';
 
@@ -36,6 +37,7 @@ function App() {
               <Route path="/dashboard/establishments" element={<Establishments />} />
               <Route path="/dashboard/reviews" element={<Reviews />} />
               <Route path="/dashboard/analytics" element={<Analytics />} />
+              <Route path="/dashboard/menu" element={<Menu />} />
               <Route path="/dashboard/loyalty" element={<Loyalty />} />
               <Route path="/dashboard/loyalty/settings" element={<LoyaltySettings />} />
             </Route>
