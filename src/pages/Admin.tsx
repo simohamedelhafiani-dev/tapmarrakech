@@ -20,12 +20,16 @@ import {
   Save,
   Pencil,
   LayoutTemplate,
-  DollarSign,
   CreditCard,
   AlertTriangle,
   Activity,
   Search,
   Filter,
+  CalendarDays,
+  ExternalLink,
+  ShieldCheck,
+  TrendingUp,
+  WalletCards,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -38,6 +42,8 @@ type Establishment = {
   slug: string;
   ai_business_type_id: string | null;
   created_at: string;
+  city?: string | null;
+  business_type?: string | null;
 };
 
 type AIBusinessType = {
@@ -62,6 +68,44 @@ type StaffMember = {
   profileRole: 'admin' | 'responsible' | 'employee' | null;
 };
 
+type GlobalStats = {
+  reviews: number;
+  averageRating: number;
+  positiveReviews: number;
+  negativeReviews: number;
+  loyaltyCustomers: number;
+  analyticsEvents: number;
+};
+
+type BillingPlan = {
+  id: string;
+  name: string;
+  price_mad: number;
+  interval: string;
+  active: boolean;
+};
+
+type BillingSubscription = {
+  id: string;
+  establishment_id: string;
+  plan_id: string;
+  status: string;
+  started_at: string | null;
+  current_period_end: string | null;
+  plan?: BillingPlan | null;
+};
+
+type BillingSnapshot = {
+  available: boolean;
+  plans: BillingPlan[];
+  subscriptions: BillingSubscription[];
+  paymentsThisMonth: number;
+  failedPayments: number;
+  overdueInvoices: number;
+  upcomingRenewals: number;
+  mrr: number;
+};
+
 type AdminSection =
   | 'overview'
   | 'establishments'
@@ -72,7 +116,8 @@ type AdminSection =
   | 'analysis'
   | 'ai'
   | 'templates'
-  | 'business';
+  | 'billing'
+  | 'system';
 
 export default function Admin() {
   const { user, signOut } = useAuth();
@@ -84,6 +129,17 @@ export default function Admin() {
   const [establishments, setEstablishments] = useState<Establishment[]>([]);
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [aiBusinessTypes, setAIBusinessTypes] = useState<AIBusinessType[]>([]);
+  const [globalStats, setGlobalStats] = useState<GlobalStats>({ reviews: 0, averageRating: 0, positiveReviews: 0, negativeReviews: 0, loyaltyCustomers: 0, analyticsEvents: 0 });
+  const [billing, setBilling] = useState<BillingSnapshot>({
+    available: false,
+    plans: [],
+    subscriptions: [],
+    paymentsThisMonth: 0,
+    failedPayments: 0,
+    overdueInvoices: 0,
+    upcomingRenewals: 0,
+    mrr: 0,
+  });
 
   const [loading, setLoading] = useState(true);
   const [staffLoading, setStaffLoading] = useState(true);
@@ -93,7 +149,7 @@ export default function Admin() {
 
     const { data, error } = await supabase
       .from('establishments')
-      .select('id, name, slug, ai_business_type_id, created_at')
+      .select('id, name, slug, ai_business_type_id, created_at, city, business_type')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -184,10 +240,90 @@ export default function Admin() {
     setAIBusinessTypes(data ?? []);
   };
 
+  const loadGlobalStats = async () => {
+    const [{ data: reviewRows }, { count: loyaltyCustomers }, { count: analyticsEvents }] = await Promise.all([
+      supabase.from('reviews').select('rating'),
+      supabase.from('loyalty_customers').select('id', { count: 'exact', head: true }),
+      supabase.from('analytics_events').select('id', { count: 'exact', head: true }),
+    ]);
+    const ratings = (reviewRows ?? []).map((r: any) => Number(r.rating)).filter((r: number) => Number.isFinite(r));
+    const averageRating = ratings.length ? ratings.reduce((a: number, r: number) => a + r, 0) / ratings.length : 0;
+    setGlobalStats({
+      reviews: ratings.length,
+      averageRating,
+      positiveReviews: ratings.filter((r: number) => r >= 4).length,
+      negativeReviews: ratings.filter((r: number) => r <= 3).length,
+      loyaltyCustomers: loyaltyCustomers ?? 0,
+      analyticsEvents: analyticsEvents ?? 0,
+    });
+  };
+
+  const loadBilling = async () => {
+    const empty: BillingSnapshot = {
+      available: false,
+      plans: [],
+      subscriptions: [],
+      paymentsThisMonth: 0,
+      failedPayments: 0,
+      overdueInvoices: 0,
+      upcomingRenewals: 0,
+      mrr: 0,
+    };
+
+    const [
+      { data: plans, error: plansError },
+      { data: subscriptions, error: subscriptionsError },
+      { count: paymentsThisMonth },
+      { count: failedPayments },
+      { count: overdueInvoices },
+    ] = await Promise.all([
+      supabase.from('subscription_plans').select('id,name,price_mad,interval,active').order('price_mad'),
+      supabase.from('subscriptions').select('id,establishment_id,plan_id,status,started_at,current_period_end,subscription_plans(id,name,price_mad,interval,active)'),
+      supabase.from('payments').select('id', { count: 'exact', head: true }).gte('paid_at', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()).eq('status', 'paid'),
+      supabase.from('payments').select('id', { count: 'exact', head: true }).eq('status', 'failed'),
+      supabase.from('invoices').select('id', { count: 'exact', head: true }).eq('status', 'overdue'),
+    ]);
+
+    if (plansError || subscriptionsError) {
+      setBilling(empty);
+      return;
+    }
+
+    const normalizedSubscriptions: BillingSubscription[] = (subscriptions ?? []).map((s: any) => ({
+      ...s,
+      plan: Array.isArray(s.subscription_plans) ? s.subscription_plans[0] ?? null : s.subscription_plans ?? null,
+    }));
+
+    const mrr = normalizedSubscriptions
+      .filter((s) => s.status === 'active')
+      .reduce((sum, s) => sum + Number(s.plan?.price_mad ?? 0), 0);
+
+    const now = Date.now();
+    const in30Days = now + 30 * 24 * 60 * 60 * 1000;
+    const upcomingRenewals = normalizedSubscriptions.filter((s) => {
+      if (!s.current_period_end || s.status !== 'active') return false;
+      const time = new Date(s.current_period_end).getTime();
+      return time >= now && time <= in30Days;
+    }).length;
+
+    setBilling({
+      available: true,
+      plans: (plans ?? []) as BillingPlan[],
+      subscriptions: normalizedSubscriptions,
+      paymentsThisMonth: paymentsThisMonth ?? 0,
+      failedPayments: failedPayments ?? 0,
+      overdueInvoices: overdueInvoices ?? 0,
+      upcomingRenewals,
+      mrr,
+    });
+  };
+
   useEffect(() => {
     loadEstablishments();
     loadStaff();
     loadAIBusinessTypes();
+    loadGlobalStats();
+    loadBilling();
   }, []);
 
   const reloadAll = async () => {
@@ -195,6 +331,8 @@ export default function Admin() {
       loadEstablishments(),
       loadStaff(),
       loadAIBusinessTypes(),
+      loadGlobalStats(),
+      loadBilling(),
     ]);
   };
 
@@ -244,11 +382,6 @@ export default function Admin() {
       icon: MessageSquare,
     },
     {
-      id: 'analysis',
-      label: 'Analyse des avis',
-      icon: Brain,
-    },
-    {
       id: 'codes',
       label: 'Codes récompenses',
       icon: Gift,
@@ -259,14 +392,19 @@ export default function Admin() {
       icon: Brain,
     },
     {
-      id: 'business',
-      label: 'Business & Facturation',
-      icon: DollarSign,
-    },
-    {
       id: 'templates',
       label: 'Templates',
       icon: LayoutTemplate,
+    },
+    {
+      id: 'billing',
+      label: 'Abonnements & facturation',
+      icon: CreditCard,
+    },
+    {
+      id: 'system',
+      label: 'Supervision technique',
+      icon: Activity,
     },
   ];
 
@@ -387,6 +525,8 @@ export default function Admin() {
               establishments={establishments}
               staff={staff}
               loading={loading || staffLoading}
+              globalStats={globalStats}
+              billing={billing}
             />
           )}
 
@@ -396,6 +536,7 @@ export default function Admin() {
               loading={loading}
               reload={loadEstablishments}
               businessTypes={aiBusinessTypes}
+              billing={billing}
             />
           )}
 
@@ -421,9 +562,6 @@ export default function Admin() {
             <ReviewsSection establishments={establishments} />
           )}
 
-          {section === 'analysis' && (
-            <ReviewAnalysisSection establishments={establishments} />
-          )}
 
           {section === 'codes' && (
             <RewardCodesSection
@@ -440,8 +578,20 @@ export default function Admin() {
 
           {section === 'templates' && <Templates />}
 
-          {section === 'business' && (
-            <BusinessAdminSection establishments={establishments} />
+          {section === 'billing' && (
+            <BillingSection
+              establishments={establishments}
+              billing={billing}
+              reload={loadBilling}
+            />
+          )}
+
+          {section === 'system' && (
+            <SystemSection
+              billing={billing}
+              globalStats={globalStats}
+              establishments={establishments}
+            />
           )}
         </main>
       </div>
@@ -457,163 +607,160 @@ function Overview({
   establishments,
   staff,
   loading,
+  globalStats,
+  billing,
 }: {
   establishments: Establishment[];
   staff: StaffMember[];
   loading: boolean;
+  globalStats: GlobalStats;
+  billing: BillingSnapshot;
 }) {
-  const responsibles = staff.filter((member) => member.role === 'MANAGER');
-  const employees = staff.filter((member) => member.role === 'STAFF');
-  const [reviewStats, setReviewStats] = useState({ total: 0, negative: 0, average: 0 });
-  const [loyaltyCustomers, setLoyaltyCustomers] = useState(0);
-
-  useEffect(() => {
-    let active = true;
-    const load = async () => {
-      const ids = establishments.map((e) => e.id);
-      if (!ids.length) return;
-      const [reviews, customers] = await Promise.all([
-        supabase.from('reviews').select('rating').in('establishment_id', ids),
-        supabase.from('loyalty_customers').select('id', { count: 'exact', head: true }).in('establishment_id', ids),
-      ]);
-      if (!active) return;
-      const ratings = reviews.data ?? [];
-      const avg = ratings.length ? ratings.reduce((a, r) => a + Number(r.rating || 0), 0) / ratings.length : 0;
-      setReviewStats({ total: ratings.length, negative: ratings.filter((r) => Number(r.rating) <= 3).length, average: avg });
-      setLoyaltyCustomers(customers.count ?? 0);
-    };
-    load();
-    return () => { active = false; };
-  }, [establishments]);
-
-  const cards = [
-    { icon: Building2, label: 'Commerces clients', value: establishments.length },
-    { icon: UserRound, label: 'Responsables', value: responsibles.length },
-    { icon: Users, label: 'Employés', value: employees.length },
-    { icon: MessageSquare, label: 'Avis traités', value: reviewStats.total },
-    { icon: BarChart3, label: 'Note moyenne', value: reviewStats.average ? reviewStats.average.toFixed(1) + ' / 5' : '—' },
-    { icon: Gift, label: 'Clients fidélité', value: loyaltyCustomers },
-  ];
-
-  return (
-    <div className="space-y-8">
-      <div className="overflow-hidden rounded-[28px] bg-forest p-7 text-white shadow-xl md:p-10">
-        <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.24em] text-gold">Command Center</p>
-            <h2 className="font-display text-3xl md:text-5xl">Vue d’ensemble</h2>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-white/60">Pilotez TapMarrakech depuis un seul espace : clients, réputation, fidélité, activité et opérations.</p>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4">
-            <p className="text-[10px] uppercase tracking-wider text-white/40">Santé plateforme</p>
-            <p className="mt-1 flex items-center gap-2 text-sm font-semibold"><span className="h-2 w-2 rounded-full bg-emerald-400" /> Opérationnelle</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {cards.map(({ icon: Icon, label, value }) => (
-          <div key={label} className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-            <div className="flex items-center justify-between">
-              <div className="grid h-11 w-11 place-items-center rounded-xl bg-forest/10 text-forest"><Icon size={19} /></div>
-              <span className="text-2xl font-semibold text-forest">{loading ? '—' : value}</span>
-            </div>
-            <p className="mt-5 text-xs font-medium text-ink/50">{label}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid gap-5 lg:grid-cols-[1.5fr_1fr]">
-        <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between"><div><p className="text-[10px] font-semibold uppercase tracking-wider text-forest/45">Réputation</p><h3 className="mt-1 text-lg font-semibold">Vue globale des avis</h3></div><MessageSquare size={20} className="text-forest/30" /></div>
-          <div className="mt-6 grid grid-cols-3 gap-3">
-            <MiniMetric label="Total" value={reviewStats.total} />
-            <MiniMetric label="≤ 3 étoiles" value={reviewStats.negative} />
-            <MiniMetric label="Moyenne" value={reviewStats.average ? reviewStats.average.toFixed(1) : '—'} />
-          </div>
-        </div>
-        <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-forest/45">À surveiller</p>
-          <div className="mt-5 space-y-3">
-            <AlertRow icon={AlertTriangle} text={reviewStats.negative ? `${reviewStats.negative} avis à traiter` : 'Aucun avis négatif détecté'} />
-            <AlertRow icon={CreditCard} text="Suivi des abonnements dans Business & Facturation" />
-            <AlertRow icon={Activity} text={`${establishments.length} commerce${establishments.length > 1 ? 's' : ''} actuellement enregistré${establishments.length > 1 ? 's' : ''}`} />
-          </div>
-        </div>
-      </div>
-
-      <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
-        <div className="flex items-center justify-between"><h3 className="text-sm font-semibold">Derniers établissements</h3><span className="text-xs text-ink/35">{establishments.length} au total</span></div>
-        <div className="mt-5 divide-y divide-ink/5">
-          {establishments.slice(0, 8).map((e) => (
-            <div key={e.id} className="flex items-center justify-between py-4">
-              <div><p className="text-sm font-semibold">{e.name}</p><p className="mt-1 text-xs text-ink/40">/{e.slug}</p></div>
-              <span className="rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-semibold text-emerald-700">Actif</span>
-            </div>
-          ))}
-          {!establishments.length && <p className="py-6 text-sm text-ink/40">Aucun établissement.</p>}
-        </div>
-      </div>
-    </div>
+  const responsibles = staff.filter(
+    (member) => member.role === 'MANAGER'
   );
-}
 
-function MiniMetric({ label, value }: { label: string; value: string | number }) {
-  return <div className="rounded-xl bg-[#f7f7f3] p-4"><p className="text-[10px] uppercase tracking-wider text-ink/35">{label}</p><p className="mt-2 text-xl font-semibold text-forest">{value}</p></div>;
-}
-
-function AlertRow({ icon: Icon, text }: { icon: typeof AlertTriangle; text: string }) {
-  return <div className="flex items-center gap-3 rounded-xl bg-[#f7f7f3] px-3 py-3"><Icon size={16} className="text-forest/55" /><span className="text-xs text-ink/60">{text}</span></div>;
-}
-
-/* =========================================================
-   BUSINESS / BILLING
-========================================================= */
-
-type BusinessPlan = { id: string; name: string; price_monthly: number; active: boolean };
-type BusinessSubscription = { id: string; establishment_id: string; plan_id: string; status: string; started_at: string; next_billing_at: string | null };
-type BusinessPayment = { id: string; establishment_id: string; amount: number; status: string; paid_at: string | null };
-
-function BusinessAdminSection({ establishments }: { establishments: Establishment[] }) {
-  const [plans, setPlans] = useState<BusinessPlan[]>([]);
-  const [subs, setSubs] = useState<BusinessSubscription[]>([]);
-  const [payments, setPayments] = useState<BusinessPayment[]>([]);
-  const [search, setSearch] = useState('');
-  const [status, setStatus] = useState('all');
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      const [p, s, pay] = await Promise.all([
-        supabase.from('subscription_plans').select('id,name,price_monthly,active').order('price_monthly'),
-        supabase.from('subscriptions').select('id,establishment_id,plan_id,status,started_at,next_billing_at'),
-        supabase.from('payments').select('id,establishment_id,amount,status,paid_at').order('created_at', { ascending: false }),
-      ]);
-      if (!alive) return;
-      setPlans(p.data ?? []); setSubs(s.data ?? []); setPayments(pay.data ?? []); setLoading(false);
-    })();
-    return () => { alive = false; };
-  }, []);
-
-  const byId = new Map(establishments.map((e) => [e.id, e]));
-  const planById = new Map(plans.map((p) => [p.id, p]));
-  const rows = establishments.filter((e) => e.name.toLowerCase().includes(search.toLowerCase())).map((e) => {
-    const sub = subs.find((s) => s.establishment_id === e.id);
-    const plan = sub ? planById.get(sub.plan_id) : undefined;
-    const last = payments.find((p) => p.establishment_id === e.id);
-    return { e, sub, plan, last };
-  }).filter((r) => status === 'all' || (r.sub?.status ?? 'none') === status);
-  const mrr = subs.filter((s) => s.status === 'active').reduce((sum, s) => sum + Number(planById.get(s.plan_id)?.price_monthly || 0), 0);
-  const paid = payments.filter((p) => p.status === 'paid').reduce((sum, p) => sum + Number(p.amount || 0), 0);
+  const employees = staff.filter(
+    (member) => member.role === 'STAFF'
+  );
 
   return (
-    <div className="space-y-7">
-      <div><p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">Business</p><h2 className="font-display text-3xl text-forest md:text-4xl">Clients & facturation</h2><p className="mt-2 text-sm text-ink/50">Le cockpit commercial de TapMarrakech : plans, abonnements et paiements.</p></div>
-      <div className="grid gap-4 md:grid-cols-3"><StatCard icon={DollarSign} label="MRR" value={`${mrr.toLocaleString('fr-MA')} DH`} /><StatCard icon={CreditCard} label="Paiements encaissés" value={`${paid.toLocaleString('fr-MA')} DH`} /><StatCard icon={Building2} label="Clients actifs" value={subs.filter(s=>s.status==='active').length} /></div>
-      <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm"><div className="flex flex-col gap-3 md:flex-row"><div className="relative flex-1"><Search size={16} className="absolute left-3 top-3 text-ink/30"/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher un commerce..." className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] py-2.5 pl-9 pr-3 text-sm outline-none focus:border-forest"/></div><div className="relative"><Filter size={16} className="absolute left-3 top-3 text-ink/30"/><select value={status} onChange={e=>setStatus(e.target.value)} className="rounded-xl border border-ink/10 bg-[#f7f7f3] py-2.5 pl-9 pr-8 text-sm outline-none"><option value="all">Tous les statuts</option><option value="active">Actif</option><option value="trial">Essai</option><option value="past_due">Impayé</option><option value="suspended">Suspendu</option><option value="none">Sans abonnement</option></select></div></div>
-        <div className="mt-6 overflow-x-auto"><table className="w-full min-w-[760px] text-left"><thead><tr className="border-b border-ink/5 text-[10px] uppercase tracking-wider text-ink/35"><th className="pb-3">Commerce</th><th>Plan</th><th>Statut</th><th>Mensuel</th><th>Échéance</th><th>Paiement</th></tr></thead><tbody className="divide-y divide-ink/5">{loading ? <tr><td colSpan={6} className="py-8 text-sm text-ink/40">Chargement...</td></tr> : rows.map(({e,sub,plan,last})=><tr key={e.id} className="text-sm"><td className="py-4 font-semibold">{e.name}</td><td className="py-4 text-ink/60">{plan?.name ?? '—'}</td><td className="py-4"><span className="rounded-full bg-forest/10 px-2.5 py-1 text-[10px] font-semibold text-forest">{sub?.status ?? 'Sans abonnement'}</span></td><td className="py-4">{plan ? `${Number(plan.price_monthly).toLocaleString('fr-MA')} DH` : '—'}</td><td className="py-4 text-ink/55">{sub?.next_billing_at ? new Date(sub.next_billing_at).toLocaleDateString('fr-FR') : '—'}</td><td className="py-4 text-ink/55">{last?.status ?? '—'}</td></tr>)}</tbody></table></div></div>
-      <div className="grid gap-5 lg:grid-cols-3">{plans.map(p=><div key={p.id} className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm"><p className="text-xs font-semibold uppercase tracking-wider text-forest/45">Plan</p><h3 className="mt-2 text-xl font-semibold">{p.name}</h3><p className="mt-3 text-2xl font-semibold text-forest">{Number(p.price_monthly).toLocaleString('fr-MA')} DH<span className="text-xs font-normal text-ink/35"> / mois</span></p></div>)}</div>
+    <div>
+      <div className="mb-8">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
+          Administration
+        </p>
+
+        <h2 className="font-display text-3xl text-forest md:text-4xl">
+          Bienvenue dans votre espace Admin
+        </h2>
+
+        <p className="mt-2 max-w-2xl text-sm text-ink/50">
+          Gérez les établissements, les responsables et les employés
+          de TapMarrakech depuis un seul espace.
+        </p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard icon={Building2} label="Établissements" value={loading ? '—' : establishments.length} />
+        <StatCard icon={UserRound} label="Responsables" value={loading ? '—' : responsibles.length} />
+        <StatCard icon={Users} label="Employés" value={loading ? '—' : employees.length} />
+        <StatCard icon={MessageSquare} label="Avis reçus" value={loading ? '—' : globalStats.reviews} />
+      </div>
+
+      <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard icon={BarChart3} label="Note moyenne globale" value={globalStats.reviews ? `${globalStats.averageRating.toFixed(1)} ★` : '—'} />
+        <StatCard icon={CheckCircle2} label="Avis positifs" value={globalStats.positiveReviews} />
+        <StatCard icon={Gift} label="Clients fidélité" value={globalStats.loyaltyCustomers} />
+        <StatCard icon={BarChart3} label="Événements analytics" value={globalStats.analyticsEvents} />
+      </div>
+
+      <div className="mt-6 grid gap-4 lg:grid-cols-[1.4fr_.6fr]">
+        <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
+          <div className="flex items-start justify-between gap-4">
+            <div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-forest/45">Réputation globale</p><h3 className="mt-2 text-xl font-semibold text-forest">Santé des avis</h3></div>
+            <span className="rounded-full bg-forest/10 px-3 py-1.5 text-xs font-semibold text-forest">{globalStats.reviews} avis</span>
+          </div>
+          <div className="mt-6 h-3 overflow-hidden rounded-full bg-ink/5"><div className="h-full rounded-full bg-forest" style={{ width: `${globalStats.reviews ? Math.round((globalStats.positiveReviews / globalStats.reviews) * 100) : 0}%` }} /></div>
+          <div className="mt-3 flex justify-between text-xs text-ink/45"><span>{globalStats.positiveReviews} positifs</span><span>{globalStats.negativeReviews} ≤ 3 étoiles</span></div>
+        </div>
+        <div className="rounded-2xl border border-gold/20 bg-[#fdf9ef] p-6"><p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">Pilotage</p><h3 className="mt-2 text-xl font-semibold text-forest">TapMarrakech</h3><p className="mt-3 text-sm leading-6 text-ink/55">Une vue globale pour piloter les établissements, la réputation, la fidélité et l’activité de la plateforme.</p></div>
+      </div>
+
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard icon={WalletCards} label="MRR" value={billing.available ? `${billing.mrr.toLocaleString('fr-FR')} MAD` : '—'} />
+        <StatCard icon={CalendarDays} label="Renouvellements < 30 j." value={billing.available ? billing.upcomingRenewals : '—'} />
+        <StatCard icon={AlertTriangle} label="Paiements échoués" value={billing.available ? billing.failedPayments : '—'} />
+        <StatCard icon={CreditCard} label="Factures en retard" value={billing.available ? billing.overdueInvoices : '—'} />
+      </div>
+
+      <div className="mt-6 grid gap-4 lg:grid-cols-[1.4fr_.6fr]">
+        <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-forest/45">Business</p>
+              <h3 className="mt-2 text-xl font-semibold text-forest">Portefeuille clients</h3>
+            </div>
+            <TrendingUp size={20} className="text-forest" />
+          </div>
+          <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
+            <MiniMetric label="Actifs" value={billing.subscriptions.filter((s) => s.status === 'active').length} />
+            <MiniMetric label="Essais" value={billing.subscriptions.filter((s) => s.status === 'trial').length} />
+            <MiniMetric label="Impayés" value={billing.subscriptions.filter((s) => ['past_due','unpaid'].includes(s.status)).length} />
+            <MiniMetric label="Plans" value={billing.plans.length} />
+          </div>
+        </div>
+        <div className="rounded-2xl border border-gold/20 bg-[#fdf9ef] p-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">Alertes</p>
+          <div className="mt-4 space-y-3 text-sm">
+            <AlertLine label="Paiements échoués" value={billing.failedPayments} />
+            <AlertLine label="Factures en retard" value={billing.overdueInvoices} />
+            <AlertLine label="Renouvellements à venir" value={billing.upcomingRenewals} />
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-8 rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
+        <h3 className="text-sm font-semibold text-ink">
+          Établissements récents
+        </h3>
+
+        {loading ? (
+          <p className="mt-5 text-sm text-ink/40">
+            Chargement...
+          </p>
+        ) : establishments.length === 0 ? (
+          <p className="mt-5 text-sm text-ink/40">
+            Aucun établissement pour le moment.
+          </p>
+        ) : (
+          <div className="mt-5 space-y-3">
+            {establishments.slice(0, 5).map((establishment) => {
+              const establishmentStaff = staff.filter(
+                (member) =>
+                  member.establishment_id === establishment.id
+              );
+
+              const manager = establishmentStaff.find(
+                (member) => member.role === 'MANAGER'
+              );
+
+              return (
+                <div
+                  key={establishment.id}
+                  className="flex flex-col gap-4 rounded-xl bg-[#f7f7f3] px-4 py-4 md:flex-row md:items-center md:justify-between"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="grid h-9 w-9 place-items-center rounded-lg bg-forest text-white">
+                      <Building2 size={17} />
+                    </div>
+
+                    <div>
+                      <p className="text-sm font-medium">
+                        {establishment.name}
+                      </p>
+
+                      <p className="text-xs text-ink/40">
+                        /{establishment.slug}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <p className="text-xs text-ink/45">
+                      Responsable
+                    </p>
+
+                    <p className="mt-1 text-xs font-semibold text-forest">
+                      {manager?.name ?? 'Non défini'}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -627,149 +774,981 @@ function EstablishmentsSection({
   loading,
   reload,
   businessTypes,
+  billing,
 }: {
   establishments: Establishment[];
   loading: boolean;
   reload: () => Promise<void>;
   businessTypes: AIBusinessType[];
+  billing: BillingSnapshot;
 }) {
-  const [showForm, setShowForm] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const [city, setCity] = useState('all');
+  const [type, setType] = useState('all');
+  const [accountStatus, setAccountStatus] = useState('all');
+  const [plan, setPlan] = useState('all');
+
+  const subscriptionByEstablishment = useMemo(
+    () => new Map(billing.subscriptions.map((s) => [s.establishment_id, s])),
+    [billing.subscriptions]
+  );
+
+  const cities = Array.from(new Set(establishments.map((e) => e.city).filter(Boolean))) as string[];
+  const filteredEstablishments = establishments.filter((e) => {
+    const haystack = `${e.name} ${e.slug} ${e.city ?? ''} ${e.business_type ?? ''}`.toLowerCase();
+    return (!search.trim() || haystack.includes(search.trim().toLowerCase()))
+      && (city === 'all' || e.city === city)
+      && (type === 'all' || e.ai_business_type_id === type)
+      && (accountStatus === 'all' || subscriptionByEstablishment.get(e.id)?.status === accountStatus)
+      && (plan === 'all' || subscriptionByEstablishment.get(e.id)?.plan_id === plan);
+  });
+
+  const selected = establishments.find((item) => item.id === selectedId) ?? null;
+
+  if (selected) {
+    return (
+      <EstablishmentWorkspace
+        establishment={selected}
+        businessTypes={businessTypes}
+        onBack={() => setSelectedId(null)}
+        onReload={reload}
+      />
+    );
+  }
 
   return (
     <div>
       <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
-            Gestion
-          </p>
-
-          <h2 className="font-display text-3xl text-forest md:text-4xl">
-            Établissements
-          </h2>
-
-          <p className="mt-2 text-sm text-ink/50">
-            Gérez les commerces présents sur TapMarrakech.
-          </p>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">Gestion</p>
+          <h2 className="font-display text-3xl text-forest md:text-4xl">Établissements</h2>
+          <p className="mt-2 text-sm text-ink/50">Cliquez sur un établissement pour ouvrir son espace de gestion complet.</p>
         </div>
-
-        <button
-          onClick={() => setShowForm(true)}
-          className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white transition hover:bg-forest-light"
-        >
-          + Ajouter un établissement
-        </button>
+        <CreateEstablishmentButton reload={reload} businessTypes={businessTypes} />
       </div>
 
-      {showForm && (
-        <CreateEstablishmentForm
-          close={() => setShowForm(false)}
-          reload={reload}
-          businessTypes={businessTypes}
-        />
-      )}
+      <div className="mb-5 rounded-2xl border border-ink/5 bg-white p-5 shadow-sm">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+          <div className="relative">
+            <Search size={16} className="absolute left-3 top-3 text-ink/30" />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher un établissement..." className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] py-2.5 pl-9 pr-3 text-sm outline-none focus:border-forest" />
+          </div>
+          <select value={city} onChange={(e) => setCity(e.target.value)} className="rounded-xl border border-ink/10 bg-[#f7f7f3] px-3 py-2.5 text-sm">
+            <option value="all">Toutes les villes</option>
+            {cities.map((value) => <option key={value} value={value}>{value}</option>)}
+          </select>
+          <select value={type} onChange={(e) => setType(e.target.value)} className="rounded-xl border border-ink/10 bg-[#f7f7f3] px-3 py-2.5 text-sm">
+            <option value="all">Tous les secteurs</option>
+            {businessTypes.map((value) => <option key={value.id} value={value.id}>{value.name}</option>)}
+          </select>
+          <select value={accountStatus} onChange={(e) => setAccountStatus(e.target.value)} className="rounded-xl border border-ink/10 bg-[#f7f7f3] px-3 py-2.5 text-sm">
+            <option value="all">Tous les statuts</option>
+            <option value="active">Actif</option>
+            <option value="trial">Essai</option>
+            <option value="past_due">En retard</option>
+            <option value="unpaid">Impayé</option>
+            <option value="canceled">Annulé</option>
+          </select>
+          <select value={plan} onChange={(e) => setPlan(e.target.value)} className="rounded-xl border border-ink/10 bg-[#f7f7f3] px-3 py-2.5 text-sm">
+            <option value="all">Tous les plans</option>
+            {billing.plans.map((value) => <option key={value.id} value={value.id}>{value.name}</option>)}
+          </select>
+        </div>
+      </div>
 
       <div className="overflow-hidden rounded-2xl border border-ink/5 bg-white shadow-sm">
         {loading ? (
-          <div className="p-8 text-sm text-ink/40">
-            Chargement...
-          </div>
+          <div className="p-8 text-sm text-ink/40">Chargement...</div>
         ) : establishments.length === 0 ? (
-          <div className="p-10 text-center">
-            <Building2
-              size={35}
-              className="mx-auto text-ink/20"
-            />
-
-            <p className="mt-4 text-sm text-ink/50">
-              Aucun établissement créé.
-            </p>
-          </div>
+          <div className="p-10 text-center text-sm text-ink/50">Aucun établissement créé.</div>
         ) : (
           <div className="divide-y divide-ink/5">
-            {establishments.map((establishment) => {
+            {filteredEstablishments.map((establishment) => {
               const accessLink = `${window.location.origin}/r/${establishment.slug}`;
-
+              const type = businessTypes.find((item) => item.id === establishment.ai_business_type_id)?.name;
               return (
-                <div
+                <button
                   key={establishment.id}
-                  className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between"
+                  onClick={() => setSelectedId(establishment.id)}
+                  className="flex w-full flex-col gap-4 p-5 text-left transition hover:bg-[#fbfbf8] md:flex-row md:items-center md:justify-between"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="grid h-11 w-11 place-items-center rounded-xl bg-forest text-white">
-                      <Building2 size={19} />
-                    </div>
-
-                    <div>
-                      <h3 className="text-sm font-semibold">
-                        {establishment.name}
-                      </h3>
-
-                      <p className="mt-1 text-xs text-ink/40">
-                        Slug : {establishment.slug}
-                      </p>
-
-                      <p className="mt-1 text-[11px] text-ink/35 break-all">
-                        {accessLink}
-                      </p>
-
-                      <div className="mt-3">
-                        <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-ink/35">
-                          Type d’établissement / IA
-                        </label>
-                        <select
-                          value={establishment.ai_business_type_id ?? ''}
-                          onChange={async (e) => {
-                            const value = e.target.value || null;
-
-                            const { error } = await supabase
-                              .from('establishments')
-                              .update({ ai_business_type_id: value })
-                              .eq('id', establishment.id);
-
-                            if (error) {
-                              console.error('Erreur type IA:', error);
-                              alert(`Impossible de modifier le type IA : ${error.message}`);
-                              return;
-                            }
-
-                            await reload();
-                          }}
-                          className="w-full max-w-[280px] rounded-lg border border-ink/10 bg-[#f7f7f3] px-3 py-2 text-xs outline-none focus:border-forest"
-                        >
-                          <option value="">Sélectionner un type</option>
-                          {businessTypes.filter((type) => type.active).map((type) => (
-                            <option key={type.id} value={type.id}>
-                              {type.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-forest text-white"><Building2 size={19} /></div>
+                    <div className="min-w-0">
+                      <h3 className="text-sm font-semibold">{establishment.name}</h3>
+                      <p className="mt-1 text-xs text-ink/40">{type ?? 'Type non défini'} · {establishment.city ?? 'Ville non définie'} · /r/{establishment.slug}</p>
+                      <p className="mt-1 truncate text-[11px] text-ink/30">{accessLink}</p>
                     </div>
                   </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      onClick={async () => {
-                        await navigator.clipboard.writeText(
-                          accessLink
-                        );
-                        alert('Lien copié.');
-                      }}
-                      className="inline-flex items-center gap-2 rounded-lg border border-ink/10 px-3 py-2 text-xs font-medium transition hover:bg-[#f7f7f3]"
-                    >
-                      <Copy size={14} />
-                      Copier le lien
-                    </button>
-
-                    <span className="rounded-lg bg-green-100 px-3 py-2 text-xs font-semibold text-green-700">
-                      Actif
-                    </span>
+                  <div className="flex shrink-0 items-center gap-3">
+                    {(() => {
+                      const subscription = subscriptionByEstablishment.get(establishment.id);
+                      return subscription ? (
+                        <div className="hidden text-right md:block">
+                          <p className="text-xs font-semibold text-forest">{subscription.plan?.name ?? 'Plan'}</p>
+                          <p className="text-[10px] text-ink/35">{subscription.status}</p>
+                        </div>
+                      ) : (
+                        <span className="hidden rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-semibold text-amber-700 md:inline-flex">Sans abonnement</span>
+                      );
+                    })()}
+                    <span className="rounded-lg bg-forest px-4 py-2 text-xs font-semibold text-white">Gérer →</span>
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+function CreateEstablishmentButton({
+  reload,
+  businessTypes,
+}: {
+  reload: () => Promise<void>;
+  businessTypes: AIBusinessType[];
+}) {
+  const [showForm, setShowForm] = useState(false);
+  return (
+    <>
+      <button onClick={() => setShowForm(true)} className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white hover:bg-forest-light">+ Ajouter un établissement</button>
+      {showForm && <CreateEstablishmentForm close={() => setShowForm(false)} reload={reload} businessTypes={businessTypes} />}
+    </>
+  );
+}
+
+type WorkspaceTab = 'profile' | 'wifi' | 'menu' | 'promotions' | 'reviews' | 'loyalty' | 'team' | 'analytics' | 'public' | 'billing';
+
+type MenuCategory = { id: string; name: string; description: string | null; display_order: number; active: boolean };
+type MenuItem = { id: string; category_id: string; name: string; description: string | null; price: number; image_url: string | null; display_order: number; active: boolean };
+type Promotion = { id: string; name: string; description: string | null; image_url: string | null; normal_price: number | null; promo_price: number | null; start_at: string | null; end_at: string | null; active: boolean; display_order: number };
+
+function EstablishmentWorkspace({
+  establishment,
+  businessTypes,
+  onBack,
+  onReload,
+}: {
+  establishment: Establishment;
+  businessTypes: AIBusinessType[];
+  onBack: () => void;
+  onReload: () => Promise<void>;
+}) {
+  const [tab, setTab] = useState<WorkspaceTab>('profile');
+  const [saving, setSaving] = useState(false);
+  const [profile, setProfile] = useState<any>(establishment);
+  const [wifi, setWifi] = useState({ network_name: '', wifi_password: '', active: true });
+  const [showWifiPassword, setShowWifiPassword] = useState(false);
+  const [categories, setCategories] = useState<MenuCategory[]>([]);
+  const [items, setItems] = useState<MenuItem[]>([]);
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [rewards, setRewards] = useState<any[]>([]);
+  const [loyalty, setLoyalty] = useState<any>({ points_per_currency: 1, currency: 'MAD', enabled: true });
+  const [customersCount, setCustomersCount] = useState(0);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [team, setTeam] = useState<any[]>([]);
+  const [eventsCount, setEventsCount] = useState(0);
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [qrDataUrl, setQrDataUrl] = useState('');
+  const [subscription, setSubscription] = useState<BillingSubscription | null>(null);
+  const [workspacePlans, setWorkspacePlans] = useState<BillingPlan[]>([]);
+  const [billingPayments, setBillingPayments] = useState<any[]>([]);
+  const [billingInvoices, setBillingInvoices] = useState<any[]>([]);
+  const [billingError, setBillingError] = useState('');
+  const [creatingSubscription, setCreatingSubscription] = useState(false);
+
+  const [menuCategoryName, setMenuCategoryName] = useState('');
+  const [menuItem, setMenuItem] = useState({ name: '', description: '', price: '', category_id: '' });
+  const [promotion, setPromotion] = useState({ name: '', description: '', normal_price: '', promo_price: '' });
+  const [reward, setReward] = useState({ name: '', description: '', points_required: '' });
+
+  const businessType =
+    businessTypes.find((x) => x.id === (profile.ai_business_type_id ?? establishment.ai_business_type_id))?.name ??
+    profile.business_type ??
+    'Établissement';
+
+  const publicSlug = profile.slug || establishment.slug;
+  const publicLink = `${window.location.origin}/r/${publicSlug}`;
+
+  const loadTab = async () => {
+    if (tab === 'profile' || tab === 'public') {
+      const { data, error } = await supabase
+        .from('establishments')
+        .select('*')
+        .eq('id', establishment.id)
+        .maybeSingle();
+      if (!error && data) setProfile(data);
+    }
+
+    if (tab === 'wifi') {
+      const { data, error } = await supabase
+        .from('establishment_wifi')
+        .select('network_name,wifi_password,security_type,active')
+        .eq('establishment_id', establishment.id)
+        .maybeSingle();
+      if (!error && data) {
+        setWifi({
+          network_name: data.network_name ?? '',
+          wifi_password: data.wifi_password ?? '',
+          active: data.active ?? true,
+        });
+      }
+    }
+
+    if (tab === 'menu') {
+      const [{ data: c }, { data: i }] = await Promise.all([
+        supabase.from('menu_categories').select('*').eq('establishment_id', establishment.id).order('display_order'),
+        supabase.from('menu_items').select('*').eq('establishment_id', establishment.id).order('display_order'),
+      ]);
+      setCategories(c ?? []);
+      setItems(i ?? []);
+      if (!menuItem.category_id && c?.[0]) {
+        setMenuItem((v) => ({ ...v, category_id: c[0].id }));
+      }
+    }
+
+    if (tab === 'promotions') {
+      const { data } = await supabase
+        .from('promotions')
+        .select('*')
+        .eq('establishment_id', establishment.id)
+        .order('display_order');
+      setPromotions(data ?? []);
+    }
+
+    if (tab === 'loyalty') {
+      const [{ data: r }, { data: l }, { count }] = await Promise.all([
+        supabase.from('loyalty_rewards').select('*').eq('establishment_id', establishment.id).order('points_required'),
+        supabase.from('loyalty_settings').select('*').eq('establishment_id', establishment.id).maybeSingle(),
+        supabase.from('loyalty_customers').select('id', { count: 'exact', head: true }).eq('establishment_id', establishment.id),
+      ]);
+      setRewards(r ?? []);
+      setLoyalty(l ?? { points_per_currency: 1, currency: 'MAD', enabled: true });
+      setCustomersCount(count ?? 0);
+    }
+
+    if (tab === 'reviews') {
+      const { data } = await supabase
+        .from('reviews')
+        .select('*')
+        .eq('establishment_id', establishment.id)
+        .order('created_at', { ascending: false })
+        .limit(100);
+      setReviews(data ?? []);
+    }
+
+    if (tab === 'team') {
+      const { data: rows } = await supabase
+        .from('establishment_staff')
+        .select('id,establishment_id,user_id,role,active,created_at')
+        .eq('establishment_id', establishment.id)
+        .order('created_at');
+
+      const userIds = (rows ?? []).map((r: any) => r.user_id).filter(Boolean);
+      let profiles: any[] = [];
+      if (userIds.length) {
+        const { data } = await supabase.from('profiles').select('id,name,email,role').in('id', userIds);
+        profiles = data ?? [];
+      }
+      const byId = new Map(profiles.map((p) => [p.id, p]));
+      setTeam((rows ?? []).map((r: any) => ({ ...r, ...(byId.get(r.user_id) ?? {}) })));
+    }
+
+    if (tab === 'analytics') {
+      const [{ count: events }, { data: reviewRows }] = await Promise.all([
+        supabase.from('analytics_events').select('id', { count: 'exact', head: true }).eq('establishment_id', establishment.id),
+        supabase.from('reviews').select('rating').eq('establishment_id', establishment.id),
+      ]);
+      setEventsCount(events ?? 0);
+      setReviews(reviewRows ?? []);
+    }
+
+    if (tab === 'billing') {
+      setBillingError('');
+      const { data: plans } = await supabase.from('subscription_plans').select('id,name,price_mad,interval,active').eq('active', true).order('price_mad');
+      setWorkspacePlans((plans ?? []) as BillingPlan[]);
+      const { data: sub, error: subError } = await supabase
+        .from('subscriptions')
+        .select('id,establishment_id,plan_id,status,started_at,current_period_end,subscription_plans(id,name,price_mad,interval,active)')
+        .eq('establishment_id', establishment.id)
+        .maybeSingle();
+
+      if (subError) {
+        setBillingError(subError.message);
+        setSubscription(null);
+        setBillingPayments([]);
+        setBillingInvoices([]);
+      } else {
+        const normalized = sub
+          ? {
+              ...sub,
+              plan: Array.isArray((sub as any).subscription_plans)
+                ? (sub as any).subscription_plans[0] ?? null
+                : (sub as any).subscription_plans ?? null,
+            }
+          : null;
+        setSubscription(normalized as BillingSubscription | null);
+
+        const [{ data: payments }, { data: invoices }] = await Promise.all([
+          supabase.from('payments').select('id,amount_mad,status,paid_at,created_at,reference').eq('establishment_id', establishment.id).order('created_at', { ascending: false }).limit(20),
+          supabase.from('invoices').select('id,number,amount_mad,status,due_at,paid_at,created_at').eq('establishment_id', establishment.id).order('created_at', { ascending: false }).limit(20),
+        ]);
+        setBillingPayments(payments ?? []);
+        setBillingInvoices(invoices ?? []);
+      }
+    }
+
+    if (tab === 'public') {
+      const { data } = await supabase.from('templates').select('*').order('name');
+      setTemplates(data ?? []);
+      try {
+        const QRCode = await import('qrcode');
+        const url = await QRCode.toDataURL(publicLink, { width: 360, margin: 2 });
+        setQrDataUrl(url);
+      } catch (error) {
+        console.error('QR generation error:', error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    loadTab();
+  }, [tab, establishment.id, publicSlug]);
+
+  const saveProfile = async () => {
+    if (!profile.name?.trim() || !profile.slug?.trim()) {
+      alert("Le nom et le slug sont obligatoires.");
+      return;
+    }
+    setSaving(true);
+    const payload = {
+      name: profile.name.trim(),
+      slug: profile.slug.trim(),
+      ai_business_type_id: profile.ai_business_type_id || null,
+      business_type: profile.business_type || businessType || null,
+      address: profile.address || null,
+      city: profile.city || null,
+      phone: profile.phone || null,
+      email: profile.email || null,
+      website_url: profile.website_url || null,
+      description: profile.description || null,
+      instagram_url: profile.instagram_url || null,
+      facebook_url: profile.facebook_url || null,
+      tiktok_url: profile.tiktok_url || null,
+      whatsapp_number: profile.whatsapp_number || null,
+      page_template_id: profile.page_template_id || null,
+      menu_template_id: profile.menu_template_id || null,
+    };
+    const { error } = await supabase.from('establishments').update(payload).eq('id', establishment.id);
+    setSaving(false);
+    if (error) return alert(`Erreur profil : ${error.message}`);
+    setProfile((v: any) => ({ ...v, ...payload }));
+    await onReload();
+    alert('Établissement enregistré.');
+  };
+
+  const saveWifi = async () => {
+    if (!wifi.network_name.trim()) return alert('Le nom du réseau est obligatoire.');
+    setSaving(true);
+    const { error } = await supabase.from('establishment_wifi').upsert(
+      {
+        establishment_id: establishment.id,
+        network_name: wifi.network_name.trim(),
+        wifi_password: wifi.wifi_password || null,
+        security_type: 'WPA',
+        active: wifi.active,
+      },
+      { onConflict: 'establishment_id' },
+    );
+    setSaving(false);
+    if (error) return alert(`Erreur Wi-Fi : ${error.message}`);
+    alert('Wi-Fi enregistré.');
+  };
+
+  const addCategory = async () => {
+    if (!menuCategoryName.trim()) return alert('Nom de catégorie obligatoire.');
+    const { error } = await supabase.from('menu_categories').insert({
+      establishment_id: establishment.id,
+      name: menuCategoryName.trim(),
+      display_order: categories.length,
+      active: true,
+    });
+    if (error) return alert(error.message);
+    setMenuCategoryName('');
+    await loadTab();
+  };
+
+  const addMenuItem = async () => {
+    if (!menuItem.name.trim() || !menuItem.category_id) return alert('Nom et catégorie obligatoires.');
+    const { error } = await supabase.from('menu_items').insert({
+      establishment_id: establishment.id,
+      category_id: menuItem.category_id,
+      name: menuItem.name.trim(),
+      description: menuItem.description.trim() || null,
+      price: Number(menuItem.price) || 0,
+      display_order: items.filter((x) => x.category_id === menuItem.category_id).length,
+      active: true,
+    });
+    if (error) return alert(error.message);
+    const categoryId = menuItem.category_id;
+    setMenuItem({ name: '', description: '', price: '', category_id: categoryId });
+    await loadTab();
+  };
+
+  const addPromotion = async () => {
+    if (!promotion.name.trim()) return alert('Nom de promotion obligatoire.');
+    const normal = promotion.normal_price ? Number(promotion.normal_price) : null;
+    const promo = promotion.promo_price ? Number(promotion.promo_price) : null;
+    if (normal !== null && promo !== null && promo > normal) return alert('Le prix promo ne peut pas dépasser le prix normal.');
+    const { error } = await supabase.from('promotions').insert({
+      establishment_id: establishment.id,
+      name: promotion.name.trim(),
+      description: promotion.description.trim() || null,
+      normal_price: normal,
+      promo_price: promo,
+      active: true,
+      display_order: promotions.length,
+    });
+    if (error) return alert(error.message);
+    setPromotion({ name: '', description: '', normal_price: '', promo_price: '' });
+    await loadTab();
+  };
+
+  const addReward = async () => {
+    const points = Number(reward.points_required);
+    if (!reward.name.trim() || !Number.isFinite(points) || points <= 0) return alert('Nom et nombre de points obligatoires.');
+    const { error } = await supabase.from('loyalty_rewards').insert({
+      establishment_id: establishment.id,
+      name: reward.name.trim(),
+      description: reward.description.trim() || null,
+      points_required: points,
+      active: true,
+    });
+    if (error) return alert(error.message);
+    setReward({ name: '', description: '', points_required: '' });
+    await loadTab();
+  };
+
+  const toggle = async (table: string, id: string, active: boolean) => {
+    const { error } = await supabase.from(table).update({ active: !active }).eq('id', id);
+    if (error) return alert(error.message);
+    await loadTab();
+  };
+
+  const remove = async (table: string, id: string) => {
+    if (!confirm('Supprimer cet élément ?')) return;
+    const { error } = await supabase.from(table).delete().eq('id', id);
+    if (error) return alert(error.message);
+    await loadTab();
+  };
+
+  const createSubscription = async (planId?: string, status: 'trial' | 'active' = 'trial') => {
+    if (subscription) return alert('Cet établissement possède déjà un abonnement.');
+    setCreatingSubscription(true);
+
+    let selectedPlanId = planId;
+    if (!selectedPlanId) {
+      selectedPlanId = workspacePlans[0]?.id;
+    }
+
+    if (!selectedPlanId) {
+      const { data: defaultPlan, error: planError } = await supabase
+        .from('subscription_plans')
+        .select('id')
+        .eq('active', true)
+        .order('price_mad', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      if (planError || !defaultPlan) {
+        setCreatingSubscription(false);
+        return alert(`Impossible de trouver un plan actif : ${planError?.message ?? 'aucun plan disponible'}`);
+      }
+      selectedPlanId = defaultPlan.id;
+    }
+
+    const startedAt = new Date();
+    const periodEnd = new Date(startedAt);
+    if (status === 'trial') periodEnd.setDate(periodEnd.getDate() + 14);
+    else periodEnd.setMonth(periodEnd.getMonth() + 1);
+
+    const { error } = await supabase.from('subscriptions').insert({
+      establishment_id: establishment.id,
+      plan_id: selectedPlanId,
+      status,
+      started_at: startedAt.toISOString(),
+      current_period_end: periodEnd.toISOString(),
+    });
+
+    setCreatingSubscription(false);
+    if (error) return alert(`Erreur création abonnement : ${error.message}`);
+    await loadTab();
+    await onReload();
+  };
+
+  const changeSubscriptionStatus = async (status: string) => {
+    if (!subscription) return alert('Aucun abonnement pour cet établissement.');
+    const { error } = await supabase.from('subscriptions').update({ status }).eq('id', subscription.id);
+    if (error) return alert(`Erreur abonnement : ${error.message}`);
+    await loadTab();
+    await onReload();
+  };
+
+  const changeSubscriptionPlan = async (planId: string) => {
+    if (!subscription) return alert('Aucun abonnement pour cet établissement.');
+    const { error } = await supabase.from('subscriptions').update({ plan_id: planId }).eq('id', subscription.id);
+    if (error) return alert(`Erreur plan : ${error.message}`);
+    await loadTab();
+    await onReload();
+  };
+
+  const saveLoyalty = async () => {
+    const points = Number(loyalty.points_per_currency);
+    if (!Number.isFinite(points) || points <= 0) return alert('Le nombre de points doit être supérieur à 0.');
+    const { error } = await supabase.from('loyalty_settings').upsert(
+      {
+        establishment_id: establishment.id,
+        points_per_currency: points,
+        currency: loyalty.currency || 'MAD',
+        enabled: !!loyalty.enabled,
+      },
+      { onConflict: 'establishment_id' },
+    );
+    if (error) return alert(`Erreur fidélité : ${error.message}`);
+    alert('Paramètres fidélité enregistrés.');
+  };
+
+  const tabs: { id: WorkspaceTab; label: string }[] = [
+    { id: 'profile', label: 'Profil' },
+    { id: 'wifi', label: 'Wi-Fi' },
+    { id: 'menu', label: 'Menu' },
+    { id: 'promotions', label: 'Promotions' },
+    { id: 'reviews', label: 'Avis' },
+    { id: 'loyalty', label: 'Fidélité' },
+    { id: 'team', label: 'Équipe' },
+    { id: 'analytics', label: 'Analytics' },
+    { id: 'public', label: 'Lien public' },
+    { id: 'billing', label: 'Abonnement' },
+  ];
+
+  const field = (label: string, key: string, type = 'text') => (
+    <label className="block">
+      <span className="mb-1 block text-xs font-medium text-ink/50">{label}</span>
+      <input
+        type={type}
+        value={profile[key] ?? ''}
+        onChange={(e) => setProfile((v: any) => ({ ...v, [key]: e.target.value }))}
+        className="w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm outline-none focus:border-forest"
+      />
+    </label>
+  );
+
+  return (
+    <div>
+      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <button onClick={onBack} className="mb-3 text-xs font-semibold text-forest">← Retour aux établissements</button>
+          <h2 className="font-display text-3xl text-forest">{profile.name ?? establishment.name}</h2>
+          <p className="mt-1 text-sm text-ink/45">{businessType} · espace de gestion complet</p>
+        </div>
+        <a href={publicLink} target="_blank" rel="noreferrer" className="rounded-xl bg-forest px-4 py-3 text-center text-xs font-semibold text-white">Ouvrir la page publique ↗</a>
+      </div>
+
+      <div className="mb-6 flex gap-2 overflow-x-auto rounded-2xl border border-ink/5 bg-white p-2 shadow-sm">
+        {tabs.map((x) => (
+          <button key={x.id} onClick={() => setTab(x.id)} className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-xs font-semibold ${tab === x.id ? 'bg-forest text-white' : 'text-ink/55 hover:bg-[#f7f7f3]'}`}>
+            {x.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'profile' && (
+        <div className="grid gap-4 md:grid-cols-2">
+          {field('Nom', 'name')}
+          {field('Slug public', 'slug')}
+          {field('Adresse', 'address')}
+          {field('Ville', 'city')}
+          {field('Téléphone', 'phone')}
+          {field('Email', 'email', 'email')}
+          {field('Site web', 'website_url')}
+          {field('WhatsApp', 'whatsapp_number')}
+          {field('Instagram', 'instagram_url')}
+          {field('Facebook', 'facebook_url')}
+          {field('TikTok', 'tiktok_url')}
+          <label className="block">
+            <span className="mb-1 block text-xs font-medium text-ink/50">Type</span>
+            <select value={profile.ai_business_type_id ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, ai_business_type_id: e.target.value || null }))} className="w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm">
+              <option value="">Type non défini</option>
+              {businessTypes.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
+            </select>
+          </label>
+          <label className="block md:col-span-2">
+            <span className="mb-1 block text-xs font-medium text-ink/50">Description</span>
+            <textarea value={profile.description ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, description: e.target.value }))} rows={4} className="w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm" />
+          </label>
+          <div className="md:col-span-2">
+            <button disabled={saving} onClick={saveProfile} className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-50">{saving ? 'Enregistrement...' : 'Enregistrer le profil'}</button>
+          </div>
+        </div>
+      )}
+
+      {tab === 'wifi' && (
+        <div className="max-w-xl rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
+          <h3 className="text-lg font-semibold">Wi-Fi client</h3>
+          <p className="mt-1 mb-5 text-xs text-ink/45">Le mot de passe est stocké dans la table Wi-Fi dédiée, séparée du profil public.</p>
+          <div className="space-y-4">
+            <label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">Nom du réseau</span><input value={wifi.network_name} onChange={(e) => setWifi({ ...wifi, network_name: e.target.value })} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></label>
+            <label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">Mot de passe</span><div className="flex gap-2"><input type={showWifiPassword ? 'text' : 'password'} value={wifi.wifi_password} onChange={(e) => setWifi({ ...wifi, wifi_password: e.target.value })} className="min-w-0 flex-1 rounded-xl border border-ink/10 px-3 py-2.5 text-sm" autoComplete="new-password" /><button type="button" onClick={() => setShowWifiPassword((v) => !v)} className="rounded-xl border border-ink/10 px-3 text-xs font-semibold text-ink/55">{showWifiPassword ? 'Masquer' : 'Afficher'}</button></div></label>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={wifi.active} onChange={(e) => setWifi({ ...wifi, active: e.target.checked })} /> Module actif</label>
+            <button disabled={saving} onClick={saveWifi} className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-50">Enregistrer le Wi-Fi</button>
+          </div>
+        </div>
+      )}
+
+      {tab === 'menu' && (
+        <div className="space-y-5">
+          <div className="grid gap-5 md:grid-cols-2">
+            <div className="rounded-2xl border border-ink/5 bg-white p-5">
+              <h3 className="font-semibold">Catégories</h3>
+              <div className="mt-4 flex gap-2"><input value={menuCategoryName} onChange={(e) => setMenuCategoryName(e.target.value)} placeholder="Ex. Entrées" className="min-w-0 flex-1 rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><button onClick={addCategory} className="rounded-xl bg-forest px-4 text-xs font-semibold text-white">Ajouter</button></div>
+              <div className="mt-4 space-y-2">
+                {categories.map((c) => (
+                  <div key={c.id} className="flex items-center justify-between gap-3 rounded-xl bg-[#f7f7f3] px-3 py-2.5 text-sm"><span>{c.name}</span><div className="flex gap-2"><button onClick={() => toggle('menu_categories', c.id, c.active)} className="text-xs text-ink/45">{c.active ? 'Désactiver' : 'Activer'}</button><button onClick={() => remove('menu_categories', c.id)} className="text-xs text-red-500">Supprimer</button></div></div>
+                ))}
+              </div>
+            </div>
+            <div className="rounded-2xl border border-ink/5 bg-white p-5">
+              <h3 className="font-semibold">Nouveau produit</h3>
+              <div className="mt-4 space-y-3"><input value={menuItem.name} onChange={(e) => setMenuItem({ ...menuItem, name: e.target.value })} placeholder="Nom" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><select value={menuItem.category_id} onChange={(e) => setMenuItem({ ...menuItem, category_id: e.target.value })} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"><option value="">Catégorie</option>{categories.filter((c) => c.active).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select><input value={menuItem.price} onChange={(e) => setMenuItem({ ...menuItem, price: e.target.value })} placeholder="Prix MAD" type="number" min="0" step="0.01" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><textarea value={menuItem.description} onChange={(e) => setMenuItem({ ...menuItem, description: e.target.value })} placeholder="Description" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><button onClick={addMenuItem} className="rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Ajouter le produit</button></div>
+            </div>
+          </div>
+          <div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Produits</h3><div className="mt-4 grid gap-2 md:grid-cols-2">{items.map((i) => <div key={i.id} className="rounded-xl bg-[#f7f7f3] p-3"><div className="flex justify-between gap-3"><strong className="text-sm">{i.name}</strong><span className="text-sm font-semibold">{Number(i.price).toFixed(2)} MAD</span></div><p className="mt-1 text-xs text-ink/45">{i.description || 'Sans description'}</p><div className="mt-2 flex gap-3"><button onClick={() => toggle('menu_items', i.id, i.active)} className="text-[11px] text-ink/45">{i.active ? 'Désactiver' : 'Activer'}</button><button onClick={() => remove('menu_items', i.id)} className="text-[11px] text-red-500">Supprimer</button></div></div>)}</div></div>
+        </div>
+      )}
+
+      {tab === 'promotions' && (
+        <div className="space-y-5">
+          <div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Créer une promotion</h3><div className="mt-4 grid gap-3 md:grid-cols-4"><input value={promotion.name} onChange={(e) => setPromotion({ ...promotion, name: e.target.value })} placeholder="Nom" className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><input value={promotion.description} onChange={(e) => setPromotion({ ...promotion, description: e.target.value })} placeholder="Description" className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><input value={promotion.normal_price} onChange={(e) => setPromotion({ ...promotion, normal_price: e.target.value })} placeholder="Prix normal" type="number" min="0" step="0.01" className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><input value={promotion.promo_price} onChange={(e) => setPromotion({ ...promotion, promo_price: e.target.value })} placeholder="Prix promo" type="number" min="0" step="0.01" className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></div><button onClick={addPromotion} className="mt-3 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Ajouter</button></div>
+          <div className="grid gap-3 md:grid-cols-2">{promotions.map((p) => <div key={p.id} className="rounded-2xl border border-ink/5 bg-white p-5"><div className="flex justify-between gap-3"><strong>{p.name}</strong><span className="text-xs text-ink/40">{p.active ? 'Actif' : 'Inactif'}</span></div><p className="mt-2 text-sm text-ink/55">{p.description || 'Sans description'}</p><p className="mt-3 text-sm font-semibold">{p.promo_price ?? '—'} MAD <span className="ml-2 text-xs text-ink/35 line-through">{p.normal_price ?? ''}</span></p><div className="mt-3 flex gap-3"><button onClick={() => toggle('promotions', p.id, p.active)} className="text-xs text-ink/45">{p.active ? 'Désactiver' : 'Activer'}</button><button onClick={() => remove('promotions', p.id)} className="text-xs text-red-500">Supprimer</button></div></div>)}</div>
+        </div>
+      )}
+
+      {tab === 'reviews' && (
+        <div className="space-y-4"><div className="grid gap-3 md:grid-cols-3"><StatCard label="Avis" value={reviews.length} /><StatCard label="Note moyenne" value={reviews.length ? (reviews.reduce((a, r) => a + Number(r.rating || 0), 0) / reviews.length).toFixed(1) : '—'} /><StatCard label="Dernier avis" value={reviews[0]?.created_at ? new Date(reviews[0].created_at).toLocaleDateString('fr-FR') : '—'} /></div><div className="rounded-2xl border border-ink/5 bg-white p-5">{reviews.length === 0 ? <p className="text-sm text-ink/45">Aucun avis.</p> : <div className="space-y-3">{reviews.map((r) => <div key={r.id} className="rounded-xl bg-[#f7f7f3] p-4"><div className="flex justify-between"><strong>{r.rating}/5</strong><span className="text-xs text-ink/35">{new Date(r.created_at).toLocaleDateString('fr-FR')}</span></div><p className="mt-2 text-sm text-ink/60">{r.feedback || r.comment || 'Aucun commentaire'}</p>{r.status ? <span className="mt-2 inline-block text-xs text-ink/40">Statut : {r.status}</span> : null}</div>)}</div>}</div></div>
+      )}
+
+      {tab === 'loyalty' && (
+        <div className="space-y-5"><div className="grid gap-3 md:grid-cols-3"><StatCard label="Clients fidélité" value={customersCount} /><StatCard label="Récompenses" value={rewards.length} /><StatCard label="Programme" value={loyalty.enabled ? 'Actif' : 'Inactif'} /></div><div className="grid gap-5 md:grid-cols-2"><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Paramètres</h3><div className="mt-4 flex gap-3"><input type="number" min="0.01" step="0.01" value={loyalty.points_per_currency ?? 1} onChange={(e) => setLoyalty({ ...loyalty, points_per_currency: Number(e.target.value) })} className="w-32 rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><select value={loyalty.currency ?? 'MAD'} onChange={(e) => setLoyalty({ ...loyalty, currency: e.target.value })} className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm"><option>MAD</option><option>EUR</option></select></div><label className="mt-3 flex items-center gap-2 text-sm"><input type="checkbox" checked={loyalty.enabled ?? true} onChange={(e) => setLoyalty({ ...loyalty, enabled: e.target.checked })} /> Programme actif</label><button onClick={saveLoyalty} className="mt-4 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Enregistrer</button></div><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Nouvelle récompense</h3><div className="mt-4 space-y-3"><input value={reward.name} onChange={(e) => setReward({ ...reward, name: e.target.value })} placeholder="Nom" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><input value={reward.points_required} onChange={(e) => setReward({ ...reward, points_required: e.target.value })} placeholder="Points requis" type="number" min="1" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><textarea value={reward.description} onChange={(e) => setReward({ ...reward, description: e.target.value })} placeholder="Description" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><button onClick={addReward} className="rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Ajouter</button></div></div></div><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Récompenses</h3><div className="mt-4 grid gap-2 md:grid-cols-2">{rewards.map((r) => <div key={r.id} className="flex items-center justify-between rounded-xl bg-[#f7f7f3] p-3"><span><strong className="text-sm">{r.name}</strong><span className="ml-2 text-xs text-ink/40">{r.points_required} pts</span></span><div className="flex gap-3"><button onClick={() => toggle('loyalty_rewards', r.id, r.active)} className="text-xs text-ink/45">{r.active ? 'Désactiver' : 'Activer'}</button><button onClick={() => remove('loyalty_rewards', r.id)} className="text-xs text-red-500">Supprimer</button></div></div>)}</div></div></div>
+      )}
+
+      {tab === 'team' && (
+        <div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Équipe de l’établissement</h3><p className="mt-1 text-xs text-ink/45">Les comptes sont gérés depuis les sections Responsables / Employés de l’Admin.</p><div className="mt-5 space-y-2">{team.length === 0 ? <p className="text-sm text-ink/45">Aucun membre affecté.</p> : team.map((m) => <div key={m.id} className="flex items-center justify-between rounded-xl bg-[#f7f7f3] p-3 text-sm"><span><strong>{m.name || 'Utilisateur'}</strong><span className="ml-2 text-xs text-ink/40">{m.email || ''}</span></span><span className="text-xs text-ink/45">{m.role} · {m.active ? 'Actif' : 'Inactif'}</span></div>)}</div></div>
+      )}
+
+      {tab === 'analytics' && (
+        <div className="space-y-5"><div className="grid gap-4 md:grid-cols-3"><StatCard label="Événements enregistrés" value={eventsCount} /><StatCard label="Avis" value={reviews.length} /><StatCard label="Note moyenne" value={reviews.length ? (reviews.reduce((a, r) => a + Number(r.rating || 0), 0) / reviews.length).toFixed(1) : '—'} /></div><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Établissement</h3><p className="mt-2 text-sm text-ink/50">Les événements et avis sont filtrés sur cet établissement uniquement.</p></div></div>
+      )}
+
+      {tab === 'billing' && (
+        <div className="space-y-5">
+          {billingError ? (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">
+              <strong>Facturation non disponible.</strong>
+              <p className="mt-1">{billingError}</p>
+            </div>
+          ) : null}
+
+          <div className="grid gap-4 md:grid-cols-4">
+            <StatCard icon={CreditCard} label="Plan" value={subscription?.plan?.name ?? 'Aucun'} />
+            <StatCard label="MRR" value={subscription ? `${Number(subscription.plan?.price_mad ?? 0).toLocaleString('fr-FR')} MAD` : '—'} />
+            <StatCard label="Statut" value={subscription?.status ?? '—'} />
+            <StatCard label="Échéance" value={subscription?.current_period_end ? new Date(subscription.current_period_end).toLocaleDateString('fr-FR') : '—'} />
+          </div>
+
+          <div className="grid gap-5 lg:grid-cols-2">
+            <div className="rounded-2xl border border-ink/5 bg-white p-5 shadow-sm">
+              <h3 className="font-semibold">Gestion de l’abonnement</h3>
+              {!subscription ? (
+                <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                  <p className="text-sm font-semibold text-amber-900">Aucun abonnement enregistré</p>
+                  <p className="mt-1 text-xs leading-5 text-amber-800/80">Créez l’abonnement directement depuis cet espace. Un essai Basic de 14 jours est proposé par défaut.</p>
+                  <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                    <select id="new-subscription-plan" defaultValue={workspacePlans[0]?.id ?? ''} className="flex-1 rounded-xl border border-amber-200 bg-white px-3 py-2.5 text-sm">
+                      {workspacePlans.map((p) => <option key={p.id} value={p.id}>{p.name} · {Number(p.price_mad).toLocaleString('fr-FR')} MAD</option>)}
+                    </select>
+                    <button
+                      disabled={creatingSubscription || !workspacePlans.length}
+                      onClick={() => {
+                        const value = (document.getElementById('new-subscription-plan') as HTMLSelectElement | null)?.value;
+                        createSubscription(value || undefined, 'trial');
+                      }}
+                      className="rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-40"
+                    >
+                      {creatingSubscription ? 'Création…' : 'Créer l’abonnement (essai 14 j.)'}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-4 space-y-4">
+                  <label className="block text-xs text-ink/50">Plan
+                    <select value={subscription.plan_id} onChange={(e) => changeSubscriptionPlan(e.target.value)} className="mt-1 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm">
+                      {workspacePlans.map((p) => <option key={p.id} value={p.id}>{p.name} · {Number(p.price_mad).toLocaleString('fr-FR')} MAD</option>)}
+                    </select>
+                  </label>
+                  <div>
+                    <p className="mb-2 text-xs text-ink/50">Statut</p>
+                    <div className="flex flex-wrap gap-2">
+                      {['active','trial','past_due','unpaid','canceled'].map((value) => (
+                        <button key={value} onClick={() => changeSubscriptionStatus(value)} className={`rounded-lg border px-3 py-2 text-[11px] font-semibold ${subscription.status === value ? 'border-forest bg-forest text-white' : 'border-ink/10 text-ink/50'}`}>{value}</button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-2xl border border-ink/5 bg-white p-5 shadow-sm">
+              <h3 className="font-semibold">Historique des paiements</h3>
+              <div className="mt-4 space-y-2">
+                {billingPayments.length === 0 ? <p className="text-sm text-ink/45">Aucun paiement enregistré.</p> : billingPayments.map((payment) => (
+                  <div key={payment.id} className="flex items-center justify-between rounded-xl bg-[#f7f7f3] px-3 py-3 text-sm">
+                    <div><strong>{Number(payment.amount_mad ?? 0).toLocaleString('fr-FR')} MAD</strong><p className="text-[11px] text-ink/35">{payment.paid_at ? new Date(payment.paid_at).toLocaleDateString('fr-FR') : '—'} · {payment.reference ?? 'Sans référence'}</p></div>
+                    <span className="text-xs font-semibold">{payment.status}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-ink/5 bg-white p-5 shadow-sm">
+            <h3 className="font-semibold">Factures</h3>
+            <div className="mt-4 overflow-x-auto">
+              {billingInvoices.length === 0 ? <p className="text-sm text-ink/45">Aucune facture enregistrée.</p> : (
+                <table className="w-full min-w-[620px] text-left text-sm">
+                  <thead><tr className="border-b border-ink/5 text-[10px] uppercase tracking-wider text-ink/35"><th className="pb-3">Facture</th><th className="pb-3">Montant</th><th className="pb-3">Statut</th><th className="pb-3">Échéance</th></tr></thead>
+                  <tbody>{billingInvoices.map((invoice) => <tr key={invoice.id} className="border-b border-ink/5 last:border-0"><td className="py-3">{invoice.number ?? invoice.id.slice(0,8)}</td><td className="py-3">{Number(invoice.amount_mad ?? 0).toLocaleString('fr-FR')} MAD</td><td className="py-3">{invoice.status}</td><td className="py-3">{invoice.due_at ? new Date(invoice.due_at).toLocaleDateString('fr-FR') : '—'}</td></tr>)}</tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {tab === 'public' && (
+        <div className="space-y-5"><div className="grid gap-5 lg:grid-cols-[1fr_280px]"><div className="rounded-2xl border border-ink/5 bg-white p-6"><p className="text-xs font-semibold uppercase tracking-wider text-gold">Lien unique QR / NFC</p><h3 className="mt-2 break-all text-xl font-semibold">{publicLink}</h3><p className="mt-2 text-sm text-ink/50">Ce lien est l’entrée unique de l’expérience client : Wi-Fi, menu, promotions, fidélité, avis et modules adaptés au type d’établissement.</p><div className="mt-5 flex flex-wrap gap-2"><button onClick={() => navigator.clipboard.writeText(publicLink).then(() => alert('Lien copié.'))} className="rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Copier le lien</button><a href={publicLink} target="_blank" rel="noreferrer" className="rounded-xl border border-ink/10 px-4 py-2.5 text-xs font-semibold">Tester la page</a>{qrDataUrl ? <a href={qrDataUrl} download={`${publicSlug}-qr.png`} className="rounded-xl border border-ink/10 px-4 py-2.5 text-xs font-semibold">Télécharger le QR</a> : null}</div></div>{qrDataUrl ? <div className="rounded-2xl border border-ink/5 bg-white p-5 text-center"><img src={qrDataUrl} alt="QR code public" className="mx-auto h-56 w-56" /><p className="mt-3 text-xs text-ink/40">QR → lien public</p></div> : null}</div><div className="rounded-2xl border border-ink/5 bg-white p-6"><h3 className="font-semibold">Modules prévus pour ce type</h3><div className="mt-4 flex flex-wrap gap-2">{['Wi-Fi','Menu','Services','Restaurant','Activités','Voyages','Offres','Promotions','Réservation','Contact','Avis','Fidélité'].map((name) => <span key={name} className="rounded-full bg-[#f7f7f3] px-3 py-1.5 text-xs text-ink/60">{name}</span>)}</div><p className="mt-3 text-xs text-ink/40">L’Admin conserve l’accès à tous les modules ; la page client pourra ensuite appliquer le mapping automatique du type.</p></div><div className="rounded-2xl border border-ink/5 bg-white p-6"><h3 className="font-semibold">Templates</h3><div className="mt-4 grid gap-3 md:grid-cols-2"><label className="text-xs text-ink/50">Template page<select value={profile.page_template_id ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, page_template_id: e.target.value || null }))} className="mt-1 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"><option value="">Automatique / défaut</option>{templates.filter((t) => t.kind === 'page' && t.active).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label><label className="text-xs text-ink/50">Template menu<select value={profile.menu_template_id ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, menu_template_id: e.target.value || null }))} className="mt-1 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"><option value="">Automatique / défaut</option>{templates.filter((t) => t.kind === 'menu' && t.active).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label></div><button onClick={saveProfile} className="mt-4 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Enregistrer les templates</button></div></div>
+      )}
+    </div>
+  );
+}
+
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon?: typeof Building2;
+  label: string;
+  value: string | number;
+}) {
+  return (
+    <div className="rounded-2xl border border-ink/5 bg-white p-5 shadow-sm">
+      <div className="flex items-center justify-between">
+        {Icon ? (
+          <div className="grid h-10 w-10 place-items-center rounded-xl bg-forest/10 text-forest">
+            <Icon size={19} />
+          </div>
+        ) : null}
+        <span className="text-2xl font-semibold text-forest">{value}</span>
+      </div>
+      <p className="mt-3 text-xs font-medium text-ink/50">{label}</p>
+    </div>
+  );
+}
+
+function MiniMetric({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="rounded-xl bg-[#f7f7f3] p-3">
+      <p className="text-[10px] uppercase tracking-wider text-ink/35">{label}</p>
+      <p className="mt-1 text-lg font-semibold text-forest">{value}</p>
+    </div>
+  );
+}
+
+function AlertLine({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="flex items-center justify-between rounded-xl bg-white/70 px-3 py-2.5">
+      <span className="text-ink/60">{label}</span>
+      <span className={`font-semibold ${value > 0 ? 'text-red-600' : 'text-forest'}`}>{value}</span>
+    </div>
+  );
+}
+
+function BillingSection({
+  establishments,
+  billing,
+  reload,
+}: {
+  establishments: Establishment[];
+  billing: BillingSnapshot;
+  reload: () => Promise<void>;
+}) {
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState('all');
+  const [plan, setPlan] = useState('all');
+
+  const establishmentMap = useMemo(
+    () => new Map(establishments.map((e) => [e.id, e])),
+    [establishments]
+  );
+
+  const filtered = billing.subscriptions.filter((sub) => {
+    const e = establishmentMap.get(sub.establishment_id);
+    const nameMatch = !search.trim() || e?.name.toLowerCase().includes(search.trim().toLowerCase());
+    const statusMatch = status === 'all' || sub.status === status;
+    const planMatch = plan === 'all' || sub.plan_id === plan;
+    return nameMatch && statusMatch && planMatch;
+  });
+
+  const formatDate = (value: string | null) =>
+    value ? new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(value)) : '—';
+
+  return (
+    <div>
+      <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">Business</p>
+          <h2 className="font-display text-3xl text-forest md:text-4xl">Abonnements & facturation</h2>
+          <p className="mt-2 text-sm text-ink/50">Pilotez les plans, abonnements, paiements et échéances de vos commerces clients.</p>
+        </div>
+        <button onClick={reload} className="rounded-xl border border-ink/10 bg-white px-4 py-3 text-xs font-semibold">Actualiser</button>
+      </div>
+
+      {!billing.available ? (
+        <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">
+          <strong>Module facturation non configuré.</strong> Les tables d’abonnement doivent être présentes dans Supabase pour activer le suivi réel.
+        </div>
+      ) : null}
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard icon={WalletCards} label="MRR" value={billing.available ? `${billing.mrr.toLocaleString('fr-FR')} MAD` : '—'} />
+        <StatCard icon={CreditCard} label="Plans actifs" value={billing.available ? billing.plans.filter((p) => p.active).length : '—'} />
+        <StatCard icon={AlertTriangle} label="Paiements échoués" value={billing.available ? billing.failedPayments : '—'} />
+        <StatCard icon={CalendarDays} label="Renouvellements < 30 j." value={billing.available ? billing.upcomingRenewals : '—'} />
+      </div>
+
+      <div className="mt-6 rounded-2xl border border-ink/5 bg-white p-5 shadow-sm">
+        <div className="grid gap-3 md:grid-cols-[1.4fr_1fr_1fr]">
+          <div className="relative">
+            <Search size={16} className="absolute left-3 top-3 text-ink/30" />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher un commerce..." className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] py-2.5 pl-9 pr-3 text-sm outline-none focus:border-forest" />
+          </div>
+          <select value={status} onChange={(e) => setStatus(e.target.value)} className="rounded-xl border border-ink/10 bg-[#f7f7f3] px-3 py-2.5 text-sm">
+            <option value="all">Tous les statuts</option>
+            <option value="active">Actif</option>
+            <option value="trial">Essai</option>
+            <option value="past_due">En retard</option>
+            <option value="unpaid">Impayé</option>
+            <option value="canceled">Annulé</option>
+          </select>
+          <select value={plan} onChange={(e) => setPlan(e.target.value)} className="rounded-xl border border-ink/10 bg-[#f7f7f3] px-3 py-2.5 text-sm">
+            <option value="all">Tous les plans</option>
+            {billing.plans.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
+        </div>
+      </div>
+
+      <div className="mt-6 rounded-2xl border border-ink/5 bg-white shadow-sm overflow-hidden">
+        <div className="grid grid-cols-[1.5fr_1fr_.8fr_1fr_1fr] gap-4 border-b border-ink/5 px-5 py-4 text-[10px] font-semibold uppercase tracking-wider text-ink/35">
+          <span>Commerce</span><span>Plan</span><span>Statut</span><span>MRR</span><span>Échéance</span>
+        </div>
+        {filtered.length === 0 ? (
+          <div className="p-10 text-center text-sm text-ink/40">Aucun abonnement correspondant.</div>
+        ) : filtered.map((sub) => {
+          const e = establishmentMap.get(sub.establishment_id);
+          return (
+            <div key={sub.id} className="grid grid-cols-[1.5fr_1fr_.8fr_1fr_1fr] gap-4 border-b border-ink/5 px-5 py-4 text-sm last:border-0">
+              <div><p className="font-semibold">{e?.name ?? 'Établissement supprimé'}</p><p className="text-xs text-ink/35">{e?.city ?? 'Ville non définie'}</p></div>
+              <span>{sub.plan?.name ?? '—'}</span>
+              <span className={`w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold ${sub.status === 'active' ? 'bg-green-100 text-green-700' : sub.status === 'trial' ? 'bg-blue-100 text-blue-700' : sub.status === 'past_due' ? 'bg-amber-100 text-amber-700' : sub.status === 'unpaid' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-600'}`}>{sub.status}</span>
+              <span className="font-semibold">{Number(sub.plan?.price_mad ?? 0).toLocaleString('fr-FR')} MAD</span>
+              <span className="text-ink/50">{formatDate(sub.current_period_end)}</span>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="mt-8">
+        <h3 className="mb-4 text-sm font-semibold">Plans disponibles</h3>
+        <div className="grid gap-4 md:grid-cols-3">
+          {billing.plans.map((p) => (
+            <div key={p.id} className="rounded-2xl border border-ink/5 bg-white p-5 shadow-sm">
+              <div className="flex items-center justify-between"><strong className="text-forest">{p.name}</strong><span className="text-lg font-semibold">{Number(p.price_mad).toLocaleString('fr-FR')} MAD</span></div>
+              <p className="mt-2 text-xs text-ink/40">{p.interval === 'year' ? 'Annuel' : 'Mensuel'} · {p.active ? 'Actif' : 'Inactif'}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SystemSection({
+  billing,
+  globalStats,
+  establishments,
+}: {
+  billing: BillingSnapshot;
+  globalStats: GlobalStats;
+  establishments: Establishment[];
+}) {
+  const [dbStatus, setDbStatus] = useState<'checking' | 'ok' | 'error'>('checking');
+
+  useEffect(() => {
+    let mounted = true;
+    supabase.from('establishments').select('id', { count: 'exact', head: true }).then(({ error }) => {
+      if (mounted) setDbStatus(error ? 'error' : 'ok');
+    });
+    return () => { mounted = false; };
+  }, []);
+
+  const services = [
+    { label: 'Base de données Supabase', status: dbStatus === 'ok' ? 'Opérationnel' : dbStatus === 'error' ? 'Erreur' : 'Vérification...', icon: ShieldCheck },
+    { label: 'Pages publiques', status: establishments.length > 0 ? 'Configurées' : 'Aucun établissement', icon: ExternalLink },
+    { label: 'Analytics', status: `${globalStats.analyticsEvents.toLocaleString('fr-FR')} événements`, icon: Activity },
+    { label: 'Facturation', status: billing.available ? 'Connectée' : 'À configurer', icon: CreditCard },
+  ];
+
+  return (
+    <div>
+      <div className="mb-8">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">Plateforme</p>
+        <h2 className="font-display text-3xl text-forest md:text-4xl">Supervision technique</h2>
+        <p className="mt-2 max-w-2xl text-sm text-ink/50">Un point de contrôle sur les services réellement accessibles depuis l’Admin.</p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        {services.map(({ label, status, icon: Icon }) => (
+          <div key={label} className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="grid h-11 w-11 place-items-center rounded-xl bg-forest/10 text-forest"><Icon size={20} /></div>
+              <span className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${status === 'Opérationnel' || status === 'Connectée' ? 'bg-green-100 text-green-700' : status === 'Erreur' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>{status}</span>
+            </div>
+            <h3 className="mt-5 text-base font-semibold">{label}</h3>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-6 rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
+        <div className="flex items-center gap-3"><Filter size={17} className="text-forest" /><h3 className="font-semibold">Contrôles disponibles</h3></div>
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+          <MiniMetric label="Établissements" value={establishments.length} />
+          <MiniMetric label="Avis" value={globalStats.reviews} />
+          <MiniMetric label="Événements" value={globalStats.analyticsEvents} />
+        </div>
+        <p className="mt-4 text-xs leading-5 text-ink/40">Les mesures d’uptime et de temps de chargement nécessitent un monitoring externe. Cette vue ne prétend pas mesurer une disponibilité qu’elle ne collecte pas encore.</p>
       </div>
     </div>
   );
@@ -816,13 +1795,15 @@ function CreateEstablishmentForm({
 
     setSaving(true);
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('establishments')
       .insert({
         name: name.trim(),
         slug: slug.trim(),
         ai_business_type_id: aiBusinessTypeId,
-      });
+      })
+      .select('id')
+      .single();
 
     setSaving(false);
 
@@ -830,6 +1811,31 @@ function CreateEstablishmentForm({
       console.error(error);
       alert(`Erreur : ${error.message}`);
       return;
+    }
+
+    // Création automatique d'un premier abonnement d'essai.
+    // Si la facturation n'est pas encore installée dans Supabase, l'établissement reste créé.
+    const { data: defaultPlan } = await supabase
+      .from('subscription_plans')
+      .select('id')
+      .eq('active', true)
+      .order('price_mad', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (defaultPlan && (data as any)?.id) {
+      const establishmentId = (data as any)[0].id;
+      const startedAt = new Date();
+      const trialEnd = new Date(startedAt);
+      trialEnd.setDate(trialEnd.getDate() + 14);
+      const { error: subscriptionError } = await supabase.from('subscriptions').insert({
+        establishment_id: establishmentId,
+        plan_id: defaultPlan.id,
+        status: 'trial',
+        started_at: startedAt.toISOString(),
+        current_period_end: trialEnd.toISOString(),
+      });
+      if (subscriptionError) console.warn('Abonnement automatique non créé:', subscriptionError.message);
     }
 
     alert('Établissement créé avec succès.');
@@ -2229,22 +3235,39 @@ function ReviewsSection({
   const [loading, setLoading] = useState(true);
   const [selectedEstablishment, setSelectedEstablishment] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
+  const [search, setSearch] = useState('');
+  const [showAnalysis, setShowAnalysis] = useState(false);
+  const [reviewsPage, setReviewsPage] = useState(1);
+  const [reviewsTotal, setReviewsTotal] = useState(0);
+  const reviewsPageSize = 50;
 
   const loadReviews = async () => {
     setLoading(true);
 
-    const { data, error } = await supabase
+    let query = supabase
       .from('reviews')
       .select(
-        'id, establishment_id, rating, type, comment, name, phone, email, status, created_at'
+        'id, establishment_id, rating, type, comment, name, phone, email, status, created_at',
+        { count: 'exact' }
       )
       .order('created_at', { ascending: false });
+
+    if (selectedEstablishment !== 'all') query = query.eq('establishment_id', selectedEstablishment);
+    if (selectedStatus !== 'all') query = query.eq('status', selectedStatus);
+    if (search.trim()) {
+      const term = search.trim().replace(/,/g, ' ');
+      query = query.or(`name.ilike.%${term}%,email.ilike.%${term}%,phone.ilike.%${term}%,comment.ilike.%${term}%`);
+    }
+
+    const from = (reviewsPage - 1) * reviewsPageSize;
+    const { data, error, count } = await query.range(from, from + reviewsPageSize - 1);
 
     if (error) {
       console.error('Erreur avis:', error);
       setReviews([]);
     } else {
       setReviews(data ?? []);
+      setReviewsTotal(count ?? 0);
     }
 
     setLoading(false);
@@ -2252,7 +3275,11 @@ function ReviewsSection({
 
   useEffect(() => {
     loadReviews();
-  }, []);
+  }, [selectedEstablishment, selectedStatus, search, reviewsPage]);
+
+  useEffect(() => {
+    setReviewsPage(1);
+  }, [selectedEstablishment, selectedStatus, search]);
 
   const establishmentMap = useMemo(
     () =>
@@ -2273,10 +3300,12 @@ function ReviewsSection({
 
       const statusMatch =
         selectedStatus === 'all' || review.status === selectedStatus;
+      const haystack = `${review.name ?? ''} ${review.comment ?? ''} ${review.email ?? ''} ${review.phone ?? ''}`.toLowerCase();
+      const searchMatch = !search.trim() || haystack.includes(search.trim().toLowerCase());
 
-      return establishmentMatch && statusMatch;
+      return establishmentMatch && statusMatch && searchMatch;
     });
-  }, [reviews, selectedEstablishment, selectedStatus]);
+  }, [reviews, selectedEstablishment, selectedStatus, search]);
 
   const newCount = reviews.filter(
     (review) => review.status === 'Nouveau'
@@ -2302,6 +3331,28 @@ function ReviewsSection({
       hour: '2-digit',
       minute: '2-digit',
     }).format(new Date(date));
+
+  const updateStatus = async (id: string, status: AdminReview['status']) => {
+    const { error } = await supabase.from('reviews').update({ status }).eq('id', id);
+    if (error) return alert(`Impossible de mettre à jour l'avis : ${error.message}`);
+    setReviews((current) => current.map((review) => review.id === id ? { ...review, status } : review));
+  };
+
+  const exportCsv = () => {
+    const rows = filteredReviews.map((review) => [
+      establishmentMap.get(review.establishment_id) ?? '', review.rating, review.type, review.status, review.name ?? '', review.phone ?? '', review.email ?? '', review.comment ?? '', review.created_at,
+    ]);
+    const csv = [['Établissement','Note','Type','Statut','Client','Téléphone','Email','Commentaire','Date'], ...rows]
+      .map((row) => row.map((cell) => `\"${String(cell).replace(/\"/g, '\\\"')}\"`).join(','))
+      .join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `tapmarrakech-avis-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div>
@@ -2395,6 +3446,14 @@ function ReviewsSection({
           </div>
         </div>
       </div>
+
+      <div className="mb-6 flex flex-col gap-3 md:flex-row">
+        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher un client, commentaire, email..." className="min-w-0 flex-1 rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm outline-none focus:border-forest" />
+        <button onClick={exportCsv} disabled={!filteredReviews.length} className="rounded-xl border border-ink/10 bg-white px-4 py-3 text-xs font-semibold disabled:opacity-40">Exporter CSV</button>
+        <button onClick={() => setShowAnalysis((v) => !v)} className="rounded-xl bg-forest px-4 py-3 text-xs font-semibold text-white">{showAnalysis ? 'Masquer l’analyse' : 'Analyse & rapport IA'}</button>
+      </div>
+
+      {showAnalysis && <div className="mb-6"><ReviewAnalysisSection establishments={establishments} /></div>}
 
       <div className="overflow-hidden rounded-2xl border border-ink/5 bg-white shadow-sm">
         {loading ? (
@@ -2501,9 +3560,12 @@ function ReviewsSection({
                     </div>
 
                     <div className="shrink-0">
-                      <span className="text-[11px] text-ink/30">
-                        Avis #{review.id.slice(0, 8)}
-                      </span>
+                      <span className="text-[11px] text-ink/30">Avis #{review.id.slice(0, 8)}</span>
+                      <div className="mt-3 flex flex-wrap gap-2 lg:justify-end">
+                        {(['Nouveau','En cours','Traité'] as const).map((status) => (
+                          <button key={status} onClick={() => updateStatus(review.id, status)} className={`rounded-lg border px-2.5 py-1.5 text-[10px] font-semibold ${review.status === status ? 'border-forest bg-forest text-white' : 'border-ink/10 text-ink/45 hover:bg-[#f7f7f3]'}`}>{status}</button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -2513,11 +3575,17 @@ function ReviewsSection({
         )}
       </div>
 
-      {reviews.length > 0 && (
-        <p className="mt-4 text-xs text-ink/35">
-          {filteredReviews.length} avis affiché
-          {filteredReviews.length > 1 ? 's' : ''} sur {reviews.length}.
-        </p>
+      {reviewsTotal > 0 && (
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-ink/35">
+            {Math.min((reviewsPage - 1) * reviewsPageSize + 1, reviewsTotal)}–{Math.min(reviewsPage * reviewsPageSize, reviewsTotal)} sur {reviewsTotal} avis
+          </p>
+          <div className="flex items-center gap-2">
+            <button disabled={reviewsPage <= 1} onClick={() => setReviewsPage((p) => Math.max(1, p - 1))} className="rounded-lg border border-ink/10 bg-white px-3 py-2 text-xs font-semibold disabled:opacity-30">Précédent</button>
+            <span className="text-xs text-ink/45">Page {reviewsPage} / {Math.max(1, Math.ceil(reviewsTotal / reviewsPageSize))}</span>
+            <button disabled={reviewsPage >= Math.ceil(reviewsTotal / reviewsPageSize)} onClick={() => setReviewsPage((p) => p + 1)} className="rounded-lg border border-ink/10 bg-white px-3 py-2 text-xs font-semibold disabled:opacity-30">Suivant</button>
+          </div>
+        </div>
       )}
     </div>
   );
@@ -2886,38 +3954,6 @@ function EmptyStaff({
 
       <p className="mx-auto mt-2 max-w-md text-sm text-ink/45">
         {description}
-      </p>
-    </div>
-  );
-}
-
-/* =========================================================
-   STAT
-========================================================= */
-
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: typeof Building2;
-  label: string;
-  value: string | number;
-}) {
-  return (
-    <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
-      <div className="flex items-center justify-between">
-        <div className="grid h-10 w-10 place-items-center rounded-xl bg-forest/10 text-forest">
-          <Icon size={19} />
-        </div>
-
-        <span className="text-2xl font-semibold text-forest">
-          {value}
-        </span>
-      </div>
-
-      <p className="mt-5 text-xs font-medium text-ink/50">
-        {label}
       </p>
     </div>
   );
