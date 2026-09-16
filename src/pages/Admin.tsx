@@ -572,24 +572,20 @@ function EstablishmentsSection({
   businessTypes: AIBusinessType[];
 }) {
   const [showForm, setShowForm] = useState(false);
+  const [selected, setSelected] = useState<Establishment | null>(null);
 
   return (
     <div>
       <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
-            Gestion
+            Gestion globale
           </p>
-
-          <h2 className="font-display text-3xl text-forest md:text-4xl">
-            Établissements
-          </h2>
-
+          <h2 className="font-display text-3xl text-forest md:text-4xl">Établissements</h2>
           <p className="mt-2 text-sm text-ink/50">
-            Gérez les commerces présents sur TapMarrakech.
+            Chaque établissement possède maintenant son espace de gestion centralisé.
           </p>
         </div>
-
         <button
           onClick={() => setShowForm(true)}
           className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white transition hover:bg-forest-light"
@@ -608,106 +604,210 @@ function EstablishmentsSection({
 
       <div className="overflow-hidden rounded-2xl border border-ink/5 bg-white shadow-sm">
         {loading ? (
-          <div className="p-8 text-sm text-ink/40">
-            Chargement...
-          </div>
+          <div className="p-8 text-sm text-ink/40">Chargement...</div>
         ) : establishments.length === 0 ? (
           <div className="p-10 text-center">
-            <Building2
-              size={35}
-              className="mx-auto text-ink/20"
-            />
-
-            <p className="mt-4 text-sm text-ink/50">
-              Aucun établissement créé.
-            </p>
+            <Building2 size={35} className="mx-auto text-ink/20" />
+            <p className="mt-4 text-sm text-ink/50">Aucun établissement créé.</p>
           </div>
         ) : (
           <div className="divide-y divide-ink/5">
             {establishments.map((establishment) => {
               const accessLink = `${window.location.origin}/r/${establishment.slug}`;
+              const type = businessTypes.find((item) => item.id === establishment.ai_business_type_id)?.name;
 
               return (
-                <div
-                  key={establishment.id}
-                  className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="grid h-11 w-11 place-items-center rounded-xl bg-forest text-white">
+                <div key={establishment.id} className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
+                  <div className="flex min-w-0 items-center gap-4">
+                    <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-forest text-white">
                       <Building2 size={19} />
                     </div>
-
-                    <div>
-                      <h3 className="text-sm font-semibold">
-                        {establishment.name}
-                      </h3>
-
-                      <p className="mt-1 text-xs text-ink/40">
-                        Slug : {establishment.slug}
-                      </p>
-
-                      <p className="mt-1 text-[11px] text-ink/35 break-all">
-                        {accessLink}
-                      </p>
-
-                      <div className="mt-3">
-                        <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-ink/35">
-                          Type d’établissement / IA
-                        </label>
-                        <select
-                          value={establishment.ai_business_type_id ?? ''}
-                          onChange={async (e) => {
-                            const value = e.target.value || null;
-
-                            const { error } = await supabase
-                              .from('establishments')
-                              .update({ ai_business_type_id: value })
-                              .eq('id', establishment.id);
-
-                            if (error) {
-                              console.error('Erreur type IA:', error);
-                              alert(`Impossible de modifier le type IA : ${error.message}`);
-                              return;
-                            }
-
-                            await reload();
-                          }}
-                          className="w-full max-w-[280px] rounded-lg border border-ink/10 bg-[#f7f7f3] px-3 py-2 text-xs outline-none focus:border-forest"
-                        >
-                          <option value="">Sélectionner un type</option>
-                          {businessTypes.filter((type) => type.active).map((type) => (
-                            <option key={type.id} value={type.id}>
-                              {type.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                    <div className="min-w-0">
+                      <h3 className="text-sm font-semibold">{establishment.name}</h3>
+                      <p className="mt-1 text-xs text-ink/40">{type ?? 'Type non défini'} · /r/{establishment.slug}</p>
+                      <p className="mt-1 break-all text-[11px] text-ink/35">{accessLink}</p>
                     </div>
                   </div>
 
                   <div className="flex flex-wrap gap-2">
                     <button
+                      onClick={() => setSelected(establishment)}
+                      className="rounded-lg bg-forest px-3 py-2 text-xs font-semibold text-white transition hover:bg-forest-light"
+                    >
+                      Gérer l’établissement
+                    </button>
+                    <button
                       onClick={async () => {
-                        await navigator.clipboard.writeText(
-                          accessLink
-                        );
-                        alert('Lien copié.');
+                        await navigator.clipboard.writeText(accessLink);
+                        alert('Lien public copié.');
                       }}
                       className="inline-flex items-center gap-2 rounded-lg border border-ink/10 px-3 py-2 text-xs font-medium transition hover:bg-[#f7f7f3]"
                     >
-                      <Copy size={14} />
-                      Copier le lien
+                      <Copy size={14} /> Copier le lien
                     </button>
-
-                    <span className="rounded-lg bg-green-100 px-3 py-2 text-xs font-semibold text-green-700">
-                      Actif
-                    </span>
                   </div>
                 </div>
               );
             })}
           </div>
         )}
+      </div>
+
+      {selected && (
+        <EstablishmentWorkspace
+          establishment={selected}
+          businessTypes={businessTypes}
+          close={() => setSelected(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function EstablishmentWorkspace({
+  establishment,
+  businessTypes,
+  close,
+}: {
+  establishment: Establishment;
+  businessTypes: AIBusinessType[];
+  close: () => void;
+}) {
+  const [tab, setTab] = useState<'general' | 'menu' | 'promotions' | 'reviews' | 'loyalty' | 'team' | 'analytics' | 'ai'>('general');
+  const [details, setDetails] = useState<any>(null);
+  const [counts, setCounts] = useState({ menu: 0, promotions: 0, reviews: 0, customers: 0, staff: 0 });
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const [est, menu, promotions, reviews, customers, staff] = await Promise.all([
+        supabase.from('establishments').select('*').eq('id', establishment.id).maybeSingle(),
+        supabase.from('menu_items').select('id', { count: 'exact', head: true }).eq('establishment_id', establishment.id),
+        supabase.from('promotions').select('id', { count: 'exact', head: true }).eq('establishment_id', establishment.id),
+        supabase.from('reviews').select('id', { count: 'exact', head: true }).eq('establishment_id', establishment.id),
+        supabase.from('loyalty_customers').select('id', { count: 'exact', head: true }).eq('establishment_id', establishment.id),
+        supabase.from('establishment_staff').select('id', { count: 'exact', head: true }).eq('establishment_id', establishment.id),
+      ]);
+      if (!active) return;
+      setDetails(est.data ?? establishment);
+      setCounts({
+        menu: menu.count ?? 0,
+        promotions: promotions.count ?? 0,
+        reviews: reviews.count ?? 0,
+        customers: customers.count ?? 0,
+        staff: staff.count ?? 0,
+      });
+    })();
+    return () => { active = false; };
+  }, [establishment]);
+
+  const update = (key: string, value: any) => setDetails((current: any) => ({ ...(current ?? establishment), [key]: value }));
+
+  const saveGeneral = async () => {
+    if (!details) return;
+    setSaving(true);
+    const payload = {
+      name: details.name,
+      slug: details.slug,
+      business_type: details.business_type ?? null,
+      address: details.address ?? null,
+      city: details.city ?? null,
+      phone: details.phone ?? null,
+      email: details.email ?? null,
+      website_url: details.website_url ?? null,
+      description: details.description ?? null,
+      instagram_url: details.instagram_url ?? null,
+      facebook_url: details.facebook_url ?? null,
+      tiktok_url: details.tiktok_url ?? null,
+      whatsapp_number: details.whatsapp_number ?? null,
+    };
+    const { error } = await supabase.from('establishments').update(payload).eq('id', establishment.id);
+    setSaving(false);
+    if (error) alert(`Impossible d'enregistrer : ${error.message}`);
+    else alert('Établissement enregistré.');
+  };
+
+  const tabs = [
+    ['general', 'Général'], ['menu', 'Menu'], ['promotions', 'Promotions'], ['reviews', 'Avis'],
+    ['loyalty', 'Fidélité'], ['team', 'Équipe'], ['analytics', 'Analytics'], ['ai', 'IA'],
+  ] as const;
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-ink/50 p-3 backdrop-blur-sm md:p-8">
+      <div className="mx-auto min-h-[calc(100vh-24px)] max-w-[1380px] overflow-hidden rounded-3xl bg-[#f7f7f3] shadow-2xl md:min-h-[calc(100vh-64px)]">
+        <div className="flex items-center justify-between border-b border-ink/10 bg-forest px-5 py-5 text-white md:px-8">
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">Espace établissement</p>
+            <h3 className="mt-1 truncate font-display text-2xl">{details?.name ?? establishment.name}</h3>
+            <p className="mt-1 text-xs text-white/50">/r/{establishment.slug}</p>
+          </div>
+          <button onClick={close} className="rounded-xl p-2 text-white/60 transition hover:bg-white/10 hover:text-white"><X size={22} /></button>
+        </div>
+
+        <div className="overflow-x-auto border-b border-ink/10 bg-white px-4 md:px-6">
+          <div className="flex min-w-max gap-1 py-2">
+            {tabs.map(([id, label]) => (
+              <button key={id} onClick={() => setTab(id)} className={`rounded-xl px-4 py-2.5 text-xs font-semibold transition ${tab === id ? 'bg-forest text-white' : 'text-ink/50 hover:bg-[#f7f7f3]'}`}>
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="p-5 md:p-8">
+          {tab === 'general' && details && (
+            <div className="space-y-6">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {[
+                  ['name', 'Nom'], ['slug', 'Slug'], ['address', 'Adresse'], ['city', 'Ville'],
+                  ['phone', 'Téléphone'], ['email', 'Email'], ['website_url', 'Site web'],
+                  ['instagram_url', 'Instagram'], ['facebook_url', 'Facebook'], ['tiktok_url', 'TikTok'], ['whatsapp_number', 'WhatsApp'],
+                ].map(([key, label]) => (
+                  <label key={key} className="block">
+                    <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-ink/40">{label}</span>
+                    <input value={details[key] ?? ''} onChange={(e) => update(key, e.target.value)} className="w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm outline-none focus:border-forest" />
+                  </label>
+                ))}
+                <label className="block">
+                  <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-ink/40">Type</span>
+                  <select value={details.business_type ?? ''} onChange={(e) => update('business_type', e.target.value)} className="w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm outline-none">
+                    <option value="">Non défini</option>
+                    {businessTypes.map((type) => <option key={type.id} value={type.name}>{type.name}</option>)}
+                  </select>
+                </label>
+              </div>
+              <label className="block">
+                <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-ink/40">Description</span>
+                <textarea value={details.description ?? ''} onChange={(e) => update('description', e.target.value)} rows={4} className="w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm outline-none focus:border-forest" />
+              </label>
+              <div className="flex flex-wrap gap-3">
+                <button onClick={saveGeneral} disabled={saving} className="rounded-xl bg-forest px-5 py-3 text-xs font-semibold text-white disabled:opacity-50">{saving ? 'Enregistrement...' : 'Enregistrer les informations'}</button>
+                <button onClick={() => window.open(`${window.location.origin}/r/${establishment.slug}`, '_blank')} className="rounded-xl border border-ink/10 bg-white px-5 py-3 text-xs font-semibold">Ouvrir la page publique</button>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-5">
+                {[
+                  ['Menu', counts.menu], ['Promotions', counts.promotions], ['Avis', counts.reviews], ['Clients fidélité', counts.customers], ['Équipe', counts.staff],
+                ].map(([label, value]) => <div key={String(label)} className="rounded-2xl border border-ink/5 bg-white p-5"><p className="text-xs text-ink/40">{label}</p><p className="mt-2 text-2xl font-semibold text-forest">{value}</p></div>)}
+              </div>
+            </div>
+          )}
+
+          {tab !== 'general' && (
+            <div className="rounded-2xl border border-dashed border-ink/10 bg-white p-8 text-center">
+              <h4 className="font-display text-2xl text-forest">{tabs.find(([id]) => id === tab)?.[1]}</h4>
+              <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-ink/50">
+                Cet espace est réservé à la gestion globale de cet établissement. La base est maintenant préparée pour brancher le module directement ici sans donner à l’Admin une restriction de type d’établissement.
+              </p>
+              <div className="mt-6 flex flex-wrap justify-center gap-3">
+                {tab === 'menu' && <button onClick={() => window.open('/dashboard/menu', '_blank')} className="rounded-xl bg-forest px-5 py-3 text-xs font-semibold text-white">Ouvrir le gestionnaire Menu</button>}
+                {tab === 'reviews' && <button onClick={() => window.open('/admin', '_blank')} className="rounded-xl bg-forest px-5 py-3 text-xs font-semibold text-white">Ouvrir les avis Admin</button>}
+                {tab === 'loyalty' && <button onClick={() => window.open('/dashboard/loyalty', '_blank')} className="rounded-xl bg-forest px-5 py-3 text-xs font-semibold text-white">Ouvrir la fidélité</button>}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
