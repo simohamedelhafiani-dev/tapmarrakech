@@ -824,8 +824,28 @@ function EstablishmentWorkspace({
   );
 }
 
-function StatCard({ label, value }: { label: string; value: string | number }) {
-  return <div className="rounded-2xl border border-ink/5 bg-white p-5 shadow-sm"><p className="text-xs text-ink/40">{label}</p><p className="mt-2 text-2xl font-semibold text-forest">{value}</p></div>;
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon?: typeof Building2;
+  label: string;
+  value: string | number;
+}) {
+  return (
+    <div className="rounded-2xl border border-ink/5 bg-white p-5 shadow-sm">
+      <div className="flex items-center justify-between">
+        {Icon ? (
+          <div className="grid h-10 w-10 place-items-center rounded-xl bg-forest/10 text-forest">
+            <Icon size={19} />
+          </div>
+        ) : null}
+        <span className="text-2xl font-semibold text-forest">{value}</span>
+      </div>
+      <p className="mt-3 text-xs font-medium text-ink/50">{label}</p>
+    </div>
+  );
 }
 
 function CreateEstablishmentForm({
@@ -2944,34 +2964,3 @@ function EmptyStaff({
   );
 }
 
-/* =========================================================
-   STAT
-========================================================= */
-
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: typeof Building2;
-  label: string;
-  value: string | number;
-}) {
-  return (
-    <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
-      <div className="flex items-center justify-between">
-        <div className="grid h-10 w-10 place-items-center rounded-xl bg-forest/10 text-forest">
-          <Icon size={19} />
-        </div>
-
-        <span className="text-2xl font-semibold text-forest">
-          {value}
-        </span>
-      </div>
-
-      <p className="mt-5 text-xs font-medium text-ink/50">
-        {label}
-      </p>
-    </div>
-  );
-}
