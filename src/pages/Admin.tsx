@@ -94,6 +94,7 @@ type BillingSubscription = {
   status: string;
   started_at: string | null;
   current_period_end: string | null;
+  trial_days: number | null;
   plan?: BillingPlan | null;
 };
 
@@ -280,7 +281,7 @@ export default function Admin() {
       { count: overdueInvoices },
     ] = await Promise.all([
       supabase.from('subscription_plans').select('id,name,price_mad,interval,active,features').order('price_mad'),
-      supabase.from('subscriptions').select('id,establishment_id,plan_id,status,started_at,current_period_end,subscription_plans(id,name,price_mad,interval,active)'),
+      supabase.from('subscriptions').select('id,establishment_id,plan_id,status,started_at,current_period_end,trial_days,subscription_plans(id,name,price_mad,interval,active)'),
       supabase.from('payments').select('id', { count: 'exact', head: true }).gte('paid_at', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()).eq('status', 'paid'),
       supabase.from('payments').select('id', { count: 'exact', head: true }).eq('status', 'failed'),
       supabase.from('invoices').select('id', { count: 'exact', head: true }).eq('status', 'overdue'),
@@ -1075,7 +1076,7 @@ function EstablishmentWorkspace({
       setWorkspacePlans((plans ?? []) as BillingPlan[]);
       const { data: sub, error: subError } = await supabase
         .from('subscriptions')
-        .select('id,establishment_id,plan_id,status,started_at,current_period_end,subscription_plans(id,name,price_mad,interval,active)')
+        .select('id,establishment_id,plan_id,status,started_at,current_period_end,trial_days,subscription_plans(id,name,price_mad,interval,active)')
         .eq('establishment_id', establishment.id)
         .maybeSingle();
 
@@ -1248,7 +1249,7 @@ function EstablishmentWorkspace({
     await loadTab();
   };
 
-  const createSubscription = async (planId?: string, status: 'trial' | 'active' = 'trial') => {
+  const createSubscription = async (planId?: string, trialDays: number = 14) => {
     if (subscription) return alert('Cet établissement possède déjà un abonnement.');
     setCreatingSubscription(true);
 
@@ -1273,14 +1274,24 @@ function EstablishmentWorkspace({
     }
 
     const startedAt = new Date();
+    const selectedPlan = workspacePlans.find((plan) => plan.id === selectedPlanId);
+    const normalizedTrialDays = Math.max(0, Math.min(365, Number(trialDays) || 0));
+    const status = normalizedTrialDays > 0 ? 'trial' : 'active';
     const periodEnd = new Date(startedAt);
-    if (status === 'trial') periodEnd.setDate(periodEnd.getDate() + 14);
-    else periodEnd.setMonth(periodEnd.getMonth() + 1);
+
+    if (status === 'trial') {
+      periodEnd.setDate(periodEnd.getDate() + normalizedTrialDays);
+    } else if (selectedPlan?.interval === 'year') {
+      periodEnd.setFullYear(periodEnd.getFullYear() + 1);
+    } else {
+      periodEnd.setMonth(periodEnd.getMonth() + 1);
+    }
 
     const { error } = await supabase.from('subscriptions').insert({
       establishment_id: establishment.id,
       plan_id: selectedPlanId,
       status,
+      trial_days: normalizedTrialDays,
       started_at: startedAt.toISOString(),
       current_period_end: periodEnd.toISOString(),
     });
@@ -1476,22 +1487,30 @@ function EstablishmentWorkspace({
               {!subscription ? (
                 <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
                   <p className="text-sm font-semibold text-amber-900">Aucun abonnement enregistré</p>
-                  <p className="mt-1 text-xs leading-5 text-amber-800/80">Créez l’abonnement directement depuis cet espace. Un essai Basic de 14 jours est proposé par défaut.</p>
-                  <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-                    <select id="new-subscription-plan" defaultValue={workspacePlans[0]?.id ?? ''} className="flex-1 rounded-xl border border-amber-200 bg-white px-3 py-2.5 text-sm">
+                  <p className="mt-1 text-xs leading-5 text-amber-800/80">Choisissez le plan et la durée d’essai pour cet établissement. Aucun essai n’est imposé.</p>
+                  <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                    <select id="new-subscription-plan" defaultValue={workspacePlans[0]?.id ?? ''} className="w-full rounded-xl border border-amber-200 bg-white px-3 py-2.5 text-sm">
                       {workspacePlans.map((p) => <option key={p.id} value={p.id}>{p.name} · {Number(p.price_mad).toLocaleString('fr-FR')} MAD</option>)}
                     </select>
-                    <button
-                      disabled={creatingSubscription || !workspacePlans.length}
-                      onClick={() => {
-                        const value = (document.getElementById('new-subscription-plan') as HTMLSelectElement | null)?.value;
-                        createSubscription(value || undefined, 'trial');
-                      }}
-                      className="rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-40"
-                    >
-                      {creatingSubscription ? 'Création…' : 'Créer l’abonnement (essai 14 j.)'}
-                    </button>
+                    <select id="new-subscription-trial-days" defaultValue="14" className="w-full rounded-xl border border-amber-200 bg-white px-3 py-2.5 text-sm">
+                      <option value="0">Aucun essai</option>
+                      <option value="7">Essai · 7 jours</option>
+                      <option value="14">Essai · 14 jours</option>
+                      <option value="30">Essai · 30 jours</option>
+                      <option value="60">Essai · 60 jours</option>
+                    </select>
                   </div>
+                  <button
+                    disabled={creatingSubscription || !workspacePlans.length}
+                    onClick={() => {
+                      const planValue = (document.getElementById('new-subscription-plan') as HTMLSelectElement | null)?.value;
+                      const trialValue = Number((document.getElementById('new-subscription-trial-days') as HTMLSelectElement | null)?.value ?? 14);
+                      createSubscription(planValue || undefined, trialValue);
+                    }}
+                    className="mt-2 w-full rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-40"
+                  >
+                    {creatingSubscription ? 'Création…' : 'Créer l’abonnement'}
+                  </button>
                 </div>
               ) : (
                 <div className="mt-4 space-y-4">
@@ -1500,6 +1519,36 @@ function EstablishmentWorkspace({
                       {workspacePlans.map((p) => <option key={p.id} value={p.id}>{p.name} · {Number(p.price_mad).toLocaleString('fr-FR')} MAD</option>)}
                     </select>
                   </label>
+                  <div>
+                    <p className="mb-2 text-xs text-ink/50">Période d’essai</p>
+                    <select
+                      value={subscription.trial_days ?? 0}
+                      onChange={async (e) => {
+                        const days = Number(e.target.value);
+                        const nextStatus = days > 0 ? 'trial' : 'active';
+                        const startedAt = subscription.started_at ? new Date(subscription.started_at) : new Date();
+                        const nextEnd = new Date(startedAt);
+                        if (nextStatus === 'trial') {
+                          nextEnd.setDate(nextEnd.getDate() + days);
+                        } else if (subscription.plan?.interval === 'year') {
+                          nextEnd.setFullYear(nextEnd.getFullYear() + 1);
+                        } else {
+                          nextEnd.setMonth(nextEnd.getMonth() + 1);
+                        }
+                        const { error } = await supabase.from('subscriptions').update({ trial_days: days, status: nextStatus, current_period_end: nextEnd.toISOString() }).eq('id', subscription.id);
+                        if (error) return alert(`Erreur période d’essai : ${error.message}`);
+                        await loadTab();
+                        await onReload();
+                      }}
+                      className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"
+                    >
+                      <option value={0}>Aucun essai</option>
+                      <option value={7}>7 jours</option>
+                      <option value={14}>14 jours</option>
+                      <option value={30}>30 jours</option>
+                      <option value={60}>60 jours</option>
+                    </select>
+                  </div>
                   <div>
                     <p className="mb-2 text-xs text-ink/50">Statut</p>
                     <div className="flex flex-wrap gap-2">
