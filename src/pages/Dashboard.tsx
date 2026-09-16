@@ -98,6 +98,9 @@ export default function Dashboard() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [profileName, setProfileName] = useState<string>('');
   const [period, setPeriod] = useState('8w');
+  const [selectedEstablishmentId, setSelectedEstablishmentId] = useState<string | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -105,6 +108,7 @@ export default function Dashboard() {
       setPlaces([]);
       setReviews([]);
       setProfileName('');
+      setSelectedEstablishmentId(null);
       setLoading(false);
       return;
     }
@@ -159,6 +163,7 @@ export default function Dashboard() {
 
           setPlaces([]);
           setReviews([]);
+          setSelectedEstablishmentId(null);
           setLoading(false);
           return;
         }
@@ -166,42 +171,36 @@ export default function Dashboard() {
         const accessiblePlaces =
           (establishments ?? []) as Establishment[];
 
-        const ids = accessiblePlaces.map(
-          (establishment) => establishment.id
-        );
+        setPlaces(accessiblePlaces);
 
         /*
-         * Charger uniquement les avis des établissements
-         * accessibles à l'utilisateur.
+         * Restaurer l'établissement sélectionné.
+         *
+         * Si aucun choix n'a encore été enregistré, on utilise
+         * le premier établissement accessible.
+         *
+         * Si l'ancien choix n'existe plus ou n'est plus accessible,
+         * on revient automatiquement au premier établissement.
          */
-        let reviewsData: Review[] = [];
+        const storageKey = `tapmarrakech:selected-establishment:${user.id}`;
+        const storedId = window.localStorage.getItem(storageKey);
 
-        if (ids.length > 0) {
-          const {
-            data,
-            error: reviewsError,
-          } = await supabase
-            .from('reviews')
-            .select(
-              '*, establishment:establishments(name)'
-            )
-            .in('establishment_id', ids)
-            .order('created_at', {
-              ascending: false,
-            });
+        const validStoredPlace = accessiblePlaces.find(
+          (place) => place.id === storedId
+        );
 
-          if (reviewsError) {
-            console.error(
-              'Erreur chargement avis:',
-              reviewsError
-            );
-          } else {
-            reviewsData = (data as Review[]) ?? [];
-          }
+        const nextId =
+          validStoredPlace?.id ??
+          accessiblePlaces[0]?.id ??
+          null;
+
+        setSelectedEstablishmentId(nextId);
+
+        if (nextId) {
+          window.localStorage.setItem(storageKey, nextId);
+        } else {
+          window.localStorage.removeItem(storageKey);
         }
-
-        setPlaces(accessiblePlaces);
-        setReviews(reviewsData);
       } catch (error) {
         console.error(
           'Erreur inattendue dashboard:',
@@ -210,6 +209,7 @@ export default function Dashboard() {
 
         setPlaces([]);
         setReviews([]);
+        setSelectedEstablishmentId(null);
       } finally {
         setLoading(false);
       }
@@ -217,6 +217,60 @@ export default function Dashboard() {
 
     load();
   }, [user, role]);
+
+  /*
+   * Charger uniquement les avis de l'établissement sélectionné.
+   *
+   * Cette séparation est importante pour que les statistiques,
+   * le graphique et les derniers retours correspondent toujours
+   * à l'établissement actuellement choisi.
+   */
+  useEffect(() => {
+    let active = true;
+
+    const loadReviews = async () => {
+      if (!selectedEstablishmentId) {
+        setReviews([]);
+        return;
+      }
+
+      const {
+        data,
+        error,
+      } = await supabase
+        .from('reviews')
+        .select(
+          '*, establishment:establishments(name)'
+        )
+        .eq('establishment_id', selectedEstablishmentId)
+        .order('created_at', {
+          ascending: false,
+        });
+
+      if (error) {
+        console.error(
+          'Erreur chargement avis:',
+          error
+        );
+
+        if (active) {
+          setReviews([]);
+        }
+
+        return;
+      }
+
+      if (active) {
+        setReviews((data as Review[]) ?? []);
+      }
+    };
+
+    loadReviews();
+
+    return () => {
+      active = false;
+    };
+  }, [selectedEstablishmentId]);
 
   const positive = reviews.filter(
     (review) => review.rating >= 4
@@ -299,10 +353,32 @@ export default function Dashboard() {
 
   const isResponsible = role === 'responsible';
 
-  const establishmentName =
-    isResponsible && places.length > 0
-      ? places[0].name
-      : null;
+  const selectedEstablishment =
+    places.find(
+      (place) => place.id === selectedEstablishmentId
+    ) ?? null;
+
+  const establishmentName = selectedEstablishment?.name ?? null;
+
+  const changeEstablishment = (establishmentId: string) => {
+    setSelectedEstablishmentId(establishmentId);
+
+    if (user?.id) {
+      const storageKey = `tapmarrakech:selected-establishment:${user.id}`;
+      window.localStorage.setItem(
+        storageKey,
+        establishmentId
+      );
+    }
+
+    window.dispatchEvent(
+      new CustomEvent('tapmarrakech:establishment-changed', {
+        detail: {
+          establishmentId,
+        },
+      })
+    );
+  };
 
   const roleLabel =
     role === 'admin'
@@ -328,6 +404,35 @@ export default function Dashboard() {
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">
             {roleLabel}
           </p>
+
+          {places.length > 0 && (
+            <div className="mt-3">
+              <label
+                htmlFor="dashboard-establishment"
+                className="sr-only"
+              >
+                Établissement actif
+              </label>
+
+              <select
+                id="dashboard-establishment"
+                value={selectedEstablishmentId ?? ''}
+                onChange={(event) =>
+                  changeEstablishment(event.target.value)
+                }
+                className="max-w-full rounded-xl border border-ink/10 bg-white px-3 py-2 text-sm font-semibold text-forest shadow-sm outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+              >
+                {places.map((place) => (
+                  <option
+                    key={place.id}
+                    value={place.id}
+                  >
+                    {place.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {isResponsible && establishmentName && (
             <p className="mt-2 text-lg font-semibold text-forest">
