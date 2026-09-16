@@ -85,6 +85,10 @@ export default function Loyalty() {
   const [firstName, setFirstName] = useState('');
   const [phone, setPhone] = useState('');
   const [amount, setAmount] = useState('');
+  const [invoiceNumber, setInvoiceNumber] = useState('');
+  const [pointsResponsibleCode, setPointsResponsibleCode] = useState('');
+  const [invoiceAmount, setInvoiceAmount] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'CARD' | 'OTHER'>('CASH');
 
   useEffect(() => {
     loadEstablishments();
@@ -240,6 +244,7 @@ export default function Loyalty() {
     if (!showPoints || !establishmentId) return;
 
     const purchaseAmount = Number(amount);
+    const responsibleCode = pointsResponsibleCode.trim();
 
     if (!purchaseAmount || purchaseAmount <= 0) {
       alert('Veuillez saisir un montant valide.');
@@ -250,6 +255,11 @@ export default function Loyalty() {
       alert(
         'Le programme de fidélité est actuellement désactivé pour cet établissement.'
       );
+      return;
+    }
+
+    if (responsibleCode.length < 4) {
+      alert('Le code responsable est obligatoire.');
       return;
     }
 
@@ -273,55 +283,31 @@ export default function Loyalty() {
 
     setSaving(true);
 
-    const transactionReference = crypto.randomUUID();
-
-    const { error: transactionError } = await supabase
-      .from('loyalty_transactions')
-      .insert({
-        establishment_id: establishmentId,
-        customer_id: showPoints.id,
-        employee_id: user?.id ?? null,
-        amount: purchaseAmount,
-        points,
-        type: 'EARN',
-        description: `Achat de ${purchaseAmount.toFixed(
-          2
-        )} ${programSettings.currency}`,
-        transaction_reference: transactionReference,
-      });
-
-    if (transactionError) {
-      alert(transactionError.message);
-      setSaving(false);
-      return;
-    }
-
-    const { error: customerError } = await supabase
-      .from('loyalty_customers')
-      .update({
-        points_balance: showPoints.points_balance + points,
-        total_points_earned:
-          showPoints.total_points_earned + points,
-        visit_count: showPoints.visit_count + 1,
-        last_visit_at: new Date().toISOString(),
-      })
-      .eq('id', showPoints.id)
-      .eq('establishment_id', establishmentId);
-
-    if (customerError) {
-      alert(
-        `La transaction a été enregistrée mais la mise à jour du client a échoué : ${customerError.message}`
-      );
-      setSaving(false);
-      return;
-    }
-
-    setAmount('');
-    setShowPoints(null);
-
-    await loadCustomers();
+    const { data, error } = await supabase.rpc('add_loyalty_points', {
+      p_establishment_id: establishmentId,
+      p_customer_id: showPoints.id,
+      p_amount: purchaseAmount,
+      p_invoice_number: invoiceNumber.trim() || null,
+      p_responsible_code: responsibleCode,
+      p_description: `Achat de ${purchaseAmount.toFixed(2)} ${programSettings.currency}`,
+    });
 
     setSaving(false);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    const newBalance = Number(data ?? 0);
+
+    setAmount('');
+    setInvoiceNumber('');
+    setPointsResponsibleCode('');
+    setShowPoints(null);
+    await loadCustomers();
+
+    alert(`+${points} points ajoutés. Nouveau solde : ${newBalance} points.`);
   }
 
   function selectReward(
@@ -344,6 +330,9 @@ export default function Loyalty() {
 
     setSelectedReward(reward);
     setRewardCode('');
+    setInvoiceNumber('');
+    setInvoiceAmount('');
+    setPaymentMethod('CASH');
     setShowRewardCode(true);
   }
 
@@ -353,22 +342,31 @@ export default function Loyalty() {
     if (!selectedReward) return;
 
     const code = rewardCode.trim();
+    const cleanInvoiceNumber = invoiceNumber.trim();
+    const purchaseAmount = Number(invoiceAmount);
 
     if (!code) {
-      alert('Veuillez saisir le code de validation.');
+      alert('Veuillez saisir le code responsable.');
       return;
     }
 
     if (code.length < 4) {
-      alert('Le code doit contenir au moins 4 caractères.');
+      alert('Le code responsable doit contenir au moins 4 caractères.');
       return;
     }
 
-    if (
-      showRewards.points_balance <
-      selectedReward.points_required
-    ) {
+    if (showRewards.points_balance < selectedReward.points_required) {
       alert('Ce client ne possède pas assez de points.');
+      return;
+    }
+
+    if (!cleanInvoiceNumber) {
+      alert('Le numéro de facture est obligatoire.');
+      return;
+    }
+
+    if (!Number.isFinite(purchaseAmount) || purchaseAmount <= 0) {
+      alert('Veuillez saisir un montant de facture valide.');
       return;
     }
 
@@ -381,29 +379,30 @@ export default function Loyalty() {
         p_customer_id: showRewards.id,
         p_reward_id: selectedReward.id,
         p_reward_code: code,
+        p_invoice_number: cleanInvoiceNumber,
+        p_invoice_amount: purchaseAmount,
+        p_payment_method: paymentMethod,
       }
     );
 
     if (error) {
       console.error('Erreur utilisation récompense:', error);
-
-      if (
-        error.message
-          .toLowerCase()
-          .includes('code récompense incorrect')
-      ) {
-        alert('❌ Code récompense incorrect.');
-      } else {
-        alert(error.message);
-      }
-
+      alert(error.message);
       setRedeeming(false);
       return;
     }
 
-    const newBalance = Number(data);
+    const result = Array.isArray(data) ? data[0] : data;
+    const newBalance = Number(result?.new_points_balance ?? 0);
+    const rewardName = result?.reward_name ?? selectedReward.name;
 
+    setInvoiceNumber('');
+    setInvoiceAmount('');
+    setPaymentMethod('CASH');
     setRewardCode('');
+    setInvoiceNumber('');
+    setInvoiceAmount('');
+    setPaymentMethod('CASH');
     setSelectedReward(null);
     setShowRewardCode(false);
     setShowRewards(null);
@@ -413,7 +412,7 @@ export default function Loyalty() {
     setRedeeming(false);
 
     alert(
-      `✅ Récompense utilisée avec succès !\n\nNouveau solde : ${newBalance} points.`
+      `Récompense utilisée avec succès !\n\n${rewardName}\nNouveau solde : ${newBalance} points.`
     );
   }
 
@@ -643,7 +642,12 @@ export default function Loyalty() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => setShowPoints(customer)}
+                        onClick={() => {
+                          setAmount('');
+                          setInvoiceNumber('');
+                          setPointsResponsibleCode('');
+                          setShowPoints(customer);
+                        }}
                         disabled={!programSettings.enabled}
                         className="rounded-lg bg-forest px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-forest-light disabled:cursor-not-allowed disabled:opacity-40"
                       >
@@ -655,6 +659,9 @@ export default function Loyalty() {
                           setShowRewards(customer);
                           setSelectedReward(null);
                           setRewardCode('');
+                          setInvoiceNumber('');
+                          setInvoiceAmount('');
+                          setPaymentMethod('CASH');
                           setShowRewardCode(false);
                         }}
                         disabled={
@@ -776,6 +783,31 @@ export default function Loyalty() {
               </div>
             </div>
 
+            <div>
+              <label className="text-xs font-medium text-ink/60">
+                Numéro de facture (optionnel)
+              </label>
+              <input
+                value={invoiceNumber}
+                onChange={e => setInvoiceNumber(e.target.value)}
+                placeholder="FAC-2026-001"
+                className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-gold"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-medium text-ink/60">
+                Code responsable *
+              </label>
+              <input
+                type="password"
+                value={pointsResponsibleCode}
+                onChange={e => setPointsResponsibleCode(e.target.value)}
+                placeholder="Code de validation"
+                className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-center text-lg tracking-[0.25em] outline-none focus:border-gold"
+              />
+            </div>
+
             <div className="rounded-xl bg-[#f7f7f3] p-4">
               <div className="flex justify-between text-xs text-ink/50">
                 <span>Règle du programme</span>
@@ -821,6 +853,7 @@ export default function Loyalty() {
               disabled={
                 saving ||
                 Number(amount) <= 0 ||
+                !pointsResponsibleCode.trim() ||
                 !programSettings.enabled
               }
               className="w-full rounded-xl bg-forest px-4 py-3 text-xs font-semibold text-white disabled:opacity-40"
@@ -990,6 +1023,51 @@ export default function Loyalty() {
                 />
               </div>
 
+              <div>
+                <label className="text-xs font-medium text-ink/60">
+                  Numéro de facture *
+                </label>
+                <input
+                  value={invoiceNumber}
+                  onChange={e => setInvoiceNumber(e.target.value)}
+                  placeholder="FAC-2026-001"
+                  disabled={redeeming}
+                  className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-gold disabled:opacity-50"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-ink/60">
+                  Montant de la facture *
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={invoiceAmount}
+                  onChange={e => setInvoiceAmount(e.target.value)}
+                  placeholder="250"
+                  disabled={redeeming}
+                  className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-gold disabled:opacity-50"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-ink/60">
+                  Mode de paiement
+                </label>
+                <select
+                  value={paymentMethod}
+                  onChange={e => setPaymentMethod(e.target.value as 'CASH' | 'CARD' | 'OTHER')}
+                  disabled={redeeming}
+                  className="mt-2 w-full rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm outline-none focus:border-gold disabled:opacity-50"
+                >
+                  <option value="CASH">Espèces</option>
+                  <option value="CARD">Carte bancaire</option>
+                  <option value="OTHER">Autre</option>
+                </select>
+              </div>
+
               <div className="rounded-xl bg-[#f7f7f3] p-4">
                 <div className="flex justify-between text-xs">
                   <span className="text-ink/50">
@@ -1029,7 +1107,9 @@ export default function Loyalty() {
                 onClick={redeemReward}
                 disabled={
                   redeeming ||
-                  !rewardCode.trim()
+                  !rewardCode.trim() ||
+                  !invoiceNumber.trim() ||
+                  Number(invoiceAmount) <= 0
                 }
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest px-4 py-3 text-xs font-semibold text-white transition hover:bg-forest-light disabled:cursor-not-allowed disabled:opacity-40"
               >

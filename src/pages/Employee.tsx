@@ -128,6 +128,7 @@ export default function Employee() {
 
   const [purchaseAmount, setPurchaseAmount] = useState('');
   const [pointsResponsibleCode, setPointsResponsibleCode] = useState('');
+  const [pointsInvoiceNumber, setPointsInvoiceNumber] = useState('');
 
   const [rewardCode, setRewardCode] = useState('');
   const [invoiceNumber, setInvoiceNumber] = useState('');
@@ -567,6 +568,7 @@ export default function Employee() {
       p_establishment_id: establishmentId,
       p_customer_id: showPoints.id,
       p_amount: amount,
+      p_invoice_number: pointsInvoiceNumber.trim() || null,
       p_responsible_code: code,
       p_description: `Achat de ${amount.toFixed(2)} ${settings.currency}`,
     });
@@ -585,6 +587,7 @@ export default function Employee() {
 
     setPurchaseAmount('');
     setPointsResponsibleCode('');
+    setPointsInvoiceNumber('');
     setShowPoints(null);
     await loadCustomers();
   }
@@ -1075,7 +1078,8 @@ export default function Employee() {
             if (!saving) {
               setShowPoints(null);
               setPurchaseAmount('');
-                        setPointsResponsibleCode('');
+              setPointsResponsibleCode('');
+              setPointsInvoiceNumber('');
             }
           }}
         >
@@ -1101,6 +1105,14 @@ export default function Employee() {
               onChange={setPurchaseAmount}
               placeholder="500"
               type="number"
+            />
+
+            <Field
+              icon={<Receipt size={16} />}
+              label="Numéro de facture (optionnel)"
+              value={pointsInvoiceNumber}
+              onChange={setPointsInvoiceNumber}
+              placeholder="FAC-2026-001"
             />
 
             <Field
