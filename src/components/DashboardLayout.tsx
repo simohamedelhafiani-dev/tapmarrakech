@@ -21,36 +21,43 @@ const links = [
     label: 'Vue d’ensemble',
     icon: LayoutDashboard,
     end: true,
+    feature: null,
   },
   {
     to: '/dashboard/establishments',
     label: 'Établissements',
     icon: Building2,
+    feature: null,
   },
   {
     to: '/dashboard/reviews',
     label: 'Avis reçus',
     icon: MessageSquare,
+    feature: 'reviews' as const,
   },
   {
     to: '/dashboard/analytics',
     label: 'Analytics',
     icon: BarChart3,
+    feature: 'analytics' as const,
   },
   {
     to: '/dashboard/menu',
     label: 'Menu',
     icon: UtensilsCrossed,
+    feature: 'menu' as const,
   },
   {
     to: '/dashboard/loyalty',
     label: 'Fidélité',
     icon: Gift,
+    feature: 'loyalty' as const,
   },
   {
     to: '/dashboard/loyalty/settings',
     label: 'Programme fidélité',
     icon: Settings2,
+    feature: 'loyalty' as const,
   },
 ];
 
@@ -63,8 +70,12 @@ type Establishment = {
 export function DashboardLayout() {
   const [open, setOpen] = useState(false);
   const [profileName, setProfileName] = useState<string | null>(null);
-  const [establishmentName, setEstablishmentName] = useState<string | null>(null);
-  const [establishmentLogoUrl, setEstablishmentLogoUrl] = useState<string | null>(null);
+  const [establishmentName, setEstablishmentName] = useState<string | null>(
+    null
+  );
+  const [establishmentLogoUrl, setEstablishmentLogoUrl] = useState<
+    string | null
+  >(null);
 
   const { signOut, user, role } = useAuth();
   const navigate = useNavigate();
@@ -306,6 +317,7 @@ export function DashboardLayout() {
               <p className="truncate text-sm font-semibold text-forest md:text-base">
                 {establishmentName || 'Mon établissement'}
               </p>
+
               <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-gold">
                 Établissement
               </p>
