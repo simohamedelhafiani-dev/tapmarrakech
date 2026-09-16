@@ -571,246 +571,261 @@ function EstablishmentsSection({
   reload: () => Promise<void>;
   businessTypes: AIBusinessType[];
 }) {
-  const [showForm, setShowForm] = useState(false);
-  const [selected, setSelected] = useState<Establishment | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const selected = establishments.find((item) => item.id === selectedId) ?? null;
+
+  if (selected) {
+    return (
+      <EstablishmentWorkspace
+        establishment={selected}
+        businessTypes={businessTypes}
+        onBack={() => setSelectedId(null)}
+        onReload={reload}
+      />
+    );
+  }
 
   return (
     <div>
       <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
-            Gestion globale
-          </p>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">Gestion</p>
           <h2 className="font-display text-3xl text-forest md:text-4xl">Établissements</h2>
-          <p className="mt-2 text-sm text-ink/50">
-            Chaque établissement possède maintenant son espace de gestion centralisé.
-          </p>
+          <p className="mt-2 text-sm text-ink/50">Cliquez sur un établissement pour ouvrir son espace de gestion complet.</p>
         </div>
-        <button
-          onClick={() => setShowForm(true)}
-          className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white transition hover:bg-forest-light"
-        >
-          + Ajouter un établissement
-        </button>
+        <CreateEstablishmentButton reload={reload} businessTypes={businessTypes} />
       </div>
-
-      {showForm && (
-        <CreateEstablishmentForm
-          close={() => setShowForm(false)}
-          reload={reload}
-          businessTypes={businessTypes}
-        />
-      )}
 
       <div className="overflow-hidden rounded-2xl border border-ink/5 bg-white shadow-sm">
         {loading ? (
           <div className="p-8 text-sm text-ink/40">Chargement...</div>
         ) : establishments.length === 0 ? (
-          <div className="p-10 text-center">
-            <Building2 size={35} className="mx-auto text-ink/20" />
-            <p className="mt-4 text-sm text-ink/50">Aucun établissement créé.</p>
-          </div>
+          <div className="p-10 text-center text-sm text-ink/50">Aucun établissement créé.</div>
         ) : (
           <div className="divide-y divide-ink/5">
             {establishments.map((establishment) => {
               const accessLink = `${window.location.origin}/r/${establishment.slug}`;
               const type = businessTypes.find((item) => item.id === establishment.ai_business_type_id)?.name;
-
               return (
-                <div key={establishment.id} className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
-                  <div className="flex min-w-0 items-center gap-4">
-                    <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-forest text-white">
-                      <Building2 size={19} />
-                    </div>
+                <button
+                  key={establishment.id}
+                  onClick={() => setSelectedId(establishment.id)}
+                  className="flex w-full flex-col gap-4 p-5 text-left transition hover:bg-[#fbfbf8] md:flex-row md:items-center md:justify-between"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-forest text-white"><Building2 size={19} /></div>
                     <div className="min-w-0">
                       <h3 className="text-sm font-semibold">{establishment.name}</h3>
                       <p className="mt-1 text-xs text-ink/40">{type ?? 'Type non défini'} · /r/{establishment.slug}</p>
-                      <p className="mt-1 break-all text-[11px] text-ink/35">{accessLink}</p>
+                      <p className="mt-1 truncate text-[11px] text-ink/30">{accessLink}</p>
                     </div>
                   </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      onClick={() => setSelected(establishment)}
-                      className="rounded-lg bg-forest px-3 py-2 text-xs font-semibold text-white transition hover:bg-forest-light"
-                    >
-                      Gérer l’établissement
-                    </button>
-                    <button
-                      onClick={async () => {
-                        await navigator.clipboard.writeText(accessLink);
-                        alert('Lien public copié.');
-                      }}
-                      className="inline-flex items-center gap-2 rounded-lg border border-ink/10 px-3 py-2 text-xs font-medium transition hover:bg-[#f7f7f3]"
-                    >
-                      <Copy size={14} /> Copier le lien
-                    </button>
-                  </div>
-                </div>
+                  <span className="shrink-0 rounded-lg bg-forest px-4 py-2 text-xs font-semibold text-white">Gérer →</span>
+                </button>
               );
             })}
           </div>
         )}
       </div>
-
-      {selected && (
-        <EstablishmentWorkspace
-          establishment={selected}
-          businessTypes={businessTypes}
-          close={() => setSelected(null)}
-        />
-      )}
     </div>
   );
 }
 
+function CreateEstablishmentButton({
+  reload,
+  businessTypes,
+}: {
+  reload: () => Promise<void>;
+  businessTypes: AIBusinessType[];
+}) {
+  const [showForm, setShowForm] = useState(false);
+  return (
+    <>
+      <button onClick={() => setShowForm(true)} className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white hover:bg-forest-light">+ Ajouter un établissement</button>
+      {showForm && <CreateEstablishmentForm close={() => setShowForm(false)} reload={reload} businessTypes={businessTypes} />}
+    </>
+  );
+}
+
+type WorkspaceTab = 'profile' | 'wifi' | 'menu' | 'promotions' | 'reviews' | 'loyalty' | 'team' | 'analytics' | 'public';
+
+type MenuCategory = { id: string; name: string; description: string | null; display_order: number; active: boolean };
+type MenuItem = { id: string; category_id: string; name: string; description: string | null; price: number; image_url: string | null; display_order: number; active: boolean };
+type Promotion = { id: string; name: string; description: string | null; image_url: string | null; normal_price: number | null; promo_price: number | null; start_at: string | null; end_at: string | null; active: boolean; display_order: number };
+
 function EstablishmentWorkspace({
   establishment,
   businessTypes,
-  close,
+  onBack,
+  onReload,
 }: {
   establishment: Establishment;
   businessTypes: AIBusinessType[];
-  close: () => void;
+  onBack: () => void;
+  onReload: () => Promise<void>;
 }) {
-  const [tab, setTab] = useState<'general' | 'menu' | 'promotions' | 'reviews' | 'loyalty' | 'team' | 'analytics' | 'ai'>('general');
-  const [details, setDetails] = useState<any>(null);
-  const [counts, setCounts] = useState({ menu: 0, promotions: 0, reviews: 0, customers: 0, staff: 0 });
+  const [tab, setTab] = useState<WorkspaceTab>('profile');
   const [saving, setSaving] = useState(false);
+  const [profile, setProfile] = useState<any>(establishment);
+  const [wifi, setWifi] = useState({ ssid: '', password: '', active: true });
+  const [categories, setCategories] = useState<MenuCategory[]>([]);
+  const [items, setItems] = useState<MenuItem[]>([]);
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [rewards, setRewards] = useState<any[]>([]);
+  const [loyalty, setLoyalty] = useState<any>({ points_per_currency: 1, currency: 'MAD', enabled: true });
+  const [customersCount, setCustomersCount] = useState(0);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [team, setTeam] = useState<StaffMember[]>([]);
+  const [eventsCount, setEventsCount] = useState(0);
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [menuCategoryName, setMenuCategoryName] = useState('');
+  const [menuItem, setMenuItem] = useState({ name: '', description: '', price: '', category_id: '' });
+  const [promotion, setPromotion] = useState({ name: '', description: '', normal_price: '', promo_price: '' });
+  const [reward, setReward] = useState({ name: '', description: '', points_required: '' });
 
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      const [est, menu, promotions, reviews, customers, staff] = await Promise.all([
-        supabase.from('establishments').select('*').eq('id', establishment.id).maybeSingle(),
-        supabase.from('menu_items').select('id', { count: 'exact', head: true }).eq('establishment_id', establishment.id),
-        supabase.from('promotions').select('id', { count: 'exact', head: true }).eq('establishment_id', establishment.id),
-        supabase.from('reviews').select('id', { count: 'exact', head: true }).eq('establishment_id', establishment.id),
-        supabase.from('loyalty_customers').select('id', { count: 'exact', head: true }).eq('establishment_id', establishment.id),
-        supabase.from('establishment_staff').select('id', { count: 'exact', head: true }).eq('establishment_id', establishment.id),
+  const publicLink = `${window.location.origin}/r/${establishment.slug}`;
+  const businessType = businessTypes.find((x) => x.id === establishment.ai_business_type_id)?.name ?? profile.business_type ?? 'Établissement';
+
+  const loadTab = async () => {
+    if (tab === 'profile' || tab === 'public') {
+      const { data } = await supabase.from('establishments').select('*').eq('id', establishment.id).maybeSingle();
+      if (data) setProfile(data);
+    }
+    if (tab === 'wifi') {
+      const { data } = await supabase.from('establishment_wifi').select('ssid,wifi_password,active').eq('establishment_id', establishment.id).maybeSingle();
+      if (data) setWifi({ ssid: data.ssid ?? '', password: data.wifi_password ?? '', active: data.active ?? true });
+    }
+    if (tab === 'menu') {
+      const [{ data: c }, { data: i }] = await Promise.all([
+        supabase.from('menu_categories').select('*').eq('establishment_id', establishment.id).order('display_order'),
+        supabase.from('menu_items').select('*').eq('establishment_id', establishment.id).order('display_order'),
       ]);
-      if (!active) return;
-      setDetails(est.data ?? establishment);
-      setCounts({
-        menu: menu.count ?? 0,
-        promotions: promotions.count ?? 0,
-        reviews: reviews.count ?? 0,
-        customers: customers.count ?? 0,
-        staff: staff.count ?? 0,
-      });
-    })();
-    return () => { active = false; };
-  }, [establishment]);
+      setCategories(c ?? []); setItems(i ?? []);
+      if (!menuItem.category_id && c?.[0]) setMenuItem((v) => ({ ...v, category_id: c[0].id }));
+    }
+    if (tab === 'promotions') {
+      const { data } = await supabase.from('promotions').select('*').eq('establishment_id', establishment.id).order('display_order');
+      setPromotions(data ?? []);
+    }
+    if (tab === 'loyalty') {
+      const [{ data: r }, { data: l }, { count }] = await Promise.all([
+        supabase.from('loyalty_rewards').select('*').eq('establishment_id', establishment.id).order('points_required'),
+        supabase.from('loyalty_settings').select('*').eq('establishment_id', establishment.id).maybeSingle(),
+        supabase.from('loyalty_customers').select('id', { count: 'exact', head: true }).eq('establishment_id', establishment.id),
+      ]);
+      setRewards(r ?? []); setLoyalty(l ?? { points_per_currency: 1, currency: 'MAD', enabled: true }); setCustomersCount(count ?? 0);
+    }
+    if (tab === 'reviews') {
+      const { data } = await supabase.from('reviews').select('*').eq('establishment_id', establishment.id).order('created_at', { ascending: false }).limit(100);
+      setReviews(data ?? []);
+    }
+    if (tab === 'team') setTeam((await supabase.from('establishment_staff').select('id,establishment_id,user_id,role,active,created_at').eq('establishment_id', establishment.id).order('created_at')).data?.map((x: any) => ({ ...x, email: '—', name: 'Membre', profileRole: null })) ?? []);
+    if (tab === 'analytics') {
+      const { count } = await supabase.from('analytics_events').select('id', { count: 'exact', head: true }).eq('establishment_id', establishment.id);
+      setEventsCount(count ?? 0);
+    }
+    if (tab === 'public') {
+      const { data } = await supabase.from('templates').select('*').order('name');
+      setTemplates(data ?? []);
+    }
+  };
 
-  const update = (key: string, value: any) => setDetails((current: any) => ({ ...(current ?? establishment), [key]: value }));
+  useEffect(() => { loadTab(); }, [tab, establishment.id]);
 
-  const saveGeneral = async () => {
-    if (!details) return;
+  const saveProfile = async () => {
     setSaving(true);
     const payload = {
-      name: details.name,
-      slug: details.slug,
-      business_type: details.business_type ?? null,
-      address: details.address ?? null,
-      city: details.city ?? null,
-      phone: details.phone ?? null,
-      email: details.email ?? null,
-      website_url: details.website_url ?? null,
-      description: details.description ?? null,
-      instagram_url: details.instagram_url ?? null,
-      facebook_url: details.facebook_url ?? null,
-      tiktok_url: details.tiktok_url ?? null,
-      whatsapp_number: details.whatsapp_number ?? null,
+      name: profile.name, slug: profile.slug, business_type: profile.business_type || null, address: profile.address || null,
+      city: profile.city || null, phone: profile.phone || null, email: profile.email || null, website_url: profile.website_url || null,
+      description: profile.description || null, instagram_url: profile.instagram_url || null, facebook_url: profile.facebook_url || null,
+      tiktok_url: profile.tiktok_url || null, whatsapp_number: profile.whatsapp_number || null,
+      page_template_id: profile.page_template_id || null, menu_template_id: profile.menu_template_id || null,
     };
     const { error } = await supabase.from('establishments').update(payload).eq('id', establishment.id);
     setSaving(false);
-    if (error) alert(`Impossible d'enregistrer : ${error.message}`);
-    else alert('Établissement enregistré.');
+    if (error) return alert(error.message);
+    await onReload(); alert('Établissement enregistré.');
   };
 
-  const tabs = [
-    ['general', 'Général'], ['menu', 'Menu'], ['promotions', 'Promotions'], ['reviews', 'Avis'],
-    ['loyalty', 'Fidélité'], ['team', 'Équipe'], ['analytics', 'Analytics'], ['ai', 'IA'],
-  ] as const;
+  const saveWifi = async () => {
+    setSaving(true);
+    const { error } = await supabase.from('establishment_wifi').upsert({ establishment_id: establishment.id, ssid: wifi.ssid, wifi_password: wifi.password || null, active: wifi.active }, { onConflict: 'establishment_id' });
+    setSaving(false); if (error) return alert(error.message); alert('Wi-Fi enregistré.');
+  };
+
+  const addCategory = async () => {
+    if (!menuCategoryName.trim()) return;
+    const { error } = await supabase.from('menu_categories').insert({ establishment_id: establishment.id, name: menuCategoryName.trim(), display_order: categories.length });
+    if (error) return alert(error.message); setMenuCategoryName(''); loadTab();
+  };
+
+  const addMenuItem = async () => {
+    if (!menuItem.name.trim() || !menuItem.category_id) return alert('Nom et catégorie obligatoires.');
+    const { error } = await supabase.from('menu_items').insert({ establishment_id: establishment.id, category_id: menuItem.category_id, name: menuItem.name.trim(), description: menuItem.description.trim() || null, price: Number(menuItem.price) || 0, display_order: items.filter((x) => x.category_id === menuItem.category_id).length });
+    if (error) return alert(error.message); setMenuItem({ name: '', description: '', price: '', category_id: menuItem.category_id }); loadTab();
+  };
+
+  const addPromotion = async () => {
+    if (!promotion.name.trim()) return;
+    const { error } = await supabase.from('promotions').insert({ establishment_id: establishment.id, name: promotion.name.trim(), description: promotion.description.trim() || null, normal_price: promotion.normal_price ? Number(promotion.normal_price) : null, promo_price: promotion.promo_price ? Number(promotion.promo_price) : null, active: true, display_order: promotions.length });
+    if (error) return alert(error.message); setPromotion({ name: '', description: '', normal_price: '', promo_price: '' }); loadTab();
+  };
+
+  const addReward = async () => {
+    if (!reward.name.trim() || !Number(reward.points_required)) return;
+    const { error } = await supabase.from('loyalty_rewards').insert({ establishment_id: establishment.id, name: reward.name.trim(), description: reward.description.trim() || null, points_required: Number(reward.points_required), active: true });
+    if (error) return alert(error.message); setReward({ name: '', description: '', points_required: '' }); loadTab();
+  };
+
+  const tabs: { id: WorkspaceTab; label: string }[] = [
+    { id: 'profile', label: 'Profil' }, { id: 'wifi', label: 'Wi-Fi' }, { id: 'menu', label: 'Menu' }, { id: 'promotions', label: 'Promotions' },
+    { id: 'reviews', label: 'Avis' }, { id: 'loyalty', label: 'Fidélité' }, { id: 'team', label: 'Équipe' }, { id: 'analytics', label: 'Analytics' }, { id: 'public', label: 'Lien public' },
+  ];
+
+  const field = (label: string, key: string, type = 'text') => (
+    <label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">{label}</span><input type={type} value={profile[key] ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, [key]: e.target.value }))} className="w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm outline-none focus:border-forest" /></label>
+  );
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-ink/50 p-3 backdrop-blur-sm md:p-8">
-      <div className="mx-auto min-h-[calc(100vh-24px)] max-w-[1380px] overflow-hidden rounded-3xl bg-[#f7f7f3] shadow-2xl md:min-h-[calc(100vh-64px)]">
-        <div className="flex items-center justify-between border-b border-ink/10 bg-forest px-5 py-5 text-white md:px-8">
-          <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">Espace établissement</p>
-            <h3 className="mt-1 truncate font-display text-2xl">{details?.name ?? establishment.name}</h3>
-            <p className="mt-1 text-xs text-white/50">/r/{establishment.slug}</p>
-          </div>
-          <button onClick={close} className="rounded-xl p-2 text-white/60 transition hover:bg-white/10 hover:text-white"><X size={22} /></button>
-        </div>
-
-        <div className="overflow-x-auto border-b border-ink/10 bg-white px-4 md:px-6">
-          <div className="flex min-w-max gap-1 py-2">
-            {tabs.map(([id, label]) => (
-              <button key={id} onClick={() => setTab(id)} className={`rounded-xl px-4 py-2.5 text-xs font-semibold transition ${tab === id ? 'bg-forest text-white' : 'text-ink/50 hover:bg-[#f7f7f3]'}`}>
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="p-5 md:p-8">
-          {tab === 'general' && details && (
-            <div className="space-y-6">
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {[
-                  ['name', 'Nom'], ['slug', 'Slug'], ['address', 'Adresse'], ['city', 'Ville'],
-                  ['phone', 'Téléphone'], ['email', 'Email'], ['website_url', 'Site web'],
-                  ['instagram_url', 'Instagram'], ['facebook_url', 'Facebook'], ['tiktok_url', 'TikTok'], ['whatsapp_number', 'WhatsApp'],
-                ].map(([key, label]) => (
-                  <label key={key} className="block">
-                    <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-ink/40">{label}</span>
-                    <input value={details[key] ?? ''} onChange={(e) => update(key, e.target.value)} className="w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm outline-none focus:border-forest" />
-                  </label>
-                ))}
-                <label className="block">
-                  <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-ink/40">Type</span>
-                  <select value={details.business_type ?? ''} onChange={(e) => update('business_type', e.target.value)} className="w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm outline-none">
-                    <option value="">Non défini</option>
-                    {businessTypes.map((type) => <option key={type.id} value={type.name}>{type.name}</option>)}
-                  </select>
-                </label>
-              </div>
-              <label className="block">
-                <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-ink/40">Description</span>
-                <textarea value={details.description ?? ''} onChange={(e) => update('description', e.target.value)} rows={4} className="w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm outline-none focus:border-forest" />
-              </label>
-              <div className="flex flex-wrap gap-3">
-                <button onClick={saveGeneral} disabled={saving} className="rounded-xl bg-forest px-5 py-3 text-xs font-semibold text-white disabled:opacity-50">{saving ? 'Enregistrement...' : 'Enregistrer les informations'}</button>
-                <button onClick={() => window.open(`${window.location.origin}/r/${establishment.slug}`, '_blank')} className="rounded-xl border border-ink/10 bg-white px-5 py-3 text-xs font-semibold">Ouvrir la page publique</button>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-5">
-                {[
-                  ['Menu', counts.menu], ['Promotions', counts.promotions], ['Avis', counts.reviews], ['Clients fidélité', counts.customers], ['Équipe', counts.staff],
-                ].map(([label, value]) => <div key={String(label)} className="rounded-2xl border border-ink/5 bg-white p-5"><p className="text-xs text-ink/40">{label}</p><p className="mt-2 text-2xl font-semibold text-forest">{value}</p></div>)}
-              </div>
-            </div>
-          )}
-
-          {tab !== 'general' && (
-            <div className="rounded-2xl border border-dashed border-ink/10 bg-white p-8 text-center">
-              <h4 className="font-display text-2xl text-forest">{tabs.find(([id]) => id === tab)?.[1]}</h4>
-              <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-ink/50">
-                Cet espace est réservé à la gestion globale de cet établissement. La base est maintenant préparée pour brancher le module directement ici sans donner à l’Admin une restriction de type d’établissement.
-              </p>
-              <div className="mt-6 flex flex-wrap justify-center gap-3">
-                {tab === 'menu' && <button onClick={() => window.open('/dashboard/menu', '_blank')} className="rounded-xl bg-forest px-5 py-3 text-xs font-semibold text-white">Ouvrir le gestionnaire Menu</button>}
-                {tab === 'reviews' && <button onClick={() => window.open('/admin', '_blank')} className="rounded-xl bg-forest px-5 py-3 text-xs font-semibold text-white">Ouvrir les avis Admin</button>}
-                {tab === 'loyalty' && <button onClick={() => window.open('/dashboard/loyalty', '_blank')} className="rounded-xl bg-forest px-5 py-3 text-xs font-semibold text-white">Ouvrir la fidélité</button>}
-              </div>
-            </div>
-          )}
-        </div>
+    <div>
+      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div><button onClick={onBack} className="mb-3 text-xs font-semibold text-forest">← Retour aux établissements</button><h2 className="font-display text-3xl text-forest">{profile.name ?? establishment.name}</h2><p className="mt-1 text-sm text-ink/45">{businessType} · espace de gestion complet</p></div>
+        <a href={publicLink} target="_blank" rel="noreferrer" className="rounded-xl bg-forest px-4 py-3 text-center text-xs font-semibold text-white">Ouvrir la page publique ↗</a>
       </div>
+
+      <div className="mb-6 flex gap-2 overflow-x-auto rounded-2xl border border-ink/5 bg-white p-2 shadow-sm">
+        {tabs.map((x) => <button key={x.id} onClick={() => setTab(x.id)} className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-xs font-semibold ${tab === x.id ? 'bg-forest text-white' : 'text-ink/55 hover:bg-[#f7f7f3]'}`}>{x.label}</button>)}
+      </div>
+
+      {tab === 'profile' && <div className="grid gap-4 md:grid-cols-2">
+        {field('Nom', 'name')}{field('Slug public', 'slug')}{field('Adresse', 'address')}{field('Ville', 'city')}{field('Téléphone', 'phone')}{field('Email', 'email', 'email')}{field('Site web', 'website_url')}{field('WhatsApp', 'whatsapp_number')}{field('Instagram', 'instagram_url')}{field('Facebook', 'facebook_url')}{field('TikTok', 'tiktok_url')}
+        <label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">Type</span><select value={profile.ai_business_type_id ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, ai_business_type_id: e.target.value || null }))} className="w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm">{businessTypes.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
+        <label className="block md:col-span-2"><span className="mb-1 block text-xs font-medium text-ink/50">Description</span><textarea value={profile.description ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, description: e.target.value }))} rows={4} className="w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm" /></label>
+        <div className="md:col-span-2"><button disabled={saving} onClick={saveProfile} className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white">{saving ? 'Enregistrement...' : 'Enregistrer le profil'}</button></div>
+      </div>}
+
+      {tab === 'wifi' && <div className="max-w-xl rounded-2xl border border-ink/5 bg-white p-6 shadow-sm"><h3 className="text-lg font-semibold">Wi-Fi client</h3><p className="mt-1 mb-5 text-xs text-ink/45">Ces informations alimenteront le module Wi-Fi de la page publique.</p><div className="space-y-4"><label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">Nom du réseau</span><input value={wifi.ssid} onChange={(e) => setWifi({ ...wifi, ssid: e.target.value })} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></label><label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">Mot de passe</span><input value={wifi.password} onChange={(e) => setWifi({ ...wifi, password: e.target.value })} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></label><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={wifi.active} onChange={(e) => setWifi({ ...wifi, active: e.target.checked })} /> Module actif</label><button disabled={saving} onClick={saveWifi} className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white">Enregistrer le Wi-Fi</button></div></div>}
+
+      {tab === 'menu' && <div className="space-y-5"><div className="grid gap-5 md:grid-cols-2"><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Catégories</h3><div className="mt-4 flex gap-2"><input value={menuCategoryName} onChange={(e) => setMenuCategoryName(e.target.value)} placeholder="Ex. Entrées" className="min-w-0 flex-1 rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><button onClick={addCategory} className="rounded-xl bg-forest px-4 text-xs font-semibold text-white">Ajouter</button></div><div className="mt-4 space-y-2">{categories.map((c) => <div key={c.id} className="flex items-center justify-between rounded-xl bg-[#f7f7f3] px-3 py-2.5 text-sm"><span>{c.name}</span><button onClick={async () => { const { error } = await supabase.from('menu_categories').update({ active: !c.active }).eq('id', c.id); if (error) alert(error.message); else loadTab(); }} className="text-xs text-ink/45">{c.active ? 'Actif' : 'Inactif'}</button></div>)}</div></div><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Nouveau produit</h3><div className="mt-4 space-y-3"><input value={menuItem.name} onChange={(e) => setMenuItem({ ...menuItem, name: e.target.value })} placeholder="Nom" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><select value={menuItem.category_id} onChange={(e) => setMenuItem({ ...menuItem, category_id: e.target.value })} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"><option value="">Catégorie</option>{categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select><input value={menuItem.price} onChange={(e) => setMenuItem({ ...menuItem, price: e.target.value })} placeholder="Prix MAD" type="number" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><textarea value={menuItem.description} onChange={(e) => setMenuItem({ ...menuItem, description: e.target.value })} placeholder="Description" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><button onClick={addMenuItem} className="rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Ajouter le produit</button></div></div></div><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Produits</h3><div className="mt-4 grid gap-2 md:grid-cols-2">{items.map((i) => <div key={i.id} className="rounded-xl bg-[#f7f7f3] p-3"><div className="flex justify-between gap-3"><strong className="text-sm">{i.name}</strong><span className="text-sm font-semibold">{Number(i.price).toFixed(2)} MAD</span></div><p className="mt-1 text-xs text-ink/45">{i.description || 'Sans description'}</p><button onClick={async () => { const { error } = await supabase.from('menu_items').update({ active: !i.active }).eq('id', i.id); if (error) alert(error.message); else loadTab(); }} className="mt-2 text-[11px] text-ink/45">{i.active ? 'Désactiver' : 'Activer'}</button></div>)}</div></div></div>}
+
+      {tab === 'promotions' && <div className="space-y-5"><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Créer une promotion</h3><div className="mt-4 grid gap-3 md:grid-cols-4"><input value={promotion.name} onChange={(e) => setPromotion({ ...promotion, name: e.target.value })} placeholder="Nom" className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><input value={promotion.description} onChange={(e) => setPromotion({ ...promotion, description: e.target.value })} placeholder="Description" className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><input value={promotion.normal_price} onChange={(e) => setPromotion({ ...promotion, normal_price: e.target.value })} placeholder="Prix normal" type="number" className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><input value={promotion.promo_price} onChange={(e) => setPromotion({ ...promotion, promo_price: e.target.value })} placeholder="Prix promo" type="number" className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></div><button onClick={addPromotion} className="mt-3 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Ajouter</button></div><div className="grid gap-3 md:grid-cols-2">{promotions.map((p) => <div key={p.id} className="rounded-2xl border border-ink/5 bg-white p-5"><div className="flex justify-between"><strong>{p.name}</strong><button onClick={async () => { const { error } = await supabase.from('promotions').update({ active: !p.active }).eq('id', p.id); if (error) alert(error.message); else loadTab(); }} className="text-xs text-ink/45">{p.active ? 'Actif' : 'Inactif'}</button></div><p className="mt-2 text-sm text-ink/55">{p.description || 'Sans description'}</p><p className="mt-3 text-sm font-semibold">{p.promo_price ?? '—'} MAD <span className="ml-2 text-xs text-ink/35 line-through">{p.normal_price ?? ''}</span></p></div>)}</div></div>}
+
+      {tab === 'reviews' && <div className="space-y-4"><div className="grid gap-3 md:grid-cols-3"><StatCard label="Avis" value={reviews.length} /><StatCard label="Note moyenne" value={reviews.length ? (reviews.reduce((a, r) => a + Number(r.rating || 0), 0) / reviews.length).toFixed(1) : '—'} /><StatCard label="Dernier avis" value={reviews[0] ? new Date(reviews[0].created_at).toLocaleDateString('fr-FR') : '—'} /></div><div className="rounded-2xl border border-ink/5 bg-white p-5">{reviews.length === 0 ? <p className="text-sm text-ink/45">Aucun avis.</p> : <div className="space-y-3">{reviews.map((r) => <div key={r.id} className="rounded-xl bg-[#f7f7f3] p-4"><div className="flex justify-between"><strong>{r.rating}/5</strong><span className="text-xs text-ink/35">{new Date(r.created_at).toLocaleDateString('fr-FR')}</span></div><p className="mt-2 text-sm text-ink/60">{r.feedback || r.comment || 'Aucun commentaire'}</p></div>)}</div>}</div></div>}
+
+      {tab === 'loyalty' && <div className="space-y-5"><div className="grid gap-3 md:grid-cols-3"><StatCard label="Clients fidélité" value={customersCount} /><StatCard label="Récompenses" value={rewards.length} /><StatCard label="Programme" value={loyalty.enabled ? 'Actif' : 'Inactif'} /></div><div className="grid gap-5 md:grid-cols-2"><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Paramètres</h3><div className="mt-4 flex gap-3"><input type="number" value={loyalty.points_per_currency ?? 1} onChange={(e) => setLoyalty({ ...loyalty, points_per_currency: Number(e.target.value) })} className="w-32 rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><select value={loyalty.currency ?? 'MAD'} onChange={(e) => setLoyalty({ ...loyalty, currency: e.target.value })} className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm"><option>MAD</option><option>EUR</option></select></div><label className="mt-3 flex items-center gap-2 text-sm"><input type="checkbox" checked={loyalty.enabled ?? true} onChange={(e) => setLoyalty({ ...loyalty, enabled: e.target.checked })} /> Programme actif</label><button onClick={async () => { const { error } = await supabase.from('loyalty_settings').upsert({ establishment_id: establishment.id, points_per_currency: loyalty.points_per_currency, currency: loyalty.currency, enabled: loyalty.enabled }, { onConflict: 'establishment_id' }); if (error) alert(error.message); else alert('Paramètres fidélité enregistrés.'); }} className="mt-4 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Enregistrer</button></div><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Nouvelle récompense</h3><div className="mt-4 space-y-3"><input value={reward.name} onChange={(e) => setReward({ ...reward, name: e.target.value })} placeholder="Nom" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><input value={reward.points_required} onChange={(e) => setReward({ ...reward, points_required: e.target.value })} placeholder="Points requis" type="number" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><textarea value={reward.description} onChange={(e) => setReward({ ...reward, description: e.target.value })} placeholder="Description" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><button onClick={addReward} className="rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Ajouter</button></div></div></div><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Récompenses</h3><div className="mt-4 grid gap-2 md:grid-cols-2">{rewards.map((r) => <div key={r.id} className="flex items-center justify-between rounded-xl bg-[#f7f7f3] p-3"><span><strong className="text-sm">{r.name}</strong><span className="ml-2 text-xs text-ink/40">{r.points_required} pts</span></span><button onClick={async () => { const { error } = await supabase.from('loyalty_rewards').update({ active: !r.active }).eq('id', r.id); if (error) alert(error.message); else loadTab(); }} className="text-xs text-ink/45">{r.active ? 'Actif' : 'Inactif'}</button></div>)}</div></div></div>}
+
+      {tab === 'team' && <div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Équipe de l’établissement</h3><p className="mt-1 text-xs text-ink/45">Les comptes sont gérés depuis les sections Responsables / Employés de l’Admin.</p><div className="mt-5 space-y-2">{team.length === 0 ? <p className="text-sm text-ink/45">Aucun membre affecté.</p> : team.map((m) => <div key={m.id} className="flex justify-between rounded-xl bg-[#f7f7f3] p-3 text-sm"><span>{m.name}</span><span className="text-xs text-ink/45">{m.role} · {m.active ? 'Actif' : 'Inactif'}</span></div>)}</div></div>}
+
+      {tab === 'analytics' && <div className="grid gap-4 md:grid-cols-3"><StatCard label="Événements enregistrés" value={eventsCount} /><StatCard label="Avis" value={reviews.length || '—'} /><StatCard label="Page publique" value="/r/:slug" /></div>}
+
+      {tab === 'public' && <div className="space-y-5"><div className="rounded-2xl border border-ink/5 bg-white p-6"><p className="text-xs font-semibold uppercase tracking-wider text-gold">Lien unique QR / NFC</p><h3 className="mt-2 text-xl font-semibold">{publicLink}</h3><p className="mt-2 text-sm text-ink/50">Ce lien doit devenir la page client complète : Wi-Fi, menu, promotions, fidélité, avis et modules adaptés au type d’établissement.</p><div className="mt-5 flex flex-wrap gap-2"><button onClick={() => navigator.clipboard.writeText(publicLink).then(() => alert('Lien copié.'))} className="rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Copier le lien</button><a href={publicLink} target="_blank" rel="noreferrer" className="rounded-xl border border-ink/10 px-4 py-2.5 text-xs font-semibold">Tester la page</a></div></div><div className="rounded-2xl border border-ink/5 bg-white p-6"><h3 className="font-semibold">Templates</h3><div className="mt-4 grid gap-3 md:grid-cols-2"><label className="text-xs text-ink/50">Template page<select value={profile.page_template_id ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, page_template_id: e.target.value || null }))} className="mt-1 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"><option value="">Automatique / défaut</option>{templates.filter((t) => t.kind === 'page' && t.active).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label><label className="text-xs text-ink/50">Template menu<select value={profile.menu_template_id ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, menu_template_id: e.target.value || null }))} className="mt-1 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"><option value="">Automatique / défaut</option>{templates.filter((t) => t.kind === 'menu' && t.active).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label></div><button onClick={saveProfile} className="mt-4 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Enregistrer les templates</button></div></div>}
     </div>
   );
+}
+
+function StatCard({ label, value }: { label: string; value: string | number }) {
+  return <div className="rounded-2xl border border-ink/5 bg-white p-5 shadow-sm"><p className="text-xs text-ink/40">{label}</p><p className="mt-2 text-2xl font-semibold text-forest">{value}</p></div>;
 }
 
 function CreateEstablishmentForm({
