@@ -30,6 +30,7 @@ import {
   ShieldCheck,
   TrendingUp,
   WalletCards,
+  Trash2,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -83,6 +84,7 @@ type BillingPlan = {
   price_mad: number;
   interval: string;
   active: boolean;
+  features?: string[] | null;
 };
 
 type BillingSubscription = {
@@ -277,7 +279,7 @@ export default function Admin() {
       { count: failedPayments },
       { count: overdueInvoices },
     ] = await Promise.all([
-      supabase.from('subscription_plans').select('id,name,price_mad,interval,active').order('price_mad'),
+      supabase.from('subscription_plans').select('id,name,price_mad,interval,active,features').order('price_mad'),
       supabase.from('subscriptions').select('id,establishment_id,plan_id,status,started_at,current_period_end,subscription_plans(id,name,price_mad,interval,active)'),
       supabase.from('payments').select('id', { count: 'exact', head: true }).gte('paid_at', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()).eq('status', 'paid'),
       supabase.from('payments').select('id', { count: 'exact', head: true }).eq('status', 'failed'),
@@ -1069,7 +1071,7 @@ function EstablishmentWorkspace({
 
     if (tab === 'billing') {
       setBillingError('');
-      const { data: plans } = await supabase.from('subscription_plans').select('id,name,price_mad,interval,active').eq('active', true).order('price_mad');
+      const { data: plans } = await supabase.from('subscription_plans').select('id,name,price_mad,interval,active,features').eq('active', true).order('price_mad');
       setWorkspacePlans((plans ?? []) as BillingPlan[]);
       const { data: sub, error: subError } = await supabase
         .from('subscriptions')
@@ -1598,6 +1600,55 @@ function BillingSection({
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('all');
   const [plan, setPlan] = useState('all');
+  const [editingPlan, setEditingPlan] = useState<BillingPlan | null>(null);
+  const [showPlanEditor, setShowPlanEditor] = useState(false);
+  const [planForm, setPlanForm] = useState({ name: '', price_mad: '', interval: 'month', features: '' });
+  const [savingPlan, setSavingPlan] = useState(false);
+
+  const openPlanEditor = (value?: BillingPlan) => {
+    setEditingPlan(value ?? null);
+    setShowPlanEditor(true);
+    setPlanForm({
+      name: value?.name ?? '',
+      price_mad: value ? String(value.price_mad) : '',
+      interval: value?.interval ?? 'month',
+      features: (value?.features ?? []).join('\n'),
+    });
+  };
+
+  const savePlan = async () => {
+    const name = planForm.name.trim();
+    const price = Number(planForm.price_mad);
+    const features = planForm.features.split('\n').map((x) => x.trim()).filter(Boolean);
+    if (!name) return alert('Le nom du plan est obligatoire.');
+    if (!Number.isFinite(price) || price < 0) return alert('Le prix doit être un montant valide.');
+    setSavingPlan(true);
+    const payload = { name, price_mad: price, interval: planForm.interval, features };
+    const result = editingPlan
+      ? await supabase.from('subscription_plans').update(payload).eq('id', editingPlan.id)
+      : await supabase.from('subscription_plans').insert({ ...payload, active: true });
+    setSavingPlan(false);
+    if (result.error) return alert(`Impossible d'enregistrer le plan : ${result.error.message}`);
+    setEditingPlan(null);
+    setShowPlanEditor(false);
+    setPlanForm({ name: '', price_mad: '', interval: 'month', features: '' });
+    await reload();
+  };
+
+  const togglePlanActive = async (value: BillingPlan) => {
+    const { error } = await supabase.from('subscription_plans').update({ active: !value.active }).eq('id', value.id);
+    if (error) return alert(`Impossible de modifier le plan : ${error.message}`);
+    await reload();
+  };
+
+  const deletePlan = async (value: BillingPlan) => {
+    const used = billing.subscriptions.some((sub) => sub.plan_id === value.id);
+    if (used) return alert('Ce plan est utilisé par un abonnement. Désactive-le plutôt que de le supprimer.');
+    if (!confirm(`Supprimer le plan « ${value.name} » ?`)) return;
+    const { error } = await supabase.from('subscription_plans').delete().eq('id', value.id);
+    if (error) return alert(`Impossible de supprimer le plan : ${error.message}`);
+    await reload();
+  };
 
   const establishmentMap = useMemo(
     () => new Map(establishments.map((e) => [e.id, e])),
@@ -1680,13 +1731,42 @@ function BillingSection({
         })}
       </div>
 
-      <div className="mt-8">
-        <h3 className="mb-4 text-sm font-semibold">Plans disponibles</h3>
-        <div className="grid gap-4 md:grid-cols-3">
+      <div className="mt-8 rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
+        <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
+          <div>
+            <h3 className="text-sm font-semibold">Plans & fonctionnalités</h3>
+            <p className="mt-1 text-xs text-ink/45">Crée, modifie les prix et définis précisément ce que chaque abonnement inclut.</p>
+          </div>
+          <button onClick={() => openPlanEditor()} className="inline-flex items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white"><Plus size={14} /> Nouveau plan</button>
+        </div>
+
+        {showPlanEditor ? (
+          <div className="mt-5 rounded-2xl border border-forest/10 bg-[#fbfbf8] p-5">
+            <div className="grid gap-4 md:grid-cols-3">
+              <label className="text-xs font-semibold">Nom du plan<input value={planForm.name} onChange={(e) => setPlanForm((v) => ({ ...v, name: e.target.value }))} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm font-normal outline-none focus:border-forest" placeholder="Premium" /></label>
+              <label className="text-xs font-semibold">Prix (MAD)<input type="number" min="0" value={planForm.price_mad} onChange={(e) => setPlanForm((v) => ({ ...v, price_mad: e.target.value }))} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm font-normal outline-none focus:border-forest" placeholder="499" /></label>
+              <label className="text-xs font-semibold">Facturation<select value={planForm.interval} onChange={(e) => setPlanForm((v) => ({ ...v, interval: e.target.value }))} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm font-normal"><option value="month">Mensuelle</option><option value="year">Annuelle</option></select></label>
+            </div>
+            <label className="mt-4 block text-xs font-semibold">Fonctionnalités incluses <span className="font-normal text-ink/40">(une fonctionnalité par ligne)</span>
+              <textarea rows={6} value={planForm.features} onChange={(e) => setPlanForm((v) => ({ ...v, features: e.target.value }))} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-3 text-sm font-normal outline-none focus:border-forest" placeholder={"Page publique\nAvis & réputation\nFidélité\nMenu\nPromotions\nAnalytics\nAssistant IA"} />
+            </label>
+            <div className="mt-4 flex justify-end gap-2">
+              <button onClick={() => { setEditingPlan(null); setShowPlanEditor(false); setPlanForm({ name: '', price_mad: '', interval: 'month', features: '' }); }} className="rounded-xl border border-ink/10 bg-white px-4 py-2.5 text-xs font-semibold">Annuler</button>
+              <button onClick={savePlan} disabled={savingPlan} className="inline-flex items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-50"><Save size={14} /> {savingPlan ? 'Enregistrement…' : 'Enregistrer'}</button>
+            </div>
+          </div>
+        ) : null}
+
+        <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {billing.plans.map((p) => (
-            <div key={p.id} className="rounded-2xl border border-ink/5 bg-white p-5 shadow-sm">
-              <div className="flex items-center justify-between"><strong className="text-forest">{p.name}</strong><span className="text-lg font-semibold">{Number(p.price_mad).toLocaleString('fr-FR')} MAD</span></div>
-              <p className="mt-2 text-xs text-ink/40">{p.interval === 'year' ? 'Annuel' : 'Mensuel'} · {p.active ? 'Actif' : 'Inactif'}</p>
+            <div key={p.id} className="rounded-2xl border border-ink/5 bg-[#fdfdfb] p-5">
+              <div className="flex items-start justify-between gap-3"><div><strong className="text-forest">{p.name}</strong><p className="mt-1 text-xs text-ink/40">{p.interval === 'year' ? 'Annuel' : 'Mensuel'} · {p.active ? 'Actif' : 'Inactif'}</p></div><span className="text-lg font-semibold">{Number(p.price_mad).toLocaleString('fr-FR')} MAD</span></div>
+              <div className="mt-4 space-y-1.5">{(p.features ?? []).length ? (p.features ?? []).map((feature) => <div key={feature} className="flex gap-2 text-xs text-ink/60"><span className="text-forest">✓</span>{feature}</div>) : <p className="text-xs text-ink/35">Aucune fonctionnalité définie.</p>}</div>
+              <div className="mt-5 flex gap-2">
+                <button onClick={() => openPlanEditor(p)} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-ink/10 bg-white px-3 py-2 text-xs font-semibold"><Pencil size={13} /> Modifier</button>
+                <button onClick={() => togglePlanActive(p)} className="rounded-xl border border-ink/10 bg-white px-3 py-2 text-xs font-semibold">{p.active ? 'Désactiver' : 'Activer'}</button>
+                <button onClick={() => deletePlan(p)} title="Supprimer" className="rounded-xl border border-red-100 bg-white px-3 py-2 text-red-600"><Trash2 size={13} /></button>
+              </div>
             </div>
           ))}
         </div>
@@ -1824,7 +1904,7 @@ function CreateEstablishmentForm({
       .maybeSingle();
 
     if (defaultPlan && (data as any)?.id) {
-      const establishmentId = (data as any)[0].id;
+      const establishmentId = (data as any)?.id;
       const startedAt = new Date();
       const trialEnd = new Date(startedAt);
       trialEnd.setDate(trialEnd.getDate() + 14);
