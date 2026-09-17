@@ -26,6 +26,32 @@ import { useAuth } from '@/contexts/AuthContext';
 import type { Establishment, Review } from '@/lib/types';
 import { Stars } from '@/components/Stars';
 
+type LoyaltyCustomer = {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  phone: string;
+  points_balance: number | null;
+  total_points_earned: number | null;
+  total_points_redeemed: number | null;
+  visit_count: number | null;
+  created_at: string;
+  last_visit_at: string | null;
+};
+
+type LoyaltyTransaction = {
+  id: string;
+  establishment_id: string;
+  customer_id: string;
+  employee_id: string | null;
+  points: number | null;
+  amount: number | null;
+  description: string | null;
+  type: string;
+  invoice_number: string | null;
+  created_at: string;
+};
+
 const ranges = [
   {
     key: '7d',
@@ -444,6 +470,34 @@ export default function Dashboard() {
     const totalRevenue = loyaltyTransactions.reduce((sum, transaction) => sum + Number(transaction.amount || 0), 0);
     const averageBasket = currentTransactions.length ? currentRevenue / currentTransactions.length : 0;
 
+    const customerMap = new Map(
+      loyaltyCustomers.map((customer) => [customer.id, customer])
+    );
+
+    const topClients = Array.from(
+      currentTransactions.reduce((map, transaction) => {
+        const existing = map.get(transaction.customer_id) ?? {
+          customerId: transaction.customer_id,
+          revenue: 0,
+          visits: 0,
+          points: 0,
+        };
+
+        existing.revenue += Number(transaction.amount || 0);
+        existing.visits += 1;
+        existing.points += Number(transaction.points || 0);
+        map.set(transaction.customer_id, existing);
+        return map;
+      }, new Map<string, { customerId: string; revenue: number; visits: number; points: number }>())
+      .values()
+    )
+      .map((item) => ({
+        ...item,
+        customer: customerMap.get(item.customerId),
+      }))
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5);
+
     const growth = (current: number, previous: number) => {
       if (previous === 0) return current > 0 ? 100 : 0;
       return ((current - previous) / previous) * 100;
@@ -468,6 +522,7 @@ export default function Dashboard() {
       totalRevenue,
       currentTransactions: currentTransactions.length,
       averageBasket,
+      topClients,
       periodDays: selected.days,
     };
   }, [reviews, loyaltyCustomers, loyaltyTransactions, selected.days]);
@@ -700,7 +755,7 @@ export default function Dashboard() {
             </div>
             <p className="mt-3 font-display text-3xl text-forest">{loyaltyLoading ? '—' : `${analytics.activeRate.toFixed(1)} %`}</p>
             <p className="mt-2 text-xs text-ink/40">ayant visité l’établissement pendant la période sélectionnée</p>
-            <p className="mt-4 text-xs font-semibold text-ink/55">{loyaltyLoading ? '—' : `${analytics.activeCustomers30d} clients actifs`}</p>
+            <p className="mt-4 text-xs font-semibold text-ink/55">{loyaltyLoading ? '—' : `${analytics.activeCustomers} clients actifs`}</p>
           </div>
 
           <div className="rounded-2xl border border-ink/5 bg-[#f7f7f3] p-5">
