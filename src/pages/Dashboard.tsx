@@ -3,7 +3,10 @@ import {
   ArrowUpRight,
   BarChart3,
   CheckCircle2,
+  Coins,
+  Gift,
   MessageCircle,
+  Users,
   Star,
   TrendingDown,
   TrendingUp,
@@ -96,6 +99,8 @@ export default function Dashboard() {
 
   const [places, setPlaces] = useState<Establishment[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [loyaltyCustomers, setLoyaltyCustomers] = useState<LoyaltyCustomer[]>([]);
+  const [loyaltyLoading, setLoyaltyLoading] = useState(false);
   const [profileName, setProfileName] = useState<string>('');
   const [period, setPeriod] = useState('8w');
   const [selectedEstablishmentId, setSelectedEstablishmentId] = useState<string | null>(
@@ -266,6 +271,42 @@ export default function Dashboard() {
     };
 
     loadReviews();
+
+    return () => {
+      active = false;
+    };
+  }, [selectedEstablishmentId]);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadLoyalty = async () => {
+      if (!selectedEstablishmentId) {
+        setLoyaltyCustomers([]);
+        return;
+      }
+
+      setLoyaltyLoading(true);
+
+      const { data, error } = await supabase
+        .from('loyalty_customers')
+        .select(
+          'id, first_name, last_name, phone, points_balance, total_points_earned, total_points_redeemed, visit_count, created_at, last_visit_at'
+        )
+        .eq('establishment_id', selectedEstablishmentId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Erreur chargement fidélité:', error);
+        if (active) setLoyaltyCustomers([]);
+      } else if (active) {
+        setLoyaltyCustomers((data as LoyaltyCustomer[]) ?? []);
+      }
+
+      if (active) setLoyaltyLoading(false);
+    };
+
+    loadLoyalty();
 
     return () => {
       active = false;
@@ -511,6 +552,171 @@ export default function Dashboard() {
           accent="bg-[#f4e4e1] text-[#a15c50]"
         />
       </div>
+
+      {/* FIDÉLITÉ */}
+
+      <section className="mt-6 rounded-2xl border border-ink/5 bg-white p-5 shadow-soft md:p-7">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div>
+            <div className="flex items-center gap-2">
+              <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#f4ead3] text-gold">
+                <Gift size={17} />
+              </div>
+              <div>
+                <h2 className="font-display text-xl text-forest">Fidélité</h2>
+                <p className="text-xs text-ink/45">Suivez vos clients fidèles et l’activité du programme.</p>
+              </div>
+            </div>
+          </div>
+
+          <Link
+            to="/dashboard/loyalty"
+            className="flex w-fit items-center gap-2 rounded-xl border border-ink/10 bg-[#fafaf7] px-4 py-2.5 text-xs font-semibold text-forest transition hover:border-gold"
+          >
+            Gérer la fidélité
+            <ArrowUpRight size={14} />
+          </Link>
+        </div>
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <Stat
+            label="Clients fidélité"
+            value={loyaltyLoading ? '—' : loyaltyCustomers.length}
+            detail="Clients inscrits"
+            icon={Users}
+            accent="bg-[#e5eee9] text-forest"
+          />
+
+          <Stat
+            label="Nouveaux inscrits"
+            value={
+              loyaltyLoading
+                ? '—'
+                : loyaltyCustomers.filter((customer) => {
+                    const date = new Date(customer.created_at);
+                    const sevenDaysAgo = new Date();
+                    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+                    return date >= sevenDaysAgo;
+                  }).length
+            }
+            detail="Sur les 7 derniers jours"
+            icon={Gift}
+            accent="bg-[#f4ead3] text-gold"
+          />
+
+          <Stat
+            label="Points en circulation"
+            value={
+              loyaltyLoading
+                ? '—'
+                : loyaltyCustomers.reduce(
+                    (sum, customer) => sum + Number(customer.points_balance || 0),
+                    0
+                  )
+            }
+            detail="Solde total des clients"
+            icon={Coins}
+            accent="bg-[#e5eee9] text-forest"
+          />
+
+          <Stat
+            label="Visites enregistrées"
+            value={
+              loyaltyLoading
+                ? '—'
+                : loyaltyCustomers.reduce(
+                    (sum, customer) => sum + Number(customer.visit_count || 0),
+                    0
+                  )
+            }
+            detail="Total des visites fidélité"
+            icon={CheckCircle2}
+            accent="bg-[#f4ead3] text-gold"
+          />
+        </div>
+
+        <div className="mt-6 grid gap-6 xl:grid-cols-[1.35fr_1fr]">
+          <div className="rounded-2xl bg-[#f7f7f3] p-5">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h3 className="text-sm font-semibold text-forest">Activité du programme</h3>
+                <p className="mt-1 text-xs text-ink/40">Points gagnés et utilisés par vos clients.</p>
+              </div>
+            </div>
+
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <div className="rounded-xl bg-white p-4">
+                <p className="text-[11px] text-ink/45">Points gagnés</p>
+                <p className="mt-2 font-display text-2xl text-forest">
+                  {loyaltyLoading
+                    ? '—'
+                    : loyaltyCustomers.reduce(
+                        (sum, customer) => sum + Number(customer.total_points_earned || 0),
+                        0
+                      )}
+                </p>
+              </div>
+              <div className="rounded-xl bg-white p-4">
+                <p className="text-[11px] text-ink/45">Points utilisés</p>
+                <p className="mt-2 font-display text-2xl text-forest">
+                  {loyaltyLoading
+                    ? '—'
+                    : loyaltyCustomers.reduce(
+                        (sum, customer) => sum + Number(customer.total_points_redeemed || 0),
+                        0
+                      )}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-2xl bg-[#f7f7f3] p-5">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h3 className="text-sm font-semibold text-forest">Derniers inscrits</h3>
+                <p className="mt-1 text-xs text-ink/40">Les 5 clients les plus récents.</p>
+              </div>
+              <Link
+                to="/dashboard/loyalty"
+                className="text-xs font-semibold text-gold"
+              >
+                Tout voir
+              </Link>
+            </div>
+
+            <div className="mt-5 space-y-3">
+              {loyaltyLoading ? (
+                <p className="py-5 text-center text-sm text-ink/35">Chargement...</p>
+              ) : loyaltyCustomers.length ? (
+                loyaltyCustomers.slice(0, 5).map((customer) => (
+                  <div
+                    key={customer.id}
+                    className="flex items-center justify-between gap-3 rounded-xl bg-white px-4 py-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-forest">
+                        {[customer.first_name, customer.last_name].filter(Boolean).join(' ') || 'Client'}
+                      </p>
+                      <p className="mt-1 text-[11px] text-ink/40">
+                        Inscrit le {new Date(customer.created_at).toLocaleDateString('fr-FR')}
+                      </p>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <p className="text-sm font-semibold text-gold">{customer.points_balance} pts</p>
+                      <p className="mt-1 text-[10px] text-ink/35">{customer.visit_count} visite{customer.visit_count > 1 ? 's' : ''}</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="py-7 text-center">
+                  <Users className="mx-auto text-ink/15" size={24} />
+                  <p className="mt-2 text-sm text-ink/40">Aucun client fidélité pour le moment.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* GRAPHIQUE + DERNIERS AVIS */}
 
