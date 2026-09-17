@@ -964,6 +964,12 @@ function EstablishmentWorkspace({
   const [billingError, setBillingError] = useState('');
   const [creatingSubscription, setCreatingSubscription] = useState(false);
 
+  // CORRECTION: gestion directe de l'équipe depuis l'établissement sélectionné.
+  const [teamFormRole, setTeamFormRole] = useState<'responsible' | 'employee' | null>(null);
+  const [editingTeamMember, setEditingTeamMember] = useState<any | null>(null);
+  const [editingTeamName, setEditingTeamName] = useState('');
+  const [savingTeamMember, setSavingTeamMember] = useState(false);
+
   const [menuCategoryName, setMenuCategoryName] = useState('');
   const [menuItem, setMenuItem] = useState({ name: '', description: '', price: '', category_id: '' });
   const [promotion, setPromotion] = useState({ name: '', description: '', normal_price: '', promo_price: '' });
@@ -1120,8 +1126,10 @@ function EstablishmentWorkspace({
 
   useEffect(() => {
     loadTab();
-  }, [tab, establishment.id, publicSlug]);
+  // CORRECTION: ne pas recharger le profil à chaque caractère saisi dans le slug.
+  }, [tab, establishment.id]);
 
+  // CORRECTION: sauvegarde du profil sans rechargement pendant la saisie.
   const saveProfile = async () => {
     if (!profile.name?.trim() || !profile.slug?.trim()) {
       alert("Le nom et le slug sont obligatoires.");
@@ -1236,6 +1244,61 @@ function EstablishmentWorkspace({
     await loadTab();
   };
 
+  // CORRECTION: édition rapide des contenus existants sans devoir les supprimer/recréer.
+  const editMenuCategory = async (category: MenuCategory) => {
+    const name = window.prompt('Nom de la catégorie', category.name);
+    if (name === null || !name.trim() || name.trim() === category.name) return;
+    const { error } = await supabase.from('menu_categories').update({ name: name.trim() }).eq('id', category.id).eq('establishment_id', establishment.id);
+    if (error) return alert(`Erreur catégorie : ${error.message}`);
+    await loadTab();
+  };
+
+  const editMenuItem = async (item: MenuItem) => {
+    const name = window.prompt('Nom du produit', item.name);
+    if (name === null || !name.trim()) return;
+    const priceValue = window.prompt('Prix (MAD)', String(item.price));
+    if (priceValue === null) return;
+    const price = Number(priceValue);
+    if (!Number.isFinite(price) || price < 0) return alert('Prix invalide.');
+    const description = window.prompt('Description', item.description ?? '');
+    if (description === null) return;
+    const { error } = await supabase.from('menu_items').update({ name: name.trim(), description: description.trim() || null, price }).eq('id', item.id).eq('establishment_id', establishment.id);
+    if (error) return alert(`Erreur produit : ${error.message}`);
+    await loadTab();
+  };
+
+  const editPromotion = async (item: Promotion) => {
+    const name = window.prompt('Nom de la promotion', item.name);
+    if (name === null || !name.trim()) return;
+    const description = window.prompt('Description', item.description ?? '');
+    if (description === null) return;
+    const normalValue = window.prompt('Prix normal (laisser vide si aucun)', item.normal_price == null ? '' : String(item.normal_price));
+    if (normalValue === null) return;
+    const promoValue = window.prompt('Prix promotionnel (laisser vide si aucun)', item.promo_price == null ? '' : String(item.promo_price));
+    if (promoValue === null) return;
+    const normal = normalValue.trim() === '' ? null : Number(normalValue);
+    const promo = promoValue.trim() === '' ? null : Number(promoValue);
+    if ((normal !== null && (!Number.isFinite(normal) || normal < 0)) || (promo !== null && (!Number.isFinite(promo) || promo < 0))) return alert('Prix invalide.');
+    if (normal !== null && promo !== null && promo > normal) return alert('Le prix promo ne peut pas dépasser le prix normal.');
+    const { error } = await supabase.from('promotions').update({ name: name.trim(), description: description.trim() || null, normal_price: normal, promo_price: promo }).eq('id', item.id).eq('establishment_id', establishment.id);
+    if (error) return alert(`Erreur promotion : ${error.message}`);
+    await loadTab();
+  };
+
+  const editReward = async (item: any) => {
+    const name = window.prompt('Nom de la récompense', item.name);
+    if (name === null || !name.trim()) return;
+    const pointsValue = window.prompt('Points requis', String(item.points_required));
+    if (pointsValue === null) return;
+    const points = Number(pointsValue);
+    if (!Number.isFinite(points) || points <= 0) return alert('Nombre de points invalide.');
+    const description = window.prompt('Description', item.description ?? '');
+    if (description === null) return;
+    const { error } = await supabase.from('loyalty_rewards').update({ name: name.trim(), points_required: points, description: description.trim() || null }).eq('id', item.id).eq('establishment_id', establishment.id);
+    if (error) return alert(`Erreur récompense : ${error.message}`);
+    await loadTab();
+  };
+
   const toggle = async (table: string, id: string, active: boolean) => {
     const { error } = await supabase.from(table).update({ active: !active }).eq('id', id);
     if (error) return alert(error.message);
@@ -1334,6 +1397,47 @@ function EstablishmentWorkspace({
     alert('Paramètres fidélité enregistrés.');
   };
 
+  // CORRECTION: modifier le nom d'un membre sans quitter l'établissement.
+  const saveTeamMember = async () => {
+    if (!editingTeamMember?.user_id) return;
+    if (!editingTeamName.trim()) {
+      alert('Le nom est obligatoire.');
+      return;
+    }
+
+    setSavingTeamMember(true);
+    const { error } = await supabase
+      .from('profiles')
+      .update({ name: editingTeamName.trim() })
+      .eq('id', editingTeamMember.user_id);
+    setSavingTeamMember(false);
+
+    if (error) {
+      alert(`Impossible de modifier le membre : ${error.message}`);
+      return;
+    }
+
+    setEditingTeamMember(null);
+    setEditingTeamName('');
+    await loadTab();
+  };
+
+  // CORRECTION: activer/désactiver un membre depuis l'établissement sélectionné.
+  const toggleTeamMemberActive = async (member: any) => {
+    const { error } = await supabase
+      .from('establishment_staff')
+      .update({ active: !member.active })
+      .eq('id', member.id)
+      .eq('establishment_id', establishment.id);
+
+    if (error) {
+      alert(`Impossible de modifier le statut : ${error.message}`);
+      return;
+    }
+
+    await loadTab();
+  };
+
   const tabs: { id: WorkspaceTab; label: string }[] = [
     { id: 'profile', label: 'Profil' },
     { id: 'wifi', label: 'Wi-Fi' },
@@ -1429,7 +1533,7 @@ function EstablishmentWorkspace({
               <div className="mt-4 flex gap-2"><input value={menuCategoryName} onChange={(e) => setMenuCategoryName(e.target.value)} placeholder="Ex. Entrées" className="min-w-0 flex-1 rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><button onClick={addCategory} className="rounded-xl bg-forest px-4 text-xs font-semibold text-white">Ajouter</button></div>
               <div className="mt-4 space-y-2">
                 {categories.map((c) => (
-                  <div key={c.id} className="flex items-center justify-between gap-3 rounded-xl bg-[#f7f7f3] px-3 py-2.5 text-sm"><span>{c.name}</span><div className="flex gap-2"><button onClick={() => toggle('menu_categories', c.id, c.active)} className="text-xs text-ink/45">{c.active ? 'Désactiver' : 'Activer'}</button><button onClick={() => remove('menu_categories', c.id)} className="text-xs text-red-500">Supprimer</button></div></div>
+                  <div key={c.id} className="flex items-center justify-between gap-3 rounded-xl bg-[#f7f7f3] px-3 py-2.5 text-sm"><span>{c.name}</span><div className="flex gap-2"><button onClick={() => editMenuCategory(c)} className="text-xs text-forest"><Pencil size={12} className="inline mr-1" />Modifier</button><button onClick={() => toggle('menu_categories', c.id, c.active)} className="text-xs text-ink/45">{c.active ? 'Désactiver' : 'Activer'}</button><button onClick={() => remove('menu_categories', c.id)} className="text-xs text-red-500">Supprimer</button></div></div>
                 ))}
               </div>
             </div>
@@ -1438,14 +1542,14 @@ function EstablishmentWorkspace({
               <div className="mt-4 space-y-3"><input value={menuItem.name} onChange={(e) => setMenuItem({ ...menuItem, name: e.target.value })} placeholder="Nom" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><select value={menuItem.category_id} onChange={(e) => setMenuItem({ ...menuItem, category_id: e.target.value })} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"><option value="">Catégorie</option>{categories.filter((c) => c.active).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select><input value={menuItem.price} onChange={(e) => setMenuItem({ ...menuItem, price: e.target.value })} placeholder="Prix MAD" type="number" min="0" step="0.01" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><textarea value={menuItem.description} onChange={(e) => setMenuItem({ ...menuItem, description: e.target.value })} placeholder="Description" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><button onClick={addMenuItem} className="rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Ajouter le produit</button></div>
             </div>
           </div>
-          <div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Produits</h3><div className="mt-4 grid gap-2 md:grid-cols-2">{items.map((i) => <div key={i.id} className="rounded-xl bg-[#f7f7f3] p-3"><div className="flex justify-between gap-3"><strong className="text-sm">{i.name}</strong><span className="text-sm font-semibold">{Number(i.price).toFixed(2)} MAD</span></div><p className="mt-1 text-xs text-ink/45">{i.description || 'Sans description'}</p><div className="mt-2 flex gap-3"><button onClick={() => toggle('menu_items', i.id, i.active)} className="text-[11px] text-ink/45">{i.active ? 'Désactiver' : 'Activer'}</button><button onClick={() => remove('menu_items', i.id)} className="text-[11px] text-red-500">Supprimer</button></div></div>)}</div></div>
+          <div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Produits</h3><div className="mt-4 grid gap-2 md:grid-cols-2">{items.map((i) => <div key={i.id} className="rounded-xl bg-[#f7f7f3] p-3"><div className="flex justify-between gap-3"><strong className="text-sm">{i.name}</strong><span className="text-sm font-semibold">{Number(i.price).toFixed(2)} MAD</span></div><p className="mt-1 text-xs text-ink/45">{i.description || 'Sans description'}</p><div className="mt-2 flex gap-3"><button onClick={() => editMenuItem(i)} className="text-[11px] text-forest"><Pencil size={12} className="inline mr-1" />Modifier</button><button onClick={() => toggle('menu_items', i.id, i.active)} className="text-[11px] text-ink/45">{i.active ? 'Désactiver' : 'Activer'}</button><button onClick={() => remove('menu_items', i.id)} className="text-[11px] text-red-500">Supprimer</button></div></div>)}</div></div>
         </div>
       )}
 
       {tab === 'promotions' && (
         <div className="space-y-5">
           <div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Créer une promotion</h3><div className="mt-4 grid gap-3 md:grid-cols-4"><input value={promotion.name} onChange={(e) => setPromotion({ ...promotion, name: e.target.value })} placeholder="Nom" className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><input value={promotion.description} onChange={(e) => setPromotion({ ...promotion, description: e.target.value })} placeholder="Description" className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><input value={promotion.normal_price} onChange={(e) => setPromotion({ ...promotion, normal_price: e.target.value })} placeholder="Prix normal" type="number" min="0" step="0.01" className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><input value={promotion.promo_price} onChange={(e) => setPromotion({ ...promotion, promo_price: e.target.value })} placeholder="Prix promo" type="number" min="0" step="0.01" className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></div><button onClick={addPromotion} className="mt-3 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Ajouter</button></div>
-          <div className="grid gap-3 md:grid-cols-2">{promotions.map((p) => <div key={p.id} className="rounded-2xl border border-ink/5 bg-white p-5"><div className="flex justify-between gap-3"><strong>{p.name}</strong><span className="text-xs text-ink/40">{p.active ? 'Actif' : 'Inactif'}</span></div><p className="mt-2 text-sm text-ink/55">{p.description || 'Sans description'}</p><p className="mt-3 text-sm font-semibold">{p.promo_price ?? '—'} MAD <span className="ml-2 text-xs text-ink/35 line-through">{p.normal_price ?? ''}</span></p><div className="mt-3 flex gap-3"><button onClick={() => toggle('promotions', p.id, p.active)} className="text-xs text-ink/45">{p.active ? 'Désactiver' : 'Activer'}</button><button onClick={() => remove('promotions', p.id)} className="text-xs text-red-500">Supprimer</button></div></div>)}</div>
+          <div className="grid gap-3 md:grid-cols-2">{promotions.map((p) => <div key={p.id} className="rounded-2xl border border-ink/5 bg-white p-5"><div className="flex justify-between gap-3"><strong>{p.name}</strong><span className="text-xs text-ink/40">{p.active ? 'Actif' : 'Inactif'}</span></div><p className="mt-2 text-sm text-ink/55">{p.description || 'Sans description'}</p><p className="mt-3 text-sm font-semibold">{p.promo_price ?? '—'} MAD <span className="ml-2 text-xs text-ink/35 line-through">{p.normal_price ?? ''}</span></p><div className="mt-3 flex gap-3"><button onClick={() => editPromotion(p)} className="text-xs text-forest"><Pencil size={12} className="inline mr-1" />Modifier</button><button onClick={() => toggle('promotions', p.id, p.active)} className="text-xs text-ink/45">{p.active ? 'Désactiver' : 'Activer'}</button><button onClick={() => remove('promotions', p.id)} className="text-xs text-red-500">Supprimer</button></div></div>)}</div>
         </div>
       )}
 
@@ -1454,11 +1558,129 @@ function EstablishmentWorkspace({
       )}
 
       {tab === 'loyalty' && (
-        <div className="space-y-5"><div className="grid gap-3 md:grid-cols-3"><StatCard label="Clients fidélité" value={customersCount} /><StatCard label="Récompenses" value={rewards.length} /><StatCard label="Programme" value={loyalty.enabled ? 'Actif' : 'Inactif'} /></div><div className="grid gap-5 md:grid-cols-2"><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Paramètres</h3><div className="mt-4 flex gap-3"><input type="number" min="0.01" step="0.01" value={loyalty.points_per_currency ?? 1} onChange={(e) => setLoyalty({ ...loyalty, points_per_currency: Number(e.target.value) })} className="w-32 rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><select value={loyalty.currency ?? 'MAD'} onChange={(e) => setLoyalty({ ...loyalty, currency: e.target.value })} className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm"><option>MAD</option><option>EUR</option></select></div><label className="mt-3 flex items-center gap-2 text-sm"><input type="checkbox" checked={loyalty.enabled ?? true} onChange={(e) => setLoyalty({ ...loyalty, enabled: e.target.checked })} /> Programme actif</label><button onClick={saveLoyalty} className="mt-4 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Enregistrer</button></div><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Nouvelle récompense</h3><div className="mt-4 space-y-3"><input value={reward.name} onChange={(e) => setReward({ ...reward, name: e.target.value })} placeholder="Nom" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><input value={reward.points_required} onChange={(e) => setReward({ ...reward, points_required: e.target.value })} placeholder="Points requis" type="number" min="1" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><textarea value={reward.description} onChange={(e) => setReward({ ...reward, description: e.target.value })} placeholder="Description" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><button onClick={addReward} className="rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Ajouter</button></div></div></div><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Récompenses</h3><div className="mt-4 grid gap-2 md:grid-cols-2">{rewards.map((r) => <div key={r.id} className="flex items-center justify-between rounded-xl bg-[#f7f7f3] p-3"><span><strong className="text-sm">{r.name}</strong><span className="ml-2 text-xs text-ink/40">{r.points_required} pts</span></span><div className="flex gap-3"><button onClick={() => toggle('loyalty_rewards', r.id, r.active)} className="text-xs text-ink/45">{r.active ? 'Désactiver' : 'Activer'}</button><button onClick={() => remove('loyalty_rewards', r.id)} className="text-xs text-red-500">Supprimer</button></div></div>)}</div></div></div>
+        <div className="space-y-5"><div className="grid gap-3 md:grid-cols-3"><StatCard label="Clients fidélité" value={customersCount} /><StatCard label="Récompenses" value={rewards.length} /><StatCard label="Programme" value={loyalty.enabled ? 'Actif' : 'Inactif'} /></div><div className="grid gap-5 md:grid-cols-2"><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Paramètres</h3><div className="mt-4 flex gap-3"><input type="number" min="0.01" step="0.01" value={loyalty.points_per_currency ?? 1} onChange={(e) => setLoyalty({ ...loyalty, points_per_currency: Number(e.target.value) })} className="w-32 rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><select value={loyalty.currency ?? 'MAD'} onChange={(e) => setLoyalty({ ...loyalty, currency: e.target.value })} className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm"><option>MAD</option><option>EUR</option></select></div><label className="mt-3 flex items-center gap-2 text-sm"><input type="checkbox" checked={loyalty.enabled ?? true} onChange={(e) => setLoyalty({ ...loyalty, enabled: e.target.checked })} /> Programme actif</label><button onClick={saveLoyalty} className="mt-4 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Enregistrer</button></div><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Nouvelle récompense</h3><div className="mt-4 space-y-3"><input value={reward.name} onChange={(e) => setReward({ ...reward, name: e.target.value })} placeholder="Nom" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><input value={reward.points_required} onChange={(e) => setReward({ ...reward, points_required: e.target.value })} placeholder="Points requis" type="number" min="1" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><textarea value={reward.description} onChange={(e) => setReward({ ...reward, description: e.target.value })} placeholder="Description" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><button onClick={addReward} className="rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Ajouter</button></div></div></div><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Récompenses</h3><div className="mt-4 grid gap-2 md:grid-cols-2">{rewards.map((r) => <div key={r.id} className="flex items-center justify-between rounded-xl bg-[#f7f7f3] p-3"><span><strong className="text-sm">{r.name}</strong><span className="ml-2 text-xs text-ink/40">{r.points_required} pts</span></span><div className="flex gap-3"><button onClick={() => editReward(r)} className="text-xs text-forest"><Pencil size={12} className="inline mr-1" />Modifier</button><button onClick={() => toggle('loyalty_rewards', r.id, r.active)} className="text-xs text-ink/45">{r.active ? 'Désactiver' : 'Activer'}</button><button onClick={() => remove('loyalty_rewards', r.id)} className="text-xs text-red-500">Supprimer</button></div></div>)}</div></div></div>
       )}
 
       {tab === 'team' && (
-        <div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Équipe de l’établissement</h3><p className="mt-1 text-xs text-ink/45">Les comptes sont gérés depuis les sections Responsables / Employés de l’Admin.</p><div className="mt-5 space-y-2">{team.length === 0 ? <p className="text-sm text-ink/45">Aucun membre affecté.</p> : team.map((m) => <div key={m.id} className="flex items-center justify-between rounded-xl bg-[#f7f7f3] p-3 text-sm"><span><strong>{m.name || 'Utilisateur'}</strong><span className="ml-2 text-xs text-ink/40">{m.email || ''}</span></span><span className="text-xs text-ink/45">{m.role} · {m.active ? 'Actif' : 'Inactif'}</span></div>)}</div></div>
+        <div className="space-y-5">
+          {/* CORRECTION: les comptes sont maintenant geres directement dans l'espace de l'etablissement. */}
+          <div className="rounded-2xl border border-ink/5 bg-white p-5 shadow-sm">
+            <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+              <div>
+                <h3 className="font-semibold">Équipe de l’établissement</h3>
+                <p className="mt-1 text-xs text-ink/45">Ajoute, modifie et active ou desactive les membres de cet établissement.</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setTeamFormRole('responsible')}
+                  className="inline-flex items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white"
+                >
+                  <UserPlus size={15} /> Ajouter un responsable
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTeamFormRole('employee')}
+                  className="inline-flex items-center gap-2 rounded-xl border border-ink/10 px-4 py-2.5 text-xs font-semibold text-forest hover:bg-[#f7f7f3]"
+                >
+                  <UserPlus size={15} /> Ajouter un employé
+                </button>
+              </div>
+            </div>
+
+            {/* CORRECTION: on transmet uniquement l'etablissement courant. Le formulaire ne peut donc pas rattacher le membre au mauvais etablissement. */}
+            {teamFormRole && (
+              <div className="mt-5">
+                <CreateStaffForm
+                  role={teamFormRole}
+                  establishments={[establishment]}
+                  close={() => setTeamFormRole(null)}
+                  reload={async () => {
+                    setTeamFormRole(null);
+                    await loadTab();
+                  }}
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-2xl border border-ink/5 bg-white p-5 shadow-sm">
+            {team.length === 0 ? (
+              <p className="text-sm text-ink/45">Aucun membre affecté.</p>
+            ) : (
+              <div className="space-y-2">
+                {team.map((m) => (
+                  <div key={m.id} className="rounded-xl bg-[#f7f7f3] p-4">
+                    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                      <div className="min-w-0">
+                        <strong className="text-sm">{m.name || 'Utilisateur'}</strong>
+                        <p className="mt-1 truncate text-xs text-ink/40">{m.email || ''}</p>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="rounded-full bg-[#f4ead3] px-3 py-1.5 text-[10px] font-semibold text-forest">
+                          {m.role === 'MANAGER' ? 'RESPONSABLE' : 'EMPLOYÉ'}
+                        </span>
+                        <span className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${m.active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                          {m.active ? 'ACTIF' : 'DÉSACTIVÉ'}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingTeamMember(m);
+                            setEditingTeamName(m.name || '');
+                          }}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-ink/10 px-3 py-2 text-xs font-medium text-forest hover:bg-white"
+                        >
+                          <Pencil size={13} /> Modifier
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => toggleTeamMemberActive(m)}
+                          className={`rounded-lg border px-3 py-2 text-xs font-medium ${m.active ? 'border-red-200 text-red-600 hover:bg-red-50' : 'border-green-200 text-green-700 hover:bg-green-50'}`}
+                        >
+                          {m.active ? 'Désactiver' : 'Activer'}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* CORRECTION: edition inline, sans reload global de la liste des etablissements. */}
+                    {editingTeamMember?.id === m.id && (
+                      <div className="mt-4 flex flex-col gap-2 rounded-xl border border-ink/10 bg-white p-3 md:flex-row md:items-end">
+                        <label className="min-w-0 flex-1">
+                          <span className="mb-1 block text-[11px] font-semibold text-ink/50">Nom</span>
+                          <input
+                            value={editingTeamName}
+                            onChange={(e) => setEditingTeamName(e.target.value)}
+                            disabled={savingTeamMember}
+                            className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm outline-none focus:border-forest"
+                          />
+                        </label>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => { setEditingTeamMember(null); setEditingTeamName(''); }}
+                            disabled={savingTeamMember}
+                            className="rounded-xl border border-ink/10 px-4 py-2.5 text-xs font-semibold"
+                          >
+                            Annuler
+                          </button>
+                          <button
+                            type="button"
+                            onClick={saveTeamMember}
+                            disabled={savingTeamMember}
+                            className="inline-flex items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-50"
+                          >
+                            <Save size={14} /> {savingTeamMember ? 'Enregistrement...' : 'Enregistrer'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       {tab === 'analytics' && (
@@ -2596,8 +2818,22 @@ function StaffRow({
   reload: () => Promise<void>;
 }) {
   const [saving, setSaving] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState(member.name ?? '');
+
+  const saveName = async () => {
+    if (!editName.trim()) return alert('Le nom est obligatoire.');
+    setSaving(true);
+    const { error } = await supabase.from('profiles').update({ name: editName.trim() }).eq('id', member.user_id);
+    setSaving(false);
+    if (error) return alert(`Impossible de modifier le nom : ${error.message}`);
+    setEditing(false);
+    await reload();
+  };
 
   const toggleActive = async () => {
+    const action = member.active ? 'désactiver' : 'activer';
+    if (!window.confirm(`Voulez-vous vraiment ${action} ce compte ?`)) return;
     setSaving(true);
 
     const { error } = await supabase
@@ -2632,9 +2868,11 @@ function StaffRow({
         </div>
 
         <div className="min-w-0">
-          <h3 className="truncate text-sm font-semibold text-forest">
-            {member.name}
-          </h3>
+          {editing ? (
+            <input value={editName} onChange={(e) => setEditName(e.target.value)} disabled={saving} className="w-full rounded-lg border border-ink/10 px-2.5 py-2 text-sm outline-none focus:border-forest" />
+          ) : (
+            <h3 className="truncate text-sm font-semibold text-forest">{member.name}</h3>
+          )}
 
           <p className="mt-1 truncate text-xs text-ink/45">
             {member.email}
@@ -2662,6 +2900,15 @@ function StaffRow({
         >
           {member.active ? 'ACTIF' : 'DÉSACTIVÉ'}
         </span>
+
+        {editing ? (
+          <>
+            <button onClick={() => { setEditing(false); setEditName(member.name ?? ''); }} disabled={saving} className="rounded-lg border border-ink/10 px-3 py-2 text-xs font-medium">Annuler</button>
+            <button onClick={saveName} disabled={saving} className="inline-flex items-center gap-2 rounded-lg bg-forest px-3 py-2 text-xs font-semibold text-white"><Save size={13} />Enregistrer</button>
+          </>
+        ) : (
+          <button onClick={() => setEditing(true)} disabled={saving} className="inline-flex items-center gap-2 rounded-lg border border-ink/10 px-3 py-2 text-xs font-medium text-forest hover:bg-[#f7f7f3]"><Pencil size={13} />Modifier</button>
+        )}
 
         <button
           onClick={toggleActive}
