@@ -24,6 +24,7 @@ import {
   DollarSign,
   UsersRound,
   Percent,
+  Printer,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -70,7 +71,8 @@ type AdminSection =
   | 'analysis'
   | 'ai'
   | 'templates'
-  | 'analytics';
+  | 'analytics'
+  | 'reports';
 
 export default function Admin() {
   const { user, signOut } = useAuth();
@@ -266,6 +268,11 @@ export default function Admin() {
       label: 'Templates',
       icon: LayoutTemplate,
     },
+    {
+      id: 'reports',
+      label: 'Rapports PDF',
+      icon: Printer,
+    },
   ];
 
   const currentLabel =
@@ -441,6 +448,10 @@ export default function Admin() {
           )}
 
           {section === 'templates' && <Templates />}
+
+          {section === 'reports' && (
+            <PDFReportsSection establishments={establishments} />
+          )}
         </main>
       </div>
     </div>
@@ -600,6 +611,8 @@ function EstablishmentsSection({
     );
   }
 
+  const visibleStaff = selectedEstablishment === 'all' ? staff : staff.filter((member) => member.establishment_id === selectedEstablishment);
+
   return (
     <div>
       <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
@@ -755,6 +768,7 @@ function EstablishmentWorkspace({
       description: profile.description || null, instagram_url: profile.instagram_url || null, facebook_url: profile.facebook_url || null,
       tiktok_url: profile.tiktok_url || null, whatsapp_number: profile.whatsapp_number || null,
       page_template_id: profile.page_template_id || null, menu_template_id: profile.menu_template_id || null,
+      logo_url: profile.logo_url || null,
     };
     const { error } = await supabase.from('establishments').update(payload).eq('id', establishment.id);
     setSaving(false);
@@ -816,6 +830,19 @@ function EstablishmentWorkspace({
         {field('Nom', 'name')}{field('Slug public', 'slug')}{field('Adresse', 'address')}{field('Ville', 'city')}{field('Téléphone', 'phone')}{field('Email', 'email', 'email')}{field('Site web', 'website_url')}{field('WhatsApp', 'whatsapp_number')}{field('Instagram', 'instagram_url')}{field('Facebook', 'facebook_url')}{field('TikTok', 'tiktok_url')}
         <label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">Type</span><select value={profile.ai_business_type_id ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, ai_business_type_id: e.target.value || null }))} className="w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm">{businessTypes.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
         <label className="block md:col-span-2"><span className="mb-1 block text-xs font-medium text-ink/50">Description</span><textarea value={profile.description ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, description: e.target.value }))} rows={4} className="w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm" /></label>
+        <div className="md:col-span-2 rounded-2xl border border-ink/5 bg-[#f7f7f3] p-5">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center">
+            <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-2xl bg-forest text-2xl font-semibold text-gold">
+              {profile.logo_url ? <img src={profile.logo_url} alt={`Logo ${profile.name ?? establishment.name}`} className="h-full w-full object-cover" /> : (profile.name ?? establishment.name)?.[0]?.toUpperCase()}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-forest">Logo de l’établissement</p>
+              <p className="mt-1 text-xs leading-5 text-ink/45">Le même logo est utilisé par la page publique et les espaces établissement lorsque l’URL est renseignée.</p>
+              <input value={profile.logo_url ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, logo_url: e.target.value }))} placeholder="https://.../logo.png" className="mt-3 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm outline-none focus:border-forest" />
+              {profile.logo_url && <button type="button" onClick={() => setProfile((v: any) => ({ ...v, logo_url: null }))} className="mt-2 text-xs font-medium text-red-600">Supprimer le logo</button>}
+            </div>
+          </div>
+        </div>
         <div className="md:col-span-2"><button disabled={saving} onClick={saveProfile} className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white">{saving ? 'Enregistrement...' : 'Enregistrer le profil'}</button></div>
       </div>}
 
@@ -1040,6 +1067,7 @@ function ResponsiblesSection({
   reload: () => Promise<void>;
 }) {
   const [showForm, setShowForm] = useState(false);
+  const [selectedEstablishment, setSelectedEstablishment] = useState('all');
 
   const establishmentMap = useMemo(
     () =>
@@ -1079,6 +1107,14 @@ function ResponsiblesSection({
         </button>
       </div>
 
+      <div className="mb-5 max-w-xl rounded-2xl border border-ink/5 bg-white p-4 shadow-sm">
+        <label className="mb-2 block text-xs font-semibold">Établissement sélectionné</label>
+        <select value={selectedEstablishment} onChange={(e) => setSelectedEstablishment(e.target.value)} className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest">
+          <option value="all">Tous les établissements</option>
+          {establishments.map((establishment) => <option key={establishment.id} value={establishment.id}>{establishment.name}</option>)}
+        </select>
+      </div>
+
       {showForm && (
         <CreateStaffForm
           role="responsible"
@@ -1093,7 +1129,7 @@ function ResponsiblesSection({
           <div className="p-8 text-sm text-ink/40">
             Chargement...
           </div>
-        ) : staff.length === 0 ? (
+        ) : visibleStaff.length === 0 ? (
           <EmptyStaff
             icon={UserRound}
             title="Aucun responsable"
@@ -1101,7 +1137,7 @@ function ResponsiblesSection({
           />
         ) : (
           <div className="divide-y divide-ink/5">
-            {staff.map((member) => {
+            {visibleStaff.map((member) => {
               const establishment =
                 establishmentMap.get(member.establishment_id);
 
@@ -1113,6 +1149,7 @@ function ResponsiblesSection({
                     establishment?.name ?? 'Établissement inconnu'
                   }
                   reload={reload}
+                  establishments={establishments}
                 />
               );
             })}
@@ -1139,6 +1176,7 @@ function EmployeesSection({
   reload: () => Promise<void>;
 }) {
   const [showForm, setShowForm] = useState(false);
+  const [selectedEstablishment, setSelectedEstablishment] = useState('all');
 
   const establishmentMap = useMemo(
     () =>
@@ -1150,6 +1188,8 @@ function EmployeesSection({
       ),
     [establishments]
   );
+
+  const visibleStaff = selectedEstablishment === 'all' ? staff : staff.filter((member) => member.establishment_id === selectedEstablishment);
 
   return (
     <div>
@@ -1178,6 +1218,14 @@ function EmployeesSection({
         </button>
       </div>
 
+      <div className="mb-5 max-w-xl rounded-2xl border border-ink/5 bg-white p-4 shadow-sm">
+        <label className="mb-2 block text-xs font-semibold">Établissement sélectionné</label>
+        <select value={selectedEstablishment} onChange={(e) => setSelectedEstablishment(e.target.value)} className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest">
+          <option value="all">Tous les établissements</option>
+          {establishments.map((establishment) => <option key={establishment.id} value={establishment.id}>{establishment.name}</option>)}
+        </select>
+      </div>
+
       {showForm && (
         <CreateStaffForm
           role="employee"
@@ -1192,7 +1240,7 @@ function EmployeesSection({
           <div className="p-8 text-sm text-ink/40">
             Chargement...
           </div>
-        ) : staff.length === 0 ? (
+        ) : visibleStaff.length === 0 ? (
           <EmptyStaff
             icon={Users}
             title="Aucun employé"
@@ -1200,7 +1248,7 @@ function EmployeesSection({
           />
         ) : (
           <div className="divide-y divide-ink/5">
-            {staff.map((member) => {
+            {visibleStaff.map((member) => {
               const establishment =
                 establishmentMap.get(member.establishment_id);
 
@@ -1212,6 +1260,7 @@ function EmployeesSection({
                     establishment?.name ?? 'Établissement inconnu'
                   }
                   reload={reload}
+                  establishments={establishments}
                 />
               );
             })}
@@ -1542,10 +1591,12 @@ function StaffRow({
   member,
   establishmentName,
   reload,
+  establishments,
 }: {
   member: StaffMember;
   establishmentName: string;
   reload: () => Promise<void>;
+  establishments: Establishment[];
 }) {
   const [saving, setSaving] = useState(false);
 
@@ -1615,6 +1666,8 @@ function StaffRow({
           {member.active ? 'ACTIF' : 'DÉSACTIVÉ'}
         </span>
 
+        <EditStaffButton member={member} establishments={establishments} reload={reload} />
+
         <button
           onClick={toggleActive}
           disabled={saving}
@@ -1635,6 +1688,71 @@ function StaffRow({
       </div>
     </div>
   );
+}
+
+/* =========================================================
+   EDIT STAFF
+========================================================= */
+function EditStaffButton({ member, establishments, reload }: { member: StaffMember; establishments: Establishment[]; reload: () => Promise<void> }) {
+  const [open, setOpen] = useState(false);
+  return <>
+    <button onClick={() => setOpen(true)} className="inline-flex items-center gap-2 rounded-lg border border-ink/10 px-3 py-2 text-xs font-medium hover:bg-[#f7f7f3]"><Pencil size={14} />Modifier</button>
+    {open && <EditStaffModal member={member} establishments={establishments} close={() => setOpen(false)} reload={reload} />}
+  </>;
+}
+
+function EditStaffModal({ member, establishments, close, reload }: { member: StaffMember; establishments: Establishment[]; close: () => void; reload: () => Promise<void> }) {
+  const isEmployee = member.role === 'STAFF';
+  const [name, setName] = useState(member.name);
+  const [email, setEmail] = useState(member.email === '—' ? '' : member.email);
+  const [establishmentId, setEstablishmentId] = useState(member.establishment_id);
+  const [password, setPassword] = useState('');
+  const [code, setCode] = useState('');
+  const [active, setActive] = useState(member.active);
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    if (!name.trim() || !establishmentId) return alert('Nom et établissement obligatoires.');
+    if (!isEmployee && !email.trim()) return alert('Email du responsable obligatoire.');
+    if (!isEmployee && password && password.length < 6) return alert('Le mot de passe doit contenir au moins 6 caractères.');
+    if (isEmployee && code && (code.length < 4 || code.length > 12)) return alert('Le code employé doit contenir entre 4 et 12 caractères.');
+    setSaving(true);
+    const { data, error } = await supabase.functions.invoke('admin-update-staff-account', { body: { staff_id: member.id, establishment_id: establishmentId, name: name.trim(), email: isEmployee ? (member.email === '—' ? '' : member.email) : email.trim().toLowerCase(), password: isEmployee ? '' : password.trim(), active } });
+    if (error || !data?.success) { setSaving(false); alert(error ? `Impossible de modifier le compte : ${error.message}` : (data?.error ?? 'Impossible de modifier le compte.')); return; }
+    if (isEmployee && code.trim()) {
+      const { error: codeError } = await supabase.rpc('admin_set_employee_access_code', { p_employee_id: member.user_id, p_establishment_id: establishmentId, p_code: code.trim(), p_active: active });
+      if (codeError) { setSaving(false); alert(`Compte modifié mais code non enregistré : ${codeError.message}`); await reload(); close(); return; }
+    }
+    setSaving(false);
+    await reload();
+    close();
+    alert('Compte modifié avec succès.');
+  };
+
+  const retire = async () => {
+    if (!window.confirm(`Retirer ${member.name} de cet établissement ?`)) return;
+    setSaving(true);
+    const { error } = await supabase.from('establishment_staff').update({ active: false }).eq('id', member.id);
+    if (!error && isEmployee) await supabase.rpc('admin_set_employee_access_status', { p_employee_id: member.user_id, p_establishment_id: member.establishment_id, p_active: false });
+    setSaving(false);
+    if (error) return alert(`Impossible de retirer le compte : ${error.message}`);
+    await reload(); close();
+  };
+
+  return <div className="fixed inset-0 z-[80] grid place-items-center bg-ink/50 p-4">
+    <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
+      <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">Administration</p><h3 className="mt-1 font-display text-2xl text-forest">Modifier {isEmployee ? 'l’employé' : 'le responsable'}</h3></div><button onClick={close} disabled={saving}><X size={20}/></button></div>
+      <div className="mt-6 grid gap-4 md:grid-cols-2">
+        <label className="block"><span className="mb-1 block text-xs font-semibold">Nom</span><input value={name} onChange={e=>setName(e.target.value)} className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm"/></label>
+        {!isEmployee && <label className="block"><span className="mb-1 block text-xs font-semibold">Email</span><input type="email" value={email} onChange={e=>setEmail(e.target.value)} className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm"/></label>}
+        <label className="block md:col-span-2"><span className="mb-1 block text-xs font-semibold">Établissement</span><select value={establishmentId} onChange={e=>setEstablishmentId(e.target.value)} className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm">{establishments.map(e=><option key={e.id} value={e.id}>{e.name}</option>)}</select></label>
+        {!isEmployee && <label className="block md:col-span-2"><span className="mb-1 block text-xs font-semibold">Nouveau mot de passe <span className="font-normal text-ink/35">(laisser vide pour conserver)</span></span><input type="password" value={password} onChange={e=>setPassword(e.target.value)} className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm"/></label>}
+        {isEmployee && <label className="block md:col-span-2"><span className="mb-1 block text-xs font-semibold">Nouveau code employé <span className="font-normal text-ink/35">(laisser vide pour conserver)</span></span><input value={code} onChange={e=>setCode(e.target.value)} placeholder="4 à 12 caractères" className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-center text-lg tracking-[0.2em]"/></label>}
+        <label className="flex items-center gap-3 rounded-xl bg-[#f7f7f3] p-4 md:col-span-2"><input type="checkbox" checked={active} onChange={e=>setActive(e.target.checked)}/><span><strong className="block text-sm text-forest">Accès actif</strong><span className="text-xs text-ink/40">Désactiver coupe l’accès sans supprimer l’historique.</span></span></label>
+      </div>
+      <div className="mt-6 flex flex-wrap justify-between gap-3"><button onClick={retire} disabled={saving} className="rounded-xl border border-red-200 px-4 py-3 text-xs font-semibold text-red-600">Retirer de l’établissement</button><div className="flex gap-3"><button onClick={close} disabled={saving} className="rounded-xl border border-ink/10 px-5 py-3 text-sm">Annuler</button><button onClick={save} disabled={saving} className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white">{saving ? 'Enregistrement...' : 'Enregistrer'}</button></div></div>
+    </div>
+  </div>;
 }
 
 /* =========================================================
@@ -2952,6 +3070,26 @@ function AIConfigurationSection({
   const [prompt, setPrompt] = useState('');
   const [active, setActive] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [aiSettings, setAISettings] = useState<any>({ provider: 'openai', model: 'gpt-5.6-luna', enabled: true, temperature: 0.2, max_output_tokens: 4000, system_instructions: '', has_api_key: false });
+  const [aiApiKey, setAIApiKey] = useState('');
+  const [aiSettingsSaving, setAISettingsSaving] = useState(false);
+
+  useEffect(() => {
+    (async () => { const { data, error } = await supabase.rpc('admin_get_ai_settings'); if (!error && data?.[0]) setAISettings(data[0]); })();
+  }, []);
+
+  const saveAISettings = async () => {
+    if (!aiSettings.provider?.trim() || !aiSettings.model?.trim()) return alert('Provider et modèle sont obligatoires.');
+    if (Number(aiSettings.temperature) < 0 || Number(aiSettings.temperature) > 2) return alert('La température doit être entre 0 et 2.');
+    if (!Number.isInteger(Number(aiSettings.max_output_tokens)) || Number(aiSettings.max_output_tokens) < 256 || Number(aiSettings.max_output_tokens) > 128000) return alert('Max output tokens invalide.');
+    setAISettingsSaving(true);
+    const { data, error } = await supabase.rpc('admin_save_ai_settings', { p_provider: aiSettings.provider.trim(), p_model: aiSettings.model.trim(), p_enabled: !!aiSettings.enabled, p_temperature: Number(aiSettings.temperature), p_max_output_tokens: Number(aiSettings.max_output_tokens), p_system_instructions: aiSettings.system_instructions ?? '', p_api_key: aiApiKey.trim() || null });
+    setAISettingsSaving(false);
+    if (error) return alert(`Impossible d’enregistrer la configuration IA : ${error.message}`);
+    if (data?.[0]) setAISettings(data[0]);
+    setAIApiKey('');
+    alert('Configuration IA enregistrée.');
+  };
 
   const resetForm = () => {
     setShowForm(false);
@@ -3082,6 +3220,20 @@ function AIConfigurationSection({
           <Plus size={16} />
           Nouveau type
         </button>
+      </div>
+
+      <div className="mb-6 rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">Moteur IA global</p><h3 className="mt-1 text-xl font-semibold text-forest">Provider et modèle utilisés par l’analyse</h3></div><span className={`rounded-full px-3 py-1 text-[10px] font-semibold ${aiSettings.enabled ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{aiSettings.enabled ? 'IA ACTIVE' : 'IA DÉSACTIVÉE'}</span></div>
+        <div className="mt-5 grid gap-4 md:grid-cols-2">
+          <label className="block"><span className="mb-1 block text-xs font-semibold">Provider / moteur</span><input value={aiSettings.provider ?? ''} onChange={e=>setAISettings((v:any)=>({...v,provider:e.target.value}))} placeholder="openai" className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm"/></label>
+          <label className="block"><span className="mb-1 block text-xs font-semibold">Modèle</span><input value={aiSettings.model ?? ''} onChange={e=>setAISettings((v:any)=>({...v,model:e.target.value}))} placeholder="gpt-5.6-luna" className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm"/></label>
+          <label className="block"><span className="mb-1 block text-xs font-semibold">Température</span><input type="number" min="0" max="2" step="0.1" value={aiSettings.temperature ?? 0.2} onChange={e=>setAISettings((v:any)=>({...v,temperature:Number(e.target.value)}))} className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm"/></label>
+          <label className="block"><span className="mb-1 block text-xs font-semibold">Max output tokens</span><input type="number" value={aiSettings.max_output_tokens ?? 4000} onChange={e=>setAISettings((v:any)=>({...v,max_output_tokens:Number(e.target.value)}))} className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm"/></label>
+          <label className="block md:col-span-2"><span className="mb-1 block text-xs font-semibold">Clé API <span className="font-normal text-ink/35">{aiSettings.has_api_key ? '— une clé est déjà enregistrée, vide pour la conserver' : '— aucune clé enregistrée'}</span></span><input type="password" value={aiApiKey} onChange={e=>setAIApiKey(e.target.value)} autoComplete="new-password" className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm"/></label>
+          <label className="flex items-center gap-3 rounded-xl bg-[#f7f7f3] p-4 md:col-span-2"><input type="checkbox" checked={!!aiSettings.enabled} onChange={e=>setAISettings((v:any)=>({...v,enabled:e.target.checked}))}/><span><strong className="block text-sm text-forest">Activer l’IA</strong><span className="text-xs text-ink/40">Le moteur global est utilisé par l’Edge Function d’analyse des avis.</span></span></label>
+          <label className="block md:col-span-2"><span className="mb-1 block text-xs font-semibold">Instructions système globales</span><textarea rows={5} value={aiSettings.system_instructions ?? ''} onChange={e=>setAISettings((v:any)=>({...v,system_instructions:e.target.value}))} className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm leading-6"/></label>
+        </div>
+        <div className="mt-5 flex justify-end"><button onClick={saveAISettings} disabled={aiSettingsSaving} className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white">{aiSettingsSaving ? 'Enregistrement...' : 'Enregistrer le moteur IA'}</button></div>
       </div>
 
       {showForm && (
@@ -3273,6 +3425,45 @@ function AIConfigurationSection({
 }
 
 /* =========================================================
+   RAPPORTS PDF
+========================================================= */
+function PDFReportsSection({ establishments }: { establishments: Establishment[] }) {
+  const [selectedId, setSelectedId] = useState(establishments[0]?.id ?? '');
+  const [period, setPeriod] = useState(30);
+  const [loading, setLoading] = useState(false);
+  useEffect(() => { if (!selectedId && establishments[0]) setSelectedId(establishments[0].id); }, [establishments, selectedId]);
+  const selected = establishments.find(e => e.id === selectedId);
+
+  const printReport = async (kind: 'reviews'|'loyalty'|'team'|'analytics'|'complete') => {
+    if (!selected) return alert('Sélectionne un établissement.');
+    setLoading(true);
+    const since = new Date(); since.setDate(since.getDate() - period);
+    const [{ data: reviews }, { data: tx }, { data: redemptions }, { data: staffRows }, { count: events }] = await Promise.all([
+      supabase.from('reviews').select('rating,type,comment,status,created_at').eq('establishment_id', selected.id).gte('created_at', since.toISOString()).order('created_at', { ascending: false }),
+      supabase.from('loyalty_transactions').select('amount,points,created_at').eq('establishment_id', selected.id).eq('type','EARN').gte('created_at', since.toISOString()),
+      supabase.from('loyalty_redemptions').select('points_used,reward_cost_mad,created_at').eq('establishment_id', selected.id).gte('created_at', since.toISOString()),
+      supabase.from('establishment_staff').select('role,active,created_at').eq('establishment_id', selected.id),
+      supabase.from('analytics_events').select('id',{count:'exact',head:true}).eq('establishment_id', selected.id).gte('created_at', since.toISOString())
+    ]);
+    setLoading(false);
+    const r=reviews??[], t=tx??[], red=redemptions??[], team=staffRows??[];
+    const avg=r.length ? (r.reduce((a:any,x:any)=>a+Number(x.rating||0),0)/r.length).toFixed(1) : '—';
+    const ca=t.reduce((a:any,x:any)=>a+Number(x.amount||0),0);
+    const rewardCost=red.reduce((a:any,x:any)=>a+Number(x.reward_cost_mad||0),0);
+    const title = kind==='complete' ? 'Rapport complet' : kind==='reviews' ? 'Rapport réputation & avis' : kind==='loyalty' ? 'Rapport fidélité' : kind==='team' ? 'Rapport équipe' : 'Rapport analytics';
+    const section = (kind==='reviews'||kind==='complete') ? `<h2>Réputation & avis</h2><p><b>Avis :</b> ${r.length} · <b>Note moyenne :</b> ${avg} / 5 · <b>Positifs :</b> ${r.filter((x:any)=>x.type==='positive').length} · <b>Nouveaux :</b> ${r.filter((x:any)=>x.status==='Nouveau').length}</p>${r.slice(0,80).map((x:any)=>`<div class="item"><b>${x.rating}/5</b> · ${x.type==='positive'?'Positif':'Négatif'} · ${new Date(x.created_at).toLocaleDateString('fr-FR')}<br>${escapeHtml(x.comment||'Aucun commentaire')}</div>`).join('')}` : '';
+    const loyalty = (kind==='loyalty'||kind==='complete') ? `<h2>Fidélité</h2><p><b>CA fidélité :</b> ${formatReportMad(ca)} · <b>Transactions :</b> ${t.length} · <b>Points :</b> ${t.reduce((a:any,x:any)=>a+Number(x.points||0),0).toLocaleString('fr-FR')} · <b>Récompenses :</b> ${red.length} · <b>Coût récompenses :</b> ${formatReportMad(rewardCost)}</p>` : '';
+    const teamHtml = (kind==='team'||kind==='complete') ? `<h2>Équipe</h2><p><b>Membres :</b> ${team.length} · <b>Actifs :</b> ${team.filter((x:any)=>x.active).length} · <b>Responsables :</b> ${team.filter((x:any)=>x.role==='MANAGER').length} · <b>Employés :</b> ${team.filter((x:any)=>x.role==='STAFF').length}</p>` : '';
+    const analytics = (kind==='analytics'||kind==='complete') ? `<h2>Analytics</h2><p><b>Événements :</b> ${events??0} · <b>Période :</b> ${period} jours</p>` : '';
+    const html=`<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(title)} - ${escapeHtml(selected.name)}</title><style>body{font-family:Arial,sans-serif;color:#17241f;padding:32px;max-width:900px;margin:auto}h1{color:#173d32;margin-bottom:4px}h2{margin-top:28px;border-bottom:1px solid #ddd;padding-bottom:8px}.meta{color:#666;font-size:12px}.item{padding:10px 0;border-bottom:1px solid #eee;font-size:13px;line-height:1.5}@media print{body{padding:0}}</style></head><body><h1>${escapeHtml(title)}</h1><div class="meta">${escapeHtml(selected.name)} · ${new Date().toLocaleDateString('fr-FR')} · ${period} derniers jours</div>${section}${loyalty}${teamHtml}${analytics}</body></html>`;
+    const win=window.open('','_blank','width=1000,height=800'); if(!win) return alert('Autorise les fenêtres popup pour générer le PDF.'); win.document.write(html); win.document.close(); win.focus(); setTimeout(()=>win.print(),250);
+  };
+  return <div><div className="mb-8"><p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">Reporting</p><h2 className="font-display text-3xl text-forest md:text-4xl">Rapports PDF</h2><p className="mt-2 max-w-2xl text-sm text-ink/50">Exporte les rapports réputation, fidélité, équipe, analytics ou le rapport complet d’un établissement.</p></div><div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm"><div className="grid gap-4 md:grid-cols-2"><label className="block"><span className="mb-2 block text-xs font-semibold">Établissement</span><select value={selectedId} onChange={e=>setSelectedId(e.target.value)} className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm">{establishments.map(e=><option key={e.id} value={e.id}>{e.name}</option>)}</select></label><label className="block"><span className="mb-2 block text-xs font-semibold">Période</span><select value={period} onChange={e=>setPeriod(Number(e.target.value))} className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm"><option value={7}>7 jours</option><option value={15}>15 jours</option><option value={30}>30 jours</option><option value={90}>90 jours</option><option value={180}>180 jours</option><option value={365}>365 jours</option></select></label></div><div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{[['reviews','Avis & réputation'],['loyalty','Fidélité'],['team','Équipe'],['analytics','Analytics'],['complete','Rapport complet']].map(([id,label])=><button key={id} onClick={()=>printReport(id as any)} disabled={loading} className="inline-flex items-center justify-center gap-2 rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-xs font-semibold text-forest hover:bg-white disabled:opacity-40"><Printer size={15}/>{loading?'Préparation…':label}</button>)}</div><p className="mt-5 text-[11px] text-ink/35">Le bouton ouvre la fenêtre d’impression du navigateur : choisis ensuite « Enregistrer au format PDF ».</p></div></div>;
+}
+function escapeHtml(value: string) { return value.replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char] as string)); }
+function formatReportMad(value: number) { return `${value.toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:0})} DH`; }
+
+/* =========================================================
    EMPTY
 ========================================================= */
 
@@ -3301,4 +3492,3 @@ function EmptyStaff({
     </div>
   );
 }
-
