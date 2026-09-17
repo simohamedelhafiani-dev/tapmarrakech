@@ -611,8 +611,6 @@ function EstablishmentsSection({
     );
   }
 
-  const visibleStaff = selectedEstablishment === 'all' ? staff : staff.filter((member) => member.establishment_id === selectedEstablishment);
-
   return (
     <div>
       <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
@@ -763,7 +761,7 @@ function EstablishmentWorkspace({
   const saveProfile = async () => {
     setSaving(true);
     const payload = {
-      name: profile.name, slug: profile.slug, business_type: profile.business_type || null, address: profile.address || null,
+      name: profile.name, slug: profile.slug, business_type: profile.business_type || null, ai_business_type_id: profile.ai_business_type_id || null, address: profile.address || null,
       city: profile.city || null, phone: profile.phone || null, email: profile.email || null, website_url: profile.website_url || null,
       description: profile.description || null, instagram_url: profile.instagram_url || null, facebook_url: profile.facebook_url || null,
       tiktok_url: profile.tiktok_url || null, whatsapp_number: profile.whatsapp_number || null,
@@ -1079,6 +1077,13 @@ function ResponsiblesSection({
       ),
     [establishments]
   );
+
+  const visibleStaff =
+    selectedEstablishment === 'all'
+      ? staff
+      : staff.filter(
+          (member) => member.establishment_id === selectedEstablishment
+        );
 
   return (
     <div>
