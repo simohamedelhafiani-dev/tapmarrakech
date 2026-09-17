@@ -65,6 +65,7 @@ type LoyaltyRedemption = {
   amount_paid: number | null;
   payment_method: string | null;
   redemption_type: string | null;
+  reward_cost_mad: number | null;
   created_at: string;
 };
 
@@ -440,7 +441,7 @@ export default function Dashboard() {
 
       const { data, error } = await supabase
         .from('loyalty_redemptions')
-        .select('id, establishment_id, customer_id, reward_id, employee_id, points_used, invoice_number, invoice_amount, discount_amount, amount_paid, payment_method, redemption_type, created_at')
+        .select('id, establishment_id, customer_id, reward_id, employee_id, points_used, invoice_number, invoice_amount, discount_amount, amount_paid, payment_method, redemption_type, reward_cost_mad, created_at')
         .eq('establishment_id', selectedEstablishmentId)
         .order('created_at', { ascending: false });
 
@@ -582,8 +583,18 @@ export default function Dashboard() {
       0
     );
 
+    const rewardCostOnPeriod = currentRedemptions.reduce(
+      (sum, redemption) => sum + Number(redemption.reward_cost_mad || 0),
+      0
+    );
+
+    const netContribution = redemptionRevenue - rewardCostOnPeriod;
+    const realROI = rewardCostOnPeriod > 0
+      ? (netContribution / rewardCostOnPeriod) * 100
+      : null;
+
     const rewardEfficiency = rewardValueOnPeriod > 0
-      ? currentRevenue / rewardValueOnPeriod
+      ? redemptionRevenue / rewardValueOnPeriod
       : 0;
 
     const customerMap = new Map(
@@ -646,10 +657,13 @@ export default function Dashboard() {
       previousRewardValue,
       redemptionRevenue,
       rewardEfficiency,
+      rewardCostOnPeriod,
+      netContribution,
+      realROI,
       topClients,
       periodDays: selected.days,
     };
-  }, [reviews, loyaltyCustomers, loyaltyTransactions, selected.days]);
+  }, [reviews, loyaltyCustomers, loyaltyTransactions, loyaltyRedemptions, pointsPerCurrency, selected.days]);
 
   const isResponsible = role === 'responsible';
 
@@ -954,13 +968,13 @@ export default function Dashboard() {
             </p>
           </div>
           <div className="rounded-xl border border-gold/20 bg-white px-4 py-3 text-right">
-            <p className="text-[10px] uppercase tracking-[0.12em] text-ink/35">Ratio CA / valeur des points</p>
+            <p className="text-[10px] uppercase tracking-[0.12em] text-ink/35">ROI réel des récompenses</p>
             <p className="mt-1 font-display text-2xl text-forest">
-              {redemptionsLoading || transactionsLoading
+              {redemptionsLoading
                 ? '—'
-                : analytics.rewardEfficiency
-                  ? `${analytics.rewardEfficiency.toFixed(1)}×`
-                  : '—'}
+                : analytics.realROI === null
+                  ? '—'
+                  : `${analytics.realROI.toFixed(0)} %`}
             </p>
           </div>
         </div>
@@ -1006,14 +1020,35 @@ export default function Dashboard() {
                 : `${analytics.redemptionRevenue.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}
             </p>
             <p className="mt-2 text-xs text-white/45">
-              montant payé enregistré lors des utilisations
+              montant payé lors des utilisations
             </p>
+          </div>
+
+          <div className="rounded-2xl bg-white p-5">
+            <p className="text-xs font-medium text-ink/50">Coût réel des récompenses</p>
+            <p className="mt-3 font-display text-3xl text-forest">
+              {redemptionsLoading
+                ? '—'
+                : `${analytics.rewardCostOnPeriod.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}
+            </p>
+            <p className="mt-2 text-xs text-ink/40">coût enregistré au moment de chaque utilisation</p>
+          </div>
+
+          <div className="rounded-2xl bg-[#f4ead3] p-5">
+            <p className="text-xs font-medium text-ink/50">Contribution nette</p>
+            <p className="mt-3 font-display text-3xl text-forest">
+              {redemptionsLoading
+                ? '—'
+                : `${analytics.netContribution.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}
+            </p>
+            <p className="mt-2 text-xs text-ink/40">CA récompenses − coût réel des récompenses</p>
           </div>
         </div>
 
         <div className="mt-5 rounded-xl border border-gold/15 bg-white px-4 py-3 text-xs leading-5 text-ink/50">
-          <strong className="text-forest">Important :</strong> ce ratio est un indicateur de performance du programme,
-          pas une marge nette. Le coût réel des récompenses n'est pas enregistré dans la base actuelle.
+          <strong className="text-forest">ROI réel :</strong> calculé sur les utilisations enregistrées avec leur coût réel :
+          <strong className="text-forest"> (CA lié aux récompenses − coût des récompenses) ÷ coût des récompenses</strong>.
+          Les anciennes utilisations créées avant l'activation du coût peuvent afficher un coût de 0 DH.
         </div>
       </section>
 
