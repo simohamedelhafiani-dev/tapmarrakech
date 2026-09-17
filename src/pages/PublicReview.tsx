@@ -1,26 +1,30 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
+  ArrowRight,
   CheckCircle2,
   ExternalLink,
   Gift,
   Heart,
+  Instagram,
+  MapPin,
   Menu as MenuIcon,
-  MessageSquare,
+  MessageCircle,
+  Phone,
   Send,
   ShieldCheck,
   Star,
-  UtensilsCrossed,
+  Utensils,
+  Wifi,
 } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import type { Establishment } from '@/lib/types';
 import { Stars } from '@/components/Stars';
 
-type PublicTab = 'menu' | 'reviews' | 'loyalty';
+type PublicTab = 'home' | 'menu' | 'reviews' | 'loyalty';
 
 type MenuCategory = {
   id: string;
-  establishment_id: string;
   name: string;
   description: string | null;
   display_order: number;
@@ -29,13 +33,39 @@ type MenuCategory = {
 
 type MenuItem = {
   id: string;
-  establishment_id: string;
   category_id: string;
   name: string;
   description: string | null;
-  price: number | string;
+  price: number;
   image_url: string | null;
   display_order: number;
+  active: boolean;
+};
+
+type Promotion = {
+  id: string;
+  name: string;
+  description: string | null;
+  image_url: string | null;
+  normal_price: number | null;
+  promo_price: number | null;
+  start_at: string | null;
+  end_at: string | null;
+  active: boolean;
+  display_order: number;
+};
+
+type WifiInfo = {
+  network_name: string | null;
+  wifi_password: string | null;
+  active: boolean;
+};
+
+type LoyaltyReward = {
+  id: string;
+  name: string;
+  description: string | null;
+  points_required: number;
   active: boolean;
 };
 
@@ -43,11 +73,13 @@ export default function PublicReview() {
   const { slug } = useParams<{ slug: string }>();
 
   const [place, setPlace] = useState<Establishment | null>(null);
-  const [activeTab, setActiveTab] = useState<PublicTab>('menu');
+  const [tab, setTab] = useState<PublicTab>('home');
 
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
-  const [menuLoading, setMenuLoading] = useState(false);
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [wifi, setWifi] = useState<WifiInfo | null>(null);
+  const [rewards, setRewards] = useState<LoyaltyReward[]>([]);
 
   const [rating, setRating] = useState(0);
   const [sent, setSent] = useState(false);
@@ -63,96 +95,96 @@ export default function PublicReview() {
 
   useEffect(() => {
     const load = async () => {
-      if (!slug) {
-        setLoading(false);
-        return;
-      }
+      if (!slug) return;
 
-      const { data, error: establishmentError } = await supabase
+      setLoading(true);
+
+      const { data: establishment } = await supabase
         .from('establishments')
         .select('*')
         .eq('slug', slug)
         .maybeSingle();
 
-      if (establishmentError) {
-        console.error('Erreur établissement public:', establishmentError);
+      if (!establishment) {
+        setPlace(null);
+        setLoading(false);
+        return;
       }
 
-      setPlace(data);
+      setPlace(establishment);
+
+      await supabase.from('analytics_events').insert({
+        establishment_id: establishment.id,
+        event_type: 'page_view',
+      });
+
+      const [
+        { data: menuCategories },
+        { data: menuItems },
+        { data: promotionData },
+        { data: wifiData },
+        { data: rewardData },
+      ] = await Promise.all([
+        supabase
+          .from('menu_categories')
+          .select('*')
+          .eq('establishment_id', establishment.id)
+          .eq('active', true)
+          .order('display_order'),
+
+        supabase
+          .from('menu_items')
+          .select('*')
+          .eq('establishment_id', establishment.id)
+          .eq('active', true)
+          .order('display_order'),
+
+        supabase
+          .from('promotions')
+          .select('*')
+          .eq('establishment_id', establishment.id)
+          .eq('active', true)
+          .order('display_order'),
+
+        supabase
+          .from('establishment_wifi')
+          .select('network_name, wifi_password, active')
+          .eq('establishment_id', establishment.id)
+          .eq('active', true)
+          .maybeSingle(),
+
+        supabase
+          .from('loyalty_rewards')
+          .select('id, name, description, points_required, active')
+          .eq('establishment_id', establishment.id)
+          .eq('active', true)
+          .order('points_required'),
+      ]);
+
+      setCategories(menuCategories ?? []);
+      setItems(menuItems ?? []);
+      setPromotions(promotionData ?? []);
+      setWifi(wifiData ?? null);
+      setRewards(rewardData ?? []);
+
       setLoading(false);
-
-      if (data) {
-        await supabase.from('analytics_events').insert({
-          establishment_id: data.id,
-          event_type: 'page_view',
-        });
-
-        await loadMenu(data.id);
-      }
     };
 
     load();
   }, [slug]);
 
-  async function loadMenu(establishmentId: string) {
-    setMenuLoading(true);
-
-    const [categoriesResult, itemsResult] = await Promise.all([
-      supabase
-        .from('menu_categories')
-        .select('*')
-        .eq('establishment_id', establishmentId)
-        .eq('active', true)
-        .order('display_order', { ascending: true })
-        .order('created_at', { ascending: true }),
-
-      supabase
-        .from('menu_items')
-        .select('*')
-        .eq('establishment_id', establishmentId)
-        .eq('active', true)
-        .order('display_order', { ascending: true })
-        .order('created_at', { ascending: true }),
-    ]);
-
-    if (categoriesResult.error) {
-      console.error(
-        'Erreur catégories menu public:',
-        categoriesResult.error
-      );
-    }
-
-    if (itemsResult.error) {
-      console.error(
-        'Erreur produits menu public:',
-        itemsResult.error
-      );
-    }
-
-    setCategories((categoriesResult.data as MenuCategory[]) ?? []);
-
-    setItems(
-      ((itemsResult.data as MenuItem[]) ?? []).map((item) => ({
-        ...item,
-        price: Number(item.price),
-      }))
-    );
-
-    setMenuLoading(false);
-  }
-
   const itemsByCategory = useMemo(() => {
-    const grouped: Record<string, MenuItem[]> = {};
+    const result: Record<string, MenuItem[]> = {};
 
     for (const item of items) {
-      if (!grouped[item.category_id]) {
-        grouped[item.category_id] = [];
+      if (!result[item.category_id]) {
+        result[item.category_id] = [];
       }
 
-      grouped[item.category_id].push(item);
+      result[item.category_id].push(item);
     }
 
-    return grouped;
+    return result;
   }, [items]);
 
   const choose = async (value: number) => {
@@ -173,13 +205,11 @@ export default function PublicReview() {
         type: 'positive',
       });
 
-      await supabase.from('analytics_events').insert([
-        {
-          establishment_id: place.id,
-          event_type: 'google_redirect',
-          rating: value,
-        },
-      ]);
+      await supabase.from('analytics_events').insert({
+        establishment_id: place.id,
+        event_type: 'google_redirect',
+        rating: value,
+      });
 
       if (place.google_review_url) {
         window.open(
@@ -197,27 +227,24 @@ export default function PublicReview() {
     }
   };
 
-  const submit = async (event: FormEvent) => {
+  const submit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     if (!place || !form.comment.trim()) return;
 
     setError('');
 
-    const { error: insertError } = await supabase
-      .from('reviews')
-      .insert({
-        establishment_id: place.id,
-        rating,
-        type: 'negative',
-        comment: form.comment.trim(),
-        name: form.name.trim() || null,
-        phone: form.phone.trim() || null,
-        email: form.email.trim() || null,
-      });
+    const { error: insertError } = await supabase.from('reviews').insert({
+      establishment_id: place.id,
+      rating,
+      type: 'negative',
+      comment: form.comment.trim(),
+      name: form.name.trim() || null,
+      phone: form.phone.trim() || null,
+      email: form.email.trim() || null,
+    });
 
     if (insertError) {
-      console.error(insertError);
       setError(
         'Impossible d’envoyer votre message. Veuillez réessayer.'
       );
@@ -233,43 +260,29 @@ export default function PublicReview() {
     setSent(true);
   };
 
-  function switchTab(tab: PublicTab) {
-    setActiveTab(tab);
-
-    if (place) {
-      supabase.from('analytics_events').insert({
-        establishment_id: place.id,
-        event_type:
-          tab === 'menu'
-            ? 'public_menu_view'
-            : tab === 'reviews'
-              ? 'public_reviews_view'
-              : 'public_loyalty_view',
-      });
-    }
-
+  const openTab = (nextTab: PublicTab) => {
+    setTab(nextTab);
     window.scrollTo({
       top: 0,
       behavior: 'smooth',
     });
-  }
+  };
 
   if (loading) {
     return (
-      <div className="grid min-h-screen place-items-center bg-[#f5f0e7]">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
+      <div className="grid min-h-screen place-items-center bg-[#f7f3ea]">
+        <div className="h-9 w-9 animate-spin rounded-full border-2 border-forest border-t-transparent" />
       </div>
     );
   }
 
   if (!place) {
     return (
-      <div className="grid min-h-screen place-items-center bg-[#f5f0e7] px-6 text-center">
+      <div className="grid min-h-screen place-items-center bg-[#f7f3ea] px-6 text-center">
         <div>
           <p className="font-display text-3xl text-forest">
             Établissement introuvable
           </p>
-
           <p className="mt-2 text-sm text-ink/60">
             Ce lien n’est plus disponible.
           </p>
@@ -278,249 +291,582 @@ export default function PublicReview() {
     );
   }
 
+  const establishment = place as any;
+
+  const phone =
+    establishment.phone ||
+    '';
+
+  const whatsapp =
+    establishment.whatsapp_number ||
+    '';
+
+  const city =
+    establishment.city ||
+    '';
+
+  const address =
+    establishment.address ||
+    '';
+
+  const description =
+    establishment.description ||
+    '';
+
+  const instagram =
+    establishment.instagram_url ||
+    '';
+
+  const website =
+    establishment.website_url ||
+    '';
+
+  const googleRating =
+    establishment.google_rating ??
+    establishment.rating ??
+    null;
+
+  const googleReviewCount =
+    establishment.google_review_count ??
+    establishment.review_count ??
+    null;
+
+  const directionsUrl =
+    address || city
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+          [address, city].filter(Boolean).join(', ')
+        )}`
+      : '';
+
   return (
-    <div className="min-h-screen bg-[#f5f0e7] text-ink">
-      <div className="mx-auto w-full max-w-[520px] px-5 pb-12 pt-8">
+    <div className="min-h-screen bg-[#f7f3ea] text-ink">
+      <div className="mx-auto min-h-screen w-full max-w-[520px] pb-28">
 
         {/* HEADER */}
-        <header className="text-center">
-          {place.logo_url ? (
-            <img
-              src={place.logo_url}
-              alt={place.name}
-              className="mx-auto mb-4 h-20 w-20 rounded-2xl object-cover shadow-soft"
-            />
-          ) : (
-            <div className="mx-auto mb-4 grid h-20 w-20 place-items-center rounded-2xl bg-forest font-display text-3xl text-gold shadow-soft">
-              {place.name[0]}
+        <header className="relative overflow-hidden bg-forest px-5 pb-8 pt-7 text-white">
+          <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-gold/10 blur-2xl" />
+          <div className="absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-white/5 blur-2xl" />
+
+          <div className="relative">
+            <div className="flex items-center justify-between">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.25em] text-gold">
+                Bienvenue
+              </div>
+
+              <div className="flex items-center gap-1.5 text-[10px] text-white/50">
+                <ShieldCheck size={13} />
+                Expérience digitale
+              </div>
             </div>
-          )}
 
-          <h1 className="font-display text-4xl text-forest">
-            {place.name}
-          </h1>
+            <div className="mt-7 flex items-center gap-4">
+              {establishment.logo_url ? (
+                <img
+                  src={establishment.logo_url}
+                  alt=""
+                  className="h-20 w-20 rounded-2xl bg-white object-cover p-1 shadow-lg"
+                />
+              ) : (
+                <div className="grid h-20 w-20 place-items-center rounded-2xl bg-white/10 font-display text-3xl text-gold">
+                  {place.name?.[0] ?? 'E'}
+                </div>
+              )}
 
-          <p className="mt-2 text-xs font-semibold tracking-[0.18em] text-forest/45">
-            BIENVENUE
-          </p>
+              <div className="min-w-0">
+                <h1 className="font-display text-3xl leading-tight">
+                  {place.name}
+                </h1>
+
+                {(googleRating || place.google_review_url) && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <div className="flex items-center gap-1 text-gold">
+                      <Star size={15} fill="currentColor" />
+                      <span className="text-sm font-semibold">
+                        {googleRating
+                          ? Number(googleRating).toFixed(1)
+                          : 'Google'}
+                      </span>
+                    </div>
+
+                    {googleReviewCount && (
+                      <span className="text-xs text-white/50">
+                        · {googleReviewCount} avis
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {description && (
+              <p className="mt-5 max-w-[440px] text-sm leading-6 text-white/65">
+                {description}
+              </p>
+            )}
+
+            {/* QUICK ACTIONS */}
+            <div className="mt-6 grid grid-cols-4 gap-2">
+              {phone && (
+                <a
+                  href={`tel:${phone}`}
+                  className="flex flex-col items-center gap-1.5 rounded-2xl bg-white/10 px-2 py-3 text-[10px] font-semibold text-white transition hover:bg-white/15"
+                >
+                  <Phone size={18} />
+                  Appeler
+                </a>
+              )}
+
+              {whatsapp && (
+                <a
+                  href={`https://wa.me/${whatsapp.replace(/\D/g, '')}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex flex-col items-center gap-1.5 rounded-2xl bg-white/10 px-2 py-3 text-[10px] font-semibold text-white transition hover:bg-white/15"
+                >
+                  <MessageCircle size={18} />
+                  WhatsApp
+                </a>
+              )}
+
+              {directionsUrl && (
+                <a
+                  href={directionsUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex flex-col items-center gap-1.5 rounded-2xl bg-white/10 px-2 py-3 text-[10px] font-semibold text-white transition hover:bg-white/15"
+                >
+                  <MapPin size={18} />
+                  Itinéraire
+                </a>
+              )}
+
+              {place.google_review_url && (
+                <button
+                  onClick={() => openTab('reviews')}
+                  className="flex flex-col items-center gap-1.5 rounded-2xl bg-white/10 px-2 py-3 text-[10px] font-semibold text-white transition hover:bg-white/15"
+                >
+                  <Star size={18} />
+                  Avis
+                </button>
+              )}
+            </div>
+          </div>
         </header>
 
-        {/* NAVIGATION PUBLIQUE */}
-        <nav className="sticky top-3 z-20 mt-8 rounded-2xl border border-ink/5 bg-white/95 p-1.5 shadow-soft backdrop-blur">
-          <div className="grid grid-cols-3 gap-1">
+        {/* HOME */}
+        {tab === 'home' && (
+          <main className="space-y-5 px-5 pt-5">
 
+            {/* PROMOTIONS */}
+            {promotions.length > 0 && (
+              <section>
+                <div className="mb-3 flex items-end justify-between">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold">
+                      À ne pas manquer
+                    </p>
+                    <h2 className="mt-1 font-display text-2xl text-forest">
+                      Nos offres
+                    </h2>
+                  </div>
+
+                  <span className="rounded-full bg-gold/10 px-3 py-1 text-[10px] font-semibold text-gold">
+                    {promotions.length} offre
+                    {promotions.length > 1 ? 's' : ''}
+                  </span>
+                </div>
+
+                <div className="space-y-3">
+                  {promotions.map((promotion) => (
+                    <div
+                      key={promotion.id}
+                      className="overflow-hidden rounded-3xl border border-ink/5 bg-white shadow-sm"
+                    >
+                      {promotion.image_url && (
+                        <img
+                          src={promotion.image_url}
+                          alt=""
+                          className="h-44 w-full object-cover"
+                        />
+                      )}
+
+                      <div className="p-5">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-red-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-red-600">
+                              <Gift size={12} />
+                              Offre
+                            </div>
+
+                            <h3 className="font-display text-xl text-forest">
+                              {promotion.name}
+                            </h3>
+
+                            {promotion.description && (
+                              <p className="mt-2 text-sm leading-5 text-ink/55">
+                                {promotion.description}
+                              </p>
+                            )}
+                          </div>
+
+                          {(promotion.promo_price !== null ||
+                            promotion.normal_price !== null) && (
+                            <div className="shrink-0 text-right">
+                              {promotion.normal_price !== null &&
+                                promotion.promo_price !== null &&
+                                promotion.normal_price >
+                                  promotion.promo_price && (
+                                  <div className="text-xs text-ink/35 line-through">
+                                    {Number(
+                                      promotion.normal_price
+                                    ).toLocaleString('fr-FR')}{' '}
+                                    MAD
+                                  </div>
+                                )}
+
+                              {promotion.promo_price !== null && (
+                                <div className="text-xl font-bold text-forest">
+                                  {Number(
+                                    promotion.promo_price
+                                  ).toLocaleString('fr-FR')}{' '}
+                                  MAD
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* MENU */}
             <button
-              type="button"
-              onClick={() => switchTab('menu')}
-              className={`flex flex-col items-center justify-center gap-1.5 rounded-xl px-2 py-3 text-xs font-semibold transition ${
-                activeTab === 'menu'
-                  ? 'bg-forest text-white'
-                  : 'text-ink/55 hover:bg-[#f7f7f3]'
-              }`}
+              onClick={() => openTab('menu')}
+              className="group flex w-full items-center justify-between rounded-3xl bg-white p-5 text-left shadow-sm ring-1 ring-ink/5 transition hover:-translate-y-0.5"
             >
-              <UtensilsCrossed size={18} />
-              <span>MENU</span>
-            </button>
+              <div className="flex items-center gap-4">
+                <div className="grid h-12 w-12 place-items-center rounded-2xl bg-forest/10 text-forest">
+                  <Utensils size={22} />
+                </div>
 
-            <button
-              type="button"
-              onClick={() => switchTab('reviews')}
-              className={`flex flex-col items-center justify-center gap-1.5 rounded-xl px-2 py-3 text-xs font-semibold transition ${
-                activeTab === 'reviews'
-                  ? 'bg-forest text-white'
-                  : 'text-ink/55 hover:bg-[#f7f7f3]'
-              }`}
-            >
-              <MessageSquare size={18} />
-              <span>AVIS</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => switchTab('loyalty')}
-              className={`flex flex-col items-center justify-center gap-1.5 rounded-xl px-2 py-3 text-xs font-semibold transition ${
-                activeTab === 'loyalty'
-                  ? 'bg-forest text-white'
-                  : 'text-ink/55 hover:bg-[#f7f7f3]'
-              }`}
-            >
-              <Gift size={18} />
-              <span>FIDÉLITÉ</span>
-            </button>
-
-          </div>
-        </nav>
-
-        {/* ========================= */}
-        {/* MENU */}
-        {/* ========================= */}
-
-        {activeTab === 'menu' && (
-          <section className="mt-8">
-
-            <div className="mb-7 text-center">
-              <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-forest text-gold">
-                <MenuIcon size={23} />
+                <div>
+                  <p className="font-display text-xl text-forest">
+                    Découvrir notre menu
+                  </p>
+                  <p className="mt-1 text-xs text-ink/45">
+                    {items.length > 0
+                      ? `${items.length} produit${
+                          items.length > 1 ? 's' : ''
+                        } disponible${items.length > 1 ? 's' : ''}`
+                      : 'Voir nos produits et services'}
+                  </p>
+                </div>
               </div>
 
-              <h2 className="font-display text-3xl text-forest">
-                Notre menu
+              <ArrowRight
+                size={20}
+                className="text-gold transition group-hover:translate-x-1"
+              />
+            </button>
+
+            {/* WIFI */}
+            {wifi?.active && wifi.network_name && (
+              <section className="rounded-3xl bg-forest p-5 text-white shadow-sm">
+                <div className="flex items-start gap-4">
+                  <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/10 text-gold">
+                    <Wifi size={22} />
+                  </div>
+
+                  <div className="min-w-0">
+                    <p className="font-display text-xl">
+                      Wi-Fi gratuit
+                    </p>
+
+                    <p className="mt-1 text-xs text-white/55">
+                      Connectez-vous pendant votre visite.
+                    </p>
+
+                    <div className="mt-4 space-y-2">
+                      <div className="rounded-xl bg-white/10 px-3 py-2.5">
+                        <p className="text-[9px] uppercase tracking-wider text-white/40">
+                          Réseau
+                        </p>
+                        <p className="mt-0.5 text-sm font-semibold">
+                          {wifi.network_name}
+                        </p>
+                      </div>
+
+                      {wifi.wifi_password && (
+                        <div className="rounded-xl bg-white/10 px-3 py-2.5">
+                          <p className="text-[9px] uppercase tracking-wider text-white/40">
+                            Mot de passe
+                          </p>
+                          <p className="mt-0.5 text-sm font-semibold">
+                            {wifi.wifi_password}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* LOYALTY */}
+            <button
+              onClick={() => openTab('loyalty')}
+              className="group flex w-full items-center justify-between rounded-3xl border border-gold/20 bg-[#fffaf0] p-5 text-left shadow-sm"
+            >
+              <div className="flex items-center gap-4">
+                <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gold/15 text-gold">
+                  <Gift size={22} />
+                </div>
+
+                <div>
+                  <p className="font-display text-xl text-forest">
+                    Programme fidélité
+                  </p>
+                  <p className="mt-1 text-xs text-ink/45">
+                    Profitez de vos avantages et récompenses.
+                  </p>
+                </div>
+              </div>
+
+              <ArrowRight
+                size={20}
+                className="text-gold transition group-hover:translate-x-1"
+              />
+            </button>
+
+            {/* REVIEW CTA */}
+            <section className="rounded-3xl bg-white p-6 text-center shadow-sm ring-1 ring-ink/5">
+              <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-gold/10 text-gold">
+                <Heart size={22} fill="currentColor" />
+              </div>
+
+              <h2 className="mt-4 font-display text-2xl text-forest">
+                Votre expérience compte
               </h2>
 
-              <p className="mt-2 text-sm text-ink/55">
-                Découvrez notre sélection
+              <p className="mx-auto mt-2 max-w-[360px] text-sm leading-6 text-ink/50">
+                Partagez votre expérience avec notre équipe.
               </p>
-            </div>
 
-            {menuLoading ? (
-              <div className="grid place-items-center py-16">
-                <div className="h-7 w-7 animate-spin rounded-full border-2 border-forest border-t-transparent" />
-              </div>
-            ) : categories.length === 0 ? (
-              <div className="rounded-3xl bg-white px-6 py-12 text-center shadow-soft">
-                <UtensilsCrossed
-                  className="mx-auto text-forest/35"
-                  size={34}
-                />
+              <button
+                onClick={() => openTab('reviews')}
+                className="mt-5 inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white"
+              >
+                Donner mon avis
+                <ArrowRight size={16} />
+              </button>
+            </section>
 
-                <h3 className="mt-4 font-display text-2xl text-forest">
-                  Menu bientôt disponible
-                </h3>
-
-                <p className="mt-2 text-sm leading-6 text-ink/50">
-                  Le menu de cet établissement sera bientôt disponible ici.
+            {/* CONTACT */}
+            {(address || city || phone || website || instagram) && (
+              <section className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-ink/5">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold">
+                  Informations
                 </p>
-              </div>
-            ) : (
-              <div className="space-y-8">
 
+                <div className="mt-4 space-y-3">
+                  {(address || city) && (
+                    <div className="flex items-start gap-3">
+                      <MapPin
+                        size={17}
+                        className="mt-0.5 shrink-0 text-forest"
+                      />
+                      <span className="text-sm leading-5 text-ink/60">
+                        {[address, city].filter(Boolean).join(', ')}
+                      </span>
+                    </div>
+                  )}
+
+                  {phone && (
+                    <a
+                      href={`tel:${phone}`}
+                      className="flex items-center gap-3 text-sm text-ink/60"
+                    >
+                      <Phone size={17} className="text-forest" />
+                      {phone}
+                    </a>
+                  )}
+
+                  {website && (
+                    <a
+                      href={
+                        website.startsWith('http')
+                          ? website
+                          : `https://${website}`
+                      }
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-3 text-sm text-ink/60"
+                    >
+                      <ExternalLink
+                        size={17}
+                        className="text-forest"
+                      />
+                      Site web
+                    </a>
+                  )}
+
+                  {instagram && (
+                    <a
+                      href={instagram}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-3 text-sm text-ink/60"
+                    >
+                      <Instagram
+                        size={17}
+                        className="text-forest"
+                      />
+                      Instagram
+                    </a>
+                  )}
+                </div>
+              </section>
+            )}
+          </main>
+        )}
+
+        {/* MENU */}
+        {tab === 'menu' && (
+          <main className="px-5 pt-5">
+            <PageTitle
+              eyebrow="Notre carte"
+              title="Menu"
+              onBack={() => openTab('home')}
+            />
+
+            {categories.length === 0 ? (
+              <EmptyState
+                icon={<Utensils size={22} />}
+                title="Menu bientôt disponible"
+                text="Les produits et services de cet établissement apparaîtront ici."
+              />
+            ) : (
+              <div className="mt-6 space-y-7">
                 {categories.map((category) => {
                   const categoryItems =
                     itemsByCategory[category.id] ?? [];
 
-                  if (categoryItems.length === 0) {
-                    return null;
-                  }
+                  if (categoryItems.length === 0) return null;
 
                   return (
-                    <div key={category.id}>
-
-                      <div className="mb-4">
-                        <h3 className="font-display text-2xl text-forest">
+                    <section key={category.id}>
+                      <div className="mb-3">
+                        <h2 className="font-display text-2xl text-forest">
                           {category.name}
-                        </h3>
+                        </h2>
 
                         {category.description && (
-                          <p className="mt-1 text-sm leading-5 text-ink/50">
+                          <p className="mt-1 text-xs leading-5 text-ink/45">
                             {category.description}
                           </p>
                         )}
                       </div>
 
                       <div className="space-y-3">
-
                         {categoryItems.map((item) => (
-                          <article
+                          <div
                             key={item.id}
-                            className="overflow-hidden rounded-2xl bg-white shadow-soft"
+                            className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-ink/5"
                           >
-                            <div className="flex gap-4 p-4">
-
+                            <div className="flex gap-3 p-3">
                               {item.image_url && (
                                 <img
                                   src={item.image_url}
-                                  alt={item.name}
+                                  alt=""
                                   className="h-24 w-24 shrink-0 rounded-xl object-cover"
                                 />
                               )}
 
-                              <div className="min-w-0 flex-1">
-
+                              <div className="min-w-0 flex-1 py-1">
                                 <div className="flex items-start justify-between gap-3">
-                                  <h4 className="font-semibold text-ink">
+                                  <h3 className="font-semibold text-forest">
                                     {item.name}
-                                  </h4>
+                                  </h3>
 
-                                  <span className="shrink-0 font-semibold text-forest">
-                                    {Number(item.price).toFixed(2)} MAD
+                                  <span className="shrink-0 font-semibold text-gold">
+                                    {Number(
+                                      item.price
+                                    ).toLocaleString('fr-FR')}{' '}
+                                    MAD
                                   </span>
                                 </div>
 
                                 {item.description && (
-                                  <p className="mt-1.5 text-xs leading-5 text-ink/55">
+                                  <p className="mt-2 text-xs leading-5 text-ink/50">
                                     {item.description}
                                   </p>
                                 )}
-
                               </div>
                             </div>
-                          </article>
+                          </div>
                         ))}
-
                       </div>
-                    </div>
+                    </section>
                   );
                 })}
-
               </div>
             )}
-
-          </section>
+          </main>
         )}
 
-        {/* ========================= */}
-        {/* AVIS */}
-        {/* ========================= */}
+        {/* REVIEWS */}
+        {tab === 'reviews' && (
+          <main className="px-5 pt-5">
+            <PageTitle
+              eyebrow="Votre expérience"
+              title="Votre avis compte"
+              onBack={() => openTab('home')}
+            />
 
-        {activeTab === 'reviews' && (
-          <section className="mt-8">
-
-            {!rating && (
-              <>
-                <div className="mb-7 text-center">
-                  <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-forest text-gold">
-                    <Star size={23} fill="currentColor" />
-                  </div>
-
-                  <h2 className="font-display text-3xl text-forest">
-                    Votre avis compte
-                  </h2>
-
-                  <p className="mt-2 text-sm leading-6 text-ink/55">
-                    Comment s’est passée votre expérience avec nous ?
-                  </p>
+            {!rating && !sent && (
+              <section className="mt-8 rounded-3xl bg-white p-7 text-center shadow-sm ring-1 ring-ink/5">
+                <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-gold/10 text-gold">
+                  <Heart size={25} fill="currentColor" />
                 </div>
 
-                <div className="rounded-3xl bg-white p-7 text-center shadow-soft">
-                  <div className="flex justify-center gap-3">
-                    <Stars
-                      rating={rating}
-                      size={42}
-                      interactive
-                      onSelect={choose}
-                    />
-                  </div>
+                <h2 className="mt-5 font-display text-2xl text-forest">
+                  Comment s’est passée votre expérience ?
+                </h2>
 
-                  <p className="mt-5 text-xs text-ink/40">
-                    Appuyez sur une étoile pour répondre
-                  </p>
+                <p className="mt-2 text-sm leading-6 text-ink/50">
+                  Votre retour nous aide à améliorer continuellement
+                  votre expérience.
+                </p>
+
+                <div className="mt-8 flex justify-center">
+                  <Stars
+                    rating={rating}
+                    size={42}
+                    interactive
+                    onSelect={choose}
+                  />
                 </div>
-              </>
+
+                <p className="mt-5 text-xs text-ink/35">
+                  Appuyez sur une étoile pour répondre
+                </p>
+              </section>
             )}
 
             {rating >= place.redirect_threshold && !sent && (
-              <div className="mt-8 animate-in rounded-3xl bg-white p-7 text-center shadow-soft">
-                <Heart
-                  className="mx-auto text-gold"
-                  fill="currentColor"
-                  size={32}
-                />
+              <section className="mt-8 rounded-3xl bg-white p-7 text-center shadow-sm ring-1 ring-ink/5">
+                <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-gold/10 text-gold">
+                  <Heart size={27} fill="currentColor" />
+                </div>
 
                 <h2 className="mt-4 font-display text-2xl text-forest">
-                  Merci pour votre retour
+                  Merci pour votre retour ❤️
                 </h2>
 
-                <p className="mt-2 text-sm leading-6 text-ink/60">
+                <p className="mt-2 text-sm leading-6 text-ink/55">
                   Votre satisfaction nous fait très plaisir.
                   Aidez-nous à la partager.
                 </p>
@@ -530,37 +876,27 @@ export default function PublicReview() {
                     href={place.google_review_url}
                     target="_blank"
                     rel="noreferrer"
-                    className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white transition hover:bg-forest-light"
+                    className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white"
                   >
                     Laisser un avis sur Google
                     <ExternalLink size={16} />
                   </a>
                 )}
-
-                <button
-                  type="button"
-                  onClick={() => switchTab('menu')}
-                  className="mt-3 w-full rounded-xl border border-forest/10 px-5 py-3 text-sm font-semibold text-forest"
-                >
-                  Retour au menu
-                </button>
-              </div>
+              </section>
             )}
 
             {rating > 0 &&
               rating < place.redirect_threshold &&
               !sent && (
-                <div className="mt-8 rounded-3xl bg-white p-7 shadow-soft">
-
+                <section className="mt-8 rounded-3xl bg-white p-7 shadow-sm ring-1 ring-ink/5">
                   <h2 className="font-display text-2xl text-forest">
-                    Nous sommes désolés que votre expérience n’ait pas été
-                    à la hauteur.
+                    Nous sommes désolés.
                   </h2>
 
-                  <p className="mt-3 text-sm leading-6 text-ink/60">
+                  <p className="mt-3 text-sm leading-6 text-ink/55">
                     Pouvez-vous nous expliquer ce qui s’est passé ?
-                    Votre message restera privé et sera transmis à notre
-                    équipe.
+                    Votre message restera privé et sera transmis à
+                    notre équipe.
                   </p>
 
                   <form
@@ -578,7 +914,7 @@ export default function PublicReview() {
                       }
                       placeholder="Votre message *"
                       rows={4}
-                      className="w-full resize-none rounded-xl border border-ink/10 bg-[#fbfaf7] p-3 text-sm outline-none transition focus:ring-2 focus:ring-gold"
+                      className="w-full resize-none rounded-xl border border-ink/10 bg-[#fbfaf7] p-3 text-sm outline-none focus:ring-2 focus:ring-gold"
                     />
 
                     <div className="grid grid-cols-2 gap-3">
@@ -628,18 +964,17 @@ export default function PublicReview() {
 
                     <button
                       type="submit"
-                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white transition hover:bg-forest-light"
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white"
                     >
                       <Send size={16} />
                       Envoyer mon retour
                     </button>
                   </form>
-                </div>
+                </section>
               )}
 
             {sent && (
-              <div className="mt-8 rounded-3xl bg-white p-8 text-center shadow-soft">
-
+              <section className="mt-8 rounded-3xl bg-white p-8 text-center shadow-sm ring-1 ring-ink/5">
                 <CheckCircle2
                   className="mx-auto text-forest"
                   size={40}
@@ -649,190 +984,271 @@ export default function PublicReview() {
                   Merci pour votre retour.
                 </h2>
 
-                <p className="mt-2 text-sm leading-6 text-ink/60">
-                  Notre équipe va prendre connaissance de votre message.
+                <p className="mt-2 text-sm leading-6 text-ink/55">
+                  Notre équipe va prendre connaissance de votre
+                  message.
                 </p>
 
                 <button
-                  type="button"
-                  onClick={() => switchTab('menu')}
-                  className="mt-6 w-full rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white"
+                  onClick={() => {
+                    setRating(0);
+                    setSent(false);
+                    setForm({
+                      comment: '',
+                      name: '',
+                      phone: '',
+                      email: '',
+                    });
+                  }}
+                  className="mt-5 text-xs font-semibold text-forest"
                 >
-                  Retour au menu
+                  Retour à l’accueil
                 </button>
-
-              </div>
+              </section>
             )}
-
-          </section>
+          </main>
         )}
 
-        {/* ========================= */}
-        {/* FIDÉLITÉ */}
-        {/* ========================= */}
+        {/* LOYALTY */}
+        {tab === 'loyalty' && (
+          <main className="px-5 pt-5">
+            <PageTitle
+              eyebrow="Vos avantages"
+              title="Fidélité"
+              onBack={() => openTab('home')}
+            />
 
-        {activeTab === 'loyalty' && (
-          <section className="mt-8">
-
-            <div className="mb-7 text-center">
-              <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-forest text-gold">
+            <section className="mt-6 overflow-hidden rounded-3xl bg-forest p-6 text-white">
+              <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gold/15 text-gold">
                 <Gift size={23} />
               </div>
 
-              <h2 className="font-display text-3xl text-forest">
-                Votre fidélité
+              <h2 className="mt-5 font-display text-2xl">
+                Récompensé à chaque visite
               </h2>
 
-              <p className="mt-2 text-sm leading-6 text-ink/55">
-                Profitez des avantages réservés à nos clients fidèles.
+              <p className="mt-2 text-sm leading-6 text-white/55">
+                Profitez du programme fidélité de {place.name}.
+                Cumulez des points et bénéficiez de récompenses.
               </p>
-            </div>
+            </section>
 
-            <div className="overflow-hidden rounded-3xl bg-forest p-7 text-white shadow-soft">
+            {rewards.length > 0 && (
+              <section className="mt-6">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold">
+                  Récompenses disponibles
+                </p>
 
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] font-semibold tracking-[0.2em] text-gold">
-                    PROGRAMME
-                  </p>
+                <div className="mt-3 space-y-3">
+                  {rewards.map((reward) => (
+                    <div
+                      key={reward.id}
+                      className="flex items-center justify-between gap-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink/5"
+                    >
+                      <div>
+                        <h3 className="font-semibold text-forest">
+                          {reward.name}
+                        </h3>
 
-                  <h3 className="mt-2 font-display text-3xl">
-                    Fidélité
-                  </h3>
+                        {reward.description && (
+                          <p className="mt-1 text-xs leading-5 text-ink/45">
+                            {reward.description}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="shrink-0 rounded-full bg-gold/10 px-3 py-1.5 text-xs font-bold text-gold">
+                        {Number(
+                          reward.points_required
+                        ).toLocaleString('fr-FR')}{' '}
+                        pts
+                      </div>
+                    </div>
+                  ))}
                 </div>
+              </section>
+            )}
 
-                <div className="grid h-14 w-14 place-items-center rounded-2xl bg-white/10">
-                  <Gift className="text-gold" size={27} />
-                </div>
-              </div>
-
-              <p className="mt-6 text-sm leading-6 text-white/70">
-                Cumulez des points lors de vos visites et profitez
-                progressivement de récompenses proposées par
-                l’établissement.
-              </p>
-
-              <div className="mt-6 grid grid-cols-3 gap-2">
-
-                <div className="rounded-2xl bg-white/10 p-3 text-center">
-                  <Star
-                    className="mx-auto text-gold"
-                    size={20}
-                    fill="currentColor"
-                  />
-                  <p className="mt-2 text-[11px] font-semibold">
-                    Points
-                  </p>
-                </div>
-
-                <div className="rounded-2xl bg-white/10 p-3 text-center">
-                  <Gift
-                    className="mx-auto text-gold"
-                    size={20}
-                  />
-                  <p className="mt-2 text-[11px] font-semibold">
-                    Récompenses
-                  </p>
-                </div>
-
-                <div className="rounded-2xl bg-white/10 p-3 text-center">
-                  <Heart
-                    className="mx-auto text-gold"
-                    size={20}
-                    fill="currentColor"
-                  />
-                  <p className="mt-2 text-[11px] font-semibold">
-                    Avantages
-                  </p>
-                </div>
-
-              </div>
-            </div>
-
-            <div className="mt-5 rounded-3xl bg-white p-7 shadow-soft">
-
-              <div className="flex items-start gap-4">
-                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#f5f0e7] text-forest">
-                  <ShieldCheck size={22} />
-                </div>
-
-                <div>
-                  <h3 className="font-display text-xl text-forest">
-                    Comment ça fonctionne ?
-                  </h3>
-
-                  <p className="mt-2 text-sm leading-6 text-ink/55">
-                    Présentez votre numéro de fidélité lors de vos
-                    prochaines visites. L’équipe pourra enregistrer
-                    votre visite et vos points.
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-6 space-y-3">
-
-                <div className="flex items-center gap-3 rounded-2xl bg-[#f7f7f3] p-4">
-                  <span className="grid h-8 w-8 place-items-center rounded-full bg-forest text-sm font-semibold text-white">
-                    1
-                  </span>
-
-                  <p className="text-sm text-ink/70">
-                    Présentez votre carte ou numéro fidélité.
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-3 rounded-2xl bg-[#f7f7f3] p-4">
-                  <span className="grid h-8 w-8 place-items-center rounded-full bg-forest text-sm font-semibold text-white">
-                    2
-                  </span>
-
-                  <p className="text-sm text-ink/70">
-                    Cumulez vos points au fil de vos visites.
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-3 rounded-2xl bg-[#f7f7f3] p-4">
-                  <span className="grid h-8 w-8 place-items-center rounded-full bg-forest text-sm font-semibold text-white">
-                    3
-                  </span>
-
-                  <p className="text-sm text-ink/70">
-                    Utilisez vos points pour profiter de récompenses.
-                  </p>
-                </div>
-
-              </div>
-
-            </div>
-
-            <div className="mt-5 rounded-3xl border border-gold/30 bg-[#fbf7ed] p-6 text-center">
-
-              <Gift
-                className="mx-auto text-gold"
-                size={28}
-              />
-
-              <h3 className="mt-3 font-display text-xl text-forest">
-                Pas encore membre ?
+            <section className="mt-6 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5">
+              <h3 className="font-display text-xl text-forest">
+                Comment ça marche ?
               </h3>
 
-              <p className="mt-2 text-sm leading-6 text-ink/55">
-                Demandez votre inscription au programme fidélité
-                directement auprès de notre équipe.
-              </p>
+              <div className="mt-5 space-y-4">
+                <LoyaltyStep
+                  number="01"
+                  title="Inscrivez-vous"
+                  text="Demandez votre inscription au programme fidélité."
+                />
 
-            </div>
+                <LoyaltyStep
+                  number="02"
+                  title="Cumulez des points"
+                  text="À chaque achat ou visite, vos points sont enregistrés."
+                />
 
-          </section>
+                <LoyaltyStep
+                  number="03"
+                  title="Profitez de vos récompenses"
+                  text="Échangez vos points contre les avantages proposés."
+                />
+              </div>
+            </section>
+          </main>
         )}
 
         {/* FOOTER */}
-        <footer className="mt-12 flex items-center justify-center gap-1.5 text-[10px] font-semibold tracking-wider text-ink/30">
-          <ShieldCheck size={13} />
-          PROPULSÉ PAR TAPMARRAKECH
+        <footer className="px-5 pb-8 pt-10 text-center">
+          <div className="flex items-center justify-center gap-1.5 text-[10px] font-semibold tracking-wider text-ink/30">
+            <ShieldCheck size={13} />
+            PROPULSÉ PAR TAPMARRAKECH
+          </div>
         </footer>
+      </div>
 
+      {/* BOTTOM NAVIGATION */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 mx-auto w-full max-w-[520px] border-t border-ink/5 bg-white/95 px-3 pb-[max(10px,env(safe-area-inset-bottom))] pt-2 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] backdrop-blur">
+        <div className="grid grid-cols-4 gap-1">
+          <BottomNavButton
+            active={tab === 'home'}
+            icon={<Star size={18} />}
+            label="Accueil"
+            onClick={() => openTab('home')}
+          />
+
+          <BottomNavButton
+            active={tab === 'menu'}
+            icon={<MenuIcon size={18} />}
+            label="Menu"
+            onClick={() => openTab('menu')}
+          />
+
+          <BottomNavButton
+            active={tab === 'reviews'}
+            icon={<Heart size={18} />}
+            label="Avis"
+            onClick={() => openTab('reviews')}
+          />
+
+          <BottomNavButton
+            active={tab === 'loyalty'}
+            icon={<Gift size={18} />}
+            label="Fidélité"
+            onClick={() => openTab('loyalty')}
+          />
+        </div>
+      </nav>
+    </div>
+  );
+}
+
+function PageTitle({
+  eyebrow,
+  title,
+  onBack,
+}: {
+  eyebrow: string;
+  title: string;
+  onBack: () => void;
+}) {
+  return (
+    <div>
+      <button
+        onClick={onBack}
+        className="mb-5 text-xs font-semibold text-forest"
+      >
+        ← Retour
+      </button>
+
+      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold">
+        {eyebrow}
+      </p>
+
+      <h1 className="mt-1 font-display text-3xl text-forest">
+        {title}
+      </h1>
+    </div>
+  );
+}
+
+function EmptyState({
+  icon,
+  title,
+  text,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  text: string;
+}) {
+  return (
+    <div className="mt-8 rounded-3xl bg-white p-8 text-center shadow-sm ring-1 ring-ink/5">
+      <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-forest/10 text-forest">
+        {icon}
+      </div>
+
+      <h2 className="mt-4 font-display text-xl text-forest">
+        {title}
+      </h2>
+
+      <p className="mt-2 text-sm leading-6 text-ink/50">
+        {text}
+      </p>
+    </div>
+  );
+}
+
+function LoyaltyStep({
+  number,
+  title,
+  text,
+}: {
+  number: string;
+  title: string;
+  text: string;
+}) {
+  return (
+    <div className="flex gap-4">
+      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gold/10 text-[10px] font-bold text-gold">
+        {number}
+      </div>
+
+      <div>
+        <h4 className="text-sm font-semibold text-forest">
+          {title}
+        </h4>
+
+        <p className="mt-1 text-xs leading-5 text-ink/45">
+          {text}
+        </p>
       </div>
     </div>
+  );
+}
+
+function BottomNavButton({
+  active,
+  icon,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex flex-col items-center justify-center gap-1 rounded-2xl py-2 transition ${
+        active
+          ? 'bg-forest text-white'
+          : 'text-ink/40 hover:bg-[#f7f7f3]'
+      }`}
+    >
+      {icon}
+      <span className="text-[9px] font-semibold">
+        {label}
+      </span>
+    </button>
   );
 }
