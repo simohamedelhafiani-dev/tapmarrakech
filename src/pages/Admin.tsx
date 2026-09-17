@@ -392,6 +392,7 @@ export default function Admin() {
               establishments={establishments}
               staff={staff}
               loading={loading || staffLoading}
+              onNavigate={setSection}
             />
           )}
 
@@ -466,10 +467,12 @@ function Overview({
   establishments,
   staff,
   loading,
+  onNavigate,
 }: {
   establishments: Establishment[];
   staff: StaffMember[];
   loading: boolean;
+  onNavigate: (section: AdminSection) => void;
 }) {
   const responsibles = staff.filter(
     (member) => member.role === 'MANAGER'
@@ -514,6 +517,44 @@ function Overview({
           label="Employés"
           value={loading ? '—' : employees.length}
         />
+      </div>
+
+      <div className="mt-8">
+        <div className="mb-4 flex items-end justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">Accès rapide</p>
+            <h3 className="mt-1 text-lg font-semibold text-forest">Raccourcis administrateur</h3>
+          </div>
+          <span className="hidden text-xs text-ink/35 md:block">Accédez directement aux modules</span>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { id: 'establishments' as AdminSection, label: 'Établissements', description: 'Gérer les établissements', icon: Building2 },
+            { id: 'responsibles' as AdminSection, label: 'Responsables', description: 'Gérer les responsables', icon: UserRound },
+            { id: 'employees' as AdminSection, label: 'Employés', description: 'Gérer les équipes', icon: Users },
+            { id: 'reviews' as AdminSection, label: 'Avis reçus', description: 'Consulter les avis', icon: MessageSquare },
+            { id: 'analysis' as AdminSection, label: 'Analyse des avis', description: 'Analyser la réputation', icon: Brain },
+            { id: 'codes' as AdminSection, label: 'Récompenses', description: 'Gérer les codes', icon: Gift },
+            { id: 'analytics' as AdminSection, label: 'Analytics', description: 'Voir les données', icon: TrendingUp },
+            { id: 'reports' as AdminSection, label: 'Rapports PDF', description: 'Créer les rapports', icon: Printer },
+          ].map(({ id, label, description, icon: Icon }) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => onNavigate(id)}
+              className="group flex items-center gap-4 rounded-2xl border border-ink/5 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-forest/15 hover:shadow-md"
+            >
+              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-forest/10 text-forest transition group-hover:bg-forest group-hover:text-white">
+                <Icon size={19} strokeWidth={1.8} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-ink">{label}</p>
+                <p className="mt-1 truncate text-[11px] text-ink/40">{description}</p>
+              </div>
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="mt-8 rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
@@ -679,6 +720,21 @@ type MenuCategory = { id: string; name: string; description: string | null; disp
 type MenuItem = { id: string; category_id: string; name: string; description: string | null; price: number; image_url: string | null; display_order: number; active: boolean };
 type Promotion = { id: string; name: string; description: string | null; image_url: string | null; normal_price: number | null; promo_price: number | null; start_at: string | null; end_at: string | null; active: boolean; display_order: number };
 
+type LoyaltyReward = {
+  id: string;
+  name: string;
+  description: string | null;
+  points_required: number;
+  active: boolean;
+  cost_mad: number;
+};
+
+type LoyaltySettings = {
+  points_per_currency: number;
+  currency: string;
+  enabled: boolean;
+};
+
 function EstablishmentWorkspace({
   establishment,
   businessTypes,
@@ -697,8 +753,8 @@ function EstablishmentWorkspace({
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
   const [promotions, setPromotions] = useState<Promotion[]>([]);
-  const [rewards, setRewards] = useState<any[]>([]);
-  const [loyalty, setLoyalty] = useState<any>({ points_per_currency: 1, currency: 'MAD', enabled: true });
+  const [rewards, setRewards] = useState<LoyaltyReward[]>([]);
+  const [loyalty, setLoyalty] = useState<LoyaltySettings>({ points_per_currency: 1, currency: 'MAD', enabled: true });
   const [customersCount, setCustomersCount] = useState(0);
   const [reviews, setReviews] = useState<any[]>([]);
   const [team, setTeam] = useState<StaffMember[]>([]);
@@ -734,12 +790,48 @@ function EstablishmentWorkspace({
       setPromotions(data ?? []);
     }
     if (tab === 'loyalty') {
-      const [{ data: r }, { data: l }, { count }] = await Promise.all([
-        supabase.from('loyalty_rewards').select('*').eq('establishment_id', establishment.id).order('points_required'),
-        supabase.from('loyalty_settings').select('*').eq('establishment_id', establishment.id).maybeSingle(),
-        supabase.from('loyalty_customers').select('id', { count: 'exact', head: true }).eq('establishment_id', establishment.id),
-      ]);
-      setRewards(r ?? []); setLoyalty(l ?? { points_per_currency: 1, currency: 'MAD', enabled: true }); setCustomersCount(count ?? 0);
+      try {
+        const [
+          { data: rewardsData, error: rewardsError },
+          { data: settingsData, error: settingsError },
+          { count, error: customersError },
+        ] = await Promise.all([
+          supabase
+            .from('loyalty_rewards')
+            .select('id, name, description, points_required, active, cost_mad')
+            .eq('establishment_id', establishment.id)
+            .order('points_required', { ascending: true }),
+          supabase
+            .from('loyalty_settings')
+            .select('points_per_currency, currency, enabled')
+            .eq('establishment_id', establishment.id)
+            .maybeSingle(),
+          supabase
+            .from('loyalty_customers')
+            .select('id', { count: 'exact', head: true })
+            .eq('establishment_id', establishment.id),
+        ]);
+
+        if (rewardsError) throw rewardsError;
+        if (settingsError) throw settingsError;
+        if (customersError) throw customersError;
+
+        setRewards(rewardsData ?? []);
+        setLoyalty(
+          settingsData ?? {
+            points_per_currency: 1,
+            currency: 'MAD',
+            enabled: true,
+          },
+        );
+        setCustomersCount(count ?? 0);
+      } catch (error) {
+        console.error('Erreur chargement fidélité:', error);
+        setRewards([]);
+        setLoyalty({ points_per_currency: 1, currency: 'MAD', enabled: true });
+        setCustomersCount(0);
+        alert(error instanceof Error ? error.message : 'Erreur lors du chargement de la fidélité.');
+      }
     }
     if (tab === 'reviews') {
       const { data } = await supabase.from('reviews').select('*').eq('establishment_id', establishment.id).order('created_at', { ascending: false }).limit(100);
@@ -798,10 +890,111 @@ function EstablishmentWorkspace({
     if (error) return alert(error.message); setPromotion({ name: '', description: '', normal_price: '', promo_price: '' }); loadTab();
   };
 
+  const saveLoyaltySettings = async () => {
+    const pointsPerCurrency = Number(loyalty.points_per_currency);
+
+    if (!Number.isFinite(pointsPerCurrency) || pointsPerCurrency <= 0) {
+      alert('Le nombre de points par unité monétaire doit être supérieur à 0.');
+      return;
+    }
+
+    try {
+      setSaving(true);
+
+      const { error } = await supabase
+        .from('loyalty_settings')
+        .upsert(
+          {
+            establishment_id: establishment.id,
+            points_per_currency: pointsPerCurrency,
+            currency: loyalty.currency,
+            enabled: loyalty.enabled,
+          },
+          { onConflict: 'establishment_id' },
+        );
+
+      if (error) throw error;
+
+      setLoyalty((current) => ({
+        ...current,
+        points_per_currency: pointsPerCurrency,
+      }));
+      alert('Paramètres fidélité enregistrés.');
+    } catch (error) {
+      console.error('Erreur enregistrement paramètres fidélité:', error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : 'Erreur lors de l’enregistrement des paramètres fidélité.',
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const addReward = async () => {
-    if (!reward.name.trim() || !Number(reward.points_required)) return;
-    const { error } = await supabase.from('loyalty_rewards').insert({ establishment_id: establishment.id, name: reward.name.trim(), description: reward.description.trim() || null, points_required: Number(reward.points_required), active: true });
-    if (error) return alert(error.message); setReward({ name: '', description: '', points_required: '' }); loadTab();
+    const pointsRequired = Number(reward.points_required);
+
+    if (!reward.name.trim()) {
+      alert('Le nom de la récompense est obligatoire.');
+      return;
+    }
+
+    if (!Number.isInteger(pointsRequired) || pointsRequired <= 0) {
+      alert('Les points requis doivent être un entier supérieur à 0.');
+      return;
+    }
+
+    try {
+      setSaving(true);
+
+      const { error } = await supabase.from('loyalty_rewards').insert({
+        establishment_id: establishment.id,
+        name: reward.name.trim(),
+        description: reward.description.trim() || null,
+        points_required: pointsRequired,
+        active: true,
+      });
+
+      if (error) throw error;
+
+      setReward({ name: '', description: '', points_required: '' });
+      await loadTab();
+    } catch (error) {
+      console.error('Erreur ajout récompense:', error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : 'Erreur lors de l’ajout de la récompense.',
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const toggleReward = async (rewardItem: LoyaltyReward) => {
+    try {
+      setSaving(true);
+
+      const { error } = await supabase
+        .from('loyalty_rewards')
+        .update({ active: !rewardItem.active })
+        .eq('id', rewardItem.id)
+        .eq('establishment_id', establishment.id);
+
+      if (error) throw error;
+
+      await loadTab();
+    } catch (error) {
+      console.error('Erreur modification récompense:', error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : 'Erreur lors de la modification de la récompense.',
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
   const tabs: { id: WorkspaceTab; label: string }[] = [
@@ -852,7 +1045,164 @@ function EstablishmentWorkspace({
 
       {tab === 'reviews' && <div className="space-y-4"><div className="grid gap-3 md:grid-cols-3"><StatCard label="Avis" value={reviews.length} /><StatCard label="Note moyenne" value={reviews.length ? (reviews.reduce((a, r) => a + Number(r.rating || 0), 0) / reviews.length).toFixed(1) : '—'} /><StatCard label="Dernier avis" value={reviews[0] ? new Date(reviews[0].created_at).toLocaleDateString('fr-FR') : '—'} /></div><div className="rounded-2xl border border-ink/5 bg-white p-5">{reviews.length === 0 ? <p className="text-sm text-ink/45">Aucun avis.</p> : <div className="space-y-3">{reviews.map((r) => <div key={r.id} className="rounded-xl bg-[#f7f7f3] p-4"><div className="flex justify-between"><strong>{r.rating}/5</strong><span className="text-xs text-ink/35">{new Date(r.created_at).toLocaleDateString('fr-FR')}</span></div><p className="mt-2 text-sm text-ink/60">{r.feedback || r.comment || 'Aucun commentaire'}</p></div>)}</div>}</div></div>}
 
-      {tab === 'loyalty' && <div className="space-y-5"><div className="grid gap-3 md:grid-cols-3"><StatCard label="Clients fidélité" value={customersCount} /><StatCard label="Récompenses" value={rewards.length} /><StatCard label="Programme" value={loyalty.enabled ? 'Actif' : 'Inactif'} /></div><div className="grid gap-5 md:grid-cols-2"><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Paramètres</h3><div className="mt-4 flex gap-3"><input type="number" value={loyalty.points_per_currency ?? 1} onChange={(e) => setLoyalty({ ...loyalty, points_per_currency: Number(e.target.value) })} className="w-32 rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><select value={loyalty.currency ?? 'MAD'} onChange={(e) => setLoyalty({ ...loyalty, currency: e.target.value })} className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm"><option>MAD</option><option>EUR</option></select></div><label className="mt-3 flex items-center gap-2 text-sm"><input type="checkbox" checked={loyalty.enabled ?? true} onChange={(e) => setLoyalty({ ...loyalty, enabled: e.target.checked })} /> Programme actif</label><button onClick={async () => { const { error } = await supabase.from('loyalty_settings').upsert({ establishment_id: establishment.id, points_per_currency: loyalty.points_per_currency, currency: loyalty.currency, enabled: loyalty.enabled }, { onConflict: 'establishment_id' }); if (error) alert(error.message); else alert('Paramètres fidélité enregistrés.'); }} className="mt-4 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Enregistrer</button></div><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Nouvelle récompense</h3><div className="mt-4 space-y-3"><input value={reward.name} onChange={(e) => setReward({ ...reward, name: e.target.value })} placeholder="Nom" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><input value={reward.points_required} onChange={(e) => setReward({ ...reward, points_required: e.target.value })} placeholder="Points requis" type="number" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><textarea value={reward.description} onChange={(e) => setReward({ ...reward, description: e.target.value })} placeholder="Description" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><button onClick={addReward} className="rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Ajouter</button></div></div></div><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Récompenses</h3><div className="mt-4 grid gap-2 md:grid-cols-2">{rewards.map((r) => <div key={r.id} className="flex items-center justify-between rounded-xl bg-[#f7f7f3] p-3"><span><strong className="text-sm">{r.name}</strong><span className="ml-2 text-xs text-ink/40">{r.points_required} pts</span></span><button onClick={async () => { const { error } = await supabase.from('loyalty_rewards').update({ active: !r.active }).eq('id', r.id); if (error) alert(error.message); else loadTab(); }} className="text-xs text-ink/45">{r.active ? 'Actif' : 'Inactif'}</button></div>)}</div></div></div>}
+      {tab === 'loyalty' && (
+        <div className="space-y-5">
+          <div className="grid gap-3 md:grid-cols-3">
+            <StatCard label="Clients fidélité" value={customersCount} />
+            <StatCard label="Récompenses" value={rewards.length} />
+            <StatCard label="Programme" value={loyalty.enabled ? 'Actif' : 'Inactif'} />
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-2">
+            <div className="rounded-2xl border border-ink/5 bg-white p-5">
+              <h3 className="font-semibold">Paramètres</h3>
+
+              <div className="mt-4 flex gap-3">
+                <label className="block">
+                  <span className="mb-1 block text-xs font-medium text-ink/50">
+                    Points par unité monétaire
+                  </span>
+                  <input
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    value={loyalty.points_per_currency}
+                    onChange={(e) =>
+                      setLoyalty({
+                        ...loyalty,
+                        points_per_currency: Number(e.target.value),
+                      })
+                    }
+                    className="w-40 rounded-xl border border-ink/10 px-3 py-2.5 text-sm"
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="mb-1 block text-xs font-medium text-ink/50">
+                    Devise
+                  </span>
+                  <select
+                    value={loyalty.currency}
+                    onChange={(e) =>
+                      setLoyalty({ ...loyalty, currency: e.target.value })
+                    }
+                    className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm"
+                  >
+                    <option value="MAD">MAD</option>
+                    <option value="EUR">EUR</option>
+                  </select>
+                </label>
+              </div>
+
+              <label className="mt-4 flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={loyalty.enabled}
+                  onChange={(e) =>
+                    setLoyalty({ ...loyalty, enabled: e.target.checked })
+                  }
+                />
+                Programme actif
+              </label>
+
+              <button
+                type="button"
+                disabled={saving}
+                onClick={saveLoyaltySettings}
+                className="mt-4 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {saving ? 'Enregistrement...' : 'Enregistrer'}
+              </button>
+            </div>
+
+            <div className="rounded-2xl border border-ink/5 bg-white p-5">
+              <h3 className="font-semibold">Nouvelle récompense</h3>
+
+              <div className="mt-4 space-y-3">
+                <input
+                  value={reward.name}
+                  onChange={(e) =>
+                    setReward({ ...reward, name: e.target.value })
+                  }
+                  placeholder="Nom"
+                  className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"
+                />
+
+                <input
+                  value={reward.points_required}
+                  onChange={(e) =>
+                    setReward({
+                      ...reward,
+                      points_required: e.target.value,
+                    })
+                  }
+                  placeholder="Points requis"
+                  type="number"
+                  min="1"
+                  step="1"
+                  className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"
+                />
+
+                <textarea
+                  value={reward.description}
+                  onChange={(e) =>
+                    setReward({ ...reward, description: e.target.value })
+                  }
+                  placeholder="Description"
+                  rows={3}
+                  className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"
+                />
+
+                <button
+                  type="button"
+                  disabled={saving}
+                  onClick={addReward}
+                  className="rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {saving ? 'Ajout...' : 'Ajouter'}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-ink/5 bg-white p-5">
+            <h3 className="font-semibold">Récompenses</h3>
+
+            <div className="mt-4 grid gap-2 md:grid-cols-2">
+              {rewards.length === 0 ? (
+                <p className="text-sm text-ink/45">
+                  Aucune récompense configurée.
+                </p>
+              ) : (
+                rewards.map((rewardItem) => (
+                  <div
+                    key={rewardItem.id}
+                    className="flex items-center justify-between rounded-xl bg-[#f7f7f3] p-3"
+                  >
+                    <span>
+                      <strong className="text-sm">
+                        {rewardItem.name}
+                      </strong>
+                      <span className="ml-2 text-xs text-ink/40">
+                        {rewardItem.points_required} pts
+                      </span>
+                    </span>
+
+                    <button
+                      type="button"
+                      disabled={saving}
+                      onClick={() => toggleReward(rewardItem)}
+                      className="text-xs text-ink/45 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {rewardItem.active ? 'Actif' : 'Inactif'}
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {tab === 'team' && <div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Équipe de l’établissement</h3><p className="mt-1 text-xs text-ink/45">Les comptes sont gérés depuis les sections Responsables / Employés de l’Admin.</p><div className="mt-5 space-y-2">{team.length === 0 ? <p className="text-sm text-ink/45">Aucun membre affecté.</p> : team.map((m) => <div key={m.id} className="flex justify-between rounded-xl bg-[#f7f7f3] p-3 text-sm"><span>{m.name}</span><span className="text-xs text-ink/45">{m.role} · {m.active ? 'Actif' : 'Inactif'}</span></div>)}</div></div>}
 
