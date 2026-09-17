@@ -2,6 +2,15 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowUpRight,
   BarChart3,
+  Building2,
+  ExternalLink,
+  Globe2,
+  Heart,
+  Menu,
+  QrCode,
+  Settings,
+  Sparkles,
+  Wifi,
   CheckCircle2,
   Coins,
   Gift,
@@ -775,6 +784,70 @@ export default function Dashboard() {
           </Link>
         )}
       </div>
+
+      {/* ACCÈS RAPIDES */}
+
+      <section className="mb-8 rounded-2xl border border-ink/5 bg-white p-5 shadow-soft md:p-7">
+        <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
+              Navigation
+            </p>
+            <h2 className="mt-1 font-display text-2xl text-forest">
+              Accès rapides
+            </h2>
+            <p className="mt-1 text-xs text-ink/45">
+              Toutes les fonctions principales de l’établissement sélectionné.
+            </p>
+          </div>
+          {establishmentName && (
+            <span className="rounded-full bg-[#f7f7f3] px-3 py-1.5 text-[10px] font-semibold text-forest">
+              {establishmentName}
+            </span>
+          )}
+        </div>
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { label: 'Établissement', description: 'Profil, logo et informations', to: '/dashboard/establishments', icon: Building2 },
+            { label: 'Avis clients', description: 'Avis, réponses et suivi', to: '/dashboard/reviews', icon: MessageCircle },
+            { label: 'Analyse IA', description: 'Comprendre les retours clients', to: '/dashboard/reviews', icon: Sparkles },
+            { label: 'Analytics', description: 'Performance et indicateurs', to: '/dashboard/analytics', icon: BarChart3 },
+            { label: 'Fidélité', description: 'Clients, points et récompenses', to: '/dashboard/loyalty', icon: Heart },
+            { label: 'Équipe', description: 'Responsables et employés', to: '/dashboard/establishments', icon: Users },
+            { label: 'Menu digital', description: 'Catégories, plats et tarifs', to: '/dashboard/menu', icon: Menu },
+            { label: 'Wi-Fi', description: 'Accès Wi-Fi de l’établissement', to: '/dashboard/establishments', icon: Wifi },
+            { label: 'Promotions', description: 'Offres et promotions', to: '/dashboard/establishments', icon: Gift },
+            { label: 'Paramètres fidélité', description: 'Règles, points et récompenses', to: '/dashboard/loyalty/settings', icon: Settings },
+            { label: 'Page publique', description: 'Voir la page client', to: establishmentName && selectedEstablishmentId ? `/r/${places.find((p) => p.id === selectedEstablishmentId)?.slug ?? ''}` : '/dashboard/establishments', icon: Globe2, external: true },
+            { label: 'QR Code', description: 'Accéder aux supports clients', to: '/dashboard/establishments', icon: QrCode },
+          ].map((shortcut) => {
+            const Icon = shortcut.icon;
+            return (
+              <Link
+                key={shortcut.label}
+                to={shortcut.to}
+                target={shortcut.external ? '_blank' : undefined}
+                rel={shortcut.external ? 'noreferrer' : undefined}
+                className="group flex min-h-[92px] items-start gap-3 rounded-xl border border-ink/5 bg-[#fdfdfb] p-4 transition hover:-translate-y-0.5 hover:border-gold/40 hover:bg-white hover:shadow-sm"
+              >
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#e5eee9] text-forest transition group-hover:bg-[#f4ead3] group-hover:text-gold">
+                  <Icon size={18} />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-center gap-1.5 text-sm font-semibold text-forest">
+                    {shortcut.label}
+                    {shortcut.external && <ExternalLink size={12} className="text-ink/30" />}
+                  </span>
+                  <span className="mt-1 block text-[11px] leading-4 text-ink/45">
+                    {shortcut.description}
+                  </span>
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
 
       {/* STATISTIQUES */}
 
