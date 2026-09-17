@@ -430,18 +430,23 @@ export default function Admin() {
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="mb-12 flex items-center justify-between px-3">
-          <div className="font-display text-2xl tracking-tight">
-            Tap<span className="text-gold">Marrakech</span>
-          </div>
+       {/* CORRECTION: logo officiel TapMarrakech */}
+<div className="mb-10 flex items-center justify-between px-3">
+  <div className="flex min-h-[64px] flex-1 items-center justify-center">
+    <img
+      src="/tapmarrakech-logo.png"
+      alt="TapMarrakech"
+      className="h-16 w-16 object-contain"
+    />
+  </div>
 
-          <button
-            className="lg:hidden"
-            onClick={() => setOpen(false)}
-          >
-            <X size={20} />
-          </button>
-        </div>
+  <button
+    className="lg:hidden"
+    onClick={() => setOpen(false)}
+  >
+    <X size={20} />
+  </button>
+</div>
 
         <p className="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
           Administration
