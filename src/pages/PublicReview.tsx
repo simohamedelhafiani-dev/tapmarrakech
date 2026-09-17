@@ -1484,20 +1484,37 @@ function WifiCard({
   } | null>(null);
 
   useEffect(() => {
-    supabase
-      .from('establishment_wifi')
-      .select('network_name,wifi_password')
-      .eq('establishment_id', establishmentId)
-      .eq('active', true)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data?.network_name) {
+    let cancelled = false;
+
+    const loadWifi = async () => {
+      try {
+        const { data, error } = await supabase.rpc('get_public_wifi', {
+          p_establishment_id: establishmentId,
+        });
+
+        if (error) {
+          console.error('Erreur lors du chargement du Wi-Fi:', error);
+          return;
+        }
+
+        const wifiData = Array.isArray(data) ? data[0] : data;
+
+        if (!cancelled && wifiData?.network_name) {
           setWifi({
-            network_name: data.network_name,
-            wifi_password: data.wifi_password || '',
+            network_name: wifiData.network_name,
+            wifi_password: wifiData.wifi_password || '',
           });
         }
-      });
+      } catch (error) {
+        console.error('Erreur inattendue lors du chargement du Wi-Fi:', error);
+      }
+    };
+
+    loadWifi();
+
+    return () => {
+      cancelled = true;
+    };
   }, [establishmentId]);
 
   if (!wifi) return null;
@@ -1534,3 +1551,4 @@ function WifiCard({
     </section>
   );
 }
+
