@@ -61,6 +61,7 @@ export default function LoyaltySettings() {
   const [rewardName, setRewardName] = useState('');
   const [rewardDescription, setRewardDescription] = useState('');
   const [rewardPoints, setRewardPoints] = useState('');
+  const [rewardCost, setRewardCost] = useState('');
 
   useEffect(() => {
     loadEstablishments();
@@ -199,6 +200,7 @@ export default function LoyaltySettings() {
     setRewardName('');
     setRewardDescription('');
     setRewardPoints('');
+    setRewardCost('');
   }
 
   async function saveReward() {
@@ -206,6 +208,7 @@ export default function LoyaltySettings() {
 
     const name = rewardName.trim();
     const points = Number(rewardPoints);
+    const cost = Number(rewardCost);
 
     if (!name) {
       alert('Veuillez saisir le nom de la récompense.');
@@ -217,6 +220,11 @@ export default function LoyaltySettings() {
       return;
     }
 
+    if (!Number.isFinite(cost) || cost < 0) {
+      alert('Le coût réel doit être un montant supérieur ou égal à 0.');
+      return;
+    }
+
     setSavingReward(true);
 
     const payload = {
@@ -224,6 +232,7 @@ export default function LoyaltySettings() {
       name,
       description: rewardDescription.trim() || null,
       points_required: points,
+      cost_mad: cost,
       active: true,
     };
 
@@ -236,6 +245,7 @@ export default function LoyaltySettings() {
           name: payload.name,
           description: payload.description,
           points_required: payload.points_required,
+          cost_mad: payload.cost_mad,
         })
         .eq('id', editingRewardId)
         .eq('establishment_id', establishmentId);
@@ -699,6 +709,31 @@ export default function LoyaltySettings() {
 
               <div>
                 <label className="text-xs font-medium text-ink/60">
+                  Coût réel pour l'établissement *
+                </label>
+
+                <div className="relative mt-2">
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={rewardCost}
+                    onChange={e => setRewardCost(e.target.value)}
+                    placeholder="20"
+                    className="w-full rounded-xl border border-ink/10 px-4 py-3 pr-16 text-sm outline-none focus:border-gold"
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gold">
+                    DH
+                  </span>
+                </div>
+
+                <p className="mt-2 text-[11px] text-ink/40">
+                  Coût estimé réellement supporté par l'établissement quand cette récompense est utilisée.
+                </p>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-ink/60">
                   Points nécessaires *
                 </label>
 
@@ -731,6 +766,9 @@ export default function LoyaltySettings() {
                 <p className="mt-1 text-xs text-gold">
                   ⭐ {Number(rewardPoints) || 0} points
                 </p>
+                <p className="mt-1 text-xs text-ink/45">
+                  Coût : {Number(rewardCost) || 0} DH
+                </p>
               </div>
 
               <button
@@ -739,7 +777,9 @@ export default function LoyaltySettings() {
                 disabled={
                   savingReward ||
                   !rewardName.trim() ||
-                  Number(rewardPoints) <= 0
+                  Number(rewardPoints) <= 0 ||
+                  Number(rewardCost) < 0 ||
+                  !Number.isFinite(Number(rewardCost))
                 }
                 className="w-full rounded-xl bg-forest px-4 py-3 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
               >
