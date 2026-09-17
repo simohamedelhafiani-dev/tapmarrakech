@@ -392,6 +392,56 @@ export default function Dashboard() {
 
   const latest = reviews.slice(0, 4);
 
+  const analytics = useMemo(() => {
+    const now = new Date();
+    const currentStart = new Date(now);
+    currentStart.setDate(currentStart.getDate() - 30);
+    const previousStart = new Date(currentStart);
+    previousStart.setDate(previousStart.getDate() - 30);
+
+    const currentReviews = reviews.filter((review) => new Date(review.created_at) >= currentStart);
+    const previousReviews = reviews.filter((review) => {
+      const date = new Date(review.created_at);
+      return date >= previousStart && date < currentStart;
+    });
+
+    const currentRegistrations = loyaltyCustomers.filter((customer) => new Date(customer.created_at) >= currentStart);
+    const previousRegistrations = loyaltyCustomers.filter((customer) => {
+      const date = new Date(customer.created_at);
+      return date >= previousStart && date < currentStart;
+    });
+
+    const totalCustomers = loyaltyCustomers.length;
+    const returningCustomers = loyaltyCustomers.filter((customer) => Number(customer.visit_count || 0) >= 2).length;
+    const activeCustomers30d = loyaltyCustomers.filter((customer) => {
+      if (!customer.last_visit_at) return false;
+      return new Date(customer.last_visit_at) >= currentStart;
+    }).length;
+    const pointsEarned = loyaltyCustomers.reduce((sum, customer) => sum + Number(customer.total_points_earned || 0), 0);
+    const pointsRedeemed = loyaltyCustomers.reduce((sum, customer) => sum + Number(customer.total_points_redeemed || 0), 0);
+    const visits = loyaltyCustomers.reduce((sum, customer) => sum + Number(customer.visit_count || 0), 0);
+
+    const growth = (current: number, previous: number) => {
+      if (previous === 0) return current > 0 ? 100 : 0;
+      return ((current - previous) / previous) * 100;
+    };
+
+    return {
+      currentReviews: currentReviews.length,
+      reviewGrowth: growth(currentReviews.length, previousReviews.length),
+      currentRegistrations: currentRegistrations.length,
+      registrationGrowth: growth(currentRegistrations.length, previousRegistrations.length),
+      returningRate: totalCustomers ? (returningCustomers / totalCustomers) * 100 : 0,
+      activeRate: totalCustomers ? (activeCustomers30d / totalCustomers) * 100 : 0,
+      redemptionRate: pointsEarned ? (pointsRedeemed / pointsEarned) * 100 : 0,
+      visits,
+      returningCustomers,
+      activeCustomers30d,
+      pointsEarned,
+      pointsRedeemed,
+    };
+  }, [reviews, loyaltyCustomers]);
+
   const isResponsible = role === 'responsible';
 
   const selectedEstablishment =
@@ -552,6 +602,92 @@ export default function Dashboard() {
           accent="bg-[#f4e4e1] text-[#a15c50]"
         />
       </div>
+
+      {/* PILOTAGE DU PROGRAMME */}
+
+      <section className="mt-6 rounded-2xl border border-ink/5 bg-white p-5 shadow-soft md:p-7">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div>
+            <div className="flex items-center gap-2">
+              <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#e5eee9] text-forest">
+                <BarChart3 size={17} />
+              </div>
+              <div>
+                <h2 className="font-display text-xl text-forest">Pilotage du programme</h2>
+                <p className="text-xs text-ink/45">Les chiffres clés pour mesurer le développement de votre programme.</p>
+              </div>
+            </div>
+          </div>
+
+          <span className="rounded-lg bg-[#f7f7f3] px-3 py-2 text-[11px] font-semibold text-ink/50">
+            Comparaison sur 30 jours
+          </span>
+        </div>
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="rounded-2xl border border-ink/5 bg-[#f7f7f3] p-5">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs font-medium text-ink/50">Nouveaux clients</p>
+              <Users size={17} className="text-forest" />
+            </div>
+            <p className="mt-3 font-display text-3xl text-forest">{loyaltyLoading ? '—' : analytics.currentRegistrations}</p>
+            <p className="mt-2 text-xs text-ink/40">inscriptions sur 30 jours</p>
+            <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-forest">
+              <TrendingUp size={14} />
+              {loyaltyLoading ? '—' : `${analytics.registrationGrowth >= 0 ? '+' : ''}${analytics.registrationGrowth.toFixed(1)} %`}
+              <span className="font-normal text-ink/35">vs période précédente</span>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-ink/5 bg-[#f7f7f3] p-5">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs font-medium text-ink/50">Taux de retour</p>
+              <TrendingUp size={17} className="text-forest" />
+            </div>
+            <p className="mt-3 font-display text-3xl text-forest">{loyaltyLoading ? '—' : `${analytics.returningRate.toFixed(1)} %`}</p>
+            <p className="mt-2 text-xs text-ink/40">clients ayant effectué au moins 2 visites</p>
+            <p className="mt-4 text-xs font-semibold text-ink/55">{loyaltyLoading ? '—' : `${analytics.returningCustomers} clients concernés`}</p>
+          </div>
+
+          <div className="rounded-2xl border border-ink/5 bg-[#f7f7f3] p-5">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs font-medium text-ink/50">Clients actifs</p>
+              <CheckCircle2 size={17} className="text-forest" />
+            </div>
+            <p className="mt-3 font-display text-3xl text-forest">{loyaltyLoading ? '—' : `${analytics.activeRate.toFixed(1)} %`}</p>
+            <p className="mt-2 text-xs text-ink/40">ayant visité l'établissement ces 30 derniers jours</p>
+            <p className="mt-4 text-xs font-semibold text-ink/55">{loyaltyLoading ? '—' : `${analytics.activeCustomers30d} clients actifs`}</p>
+          </div>
+
+          <div className="rounded-2xl border border-ink/5 bg-[#f7f7f3] p-5">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs font-medium text-ink/50">Utilisation des points</p>
+              <Coins size={17} className="text-gold" />
+            </div>
+            <p className="mt-3 font-display text-3xl text-forest">{loyaltyLoading ? '—' : `${analytics.redemptionRate.toFixed(1)} %`}</p>
+            <p className="mt-2 text-xs text-ink/40">part des points gagnés déjà utilisés</p>
+            <p className="mt-4 text-xs font-semibold text-ink/55">{loyaltyLoading ? '—' : `${analytics.pointsRedeemed.toLocaleString('fr-FR')} / ${analytics.pointsEarned.toLocaleString('fr-FR')} pts`}</p>
+          </div>
+        </div>
+
+        <div className="mt-6 grid gap-4 md:grid-cols-3">
+          <div className="rounded-2xl bg-forest p-5 text-white">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold">Visites cumulées</p>
+            <p className="mt-2 font-display text-3xl">{loyaltyLoading ? '—' : analytics.visits.toLocaleString('fr-FR')}</p>
+            <p className="mt-1 text-xs text-white/45">visites enregistrées dans le programme</p>
+          </div>
+          <div className="rounded-2xl border border-ink/5 p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold">Avis sur 30 jours</p>
+            <p className="mt-2 font-display text-3xl text-forest">{analytics.currentReviews}</p>
+            <p className="mt-1 text-xs text-ink/40">{analytics.reviewGrowth >= 0 ? '+' : ''}{analytics.reviewGrowth.toFixed(1)} % vs les 30 jours précédents</p>
+          </div>
+          <div className="rounded-2xl border border-gold/20 bg-[#fdf9ef] p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold">Chiffre généré</p>
+            <p className="mt-2 text-sm font-semibold text-forest">À connecter aux transactions</p>
+            <p className="mt-2 text-xs leading-5 text-ink/45">Le dashboard ne calcule pas encore de CA réel, car le projet n'enregistre pas actuellement le montant de chaque achat/visite fidélité.</p>
+          </div>
+        </div>
+      </section>
 
       {/* FIDÉLITÉ */}
 
