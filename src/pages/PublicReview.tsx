@@ -1013,8 +1013,9 @@ export default function PublicReview() {
             </div>
 
             {loyaltyCreated ? (
-              <section className="mt-8">
-                <div className="relative overflow-hidden rounded-[32px] bg-forest p-7 text-white shadow-2xl">
+              <section className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto bg-[#f5f0e7]/95 px-4 py-6 backdrop-blur-sm">
+                <div className="w-full max-w-[420px]">
+                  <div className="relative overflow-hidden rounded-[32px] bg-forest p-7 text-white shadow-2xl">
                   <div className="absolute -right-10 -top-10 h-36 w-36 rounded-full bg-gold/10 blur-2xl" />
 
                   <div className="relative">
@@ -1063,12 +1064,13 @@ export default function PublicReview() {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => setLoyaltyCreated(null)}
-                  className="mt-5 w-full rounded-full border border-ink/10 bg-white py-3 text-sm font-semibold text-forest"
-                >
-                  Retour au programme
-                </button>
+                  <button
+                    onClick={() => setLoyaltyCreated(null)}
+                    className="mt-5 w-full rounded-full border border-ink/10 bg-white py-3 text-sm font-semibold text-forest"
+                  >
+                    Retour au programme
+                  </button>
+                </div>
               </section>
             ) : (
               <>
