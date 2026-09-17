@@ -52,6 +52,22 @@ type LoyaltyTransaction = {
   created_at: string;
 };
 
+type LoyaltyRedemption = {
+  id: string;
+  establishment_id: string;
+  customer_id: string;
+  reward_id: string;
+  employee_id: string | null;
+  points_used: number | null;
+  invoice_number: string | null;
+  invoice_amount: number | null;
+  discount_amount: number | null;
+  amount_paid: number | null;
+  payment_method: string | null;
+  redemption_type: string | null;
+  created_at: string;
+};
+
 const ranges = [
   {
     key: '7d',
@@ -127,8 +143,11 @@ export default function Dashboard() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loyaltyCustomers, setLoyaltyCustomers] = useState<LoyaltyCustomer[]>([]);
   const [loyaltyTransactions, setLoyaltyTransactions] = useState<LoyaltyTransaction[]>([]);
+  const [loyaltyRedemptions, setLoyaltyRedemptions] = useState<LoyaltyRedemption[]>([]);
+  const [pointsPerCurrency, setPointsPerCurrency] = useState(1);
   const [loyaltyLoading, setLoyaltyLoading] = useState(false);
   const [transactionsLoading, setTransactionsLoading] = useState(false);
+  const [redemptionsLoading, setRedemptionsLoading] = useState(false);
   const [profileName, setProfileName] = useState<string>('');
   const [period, setPeriod] = useState('30d');
   const [selectedEstablishmentId, setSelectedEstablishmentId] = useState<string | null>(
@@ -312,6 +331,7 @@ export default function Dashboard() {
       if (!selectedEstablishmentId) {
         setLoyaltyCustomers([]);
         setLoyaltyTransactions([]);
+        setLoyaltyRedemptions([]);
         return;
       }
 
@@ -336,6 +356,36 @@ export default function Dashboard() {
     };
 
     loadLoyalty();
+
+    return () => {
+      active = false;
+    };
+  }, [selectedEstablishmentId]);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadLoyaltySettings = async () => {
+      if (!selectedEstablishmentId) {
+        setPointsPerCurrency(1);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('loyalty_settings')
+        .select('points_per_currency')
+        .eq('establishment_id', selectedEstablishmentId)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Erreur chargement paramètres fidélité:', error);
+        if (active) setPointsPerCurrency(1);
+      } else if (active) {
+        setPointsPerCurrency(Number(data?.points_per_currency || 1));
+      }
+    };
+
+    loadLoyaltySettings();
 
     return () => {
       active = false;
@@ -371,6 +421,40 @@ export default function Dashboard() {
     };
 
     loadLoyaltyTransactions();
+
+    return () => {
+      active = false;
+    };
+  }, [selectedEstablishmentId]);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadLoyaltyRedemptions = async () => {
+      if (!selectedEstablishmentId) {
+        setLoyaltyRedemptions([]);
+        return;
+      }
+
+      setRedemptionsLoading(true);
+
+      const { data, error } = await supabase
+        .from('loyalty_redemptions')
+        .select('id, establishment_id, customer_id, reward_id, employee_id, points_used, invoice_number, invoice_amount, discount_amount, amount_paid, payment_method, redemption_type, created_at')
+        .eq('establishment_id', selectedEstablishmentId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Erreur chargement récompenses utilisées:', error);
+        if (active) setLoyaltyRedemptions([]);
+      } else if (active) {
+        setLoyaltyRedemptions((data as LoyaltyRedemption[]) ?? []);
+      }
+
+      if (active) setRedemptionsLoading(false);
+    };
+
+    loadLoyaltyRedemptions();
 
     return () => {
       active = false;
@@ -470,6 +554,38 @@ export default function Dashboard() {
     const totalRevenue = loyaltyTransactions.reduce((sum, transaction) => sum + Number(transaction.amount || 0), 0);
     const averageBasket = currentTransactions.length ? currentRevenue / currentTransactions.length : 0;
 
+    const currentRedemptions = loyaltyRedemptions.filter((redemption) => new Date(redemption.created_at) >= currentStart);
+    const previousRedemptions = loyaltyRedemptions.filter((redemption) => {
+      const date = new Date(redemption.created_at);
+      return date >= previousStart && date < currentStart;
+    });
+
+    const pointsRedeemedOnPeriod = currentRedemptions.reduce(
+      (sum, redemption) => sum + Number(redemption.points_used || 0),
+      0
+    );
+    const previousPointsRedeemedOnPeriod = previousRedemptions.reduce(
+      (sum, redemption) => sum + Number(redemption.points_used || 0),
+      0
+    );
+
+    const rewardValueOnPeriod = pointsPerCurrency > 0
+      ? pointsRedeemedOnPeriod / pointsPerCurrency
+      : 0;
+
+    const previousRewardValue = pointsPerCurrency > 0
+      ? previousPointsRedeemedOnPeriod / pointsPerCurrency
+      : 0;
+
+    const redemptionRevenue = currentRedemptions.reduce(
+      (sum, redemption) => sum + Number(redemption.amount_paid ?? redemption.invoice_amount ?? 0),
+      0
+    );
+
+    const rewardEfficiency = rewardValueOnPeriod > 0
+      ? currentRevenue / rewardValueOnPeriod
+      : 0;
+
     const customerMap = new Map(
       loyaltyCustomers.map((customer) => [customer.id, customer])
     );
@@ -522,6 +638,14 @@ export default function Dashboard() {
       totalRevenue,
       currentTransactions: currentTransactions.length,
       averageBasket,
+      currentRedemptions: currentRedemptions.length,
+      previousRedemptions: previousRedemptions.length,
+      redemptionGrowth: growth(currentRedemptions.length, previousRedemptions.length),
+      pointsRedeemedOnPeriod,
+      rewardValueOnPeriod,
+      previousRewardValue,
+      redemptionRevenue,
+      rewardEfficiency,
       topClients,
       periodDays: selected.days,
     };
@@ -811,6 +935,85 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ROI FIDÉLITÉ */}
+
+      <section className="mt-6 rounded-2xl border border-gold/20 bg-[#fdf9ef] p-5 shadow-soft md:p-7">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
+              ROI fidélité
+            </p>
+            <h2 className="mt-1 font-display text-2xl text-forest">
+              Valeur créée par le programme
+            </h2>
+            <p className="mt-1 text-xs text-ink/45">
+              Mesure l’activité commerciale associée aux clients fidélité et aux récompenses utilisées.
+            </p>
+          </div>
+          <div className="rounded-xl border border-gold/20 bg-white px-4 py-3 text-right">
+            <p className="text-[10px] uppercase tracking-[0.12em] text-ink/35">Ratio CA / valeur des points</p>
+            <p className="mt-1 font-display text-2xl text-forest">
+              {redemptionsLoading || transactionsLoading
+                ? '—'
+                : analytics.rewardEfficiency
+                  ? `${analytics.rewardEfficiency.toFixed(1)}×`
+                  : '—'}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="rounded-2xl bg-white p-5">
+            <p className="text-xs font-medium text-ink/50">Récompenses utilisées</p>
+            <p className="mt-3 font-display text-3xl text-forest">
+              {redemptionsLoading ? '—' : analytics.currentRedemptions}
+            </p>
+            <p className="mt-2 text-xs text-ink/40">
+              {redemptionsLoading
+                ? '—'
+                : `${analytics.redemptionGrowth >= 0 ? '+' : ''}${analytics.redemptionGrowth.toFixed(1)} % vs période précédente`}
+            </p>
+          </div>
+
+          <div className="rounded-2xl bg-white p-5">
+            <p className="text-xs font-medium text-ink/50">Points consommés</p>
+            <p className="mt-3 font-display text-3xl text-forest">
+              {redemptionsLoading ? '—' : analytics.pointsRedeemedOnPeriod.toLocaleString('fr-FR')}
+            </p>
+            <p className="mt-2 text-xs text-ink/40">sur la période sélectionnée</p>
+          </div>
+
+          <div className="rounded-2xl bg-white p-5">
+            <p className="text-xs font-medium text-ink/50">Valeur des points</p>
+            <p className="mt-3 font-display text-3xl text-forest">
+              {redemptionsLoading
+                ? '—'
+                : `${analytics.rewardValueOnPeriod.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}
+            </p>
+            <p className="mt-2 text-xs text-ink/40">
+              équivalent monétaire selon le barème de points
+            </p>
+          </div>
+
+          <div className="rounded-2xl bg-forest p-5 text-white">
+            <p className="text-xs font-medium text-white/55">CA lié aux récompenses</p>
+            <p className="mt-3 font-display text-3xl">
+              {redemptionsLoading
+                ? '—'
+                : `${analytics.redemptionRevenue.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}
+            </p>
+            <p className="mt-2 text-xs text-white/45">
+              montant payé enregistré lors des utilisations
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-5 rounded-xl border border-gold/15 bg-white px-4 py-3 text-xs leading-5 text-ink/50">
+          <strong className="text-forest">Important :</strong> ce ratio est un indicateur de performance du programme,
+          pas une marge nette. Le coût réel des récompenses n'est pas enregistré dans la base actuelle.
         </div>
       </section>
 
