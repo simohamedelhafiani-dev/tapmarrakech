@@ -137,7 +137,7 @@ export default function Employee() {
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(EMPLOYEE_SESSION_KEY);
+      const raw = sessionStorage.getItem(EMPLOYEE_SESSION_KEY);
       if (!raw) {
         setLoginLoading(false);
         return;
@@ -147,7 +147,7 @@ export default function Employee() {
       const expiresAt = new Date(stored.expires_at).getTime();
 
       if (!stored.access_token || !stored.session_token || !expiresAt || expiresAt <= Date.now()) {
-        localStorage.removeItem(EMPLOYEE_SESSION_KEY);
+        sessionStorage.removeItem(EMPLOYEE_SESSION_KEY);
         setLoginLoading(false);
         return;
       }
@@ -156,7 +156,7 @@ export default function Employee() {
       setEstablishmentId(stored.establishment_id);
     } catch (error) {
       console.error('Session employé invalide:', error);
-      localStorage.removeItem(EMPLOYEE_SESSION_KEY);
+      sessionStorage.removeItem(EMPLOYEE_SESSION_KEY);
     } finally {
       setLoginLoading(false);
     }
@@ -268,7 +268,7 @@ export default function Employee() {
         expires_at: result.expires_at,
       };
 
-      localStorage.setItem(EMPLOYEE_SESSION_KEY, JSON.stringify(nextSession));
+      sessionStorage.setItem(EMPLOYEE_SESSION_KEY, JSON.stringify(nextSession));
       setEmployeeCode('');
       setSession(nextSession);
       setEstablishmentId(nextSession.establishment_id);
@@ -290,7 +290,7 @@ export default function Employee() {
     } catch (error) {
       console.error('Erreur déconnexion employé:', error);
     } finally {
-      localStorage.removeItem(EMPLOYEE_SESSION_KEY);
+      sessionStorage.removeItem(EMPLOYEE_SESSION_KEY);
       setSession(null);
       setEstablishmentId('');
       setEstablishmentLogoUrl(null);
