@@ -100,7 +100,9 @@ export default function Dashboard() {
   const [places, setPlaces] = useState<Establishment[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loyaltyCustomers, setLoyaltyCustomers] = useState<LoyaltyCustomer[]>([]);
+  const [loyaltyTransactions, setLoyaltyTransactions] = useState<LoyaltyTransaction[]>([]);
   const [loyaltyLoading, setLoyaltyLoading] = useState(false);
+  const [transactionsLoading, setTransactionsLoading] = useState(false);
   const [profileName, setProfileName] = useState<string>('');
   const [period, setPeriod] = useState('8w');
   const [selectedEstablishmentId, setSelectedEstablishmentId] = useState<string | null>(
@@ -283,6 +285,7 @@ export default function Dashboard() {
     const loadLoyalty = async () => {
       if (!selectedEstablishmentId) {
         setLoyaltyCustomers([]);
+        setLoyaltyTransactions([]);
         return;
       }
 
@@ -307,6 +310,41 @@ export default function Dashboard() {
     };
 
     loadLoyalty();
+
+    return () => {
+      active = false;
+    };
+  }, [selectedEstablishmentId]);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadLoyaltyTransactions = async () => {
+      if (!selectedEstablishmentId) {
+        setLoyaltyTransactions([]);
+        return;
+      }
+
+      setTransactionsLoading(true);
+
+      const { data, error } = await supabase
+        .from('loyalty_transactions')
+        .select('id, establishment_id, customer_id, employee_id, points, amount, description, type, invoice_number, created_at')
+        .eq('establishment_id', selectedEstablishmentId)
+        .eq('type', 'EARN')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Erreur chargement transactions fidélité:', error);
+        if (active) setLoyaltyTransactions([]);
+      } else if (active) {
+        setLoyaltyTransactions((data as LoyaltyTransaction[]) ?? []);
+      }
+
+      if (active) setTransactionsLoading(false);
+    };
+
+    loadLoyaltyTransactions();
 
     return () => {
       active = false;
@@ -421,6 +459,17 @@ export default function Dashboard() {
     const pointsRedeemed = loyaltyCustomers.reduce((sum, customer) => sum + Number(customer.total_points_redeemed || 0), 0);
     const visits = loyaltyCustomers.reduce((sum, customer) => sum + Number(customer.visit_count || 0), 0);
 
+    const currentTransactions = loyaltyTransactions.filter((transaction) => new Date(transaction.created_at) >= currentStart);
+    const previousTransactions = loyaltyTransactions.filter((transaction) => {
+      const date = new Date(transaction.created_at);
+      return date >= previousStart && date < currentStart;
+    });
+
+    const currentRevenue = currentTransactions.reduce((sum, transaction) => sum + Number(transaction.amount || 0), 0);
+    const previousRevenue = previousTransactions.reduce((sum, transaction) => sum + Number(transaction.amount || 0), 0);
+    const totalRevenue = loyaltyTransactions.reduce((sum, transaction) => sum + Number(transaction.amount || 0), 0);
+    const averageBasket = currentTransactions.length ? currentRevenue / currentTransactions.length : 0;
+
     const growth = (current: number, previous: number) => {
       if (previous === 0) return current > 0 ? 100 : 0;
       return ((current - previous) / previous) * 100;
@@ -439,8 +488,14 @@ export default function Dashboard() {
       activeCustomers30d,
       pointsEarned,
       pointsRedeemed,
+      currentRevenue,
+      previousRevenue,
+      revenueGrowth: growth(currentRevenue, previousRevenue),
+      totalRevenue,
+      currentTransactions: currentTransactions.length,
+      averageBasket,
     };
-  }, [reviews, loyaltyCustomers]);
+  }, [reviews, loyaltyCustomers, loyaltyTransactions]);
 
   const isResponsible = role === 'responsible';
 
@@ -677,14 +732,40 @@ export default function Dashboard() {
             <p className="mt-1 text-xs text-white/45">visites enregistrées dans le programme</p>
           </div>
           <div className="rounded-2xl border border-ink/5 p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold">CA fidélité cumulé</p>
+            <p className="mt-2 font-display text-3xl text-forest">{transactionsLoading ? '—' : `${analytics.totalRevenue.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}</p>
+            <p className="mt-1 text-xs text-ink/40">depuis le début des transactions enregistrées</p>
+          </div>
+          <div className="rounded-2xl border border-ink/5 p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold">Avis sur 30 jours</p>
             <p className="mt-2 font-display text-3xl text-forest">{analytics.currentReviews}</p>
             <p className="mt-1 text-xs text-ink/40">{analytics.reviewGrowth >= 0 ? '+' : ''}{analytics.reviewGrowth.toFixed(1)} % vs les 30 jours précédents</p>
           </div>
           <div className="rounded-2xl border border-gold/20 bg-[#fdf9ef] p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold">Chiffre généré</p>
-            <p className="mt-2 text-sm font-semibold text-forest">À connecter aux transactions</p>
-            <p className="mt-2 text-xs leading-5 text-ink/45">Le dashboard ne calcule pas encore de CA réel, car le projet n'enregistre pas actuellement le montant de chaque achat/visite fidélité.</p>
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold">Chiffre généré</p>
+              <TrendingUp size={17} className="text-gold" />
+            </div>
+            <p className="mt-2 font-display text-3xl text-forest">
+              {transactionsLoading ? '—' : `${analytics.currentRevenue.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}
+            </p>
+            <p className="mt-1 text-xs text-ink/45">CA généré par les achats fidélité sur 30 jours</p>
+            <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+              <span className="font-semibold text-forest">
+                {transactionsLoading ? '—' : `${analytics.revenueGrowth >= 0 ? '+' : ''}${analytics.revenueGrowth.toFixed(1)} %`}
+              </span>
+              <span className="text-ink/35">vs 30 jours précédents</span>
+            </div>
+            <div className="mt-3 grid grid-cols-2 gap-3 border-t border-gold/10 pt-3">
+              <div>
+                <p className="text-[10px] text-ink/35">Transactions</p>
+                <p className="mt-1 text-sm font-semibold text-forest">{transactionsLoading ? '—' : analytics.currentTransactions}</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-ink/35">Panier moyen</p>
+                <p className="mt-1 text-sm font-semibold text-forest">{transactionsLoading ? '—' : `${analytics.averageBasket.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
