@@ -176,7 +176,7 @@ export default function Employee() {
     let cancelled = false;
 
     async function loadEstablishmentBranding() {
-      const { data, error } = await employeeSupabase.rpc('get_my_establishments');
+      const { data, error } = await employeeSupabase.rpc('get_my_employee_establishments');
 
       if (error) {
         console.error('Erreur chargement logo établissement:', error);
