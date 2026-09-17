@@ -28,9 +28,9 @@ import { Stars } from '@/components/Stars';
 
 const ranges = [
   {
-    key: '8w',
-    label: '8 dernières semaines',
-    days: 56,
+    key: '7d',
+    label: '7 derniers jours',
+    days: 7,
   },
   {
     key: '30d',
@@ -104,7 +104,7 @@ export default function Dashboard() {
   const [loyaltyLoading, setLoyaltyLoading] = useState(false);
   const [transactionsLoading, setTransactionsLoading] = useState(false);
   const [profileName, setProfileName] = useState<string>('');
-  const [period, setPeriod] = useState('8w');
+  const [period, setPeriod] = useState('30d');
   const [selectedEstablishmentId, setSelectedEstablishmentId] = useState<string | null>(
     null
   );
@@ -380,62 +380,36 @@ export default function Dashboard() {
 
   const chart = useMemo(() => {
     const now = new Date();
+    const bucketDays = Math.max(1, Math.ceil(selected.days / 7));
 
-    return Array.from(
-      {
-        length: period === '8w' ? 8 : 7,
-      },
-      (_, index) => {
-        const end = new Date(now);
+    return Array.from({ length: 7 }, (_, index) => {
+      const end = new Date(now);
+      end.setDate(now.getDate() - (6 - index) * bucketDays);
 
-        end.setDate(
-          now.getDate() -
-            (period === '8w'
-              ? (7 - index) * 7
-              : (6 - index) *
-                Math.ceil(selected.days / 7))
-        );
+      const start = new Date(end);
+      start.setDate(end.getDate() - bucketDays);
 
-        const start = new Date(end);
+      const rows = reviews.filter((review) => {
+        const date = new Date(review.created_at);
+        return date >= start && date <= end;
+      });
 
-        start.setDate(
-          end.getDate() -
-            (period === '8w'
-              ? 7
-              : Math.ceil(selected.days / 7))
-        );
-
-        const rows = reviews.filter((review) => {
-          const date = new Date(review.created_at);
-
-          return date >= start && date <= end;
-        });
-
-        return {
-          name:
-            period === '8w'
-              ? `S${index + 1}`
-              : `${index + 1}`,
-          total: rows.length,
-          positive: rows.filter(
-            (review) => review.rating >= 4
-          ).length,
-          negative: rows.filter(
-            (review) => review.rating <= 3
-          ).length,
-        };
-      }
-    );
-  }, [reviews, period, selected.days]);
+      return {
+        name: selected.days <= 7 ? `${index + 1}` : `P${index + 1}`,
+        total: rows.length,
+        positive: rows.filter((review) => review.rating >= 4).length,
+        negative: rows.filter((review) => review.rating <= 3).length,
+      };
+    });
+  }, [reviews, selected.days]);
 
   const latest = reviews.slice(0, 4);
 
   const analytics = useMemo(() => {
     const now = new Date();
     const currentStart = new Date(now);
-    currentStart.setDate(currentStart.getDate() - 30);
+    currentStart.setDate(currentStart.getDate() - selected.days);
     const previousStart = new Date(currentStart);
-    previousStart.setDate(previousStart.getDate() - 30);
 
     const currentReviews = reviews.filter((review) => new Date(review.created_at) >= currentStart);
     const previousReviews = reviews.filter((review) => {
@@ -451,7 +425,7 @@ export default function Dashboard() {
 
     const totalCustomers = loyaltyCustomers.length;
     const returningCustomers = loyaltyCustomers.filter((customer) => Number(customer.visit_count || 0) >= 2).length;
-    const activeCustomers30d = loyaltyCustomers.filter((customer) => {
+    const activeCustomers = loyaltyCustomers.filter((customer) => {
       if (!customer.last_visit_at) return false;
       return new Date(customer.last_visit_at) >= currentStart;
     }).length;
@@ -481,11 +455,11 @@ export default function Dashboard() {
       currentRegistrations: currentRegistrations.length,
       registrationGrowth: growth(currentRegistrations.length, previousRegistrations.length),
       returningRate: totalCustomers ? (returningCustomers / totalCustomers) * 100 : 0,
-      activeRate: totalCustomers ? (activeCustomers30d / totalCustomers) * 100 : 0,
+      activeRate: totalCustomers ? (activeCustomers / totalCustomers) * 100 : 0,
       redemptionRate: pointsEarned ? (pointsRedeemed / pointsEarned) * 100 : 0,
       visits,
       returningCustomers,
-      activeCustomers30d,
+      activeCustomers,
       pointsEarned,
       pointsRedeemed,
       currentRevenue,
@@ -494,8 +468,9 @@ export default function Dashboard() {
       totalRevenue,
       currentTransactions: currentTransactions.length,
       averageBasket,
+      periodDays: selected.days,
     };
-  }, [reviews, loyaltyCustomers, loyaltyTransactions]);
+  }, [reviews, loyaltyCustomers, loyaltyTransactions, selected.days]);
 
   const isResponsible = role === 'responsible';
 
@@ -674,9 +649,23 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <span className="rounded-lg bg-[#f7f7f3] px-3 py-2 text-[11px] font-semibold text-ink/50">
-            Comparaison sur 30 jours
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="hidden rounded-lg bg-[#f7f7f3] px-3 py-2 text-[11px] font-semibold text-ink/50 sm:inline-block">
+              Comparaison avec la période précédente
+            </span>
+            <select
+              value={period}
+              onChange={(event) => setPeriod(event.target.value)}
+              className="rounded-lg border border-ink/10 bg-[#fafaf7] px-3 py-2 text-xs font-semibold text-ink/65 outline-none focus:border-forest"
+              aria-label="Choisir la période d'analyse"
+            >
+              {ranges.map((range) => (
+                <option key={range.key} value={range.key}>
+                  {range.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -686,7 +675,7 @@ export default function Dashboard() {
               <Users size={17} className="text-forest" />
             </div>
             <p className="mt-3 font-display text-3xl text-forest">{loyaltyLoading ? '—' : analytics.currentRegistrations}</p>
-            <p className="mt-2 text-xs text-ink/40">inscriptions sur 30 jours</p>
+            <p className="mt-2 text-xs text-ink/40">inscriptions sur la période sélectionnée</p>
             <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-forest">
               <TrendingUp size={14} />
               {loyaltyLoading ? '—' : `${analytics.registrationGrowth >= 0 ? '+' : ''}${analytics.registrationGrowth.toFixed(1)} %`}
@@ -710,7 +699,7 @@ export default function Dashboard() {
               <CheckCircle2 size={17} className="text-forest" />
             </div>
             <p className="mt-3 font-display text-3xl text-forest">{loyaltyLoading ? '—' : `${analytics.activeRate.toFixed(1)} %`}</p>
-            <p className="mt-2 text-xs text-ink/40">ayant visité l'établissement ces 30 derniers jours</p>
+            <p className="mt-2 text-xs text-ink/40">ayant visité l’établissement pendant la période sélectionnée</p>
             <p className="mt-4 text-xs font-semibold text-ink/55">{loyaltyLoading ? '—' : `${analytics.activeCustomers30d} clients actifs`}</p>
           </div>
 
@@ -737,9 +726,9 @@ export default function Dashboard() {
             <p className="mt-1 text-xs text-ink/40">depuis le début des transactions enregistrées</p>
           </div>
           <div className="rounded-2xl border border-ink/5 p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold">Avis sur 30 jours</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold">Avis sur la période</p>
             <p className="mt-2 font-display text-3xl text-forest">{analytics.currentReviews}</p>
-            <p className="mt-1 text-xs text-ink/40">{analytics.reviewGrowth >= 0 ? '+' : ''}{analytics.reviewGrowth.toFixed(1)} % vs les 30 jours précédents</p>
+            <p className="mt-1 text-xs text-ink/40">{analytics.reviewGrowth >= 0 ? '+' : ''}{analytics.reviewGrowth.toFixed(1)} % vs la période précédente</p>
           </div>
           <div className="rounded-2xl border border-gold/20 bg-[#fdf9ef] p-5">
             <div className="flex items-center justify-between gap-3">
@@ -749,12 +738,12 @@ export default function Dashboard() {
             <p className="mt-2 font-display text-3xl text-forest">
               {transactionsLoading ? '—' : `${analytics.currentRevenue.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}
             </p>
-            <p className="mt-1 text-xs text-ink/45">CA généré par les achats fidélité sur 30 jours</p>
+            <p className="mt-1 text-xs text-ink/45">CA généré par les achats fidélité sur la période sélectionnée</p>
             <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
               <span className="font-semibold text-forest">
                 {transactionsLoading ? '—' : `${analytics.revenueGrowth >= 0 ? '+' : ''}${analytics.revenueGrowth.toFixed(1)} %`}
               </span>
-              <span className="text-ink/35">vs 30 jours précédents</span>
+              <span className="text-ink/35">vs la période précédente</span>
             </div>
             <div className="mt-3 grid grid-cols-2 gap-3 border-t border-gold/10 pt-3">
               <div>
@@ -950,22 +939,7 @@ export default function Dashboard() {
               </p>
             </div>
 
-            <select
-              value={period}
-              onChange={(event) =>
-                setPeriod(event.target.value)
-              }
-              className="rounded-lg border border-ink/10 bg-[#fafaf7] px-3 py-2 text-xs text-ink/65 outline-none"
-            >
-              {ranges.map((range) => (
-                <option
-                  key={range.key}
-                  value={range.key}
-                >
-                  {range.label}
-                </option>
-              ))}
-            </select>
+
           </div>
 
           <div className="mt-8 h-64">
