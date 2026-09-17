@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
+  ArrowLeft,
   ArrowRight,
+  Check,
   CheckCircle2,
   ExternalLink,
   Gift,
@@ -12,16 +14,18 @@ import {
   Phone,
   Send,
   ShieldCheck,
+  Sparkles,
   Star,
-  Utensils,
+  UtensilsCrossed,
   Wifi,
+  X,
 } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import type { Establishment } from '@/lib/types';
 import { Stars } from '@/components/Stars';
 
-type PublicTab = 'home' | 'menu' | 'reviews' | 'loyalty';
+type Section = 'home' | 'menu' | 'reviews' | 'loyalty';
 
 type MenuCategory = {
   id: string;
@@ -55,12 +59,6 @@ type Promotion = {
   display_order: number;
 };
 
-type WifiInfo = {
-  network_name: string | null;
-  wifi_password: string | null;
-  active: boolean;
-};
-
 type LoyaltyReward = {
   id: string;
   name: string;
@@ -73,20 +71,33 @@ export default function PublicReview() {
   const { slug } = useParams<{ slug: string }>();
 
   const [place, setPlace] = useState<Establishment | null>(null);
-  const [tab, setTab] = useState<PublicTab>('home');
+  const [section, setSection] = useState<Section>('home');
 
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
   const [promotions, setPromotions] = useState<Promotion[]>([]);
-  const [wifi, setWifi] = useState<WifiInfo | null>(null);
   const [rewards, setRewards] = useState<LoyaltyReward[]>([]);
+  const [loyaltyEnabled, setLoyaltyEnabled] = useState(true);
 
   const [rating, setRating] = useState(0);
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
-  const [form, setForm] = useState({
+  const [showLoyaltyForm, setShowLoyaltyForm] = useState(false);
+  const [loyaltyCreated, setLoyaltyCreated] = useState<any>(null);
+  const [loyaltyLoading, setLoyaltyLoading] = useState(false);
+  const [loyaltyError, setLoyaltyError] = useState('');
+
+  const [loyaltyForm, setLoyaltyForm] = useState({
+    first_name: '',
+    last_name: '',
+    phone: '',
+    birth_date: '',
+  });
+
+  const [reviewError, setReviewError] = useState('');
+
+  const [reviewForm, setReviewForm] = useState({
     comment: '',
     name: '',
     phone: '',
@@ -121,9 +132,9 @@ export default function PublicReview() {
       const [
         { data: menuCategories },
         { data: menuItems },
-        { data: promotionData },
-        { data: wifiData },
-        { data: rewardData },
+        { data: promotionRows },
+        { data: rewardRows },
+        { data: loyaltySettings },
       ] = await Promise.all([
         supabase
           .from('menu_categories')
@@ -147,25 +158,24 @@ export default function PublicReview() {
           .order('display_order'),
 
         supabase
-          .from('establishment_wifi')
-          .select('network_name, wifi_password, active')
-          .eq('establishment_id', establishment.id)
-          .eq('active', true)
-          .maybeSingle(),
-
-        supabase
           .from('loyalty_rewards')
-          .select('id, name, description, points_required, active')
+          .select('id,name,description,points_required,active')
           .eq('establishment_id', establishment.id)
           .eq('active', true)
           .order('points_required'),
+
+        supabase
+          .from('loyalty_settings')
+          .select('enabled')
+          .eq('establishment_id', establishment.id)
+          .maybeSingle(),
       ]);
 
       setCategories(menuCategories ?? []);
       setItems(menuItems ?? []);
-      setPromotions(promotionData ?? []);
-      setWifi(wifiData ?? null);
-      setRewards(rewardData ?? []);
+      setPromotions(promotionRows ?? []);
+      setRewards(rewardRows ?? []);
+      setLoyaltyEnabled(loyaltySettings?.enabled ?? true);
 
       setLoading(false);
     };
@@ -174,20 +184,25 @@ export default function PublicReview() {
   }, [slug]);
 
   const itemsByCategory = useMemo(() => {
-    const result: Record<string, MenuItem[]> = {};
+    const grouped: Record<string, MenuItem[]> = {};
 
-    for (const item of items) {
-      if (!result[item.category_id]) {
-        result[item.category_id] = [];
+    items.forEach((item) => {
+      if (!grouped[item.category_id]) {
+        grouped[item.category_id] = [];
       }
 
-      result[item.category_id].push(item);
-    }
+      grouped[item.category_id].push(item);
+    });
 
-    return result;
+    return grouped;
   }, [items]);
 
-  const choose = async (value: number) => {
+  const navigate = (next: Section) => {
+    setSection(next);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const chooseRating = async (value: number) => {
     if (!place || rating) return;
 
     setRating(value);
@@ -227,25 +242,27 @@ export default function PublicReview() {
     }
   };
 
-  const submit = async (event: React.FormEvent) => {
+  const submitPrivateReview = async (
+    event: React.FormEvent
+  ) => {
     event.preventDefault();
 
-    if (!place || !form.comment.trim()) return;
+    if (!place || !reviewForm.comment.trim()) return;
 
-    setError('');
+    setReviewError('');
 
-    const { error: insertError } = await supabase.from('reviews').insert({
+    const { error } = await supabase.from('reviews').insert({
       establishment_id: place.id,
       rating,
       type: 'negative',
-      comment: form.comment.trim(),
-      name: form.name.trim() || null,
-      phone: form.phone.trim() || null,
-      email: form.email.trim() || null,
+      comment: reviewForm.comment.trim(),
+      name: reviewForm.name.trim() || null,
+      phone: reviewForm.phone.trim() || null,
+      email: reviewForm.email.trim() || null,
     });
 
-    if (insertError) {
-      setError(
+    if (error) {
+      setReviewError(
         'Impossible d’envoyer votre message. Veuillez réessayer.'
       );
       return;
@@ -260,17 +277,85 @@ export default function PublicReview() {
     setSent(true);
   };
 
-  const openTab = (nextTab: PublicTab) => {
-    setTab(nextTab);
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
+  const registerLoyalty = async (
+    event: React.FormEvent
+  ) => {
+    event.preventDefault();
+
+    if (!place) return;
+
+    setLoyaltyError('');
+
+    if (!loyaltyForm.first_name.trim()) {
+      setLoyaltyError('Veuillez saisir votre prénom.');
+      return;
+    }
+
+    if (!loyaltyForm.last_name.trim()) {
+      setLoyaltyError('Veuillez saisir votre nom.');
+      return;
+    }
+
+    if (!loyaltyForm.phone.trim()) {
+      setLoyaltyError('Veuillez saisir votre numéro de téléphone.');
+      return;
+    }
+
+    setLoyaltyLoading(true);
+
+    const { data, error } = await supabase.rpc(
+      'register_public_loyalty_customer',
+      {
+        p_establishment_id: place.id,
+        p_first_name: loyaltyForm.first_name.trim(),
+        p_last_name: loyaltyForm.last_name.trim(),
+        p_phone: loyaltyForm.phone.trim(),
+        p_birth_date: loyaltyForm.birth_date || null,
+      }
+    );
+
+    setLoyaltyLoading(false);
+
+    if (error) {
+      if (
+        error.message
+          ?.toLowerCase()
+          .includes('already_registered')
+      ) {
+        setLoyaltyError(
+          'Ce numéro est déjà inscrit au programme fidélité.'
+        );
+      } else {
+        setLoyaltyError(
+          error.message ||
+            'Impossible de créer votre carte fidélité.'
+        );
+      }
+
+      return;
+    }
+
+    const customer = Array.isArray(data) ? data[0] : data;
+
+    if (!customer) {
+      setLoyaltyError(
+        'Impossible de créer votre carte fidélité.'
+      );
+      return;
+    }
+
+    setLoyaltyCreated(customer);
+    setShowLoyaltyForm(false);
+
+    await supabase.from('analytics_events').insert({
+      establishment_id: place.id,
+      event_type: 'loyalty_registration',
     });
   };
 
   if (loading) {
     return (
-      <div className="grid min-h-screen place-items-center bg-[#f7f3ea]">
+      <div className="grid min-h-screen place-items-center bg-[#f5f0e7]">
         <div className="h-9 w-9 animate-spin rounded-full border-2 border-forest border-t-transparent" />
       </div>
     );
@@ -278,12 +363,12 @@ export default function PublicReview() {
 
   if (!place) {
     return (
-      <div className="grid min-h-screen place-items-center bg-[#f7f3ea] px-6 text-center">
+      <div className="grid min-h-screen place-items-center bg-[#f5f0e7] px-6 text-center">
         <div>
           <p className="font-display text-3xl text-forest">
             Établissement introuvable
           </p>
-          <p className="mt-2 text-sm text-ink/60">
+          <p className="mt-2 text-sm text-ink/50">
             Ce lien n’est plus disponible.
           </p>
         </div>
@@ -291,45 +376,19 @@ export default function PublicReview() {
     );
   }
 
-  const establishment = place as any;
+  const p = place as any;
 
-  const phone =
-    establishment.phone ||
-    '';
-
-  const whatsapp =
-    establishment.whatsapp_number ||
-    '';
-
-  const city =
-    establishment.city ||
-    '';
-
-  const address =
-    establishment.address ||
-    '';
-
-  const description =
-    establishment.description ||
-    '';
-
-  const instagram =
-    establishment.instagram_url ||
-    '';
-
-  const website =
-    establishment.website_url ||
-    '';
-
+  const phone = p.phone || '';
+  const whatsapp = p.whatsapp_number || '';
+  const address = p.address || '';
+  const city = p.city || '';
+  const description = p.description || '';
+  const website = p.website_url || '';
+  const instagram = p.instagram_url || '';
   const googleRating =
-    establishment.google_rating ??
-    establishment.rating ??
-    null;
-
+    p.google_rating ?? p.rating ?? null;
   const googleReviewCount =
-    establishment.google_review_count ??
-    establishment.review_count ??
-    null;
+    p.google_review_count ?? p.review_count ?? null;
 
   const directionsUrl =
     address || city
@@ -339,426 +398,380 @@ export default function PublicReview() {
       : '';
 
   return (
-    <div className="min-h-screen bg-[#f7f3ea] text-ink">
-      <div className="mx-auto min-h-screen w-full max-w-[520px] pb-28">
+    <div className="min-h-screen bg-[#f5f0e7] text-ink">
+      <div className="mx-auto min-h-screen w-full max-w-[520px] overflow-hidden bg-[#f5f0e7] pb-24 shadow-2xl">
 
-        {/* HEADER */}
-        <header className="relative overflow-hidden bg-forest px-5 pb-8 pt-7 text-white">
-          <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-gold/10 blur-2xl" />
-          <div className="absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-white/5 blur-2xl" />
-
-          <div className="relative">
-            <div className="flex items-center justify-between">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.25em] text-gold">
-                Bienvenue
+        {/* =====================================================
+            HOME
+        ===================================================== */}
+        {section === 'home' && (
+          <>
+            {/* PREMIUM HERO */}
+            <section className="relative min-h-[520px] overflow-hidden bg-forest">
+              <div className="absolute inset-0">
+                <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-gold/10 blur-3xl" />
+                <div className="absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-black/20 blur-3xl" />
               </div>
 
-              <div className="flex items-center gap-1.5 text-[10px] text-white/50">
-                <ShieldCheck size={13} />
-                Expérience digitale
-              </div>
-            </div>
+              <div className="relative px-6 pb-8 pt-7">
+                <div className="flex items-center justify-between">
+                  <img
+                    src="/tapmarrakech-logo.png"
+                    alt="TapMarrakech"
+                    className="h-8 w-auto object-contain brightness-0 invert opacity-80"
+                  />
 
-            <div className="mt-7 flex items-center gap-4">
-              {establishment.logo_url ? (
-                <img
-                  src={establishment.logo_url}
-                  alt=""
-                  className="h-20 w-20 rounded-2xl bg-white object-cover p-1 shadow-lg"
-                />
-              ) : (
-                <div className="grid h-20 w-20 place-items-center rounded-2xl bg-white/10 font-display text-3xl text-gold">
-                  {place.name?.[0] ?? 'E'}
+                  <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-white/60">
+                    Votre expérience
+                  </div>
                 </div>
-              )}
 
-              <div className="min-w-0">
-                <h1 className="font-display text-3xl leading-tight">
-                  {place.name}
-                </h1>
+                <div className="mt-14 text-center">
+                  {p.logo_url ? (
+                    <div className="mx-auto mb-6 flex h-28 w-28 items-center justify-center rounded-[30px] bg-white p-2 shadow-2xl">
+                      <img
+                        src={p.logo_url}
+                        alt={p.name}
+                        className="h-full w-full rounded-[22px] object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="mx-auto mb-6 grid h-28 w-28 place-items-center rounded-[30px] bg-white/10 font-display text-5xl text-gold ring-1 ring-white/10">
+                      {p.name?.[0] || 'E'}
+                    </div>
+                  )}
 
-                {(googleRating || place.google_review_url) && (
-                  <div className="mt-2 flex items-center gap-2">
-                    <div className="flex items-center gap-1 text-gold">
-                      <Star size={15} fill="currentColor" />
-                      <span className="text-sm font-semibold">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-gold">
+                    Bienvenue
+                  </p>
+
+                  <h1 className="mt-3 font-display text-4xl leading-tight text-white">
+                    {p.name}
+                  </h1>
+
+                  {(googleRating || p.google_review_url) && (
+                    <div className="mt-5 flex items-center justify-center gap-2">
+                      <Star
+                        size={16}
+                        fill="currentColor"
+                        className="text-gold"
+                      />
+
+                      <span className="text-sm font-semibold text-white">
                         {googleRating
                           ? Number(googleRating).toFixed(1)
                           : 'Google'}
                       </span>
+
+                      {googleReviewCount && (
+                        <span className="text-xs text-white/40">
+                          · {googleReviewCount} avis
+                        </span>
+                      )}
                     </div>
+                  )}
 
-                    {googleReviewCount && (
-                      <span className="text-xs text-white/50">
-                        · {googleReviewCount} avis
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {description && (
-              <p className="mt-5 max-w-[440px] text-sm leading-6 text-white/65">
-                {description}
-              </p>
-            )}
-
-            {/* QUICK ACTIONS */}
-            <div className="mt-6 grid grid-cols-4 gap-2">
-              {phone && (
-                <a
-                  href={`tel:${phone}`}
-                  className="flex flex-col items-center gap-1.5 rounded-2xl bg-white/10 px-2 py-3 text-[10px] font-semibold text-white transition hover:bg-white/15"
-                >
-                  <Phone size={18} />
-                  Appeler
-                </a>
-              )}
-
-              {whatsapp && (
-                <a
-                  href={`https://wa.me/${whatsapp.replace(/\D/g, '')}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex flex-col items-center gap-1.5 rounded-2xl bg-white/10 px-2 py-3 text-[10px] font-semibold text-white transition hover:bg-white/15"
-                >
-                  <MessageCircle size={18} />
-                  WhatsApp
-                </a>
-              )}
-
-              {directionsUrl && (
-                <a
-                  href={directionsUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex flex-col items-center gap-1.5 rounded-2xl bg-white/10 px-2 py-3 text-[10px] font-semibold text-white transition hover:bg-white/15"
-                >
-                  <MapPin size={18} />
-                  Itinéraire
-                </a>
-              )}
-
-              {place.google_review_url && (
-                <button
-                  onClick={() => openTab('reviews')}
-                  className="flex flex-col items-center gap-1.5 rounded-2xl bg-white/10 px-2 py-3 text-[10px] font-semibold text-white transition hover:bg-white/15"
-                >
-                  <Star size={18} />
-                  Avis
-                </button>
-              )}
-            </div>
-          </div>
-        </header>
-
-        {/* HOME */}
-        {tab === 'home' && (
-          <main className="space-y-5 px-5 pt-5">
-
-            {/* PROMOTIONS */}
-            {promotions.length > 0 && (
-              <section>
-                <div className="mb-3 flex items-end justify-between">
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold">
-                      À ne pas manquer
+                  {description && (
+                    <p className="mx-auto mt-5 max-w-[390px] text-sm leading-6 text-white/55">
+                      {description}
                     </p>
-                    <h2 className="mt-1 font-display text-2xl text-forest">
-                      Nos offres
-                    </h2>
-                  </div>
-
-                  <span className="rounded-full bg-gold/10 px-3 py-1 text-[10px] font-semibold text-gold">
-                    {promotions.length} offre
-                    {promotions.length > 1 ? 's' : ''}
-                  </span>
+                  )}
                 </div>
 
-                <div className="space-y-3">
-                  {promotions.map((promotion) => (
-                    <div
-                      key={promotion.id}
-                      className="overflow-hidden rounded-3xl border border-ink/5 bg-white shadow-sm"
+                {/* ACTION PILLS */}
+                <div className="mt-8 flex flex-wrap justify-center gap-2">
+                  {phone && (
+                    <a
+                      href={`tel:${phone}`}
+                      className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-xs font-semibold text-forest"
                     >
-                      {promotion.image_url && (
-                        <img
-                          src={promotion.image_url}
-                          alt=""
-                          className="h-44 w-full object-cover"
-                        />
-                      )}
+                      <Phone size={14} />
+                      Appeler
+                    </a>
+                  )}
 
-                      <div className="p-5">
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-red-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-red-600">
-                              <Gift size={12} />
-                              Offre
+                  {whatsapp && (
+                    <a
+                      href={`https://wa.me/${whatsapp.replace(
+                        /\D/g,
+                        ''
+                      )}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2.5 text-xs font-semibold text-white ring-1 ring-white/10"
+                    >
+                      <MessageCircle size={14} />
+                      WhatsApp
+                    </a>
+                  )}
+
+                  {directionsUrl && (
+                    <a
+                      href={directionsUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2.5 text-xs font-semibold text-white ring-1 ring-white/10"
+                    >
+                      <MapPin size={14} />
+                      Itinéraire
+                    </a>
+                  )}
+                </div>
+              </div>
+            </section>
+
+            {/* MAIN CONTENT */}
+            <main className="space-y-6 px-5 pt-6">
+
+              {/* PROMOTIONS */}
+              {promotions.length > 0 && (
+                <section>
+                  <div className="mb-4 flex items-end justify-between">
+                    <div>
+                      <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-gold">
+                        En ce moment
+                      </p>
+                      <h2 className="mt-1 font-display text-3xl text-forest">
+                        À découvrir
+                      </h2>
+                    </div>
+
+                    <Sparkles
+                      size={20}
+                      className="mb-1 text-gold"
+                    />
+                  </div>
+
+                  <div className="-mx-5 flex gap-4 overflow-x-auto px-5 pb-2 scrollbar-hide">
+                    {promotions.map((promotion) => (
+                      <article
+                        key={promotion.id}
+                        className="relative min-w-[310px] overflow-hidden rounded-[28px] bg-forest shadow-xl"
+                      >
+                        {promotion.image_url ? (
+                          <img
+                            src={promotion.image_url}
+                            alt=""
+                            className="h-52 w-full object-cover"
+                          />
+                        ) : (
+                          <div className="h-36 bg-gradient-to-br from-forest via-[#214d40] to-[#0e2923]" />
+                        )}
+
+                        <div className="p-5 text-white">
+                          <span className="inline-flex items-center rounded-full bg-gold px-3 py-1 text-[9px] font-bold uppercase tracking-wider text-forest">
+                            Offre exclusive
+                          </span>
+
+                          <div className="mt-3 flex items-end justify-between gap-4">
+                            <div>
+                              <h3 className="font-display text-2xl">
+                                {promotion.name}
+                              </h3>
+
+                              {promotion.description && (
+                                <p className="mt-1.5 text-xs leading-5 text-white/50">
+                                  {promotion.description}
+                                </p>
+                              )}
                             </div>
 
-                            <h3 className="font-display text-xl text-forest">
-                              {promotion.name}
-                            </h3>
-
-                            {promotion.description && (
-                              <p className="mt-2 text-sm leading-5 text-ink/55">
-                                {promotion.description}
-                              </p>
-                            )}
-                          </div>
-
-                          {(promotion.promo_price !== null ||
-                            promotion.normal_price !== null) && (
-                            <div className="shrink-0 text-right">
-                              {promotion.normal_price !== null &&
-                                promotion.promo_price !== null &&
-                                promotion.normal_price >
-                                  promotion.promo_price && (
-                                  <div className="text-xs text-ink/35 line-through">
+                            {promotion.promo_price !== null && (
+                              <div className="shrink-0 text-right">
+                                {promotion.normal_price !== null && (
+                                  <p className="text-[10px] text-white/35 line-through">
                                     {Number(
                                       promotion.normal_price
                                     ).toLocaleString('fr-FR')}{' '}
                                     MAD
-                                  </div>
+                                  </p>
                                 )}
 
-                              {promotion.promo_price !== null && (
-                                <div className="text-xl font-bold text-forest">
+                                <p className="text-xl font-bold text-gold">
                                   {Number(
                                     promotion.promo_price
                                   ).toLocaleString('fr-FR')}{' '}
                                   MAD
-                                </div>
-                              )}
-                            </div>
-                          )}
+                                </p>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* MENU */}
-            <button
-              onClick={() => openTab('menu')}
-              className="group flex w-full items-center justify-between rounded-3xl bg-white p-5 text-left shadow-sm ring-1 ring-ink/5 transition hover:-translate-y-0.5"
-            >
-              <div className="flex items-center gap-4">
-                <div className="grid h-12 w-12 place-items-center rounded-2xl bg-forest/10 text-forest">
-                  <Utensils size={22} />
-                </div>
-
-                <div>
-                  <p className="font-display text-xl text-forest">
-                    Découvrir notre menu
-                  </p>
-                  <p className="mt-1 text-xs text-ink/45">
-                    {items.length > 0
-                      ? `${items.length} produit${
-                          items.length > 1 ? 's' : ''
-                        } disponible${items.length > 1 ? 's' : ''}`
-                      : 'Voir nos produits et services'}
-                  </p>
-                </div>
-              </div>
-
-              <ArrowRight
-                size={20}
-                className="text-gold transition group-hover:translate-x-1"
-              />
-            </button>
-
-            {/* WIFI */}
-            {wifi?.active && wifi.network_name && (
-              <section className="rounded-3xl bg-forest p-5 text-white shadow-sm">
-                <div className="flex items-start gap-4">
-                  <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/10 text-gold">
-                    <Wifi size={22} />
+                      </article>
+                    ))}
                   </div>
+                </section>
+              )}
 
-                  <div className="min-w-0">
-                    <p className="font-display text-xl">
-                      Wi-Fi gratuit
-                    </p>
+              {/* 3 PRIMARY EXPERIENCES */}
+              <section className="grid grid-cols-3 gap-3">
+                <FeatureCard
+                  icon={<UtensilsCrossed size={21} />}
+                  title="Menu"
+                  subtitle="Découvrir"
+                  onClick={() => navigate('menu')}
+                />
 
-                    <p className="mt-1 text-xs text-white/55">
-                      Connectez-vous pendant votre visite.
-                    </p>
+                <FeatureCard
+                  icon={<Heart size={21} />}
+                  title="Avis"
+                  subtitle="Votre expérience"
+                  onClick={() => navigate('reviews')}
+                />
 
-                    <div className="mt-4 space-y-2">
-                      <div className="rounded-xl bg-white/10 px-3 py-2.5">
-                        <p className="text-[9px] uppercase tracking-wider text-white/40">
-                          Réseau
-                        </p>
-                        <p className="mt-0.5 text-sm font-semibold">
-                          {wifi.network_name}
-                        </p>
-                      </div>
-
-                      {wifi.wifi_password && (
-                        <div className="rounded-xl bg-white/10 px-3 py-2.5">
-                          <p className="text-[9px] uppercase tracking-wider text-white/40">
-                            Mot de passe
-                          </p>
-                          <p className="mt-0.5 text-sm font-semibold">
-                            {wifi.wifi_password}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                {loyaltyEnabled ? (
+                  <FeatureCard
+                    icon={<Gift size={21} />}
+                    title="Fidélité"
+                    subtitle="Vos avantages"
+                    onClick={() => navigate('loyalty')}
+                    featured
+                  />
+                ) : (
+                  <FeatureCard
+                    icon={<Sparkles size={21} />}
+                    title="Découvrir"
+                    subtitle="Nos services"
+                    onClick={() => {}}
+                  />
+                )}
               </section>
-            )}
 
-            {/* LOYALTY */}
-            <button
-              onClick={() => openTab('loyalty')}
-              className="group flex w-full items-center justify-between rounded-3xl border border-gold/20 bg-[#fffaf0] p-5 text-left shadow-sm"
-            >
-              <div className="flex items-center gap-4">
-                <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gold/15 text-gold">
-                  <Gift size={22} />
-                </div>
+              {/* LOYALTY TEASER */}
+              {loyaltyEnabled && (
+                <section className="relative overflow-hidden rounded-[30px] bg-[#e9dfca] p-6">
+                  <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gold/20 blur-2xl" />
 
-                <div>
-                  <p className="font-display text-xl text-forest">
-                    Programme fidélité
-                  </p>
-                  <p className="mt-1 text-xs text-ink/45">
-                    Profitez de vos avantages et récompenses.
-                  </p>
-                </div>
-              </div>
-
-              <ArrowRight
-                size={20}
-                className="text-gold transition group-hover:translate-x-1"
-              />
-            </button>
-
-            {/* REVIEW CTA */}
-            <section className="rounded-3xl bg-white p-6 text-center shadow-sm ring-1 ring-ink/5">
-              <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-gold/10 text-gold">
-                <Heart size={22} fill="currentColor" />
-              </div>
-
-              <h2 className="mt-4 font-display text-2xl text-forest">
-                Votre expérience compte
-              </h2>
-
-              <p className="mx-auto mt-2 max-w-[360px] text-sm leading-6 text-ink/50">
-                Partagez votre expérience avec notre équipe.
-              </p>
-
-              <button
-                onClick={() => openTab('reviews')}
-                className="mt-5 inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white"
-              >
-                Donner mon avis
-                <ArrowRight size={16} />
-              </button>
-            </section>
-
-            {/* CONTACT */}
-            {(address || city || phone || website || instagram) && (
-              <section className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-ink/5">
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold">
-                  Informations
-                </p>
-
-                <div className="mt-4 space-y-3">
-                  {(address || city) && (
-                    <div className="flex items-start gap-3">
-                      <MapPin
-                        size={17}
-                        className="mt-0.5 shrink-0 text-forest"
-                      />
-                      <span className="text-sm leading-5 text-ink/60">
-                        {[address, city].filter(Boolean).join(', ')}
+                  <div className="relative">
+                    <div className="flex items-center gap-2 text-gold">
+                      <Gift size={17} />
+                      <span className="text-[9px] font-bold uppercase tracking-[0.25em]">
+                        Programme fidélité
                       </span>
                     </div>
-                  )}
 
-                  {phone && (
-                    <a
-                      href={`tel:${phone}`}
-                      className="flex items-center gap-3 text-sm text-ink/60"
-                    >
-                      <Phone size={17} className="text-forest" />
-                      {phone}
-                    </a>
-                  )}
+                    <h2 className="mt-3 max-w-[300px] font-display text-2xl leading-tight text-forest">
+                      Plus vous revenez,
+                      plus vous êtes récompensé.
+                    </h2>
 
-                  {website && (
-                    <a
-                      href={
-                        website.startsWith('http')
-                          ? website
-                          : `https://${website}`
-                      }
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-center gap-3 text-sm text-ink/60"
+                    <button
+                      onClick={() => navigate('loyalty')}
+                      className="mt-5 inline-flex items-center gap-2 rounded-full bg-forest px-5 py-3 text-xs font-semibold text-white"
                     >
-                      <ExternalLink
-                        size={17}
-                        className="text-forest"
-                      />
-                      Site web
-                    </a>
-                  )}
+                      Rejoindre le programme
+                      <ArrowRight size={14} />
+                    </button>
+                  </div>
+                </section>
+              )}
 
-                  {instagram && (
-                    <a
-                      href={instagram}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-center gap-3 text-sm text-ink/60"
-                    >
-                      <Instagram
-                        size={17}
-                        className="text-forest"
-                      />
-                      Instagram
-                    </a>
-                  )}
-                </div>
-              </section>
-            )}
-          </main>
+              {/* WIFI */}
+              <WifiCard establishmentId={p.id} />
+
+              {/* CONTACT */}
+              {(address ||
+                city ||
+                website ||
+                instagram) && (
+                <section className="border-t border-ink/5 pt-6">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-gold">
+                    Informations
+                  </p>
+
+                  <div className="mt-4 space-y-3">
+                    {(address || city) && (
+                      <div className="flex gap-3">
+                        <MapPin
+                          size={16}
+                          className="mt-0.5 shrink-0 text-forest"
+                        />
+                        <span className="text-sm text-ink/55">
+                          {[address, city]
+                            .filter(Boolean)
+                            .join(', ')}
+                        </span>
+                      </div>
+                    )}
+
+                    {website && (
+                      <a
+                        href={
+                          website.startsWith('http')
+                            ? website
+                            : `https://${website}`
+                        }
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center gap-3 text-sm text-ink/55"
+                      >
+                        <ExternalLink
+                          size={16}
+                          className="text-forest"
+                        />
+                        Site internet
+                      </a>
+                    )}
+
+                    {instagram && (
+                      <a
+                        href={instagram}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center gap-3 text-sm text-ink/55"
+                      >
+                        <Instagram
+                          size={16}
+                          className="text-forest"
+                        />
+                        Instagram
+                      </a>
+                    )}
+                  </div>
+                </section>
+              )}
+            </main>
+          </>
         )}
 
-        {/* MENU */}
-        {tab === 'menu' && (
-          <main className="px-5 pt-5">
-            <PageTitle
-              eyebrow="Notre carte"
-              title="Menu"
-              onBack={() => openTab('home')}
-            />
+        {/* =====================================================
+            MENU
+        ===================================================== */}
+        {section === 'menu' && (
+          <main className="px-5 pt-6">
+            <BackButton onClick={() => navigate('home')} />
+
+            <div className="mt-7">
+              <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-gold">
+                Découvrez
+              </p>
+
+              <h1 className="mt-1 font-display text-4xl text-forest">
+                Notre menu
+              </h1>
+
+              <p className="mt-2 text-sm text-ink/45">
+                Une sélection préparée pour vous.
+              </p>
+            </div>
 
             {categories.length === 0 ? (
-              <EmptyState
-                icon={<Utensils size={22} />}
+              <Empty
+                icon={<UtensilsCrossed size={22} />}
                 title="Menu bientôt disponible"
-                text="Les produits et services de cet établissement apparaîtront ici."
+                text="Le contenu apparaîtra ici dès qu’il sera ajouté."
               />
             ) : (
-              <div className="mt-6 space-y-7">
+              <div className="mt-8 space-y-8">
                 {categories.map((category) => {
                   const categoryItems =
                     itemsByCategory[category.id] ?? [];
 
-                  if (categoryItems.length === 0) return null;
+                  if (!categoryItems.length) return null;
 
                   return (
                     <section key={category.id}>
-                      <div className="mb-3">
+                      <div className="mb-4">
                         <h2 className="font-display text-2xl text-forest">
                           {category.name}
                         </h2>
@@ -772,41 +785,39 @@ export default function PublicReview() {
 
                       <div className="space-y-3">
                         {categoryItems.map((item) => (
-                          <div
+                          <article
                             key={item.id}
-                            className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-ink/5"
+                            className="flex overflow-hidden rounded-[22px] bg-white p-3 shadow-sm ring-1 ring-ink/5"
                           >
-                            <div className="flex gap-3 p-3">
-                              {item.image_url && (
-                                <img
-                                  src={item.image_url}
-                                  alt=""
-                                  className="h-24 w-24 shrink-0 rounded-xl object-cover"
-                                />
-                              )}
+                            {item.image_url && (
+                              <img
+                                src={item.image_url}
+                                alt=""
+                                className="h-24 w-24 shrink-0 rounded-[16px] object-cover"
+                              />
+                            )}
 
-                              <div className="min-w-0 flex-1 py-1">
-                                <div className="flex items-start justify-between gap-3">
-                                  <h3 className="font-semibold text-forest">
-                                    {item.name}
-                                  </h3>
+                            <div className="min-w-0 flex-1 p-2">
+                              <div className="flex items-start justify-between gap-3">
+                                <h3 className="font-semibold text-forest">
+                                  {item.name}
+                                </h3>
 
-                                  <span className="shrink-0 font-semibold text-gold">
-                                    {Number(
-                                      item.price
-                                    ).toLocaleString('fr-FR')}{' '}
-                                    MAD
-                                  </span>
-                                </div>
-
-                                {item.description && (
-                                  <p className="mt-2 text-xs leading-5 text-ink/50">
-                                    {item.description}
-                                  </p>
-                                )}
+                                <span className="shrink-0 text-sm font-bold text-gold">
+                                  {Number(
+                                    item.price
+                                  ).toLocaleString('fr-FR')}{' '}
+                                  MAD
+                                </span>
                               </div>
+
+                              {item.description && (
+                                <p className="mt-2 text-xs leading-5 text-ink/45">
+                                  {item.description}
+                                </p>
+                              )}
                             </div>
-                          </div>
+                          </article>
                         ))}
                       </div>
                     </section>
@@ -817,361 +828,567 @@ export default function PublicReview() {
           </main>
         )}
 
-        {/* REVIEWS */}
-        {tab === 'reviews' && (
-          <main className="px-5 pt-5">
-            <PageTitle
-              eyebrow="Votre expérience"
-              title="Votre avis compte"
-              onBack={() => openTab('home')}
-            />
+        {/* =====================================================
+            REVIEWS
+        ===================================================== */}
+        {section === 'reviews' && (
+          <main className="px-5 pt-6">
+            <BackButton onClick={() => navigate('home')} />
+
+            <div className="mt-7">
+              <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-gold">
+                Votre expérience
+              </p>
+
+              <h1 className="mt-1 font-display text-4xl text-forest">
+                Votre avis compte.
+              </h1>
+            </div>
 
             {!rating && !sent && (
-              <section className="mt-8 rounded-3xl bg-white p-7 text-center shadow-sm ring-1 ring-ink/5">
-                <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-gold/10 text-gold">
+              <section className="mt-8 rounded-[30px] bg-forest p-7 text-center text-white shadow-xl">
+                <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-white/10 text-gold">
                   <Heart size={25} fill="currentColor" />
                 </div>
 
-                <h2 className="mt-5 font-display text-2xl text-forest">
-                  Comment s’est passée votre expérience ?
+                <h2 className="mt-5 font-display text-2xl">
+                  Comment était votre expérience ?
                 </h2>
 
-                <p className="mt-2 text-sm leading-6 text-ink/50">
-                  Votre retour nous aide à améliorer continuellement
-                  votre expérience.
+                <p className="mt-2 text-sm leading-6 text-white/50">
+                  Votre retour nous aide à vous offrir une
+                  meilleure expérience.
                 </p>
 
                 <div className="mt-8 flex justify-center">
                   <Stars
                     rating={rating}
-                    size={42}
+                    size={40}
                     interactive
-                    onSelect={choose}
+                    onSelect={chooseRating}
                   />
                 </div>
 
-                <p className="mt-5 text-xs text-ink/35">
-                  Appuyez sur une étoile pour répondre
+                <p className="mt-5 text-[10px] uppercase tracking-wider text-white/30">
+                  Touchez une étoile
                 </p>
               </section>
             )}
 
-            {rating >= place.redirect_threshold && !sent && (
-              <section className="mt-8 rounded-3xl bg-white p-7 text-center shadow-sm ring-1 ring-ink/5">
-                <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-gold/10 text-gold">
-                  <Heart size={27} fill="currentColor" />
-                </div>
+            {rating >= place.redirect_threshold &&
+              !sent && (
+                <section className="mt-8 rounded-[30px] bg-white p-7 text-center shadow-sm ring-1 ring-ink/5">
+                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-gold/10 text-gold">
+                    <Check size={26} />
+                  </div>
 
-                <h2 className="mt-4 font-display text-2xl text-forest">
-                  Merci pour votre retour ❤️
-                </h2>
+                  <h2 className="mt-5 font-display text-2xl text-forest">
+                    Merci beaucoup.
+                  </h2>
 
-                <p className="mt-2 text-sm leading-6 text-ink/55">
-                  Votre satisfaction nous fait très plaisir.
-                  Aidez-nous à la partager.
-                </p>
+                  <p className="mt-2 text-sm leading-6 text-ink/50">
+                    Votre satisfaction nous fait vraiment plaisir.
+                  </p>
 
-                {place.google_review_url && (
-                  <a
-                    href={place.google_review_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white"
-                  >
-                    Laisser un avis sur Google
-                    <ExternalLink size={16} />
-                  </a>
-                )}
-              </section>
-            )}
+                  {place.google_review_url && (
+                    <a
+                      href={place.google_review_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-6 flex items-center justify-center gap-2 rounded-full bg-forest px-5 py-3.5 text-sm font-semibold text-white"
+                    >
+                      Partager sur Google
+                      <ExternalLink size={15} />
+                    </a>
+                  )}
+                </section>
+              )}
 
             {rating > 0 &&
               rating < place.redirect_threshold &&
               !sent && (
-                <section className="mt-8 rounded-3xl bg-white p-7 shadow-sm ring-1 ring-ink/5">
+                <section className="mt-8 rounded-[30px] bg-white p-7 shadow-sm ring-1 ring-ink/5">
                   <h2 className="font-display text-2xl text-forest">
-                    Nous sommes désolés.
+                    Parlons-en.
                   </h2>
 
-                  <p className="mt-3 text-sm leading-6 text-ink/55">
-                    Pouvez-vous nous expliquer ce qui s’est passé ?
-                    Votre message restera privé et sera transmis à
-                    notre équipe.
+                  <p className="mt-2 text-sm leading-6 text-ink/50">
+                    Votre message reste privé et sera transmis
+                    directement à notre équipe.
                   </p>
 
                   <form
-                    onSubmit={submit}
+                    onSubmit={submitPrivateReview}
                     className="mt-6 space-y-3"
                   >
                     <textarea
                       required
-                      value={form.comment}
+                      rows={4}
+                      value={reviewForm.comment}
                       onChange={(e) =>
-                        setForm({
-                          ...form,
+                        setReviewForm({
+                          ...reviewForm,
                           comment: e.target.value,
                         })
                       }
-                      placeholder="Votre message *"
-                      rows={4}
-                      className="w-full resize-none rounded-xl border border-ink/10 bg-[#fbfaf7] p-3 text-sm outline-none focus:ring-2 focus:ring-gold"
+                      placeholder="Que pouvons-nous améliorer ?"
+                      className="w-full resize-none rounded-2xl border border-ink/10 bg-[#faf9f6] p-4 text-sm outline-none focus:border-forest"
                     />
 
                     <div className="grid grid-cols-2 gap-3">
                       <input
-                        value={form.name}
+                        value={reviewForm.name}
                         onChange={(e) =>
-                          setForm({
-                            ...form,
+                          setReviewForm({
+                            ...reviewForm,
                             name: e.target.value,
                           })
                         }
-                        placeholder="Votre nom"
-                        className="rounded-xl border border-ink/10 bg-[#fbfaf7] p-3 text-sm outline-none focus:ring-2 focus:ring-gold"
+                        placeholder="Nom"
+                        className="rounded-2xl border border-ink/10 bg-[#faf9f6] p-3.5 text-sm outline-none focus:border-forest"
                       />
 
                       <input
-                        value={form.phone}
+                        value={reviewForm.phone}
                         onChange={(e) =>
-                          setForm({
-                            ...form,
+                          setReviewForm({
+                            ...reviewForm,
                             phone: e.target.value,
                           })
                         }
                         placeholder="Téléphone"
-                        className="rounded-xl border border-ink/10 bg-[#fbfaf7] p-3 text-sm outline-none focus:ring-2 focus:ring-gold"
+                        className="rounded-2xl border border-ink/10 bg-[#faf9f6] p-3.5 text-sm outline-none focus:border-forest"
                       />
                     </div>
 
-                    <input
-                      type="email"
-                      value={form.email}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          email: e.target.value,
-                        })
-                      }
-                      placeholder="Votre email (facultatif)"
-                      className="w-full rounded-xl border border-ink/10 bg-[#fbfaf7] p-3 text-sm outline-none focus:ring-2 focus:ring-gold"
-                    />
-
-                    {error && (
+                    {reviewError && (
                       <p className="text-xs text-red-600">
-                        {error}
+                        {reviewError}
                       </p>
                     )}
 
-                    <button
-                      type="submit"
-                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white"
-                    >
-                      <Send size={16} />
-                      Envoyer mon retour
+                    <button className="flex w-full items-center justify-center gap-2 rounded-full bg-forest px-5 py-3.5 text-sm font-semibold text-white">
+                      <Send size={15} />
+                      Envoyer
                     </button>
                   </form>
                 </section>
               )}
 
             {sent && (
-              <section className="mt-8 rounded-3xl bg-white p-8 text-center shadow-sm ring-1 ring-ink/5">
+              <section className="mt-8 rounded-[30px] bg-white p-8 text-center shadow-sm ring-1 ring-ink/5">
                 <CheckCircle2
+                  size={42}
                   className="mx-auto text-forest"
-                  size={40}
                 />
 
-                <h2 className="mt-4 font-display text-2xl text-forest">
+                <h2 className="mt-5 font-display text-2xl text-forest">
                   Merci pour votre retour.
                 </h2>
 
-                <p className="mt-2 text-sm leading-6 text-ink/55">
+                <p className="mt-2 text-sm text-ink/50">
                   Notre équipe va prendre connaissance de votre
                   message.
                 </p>
-
-                <button
-                  onClick={() => {
-                    setRating(0);
-                    setSent(false);
-                    setForm({
-                      comment: '',
-                      name: '',
-                      phone: '',
-                      email: '',
-                    });
-                  }}
-                  className="mt-5 text-xs font-semibold text-forest"
-                >
-                  Retour à l’accueil
-                </button>
               </section>
             )}
           </main>
         )}
 
-        {/* LOYALTY */}
-        {tab === 'loyalty' && (
-          <main className="px-5 pt-5">
-            <PageTitle
-              eyebrow="Vos avantages"
-              title="Fidélité"
-              onBack={() => openTab('home')}
-            />
+        {/* =====================================================
+            LOYALTY
+        ===================================================== */}
+        {section === 'loyalty' && (
+          <main className="px-5 pt-6">
+            <BackButton onClick={() => navigate('home')} />
 
-            <section className="mt-6 overflow-hidden rounded-3xl bg-forest p-6 text-white">
-              <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gold/15 text-gold">
-                <Gift size={23} />
-              </div>
-
-              <h2 className="mt-5 font-display text-2xl">
-                Récompensé à chaque visite
-              </h2>
-
-              <p className="mt-2 text-sm leading-6 text-white/55">
-                Profitez du programme fidélité de {place.name}.
-                Cumulez des points et bénéficiez de récompenses.
+            <div className="mt-7">
+              <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-gold">
+                Programme exclusif
               </p>
-            </section>
 
-            {rewards.length > 0 && (
-              <section className="mt-6">
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold">
-                  Récompenses disponibles
-                </p>
+              <h1 className="mt-1 font-display text-4xl text-forest">
+                Fidélité
+              </h1>
+            </div>
 
-                <div className="mt-3 space-y-3">
-                  {rewards.map((reward) => (
-                    <div
-                      key={reward.id}
-                      className="flex items-center justify-between gap-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink/5"
-                    >
-                      <div>
-                        <h3 className="font-semibold text-forest">
-                          {reward.name}
-                        </h3>
+            {loyaltyCreated ? (
+              <section className="mt-8">
+                <div className="relative overflow-hidden rounded-[32px] bg-forest p-7 text-white shadow-2xl">
+                  <div className="absolute -right-10 -top-10 h-36 w-36 rounded-full bg-gold/10 blur-2xl" />
 
-                        {reward.description && (
-                          <p className="mt-1 text-xs leading-5 text-ink/45">
-                            {reward.description}
-                          </p>
-                        )}
+                  <div className="relative">
+                    <CheckCircle2
+                      size={34}
+                      className="text-gold"
+                    />
+
+                    <p className="mt-6 text-[9px] font-bold uppercase tracking-[0.25em] text-gold">
+                      Bienvenue dans le programme
+                    </p>
+
+                    <h2 className="mt-2 font-display text-3xl">
+                      {loyaltyCreated.first_name}
+                    </h2>
+
+                    <div className="mt-7 rounded-[22px] border border-white/10 bg-white/5 p-5">
+                      <p className="text-[9px] uppercase tracking-wider text-white/35">
+                        Votre numéro fidélité
+                      </p>
+
+                      <p className="mt-2 text-2xl font-bold tracking-[0.12em] text-gold">
+                        {loyaltyCreated.loyalty_number}
+                      </p>
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-2 gap-3">
+                      <div className="rounded-2xl bg-white/5 p-4">
+                        <p className="text-[9px] uppercase text-white/35">
+                          Points
+                        </p>
+                        <p className="mt-1 text-xl font-bold">
+                          {loyaltyCreated.points_balance ?? 0}
+                        </p>
                       </div>
 
-                      <div className="shrink-0 rounded-full bg-gold/10 px-3 py-1.5 text-xs font-bold text-gold">
-                        {Number(
-                          reward.points_required
-                        ).toLocaleString('fr-FR')}{' '}
-                        pts
+                      <div className="rounded-2xl bg-white/5 p-4">
+                        <p className="text-[9px] uppercase text-white/35">
+                          Visites
+                        </p>
+                        <p className="mt-1 text-xl font-bold">
+                          {loyaltyCreated.visit_count ?? 0}
+                        </p>
                       </div>
                     </div>
-                  ))}
+                  </div>
                 </div>
+
+                <button
+                  onClick={() => setLoyaltyCreated(null)}
+                  className="mt-5 w-full rounded-full border border-ink/10 bg-white py-3 text-sm font-semibold text-forest"
+                >
+                  Retour au programme
+                </button>
               </section>
+            ) : (
+              <>
+                <section className="relative mt-8 overflow-hidden rounded-[32px] bg-forest p-7 text-white shadow-2xl">
+                  <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-gold/10 blur-3xl" />
+
+                  <div className="relative">
+                    <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gold/15 text-gold">
+                      <Gift size={26} />
+                    </div>
+
+                    <h2 className="mt-6 max-w-[330px] font-display text-3xl leading-tight">
+                      Des avantages réservés à nos clients fidèles.
+                    </h2>
+
+                    <p className="mt-3 text-sm leading-6 text-white/50">
+                      Cumulez des points à chaque visite et
+                      profitez de récompenses exclusives.
+                    </p>
+
+                    <button
+                      onClick={() => setShowLoyaltyForm(true)}
+                      className="mt-7 flex w-full items-center justify-center gap-2 rounded-full bg-gold px-5 py-3.5 text-sm font-bold text-forest"
+                    >
+                      Rejoindre gratuitement
+                      <ArrowRight size={16} />
+                    </button>
+                  </div>
+                </section>
+
+                {rewards.length > 0 && (
+                  <section className="mt-8">
+                    <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-gold">
+                      Vos futures récompenses
+                    </p>
+
+                    <div className="mt-4 space-y-3">
+                      {rewards.map((reward) => (
+                        <div
+                          key={reward.id}
+                          className="flex items-center justify-between gap-4 rounded-[22px] bg-white p-4 shadow-sm ring-1 ring-ink/5"
+                        >
+                          <div>
+                            <h3 className="font-semibold text-forest">
+                              {reward.name}
+                            </h3>
+
+                            {reward.description && (
+                              <p className="mt-1 text-xs leading-5 text-ink/45">
+                                {reward.description}
+                              </p>
+                            )}
+                          </div>
+
+                          <span className="shrink-0 rounded-full bg-gold/10 px-3 py-1.5 text-[10px] font-bold text-gold">
+                            {reward.points_required} pts
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                <section className="mt-8 rounded-[28px] bg-white p-6 ring-1 ring-ink/5">
+                  <h3 className="font-display text-xl text-forest">
+                    Comment ça marche ?
+                  </h3>
+
+                  <div className="mt-5 space-y-5">
+                    <Step
+                      number="01"
+                      title="Inscrivez-vous"
+                      text="Créez gratuitement votre carte fidélité."
+                    />
+
+                    <Step
+                      number="02"
+                      title="Cumulez"
+                      text="À chaque achat ou visite, vous accumulez des points."
+                    />
+
+                    <Step
+                      number="03"
+                      title="Soyez récompensé"
+                      text="Utilisez vos points pour profiter de vos avantages."
+                    />
+                  </div>
+                </section>
+              </>
             )}
-
-            <section className="mt-6 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5">
-              <h3 className="font-display text-xl text-forest">
-                Comment ça marche ?
-              </h3>
-
-              <div className="mt-5 space-y-4">
-                <LoyaltyStep
-                  number="01"
-                  title="Inscrivez-vous"
-                  text="Demandez votre inscription au programme fidélité."
-                />
-
-                <LoyaltyStep
-                  number="02"
-                  title="Cumulez des points"
-                  text="À chaque achat ou visite, vos points sont enregistrés."
-                />
-
-                <LoyaltyStep
-                  number="03"
-                  title="Profitez de vos récompenses"
-                  text="Échangez vos points contre les avantages proposés."
-                />
-              </div>
-            </section>
           </main>
         )}
 
-        {/* FOOTER */}
-        <footer className="px-5 pb-8 pt-10 text-center">
-          <div className="flex items-center justify-center gap-1.5 text-[10px] font-semibold tracking-wider text-ink/30">
-            <ShieldCheck size={13} />
-            PROPULSÉ PAR TAPMARRAKECH
+        <footer className="px-5 pb-5 pt-12 text-center">
+          <div className="flex items-center justify-center gap-1.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-ink/25">
+            <ShieldCheck size={12} />
+            Une expérience propulsée par TapMarrakech
           </div>
         </footer>
       </div>
 
-      {/* BOTTOM NAVIGATION */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 mx-auto w-full max-w-[520px] border-t border-ink/5 bg-white/95 px-3 pb-[max(10px,env(safe-area-inset-bottom))] pt-2 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] backdrop-blur">
+      {/* =====================================================
+          BOTTOM NAV
+      ===================================================== */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 mx-auto w-full max-w-[520px] border-t border-ink/5 bg-[#fffdf9]/95 px-3 pb-[max(9px,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl">
         <div className="grid grid-cols-4 gap-1">
-          <BottomNavButton
-            active={tab === 'home'}
-            icon={<Star size={18} />}
+          <NavButton
+            active={section === 'home'}
+            icon={<Sparkles size={18} />}
             label="Accueil"
-            onClick={() => openTab('home')}
+            onClick={() => navigate('home')}
           />
 
-          <BottomNavButton
-            active={tab === 'menu'}
+          <NavButton
+            active={section === 'menu'}
             icon={<MenuIcon size={18} />}
             label="Menu"
-            onClick={() => openTab('menu')}
+            onClick={() => navigate('menu')}
           />
 
-          <BottomNavButton
-            active={tab === 'reviews'}
+          <NavButton
+            active={section === 'reviews'}
             icon={<Heart size={18} />}
             label="Avis"
-            onClick={() => openTab('reviews')}
+            onClick={() => navigate('reviews')}
           />
 
-          <BottomNavButton
-            active={tab === 'loyalty'}
+          <NavButton
+            active={section === 'loyalty'}
             icon={<Gift size={18} />}
             label="Fidélité"
-            onClick={() => openTab('loyalty')}
+            onClick={() => navigate('loyalty')}
           />
         </div>
       </nav>
+
+      {/* =====================================================
+          LOYALTY MODAL
+      ===================================================== */}
+      {showLoyaltyForm && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink/50 p-0 backdrop-blur-sm">
+          <div className="w-full max-w-[520px] rounded-t-[34px] bg-[#fffdf9] p-6 pb-8 shadow-2xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-gold">
+                  Inscription gratuite
+                </p>
+
+                <h2 className="mt-1 font-display text-2xl text-forest">
+                  Rejoindre la fidélité
+                </h2>
+              </div>
+
+              <button
+                onClick={() => setShowLoyaltyForm(false)}
+                className="grid h-9 w-9 place-items-center rounded-full bg-ink/5 text-ink/50"
+              >
+                <X size={17} />
+              </button>
+            </div>
+
+            <form
+              onSubmit={registerLoyalty}
+              className="mt-6 space-y-3"
+            >
+              <div className="grid grid-cols-2 gap-3">
+                <input
+                  required
+                  value={loyaltyForm.first_name}
+                  onChange={(e) =>
+                    setLoyaltyForm({
+                      ...loyaltyForm,
+                      first_name: e.target.value,
+                    })
+                  }
+                  placeholder="Prénom"
+                  className="rounded-2xl border border-ink/10 bg-white px-4 py-3.5 text-sm outline-none focus:border-forest"
+                />
+
+                <input
+                  required
+                  value={loyaltyForm.last_name}
+                  onChange={(e) =>
+                    setLoyaltyForm({
+                      ...loyaltyForm,
+                      last_name: e.target.value,
+                    })
+                  }
+                  placeholder="Nom"
+                  className="rounded-2xl border border-ink/10 bg-white px-4 py-3.5 text-sm outline-none focus:border-forest"
+                />
+              </div>
+
+              <input
+                required
+                type="tel"
+                value={loyaltyForm.phone}
+                onChange={(e) =>
+                  setLoyaltyForm({
+                    ...loyaltyForm,
+                    phone: e.target.value,
+                  })
+                }
+                placeholder="Numéro de téléphone"
+                className="w-full rounded-2xl border border-ink/10 bg-white px-4 py-3.5 text-sm outline-none focus:border-forest"
+              />
+
+              <div>
+                <label className="mb-1.5 block text-[10px] font-medium text-ink/45">
+                  Date de naissance
+                  <span className="ml-1">(facultatif)</span>
+                </label>
+
+                <input
+                  type="date"
+                  value={loyaltyForm.birth_date}
+                  onChange={(e) =>
+                    setLoyaltyForm({
+                      ...loyaltyForm,
+                      birth_date: e.target.value,
+                    })
+                  }
+                  className="w-full rounded-2xl border border-ink/10 bg-white px-4 py-3.5 text-sm outline-none focus:border-forest"
+                />
+              </div>
+
+              {loyaltyError && (
+                <div className="rounded-2xl bg-red-50 px-4 py-3 text-xs text-red-600">
+                  {loyaltyError}
+                </div>
+              )}
+
+              <button
+                disabled={loyaltyLoading}
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-forest px-5 py-4 text-sm font-bold text-white disabled:opacity-50"
+              >
+                {loyaltyLoading
+                  ? 'Création de votre carte...'
+                  : 'Créer ma carte fidélité'}
+                {!loyaltyLoading && <ArrowRight size={16} />}
+              </button>
+
+              <p className="text-center text-[9px] leading-4 text-ink/30">
+                Vos informations sont utilisées uniquement pour
+                gérer votre programme fidélité.
+              </p>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function PageTitle({
-  eyebrow,
+/* =========================================================
+   COMPONENTS
+========================================================= */
+
+function FeatureCard({
+  icon,
   title,
-  onBack,
+  subtitle,
+  onClick,
+  featured = false,
 }: {
-  eyebrow: string;
+  icon: React.ReactNode;
   title: string;
-  onBack: () => void;
+  subtitle: string;
+  onClick: () => void;
+  featured?: boolean;
 }) {
   return (
-    <div>
-      <button
-        onClick={onBack}
-        className="mb-5 text-xs font-semibold text-forest"
+    <button
+      onClick={onClick}
+      className={`rounded-[22px] p-4 text-left transition active:scale-[0.98] ${
+        featured
+          ? 'bg-forest text-white shadow-lg'
+          : 'bg-white text-forest shadow-sm ring-1 ring-ink/5'
+      }`}
+    >
+      <div
+        className={`grid h-10 w-10 place-items-center rounded-xl ${
+          featured
+            ? 'bg-white/10 text-gold'
+            : 'bg-forest/5 text-forest'
+        }`}
       >
-        ← Retour
-      </button>
+        {icon}
+      </div>
 
-      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold">
-        {eyebrow}
+      <p className="mt-4 text-sm font-bold">{title}</p>
+
+      <p
+        className={`mt-1 text-[9px] ${
+          featured ? 'text-white/45' : 'text-ink/35'
+        }`}
+      >
+        {subtitle}
       </p>
-
-      <h1 className="mt-1 font-display text-3xl text-forest">
-        {title}
-      </h1>
-    </div>
+    </button>
   );
 }
 
-function EmptyState({
+function BackButton({
+  onClick,
+}: {
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="flex items-center gap-2 text-xs font-semibold text-forest"
+    >
+      <ArrowLeft size={15} />
+      Accueil
+    </button>
+  );
+}
+
+function Empty({
   icon,
   title,
   text,
@@ -1181,8 +1398,8 @@ function EmptyState({
   text: string;
 }) {
   return (
-    <div className="mt-8 rounded-3xl bg-white p-8 text-center shadow-sm ring-1 ring-ink/5">
-      <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-forest/10 text-forest">
+    <div className="mt-8 rounded-[28px] bg-white p-8 text-center ring-1 ring-ink/5">
+      <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-forest/5 text-forest">
         {icon}
       </div>
 
@@ -1190,14 +1407,14 @@ function EmptyState({
         {title}
       </h2>
 
-      <p className="mt-2 text-sm leading-6 text-ink/50">
+      <p className="mt-2 text-sm leading-6 text-ink/45">
         {text}
       </p>
     </div>
   );
 }
 
-function LoyaltyStep({
+function Step({
   number,
   title,
   text,
@@ -1208,7 +1425,7 @@ function LoyaltyStep({
 }) {
   return (
     <div className="flex gap-4">
-      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gold/10 text-[10px] font-bold text-gold">
+      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gold/10 text-[9px] font-bold text-gold">
         {number}
       </div>
 
@@ -1225,7 +1442,7 @@ function LoyaltyStep({
   );
 }
 
-function BottomNavButton({
+function NavButton({
   active,
   icon,
   label,
@@ -1241,14 +1458,77 @@ function BottomNavButton({
       onClick={onClick}
       className={`flex flex-col items-center justify-center gap-1 rounded-2xl py-2 transition ${
         active
-          ? 'bg-forest text-white'
-          : 'text-ink/40 hover:bg-[#f7f7f3]'
+          ? 'bg-forest text-white shadow-sm'
+          : 'text-ink/35'
       }`}
     >
       {icon}
+
       <span className="text-[9px] font-semibold">
         {label}
       </span>
     </button>
+  );
+}
+
+function WifiCard({
+  establishmentId,
+}: {
+  establishmentId: string;
+}) {
+  const [wifi, setWifi] = useState<{
+    network_name: string;
+    wifi_password: string;
+  } | null>(null);
+
+  useEffect(() => {
+    supabase
+      .from('establishment_wifi')
+      .select('network_name,wifi_password')
+      .eq('establishment_id', establishmentId)
+      .eq('active', true)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.network_name) {
+          setWifi({
+            network_name: data.network_name,
+            wifi_password: data.wifi_password || '',
+          });
+        }
+      });
+  }, [establishmentId]);
+
+  if (!wifi) return null;
+
+  return (
+    <section className="rounded-[28px] bg-white p-5 shadow-sm ring-1 ring-ink/5">
+      <div className="flex items-start gap-4">
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-forest/5 text-forest">
+          <Wifi size={20} />
+        </div>
+
+        <div>
+          <p className="font-display text-xl text-forest">
+            Wi-Fi gratuit
+          </p>
+
+          <p className="mt-1 text-xs text-ink/40">
+            Connectez-vous pendant votre visite.
+          </p>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            <span className="rounded-full bg-[#f7f5ef] px-3 py-1.5 text-xs font-semibold text-forest">
+              {wifi.network_name}
+            </span>
+
+            {wifi.wifi_password && (
+              <span className="rounded-full bg-gold/10 px-3 py-1.5 text-xs font-semibold text-gold">
+                {wifi.wifi_password}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
