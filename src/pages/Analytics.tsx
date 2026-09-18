@@ -54,7 +54,7 @@ export default function Analytics() {
 
     if (places.length > 0) {
       setEstablishmentId(current =>
-        places.some(place => place.id === current) ? current : places[0].id
+        places.some((place: Establishment) => place.id === current) ? current : places[0].id
       );
     } else {
       setEstablishmentId('');
