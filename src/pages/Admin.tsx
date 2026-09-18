@@ -2009,15 +2009,27 @@ function CreateStaffForm({
     setSaving(false);
 
     if (error) {
-      console.error(
-        'Erreur création compte:',
-        error
-      );
+      console.error('Erreur création compte:', error);
 
-      alert(
-        `Impossible de créer le compte : ${error.message}`
-      );
+      let detail = error.message;
+      try {
+        const context = (error as { context?: Response }).context;
+        if (context) {
+          const raw = await context.clone().text();
+          if (raw) {
+            try {
+              const parsed = JSON.parse(raw) as { error?: string; message?: string; details?: string };
+              detail = parsed.error ?? parsed.message ?? parsed.details ?? raw;
+            } catch {
+              detail = raw;
+            }
+          }
+        }
+      } catch (diagnosticError) {
+        console.error('Impossible de lire la réponse de l’Edge Function:', diagnosticError);
+      }
 
+      alert(`Impossible de créer le compte : ${detail}`);
       return;
     }
 
