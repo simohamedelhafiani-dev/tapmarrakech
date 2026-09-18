@@ -199,6 +199,21 @@ Deno.serve(async (request) => {
       );
     }
 
+    const expectedType: ReviewType = rating >= 4 ? 'positive' : 'negative';
+
+    if (type !== expectedType) {
+      return json(
+        {
+          success: false,
+          error:
+            rating >= 4
+              ? 'Les notes de 4 ou 5 étoiles sont orientées vers Google.'
+              : 'Les notes de 1 à 3 étoiles sont destinées au retour privé.',
+        },
+        400
+      );
+    }
+
     const sessionId = body.session_id;
 
     if (
