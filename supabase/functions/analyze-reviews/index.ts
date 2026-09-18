@@ -188,13 +188,6 @@ Deno.serve(async (request) => {
       }, 500);
     }
 
-    if (!openaiApiKey) {
-      return json({
-        success: false,
-        error: 'OPENAI_API_KEY n’est pas configurée dans les secrets Supabase.',
-      }, 500);
-    }
-
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {
       return json({ success: false, error: 'Session utilisateur manquante.' }, 401);
@@ -222,6 +215,35 @@ Deno.serve(async (request) => {
       body = await request.json();
     } catch {
       body = {};
+    }
+
+    if (body.health_check === true) {
+      const { error: healthError } = await userClient
+        .from('establishments')
+        .select('id', { count: 'exact', head: true });
+
+      if (healthError) {
+        console.error('analyze-reviews health check failed', healthError);
+        return json({
+          success: false,
+          health_check: true,
+          error: `Service accessible mais accès aux établissements indisponible : ${healthError.message}`,
+        }, 503);
+      }
+
+      return json({
+        success: true,
+        health_check: true,
+        service: 'analyze-reviews',
+        openai_configured: Boolean(openaiApiKey),
+      });
+    }
+
+    if (!openaiApiKey) {
+      return json({
+        success: false,
+        error: 'OPENAI_API_KEY n’est pas configurée dans les secrets Supabase.',
+      }, 500);
     }
 
     const requestedEstablishmentId = body.establishment_id?.trim() || null;
