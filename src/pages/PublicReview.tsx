@@ -112,7 +112,9 @@ export default function PublicReview() {
 
       const { data: establishment } = await supabase
         .from('establishments')
-        .select('*')
+        .select(
+          'id,name,slug,logo_url,google_review_url,redirect_threshold,phone,email,address,city,description,website_url,instagram_url,facebook_url,tiktok_url,whatsapp_number,page_template_id,menu_template_id'
+        )
         .eq('slug', slug)
         .maybeSingle();
 
@@ -1457,10 +1459,10 @@ function NavButton({
   return (
     <button
       onClick={onClick}
-      className={`flex flex-col items-center justify-center gap-1 rounded-2xl py-2 transition ${
+      className={`flex min-h-[58px] flex-col items-center justify-center gap-1 rounded-[18px] px-2 py-2 transition-all duration-200 active:scale-95 ${
         active
-          ? 'bg-forest text-white shadow-sm'
-          : 'text-ink/35'
+          ? 'bg-forest text-white shadow-lg shadow-forest/20'
+          : 'text-ink/40 hover:bg-forest/5 hover:text-forest'
       }`}
     >
       {icon}
