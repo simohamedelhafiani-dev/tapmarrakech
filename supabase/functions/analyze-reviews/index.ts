@@ -178,10 +178,9 @@ Deno.serve(async (request) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
-    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
-    const openaiModel = Deno.env.get('OPENAI_MODEL') || 'gpt-5.6-luna';
+    const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-    if (!supabaseUrl || !supabaseAnonKey) {
+    if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceRoleKey) {
       return json({
         success: false,
         error: 'Configuration Supabase manquante sur la fonction analyze-reviews.',
@@ -210,12 +209,48 @@ Deno.serve(async (request) => {
       return json({ success: false, error: 'Session utilisateur invalide ou expirée.' }, 401);
     }
 
-    let body: { establishment_id?: string } = {};
+    let body: { establishment_id?: string; health_check?: boolean } = {};
     try {
       body = await request.json();
     } catch {
       body = {};
     }
+
+    const serviceClient = createClient(supabaseUrl, supabaseServiceRoleKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    });
+
+    const { data: aiSettings, error: aiSettingsError } = await serviceClient
+      .from('ai_global_settings')
+      .select('provider, model, api_key, enabled, temperature, max_output_tokens, system_instructions')
+      .eq('id', true)
+      .maybeSingle();
+
+    if (aiSettingsError) {
+      console.error('ai_global_settings query failed', aiSettingsError);
+      return json({
+        success: false,
+        error: 'Impossible de récupérer la configuration IA.',
+      }, 503);
+    }
+
+    if (!aiSettings) {
+      return json({
+        success: false,
+        error: 'La configuration IA globale est absente.',
+      }, 503);
+    }
+
+    const aiProvider = String(aiSettings.provider ?? '').trim().toLowerCase();
+    const aiModel = String(aiSettings.model ?? '').trim();
+    const aiApiKey = String(aiSettings.api_key ?? '').trim();
+    const aiEnabled = aiSettings.enabled === true;
+    const aiTemperature = Number(aiSettings.temperature);
+    const aiMaxOutputTokens = Number(aiSettings.max_output_tokens);
+    const adminSystemInstructions = String(aiSettings.system_instructions ?? '').trim();
 
     if (body.health_check === true) {
       const { error: healthError } = await userClient
@@ -235,15 +270,53 @@ Deno.serve(async (request) => {
         success: true,
         health_check: true,
         service: 'analyze-reviews',
-        openai_configured: Boolean(openaiApiKey),
+        ai_configured: aiEnabled && aiProvider === 'openai' && Boolean(aiModel) && Boolean(aiApiKey),
+        ai_enabled: aiEnabled,
+        provider: aiProvider || null,
+        model: aiModel || null,
       });
     }
 
-    if (!openaiApiKey) {
+    if (!aiEnabled) {
       return json({
         success: false,
-        error: 'OPENAI_API_KEY n’est pas configurée dans les secrets Supabase.',
-      }, 500);
+        error: 'L’analyse IA est désactivée dans la configuration globale.',
+      }, 503);
+    }
+
+    if (aiProvider !== 'openai') {
+      return json({
+        success: false,
+        error: `Le fournisseur IA « ${aiProvider || 'non défini'} » n’est pas supporté par cette fonction.`,
+      }, 400);
+    }
+
+    if (!aiApiKey) {
+      return json({
+        success: false,
+        error: 'La clé API OpenAI est absente de la configuration IA globale.',
+      }, 503);
+    }
+
+    if (!aiModel) {
+      return json({
+        success: false,
+        error: 'Le modèle IA est absent de la configuration globale.',
+      }, 503);
+    }
+
+    if (!Number.isFinite(aiTemperature) || aiTemperature < 0 || aiTemperature > 2) {
+      return json({
+        success: false,
+        error: 'La température IA doit être comprise entre 0 et 2.',
+      }, 503);
+    }
+
+    if (!Number.isInteger(aiMaxOutputTokens) || aiMaxOutputTokens < 256 || aiMaxOutputTokens > 128000) {
+      return json({
+        success: false,
+        error: 'Le nombre de tokens IA doit être compris entre 256 et 128000.',
+      }, 503);
     }
 
     const requestedEstablishmentId = body.establishment_id?.trim() || null;
@@ -372,6 +445,8 @@ Deno.serve(async (request) => {
       'Identifie les thèmes réellement récurrents. Si un thème n’est pas suffisamment présent, ne le présente pas comme récurrent.',
       'Les priorités doivent être explicites : Critique, Haute, Moyenne ou Faible.',
       'Les recommandations doivent être concrètes, réalisables par un commerce et directement liées aux avis.',
+      ...(adminSystemInstructions ? [`Instructions globales définies par l’administrateur : ${adminSystemInstructions}`] : []),
+      'Les règles de sortie structurée et de fidélité aux données restent obligatoires.',
       'Retourne exactement la structure JSON demandée.',
     ].join(' ');
 
@@ -384,11 +459,11 @@ Deno.serve(async (request) => {
     const openaiResponse = await fetch('https://api.openai.com/v1/responses', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${openaiApiKey}`,
+        Authorization: `Bearer ${aiApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: openaiModel,
+        model: aiModel,
         input: [
           {
             role: 'system',
@@ -417,7 +492,8 @@ Deno.serve(async (request) => {
             schema: analysisSchema,
           },
         },
-        max_output_tokens: 4000,
+        max_output_tokens: aiMaxOutputTokens,
+        temperature: aiTemperature,
       }),
     });
 
