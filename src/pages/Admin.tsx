@@ -8,7 +8,6 @@ import {
   Users,
   UserRound,
   X,
-  Copy,
   CheckCircle2,
   UserPlus,
   Power,
