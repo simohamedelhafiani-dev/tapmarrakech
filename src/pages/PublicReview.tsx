@@ -102,6 +102,7 @@ export default function PublicReview() {
     name: '',
     phone: '',
     email: '',
+    website: '',
   });
 
   useEffect(() => {
@@ -204,9 +205,65 @@ export default function PublicReview() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const getPublicReviewSessionId = () => {
+    const key = `tapmarrakech_public_review_session:${slug || 'unknown'}`;
+
+    try {
+      const existing = window.sessionStorage.getItem(key);
+
+      if (existing) {
+        return existing;
+      }
+
+      const sessionId = crypto.randomUUID();
+      window.sessionStorage.setItem(key, sessionId);
+      return sessionId;
+    } catch {
+      return crypto.randomUUID();
+    }
+  };
+
+  const submitPublicReview = async (payload: {
+    rating: number;
+    type: 'positive' | 'negative';
+    comment?: string;
+    name?: string | null;
+    phone?: string | null;
+    email?: string | null;
+    honeypot?: string;
+  }) => {
+    const { data, error } = await supabase.functions.invoke(
+      'submit-public-review',
+      {
+        body: {
+          establishment_id: place?.id,
+          session_id: getPublicReviewSessionId(),
+          ...payload,
+        },
+      }
+    );
+
+    if (error) {
+      return {
+        data: null,
+        error: error.message || 'Impossible d’envoyer votre avis.',
+      };
+    }
+
+    if (!data?.success) {
+      return {
+        data: null,
+        error: data?.error || 'Impossible d’envoyer votre avis.',
+      };
+    }
+
+    return { data, error: null };
+  };
+
   const chooseRating = async (value: number) => {
     if (!place || rating) return;
 
+    setReviewError('');
     setRating(value);
 
     await supabase.from('analytics_events').insert({
@@ -216,11 +273,16 @@ export default function PublicReview() {
     });
 
     if (value >= place.redirect_threshold) {
-      await supabase.from('reviews').insert({
-        establishment_id: place.id,
+      const { error } = await submitPublicReview({
         rating: value,
         type: 'positive',
       });
+
+      if (error) {
+        setRating(0);
+        setReviewError(error);
+        return;
+      }
 
       await supabase.from('analytics_events').insert({
         establishment_id: place.id,
@@ -249,23 +311,25 @@ export default function PublicReview() {
   ) => {
     event.preventDefault();
 
-    if (!place || !reviewForm.comment.trim()) return;
+    if (!place || !rating || !reviewForm.comment.trim()) return;
 
     setReviewError('');
 
-    const { error } = await supabase.from('reviews').insert({
-      establishment_id: place.id,
+    const { error } = await submitPublicReview({
       rating,
       type: 'negative',
       comment: reviewForm.comment.trim(),
       name: reviewForm.name.trim() || null,
       phone: reviewForm.phone.trim() || null,
       email: reviewForm.email.trim() || null,
+      honeypot: reviewForm.website,
     });
 
     if (error) {
       setReviewError(
-        'Impossible d’envoyer votre message. Veuillez réessayer.'
+        error === 'Trop de tentatives. Veuillez réessayer plus tard.'
+          ? error
+          : 'Impossible d’envoyer votre message. Veuillez réessayer.'
       );
       return;
     }
@@ -936,6 +1000,27 @@ export default function PublicReview() {
                       placeholder="Que pouvons-nous améliorer ?"
                       className="w-full resize-none rounded-2xl border border-ink/10 bg-[#faf9f6] p-4 text-sm outline-none focus:border-forest"
                     />
+
+                    <div
+                      aria-hidden="true"
+                      className="absolute -left-[10000px] h-px w-px overflow-hidden"
+                    >
+                      <label htmlFor="review-website">
+                        Site web
+                      </label>
+                      <input
+                        id="review-website"
+                        tabIndex={-1}
+                        autoComplete="off"
+                        value={reviewForm.website}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            website: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
 
                     <div className="grid grid-cols-2 gap-3">
                       <input
