@@ -252,7 +252,61 @@ export default function Reviews() {
         return;
       }
 
-      setAiAnalysis(result.analysis);
+      const rawAnalysis = result.analysis;
+
+      const normalizedAnalysis: AIAnalysis = {
+        summary:
+          typeof rawAnalysis.summary === 'string'
+            ? rawAnalysis.summary
+            : '',
+        sentiment:
+          typeof rawAnalysis.sentiment === 'string'
+            ? rawAnalysis.sentiment
+            : 'Non déterminé',
+        satisfaction_score:
+          typeof rawAnalysis.satisfaction_score === 'number'
+            ? rawAnalysis.satisfaction_score
+            : 0,
+        strengths: Array.isArray(rawAnalysis.strengths)
+          ? rawAnalysis.strengths.filter(
+              (item): item is string =>
+                typeof item === 'string'
+            )
+          : [],
+        weaknesses: Array.isArray(rawAnalysis.weaknesses)
+          ? rawAnalysis.weaknesses.filter(
+              (item): item is string =>
+                typeof item === 'string'
+            )
+          : [],
+        recurring_issues: Array.isArray(
+          rawAnalysis.recurring_issues
+        )
+          ? rawAnalysis.recurring_issues.filter(
+              (item): item is AIRecurringIssue =>
+                Boolean(item) &&
+                typeof item === 'object' &&
+                typeof item.topic === 'string' &&
+                typeof item.frequency === 'string' &&
+                typeof item.priority === 'string' &&
+                typeof item.explanation === 'string'
+            )
+          : [],
+        recommendations: Array.isArray(
+          rawAnalysis.recommendations
+        )
+          ? rawAnalysis.recommendations.filter(
+              (item): item is AIRecommendation =>
+                Boolean(item) &&
+                typeof item === 'object' &&
+                typeof item.priority === 'string' &&
+                typeof item.action === 'string' &&
+                typeof item.reason === 'string'
+            )
+          : [],
+      };
+
+      setAiAnalysis(normalizedAnalysis);
       setAiStatistics(
         result.statistics ?? null
       );
