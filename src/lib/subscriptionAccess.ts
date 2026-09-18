@@ -78,7 +78,7 @@ export async function getMySubscriptionAccess(
 
   return establishmentId
     ? accesses.filter(
-        (access) => access.establishment_id === establishmentId
+        (access: SubscriptionAccess) => access.establishment_id === establishmentId
       )
     : accesses;
 }
