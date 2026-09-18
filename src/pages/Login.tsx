@@ -6,7 +6,6 @@ import {
   LockKeyhole,
   ShieldCheck,
   UserRound,
-  UsersRound,
   Eye,
   EyeOff,
 } from 'lucide-react';
