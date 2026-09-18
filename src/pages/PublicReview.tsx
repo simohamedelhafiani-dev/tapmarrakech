@@ -398,8 +398,8 @@ export default function PublicReview() {
       : '';
 
   return (
-    <div className="min-h-screen bg-[#f5f0e7] text-ink">
-      <div className="mx-auto min-h-screen w-full max-w-[520px] overflow-hidden bg-[#f5f0e7] pb-24 shadow-2xl">
+    <div className="min-h-screen bg-[#eee9df] text-ink selection:bg-gold/20">
+      <div className="mx-auto min-h-screen w-full max-w-[520px] overflow-hidden bg-[#f8f5ef] pb-24 shadow-[0_30px_90px_rgba(20,45,37,0.16)] ring-1 ring-black/5">
 
         {/* =====================================================
             HOME
@@ -407,9 +407,10 @@ export default function PublicReview() {
         {section === 'home' && (
           <>
             {/* PREMIUM HERO */}
-            <section className="relative min-h-[520px] overflow-hidden bg-forest">
+            <section className="relative min-h-[570px] overflow-hidden bg-[#102d25]">
               <div className="absolute inset-0">
-                <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-gold/10 blur-3xl" />
+                <div className="absolute -right-28 -top-28 h-80 w-80 rounded-full bg-gold/10 blur-3xl" />
+                <div className="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
                 <div className="absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-black/20 blur-3xl" />
               </div>
 
@@ -426,9 +427,9 @@ export default function PublicReview() {
                   </div>
                 </div>
 
-                <div className="mt-14 text-center">
+                <div className="mt-16 text-center">
                   {p.logo_url ? (
-                    <div className="mx-auto mb-6 flex h-28 w-28 items-center justify-center rounded-[30px] bg-white p-2 shadow-2xl">
+                    <div className="mx-auto mb-7 flex h-28 w-28 items-center justify-center rounded-[32px] bg-white p-2 shadow-[0_20px_50px_rgba(0,0,0,0.28)] ring-1 ring-white/20">
                       <img
                         src={p.logo_url}
                         alt={p.name}
@@ -436,7 +437,7 @@ export default function PublicReview() {
                       />
                     </div>
                   ) : (
-                    <div className="mx-auto mb-6 grid h-28 w-28 place-items-center rounded-[30px] bg-white/10 font-display text-5xl text-gold ring-1 ring-white/10">
+                    <div className="mx-auto mb-7 grid h-28 w-28 place-items-center rounded-[32px] bg-white/[0.07] font-display text-5xl text-gold ring-1 ring-white/10 shadow-2xl">
                       {p.name?.[0] || 'E'}
                     </div>
                   )}
@@ -445,7 +446,7 @@ export default function PublicReview() {
                     Bienvenue
                   </p>
 
-                  <h1 className="mt-3 font-display text-4xl leading-tight text-white">
+                  <h1 className="mt-3 font-display text-[2.65rem] leading-[1.05] tracking-[-0.02em] text-white">
                     {p.name}
                   </h1>
 
@@ -472,18 +473,18 @@ export default function PublicReview() {
                   )}
 
                   {description && (
-                    <p className="mx-auto mt-5 max-w-[390px] text-sm leading-6 text-white/55">
+                    <p className="mx-auto mt-5 max-w-[390px] text-[13px] leading-6 text-white/55">
                       {description}
                     </p>
                   )}
                 </div>
 
                 {/* ACTION PILLS */}
-                <div className="mt-8 flex flex-wrap justify-center gap-2">
+                <div className="mt-9 flex flex-wrap justify-center gap-2.5">
                   {phone && (
                     <a
                       href={`tel:${phone}`}
-                      className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-xs font-semibold text-forest"
+                      className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-xs font-semibold text-forest shadow-lg shadow-black/10 transition active:scale-[0.98]"
                     >
                       <Phone size={14} />
                       Appeler
@@ -498,7 +499,7 @@ export default function PublicReview() {
                       )}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2.5 text-xs font-semibold text-white ring-1 ring-white/10"
+                      className="inline-flex items-center gap-2 rounded-full bg-white/[0.07] px-5 py-3 text-xs font-semibold text-white ring-1 ring-white/10 backdrop-blur-md transition active:scale-[0.98]"
                     >
                       <MessageCircle size={14} />
                       WhatsApp
@@ -510,7 +511,7 @@ export default function PublicReview() {
                       href={directionsUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2.5 text-xs font-semibold text-white ring-1 ring-white/10"
+                      className="inline-flex items-center gap-2 rounded-full bg-white/[0.07] px-5 py-3 text-xs font-semibold text-white ring-1 ring-white/10 backdrop-blur-md transition active:scale-[0.98]"
                     >
                       <MapPin size={14} />
                       Itinéraire
@@ -521,7 +522,7 @@ export default function PublicReview() {
             </section>
 
             {/* MAIN CONTENT */}
-            <main className="space-y-6 px-5 pt-6">
+            <main className="space-y-7 px-5 pt-7">
 
               {/* PROMOTIONS */}
               {promotions.length > 0 && (
@@ -546,13 +547,13 @@ export default function PublicReview() {
                     {promotions.map((promotion) => (
                       <article
                         key={promotion.id}
-                        className="relative min-w-[310px] overflow-hidden rounded-[28px] bg-forest shadow-xl"
+                        className="relative min-w-[310px] overflow-hidden rounded-[30px] bg-forest shadow-[0_18px_45px_rgba(20,45,37,0.18)] ring-1 ring-black/5"
                       >
                         {promotion.image_url ? (
                           <img
                             src={promotion.image_url}
                             alt=""
-                            className="h-52 w-full object-cover"
+                            className="h-56 w-full object-cover"
                           />
                         ) : (
                           <div className="h-36 bg-gradient-to-br from-forest via-[#214d40] to-[#0e2923]" />
@@ -997,8 +998,7 @@ export default function PublicReview() {
 
         {/* =====================================================
             LOYALTY
-        ===================================================== */}
-        {section === 'loyalty' && (
+        ===================================================== */}        {section === 'loyalty' && (
           <main className="px-5 pt-6">
             <BackButton onClick={() => navigate('home')} />
 
@@ -1175,7 +1175,7 @@ export default function PublicReview() {
       {/* =====================================================
           BOTTOM NAV
       ===================================================== */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 mx-auto w-full max-w-[520px] border-t border-ink/5 bg-[#fffdf9]/95 px-3 pb-[max(9px,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 mx-auto w-full max-w-[520px] border-t border-black/5 bg-[#fffdf9]/92 px-3 pb-[max(9px,env(safe-area-inset-bottom))] pt-2 shadow-[0_-12px_35px_rgba(20,45,37,0.08)] backdrop-blur-2xl">
         <div className="grid grid-cols-4 gap-1">
           <NavButton
             active={section === 'home'}
@@ -1551,4 +1551,3 @@ function WifiCard({
     </section>
   );
 }
-
