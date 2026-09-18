@@ -272,7 +272,7 @@ export default function PublicReview() {
       rating: value,
     });
 
-    if (value >= place.redirect_threshold) {
+    if (value >= 4) {
       const { error } = await submitPublicReview({
         rating: value,
         type: 'positive',
