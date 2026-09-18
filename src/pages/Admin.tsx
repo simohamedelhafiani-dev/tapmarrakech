@@ -3354,51 +3354,62 @@ function AdminAnalyticsSection({
   establishments: Establishment[];
 }) {
   const [period, setPeriod] = useState<7 | 30 | 90 | 180 | 365>(30);
+  const [selectedEstablishment, setSelectedEstablishment] = useState('all');
   const [loading, setLoading] = useState(true);
-  const [transactions, setTransactions] = useState<
-    Array<{ establishment_id: string; amount: number | null; points: number; created_at: string }>
-  >([]);
-  const [redemptions, setRedemptions] = useState<
-    Array<{ establishment_id: string; points_used: number; reward_cost_mad: number | null; created_at: string }>
-  >([]);
+  const [transactions, setTransactions] = useState<Array<{ establishment_id: string; amount: number | null; points: number; created_at: string }>>([]);
+  const [redemptions, setRedemptions] = useState<Array<{ establishment_id: string; points_used: number; reward_cost_mad: number | null; created_at: string }>>([]);
+  const [reviews, setReviews] = useState<Array<{ establishment_id: string; rating: number; type: string | null; created_at: string }>>([]);
+  const [events, setEvents] = useState<Array<{ establishment_id: string; created_at: string }>>([]);
 
   const loadAnalytics = async () => {
     setLoading(true);
-    const since = new Date();
-    since.setDate(since.getDate() - period);
+    try {
+      const since = new Date();
+      since.setDate(since.getDate() - period);
+      const establishmentFilter = selectedEstablishment === 'all' ? null : selectedEstablishment;
 
-    const [txResult, redemptionResult] = await Promise.all([
-      supabase
-        .from('loyalty_transactions')
-        .select('establishment_id, amount, points, created_at')
-        .gte('created_at', since.toISOString())
-        .eq('type', 'EARN'),
-      supabase
-        .from('loyalty_redemptions')
-        .select('establishment_id, points_used, reward_cost_mad, created_at')
-        .gte('created_at', since.toISOString()),
-    ]);
+      let txQuery = supabase.from('loyalty_transactions').select('establishment_id, amount, points, created_at').gte('created_at', since.toISOString()).eq('type', 'EARN');
+      let redemptionQuery = supabase.from('loyalty_redemptions').select('establishment_id, points_used, reward_cost_mad, created_at').gte('created_at', since.toISOString());
+      let reviewQuery = supabase.from('reviews').select('establishment_id, rating, type, created_at').gte('created_at', since.toISOString());
+      let eventQuery = supabase.from('analytics_events').select('establishment_id, created_at').gte('created_at', since.toISOString());
 
-    if (txResult.error) {
-      console.error('Erreur analytics transactions:', txResult.error);
-      setTransactions([]);
-    } else {
+      if (establishmentFilter) {
+        txQuery = txQuery.eq('establishment_id', establishmentFilter);
+        redemptionQuery = redemptionQuery.eq('establishment_id', establishmentFilter);
+        reviewQuery = reviewQuery.eq('establishment_id', establishmentFilter);
+        eventQuery = eventQuery.eq('establishment_id', establishmentFilter);
+      }
+
+      const [txResult, redemptionResult, reviewResult, eventResult] = await Promise.all([
+        txQuery,
+        redemptionQuery,
+        reviewQuery,
+        eventQuery,
+      ]);
+
+      if (txResult.error) throw txResult.error;
+      if (redemptionResult.error) throw redemptionResult.error;
+      if (reviewResult.error) throw reviewResult.error;
+      if (eventResult.error) throw eventResult.error;
+
       setTransactions(txResult.data ?? []);
-    }
-
-    if (redemptionResult.error) {
-      console.error('Erreur analytics récompenses:', redemptionResult.error);
-      setRedemptions([]);
-    } else {
       setRedemptions(redemptionResult.data ?? []);
+      setReviews(reviewResult.data ?? []);
+      setEvents(eventResult.data ?? []);
+    } catch (error) {
+      console.error('Erreur analytics globales:', error);
+      setTransactions([]);
+      setRedemptions([]);
+      setReviews([]);
+      setEvents([]);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   useEffect(() => {
     loadAnalytics();
-  }, [period]);
+  }, [period, selectedEstablishment]);
 
   const establishmentMap = useMemo(
     () => new Map(establishments.map((item) => [item.id, item.name])),
@@ -3409,183 +3420,162 @@ function AdminAnalyticsSection({
     () => transactions.filter((row) => establishmentMap.has(row.establishment_id)),
     [transactions, establishmentMap]
   );
-
   const visibleRedemptions = useMemo(
     () => redemptions.filter((row) => establishmentMap.has(row.establishment_id)),
     [redemptions, establishmentMap]
   );
-
-  const revenue = useMemo(
-    () =>
-      visibleTransactions.reduce(
-        (sum, row) => sum + Number(row.amount ?? 0),
-        0
-      ),
-    [visibleTransactions]
+  const visibleReviews = useMemo(
+    () => reviews.filter((row) => establishmentMap.has(row.establishment_id)),
+    [reviews, establishmentMap]
+  );
+  const visibleEvents = useMemo(
+    () => events.filter((row) => establishmentMap.has(row.establishment_id)),
+    [events, establishmentMap]
   );
 
+  const revenue = visibleTransactions.reduce((sum, row) => sum + Number(row.amount ?? 0), 0);
   const transactionCount = visibleTransactions.length;
   const averageTicket = transactionCount > 0 ? revenue / transactionCount : 0;
-  const pointsEarned = visibleTransactions.reduce(
-    (sum, row) => sum + Number(row.points ?? 0),
-    0
-  );
+  const pointsEarned = visibleTransactions.reduce((sum, row) => sum + Number(row.points ?? 0), 0);
   const redemptionCount = visibleRedemptions.length;
-  const rewardCost = visibleRedemptions.reduce(
-    (sum, row) => sum + Number(row.reward_cost_mad ?? 0),
-    0
-  );
+  const rewardCost = visibleRedemptions.reduce((sum, row) => sum + Number(row.reward_cost_mad ?? 0), 0);
   const netContribution = revenue - rewardCost;
   const rewardCostRate = revenue > 0 ? (rewardCost / revenue) * 100 : 0;
+  const averageRating = visibleReviews.length
+    ? visibleReviews.reduce((sum, row) => sum + Number(row.rating ?? 0), 0) / visibleReviews.length
+    : 0;
+  const positiveReviews = visibleReviews.filter((row) => row.type === 'positive' || Number(row.rating) >= 4).length;
+  const negativeReviews = visibleReviews.filter((row) => row.type === 'negative' || Number(row.rating) <= 3).length;
 
   const byEstablishment = useMemo(() => {
-    const map = new Map<
-      string,
-      { name: string; revenue: number; transactions: number; rewards: number; cost: number }
-    >();
+    const map = new Map<string, {
+      id: string;
+      name: string;
+      revenue: number;
+      transactions: number;
+      rewards: number;
+      rewardCost: number;
+      reviews: number;
+      ratingTotal: number;
+      events: number;
+      points: number;
+    }>();
 
     for (const establishment of establishments) {
       map.set(establishment.id, {
+        id: establishment.id,
         name: establishment.name,
         revenue: 0,
         transactions: 0,
         rewards: 0,
-        cost: 0,
+        rewardCost: 0,
+        reviews: 0,
+        ratingTotal: 0,
+        events: 0,
+        points: 0,
       });
     }
 
-    for (const row of visibleTransactions) {
+    for (const row of transactions) {
       const item = map.get(row.establishment_id);
       if (!item) continue;
       item.revenue += Number(row.amount ?? 0);
       item.transactions += 1;
+      item.points += Number(row.points ?? 0);
     }
-
-    for (const row of visibleRedemptions) {
+    for (const row of redemptions) {
       const item = map.get(row.establishment_id);
       if (!item) continue;
       item.rewards += 1;
-      item.cost += Number(row.reward_cost_mad ?? 0);
+      item.rewardCost += Number(row.reward_cost_mad ?? 0);
+    }
+    for (const row of reviews) {
+      const item = map.get(row.establishment_id);
+      if (!item) continue;
+      item.reviews += 1;
+      item.ratingTotal += Number(row.rating ?? 0);
+    }
+    for (const row of events) {
+      const item = map.get(row.establishment_id);
+      if (!item) continue;
+      item.events += 1;
     }
 
-    return Array.from(map.values())
-      .filter((item) => item.revenue > 0 || item.rewards > 0)
-      .sort((a, b) => b.revenue - a.revenue);
-  }, [establishments, visibleTransactions, visibleRedemptions]);
+    return Array.from(map.values()).filter((item) =>
+      selectedEstablishment === 'all'
+        ? item.revenue > 0 || item.rewards > 0 || item.reviews > 0 || item.events > 0
+        : item.id === selectedEstablishment
+    );
+  }, [establishments, transactions, redemptions, reviews, events, selectedEstablishment]);
 
   const formatMad = (value: number) =>
-    `${value.toLocaleString('fr-FR', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    })} DH`;
+    `${value.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} DH`;
 
   return (
     <div>
       <div className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
-            Pilotage
-          </p>
-          <h2 className="font-display text-3xl text-forest md:text-4xl">
-            Analytics globales
-          </h2>
-          <p className="mt-2 max-w-2xl text-sm text-ink/50">
-            Une vue Admin de l'activité fidélité et du chiffre généré par
-            l'ensemble des établissements.
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">Pilotage</p>
+          <h2 className="font-display text-3xl text-forest md:text-4xl">Analytics globales</h2>
+          <p className="mt-2 max-w-3xl text-sm text-ink/50">
+            Une vue consolidée des avis, de la fidélité et des événements enregistrés pour chaque établissement.
           </p>
         </div>
-
-        <select
-          value={period}
-          onChange={(e) =>
-            setPeriod(Number(e.target.value) as 7 | 30 | 90 | 180 | 365)
-          }
-          className="rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm font-medium text-ink outline-none focus:border-forest"
-        >
-          <option value={7}>7 derniers jours</option>
-          <option value={30}>30 derniers jours</option>
-          <option value={90}>3 derniers mois</option>
-          <option value={180}>6 derniers mois</option>
-          <option value={365}>12 derniers mois</option>
-        </select>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <select value={selectedEstablishment} onChange={(e) => setSelectedEstablishment(e.target.value)} className="rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm font-medium text-ink outline-none focus:border-forest">
+            <option value="all">Tous les établissements</option>
+            {establishments.map((establishment) => <option key={establishment.id} value={establishment.id}>{establishment.name}</option>)}
+          </select>
+          <select value={period} onChange={(e) => setPeriod(Number(e.target.value) as 7 | 30 | 90 | 180 | 365)} className="rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm font-medium text-ink outline-none focus:border-forest">
+            <option value={7}>7 derniers jours</option>
+            <option value={30}>30 derniers jours</option>
+            <option value={90}>3 derniers mois</option>
+            <option value={180}>6 derniers mois</option>
+            <option value={365}>12 derniers mois</option>
+          </select>
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <AdminAnalyticsCard
-          icon={DollarSign}
-          label="Chiffre généré"
-          value={loading ? '—' : formatMad(revenue)}
-          helper={`${transactionCount} transaction${transactionCount > 1 ? 's' : ''}`}
-        />
-        <AdminAnalyticsCard
-          icon={TrendingUp}
-          label="Panier moyen"
-          value={loading ? '—' : formatMad(averageTicket)}
-          helper="par transaction fidélité"
-        />
-        <AdminAnalyticsCard
-          icon={UsersRound}
-          label="Points distribués"
-          value={loading ? '—' : pointsEarned.toLocaleString('fr-FR')}
-          helper="sur la période"
-        />
-        <AdminAnalyticsCard
-          icon={Gift}
-          label="Coût récompenses"
-          value={loading ? '—' : formatMad(rewardCost)}
-          helper={`${redemptionCount} utilisation${redemptionCount > 1 ? 's' : ''}`}
-        />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <AdminAnalyticsCard icon={MessageSquare} label="Avis" value={loading ? '—' : String(visibleReviews.length)} helper={`${positiveReviews} positifs · ${negativeReviews} négatifs`} />
+        <AdminAnalyticsCard icon={BarChart3} label="Note moyenne" value={loading ? '—' : `${averageRating.toFixed(1)} ★`} helper="sur 5" />
+        <AdminAnalyticsCard icon={DollarSign} label="CA fidélité" value={loading ? '—' : formatMad(revenue)} helper={`${transactionCount} transactions`} />
+        <AdminAnalyticsCard icon={TrendingUp} label="Panier moyen" value={loading ? '—' : formatMad(averageTicket)} helper="par transaction" />
+        <AdminAnalyticsCard icon={UsersRound} label="Points distribués" value={loading ? '—' : pointsEarned.toLocaleString('fr-FR')} helper="sur la période" />
+        <AdminAnalyticsCard icon={Activity} label="Événements" value={loading ? '—' : visibleEvents.length.toLocaleString('fr-FR')} helper="analytics" />
       </div>
 
-      <div className="mt-5 grid gap-5 lg:grid-cols-[1.4fr_0.6fr]">
+      <div className="mt-5 grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
         <div className="rounded-2xl border border-ink/10 bg-white p-5">
           <div className="mb-5">
-            <h3 className="text-base font-semibold text-forest">
-              Performance par établissement
-            </h3>
-            <p className="mt-1 text-xs text-ink/40">
-              Classement par chiffre généré sur la période sélectionnée.
-            </p>
+            <h3 className="text-base font-semibold text-forest">Détail par établissement</h3>
+            <p className="mt-1 text-xs text-ink/40">Avis, fidélité, récompenses et analytics sur la période sélectionnée.</p>
           </div>
-
           {loading ? (
-            <div className="py-12 text-center text-sm text-ink/40">
-              Chargement…
-            </div>
+            <div className="py-12 text-center text-sm text-ink/40">Chargement…</div>
           ) : byEstablishment.length === 0 ? (
-            <div className="rounded-xl bg-[#f7f7f3] p-8 text-center text-sm text-ink/40">
-              Aucun chiffre de fidélité enregistré sur cette période.
-            </div>
+            <div className="rounded-xl bg-[#f7f7f3] p-8 text-center text-sm text-ink/40">Aucune donnée sur cette période.</div>
           ) : (
             <div className="space-y-3">
-              {byEstablishment.map((item, index) => (
-                <div
-                  key={item.name}
-                  className="rounded-xl border border-ink/5 bg-[#fbfbf8] p-4"
-                >
-                  <div className="flex items-center justify-between gap-4">
+              {byEstablishment.map((item) => (
+                <div key={item.id} className="rounded-xl border border-ink/5 bg-[#fbfbf8] p-4">
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div className="min-w-0">
-                      <div className="flex items-center gap-3">
-                        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-forest text-[11px] font-semibold text-white">
-                          {index + 1}
-                        </span>
-                        <p className="truncate text-sm font-semibold text-ink">
-                          {item.name}
-                        </p>
+                      <p className="text-sm font-semibold text-ink">{item.name}</p>
+                      <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-ink/45">
+                        <span>{item.reviews} avis</span>
+                        <span>·</span>
+                        <span>{item.ratingTotal && item.reviews ? (item.ratingTotal / item.reviews).toFixed(1) : '0.0'} ★</span>
+                        <span>·</span>
+                        <span>{item.events} événements</span>
                       </div>
-                      <p className="mt-2 pl-10 text-xs text-ink/40">
-                        {item.transactions} transaction
-                        {item.transactions > 1 ? 's' : ''} · {item.rewards}{' '}
-                        récompense{item.rewards > 1 ? 's' : ''}
-                      </p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-base font-semibold text-forest">
-                        {formatMad(item.revenue)}
-                      </p>
-                      <p className="mt-1 text-[11px] text-ink/35">
-                        coût récompenses : {formatMad(item.cost)}
-                      </p>
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-right text-xs">
+                      <span className="text-ink/40">CA fidélité <strong className="ml-1 text-forest">{formatMad(item.revenue)}</strong></span>
+                      <span className="text-ink/40">Transactions <strong className="ml-1 text-forest">{item.transactions}</strong></span>
+                      <span className="text-ink/40">Points <strong className="ml-1 text-forest">{item.points.toLocaleString('fr-FR')}</strong></span>
+                      <span className="text-ink/40">Récompenses <strong className="ml-1 text-forest">{item.rewards}</strong></span>
+                      <span className="text-ink/40">Coût récompenses <strong className="ml-1 text-forest">{formatMad(item.rewardCost)}</strong></span>
                     </div>
                   </div>
                 </div>
@@ -3595,48 +3585,18 @@ function AdminAnalyticsSection({
         </div>
 
         <div className="rounded-2xl border border-ink/10 bg-forest p-5 text-white">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/50">
-            Lecture financière
-          </p>
-          <h3 className="mt-2 text-xl font-semibold">
-            Contribution fidélité
-          </h3>
-
-          <div className="mt-6 space-y-5">
-            <div>
-              <p className="text-xs text-white/50">CA généré</p>
-              <p className="mt-1 text-2xl font-semibold">
-                {loading ? '—' : formatMad(revenue)}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-white/50">Coût des récompenses</p>
-              <p className="mt-1 text-2xl font-semibold">
-                {loading ? '—' : formatMad(rewardCost)}
-              </p>
-            </div>
-            <div className="border-t border-white/10 pt-5">
-              <p className="text-xs text-white/50">CA après coût récompenses</p>
-              <p className="mt-1 text-3xl font-semibold text-gold">
-                {loading ? '—' : formatMad(netContribution)}
-              </p>
-            </div>
-            <div className="flex items-center justify-between rounded-xl bg-white/10 px-4 py-3">
-              <span className="flex items-center gap-2 text-xs text-white/60">
-                <Percent size={14} />
-                Part du CA consommée en récompenses
-              </span>
-              <strong className="text-sm">
-                {loading ? '—' : `${rewardCostRate.toFixed(1)} %`}
-              </strong>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/50">Synthèse période</p>
+          <h3 className="mt-2 text-xl font-semibold">Vue financière & réputation</h3>
+          <div className="mt-6 space-y-4">
+            <div><p className="text-xs text-white/50">CA fidélité</p><p className="mt-1 text-2xl font-semibold">{loading ? '—' : formatMad(revenue)}</p></div>
+            <div><p className="text-xs text-white/50">Coût récompenses</p><p className="mt-1 text-2xl font-semibold">{loading ? '—' : formatMad(rewardCost)}</p></div>
+            <div><p className="text-xs text-white/50">CA après coût récompenses</p><p className="mt-1 text-3xl font-semibold text-gold">{loading ? '—' : formatMad(netContribution)}</p></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-xl bg-white/10 px-4 py-3"><p className="text-[11px] text-white/50">Récompenses</p><p className="mt-1 text-lg font-semibold">{redemptionCount}</p></div>
+              <div className="rounded-xl bg-white/10 px-4 py-3"><p className="text-[11px] text-white/50">Part coût</p><p className="mt-1 text-lg font-semibold">{loading ? '—' : `${rewardCostRate.toFixed(1)} %`}</p></div>
             </div>
           </div>
-
-          <p className="mt-6 text-[11px] leading-5 text-white/40">
-            Le coût utilisé est celui enregistré au moment de chaque
-            utilisation de récompense. Cela permet de conserver un historique
-            fiable même si le coût d'une récompense change ensuite.
-          </p>
+          <p className="mt-6 text-[11px] leading-5 text-white/40">Les indicateurs sont calculés uniquement à partir des données enregistrées dans les tables consultées. Aucun chiffre d’uptime ou de performance technique n’est inventé.</p>
         </div>
       </div>
     </div>
