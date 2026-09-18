@@ -581,6 +581,7 @@ export default function Admin() {
           {section === 'codes' && (
             <RewardCodesSection
               establishments={establishments}
+              responsibleMembers={responsibleMembers}
             />
           )}
 
@@ -2377,223 +2378,154 @@ function EditStaffModal({ member, establishments, close, reload }: { member: Sta
 
 function RewardCodesSection({
   establishments,
+  responsibleMembers,
 }: {
   establishments: Establishment[];
+  responsibleMembers: StaffMember[];
 }) {
-  const [selectedEstablishment, setSelectedEstablishment] =
-    useState(establishments[0]?.id ?? '');
-
+  const [selectedEstablishment, setSelectedEstablishment] = useState(establishments[0]?.id ?? '');
   const [code, setCode] = useState('');
   const [confirmCode, setConfirmCode] = useState('');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (
-      !selectedEstablishment &&
-      establishments.length > 0
-    ) {
-      setSelectedEstablishment(
-        establishments[0].id
-      );
+    if (!selectedEstablishment && establishments.length > 0) {
+      setSelectedEstablishment(establishments[0].id);
     }
   }, [establishments, selectedEstablishment]);
 
-  const selectedName =
-    establishments.find(
-      (establishment) =>
-        establishment.id === selectedEstablishment
-    )?.name ?? '';
-
   const saveCode = async () => {
-    if (!selectedEstablishment) {
-      alert('Veuillez sélectionner un établissement.');
-      return;
-    }
-
-    if (code.trim().length < 4) {
-      alert(
-        'Le code doit contenir au moins 4 caractères.'
-      );
-      return;
-    }
-
-    if (code !== confirmCode) {
-      alert('Les deux codes ne correspondent pas.');
-      return;
-    }
+    if (!selectedEstablishment) return alert('Veuillez sélectionner un établissement.');
+    if (code.trim().length < 4) return alert('Le code doit contenir au moins 4 caractères.');
+    if (code !== confirmCode) return alert('Les deux codes ne correspondent pas.');
 
     setSaving(true);
-
-    const { data, error } = await supabase.rpc(
-      'set_loyalty_admin_code',
-      {
-        target_establishment_id:
-          selectedEstablishment,
+    try {
+      const { data, error } = await supabase.rpc('set_loyalty_admin_code', {
+        target_establishment_id: selectedEstablishment,
         new_code: code,
-      }
-    );
+      });
 
-    setSaving(false);
+      if (error) throw error;
+      if (data !== true) throw new Error("Le code n'a pas pu être enregistré.");
 
-    if (error) {
-      console.error(
-        'Erreur code récompense:',
-        error
-      );
-
-      alert(
-        `Impossible d'enregistrer le code : ${error.message}`
-      );
-
-      return;
+      setCode('');
+      setConfirmCode('');
+      alert('Code récompense enregistré. Le responsable peut maintenant l’utiliser pour valider les récompenses.');
+    } catch (error) {
+      console.error('Erreur code récompense:', error);
+      alert(`Impossible d'enregistrer le code : ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+    } finally {
+      setSaving(false);
     }
-
-    if (data !== true) {
-      alert(
-        "Le code n'a pas pu être enregistré."
-      );
-      return;
-    }
-
-    setCode('');
-    setConfirmCode('');
-
-    alert(
-      `Code récompense enregistré pour ${selectedName}.`
-    );
   };
 
   if (establishments.length === 0) {
     return (
       <div>
         <div className="mb-8">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
-            Fidélité
-          </p>
-
-          <h2 className="font-display text-3xl text-forest md:text-4xl">
-            Codes récompenses
-          </h2>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">Fidélité</p>
+          <h2 className="font-display text-3xl text-forest md:text-4xl">Codes récompenses</h2>
         </div>
-
-        <EmptyStaff
-          icon={Gift}
-          title="Aucun établissement"
-          description="Créez d’abord un établissement avant de configurer son code récompense."
-        />
+        <EmptyStaff icon={Gift} title="Aucun établissement" description="Créez d’abord un établissement avant de configurer son code récompense." />
       </div>
     );
+  }
+
+  const responsibleByEstablishment = new Map<string, StaffMember[]>();
+  for (const member of responsibleMembers) {
+    const list = responsibleByEstablishment.get(member.establishment_id) ?? [];
+    list.push(member);
+    responsibleByEstablishment.set(member.establishment_id, list);
   }
 
   return (
     <div>
       <div className="mb-8">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
-          Fidélité
-        </p>
-
-        <h2 className="font-display text-3xl text-forest md:text-4xl">
-          Codes récompenses
-        </h2>
-
-        <p className="mt-2 max-w-2xl text-sm text-ink/50">
-          Le code est utilisé uniquement lorsqu’une récompense
-          est consommée. Il ne sert pas à se connecter.
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">Fidélité</p>
+        <h2 className="font-display text-3xl text-forest md:text-4xl">Codes récompenses</h2>
+        <p className="mt-2 max-w-3xl text-sm text-ink/50">
+          Gestion des responsables et du code de validation des récompenses. Pour des raisons de sécurité, le code existant n’est jamais relu ni affiché en clair : l’Admin peut uniquement le remplacer.
         </p>
       </div>
 
-      <div className="max-w-2xl rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
-        <div className="mb-6 flex items-start gap-4 rounded-xl border border-gold/20 bg-[#fdf9ef] p-4">
-          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#f4ead3] text-gold">
-            <LockKeyhole size={18} />
-          </div>
+      <div className="mb-6 grid gap-4 lg:grid-cols-2">
+        {establishments.map((establishment) => {
+          const responsibles = responsibleByEstablishment.get(establishment.id) ?? [];
+          const isSelected = selectedEstablishment === establishment.id;
+          return (
+            <button
+              key={establishment.id}
+              type="button"
+              onClick={() => setSelectedEstablishment(establishment.id)}
+              className={`rounded-2xl border bg-white p-5 text-left shadow-sm transition ${isSelected ? 'border-gold/50 ring-2 ring-gold/10' : 'border-ink/5 hover:border-ink/15'}`}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink/35">Établissement</p>
+                  <h3 className="mt-1 text-base font-semibold text-forest">{establishment.name}</h3>
+                </div>
+                <span className="rounded-full bg-forest/10 px-3 py-1 text-[10px] font-semibold text-forest">
+                  {responsibles.length} responsable{responsibles.length > 1 ? 's' : ''}
+                </span>
+              </div>
+              <div className="mt-4 space-y-2">
+                {responsibles.length === 0 ? (
+                  <p className="text-xs text-ink/40">Aucun responsable affecté.</p>
+                ) : responsibles.map((member) => (
+                  <div key={member.id} className="flex items-center justify-between rounded-xl bg-[#f7f7f3] px-3 py-2">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-ink">{member.name}</p>
+                      <p className="truncate text-xs text-ink/40">{member.email}</p>
+                    </div>
+                    <span className="shrink-0 rounded-lg bg-white px-2 py-1 font-mono text-xs text-ink/45">••••••</span>
+                  </div>
+                ))}
+              </div>
+            </button>
+          );
+        })}
+      </div>
 
+      <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
-            <p className="text-sm font-semibold text-forest">
-              Code sécurisé
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">Configuration</p>
+            <h3 className="mt-1 text-xl font-semibold text-forest">
+              Code de {establishments.find((item) => item.id === selectedEstablishment)?.name ?? 'l’établissement'}
+            </h3>
+            <p className="mt-2 text-xs leading-5 text-ink/45">
+              Le responsable conserve son accès. Une demande de changement peut être traitée ici en remplaçant le code actuel.
             </p>
-
-            <p className="mt-1 text-xs leading-5 text-ink/50">
-              Tu définis ici le code de validation et tu le
-              transmets au responsable de l’établissement.
-              Le code n’est jamais affiché dans l’application
-              après son enregistrement.
-            </p>
+          </div>
+          <div className="rounded-xl bg-[#f7f7f3] px-4 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink/35">Code actuel</p>
+            <p className="mt-1 font-mono text-sm tracking-[0.2em] text-ink/50">••••••</p>
           </div>
         </div>
 
-        <div className="space-y-5">
-          <div>
-            <label className="mb-2 block text-xs font-semibold">
-              Établissement
-            </label>
+        <div className="mt-6 grid gap-5 md:grid-cols-2">
+          <label className="block">
+            <span className="mb-2 block text-xs font-semibold">Nouveau code récompense</span>
+            <input type="password" value={code} onChange={(e) => setCode(e.target.value)} placeholder="Minimum 4 caractères" autoComplete="new-password" className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-center text-lg tracking-[0.2em] outline-none focus:border-forest" />
+          </label>
+          <label className="block">
+            <span className="mb-2 block text-xs font-semibold">Confirmer le code</span>
+            <input type="password" value={confirmCode} onChange={(e) => setConfirmCode(e.target.value)} placeholder="Retapez le code" autoComplete="new-password" className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-center text-lg tracking-[0.2em] outline-none focus:border-forest" />
+          </label>
+        </div>
 
-            <select
-              value={selectedEstablishment}
-              onChange={(e) =>
-                setSelectedEstablishment(
-                  e.target.value
-                )
-              }
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
-            >
-              {establishments.map((establishment) => (
-                <option
-                  key={establishment.id}
-                  value={establishment.id}
-                >
-                  {establishment.name}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div className="mt-5 flex items-center gap-3 rounded-xl border border-gold/20 bg-[#fdf9ef] p-4">
+          <LockKeyhole size={18} className="shrink-0 text-gold" />
+          <p className="text-xs leading-5 text-ink/50">
+            Le stockage du code reste protégé par le mécanisme existant. Cette interface ne tente pas de récupérer le code en clair.
+          </p>
+        </div>
 
-          <div>
-            <label className="mb-2 block text-xs font-semibold">
-              Nouveau code récompense
-            </label>
-
-            <input
-              type="password"
-              value={code}
-              onChange={(e) =>
-                setCode(e.target.value)
-              }
-              placeholder="Ex : 4829"
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-center text-lg tracking-[0.2em] outline-none focus:border-forest"
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-xs font-semibold">
-              Confirmer le code
-            </label>
-
-            <input
-              type="password"
-              value={confirmCode}
-              onChange={(e) =>
-                setConfirmCode(e.target.value)
-              }
-              placeholder="Retapez le code"
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-center text-lg tracking-[0.2em] outline-none focus:border-forest"
-            />
-          </div>
-
-          <button
-            onClick={saveCode}
-            disabled={
-              saving ||
-              !code.trim() ||
-              !confirmCode.trim()
-            }
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-40"
-          >
+        <div className="mt-5 flex justify-end">
+          <button onClick={saveCode} disabled={saving || !code.trim() || !confirmCode.trim()} className="inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-40">
             <CheckCircle2 size={16} />
-
-            {saving
-              ? 'Enregistrement...'
-              : 'Enregistrer le code'}
+            {saving ? 'Enregistrement...' : 'Remplacer le code'}
           </button>
         </div>
       </div>
