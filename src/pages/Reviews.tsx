@@ -28,6 +28,13 @@ type AIRecommendation = {
   reason: string;
 };
 
+type AIPriorityAction = {
+  priority: string;
+  action: string;
+  reason: string;
+  impact: string;
+};
+
 type AIAnalysis = {
   summary: string;
   sentiment: string;
@@ -36,6 +43,7 @@ type AIAnalysis = {
   weaknesses: string[];
   recurring_issues: AIRecurringIssue[];
   recommendations: AIRecommendation[];
+  actions_prioritaires: AIPriorityAction[];
 };
 
 type AIResponse = {
@@ -302,6 +310,19 @@ export default function Reviews() {
                 typeof item.priority === 'string' &&
                 typeof item.action === 'string' &&
                 typeof item.reason === 'string'
+            )
+          : [],
+        actions_prioritaires: Array.isArray(
+          rawAnalysis.actions_prioritaires
+        )
+          ? rawAnalysis.actions_prioritaires.filter(
+              (item): item is AIPriorityAction =>
+                Boolean(item) &&
+                typeof item === 'object' &&
+                typeof item.priority === 'string' &&
+                typeof item.action === 'string' &&
+                typeof item.reason === 'string' &&
+                typeof item.impact === 'string'
             )
           : [],
       };
