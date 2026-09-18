@@ -66,15 +66,17 @@ export async function getMySubscriptionAccess(
     return [];
   }
 
-  const accesses = (data ?? []).map((row: any) => ({
-    establishment_id: row.establishment_id,
-    subscription_status: row.subscription_status,
-    plan_id: row.plan_id,
-    plan_name: row.plan_name,
-    features: Array.isArray(row.features)
-      ? row.features.map(String)
-      : [],
-  }));
+  const accesses = (data ?? []).map((row: unknown) => {
+    const item = row as Record<string, unknown>;
+
+    return {
+    establishment_id: String(item.establishment_id ?? ''),
+    subscription_status: String(item.subscription_status ?? ''),
+    plan_id: item.plan_id ? String(item.plan_id) : null,
+    plan_name: String(item.plan_name ?? ''),
+    features: Array.isArray(item.features) ? item.features.map(String) : [],
+    };
+  });
 
   return establishmentId
     ? accesses.filter(
