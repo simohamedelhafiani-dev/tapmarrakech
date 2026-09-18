@@ -192,13 +192,6 @@ export function DashboardLayout() {
     formattedDate.charAt(0).toUpperCase() +
     formattedDate.slice(1);
 
-  const sidebarTitle =
-    role === 'admin'
-      ? 'TapMarrakech'
-      : role === 'responsible'
-        ? establishmentName || 'Mon établissement'
-        : 'Mon espace';
-
   return (
     <div className="min-h-screen bg-[#f7f7f3] text-ink">
       {open && (
