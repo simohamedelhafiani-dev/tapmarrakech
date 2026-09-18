@@ -2631,7 +2631,69 @@ function ReviewAnalysisSection({
       return;
     }
 
-    setResult(data as ReviewAnalysisResponse);
+    const rawAnalysis = data.analysis as Partial<ReviewAnalysis>;
+
+    const normalizedAnalysis: ReviewAnalysis = {
+      summary:
+        typeof rawAnalysis.summary === 'string'
+          ? rawAnalysis.summary
+          : '',
+      sentiment:
+        typeof rawAnalysis.sentiment === 'string'
+          ? rawAnalysis.sentiment
+          : 'Non déterminé',
+      satisfaction_score:
+        typeof rawAnalysis.satisfaction_score === 'number'
+          ? rawAnalysis.satisfaction_score
+          : 0,
+      strengths: Array.isArray(rawAnalysis.strengths)
+        ? rawAnalysis.strengths.filter(
+            (item): item is string => typeof item === 'string'
+          )
+        : [],
+      weaknesses: Array.isArray(rawAnalysis.weaknesses)
+        ? rawAnalysis.weaknesses.filter(
+            (item): item is string => typeof item === 'string'
+          )
+        : [],
+      recurring_issues: Array.isArray(rawAnalysis.recurring_issues)
+        ? rawAnalysis.recurring_issues.filter(
+            (item): item is ReviewAnalysis['recurring_issues'][number] =>
+              Boolean(item) &&
+              typeof item === 'object' &&
+              typeof item.topic === 'string' &&
+              typeof item.frequency === 'string' &&
+              typeof item.priority === 'string' &&
+              typeof item.explanation === 'string'
+          )
+        : [],
+      recommendations: Array.isArray(rawAnalysis.recommendations)
+        ? rawAnalysis.recommendations.filter(
+            (item): item is ReviewAnalysis['recommendations'][number] =>
+              Boolean(item) &&
+              typeof item === 'object' &&
+              typeof item.priority === 'string' &&
+              typeof item.action === 'string' &&
+              typeof item.reason === 'string'
+          )
+        : [],
+      actions_prioritaires: Array.isArray(rawAnalysis.actions_prioritaires)
+        ? rawAnalysis.actions_prioritaires.filter(
+            (item): item is ReviewAnalysis['actions_prioritaires'][number] =>
+              Boolean(item) &&
+              typeof item === 'object' &&
+              typeof item.priority === 'string' &&
+              typeof item.action === 'string' &&
+              typeof item.reason === 'string' &&
+              typeof item.impact === 'string'
+          )
+        : [],
+    };
+
+    setResult({
+      ...(data as ReviewAnalysisResponse),
+      analysis: normalizedAnalysis,
+    });
     setLoading(false);
   };
 
