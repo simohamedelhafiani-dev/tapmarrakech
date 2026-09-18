@@ -538,6 +538,8 @@ export default function Admin() {
               staff={staff}
               loading={loading || staffLoading}
               onNavigate={setSection}
+              billing={billing}
+              globalStats={globalStats}
             />
           )}
 
@@ -621,12 +623,75 @@ function Overview({
   staff,
   loading,
   onNavigate,
+  billing,
+  globalStats,
 }: {
   establishments: Establishment[];
   staff: StaffMember[];
   loading: boolean;
   onNavigate: (section: AdminSection) => void;
+  billing: BillingSnapshot;
+  globalStats: GlobalStats;
 }) {
+  const [selectedEstablishment, setSelectedEstablishment] = useState('all');
+  const [establishmentDetail, setEstablishmentDetail] = useState({
+    reviews: 0,
+    averageRating: 0,
+    loyaltyCustomers: 0,
+    analyticsEvents: 0,
+    loyaltyRevenue: 0,
+  });
+  const [detailLoading, setDetailLoading] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    const loadDetail = async () => {
+      setDetailLoading(true);
+      try {
+        const reviewQuery = selectedEstablishment === 'all'
+          ? supabase.from('reviews').select('rating')
+          : supabase.from('reviews').select('rating').eq('establishment_id', selectedEstablishment);
+        const customerQuery = selectedEstablishment === 'all'
+          ? supabase.from('loyalty_customers').select('id', { count: 'exact', head: true })
+          : supabase.from('loyalty_customers').select('id', { count: 'exact', head: true }).eq('establishment_id', selectedEstablishment);
+        const eventsQuery = selectedEstablishment === 'all'
+          ? supabase.from('analytics_events').select('id', { count: 'exact', head: true })
+          : supabase.from('analytics_events').select('id', { count: 'exact', head: true }).eq('establishment_id', selectedEstablishment);
+        const revenueQuery = selectedEstablishment === 'all'
+          ? supabase.from('loyalty_transactions').select('amount').eq('type', 'EARN')
+          : supabase.from('loyalty_transactions').select('amount').eq('type', 'EARN').eq('establishment_id', selectedEstablishment);
+
+        const [{ data: reviews }, { count: loyaltyCustomers }, { count: analyticsEvents }, { data: revenueRows }] =
+          await Promise.all([reviewQuery, customerQuery, eventsQuery, revenueQuery]);
+
+        if (!mounted) return;
+        const ratings = (reviews ?? []).map((row) => Number(row.rating)).filter(Number.isFinite);
+        setEstablishmentDetail({
+          reviews: ratings.length,
+          averageRating: ratings.length ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length : 0,
+          loyaltyCustomers: loyaltyCustomers ?? 0,
+          analyticsEvents: analyticsEvents ?? 0,
+          loyaltyRevenue: (revenueRows ?? []).reduce((sum, row) => sum + Number(row.amount ?? 0), 0),
+        });
+      } catch (error) {
+        console.error('Erreur vue établissement Admin:', error);
+        if (mounted) {
+          setEstablishmentDetail({
+            reviews: 0,
+            averageRating: 0,
+            loyaltyCustomers: 0,
+            analyticsEvents: 0,
+            loyaltyRevenue: 0,
+          });
+        }
+      } finally {
+        if (mounted) setDetailLoading(false);
+      }
+    };
+    loadDetail();
+    return () => { mounted = false; };
+  }, [selectedEstablishment]);
+
   const responsibles = staff.filter(
     (member) => member.role === 'MANAGER'
   );
@@ -670,6 +735,49 @@ function Overview({
           label="Employés"
           value={loading ? '—' : employees.length}
         />
+      </div>
+
+      <div className="mt-8 rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">Pilotage global</p>
+            <h3 className="mt-1 text-xl font-semibold text-forest">Vue par établissement</h3>
+            <p className="mt-1 text-xs text-ink/40">Sélectionne un établissement pour isoler ses indicateurs, ou conserve la vue globale.</p>
+          </div>
+          <select
+            value={selectedEstablishment}
+            onChange={(e) => setSelectedEstablishment(e.target.value)}
+            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm font-medium outline-none focus:border-forest lg:w-80"
+          >
+            <option value="all">Tous les établissements</option>
+            {establishments.map((establishment) => (
+              <option key={establishment.id} value={establishment.id}>{establishment.name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+          <AdminAnalyticsCard icon={MessageSquare} label="Avis" value={detailLoading ? '—' : String(establishmentDetail.reviews)} helper={selectedEstablishment === 'all' ? 'tous établissements' : 'établissement sélectionné'} />
+          <AdminAnalyticsCard icon={BarChart3} label="Note moyenne" value={detailLoading ? '—' : establishmentDetail.averageRating.toFixed(1) + ' ★'} helper="sur 5" />
+          <AdminAnalyticsCard icon={UsersRound} label="Clients fidélité" value={detailLoading ? '—' : establishmentDetail.loyaltyCustomers.toLocaleString('fr-FR')} helper="clients enregistrés" />
+          <AdminAnalyticsCard icon={Activity} label="Événements" value={detailLoading ? '—' : establishmentDetail.analyticsEvents.toLocaleString('fr-FR')} helper="analytics" />
+          <AdminAnalyticsCard icon={DollarSign} label="CA fidélité" value={detailLoading ? '—' : establishmentDetail.loyaltyRevenue.toLocaleString('fr-FR') + ' DH'} helper="transactions EARN" />
+        </div>
+
+        <div className="mt-5 grid gap-4 md:grid-cols-3">
+          <div className="rounded-xl bg-[#f7f7f3] p-4">
+            <p className="text-xs text-ink/40">Abonnements actifs</p>
+            <p className="mt-1 text-xl font-semibold text-forest">{billing.subscriptions.filter((item) => item.status === 'active').length}</p>
+          </div>
+          <div className="rounded-xl bg-[#f7f7f3] p-4">
+            <p className="text-xs text-ink/40">MRR</p>
+            <p className="mt-1 text-xl font-semibold text-forest">{billing.available ? billing.mrr.toLocaleString('fr-FR') + ' DH' : '—'}</p>
+          </div>
+          <div className="rounded-xl bg-[#f7f7f3] p-4">
+            <p className="text-xs text-ink/40">Événements globaux</p>
+            <p className="mt-1 text-xl font-semibold text-forest">{globalStats.analyticsEvents.toLocaleString('fr-FR')}</p>
+          </div>
+        </div>
       </div>
 
       <div className="mt-8">
