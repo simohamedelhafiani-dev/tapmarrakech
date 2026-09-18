@@ -4214,51 +4214,146 @@ function SystemSection({
   globalStats: GlobalStats;
   establishments: Establishment[];
 }) {
-  const [dbStatus, setDbStatus] = useState<'checking' | 'ok' | 'error'>('checking');
+  type CheckStatus = 'checking' | 'ok' | 'error';
+
+  type Check = {
+    label: string;
+    status: CheckStatus;
+    detail: string;
+    icon: typeof ShieldCheck;
+  };
+
+  const [checks, setChecks] = useState<Check[]>([]);
+  const [checking, setChecking] = useState(false);
+  const [lastChecked, setLastChecked] = useState<string | null>(null);
+
+  const runChecks = async () => {
+    setChecking(true);
+
+    const next: Check[] = [
+      { label: 'Base de données Supabase', status: 'checking', detail: 'Connexion en cours…', icon: ShieldCheck },
+      { label: 'Session administrateur', status: 'checking', detail: 'Vérification en cours…', icon: LockKeyhole },
+      { label: 'Configuration IA', status: 'checking', detail: 'Vérification en cours…', icon: Brain },
+      { label: 'Fonction Analyse IA', status: 'checking', detail: 'Vérification du service…', icon: Activity },
+      { label: 'Établissements', status: 'checking', detail: 'Vérification en cours…', icon: Building2 },
+      { label: 'Analytics', status: 'checking', detail: 'Vérification en cours…', icon: TrendingUp },
+      { label: 'Facturation', status: 'checking', detail: 'Vérification en cours…', icon: CreditCard },
+    ];
+
+    setChecks(next);
+
+    try {
+      const { error } = await supabase.from('establishments').select('id', { count: 'exact', head: true });
+      next[0] = error
+        ? { ...next[0], status: 'error', detail: error.message }
+        : { ...next[0], status: 'ok', detail: 'Connexion Supabase opérationnelle' };
+    } catch (error) {
+      next[0] = { ...next[0], status: 'error', detail: error instanceof Error ? error.message : 'Erreur inconnue' };
+    }
+
+    try {
+      const { data, error } = await supabase.auth.getUser();
+      next[1] = error || !data.user
+        ? { ...next[1], status: 'error', detail: error?.message ?? 'Aucune session administrateur active' }
+        : { ...next[1], status: 'ok', detail: data.user.email ?? 'Session active' };
+    } catch (error) {
+      next[1] = { ...next[1], status: 'error', detail: error instanceof Error ? error.message : 'Erreur inconnue' };
+    }
+
+    try {
+      const { data, error } = await supabase.rpc('admin_get_ai_settings');
+      const settings = Array.isArray(data) ? data[0] : data;
+      next[2] = error
+        ? { ...next[2], status: 'error', detail: error.message }
+        : { ...next[2], status: settings ? 'ok' : 'error', detail: settings ? 'Configuration IA accessible' : 'Aucune configuration IA trouvée' };
+    } catch (error) {
+      next[2] = { ...next[2], status: 'error', detail: error instanceof Error ? error.message : 'Erreur inconnue' };
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-reviews', { body: { health_check: true } });
+      if (error) {
+        next[3] = { ...next[3], status: 'error', detail: error.message };
+      } else if (data?.success === false && data?.error) {
+        const noReviews = data.error.includes('Aucun avis');
+        next[3] = { ...next[3], status: noReviews ? 'ok' : 'error', detail: noReviews ? 'Fonction accessible (aucun avis à analyser)' : data.error };
+      } else {
+        next[3] = { ...next[3], status: 'ok', detail: 'Fonction accessible' };
+      }
+    } catch (error) {
+      next[3] = { ...next[3], status: 'error', detail: error instanceof Error ? error.message : 'Fonction inaccessible' };
+    }
+
+    next[4] = {
+      ...next[4],
+      status: establishments.length > 0 ? 'ok' : 'error',
+      detail: establishments.length > 0 ? `${establishments.length} établissement${establishments.length > 1 ? 's' : ''} chargé${establishments.length > 1 ? 's' : ''}` : 'Aucun établissement chargé',
+    };
+    next[5] = { ...next[5], status: 'ok', detail: `${globalStats.analyticsEvents.toLocaleString('fr-FR')} événements enregistrés` };
+    next[6] = {
+      ...next[6],
+      status: billing.available ? 'ok' : 'error',
+      detail: billing.available ? `${billing.subscriptions.length} abonnement${billing.subscriptions.length > 1 ? 's' : ''} chargé${billing.subscriptions.length > 1 ? 's' : ''}` : 'Tables de facturation indisponibles ou non configurées',
+    };
+
+    setChecks(next);
+    setLastChecked(new Date().toISOString());
+    setChecking(false);
+  };
 
   useEffect(() => {
-    let mounted = true;
-    supabase.from('establishments').select('id', { count: 'exact', head: true }).then(({ error }) => {
-      if (mounted) setDbStatus(error ? 'error' : 'ok');
-    });
-    return () => { mounted = false; };
+    void runChecks();
   }, []);
 
-  const services = [
-    { label: 'Base de données Supabase', status: dbStatus === 'ok' ? 'Opérationnel' : dbStatus === 'error' ? 'Erreur' : 'Vérification...', icon: ShieldCheck },
-    { label: 'Pages publiques', status: establishments.length > 0 ? 'Configurées' : 'Aucun établissement', icon: ExternalLink },
-    { label: 'Analytics', status: `${globalStats.analyticsEvents.toLocaleString('fr-FR')} événements`, icon: Activity },
-    { label: 'Facturation', status: billing.available ? 'Connectée' : 'À configurer', icon: CreditCard },
-  ];
+  const okCount = checks.filter((check) => check.status === 'ok').length;
+  const errorCount = checks.filter((check) => check.status === 'error').length;
 
   return (
     <div>
-      <div className="mb-8">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">Plateforme</p>
-        <h2 className="font-display text-3xl text-forest md:text-4xl">Supervision technique</h2>
-        <p className="mt-2 max-w-2xl text-sm text-ink/50">Un point de contrôle sur les services réellement accessibles depuis l’Admin.</p>
+      <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">Plateforme</p>
+          <h2 className="font-display text-3xl text-forest md:text-4xl">Supervision technique</h2>
+          <p className="mt-2 max-w-2xl text-sm text-ink/50">Diagnostic en temps réel des services critiques accessibles depuis l’Admin.</p>
+        </div>
+        <button onClick={() => void runChecks()} disabled={checking} className="inline-flex items-center justify-center gap-2 rounded-xl bg-forest px-4 py-3 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">
+          <RefreshCw size={14} className={checking ? 'animate-spin' : ''} />
+          {checking ? 'Vérification…' : 'Relancer le diagnostic'}
+        </button>
+      </div>
+
+      <div className="mb-6 grid gap-4 sm:grid-cols-3">
+        <MiniMetric label="Contrôles OK" value={okCount} />
+        <MiniMetric label="Erreurs" value={errorCount} />
+        <MiniMetric label="Établissements" value={establishments.length} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        {services.map(({ label, status, icon: Icon }) => (
+        {checks.map(({ label, status, detail, icon: Icon }) => (
           <div key={label} className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div className="grid h-11 w-11 place-items-center rounded-xl bg-forest/10 text-forest"><Icon size={20} /></div>
-              <span className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${status === 'Opérationnel' || status === 'Connectée' ? 'bg-green-100 text-green-700' : status === 'Erreur' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>{status}</span>
+            <div className="flex items-start justify-between gap-4">
+              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-forest/10 text-forest"><Icon size={20} /></div>
+              <span className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${
+                status === 'ok' ? 'bg-green-100 text-green-700' : status === 'error' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
+              }`}>{status === 'ok' ? 'Opérationnel' : status === 'error' ? 'Erreur' : 'Vérification…'}</span>
             </div>
             <h3 className="mt-5 text-base font-semibold">{label}</h3>
+            <p className="mt-2 break-words text-xs leading-5 text-ink/45">{detail}</p>
           </div>
         ))}
       </div>
 
       <div className="mt-6 rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
-        <div className="flex items-center gap-3"><Filter size={17} className="text-forest" /><h3 className="font-semibold">Contrôles disponibles</h3></div>
+        <div className="flex items-center gap-3"><Filter size={17} className="text-forest" /><h3 className="font-semibold">État global</h3></div>
+        <div className="mt-4 rounded-xl bg-[#f7f7f3] p-4 text-sm">
+          {errorCount === 0 && checks.length > 0 ? <span className="font-semibold text-forest">Tous les contrôles exécutés sont opérationnels.</span> : <span className="font-semibold text-[#a15c50]">{errorCount} contrôle{errorCount > 1 ? 's' : ''} nécessite{errorCount > 1 ? 'nt' : ''} une vérification.</span>}
+        </div>
         <div className="mt-4 grid gap-3 md:grid-cols-3">
-          <MiniMetric label="Établissements" value={establishments.length} />
           <MiniMetric label="Avis" value={globalStats.reviews} />
           <MiniMetric label="Événements" value={globalStats.analyticsEvents} />
+          <MiniMetric label="Abonnements" value={billing.available ? billing.subscriptions.length : 0} />
         </div>
-        <p className="mt-4 text-xs leading-5 text-ink/40">Les mesures d’uptime et de temps de chargement nécessitent un monitoring externe. Cette vue ne prétend pas mesurer une disponibilité qu’elle ne collecte pas encore.</p>
+        <p className="mt-4 text-xs leading-5 text-ink/40">Dernier diagnostic : {lastChecked ? new Date(lastChecked).toLocaleString('fr-FR') : 'en cours'}. Les métriques d’uptime et de temps de chargement restent distinctes d’un diagnostic fonctionnel.</p>
       </div>
     </div>
   );
