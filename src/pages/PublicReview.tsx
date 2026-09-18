@@ -997,4 +997,556 @@ export default function PublicReview() {
 
         {/* =====================================================
             LOYALTY
-        ===================================================== */}
+        ===================================================== */}        {section === 'loyalty' && (
+          <main className="px-5 pt-6">
+            <BackButton onClick={() => navigate('home')} />
+
+            <div className="mt-7">
+              <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-gold">
+                Programme exclusif
+              </p>
+
+              <h1 className="mt-1 font-display text-4xl text-forest">
+                Fidélité
+              </h1>
+            </div>
+
+            {loyaltyCreated ? (
+              <section className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto bg-[#f5f0e7]/95 px-4 py-6 backdrop-blur-sm">
+                <div className="w-full max-w-[420px]">
+                  <div className="relative overflow-hidden rounded-[32px] bg-forest p-7 text-white shadow-2xl">
+                  <div className="absolute -right-10 -top-10 h-36 w-36 rounded-full bg-gold/10 blur-2xl" />
+
+                  <div className="relative">
+                    <CheckCircle2
+                      size={34}
+                      className="text-gold"
+                    />
+
+                    <p className="mt-6 text-[9px] font-bold uppercase tracking-[0.25em] text-gold">
+                      Bienvenue dans le programme
+                    </p>
+
+                    <h2 className="mt-2 font-display text-3xl">
+                      {loyaltyCreated.first_name}
+                    </h2>
+
+                    <div className="mt-7 rounded-[22px] border border-white/10 bg-white/5 p-5">
+                      <p className="text-[9px] uppercase tracking-wider text-white/35">
+                        Votre numéro fidélité
+                      </p>
+
+                      <p className="mt-2 text-2xl font-bold tracking-[0.12em] text-gold">
+                        {loyaltyCreated.loyalty_number}
+                      </p>
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-2 gap-3">
+                      <div className="rounded-2xl bg-white/5 p-4">
+                        <p className="text-[9px] uppercase text-white/35">
+                          Points
+                        </p>
+                        <p className="mt-1 text-xl font-bold">
+                          {loyaltyCreated.points_balance ?? 0}
+                        </p>
+                      </div>
+
+                      <div className="rounded-2xl bg-white/5 p-4">
+                        <p className="text-[9px] uppercase text-white/35">
+                          Visites
+                        </p>
+                        <p className="mt-1 text-xl font-bold">
+                          {loyaltyCreated.visit_count ?? 0}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                  <button
+                    onClick={() => setLoyaltyCreated(null)}
+                    className="mt-5 w-full rounded-full border border-ink/10 bg-white py-3 text-sm font-semibold text-forest"
+                  >
+                    Retour au programme
+                  </button>
+                </div>
+              </section>
+            ) : (
+              <>
+                <section className="relative mt-8 overflow-hidden rounded-[32px] bg-forest p-7 text-white shadow-2xl">
+                  <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-gold/10 blur-3xl" />
+
+                  <div className="relative">
+                    <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gold/15 text-gold">
+                      <Gift size={26} />
+                    </div>
+
+                    <h2 className="mt-6 max-w-[330px] font-display text-3xl leading-tight">
+                      Des avantages réservés à nos clients fidèles.
+                    </h2>
+
+                    <p className="mt-3 text-sm leading-6 text-white/50">
+                      Cumulez des points à chaque visite et
+                      profitez de récompenses exclusives.
+                    </p>
+
+                    <button
+                      onClick={() => setShowLoyaltyForm(true)}
+                      className="mt-7 flex w-full items-center justify-center gap-2 rounded-full bg-gold px-5 py-3.5 text-sm font-bold text-forest"
+                    >
+                      Rejoindre gratuitement
+                      <ArrowRight size={16} />
+                    </button>
+                  </div>
+                </section>
+
+                {rewards.length > 0 && (
+                  <section className="mt-8">
+                    <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-gold">
+                      Vos futures récompenses
+                    </p>
+
+                    <div className="mt-4 space-y-3">
+                      {rewards.map((reward) => (
+                        <div
+                          key={reward.id}
+                          className="flex items-center justify-between gap-4 rounded-[22px] bg-white p-4 shadow-sm ring-1 ring-ink/5"
+                        >
+                          <div>
+                            <h3 className="font-semibold text-forest">
+                              {reward.name}
+                            </h3>
+
+                            {reward.description && (
+                              <p className="mt-1 text-xs leading-5 text-ink/45">
+                                {reward.description}
+                              </p>
+                            )}
+                          </div>
+
+                          <span className="shrink-0 rounded-full bg-gold/10 px-3 py-1.5 text-[10px] font-bold text-gold">
+                            {reward.points_required} pts
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                <section className="mt-8 rounded-[28px] bg-white p-6 ring-1 ring-ink/5">
+                  <h3 className="font-display text-xl text-forest">
+                    Comment ça marche ?
+                  </h3>
+
+                  <div className="mt-5 space-y-5">
+                    <Step
+                      number="01"
+                      title="Inscrivez-vous"
+                      text="Créez gratuitement votre carte fidélité."
+                    />
+
+                    <Step
+                      number="02"
+                      title="Cumulez"
+                      text="À chaque achat ou visite, vous accumulez des points."
+                    />
+
+                    <Step
+                      number="03"
+                      title="Soyez récompensé"
+                      text="Utilisez vos points pour profiter de vos avantages."
+                    />
+                  </div>
+                </section>
+              </>
+            )}
+          </main>
+        )}
+
+        <footer className="px-5 pb-5 pt-12 text-center">
+          <div className="flex items-center justify-center gap-1.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-ink/25">
+            <ShieldCheck size={12} />
+            Une expérience propulsée par TapMarrakech
+          </div>
+        </footer>
+      </div>
+
+      {/* =====================================================
+          BOTTOM NAV
+      ===================================================== */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 mx-auto w-full max-w-[520px] border-t border-ink/5 bg-[#fffdf9]/95 px-3 pb-[max(9px,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl">
+        <div className="grid grid-cols-4 gap-1">
+          <NavButton
+            active={section === 'home'}
+            icon={<Sparkles size={18} />}
+            label="Accueil"
+            onClick={() => navigate('home')}
+          />
+
+          <NavButton
+            active={section === 'menu'}
+            icon={<MenuIcon size={18} />}
+            label="Menu"
+            onClick={() => navigate('menu')}
+          />
+
+          <NavButton
+            active={section === 'reviews'}
+            icon={<Heart size={18} />}
+            label="Avis"
+            onClick={() => navigate('reviews')}
+          />
+
+          <NavButton
+            active={section === 'loyalty'}
+            icon={<Gift size={18} />}
+            label="Fidélité"
+            onClick={() => navigate('loyalty')}
+          />
+        </div>
+      </nav>
+
+      {/* =====================================================
+          LOYALTY MODAL
+      ===================================================== */}
+      {showLoyaltyForm && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink/50 p-0 backdrop-blur-sm">
+          <div className="w-full max-w-[520px] rounded-t-[34px] bg-[#fffdf9] p-6 pb-8 shadow-2xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-gold">
+                  Inscription gratuite
+                </p>
+
+                <h2 className="mt-1 font-display text-2xl text-forest">
+                  Rejoindre la fidélité
+                </h2>
+              </div>
+
+              <button
+                onClick={() => setShowLoyaltyForm(false)}
+                className="grid h-9 w-9 place-items-center rounded-full bg-ink/5 text-ink/50"
+              >
+                <X size={17} />
+              </button>
+            </div>
+
+            <form
+              onSubmit={registerLoyalty}
+              className="mt-6 space-y-3"
+            >
+              <div className="grid grid-cols-2 gap-3">
+                <input
+                  required
+                  value={loyaltyForm.first_name}
+                  onChange={(e) =>
+                    setLoyaltyForm({
+                      ...loyaltyForm,
+                      first_name: e.target.value,
+                    })
+                  }
+                  placeholder="Prénom"
+                  className="rounded-2xl border border-ink/10 bg-white px-4 py-3.5 text-sm outline-none focus:border-forest"
+                />
+
+                <input
+                  required
+                  value={loyaltyForm.last_name}
+                  onChange={(e) =>
+                    setLoyaltyForm({
+                      ...loyaltyForm,
+                      last_name: e.target.value,
+                    })
+                  }
+                  placeholder="Nom"
+                  className="rounded-2xl border border-ink/10 bg-white px-4 py-3.5 text-sm outline-none focus:border-forest"
+                />
+              </div>
+
+              <input
+                required
+                type="tel"
+                value={loyaltyForm.phone}
+                onChange={(e) =>
+                  setLoyaltyForm({
+                    ...loyaltyForm,
+                    phone: e.target.value,
+                  })
+                }
+                placeholder="Numéro de téléphone"
+                className="w-full rounded-2xl border border-ink/10 bg-white px-4 py-3.5 text-sm outline-none focus:border-forest"
+              />
+
+              <div>
+                <label className="mb-1.5 block text-[10px] font-medium text-ink/45">
+                  Date de naissance
+                  <span className="ml-1">(facultatif)</span>
+                </label>
+
+                <input
+                  type="date"
+                  value={loyaltyForm.birth_date}
+                  onChange={(e) =>
+                    setLoyaltyForm({
+                      ...loyaltyForm,
+                      birth_date: e.target.value,
+                    })
+                  }
+                  className="w-full rounded-2xl border border-ink/10 bg-white px-4 py-3.5 text-sm outline-none focus:border-forest"
+                />
+              </div>
+
+              {loyaltyError && (
+                <div className="rounded-2xl bg-red-50 px-4 py-3 text-xs text-red-600">
+                  {loyaltyError}
+                </div>
+              )}
+
+              <button
+                disabled={loyaltyLoading}
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-forest px-5 py-4 text-sm font-bold text-white disabled:opacity-50"
+              >
+                {loyaltyLoading
+                  ? 'Création de votre carte...'
+                  : 'Créer ma carte fidélité'}
+                {!loyaltyLoading && <ArrowRight size={16} />}
+              </button>
+
+              <p className="text-center text-[9px] leading-4 text-ink/30">
+                Vos informations sont utilisées uniquement pour
+                gérer votre programme fidélité.
+              </p>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* =========================================================
+   COMPONENTS
+========================================================= */
+
+function FeatureCard({
+  icon,
+  title,
+  subtitle,
+  onClick,
+  featured = false,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  subtitle: string;
+  onClick: () => void;
+  featured?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`rounded-[22px] p-4 text-left transition active:scale-[0.98] ${
+        featured
+          ? 'bg-forest text-white shadow-lg'
+          : 'bg-white text-forest shadow-sm ring-1 ring-ink/5'
+      }`}
+    >
+      <div
+        className={`grid h-10 w-10 place-items-center rounded-xl ${
+          featured
+            ? 'bg-white/10 text-gold'
+            : 'bg-forest/5 text-forest'
+        }`}
+      >
+        {icon}
+      </div>
+
+      <p className="mt-4 text-sm font-bold">{title}</p>
+
+      <p
+        className={`mt-1 text-[9px] ${
+          featured ? 'text-white/45' : 'text-ink/35'
+        }`}
+      >
+        {subtitle}
+      </p>
+    </button>
+  );
+}
+
+function BackButton({
+  onClick,
+}: {
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="flex items-center gap-2 text-xs font-semibold text-forest"
+    >
+      <ArrowLeft size={15} />
+      Accueil
+    </button>
+  );
+}
+
+function Empty({
+  icon,
+  title,
+  text,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  text: string;
+}) {
+  return (
+    <div className="mt-8 rounded-[28px] bg-white p-8 text-center ring-1 ring-ink/5">
+      <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-forest/5 text-forest">
+        {icon}
+      </div>
+
+      <h2 className="mt-4 font-display text-xl text-forest">
+        {title}
+      </h2>
+
+      <p className="mt-2 text-sm leading-6 text-ink/45">
+        {text}
+      </p>
+    </div>
+  );
+}
+
+function Step({
+  number,
+  title,
+  text,
+}: {
+  number: string;
+  title: string;
+  text: string;
+}) {
+  return (
+    <div className="flex gap-4">
+      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gold/10 text-[9px] font-bold text-gold">
+        {number}
+      </div>
+
+      <div>
+        <h4 className="text-sm font-semibold text-forest">
+          {title}
+        </h4>
+
+        <p className="mt-1 text-xs leading-5 text-ink/45">
+          {text}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function NavButton({
+  active,
+  icon,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex flex-col items-center justify-center gap-1 rounded-2xl py-2 transition ${
+        active
+          ? 'bg-forest text-white shadow-sm'
+          : 'text-ink/35'
+      }`}
+    >
+      {icon}
+
+      <span className="text-[9px] font-semibold">
+        {label}
+      </span>
+    </button>
+  );
+}
+
+function WifiCard({
+  establishmentId,
+}: {
+  establishmentId: string;
+}) {
+  const [wifi, setWifi] = useState<{
+    network_name: string;
+    wifi_password: string;
+  } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadWifi = async () => {
+      try {
+        const { data, error } = await supabase.rpc('get_public_wifi', {
+          p_establishment_id: establishmentId,
+        });
+
+        if (error) {
+          console.error('Erreur lors du chargement du Wi-Fi:', error);
+          return;
+        }
+
+        const wifiData = Array.isArray(data) ? data[0] : data;
+
+        if (!cancelled && wifiData?.network_name) {
+          setWifi({
+            network_name: wifiData.network_name,
+            wifi_password: wifiData.wifi_password || '',
+          });
+        }
+      } catch (error) {
+        console.error('Erreur inattendue lors du chargement du Wi-Fi:', error);
+      }
+    };
+
+    loadWifi();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [establishmentId]);
+
+  if (!wifi) return null;
+
+  return (
+    <section className="rounded-[28px] bg-white p-5 shadow-sm ring-1 ring-ink/5">
+      <div className="flex items-start gap-4">
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-forest/5 text-forest">
+          <Wifi size={20} />
+        </div>
+
+        <div>
+          <p className="font-display text-xl text-forest">
+            Wi-Fi gratuit
+          </p>
+
+          <p className="mt-1 text-xs text-ink/40">
+            Connectez-vous pendant votre visite.
+          </p>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            <span className="rounded-full bg-[#f7f5ef] px-3 py-1.5 text-xs font-semibold text-forest">
+              {wifi.network_name}
+            </span>
+
+            {wifi.wifi_password && (
+              <span className="rounded-full bg-gold/10 px-3 py-1.5 text-xs font-semibold text-gold">
+                {wifi.wifi_password}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
