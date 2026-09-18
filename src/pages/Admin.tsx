@@ -24,6 +24,16 @@ import {
   UsersRound,
   Percent,
   Printer,
+  CreditCard,
+  AlertTriangle,
+  Activity,
+  Search,
+  Filter,
+  CalendarDays,
+  ExternalLink,
+  ShieldCheck,
+  WalletCards,
+  Trash2,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -36,6 +46,8 @@ type Establishment = {
   slug: string;
   ai_business_type_id: string | null;
   created_at: string;
+  city?: string | null;
+  business_type?: string | null;
 };
 
 type AIBusinessType = {
@@ -60,6 +72,46 @@ type StaffMember = {
   profileRole: 'admin' | 'responsible' | 'employee' | null;
 };
 
+type GlobalStats = {
+  reviews: number;
+  averageRating: number;
+  positiveReviews: number;
+  negativeReviews: number;
+  loyaltyCustomers: number;
+  analyticsEvents: number;
+};
+
+type BillingPlan = {
+  id: string;
+  name: string;
+  price_mad: number;
+  interval: string;
+  active: boolean;
+  features?: string[] | null;
+};
+
+type BillingSubscription = {
+  id: string;
+  establishment_id: string;
+  plan_id: string;
+  status: string;
+  started_at: string | null;
+  current_period_end: string | null;
+  trial_days: number | null;
+  plan?: BillingPlan | null;
+};
+
+type BillingSnapshot = {
+  available: boolean;
+  plans: BillingPlan[];
+  subscriptions: BillingSubscription[];
+  paymentsThisMonth: number;
+  failedPayments: number;
+  overdueInvoices: number;
+  upcomingRenewals: number;
+  mrr: number;
+};
+
 type AdminSection =
   | 'overview'
   | 'establishments'
@@ -71,7 +123,9 @@ type AdminSection =
   | 'ai'
   | 'templates'
   | 'analytics'
-  | 'reports';
+  | 'reports'
+  | 'billing'
+  | 'system';
 
 export default function Admin() {
   const { user, signOut } = useAuth();
@@ -83,6 +137,26 @@ export default function Admin() {
   const [establishments, setEstablishments] = useState<Establishment[]>([]);
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [aiBusinessTypes, setAIBusinessTypes] = useState<AIBusinessType[]>([]);
+  const [globalStats, setGlobalStats] = useState<GlobalStats>({
+    reviews: 0,
+    averageRating: 0,
+    positiveReviews: 0,
+    negativeReviews: 0,
+    loyaltyCustomers: 0,
+    analyticsEvents: 0,
+  });
+
+  const [billing, setBilling] = useState<BillingSnapshot>({
+    available: false,
+    plans: [],
+    subscriptions: [],
+    paymentsThisMonth: 0,
+    failedPayments: 0,
+    overdueInvoices: 0,
+    upcomingRenewals: 0,
+    mrr: 0,
+  });
+
 
   const [loading, setLoading] = useState(true);
   const [staffLoading, setStaffLoading] = useState(true);
@@ -183,10 +257,70 @@ export default function Admin() {
     setAIBusinessTypes(data ?? []);
   };
 
+  const loadGlobalStats = async () => {
+    try {
+      const [{ data: reviewRows }, { count: loyaltyCustomers }, { count: analyticsEvents }] = await Promise.all([
+        supabase.from('reviews').select('rating'),
+        supabase.from('loyalty_customers').select('id', { count: 'exact', head: true }),
+        supabase.from('analytics_events').select('id', { count: 'exact', head: true }),
+      ]);
+      const ratings = (reviewRows ?? []).map((row) => Number(row.rating)).filter((rating) => Number.isFinite(rating));
+      const averageRating = ratings.length ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length : 0;
+      setGlobalStats({ reviews: ratings.length, averageRating, positiveReviews: ratings.filter((rating) => rating >= 4).length, negativeReviews: ratings.filter((rating) => rating <= 3).length, loyaltyCustomers: loyaltyCustomers ?? 0, analyticsEvents: analyticsEvents ?? 0 });
+    } catch (error) {
+      console.error('Erreur statistiques globales:', error);
+      setGlobalStats({ reviews: 0, averageRating: 0, positiveReviews: 0, negativeReviews: 0, loyaltyCustomers: 0, analyticsEvents: 0 });
+    }
+  };
+
+  const loadBilling = async () => {
+    const empty: BillingSnapshot = { available: false, plans: [], subscriptions: [], paymentsThisMonth: 0, failedPayments: 0, overdueInvoices: 0, upcomingRenewals: 0, mrr: 0 };
+    try {
+      const [
+        { data: plans, error: plansError },
+        { data: subscriptions, error: subscriptionsError },
+        { count: paymentsThisMonth },
+        { count: failedPayments },
+        { count: overdueInvoices },
+      ] = await Promise.all([
+        supabase.from('subscription_plans').select('id,name,price_mad,interval,active,features').order('price_mad'),
+        supabase.from('subscriptions').select('id,establishment_id,plan_id,status,started_at,current_period_end,trial_days,subscription_plans(id,name,price_mad,interval,active)'),
+        supabase.from('payments').select('id', { count: 'exact', head: true }).gte('paid_at', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()).eq('status', 'paid'),
+        supabase.from('payments').select('id', { count: 'exact', head: true }).eq('status', 'failed'),
+        supabase.from('invoices').select('id', { count: 'exact', head: true }).eq('status', 'overdue'),
+      ]);
+      if (plansError || subscriptionsError) {
+        if (plansError) console.error('Erreur plans:', plansError);
+        if (subscriptionsError) console.error('Erreur abonnements:', subscriptionsError);
+        setBilling(empty);
+        return;
+      }
+      const normalizedSubscriptions: BillingSubscription[] = (subscriptions ?? []).map((subscription) => {
+        const relation = subscription.subscription_plans;
+        const plan = Array.isArray(relation) ? relation[0] ?? null : relation ?? null;
+        return { ...subscription, plan: plan as BillingPlan | null };
+      });
+      const mrr = normalizedSubscriptions.filter((subscription) => subscription.status === 'active').reduce((sum, subscription) => sum + Number(subscription.plan?.price_mad ?? 0), 0);
+      const now = Date.now();
+      const in30Days = now + 30 * 24 * 60 * 60 * 1000;
+      const upcomingRenewals = normalizedSubscriptions.filter((subscription) => {
+        if (!subscription.current_period_end || subscription.status !== 'active') return false;
+        const time = new Date(subscription.current_period_end).getTime();
+        return time >= now && time <= in30Days;
+      }).length;
+      setBilling({ available: true, plans: (plans ?? []) as BillingPlan[], subscriptions: normalizedSubscriptions, paymentsThisMonth: paymentsThisMonth ?? 0, failedPayments: failedPayments ?? 0, overdueInvoices: overdueInvoices ?? 0, upcomingRenewals, mrr });
+    } catch (error) {
+      console.error('Erreur facturation:', error);
+      setBilling(empty);
+    }
+  };
+
   useEffect(() => {
     loadEstablishments();
     loadStaff();
     loadAIBusinessTypes();
+    loadGlobalStats();
+    loadBilling();
   }, []);
 
   const reloadAll = async () => {
@@ -194,6 +328,8 @@ export default function Admin() {
       loadEstablishments(),
       loadStaff(),
       loadAIBusinessTypes(),
+      loadGlobalStats(),
+      loadBilling(),
     ]);
   };
 
@@ -271,6 +407,16 @@ export default function Admin() {
       id: 'reports',
       label: 'Rapports PDF',
       icon: Printer,
+    },
+    {
+      id: 'billing',
+      label: 'Abonnements & facturation',
+      icon: CreditCard,
+    },
+    {
+      id: 'system',
+      label: 'Supervision technique',
+      icon: Activity,
     },
   ];
 
@@ -451,6 +597,14 @@ export default function Admin() {
 
           {section === 'reports' && (
             <PDFReportsSection establishments={establishments} />
+          )}
+
+          {section === 'billing' && (
+            <BillingSection establishments={establishments} billing={billing} reload={loadBilling} />
+          )}
+
+          {section === 'system' && (
+            <SystemSection billing={billing} globalStats={globalStats} establishments={establishments} />
           )}
         </main>
       </div>
@@ -3845,4 +3999,25 @@ function EmptyStaff({
       </p>
     </div>
   );
+}
+
+
+/* =========================================================
+   BILLING
+========================================================= */
+
+function BillingSection({
+  establishments,
+  billing,
+  reload,
+}
+
+/* =========================================================
+   SYSTEM
+========================================================= */
+
+function SystemSection({
+  billing,
+  globalStats,
+  establishments,
 }
