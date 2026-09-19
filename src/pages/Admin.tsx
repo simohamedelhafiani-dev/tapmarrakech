@@ -1026,6 +1026,9 @@ function EstablishmentWorkspace({
   const [eventsCount, setEventsCount] = useState(0);
   const [templates, setTemplates] = useState<any[]>([]);
   const [menuTemplate, setMenuTemplate] = useState('editorial');
+  const [menuDisplayMode, setMenuDisplayMode] = useState<'digital' | 'pdf'>('digital');
+  const [menuPdfUrl, setMenuPdfUrl] = useState<string | null>(null);
+  const [menuPdfUploading, setMenuPdfUploading] = useState(false);
   const [menuCategoryName, setMenuCategoryName] = useState('');
   const [menuItem, setMenuItem] = useState({ name: '', description: '', price: '', category_id: '' });
   const [menuImportOpen, setMenuImportOpen] = useState(false);
@@ -1060,10 +1063,13 @@ function EstablishmentWorkspace({
       const [{ data: c }, { data: i }, { data: establishmentRow }] = await Promise.all([
         supabase.from('menu_categories').select('*').eq('establishment_id', establishment.id).order('display_order'),
         supabase.from('menu_items').select('*').eq('establishment_id', establishment.id).order('display_order'),
-        supabase.from('establishments').select('menu_template_id').eq('id', establishment.id).maybeSingle(),
+        supabase.from('establishments').select('menu_template_id,menu_display_mode,menu_pdf_url').eq('id', establishment.id).maybeSingle(),
       ]);
       setCategories(c ?? []);
-      setMenuTemplate(establishmentRow?.menu_template_id ?? 'editorial'); setItems(i ?? []);
+      setMenuTemplate(establishmentRow?.menu_template_id ?? 'editorial');
+      setMenuDisplayMode(establishmentRow?.menu_display_mode === 'pdf' ? 'pdf' : 'digital');
+      setMenuPdfUrl(establishmentRow?.menu_pdf_url ?? null);
+      setItems(i ?? []);
       if (!menuItem.category_id && c?.[0]) setMenuItem((v) => ({ ...v, category_id: c[0].id }));
     }
     if (tab === 'promotions') {
@@ -1179,6 +1185,49 @@ function EstablishmentWorkspace({
     setSaving(true);
     const { error } = await supabase.from('establishment_wifi').upsert({ establishment_id: establishment.id, ssid: wifi.ssid, wifi_password: wifi.password || null, active: wifi.active }, { onConflict: 'establishment_id' });
     setSaving(false); if (error) return alert(error.message); alert('Wi-Fi enregistré.');
+  };
+
+  const setMenuMode = async (mode: 'digital' | 'pdf') => {
+    setMenuDisplayMode(mode);
+    const { error } = await supabase.from('establishments').update({ menu_display_mode: mode }).eq('id', establishment.id);
+    if (error) { alert(error.message); return; }
+  };
+
+  const uploadMenuPdf = async (file: File) => {
+    if (file.type !== 'application/pdf') {
+      alert('Sélectionne uniquement un fichier PDF.');
+      return;
+    }
+    setMenuPdfUploading(true);
+    try {
+      const path = `${establishment.id}/menu-${Date.now()}.pdf`;
+      const { error } = await supabase.storage.from('menu-pdfs').upload(path, file, {
+        upsert: true,
+        contentType: 'application/pdf',
+        cacheControl: '31536000',
+      });
+      if (error) throw error;
+      const { data } = supabase.storage.from('menu-pdfs').getPublicUrl(path);
+      const { error: updateError } = await supabase.from('establishments').update({
+        menu_pdf_url: data.publicUrl,
+        menu_display_mode: 'pdf',
+      }).eq('id', establishment.id);
+      if (updateError) throw updateError;
+      setMenuPdfUrl(data.publicUrl);
+      setMenuDisplayMode('pdf');
+      alert('Menu PDF importé. Il sera affiché tel quel sur la page publique.');
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Impossible d’importer le PDF.');
+    } finally {
+      setMenuPdfUploading(false);
+    }
+  };
+
+  const removeMenuPdf = async () => {
+    const { error } = await supabase.from('establishments').update({ menu_pdf_url: null, menu_display_mode: 'digital' }).eq('id', establishment.id);
+    if (error) return alert(error.message);
+    setMenuPdfUrl(null);
+    setMenuDisplayMode('digital');
   };
 
   const saveMenuTemplate = async (templateId: string) => {
@@ -1601,6 +1650,38 @@ function EstablishmentWorkspace({
             )}
           </div>
         )}
+
+        <div className="rounded-2xl border border-forest/10 bg-white p-6 shadow-sm">
+          <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Mode d'affichage</p>
+              <h3 className="mt-1 text-xl font-semibold text-forest">Comment afficher le menu ?</h3>
+              <p className="mt-1 text-xs text-ink/45">Choisis entre un vrai menu numérique construit dans TapMarrakech ou le PDF original du commerce.</p>
+            </div>
+            <span className="rounded-full bg-[#f7f7f3] px-3 py-1.5 text-[11px] font-semibold text-forest">{menuDisplayMode === 'pdf' ? 'PDF original' : 'Menu numérique'}</span>
+          </div>
+          <div className="mt-5 grid gap-3 md:grid-cols-2">
+            <button type="button" onClick={() => void setMenuMode('digital')} className={`rounded-2xl border p-4 text-left ${menuDisplayMode === 'digital' ? 'border-gold ring-2 ring-gold/20' : 'border-ink/10'}`}>
+              <div className="font-semibold text-forest">✨ Menu numérique</div>
+              <p className="mt-1 text-xs text-ink/45">Templates, photos, catégories, produits et édition directement dans TapMarrakech.</p>
+            </button>
+            <div className={`rounded-2xl border p-4 ${menuDisplayMode === 'pdf' ? 'border-gold ring-2 ring-gold/20' : 'border-ink/10'}`}>
+              <div className="font-semibold text-forest">📄 Garder le menu original</div>
+              <p className="mt-1 text-xs text-ink/45">Importe le PDF tel quel. Aucun template et aucune analyse IA.</p>
+              <label className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">
+                <Upload size={14} />
+                {menuPdfUploading ? 'Import en cours…' : menuPdfUrl ? 'Remplacer le PDF' : 'Importer le PDF'}
+                <input type="file" accept="application/pdf,.pdf" className="sr-only" disabled={menuPdfUploading} onChange={(e) => { const file = e.target.files?.[0]; if (file) void uploadMenuPdf(file); e.currentTarget.value = ''; }} />
+              </label>
+              {menuPdfUrl && (
+                <div className="mt-3 flex items-center gap-3 text-xs">
+                  <a href={menuPdfUrl} target="_blank" rel="noreferrer" className="text-forest underline">Voir le PDF</a>
+                  <button type="button" onClick={() => void removeMenuPdf()} className="text-red-600">Retirer</button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
 
         <div className="rounded-2xl border border-gold/20 bg-[#fbf8ee] p-6 shadow-sm">
           <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
