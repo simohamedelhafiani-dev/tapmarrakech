@@ -590,7 +590,7 @@ export default function Loyalty() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px] text-left">
+          <table className="w-full min-w-[760px] text-left">
             <thead>
               <tr className="border-b border-ink/5 text-[10px] uppercase tracking-wider text-ink/40">
                 <th className="px-6 py-4">Client</th>
