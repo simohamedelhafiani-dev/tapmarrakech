@@ -23,7 +23,6 @@ import { useParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import type { Establishment } from '@/lib/types';
 import { Stars } from '@/components/Stars';
-import QRCode from 'qrcode';
 
 type Section = 'home' | 'menu' | 'reviews' | 'loyalty';
 
@@ -85,6 +84,7 @@ export default function PublicReview() {
 
   const [showLoyaltyForm, setShowLoyaltyForm] = useState(false);
   const [loyaltyCreated, setLoyaltyCreated] = useState<any>(null);
+  const [loyaltyCardUrl, setLoyaltyCardUrl] = useState('');
   const [loyaltyLoading, setLoyaltyLoading] = useState(false);
   const [loyaltyError, setLoyaltyError] = useState('');
 
@@ -410,7 +410,31 @@ export default function PublicReview() {
       return;
     }
 
-    setLoyaltyCreated(customer);
+    const { data: linkData, error: linkError } = await supabase.rpc(
+      'get_public_loyalty_link',
+      {
+        p_establishment_id: place.id,
+        p_loyalty_number: customer.loyalty_number,
+        p_phone: loyaltyForm.phone.trim(),
+      }
+    );
+
+    const loyaltyLink = Array.isArray(linkData) ? linkData[0]?.access_token : linkData?.access_token;
+
+    if (linkError || !loyaltyLink) {
+      setLoyaltyCreated(customer);
+      setLoyaltyCardUrl('');
+    } else {
+      const url = new URL('/loyalty/' + loyaltyLink, window.location.origin).toString();
+      setLoyaltyCreated(customer);
+      setLoyaltyCardUrl(url);
+      try {
+        window.localStorage.setItem('tapmarrakech:customer-card-token', String(loyaltyLink));
+      } catch {
+        // Ignore storage restrictions; the permanent link remains available.
+      }
+    }
+
     setShowLoyaltyForm(false);
 
     await supabase.from('analytics_events').insert({
@@ -1034,57 +1058,82 @@ export default function PublicReview() {
               <section className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto bg-[#f5f0e7]/95 px-4 py-6 backdrop-blur-sm">
                 <div className="w-full max-w-[420px]">
                   <div className="relative overflow-hidden rounded-[32px] bg-forest p-7 text-white shadow-2xl">
-                  <div className="absolute -right-10 -top-10 h-36 w-36 rounded-full bg-gold/10 blur-2xl" />
+                    <div className="absolute -right-10 -top-10 h-36 w-36 rounded-full bg-gold/10 blur-2xl" />
 
-                  <div className="relative">
-                    <CheckCircle2
-                      size={34}
-                      className="text-gold"
-                    />
+                    <div className="relative">
+                      <CheckCircle2 size={34} className="text-gold" />
 
-                    <p className="mt-6 text-[9px] font-bold uppercase tracking-[0.25em] text-gold">
-                      Bienvenue dans le programme
-                    </p>
-
-                    <h2 className="mt-2 font-display text-3xl">
-                      {loyaltyCreated.first_name}
-                    </h2>
-
-                    <div className="mt-7 rounded-[22px] border border-white/10 bg-white/5 p-5">
-                      <p className="text-[9px] uppercase tracking-wider text-white/35">
-                        Votre numéro fidélité
+                      <p className="mt-6 text-[9px] font-bold uppercase tracking-[0.25em] text-gold">
+                        Bienvenue dans le programme
                       </p>
 
-                      <p className="mt-2 text-2xl font-bold tracking-[0.12em] text-gold">
-                        {loyaltyCreated.loyalty_number}
-                      </p>
-                    </div>
+                      <h2 className="mt-2 font-display text-3xl">
+                        {loyaltyCreated.first_name}
+                      </h2>
 
-                    <div className="mt-4 grid grid-cols-2 gap-3">
-                      <div className="rounded-2xl bg-white/5 p-4">
-                        <p className="text-[9px] uppercase text-white/35">
-                          Points
+                      <div className="mt-7 rounded-[22px] border border-white/10 bg-white/5 p-5">
+                        <p className="text-[9px] uppercase tracking-wider text-white/35">
+                          Votre carte fidélité
                         </p>
-                        <p className="mt-1 text-xl font-bold">
-                          {loyaltyCreated.points_balance ?? 0}
+                        <p className="mt-2 break-all text-[11px] leading-5 text-white/70">
+                          {loyaltyCardUrl || 'Votre carte est créée. Ouvrez-la depuis votre espace fidélité.'}
                         </p>
                       </div>
 
-                      <div className="rounded-2xl bg-white/5 p-4">
-                        <p className="text-[9px] uppercase text-white/35">
-                          Visites
-                        </p>
-                        <p className="mt-1 text-xl font-bold">
-                          {loyaltyCreated.visit_count ?? 0}
-                        </p>
+                      <div className="mt-4 grid grid-cols-2 gap-3">
+                        <div className="rounded-2xl bg-white/5 p-4">
+                          <p className="text-[9px] uppercase text-white/35">Points</p>
+                          <p className="mt-1 text-xl font-bold">{loyaltyCreated.points_balance ?? 0}</p>
+                        </div>
+                        <div className="rounded-2xl bg-white/5 p-4">
+                          <p className="text-[9px] uppercase text-white/35">Visites</p>
+                          <p className="mt-1 text-xl font-bold">{loyaltyCreated.visit_count ?? 0}</p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+
+                  {loyaltyCardUrl && (
+                    <div className="mt-4 grid grid-cols-2 gap-3">
+                      <a
+                        href={loyaltyCardUrl}
+                        className="flex items-center justify-center rounded-full bg-forest px-4 py-3 text-sm font-semibold text-white"
+                      >
+                        Ouvrir ma carte
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => navigator.clipboard.writeText(loyaltyCardUrl)}
+                        className="rounded-full border border-ink/10 bg-white px-4 py-3 text-sm font-semibold text-forest"
+                      >
+                        Copier le lien
+                      </button>
+                    </div>
+                  )}
+
+                  {loyaltyCardUrl && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (navigator.share) {
+                          await navigator.share({
+                            title: 'Ma carte fidélité',
+                            text: 'Voici ma carte fidélité.',
+                            url: loyaltyCardUrl,
+                          });
+                          return;
+                        }
+                        await navigator.clipboard.writeText(loyaltyCardUrl);
+                      }}
+                      className="mt-3 w-full rounded-full bg-gold px-5 py-3.5 text-sm font-bold text-forest"
+                    >
+                      Partager / enregistrer ma carte
+                    </button>
+                  )}
 
                   <button
                     onClick={() => setLoyaltyCreated(null)}
-                    className="mt-5 w-full rounded-full border border-ink/10 bg-white py-3 text-sm font-semibold text-forest"
+                    className="mt-3 w-full rounded-full border border-ink/10 bg-white py-3 text-sm font-semibold text-forest"
                   >
                     Retour au programme
                   </button>
