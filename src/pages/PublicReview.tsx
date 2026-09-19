@@ -1517,8 +1517,8 @@ function WifiActionRow({
     network_name: string;
     wifi_password: string;
   } | null>(null);
-  const [qr, setQr] = useState('');
   const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState<'network' | 'password' | ''>('');
 
   useEffect(() => {
     let cancelled = false;
@@ -1554,24 +1554,13 @@ function WifiActionRow({
     };
   }, [establishmentId]);
 
-  const escapeWifi = (value: string) =>
-    value.replace(/([\\;,:"'])/g, '\\$1');
-
-  const openWifi = async () => {
-    if (!wifi) return;
-
+  const copy = async (value: string, type: 'network' | 'password') => {
     try {
-      const security = wifi.wifi_password ? 'WPA' : 'nopass';
-      const payload = `WIFI:T:${security};S:${escapeWifi(wifi.network_name)};P:${escapeWifi(wifi.wifi_password)};;`;
-      const dataUrl = await QRCode.toDataURL(payload, {
-        width: 260,
-        margin: 2,
-        color: { dark: '#17352a', light: '#ffffff' },
-      });
-      setQr(dataUrl);
-      setOpen(true);
-    } catch (error) {
-      console.error('Impossible de générer le QR Wi-Fi:', error);
+      await navigator.clipboard.writeText(value);
+      setCopied(type);
+      window.setTimeout(() => setCopied(''), 1600);
+    } catch {
+      // Clipboard may be unavailable in some browsers.
     }
   };
 
@@ -1581,7 +1570,7 @@ function WifiActionRow({
     <>
       <button
         type="button"
-        onClick={openWifi}
+        onClick={() => setOpen(true)}
         className="group flex w-full items-center gap-4 rounded-[24px] bg-white p-4 text-left shadow-sm ring-1 ring-ink/5 transition active:scale-[0.99]"
       >
         <div className="grid h-12 w-12 shrink-0 place-items-center rounded-[17px] bg-emerald-50 text-emerald-600">
@@ -1591,16 +1580,16 @@ function WifiActionRow({
         <div className="min-w-0 flex-1">
           <p className="text-[15px] font-bold text-forest">Se connecter au Wi-Fi</p>
           <p className="mt-1 text-[11px] leading-5 text-ink/45">
-            {wifi?.network_name ? `Wi-Fi gratuit · ${wifi.network_name}` : 'Wi-Fi gratuit pour nos clients'}
+            Appuyez ici pour afficher les informations de connexion.
           </p>
         </div>
 
         <ArrowRight size={19} className="shrink-0 text-ink/35" />
       </button>
 
-      {open && wifi && (
+      {open && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-ink/50 px-4 py-6 backdrop-blur-sm">
-          <div className="w-full max-w-[380px] rounded-[30px] bg-[#fffdf9] p-6 text-center shadow-2xl">
+          <div className="w-full max-w-[380px] rounded-[30px] bg-[#fffdf9] p-6 shadow-2xl">
             <button
               type="button"
               onClick={() => setOpen(false)}
@@ -1614,25 +1603,45 @@ function WifiActionRow({
               <Wifi size={23} />
             </div>
 
-            <h2 className="mt-4 font-display text-2xl text-forest">
+            <h2 className="mt-4 text-center font-display text-2xl text-forest">
               Connexion Wi-Fi
             </h2>
 
-            <p className="mt-1 text-sm text-ink/45">
-              Scannez ce QR code avec l’appareil photo de votre téléphone.
+            <p className="mt-1 text-center text-sm leading-5 text-ink/45">
+              Connectez votre téléphone au réseau ci-dessous.
             </p>
 
-            <div className="mx-auto mt-5 w-fit rounded-2xl bg-white p-3 shadow-sm ring-1 ring-ink/5">
-              {qr && <img src={qr} alt="QR de connexion Wi-Fi" className="h-56 w-56" />}
+            <div className="mt-5 rounded-2xl border border-ink/5 bg-[#f7f7f3] p-4">
+              <p className="text-[10px] uppercase tracking-[0.14em] text-ink/40">Réseau Wi-Fi</p>
+              <div className="mt-2 flex items-center gap-2">
+                <p className="min-w-0 flex-1 break-all text-sm font-bold text-forest">{wifi.network_name}</p>
+                <button
+                  type="button"
+                  onClick={() => copy(wifi.network_name, 'network')}
+                  className="shrink-0 rounded-full bg-white px-3 py-2 text-[10px] font-semibold text-forest ring-1 ring-ink/5"
+                >
+                  {copied === 'network' ? 'Copié' : 'Copier'}
+                </button>
+              </div>
             </div>
 
-            <p className="mt-4 text-sm font-semibold text-forest">
-              {wifi.network_name}
-            </p>
-
-            <p className="mt-1 text-[11px] text-ink/35">
-              Le mot de passe n’est pas affiché.
-            </p>
+            <div className="mt-3 rounded-2xl border border-ink/5 bg-[#f7f7f3] p-4">
+              <p className="text-[10px] uppercase tracking-[0.14em] text-ink/40">Mot de passe</p>
+              <div className="mt-2 flex items-center gap-2">
+                <p className="min-w-0 flex-1 break-all text-sm font-bold text-forest">
+                  {wifi.wifi_password || 'Aucun mot de passe'}
+                </p>
+                {wifi.wifi_password && (
+                  <button
+                    type="button"
+                    onClick={() => copy(wifi.wifi_password, 'password')}
+                    className="shrink-0 rounded-full bg-white px-3 py-2 text-[10px] font-semibold text-forest ring-1 ring-ink/5"
+                  >
+                    {copied === 'password' ? 'Copié' : 'Copier'}
+                  </button>
+                )}
+              </div>
+            </div>
 
             <button
               type="button"
