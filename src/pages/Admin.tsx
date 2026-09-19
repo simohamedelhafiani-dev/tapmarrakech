@@ -4895,18 +4895,20 @@ function BillingSection({
         </div>
         {filtered.length === 0 ? (
           <div className="p-10 text-center text-sm text-ink/40">Aucun abonnement correspondant.</div>
-        ) : filtered.map((sub) => {
-          const e = establishmentMap.get(sub.establishment_id);
-          return (
-            <div key={sub.id} className="grid min-w-[760px] grid-cols-[1.5fr_1fr_.8fr_1fr_1fr] gap-4 border-b border-ink/5 px-5 py-4 text-sm last:border-0">
-              <div><p className="font-semibold">{e?.name ?? 'Établissement supprimé'}</p><p className="text-xs text-ink/35">{e?.city ?? 'Ville non définie'}</p></div>
-              <span>{sub.plan?.name ?? '—'}</span>
-              <span className={`w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold ${sub.status === 'active' ? 'bg-green-100 text-green-700' : sub.status === 'trial' ? 'bg-blue-100 text-blue-700' : sub.status === 'past_due' ? 'bg-amber-100 text-amber-700' : sub.status === 'unpaid' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-600'}`}>{sub.status}</span>
-              <span className="font-semibold">{Number(sub.plan?.price_mad ?? 0).toLocaleString('fr-FR')} MAD</span>
-              <span className="text-ink/50">{formatDate(sub.current_period_end)}</span>
-            </div>
-          );
-        })}
+        ) : (
+          filtered.map((sub) => {
+            const e = establishmentMap.get(sub.establishment_id);
+            return (
+              <div key={sub.id} className="grid min-w-[760px] grid-cols-[1.5fr_1fr_.8fr_1fr_1fr] gap-4 border-b border-ink/5 px-5 py-4 text-sm last:border-0">
+                <div><p className="font-semibold">{e?.name ?? 'Établissement supprimé'}</p><p className="text-xs text-ink/35">{e?.city ?? 'Ville non définie'}</p></div>
+                <span>{sub.plan?.name ?? '—'}</span>
+                <span className={`w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold ${sub.status === 'active' ? 'bg-green-100 text-green-700' : sub.status === 'trial' ? 'bg-blue-100 text-blue-700' : sub.status === 'past_due' ? 'bg-amber-100 text-amber-700' : sub.status === 'unpaid' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-600'}`}>{sub.status}</span>
+                <span className="font-semibold">{Number(sub.plan?.price_mad ?? 0).toLocaleString('fr-FR')} MAD</span>
+                <span className="text-ink/50">{formatDate(sub.current_period_end)}</span>
+              </div>
+            );
+          })
+        )}
       </div>
 
       <div className="mt-8 rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
