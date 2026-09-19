@@ -22,6 +22,7 @@ import LoyaltySettings from '@/pages/LoyaltySettings';
 import Menu from '@/pages/Menu';
 import Admin from '@/pages/Admin';
 import Employee from '@/pages/Employee';
+import LoyaltyScanner from '@/pages/LoyaltyScanner';
 
 type EstablishmentRow = {
   id: string;
@@ -212,7 +213,16 @@ function App() {
           </Route>
 
           {/* L'employé possède sa propre session par code. */}
-          <Route path="/employee" element={<Employee />} />
+          <Route
+            path="/employee"
+            element={
+              new URLSearchParams(window.location.search).has('scanner') ? (
+                <LoyaltyScanner />
+              ) : (
+                <Employee />
+              )
+            }
+          />
 
           <Route path="*" element={<RoleRedirect />} />
         </Routes>
