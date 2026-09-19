@@ -9,6 +9,7 @@ import type { SubscriptionFeature } from '@/lib/subscriptionAccess';
 import { supabase } from '@/lib/supabase';
 
 import PublicReview from '@/pages/PublicReview';
+import LoyaltyCard from '@/pages/LoyaltyCard';
 import Login from '@/pages/Login';
 import { ForgotPassword, Register } from '@/pages/AuthPages';
 
@@ -150,6 +151,7 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/r/:slug" element={<PublicReview />} />
+          <Route path="/loyalty/:token" element={<LoyaltyCard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -230,6 +232,12 @@ function RoleRedirect() {
   }
 
   if (!user) {
+    const scannerToken = window.localStorage.getItem('tapmarrakech:scanner-token');
+    if (scannerToken) return <Navigate to={`/employee?scanner=${scannerToken}`} replace />;
+
+    const customerToken = window.localStorage.getItem('tapmarrakech:customer-card-token');
+    if (customerToken) return <Navigate to={`/loyalty/${customerToken}`} replace />;
+
     return <Navigate to="/login" replace />;
   }
 

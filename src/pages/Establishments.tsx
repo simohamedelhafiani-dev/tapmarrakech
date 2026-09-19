@@ -32,6 +32,7 @@ export default function Establishments() {
   const [message, setMessage] = useState('');
   const [qr, setQr] = useState<Establishment | null>(null);
   const [loading, setLoading] = useState(true);
+  const [scannerLinks, setScannerLinks] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!user) {
@@ -76,7 +77,23 @@ export default function Establishments() {
           return;
         }
 
-        setPlaces((data ?? []) as Establishment[]);
+        const nextPlaces = (data ?? []) as Establishment[];
+        setPlaces(nextPlaces);
+
+        const links = await Promise.all(
+          nextPlaces.map(async (place) => {
+            const { data: linkData, error: linkError } = await supabase.rpc(
+              'get_or_create_establishment_scanner_link',
+              { p_establishment_id: place.id }
+            );
+            const row = Array.isArray(linkData) ? linkData[0] : linkData;
+            return linkError || !row?.scanner_token
+              ? null
+              : [place.id, `${window.location.origin}/employee?scanner=${row.scanner_token}`] as const;
+          })
+        );
+
+        setScannerLinks(Object.fromEntries(links.filter(Boolean) as Array<readonly [string, string]>));
         setLoading(false);
       } catch (error) {
         console.error(
@@ -421,6 +438,29 @@ export default function Establishments() {
                 >
                   Modifier
                 </button>
+              </div>
+
+              <div className="mt-5 rounded-xl bg-[#f7f7f3] p-3">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-forest/50">Accès scanner fidélité</p>
+                <p className="mt-1 truncate text-[11px] text-ink/40">{scannerLinks[place.id] ?? 'Génération du lien…'}</p>
+                {scannerLinks[place.id] && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <button
+                      onClick={() => copy(scannerLinks[place.id])}
+                      className="rounded-lg bg-white px-3 py-2 text-[11px] font-semibold text-forest"
+                    >
+                      Copier le scanner
+                    </button>
+                    <a
+                      href={scannerLinks[place.id]}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded-lg bg-white px-3 py-2 text-[11px] font-semibold text-forest"
+                    >
+                      Ouvrir le scanner
+                    </a>
+                  </div>
+                )}
               </div>
 
               <div className="mt-5 flex flex-wrap gap-2 border-t border-ink/5 pt-4">
