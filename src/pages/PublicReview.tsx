@@ -1072,12 +1072,31 @@ export default function PublicReview() {
                       </h2>
 
                       <div className="mt-7 rounded-[22px] border border-white/10 bg-white/5 p-5">
-                        <p className="text-[9px] uppercase tracking-wider text-white/35">
-                          Votre carte fidélité
-                        </p>
-                        <p className="mt-2 break-all text-[11px] leading-5 text-white/70">
-                          {loyaltyCardUrl || 'Votre carte est créée. Ouvrez-la depuis votre espace fidélité.'}
-                        </p>
+                        <div className="flex items-center justify-between gap-4">
+                          <div>
+                            <p className="text-[9px] uppercase tracking-[0.18em] text-white/35">
+                              Carte fidélité
+                            </p>
+                            <p className="mt-2 text-sm font-semibold text-white">
+                              Votre carte est prête
+                            </p>
+                            <p className="mt-1 text-[10px] leading-4 text-white/40">
+                              Gardez-la sur votre téléphone pour la présenter à chaque visite.
+                            </p>
+                          </div>
+                          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gold/15 text-gold">
+                            <Gift size={21} />
+                          </div>
+                        </div>
+
+                        <div className="mt-4 rounded-xl bg-black/10 px-3 py-2.5">
+                          <p className="text-[8px] uppercase tracking-[0.16em] text-white/30">
+                            N° carte
+                          </p>
+                          <p className="mt-1 text-xs font-semibold tracking-[0.08em] text-white/75">
+                            {loyaltyCreated.loyalty_number}
+                          </p>
+                        </div>
                       </div>
 
                       <div className="mt-4 grid grid-cols-2 gap-3">
