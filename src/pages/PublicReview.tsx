@@ -114,7 +114,7 @@ export default function PublicReview() {
       const { data: establishment } = await supabase
         .from('establishments')
         .select(
-          'id,name,slug,logo_url,google_review_url,redirect_threshold,phone,email,address,city,description,website_url,instagram_url,facebook_url,tiktok_url,whatsapp_number,page_template_id,menu_template_id,menu_display_mode,menu_pdf_url,menu_ai_design'
+          'id,name,slug,logo_url,google_review_url,redirect_threshold,phone,email,address,city,description,website_url,instagram_url,facebook_url,tiktok_url,whatsapp_number,page_template_id,menu_template_id,menu_display_mode,menu_pdf_url,menu_ai_design,menu_ai_photo_mode'
         )
         .eq('slug', slug)
         .maybeSingle();
@@ -792,6 +792,7 @@ export default function PublicReview() {
                 categories={categories}
                 items={items}
                 itemsByCategory={itemsByCategory}
+                photoMode={(p as any).menu_ai_photo_mode === 'without_photos' ? 'without_photos' : 'with_photos'}
               />
             ) : (
               <MenuTemplate
@@ -1388,12 +1389,14 @@ function AIPremiumMenu({
   categories,
   items,
   itemsByCategory,
+  photoMode,
 }: {
   design: any;
   place: any;
   categories: MenuCategory[];
   items: MenuItem[];
   itemsByCategory: Record<string, MenuItem[]>;
+  photoMode: 'with_photos' | 'without_photos';
 }) {
   const style = design?.style ?? 'editorial';
   const sections = Array.isArray(design?.sections) ? design.sections : [];
@@ -1414,9 +1417,9 @@ function AIPremiumMenu({
   const navSections = visibleSections.filter((section: any) => section?.title).slice(0, 12);
 
   const heroImage =
-    items.find((item) => item.image_url)?.image_url ??
-    place.logo_url ??
-    null;
+    photoMode === 'with_photos'
+      ? items.find((item) => item.image_url)?.image_url ?? place.logo_url ?? null
+      : null;
 
   const palette =
     style === 'dark'
@@ -1584,7 +1587,7 @@ function AIPremiumMenu({
                         key={item.id}
                         className={`overflow-hidden rounded-[26px] border shadow-sm ${palette.card}`}
                       >
-                        {item.image_url && (
+                        {photoMode === 'with_photos' && item.image_url && (
                           <img src={item.image_url} alt="" className="h-48 w-full object-cover" />
                         )}
                         <div className="p-5">
@@ -1612,13 +1615,9 @@ function AIPremiumMenu({
                         key={item.id}
                         className={`overflow-hidden rounded-[22px] border shadow-sm ${palette.card}`}
                       >
-                        {item.image_url ? (
+                        {photoMode === 'with_photos' && item.image_url ? (
                           <img src={item.image_url} alt="" className="aspect-[1.15] w-full object-cover" />
-                        ) : (
-                          <div className="grid aspect-[1.15] place-items-center bg-forest/[0.04]">
-                            <UtensilsCrossed size={22} className="text-forest/15" />
-                          </div>
-                        )}
+                        ) : null}
                         <div className="p-3.5">
                           <h3 className={`line-clamp-2 text-sm font-bold leading-5 ${palette.product}`}>
                             {item.name}
