@@ -151,6 +151,7 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/r/:slug" element={<PublicReview />} />
+          <Route path="/loyalty" element={<LoyaltyLaunch />} />
           <Route path="/loyalty/:token" element={<LoyaltyCard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -218,6 +219,16 @@ function App() {
       </AuthProvider>
     </BrowserRouter>
   );
+}
+
+function LoyaltyLaunch() {
+  const customerToken = window.localStorage.getItem('tapmarrakech:customer-card-token');
+
+  if (customerToken) {
+    return <Navigate to={`/loyalty/${customerToken}`} replace />;
+  }
+
+  return <Navigate to="/login" replace />;
 }
 
 function RoleRedirect() {
