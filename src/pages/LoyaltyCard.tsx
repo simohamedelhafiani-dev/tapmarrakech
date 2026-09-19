@@ -24,6 +24,7 @@ type Transaction = {
   points: number;
   transaction_type: string;
   description: string | null;
+  type: string;
   created_at: string;
 };
 
