@@ -4891,7 +4891,7 @@ function BillingSection({
       </div>
 
       <div className="mt-6 rounded-2xl border border-ink/5 bg-white shadow-sm overflow-hidden">
-        <div className="grid grid-cols-[1.5fr_1fr_.8fr_1fr_1fr] gap-4 border-b border-ink/5 px-5 py-4 text-[10px] font-semibold uppercase tracking-wider text-ink/35">
+        <div className="overflow-x-auto"><div className="grid min-w-[760px] grid-cols-[1.5fr_1fr_.8fr_1fr_1fr] gap-4 border-b border-ink/5 px-5 py-4 text-[10px] font-semibold uppercase tracking-wider text-ink/35">
           <span>Commerce</span><span>Plan</span><span>Statut</span><span>MRR</span><span>Échéance</span>
         </div>
         {filtered.length === 0 ? (
