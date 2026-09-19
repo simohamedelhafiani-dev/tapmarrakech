@@ -232,6 +232,12 @@ function RoleRedirect() {
   }
 
   if (!user) {
+    const scannerToken = window.localStorage.getItem('tapmarrakech:scanner-token');
+    if (scannerToken) return <Navigate to={`/employee?scanner=${scannerToken}`} replace />;
+
+    const customerToken = window.localStorage.getItem('tapmarrakech:customer-card-token');
+    if (customerToken) return <Navigate to={`/loyalty/${customerToken}`} replace />;
+
     return <Navigate to="/login" replace />;
   }
 
