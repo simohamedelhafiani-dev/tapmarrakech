@@ -121,6 +121,7 @@ export default function Employee() {
   const [showPoints, setShowPoints] = useState<LoyaltyCustomer | null>(null);
   const [showRewards, setShowRewards] = useState<LoyaltyCustomer | null>(null);
   const [showCard, setShowCard] = useState<LoyaltyCustomer | null>(null);
+  const [showCardLink, setShowCardLink] = useState('');
   const [editCustomer, setEditCustomer] = useState<LoyaltyCustomer | null>(null);
   const [selectedReward, setSelectedReward] = useState<LoyaltyReward | null>(null);
 
@@ -711,6 +712,30 @@ export default function Employee() {
     await loadCustomers();
   }
 
+  useEffect(() => {
+    let active = true;
+    if (!showCard) {
+      setShowCardLink('');
+      return;
+    }
+
+    const loadCardLink = async () => {
+      const { data, error } = await employeeSupabase?.rpc('get_loyalty_customer_link', {
+        p_customer_id: showCard.id,
+      }) ?? { data: null, error: null };
+
+      const row = Array.isArray(data) ? data[0] : data;
+      if (active && !error && row?.access_token) {
+        setShowCardLink(`${window.location.origin}/loyalty/${row.access_token}`);
+      }
+    };
+
+    void loadCardLink();
+    return () => {
+      active = false;
+    };
+  }, [showCard, employeeSupabase]);
+
   const selectedEstablishmentName = session?.establishment_name ?? '';
 
   const openScannedCustomer = async (rawValue: string) => {
@@ -1182,6 +1207,22 @@ export default function Employee() {
               </p>
             </div>
           </div>
+
+          {showCardLink && (
+            <div className="mt-5 rounded-2xl border border-ink/5 bg-[#f7f7f3] p-4">
+              <p className="text-xs font-semibold text-forest">Lien permanent de la carte</p>
+              <p className="mt-2 break-all text-[11px] leading-5 text-ink/45">{showCardLink}</p>
+              <button
+                onClick={async () => {
+                  await navigator.clipboard.writeText(showCardLink);
+                  alert('Lien de la carte copié.');
+                }}
+                className="mt-3 w-full rounded-xl bg-white px-3 py-2.5 text-xs font-semibold text-forest"
+              >
+                Copier le lien client
+              </button>
+            </div>
+          )}
 
           <div className="mt-5 flex gap-3">
             <button
