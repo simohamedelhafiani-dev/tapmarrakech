@@ -372,7 +372,7 @@ export default function LoyaltyScanner() {
                   value={manualSearch}
                   onChange={e => {
                     setManualSearch(e.target.value);
-                    if (e.target.value.trim().length >= 2) void searchCustomer();
+                    if (e.target.value.trim().length >= 2) void searchCustomer(e.target.value);
                     else setManualMatches([]);
                   }}
                   placeholder="N° fidélité, téléphone ou nom"
