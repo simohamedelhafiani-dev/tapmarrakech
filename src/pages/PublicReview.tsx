@@ -1183,49 +1183,6 @@ export default function PublicReview() {
           </main>
         )}
 
-        <footer className="px-5 pb-5 pt-12 text-center">
-          <div className="flex items-center justify-center gap-1.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-ink/25">
-            <ShieldCheck size={12} />
-            Une expérience propulsée par TapMarrakech
-          </div>
-        </footer>
-      </div>
-
-      {/* =====================================================
-          BOTTOM NAV
-      ===================================================== */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 mx-auto w-full max-w-[520px] border-t border-ink/5 bg-[#fffdf9]/95 px-3 pb-[max(9px,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl">
-        <div className="grid grid-cols-4 gap-1">
-          <NavButton
-            active={section === 'home'}
-            icon={<Sparkles size={18} />}
-            label="Accueil"
-            onClick={() => navigate('home')}
-          />
-
-          <NavButton
-            active={section === 'menu'}
-            icon={<MenuIcon size={18} />}
-            label="Menu"
-            onClick={() => navigate('menu')}
-          />
-
-          <NavButton
-            active={section === 'reviews'}
-            icon={<Heart size={18} />}
-            label="Avis"
-            onClick={() => navigate('reviews')}
-          />
-
-          <NavButton
-            active={section === 'loyalty'}
-            icon={<Gift size={18} />}
-            label="Fidélité"
-            onClick={() => navigate('loyalty')}
-          />
-        </div>
-      </nav>
-
       {/* =====================================================
           LOYALTY MODAL
       ===================================================== */}
