@@ -1113,16 +1113,33 @@ function EstablishmentWorkspace({
 
   useEffect(() => {
     loadTab();
-    void supabase.rpc('get_or_create_establishment_scanner_link', { p_establishment_id: establishment.id }).then(({ data, error }) => {
+  }, [tab, establishment.id]);
+
+  useEffect(() => {
+    let mounted = true;
+    const loadScannerLink = async () => {
+      const { data, error } = await supabase
+        .from('establishment_scanner_links')
+        .select('access_token')
+        .eq('establishment_id', establishment.id)
+        .maybeSingle();
+
+      if (!mounted) return;
       if (error) {
-        console.error('Erreur lien scanner:', error);
+        console.error('Erreur chargement lien scanner:', error);
         setScannerLink(null);
         return;
       }
-      const token = Array.isArray(data) ? data[0]?.scanner_token : data?.scanner_token;
-      setScannerLink(token ? `${window.location.origin}/employee?scanner=${encodeURIComponent(token)}` : null);
-    });
-  }, [tab, establishment.id]);
+
+      const token = data?.access_token;
+      setScannerLink(token ? window.location.origin + '/employee?scanner=' + encodeURIComponent(token) : null);
+    };
+
+    void loadScannerLink();
+    return () => {
+      mounted = false;
+    };
+  }, [establishment.id]);
 
   const saveProfile = async () => {
     setSaving(true);
