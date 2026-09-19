@@ -1119,7 +1119,7 @@ function EstablishmentWorkspace({
         setScannerLink(null);
         return;
       }
-      const token = Array.isArray(data) ? data[0]?.access_token : data?.access_token;
+      const token = Array.isArray(data) ? data[0]?.scanner_token : data?.scanner_token;
       setScannerLink(token ? `${window.location.origin}/employee?scanner=${encodeURIComponent(token)}` : null);
     });
   }, [tab, establishment.id]);
