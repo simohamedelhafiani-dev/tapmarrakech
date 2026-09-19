@@ -20,6 +20,7 @@ import {
   Printer,
 } from 'lucide-react';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import QrScanner from '@/components/QrScanner';
 
 type Establishment = {
   id: string;
@@ -75,6 +76,12 @@ export default function Employee() {
   const [employeeCode, setEmployeeCode] = useState('');
   const [loginLoading, setLoginLoading] = useState(true);
   const [loginSaving, setLoginSaving] = useState(false);
+  const scannerToken = useMemo(() => new URLSearchParams(window.location.search).get('scanner') ?? '', []);
+  const [scannerReady, setScannerReady] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
+  const [scannerLoading, setScannerLoading] = useState(false);
+  const [scannerMessage, setScannerMessage] = useState('');
+  const [manualCustomerSearch, setManualCustomerSearch] = useState('');
 
   const employeeSupabase = useMemo<SupabaseClient | null>(() => {
     if (!session?.access_token) return null;
@@ -134,6 +141,44 @@ export default function Employee() {
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [invoiceAmount, setInvoiceAmount] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'CARD' | 'OTHER'>('CASH');
+
+  useEffect(() => {
+    if (!session || !scannerToken) {
+      setScannerReady(false);
+      return;
+    }
+
+    let active = true;
+    const validateScanner = async () => {
+      const { data, error } = await supabase.rpc('get_public_scanner_context', {
+        p_scanner_token: scannerToken,
+      });
+      const context = Array.isArray(data) ? data[0] : data;
+
+      if (!active) return;
+
+      if (error || !context) {
+        setScannerReady(false);
+        setScannerMessage('Lien scanner invalide ou expiré.');
+        return;
+      }
+
+      if (context.establishment_id !== session.establishment_id) {
+        setScannerReady(false);
+        setScannerMessage('Ce lien scanner appartient à un autre établissement.');
+        return;
+      }
+
+      setScannerReady(true);
+      setScannerMessage('');
+    };
+
+    void validateScanner();
+    return () => {
+      active = false;
+    };
+  }, [session, scannerToken]);
+
 
   useEffect(() => {
     try {
@@ -668,6 +713,73 @@ export default function Employee() {
 
   const selectedEstablishmentName = session?.establishment_name ?? '';
 
+  const openScannedCustomer = async (rawValue: string) => {
+    const value = rawValue.trim();
+    if (!value) return;
+
+    let token = value;
+    try {
+      const url = new URL(value);
+      const parts = url.pathname.split('/').filter(Boolean);
+      if (parts[0] === 'loyalty' && parts[1]) token = parts[1];
+    } catch {
+      // Manual UUID input is also accepted.
+    }
+
+    setScannerLoading(true);
+    setScannerMessage('');
+
+    const { data, error } = await supabase.rpc('get_public_loyalty_card', {
+      p_access_token: token,
+    });
+    const card = Array.isArray(data) ? data[0] : data;
+
+    setScannerLoading(false);
+
+    if (error || !card) {
+      setScannerMessage('Carte inconnue. Vérifiez le QR ou utilisez le code / téléphone.');
+      return;
+    }
+
+    if (card.establishment_id !== session?.establishment_id) {
+      setScannerMessage('Cette carte appartient à un autre établissement.');
+      return;
+    }
+
+    const customer = customers.find(item => item.id === card.customer_id) ?? ({
+      id: card.customer_id,
+      establishment_id: card.establishment_id,
+      loyalty_number: card.loyalty_number,
+      phone: '',
+      first_name: card.first_name,
+      last_name: card.last_name,
+      birth_date: null,
+      points_balance: Number(card.points_balance ?? 0),
+      total_points_earned: Number(card.total_points_earned ?? 0),
+      total_points_redeemed: Number(card.total_points_redeemed ?? 0),
+      visit_count: Number(card.visit_count ?? 0),
+      last_visit_at: card.last_visit_at ?? null,
+      created_at: card.created_at,
+    } as LoyaltyCustomer);
+
+    setShowScanner(false);
+    setShowPoints(customer);
+    setPurchaseAmount('');
+    setPointsResponsibleCode('');
+    setPointsInvoiceNumber('');
+  };
+
+  const manualMatches = useMemo(() => {
+    const value = manualCustomerSearch.trim().toLowerCase();
+    if (!value) return customers.slice(0, 5);
+    return customers.filter(customer =>
+      customer.loyalty_number.toLowerCase().includes(value) ||
+      customer.phone.toLowerCase().includes(value) ||
+      `${customer.first_name} ${customer.last_name ?? ''}`.toLowerCase().includes(value)
+    ).slice(0, 8);
+  }, [customers, manualCustomerSearch]);
+
+
   if (loginLoading) {
     return (
       <div className="min-h-screen grid place-items-center bg-[#f7f7f3]">
@@ -789,6 +901,20 @@ export default function Employee() {
               Recherchez un client, ajoutez ses points ou utilisez une récompense.
             </p>
           </div>
+
+          {scannerReady && (
+            <button
+              onClick={() => {
+                setScannerMessage('');
+                setManualCustomerSearch('');
+                setShowScanner(true);
+              }}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gold px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+            >
+              <CreditCard size={17} />
+              Scanner fidélité
+            </button>
+          )}
 
           <button
             onClick={logoutEmployee}
@@ -1072,6 +1198,68 @@ export default function Employee() {
               Fermer
             </button>
           </div>
+        </Modal>
+      )}
+
+      {showScanner && (
+        <Modal
+          title="Scanner fidélité"
+          onClose={() => {
+            if (!scannerLoading) {
+              setShowScanner(false);
+              setScannerMessage('');
+              setManualCustomerSearch('');
+            }
+          }}
+        >
+          <p className="mb-4 text-xs leading-5 text-ink/50">
+            Scannez la carte du client. Le client doit présenter son QR personnel.
+          </p>
+
+          <QrScanner onScan={openScannedCustomer} onClose={() => setShowScanner(false)} />
+
+          <div className="my-5 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.15em] text-ink/30">
+            <span className="h-px flex-1 bg-ink/10" />
+            ou saisie manuelle
+            <span className="h-px flex-1 bg-ink/10" />
+          </div>
+
+          <input
+            value={manualCustomerSearch}
+            onChange={e => setManualCustomerSearch(e.target.value)}
+            placeholder="N° fidélité, téléphone, nom..."
+            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+          />
+
+          {manualMatches.length > 0 && (
+            <div className="mt-2 overflow-hidden rounded-xl border border-ink/5">
+              {manualMatches.map(customer => (
+                <button
+                  key={customer.id}
+                  type="button"
+                  onClick={() => {
+                    setShowScanner(false);
+                    setShowPoints(customer);
+                    setManualCustomerSearch('');
+                  }}
+                  className="flex w-full items-center justify-between border-b border-ink/5 bg-white px-4 py-3 text-left last:border-0 hover:bg-[#f7f7f3]"
+                >
+                  <span>
+                    <span className="block text-sm font-semibold text-forest">{customer.first_name} {customer.last_name ?? ''}</span>
+                    <span className="text-[11px] text-ink/40">{customer.loyalty_number} · {customer.phone}</span>
+                  </span>
+                  <span className="text-xs font-semibold text-gold">{customer.points_balance} pts</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {scannerLoading && (
+            <p className="mt-3 text-center text-xs text-ink/45">Lecture de la carte…</p>
+          )}
+          {scannerMessage && (
+            <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-xs leading-5 text-red-700">{scannerMessage}</p>
+          )}
         </Modal>
       )}
 
