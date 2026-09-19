@@ -13,7 +13,6 @@ import {
   MessageCircle,
   Phone,
   Send,
-  ShieldCheck,
   Sparkles,
   Star,
   UtensilsCrossed,
@@ -1526,13 +1525,14 @@ function WifiActionRow({
     }
   };
 
+  if (!wifi) return null;
+
   return (
     <>
       <button
         type="button"
         onClick={openWifi}
-        disabled={!wifi}
-        className="group flex w-full items-center gap-4 rounded-[24px] bg-white p-4 text-left shadow-sm ring-1 ring-ink/5 transition active:scale-[0.99] disabled:opacity-60"
+        className="group flex w-full items-center gap-4 rounded-[24px] bg-white p-4 text-left shadow-sm ring-1 ring-ink/5 transition active:scale-[0.99]"
       >
         <div className="grid h-12 w-12 shrink-0 place-items-center rounded-[17px] bg-emerald-50 text-emerald-600">
           <Wifi size={22} />
