@@ -278,7 +278,7 @@ export function DashboardLayout() {
       </aside>
 
       <div className="lg:pl-[270px]">
-        <header className="sticky top-0 z-20 flex h-[104px] items-center justify-between border-b border-ink/5 bg-[#f7f7f3]/95 px-5 md:px-10">
+        <header className="sticky top-0 z-20 flex min-h-[76px] items-center justify-between border-b border-ink/5 bg-[#f7f7f3]/95 px-4 py-3 sm:h-[88px] sm:px-6 md:h-[104px] md:px-10">
           <button
             onClick={() => setOpen(true)}
             className="text-ink lg:hidden"
@@ -291,7 +291,7 @@ export function DashboardLayout() {
             {capitalizedDate}
           </div>
 
-          <div className="pointer-events-none absolute left-1/2 top-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center gap-3">
+          <div className="pointer-events-none absolute left-1/2 top-1/2 z-10 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-3 sm:flex">
             {establishmentLogoUrl ? (
               <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-ink/10 bg-white p-1.5 shadow-sm">
                 <img
@@ -321,14 +321,14 @@ export function DashboardLayout() {
             onClick={() =>
               navigate('/dashboard/establishments')
             }
-            className="ml-auto flex items-center gap-2 rounded-full bg-forest px-4 py-2 text-xs font-semibold text-white transition hover:bg-forest-light"
+            className="ml-auto flex items-center gap-2 rounded-full bg-forest px-3 py-2 text-xs font-semibold text-white transition hover:bg-forest-light sm:px-4"
           >
             <Building2 size={15} />
-            Gérer mes établissements
+            <span className="hidden sm:inline">Gérer mes établissements</span>
           </button>
         </header>
 
-        <main className="mx-auto max-w-[1440px] p-5 md:p-10">
+        <main className="mx-auto w-full max-w-[1440px] p-4 sm:p-5 md:p-10">
           <Outlet />
         </main>
 
