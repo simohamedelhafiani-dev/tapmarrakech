@@ -34,6 +34,9 @@ import {
   ShieldCheck,
   WalletCards,
   Trash2,
+  Upload,
+  Sparkles,
+  FileText,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -1025,6 +1028,18 @@ function EstablishmentWorkspace({
   const [menuTemplate, setMenuTemplate] = useState('editorial');
   const [menuCategoryName, setMenuCategoryName] = useState('');
   const [menuItem, setMenuItem] = useState({ name: '', description: '', price: '', category_id: '' });
+  const [menuImportOpen, setMenuImportOpen] = useState(false);
+  const [menuImportFile, setMenuImportFile] = useState<File | null>(null);
+  const [menuImportLoading, setMenuImportLoading] = useState(false);
+  const [menuImportApplying, setMenuImportApplying] = useState(false);
+  const [menuImportError, setMenuImportError] = useState('');
+  const [editingMenuItemId, setEditingMenuItemId] = useState<string | null>(null);
+  const [editingMenuItem, setEditingMenuItem] = useState({ name: '', description: '', price: '', category_id: '', image_url: '' });
+  const [menuImageUploading, setMenuImageUploading] = useState(false);
+  const [menuItemSaving, setMenuItemSaving] = useState(false);
+  const [menuImportPreview, setMenuImportPreview] = useState<{
+    categories: { name: string; description: string | null; items: { name: string; description: string | null; price: number }[] }[];
+  } | null>(null);
   const [promotion, setPromotion] = useState({ name: '', description: '', normal_price: '', promo_price: '' });
   const [reward, setReward] = useState({ name: '', description: '', points_required: '' });
 
@@ -1181,6 +1196,92 @@ function EstablishmentWorkspace({
     await onReload();
   };
 
+  const importMenuWithAI = async () => {
+    if (!menuImportFile) {
+      setMenuImportError('Sélectionne un PDF ou une photo de menu.');
+      return;
+    }
+
+    setMenuImportLoading(true);
+    setMenuImportError('');
+    setMenuImportPreview(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', menuImportFile);
+      formData.append('establishment_id', establishment.id);
+
+      const { data, error } = await supabase.functions.invoke('import-menu', {
+        body: formData,
+      });
+
+      if (error) throw error;
+      if (!data?.success || !data?.menu) {
+        throw new Error(data?.error || 'Impossible d’analyser le menu.');
+      }
+
+      setMenuImportPreview(data.menu);
+    } catch (error) {
+      console.error('Erreur import menu IA:', error);
+      setMenuImportError(error instanceof Error ? error.message : 'Erreur pendant l’analyse du menu.');
+    } finally {
+      setMenuImportLoading(false);
+    }
+  };
+
+  const applyImportedMenu = async () => {
+    if (!menuImportPreview) return;
+
+    setMenuImportApplying(true);
+    try {
+      for (const category of menuImportPreview.categories) {
+        const { data: categoryRow, error: categoryError } = await supabase
+          .from('menu_categories')
+          .insert({
+            establishment_id: establishment.id,
+            name: category.name.trim(),
+            description: category.description?.trim() || null,
+            display_order: categories.length,
+            active: true,
+          })
+          .select('id')
+          .single();
+
+        if (categoryError) throw categoryError;
+
+        const rows = category.items
+          .filter((item) => item.name?.trim())
+          .map((item, index) => ({
+            establishment_id: establishment.id,
+            category_id: categoryRow.id,
+            name: item.name.trim(),
+            description: item.description?.trim() || null,
+            price: Number.isFinite(Number(item.price)) ? Number(item.price) : 0,
+            image_url: null,
+            display_order: index,
+            active: true,
+          }));
+
+        if (rows.length) {
+          const { error: itemsError } = await supabase.from('menu_items').insert(rows);
+          if (itemsError) throw itemsError;
+        }
+      }
+
+      setMenuImportOpen(false);
+      setMenuImportFile(null);
+      setMenuImportPreview(null);
+      setMenuImportError('');
+      await loadTab();
+      alert('Menu importé avec succès. Tu peux maintenant modifier chaque produit.');
+    } catch (error) {
+      console.error('Erreur création menu importé:', error);
+      setMenuImportError(error instanceof Error ? error.message : 'Impossible d’enregistrer le menu.');
+    } finally {
+      setMenuImportApplying(false);
+    }
+  };
+
   const addCategory = async () => {
     if (!menuCategoryName.trim()) return;
     const { error } = await supabase.from('menu_categories').insert({ establishment_id: establishment.id, name: menuCategoryName.trim(), display_order: categories.length });
@@ -1191,6 +1292,48 @@ function EstablishmentWorkspace({
     if (!menuItem.name.trim() || !menuItem.category_id) return alert('Nom et catégorie obligatoires.');
     const { error } = await supabase.from('menu_items').insert({ establishment_id: establishment.id, category_id: menuItem.category_id, name: menuItem.name.trim(), description: menuItem.description.trim() || null, price: Number(menuItem.price) || 0, display_order: items.filter((x) => x.category_id === menuItem.category_id).length });
     if (error) return alert(error.message); setMenuItem({ name: '', description: '', price: '', category_id: menuItem.category_id }); loadTab();
+  };
+
+  const startEditMenuItem = (item: MenuItem) => {
+    setEditingMenuItemId(item.id);
+    setEditingMenuItem({ name: item.name, description: item.description ?? '', price: String(item.price ?? ''), category_id: item.category_id, image_url: item.image_url ?? '' });
+  };
+
+  const uploadMenuItemImage = async (file: File) => {
+    if (!editingMenuItemId) return;
+    setMenuImageUploading(true);
+    try {
+      const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const path = `${establishment.id}/${editingMenuItemId}-${Date.now()}.${extension}`;
+      const { error } = await supabase.storage.from('menu-images').upload(path, file, { upsert: true, contentType: file.type, cacheControl: '31536000' });
+      if (error) throw error;
+      const { data } = supabase.storage.from('menu-images').getPublicUrl(path);
+      setEditingMenuItem((current) => ({ ...current, image_url: data.publicUrl }));
+    } catch (error) {
+      console.error('Erreur upload photo menu:', error);
+      alert(error instanceof Error ? error.message : 'Impossible d’envoyer la photo.');
+    } finally {
+      setMenuImageUploading(false);
+    }
+  };
+
+  const saveEditedMenuItem = async () => {
+    if (!editingMenuItemId || !editingMenuItem.name.trim() || !editingMenuItem.category_id) {
+      alert('Nom et catégorie obligatoires.');
+      return;
+    }
+    setMenuItemSaving(true);
+    const { error } = await supabase.from('menu_items').update({
+      name: editingMenuItem.name.trim(),
+      description: editingMenuItem.description.trim() || null,
+      price: Number(editingMenuItem.price) || 0,
+      category_id: editingMenuItem.category_id,
+      image_url: editingMenuItem.image_url.trim() || null,
+    }).eq('id', editingMenuItemId).eq('establishment_id', establishment.id);
+    setMenuItemSaving(false);
+    if (error) return alert(error.message);
+    setEditingMenuItemId(null);
+    await loadTab();
   };
 
   const addPromotion = async () => {
@@ -1366,6 +1509,99 @@ function EstablishmentWorkspace({
       {tab === 'wifi' && <div className="max-w-xl rounded-2xl border border-ink/5 bg-white p-6 shadow-sm"><h3 className="text-lg font-semibold">Wi-Fi client</h3><p className="mt-1 mb-5 text-xs text-ink/45">Ces informations alimenteront le module Wi-Fi de la page publique.</p><div className="space-y-4"><label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">Nom du réseau</span><input value={wifi.ssid} onChange={(e) => setWifi({ ...wifi, ssid: e.target.value })} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></label><label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">Mot de passe</span><input value={wifi.password} onChange={(e) => setWifi({ ...wifi, password: e.target.value })} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></label><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={wifi.active} onChange={(e) => setWifi({ ...wifi, active: e.target.checked })} /> Module actif</label><button disabled={saving} onClick={saveWifi} className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white">Enregistrer le Wi-Fi</button></div></div>}
 
       {tab === 'menu' && <div className="space-y-5">
+        <div className="rounded-2xl border border-forest/10 bg-white p-6 shadow-sm">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-start gap-4">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-forest/10 text-forest">
+                <Sparkles size={21} />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Import intelligent</p>
+                <h3 className="mt-1 text-xl font-semibold text-forest">Créer le menu avec l’IA</h3>
+                <p className="mt-1 max-w-2xl text-xs leading-5 text-ink/45">
+                  Envoie le PDF ou des photos du menu. L’IA détecte les catégories, plats, descriptions et prix, puis tu vérifies avant publication.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => { setMenuImportOpen(true); setMenuImportError(''); }}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-forest px-5 py-3 text-xs font-semibold text-white"
+            >
+              <Upload size={15} />
+              Importer mon menu
+            </button>
+          </div>
+        </div>
+
+        {menuImportOpen && (
+          <div className="rounded-2xl border border-gold/20 bg-[#fbf8ee] p-6 shadow-sm">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-semibold text-forest">Importer un menu</h3>
+                <p className="mt-1 text-xs text-ink/45">PDF, JPG, PNG ou WEBP. Tu peux commencer avec un menu complet en PDF.</p>
+              </div>
+              <button type="button" onClick={() => { setMenuImportOpen(false); setMenuImportPreview(null); setMenuImportError(''); }} className="text-xs font-semibold text-ink/40">Fermer</button>
+            </div>
+
+            <div className="mt-5 rounded-2xl border border-dashed border-ink/15 bg-white p-5">
+              <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl py-8 text-center">
+                <FileText size={28} className="text-gold" />
+                <span className="text-sm font-semibold text-forest">{menuImportFile ? menuImportFile.name : 'Choisir le PDF ou les photos du menu'}</span>
+                <span className="text-xs text-ink/40">Le fichier est analysé uniquement pour construire le brouillon du menu.</span>
+                <input
+                  type="file"
+                  accept=".pdf,image/jpeg,image/png,image/webp"
+                  className="sr-only"
+                  onChange={(e) => { setMenuImportFile(e.target.files?.[0] ?? null); setMenuImportPreview(null); setMenuImportError(''); }}
+                />
+              </label>
+            </div>
+
+            <div className="mt-4 flex flex-wrap justify-end gap-2">
+              <button type="button" onClick={importMenuWithAI} disabled={!menuImportFile || menuImportLoading} className="inline-flex items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-50">
+                <Sparkles size={14} />
+                {menuImportLoading ? 'Analyse du menu…' : 'Analyser avec l’IA'}
+              </button>
+            </div>
+
+            {menuImportError && <div className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-xs text-red-700">{menuImportError}</div>}
+
+            {menuImportPreview && (
+              <div className="mt-5 rounded-2xl border border-ink/5 bg-white p-5">
+                <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <h4 className="font-semibold text-forest">Menu détecté</h4>
+                    <p className="mt-1 text-xs text-ink/40">
+                      {menuImportPreview.categories.length} catégorie(s) · {menuImportPreview.categories.reduce((sum, c) => sum + c.items.length, 0)} produit(s)
+                    </p>
+                  </div>
+                  <button type="button" onClick={applyImportedMenu} disabled={menuImportApplying} className="rounded-xl bg-gold px-4 py-2.5 text-xs font-bold text-forest disabled:opacity-50">
+                    {menuImportApplying ? 'Création du menu…' : 'Créer ce menu'}
+                  </button>
+                </div>
+
+                <div className="mt-5 space-y-4">
+                  {menuImportPreview.categories.map((category, categoryIndex) => (
+                    <div key={categoryIndex} className="rounded-xl bg-[#f7f7f3] p-4">
+                      <div className="font-semibold text-forest">{category.name}</div>
+                      <div className="mt-3 space-y-2">
+                        {category.items.map((item, itemIndex) => (
+                          <div key={itemIndex} className="grid gap-2 rounded-xl bg-white p-3 md:grid-cols-[1.2fr_.7fr_1.8fr]">
+                            <input value={item.name} onChange={(e) => setMenuImportPreview((current) => current ? ({ ...current, categories: current.categories.map((c, ci) => ci === categoryIndex ? ({ ...c, items: c.items.map((it, ii) => ii === itemIndex ? ({ ...it, name: e.target.value }) : it) }) : c) }) : current)} className="rounded-lg border border-ink/10 px-3 py-2 text-xs" />
+                            <input type="number" value={item.price} onChange={(e) => setMenuImportPreview((current) => current ? ({ ...current, categories: current.categories.map((c, ci) => ci === categoryIndex ? ({ ...c, items: c.items.map((it, ii) => ii === itemIndex ? ({ ...it, price: Number(e.target.value) }) : it) }) : c) }) : current)} className="rounded-lg border border-ink/10 px-3 py-2 text-xs" />
+                            <input value={item.description ?? ''} onChange={(e) => setMenuImportPreview((current) => current ? ({ ...current, categories: current.categories.map((c, ci) => ci === categoryIndex ? ({ ...c, items: c.items.map((it, ii) => ii === itemIndex ? ({ ...it, description: e.target.value }) : it) }) : c) }) : current)} className="rounded-lg border border-ink/10 px-3 py-2 text-xs" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="rounded-2xl border border-gold/20 bg-[#fbf8ee] p-6 shadow-sm">
           <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
             <div>
@@ -1415,8 +1651,24 @@ function EstablishmentWorkspace({
           </div>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-2"><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Catégories</h3><div className="mt-4 flex gap-2"><input value={menuCategoryName} onChange={(e) => setMenuCategoryName(e.target.value)} placeholder="Ex. Entrées" className="min-w-0 flex-1 rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><button onClick={addCategory} className="rounded-xl bg-forest px-4 text-xs font-semibold text-white">Ajouter</button></div><div className="mt-4 space-y-2">{categories.map((c) => <div key={c.id} className="flex items-center justify-between rounded-xl bg-[#f7f7f3] px-3 py-2.5 text-sm"><span>{c.name}</span><button onClick={async () => { const { error } = await supabase.from('menu_categories').update({ active: !c.active }).eq('id', c.id); if (error) alert(error.message); else loadTab(); }} className="text-xs text-ink/45">{c.active ? 'Actif' : 'Inactif'}</button></div>)}</div></div><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Nouveau produit</h3><div className="mt-4 space-y-3"><input value={menuItem.name} onChange={(e) => setMenuItem({ ...menuItem, name: e.target.value })} placeholder="Nom" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><select value={menuItem.category_id} onChange={(e) => setMenuItem({ ...menuItem, category_id: e.target.value })} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"><option value="">Catégorie</option>{categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select><input value={menuItem.price} onChange={(e) => setMenuItem({ ...menuItem, price: e.target.value })} placeholder="Prix MAD" type="number" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><textarea value={menuItem.description} onChange={(e) => setMenuItem({ ...menuItem, description: e.target.value })} placeholder="Description" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><button onClick={addMenuItem} className="rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Ajouter le produit</button></div></div></div><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Produits</h3><div className="mt-4 grid gap-2 md:grid-cols-2">{items.map((i) => <div key={i.id} className="rounded-xl bg-[#f7f7f3] p-3"><div className="flex justify-between gap-3"><strong className="text-sm">{i.name}</strong><span className="text-sm font-semibold">{Number(i.price).toFixed(2)} MAD</span></div><p className="mt-1 text-xs text-ink/45">{i.description || 'Sans description'}</p><button onClick={async () => { const { error } = await supabase.from('menu_items').update({ active: !i.active }).eq('id', i.id); if (error) alert(error.message); else loadTab(); }} className="mt-2 text-[11px] text-ink/45">{i.active ? 'Désactiver' : 'Activer'}</button></div>)}</div></div></div>}
+        <div className="grid gap-5 md:grid-cols-2"><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Catégories</h3><div className="mt-4 flex gap-2"><input value={menuCategoryName} onChange={(e) => setMenuCategoryName(e.target.value)} placeholder="Ex. Entrées" className="min-w-0 flex-1 rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><button onClick={addCategory} className="rounded-xl bg-forest px-4 text-xs font-semibold text-white">Ajouter</button></div><div className="mt-4 space-y-2">{categories.map((c) => <div key={c.id} className="flex items-center justify-between rounded-xl bg-[#f7f7f3] px-3 py-2.5 text-sm"><span>{c.name}</span><button onClick={async () => { const { error } = await supabase.from('menu_categories').update({ active: !c.active }).eq('id', c.id); if (error) alert(error.message); else loadTab(); }} className="text-xs text-ink/45">{c.active ? 'Actif' : 'Inactif'}</button></div>)}</div></div><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Nouveau produit</h3><div className="mt-4 space-y-3"><input value={menuItem.name} onChange={(e) => setMenuItem({ ...menuItem, name: e.target.value })} placeholder="Nom" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><select value={menuItem.category_id} onChange={(e) => setMenuItem({ ...menuItem, category_id: e.target.value })} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"><option value="">Catégorie</option>{categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select><input value={menuItem.price} onChange={(e) => setMenuItem({ ...menuItem, price: e.target.value })} placeholder="Prix MAD" type="number" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><textarea value={menuItem.description} onChange={(e) => setMenuItem({ ...menuItem, description: e.target.value })} placeholder="Description" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><button onClick={addMenuItem} className="rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Ajouter le produit</button></div></div></div><div className="rounded-2xl border border-ink/5 bg-white p-5"><div className="flex items-center justify-between gap-3"><div><h3 className="font-semibold">Produits</h3><p className="mt-1 text-xs text-ink/40">Modifie un produit existant sans le supprimer.</p></div><span className="rounded-full bg-[#f7f7f3] px-3 py-1 text-[11px] text-ink/45">${items.length} produit${items.length > 1 ? 's' : ''}</span></div><div className="mt-4 grid gap-3 md:grid-cols-2">{items.map((i) => <div key={i.id} className="rounded-2xl border border-ink/5 bg-[#f7f7f3] p-3"><div className="flex gap-3">{i.image_url ? <img src={i.image_url} alt="" className="h-16 w-16 shrink-0 rounded-xl object-cover" /> : <div className="grid h-16 w-16 shrink-0 place-items-center rounded-xl bg-white text-[10px] text-ink/25">Photo</div>}<div className="min-w-0 flex-1"><div className="flex justify-between gap-3"><strong className="truncate text-sm">{i.name}</strong><span className="shrink-0 text-sm font-semibold">{Number(i.price).toFixed(2)} MAD</span></div><p className="mt-1 line-clamp-2 text-xs text-ink/45">{i.description || 'Sans description'}</p></div></div><div className="mt-3 flex items-center justify-between"><button onClick={() => startEditMenuItem(i)} className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[11px] font-semibold text-forest"><Pencil size={13} /> Modifier</button><button onClick={async () => { const { error } = await supabase.from('menu_items').update({ active: !i.active }).eq('id', i.id); if (error) alert(error.message); else loadTab(); }} className="text-[11px] text-ink/45">{i.active ? 'Désactiver' : 'Activer'}</button></div></div>)}</div></div></div>}
 
+      {editingMenuItemId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Édition du produit</p><h3 className="mt-1 text-xl font-semibold text-forest">Modifier le produit</h3></div><button type="button" onClick={() => setEditingMenuItemId(null)} className="rounded-xl p-2 text-ink/40 hover:bg-[#f7f7f3]"><X size={18} /></button></div>
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              <label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">Nom du produit</span><input value={editingMenuItem.name} onChange={(e) => setEditingMenuItem((v) => ({ ...v, name: e.target.value }))} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></label>
+              <label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">Catégorie</span><select value={editingMenuItem.category_id} onChange={(e) => setEditingMenuItem((v) => ({ ...v, category_id: e.target.value }))} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm">{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
+              <label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">Prix (MAD)</span><input type="number" min="0" step="0.01" value={editingMenuItem.price} onChange={(e) => setEditingMenuItem((v) => ({ ...v, price: e.target.value }))} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></label>
+              <label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">URL photo</span><input value={editingMenuItem.image_url} onChange={(e) => setEditingMenuItem((v) => ({ ...v, image_url: e.target.value }))} placeholder="https://..." className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></label>
+              <label className="block md:col-span-2"><span className="mb-1 block text-xs font-medium text-ink/50">Description / composants</span><textarea rows={5} value={editingMenuItem.description} onChange={(e) => setEditingMenuItem((v) => ({ ...v, description: e.target.value }))} placeholder="Ex. tomates, mozzarella, basilic, huile d'olive..." className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></label>
+            </div>
+            <div className="mt-4 rounded-2xl border border-dashed border-ink/15 bg-[#f7f7f3] p-4"><div className="flex flex-col gap-4 sm:flex-row sm:items-center"><div className="h-28 w-28 shrink-0 overflow-hidden rounded-2xl bg-white">{editingMenuItem.image_url ? <img src={editingMenuItem.image_url} alt="" className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-xs text-ink/30">Pas de photo</div>}</div><div><p className="text-sm font-semibold text-forest">Photo du produit</p><p className="mt-1 text-xs text-ink/40">JPG, PNG ou WEBP.</p><label className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white"><Upload size={14} />{menuImageUploading ? 'Envoi…' : 'Choisir une photo'}<input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={menuImageUploading} onChange={(e) => { const file = e.target.files?.[0]; if (file) void uploadMenuItemImage(file); e.currentTarget.value = ''; }} /></label></div></div></div>
+            <div className="mt-6 flex justify-end gap-2"><button type="button" onClick={() => setEditingMenuItemId(null)} className="rounded-xl border border-ink/10 px-4 py-2.5 text-xs font-semibold">Annuler</button><button type="button" disabled={menuItemSaving || menuImageUploading} onClick={saveEditedMenuItem} className="rounded-xl bg-forest px-5 py-2.5 text-xs font-semibold text-white disabled:opacity-50">{menuItemSaving ? 'Enregistrement…' : 'Enregistrer les modifications'}</button></div>
+          </div>
+        </div>
+      )}
       {tab === 'promotions' && <div className="space-y-5"><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Créer une promotion</h3><div className="mt-4 grid gap-3 md:grid-cols-4"><input value={promotion.name} onChange={(e) => setPromotion({ ...promotion, name: e.target.value })} placeholder="Nom" className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><input value={promotion.description} onChange={(e) => setPromotion({ ...promotion, description: e.target.value })} placeholder="Description" className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><input value={promotion.normal_price} onChange={(e) => setPromotion({ ...promotion, normal_price: e.target.value })} placeholder="Prix normal" type="number" className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><input value={promotion.promo_price} onChange={(e) => setPromotion({ ...promotion, promo_price: e.target.value })} placeholder="Prix promo" type="number" className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></div><button onClick={addPromotion} className="mt-3 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Ajouter</button></div><div className="grid gap-3 md:grid-cols-2">{promotions.map((p) => <div key={p.id} className="rounded-2xl border border-ink/5 bg-white p-5"><div className="flex justify-between"><strong>{p.name}</strong><button onClick={async () => { const { error } = await supabase.from('promotions').update({ active: !p.active }).eq('id', p.id); if (error) alert(error.message); else loadTab(); }} className="text-xs text-ink/45">{p.active ? 'Actif' : 'Inactif'}</button></div><p className="mt-2 text-sm text-ink/55">{p.description || 'Sans description'}</p><p className="mt-3 text-sm font-semibold">{p.promo_price ?? '—'} MAD <span className="ml-2 text-xs text-ink/35 line-through">{p.normal_price ?? ''}</span></p></div>)}</div></div>}
 
       {tab === 'reviews' && <div className="space-y-4"><div className="grid gap-3 md:grid-cols-3"><StatCard label="Avis" value={reviews.length} /><StatCard label="Note moyenne" value={reviews.length ? (reviews.reduce((a, r) => a + Number(r.rating || 0), 0) / reviews.length).toFixed(1) : '—'} /><StatCard label="Dernier avis" value={reviews[0] ? new Date(reviews[0].created_at).toLocaleDateString('fr-FR') : '—'} /></div><div className="rounded-2xl border border-ink/5 bg-white p-5">{reviews.length === 0 ? <p className="text-sm text-ink/45">Aucun avis.</p> : <div className="space-y-3">{reviews.map((r) => <div key={r.id} className="rounded-xl bg-[#f7f7f3] p-4"><div className="flex justify-between"><strong>{r.rating}/5</strong><span className="text-xs text-ink/35">{new Date(r.created_at).toLocaleDateString('fr-FR')}</span></div><p className="mt-2 text-sm text-ink/60">{r.feedback || r.comment || 'Aucun commentaire'}</p></div>)}</div>}</div></div>}
