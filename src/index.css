@@ -7,3 +7,22 @@ body { margin: 0; min-width: 320px; }
 button, input, textarea, select { font: inherit; }
 .font-display { font-family: 'Playfair Display', serif; }
 @layer utilities { .bg-cream { background-color: #f7f7f3; } .text-ink { color: #17221d; } .bg-forest { background-color: #17352a; } .text-forest { color: #17352a; } .bg-gold { background-color: #c8a96b; } .text-gold { color: #c8a96b; } .border-gold { border-color: #c8a96b; } .bg-forest-light { background-color: #285542; } }
+
+
+html, body, #root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+img, svg, video, canvas {
+  max-width: 100%;
+}
+
+input, textarea, select, button {
+  max-width: 100%;
+}
+
+table {
+  max-width: 100%;
+}
