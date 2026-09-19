@@ -1022,6 +1022,7 @@ function EstablishmentWorkspace({
   const [team, setTeam] = useState<StaffMember[]>([]);
   const [eventsCount, setEventsCount] = useState(0);
   const [templates, setTemplates] = useState<any[]>([]);
+  const [menuTemplate, setMenuTemplate] = useState('editorial');
   const [menuCategoryName, setMenuCategoryName] = useState('');
   const [menuItem, setMenuItem] = useState({ name: '', description: '', price: '', category_id: '' });
   const [promotion, setPromotion] = useState({ name: '', description: '', normal_price: '', promo_price: '' });
@@ -1041,11 +1042,13 @@ function EstablishmentWorkspace({
       if (data) setWifi({ ssid: data.ssid ?? '', password: data.wifi_password ?? '', active: data.active ?? true });
     }
     if (tab === 'menu') {
-      const [{ data: c }, { data: i }] = await Promise.all([
+      const [{ data: c }, { data: i }, { data: establishmentRow }] = await Promise.all([
         supabase.from('menu_categories').select('*').eq('establishment_id', establishment.id).order('display_order'),
         supabase.from('menu_items').select('*').eq('establishment_id', establishment.id).order('display_order'),
+        supabase.from('establishments').select('menu_template_id').eq('id', establishment.id).maybeSingle(),
       ]);
-      setCategories(c ?? []); setItems(i ?? []);
+      setCategories(c ?? []);
+      setMenuTemplate(establishmentRow?.menu_template_id ?? 'editorial'); setItems(i ?? []);
       if (!menuItem.category_id && c?.[0]) setMenuItem((v) => ({ ...v, category_id: c[0].id }));
     }
     if (tab === 'promotions') {
@@ -1161,6 +1164,21 @@ function EstablishmentWorkspace({
     setSaving(true);
     const { error } = await supabase.from('establishment_wifi').upsert({ establishment_id: establishment.id, ssid: wifi.ssid, wifi_password: wifi.password || null, active: wifi.active }, { onConflict: 'establishment_id' });
     setSaving(false); if (error) return alert(error.message); alert('Wi-Fi enregistré.');
+  };
+
+  const saveMenuTemplate = async (templateId: string) => {
+    setMenuTemplate(templateId);
+    const { error } = await supabase
+      .from('establishments')
+      .update({ menu_template_id: templateId })
+      .eq('id', establishment.id);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    await onReload();
   };
 
   const addCategory = async () => {
@@ -1347,7 +1365,57 @@ function EstablishmentWorkspace({
 
       {tab === 'wifi' && <div className="max-w-xl rounded-2xl border border-ink/5 bg-white p-6 shadow-sm"><h3 className="text-lg font-semibold">Wi-Fi client</h3><p className="mt-1 mb-5 text-xs text-ink/45">Ces informations alimenteront le module Wi-Fi de la page publique.</p><div className="space-y-4"><label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">Nom du réseau</span><input value={wifi.ssid} onChange={(e) => setWifi({ ...wifi, ssid: e.target.value })} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></label><label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">Mot de passe</span><input value={wifi.password} onChange={(e) => setWifi({ ...wifi, password: e.target.value })} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></label><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={wifi.active} onChange={(e) => setWifi({ ...wifi, active: e.target.checked })} /> Module actif</label><button disabled={saving} onClick={saveWifi} className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white">Enregistrer le Wi-Fi</button></div></div>}
 
-      {tab === 'menu' && <div className="space-y-5"><div className="grid gap-5 md:grid-cols-2"><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Catégories</h3><div className="mt-4 flex gap-2"><input value={menuCategoryName} onChange={(e) => setMenuCategoryName(e.target.value)} placeholder="Ex. Entrées" className="min-w-0 flex-1 rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><button onClick={addCategory} className="rounded-xl bg-forest px-4 text-xs font-semibold text-white">Ajouter</button></div><div className="mt-4 space-y-2">{categories.map((c) => <div key={c.id} className="flex items-center justify-between rounded-xl bg-[#f7f7f3] px-3 py-2.5 text-sm"><span>{c.name}</span><button onClick={async () => { const { error } = await supabase.from('menu_categories').update({ active: !c.active }).eq('id', c.id); if (error) alert(error.message); else loadTab(); }} className="text-xs text-ink/45">{c.active ? 'Actif' : 'Inactif'}</button></div>)}</div></div><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Nouveau produit</h3><div className="mt-4 space-y-3"><input value={menuItem.name} onChange={(e) => setMenuItem({ ...menuItem, name: e.target.value })} placeholder="Nom" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><select value={menuItem.category_id} onChange={(e) => setMenuItem({ ...menuItem, category_id: e.target.value })} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"><option value="">Catégorie</option>{categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select><input value={menuItem.price} onChange={(e) => setMenuItem({ ...menuItem, price: e.target.value })} placeholder="Prix MAD" type="number" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><textarea value={menuItem.description} onChange={(e) => setMenuItem({ ...menuItem, description: e.target.value })} placeholder="Description" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><button onClick={addMenuItem} className="rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Ajouter le produit</button></div></div></div><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Produits</h3><div className="mt-4 grid gap-2 md:grid-cols-2">{items.map((i) => <div key={i.id} className="rounded-xl bg-[#f7f7f3] p-3"><div className="flex justify-between gap-3"><strong className="text-sm">{i.name}</strong><span className="text-sm font-semibold">{Number(i.price).toFixed(2)} MAD</span></div><p className="mt-1 text-xs text-ink/45">{i.description || 'Sans description'}</p><button onClick={async () => { const { error } = await supabase.from('menu_items').update({ active: !i.active }).eq('id', i.id); if (error) alert(error.message); else loadTab(); }} className="mt-2 text-[11px] text-ink/45">{i.active ? 'Désactiver' : 'Activer'}</button></div>)}</div></div></div>}
+      {tab === 'menu' && <div className="space-y-5">
+        <div className="rounded-2xl border border-gold/20 bg-[#fbf8ee] p-6 shadow-sm">
+          <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Design du menu</p>
+              <h3 className="mt-1 text-xl font-semibold text-forest">Choisir le template</h3>
+              <p className="mt-1 text-xs text-ink/45">Le template sélectionné sera utilisé automatiquement sur la page publique de cet établissement.</p>
+            </div>
+            <span className="rounded-full bg-white px-3 py-1.5 text-[11px] font-semibold text-forest shadow-sm">Actuel : {menuTemplate === 'luxury' ? 'Luxury' : menuTemplate === 'cards' ? 'Cards' : menuTemplate === 'dark' ? 'Dark' : 'Editorial'}</span>
+          </div>
+
+          <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {[
+              { id: 'editorial', name: 'Editorial', description: 'Épuré, élégant et très lisible.', tone: 'bg-white', accent: 'bg-forest' },
+              { id: 'luxury', name: 'Luxury', description: 'Restaurant premium avec détails dorés.', tone: 'bg-[#fbf8ee]', accent: 'bg-gold' },
+              { id: 'cards', name: 'Cards', description: 'Photos produits et présentation visuelle.', tone: 'bg-white', accent: 'bg-forest' },
+              { id: 'dark', name: 'Dark', description: 'Ambiance lounge, sombre et sophistiquée.', tone: 'bg-forest', accent: 'bg-gold' },
+            ].map((template) => (
+              <button
+                key={template.id}
+                type="button"
+                onClick={() => void saveMenuTemplate(template.id)}
+                className={`group overflow-hidden rounded-2xl border text-left transition ${menuTemplate === template.id ? 'border-gold ring-2 ring-gold/20' : 'border-ink/8 hover:border-gold/50'}`}
+              >
+                <div className={`h-28 p-4 ${template.tone} `}>
+                  <div className="flex items-center justify-between">
+                    <span className={`h-2 w-16 rounded-full ${template.accent}`}></span>
+                    <span className={`h-2 w-6 rounded-full ${template.id === 'dark' ? 'bg-white/40' : 'bg-ink/10'}`}></span>
+                  </div>
+                  <div className="mt-5 space-y-2">
+                    <div className={`h-2 w-3/4 rounded-full ${template.id === 'dark' ? 'bg-white/30' : 'bg-ink/10'}`}></div>
+                    <div className={`h-2 w-1/2 rounded-full ${template.id === 'dark' ? 'bg-white/20' : 'bg-ink/5'}`}></div>
+                    <div className="flex justify-between gap-3">
+                      <div className={`h-2 w-1/3 rounded-full ${template.id === 'dark' ? 'bg-white/20' : 'bg-ink/5'}`}></div>
+                      <div className={`h-2 w-10 rounded-full ${template.accent}`}></div>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-white p-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <strong className="text-sm text-forest">{template.name}</strong>
+                    {menuTemplate === template.id && <span className="rounded-full bg-forest px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-white">Actif</span>}
+                  </div>
+                  <p className="mt-1 text-[11px] leading-4 text-ink/40">{template.description}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid gap-5 md:grid-cols-2"><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Catégories</h3><div className="mt-4 flex gap-2"><input value={menuCategoryName} onChange={(e) => setMenuCategoryName(e.target.value)} placeholder="Ex. Entrées" className="min-w-0 flex-1 rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><button onClick={addCategory} className="rounded-xl bg-forest px-4 text-xs font-semibold text-white">Ajouter</button></div><div className="mt-4 space-y-2">{categories.map((c) => <div key={c.id} className="flex items-center justify-between rounded-xl bg-[#f7f7f3] px-3 py-2.5 text-sm"><span>{c.name}</span><button onClick={async () => { const { error } = await supabase.from('menu_categories').update({ active: !c.active }).eq('id', c.id); if (error) alert(error.message); else loadTab(); }} className="text-xs text-ink/45">{c.active ? 'Actif' : 'Inactif'}</button></div>)}</div></div><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Nouveau produit</h3><div className="mt-4 space-y-3"><input value={menuItem.name} onChange={(e) => setMenuItem({ ...menuItem, name: e.target.value })} placeholder="Nom" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><select value={menuItem.category_id} onChange={(e) => setMenuItem({ ...menuItem, category_id: e.target.value })} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"><option value="">Catégorie</option>{categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select><input value={menuItem.price} onChange={(e) => setMenuItem({ ...menuItem, price: e.target.value })} placeholder="Prix MAD" type="number" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><textarea value={menuItem.description} onChange={(e) => setMenuItem({ ...menuItem, description: e.target.value })} placeholder="Description" className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><button onClick={addMenuItem} className="rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Ajouter le produit</button></div></div></div><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Produits</h3><div className="mt-4 grid gap-2 md:grid-cols-2">{items.map((i) => <div key={i.id} className="rounded-xl bg-[#f7f7f3] p-3"><div className="flex justify-between gap-3"><strong className="text-sm">{i.name}</strong><span className="text-sm font-semibold">{Number(i.price).toFixed(2)} MAD</span></div><p className="mt-1 text-xs text-ink/45">{i.description || 'Sans description'}</p><button onClick={async () => { const { error } = await supabase.from('menu_items').update({ active: !i.active }).eq('id', i.id); if (error) alert(error.message); else loadTab(); }} className="mt-2 text-[11px] text-ink/45">{i.active ? 'Désactiver' : 'Activer'}</button></div>)}</div></div></div>}
 
       {tab === 'promotions' && <div className="space-y-5"><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Créer une promotion</h3><div className="mt-4 grid gap-3 md:grid-cols-4"><input value={promotion.name} onChange={(e) => setPromotion({ ...promotion, name: e.target.value })} placeholder="Nom" className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><input value={promotion.description} onChange={(e) => setPromotion({ ...promotion, description: e.target.value })} placeholder="Description" className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><input value={promotion.normal_price} onChange={(e) => setPromotion({ ...promotion, normal_price: e.target.value })} placeholder="Prix normal" type="number" className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><input value={promotion.promo_price} onChange={(e) => setPromotion({ ...promotion, promo_price: e.target.value })} placeholder="Prix promo" type="number" className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></div><button onClick={addPromotion} className="mt-3 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Ajouter</button></div><div className="grid gap-3 md:grid-cols-2">{promotions.map((p) => <div key={p.id} className="rounded-2xl border border-ink/5 bg-white p-5"><div className="flex justify-between"><strong>{p.name}</strong><button onClick={async () => { const { error } = await supabase.from('promotions').update({ active: !p.active }).eq('id', p.id); if (error) alert(error.message); else loadTab(); }} className="text-xs text-ink/45">{p.active ? 'Actif' : 'Inactif'}</button></div><p className="mt-2 text-sm text-ink/55">{p.description || 'Sans description'}</p><p className="mt-3 text-sm font-semibold">{p.promo_price ?? '—'} MAD <span className="ml-2 text-xs text-ink/35 line-through">{p.normal_price ?? ''}</span></p></div>)}</div></div>}
 
