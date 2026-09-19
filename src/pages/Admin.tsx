@@ -1264,7 +1264,34 @@ function EstablishmentWorkspace({
         body: formData,
       });
 
-      if (error) throw error;
+      if (error) {
+        let detailedMessage = error instanceof Error
+          ? error.message
+          : 'Erreur pendant l’analyse du menu.';
+
+        try {
+          const functionError = error as {
+            context?: {
+              json?: () => Promise<any>;
+            };
+          };
+
+          const errorBody = await functionError.context?.json?.();
+
+          if (errorBody?.error || errorBody?.message) {
+            detailedMessage =
+              errorBody.error ||
+              errorBody.message ||
+              detailedMessage;
+          }
+        } catch {
+          // Supabase may return an error without a readable response body.
+        }
+
+        console.error('Erreur import menu IA:', error, detailedMessage);
+        throw new Error(detailedMessage);
+      }
+
       if (!data?.success || !data?.menu) {
         throw new Error(data?.error || 'Impossible d’analyser le menu.');
       }
