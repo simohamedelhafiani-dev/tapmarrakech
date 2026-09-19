@@ -114,7 +114,7 @@ export default function PublicReview() {
       const { data: establishment } = await supabase
         .from('establishments')
         .select(
-          'id,name,slug,logo_url,google_review_url,redirect_threshold,phone,email,address,city,description,website_url,instagram_url,facebook_url,tiktok_url,whatsapp_number,page_template_id,menu_template_id,menu_display_mode,menu_pdf_url'
+          'id,name,slug,logo_url,google_review_url,redirect_threshold,phone,email,address,city,description,website_url,instagram_url,facebook_url,tiktok_url,whatsapp_number,page_template_id,menu_template_id,menu_display_mode,menu_pdf_url,menu_ai_design'
         )
         .eq('slug', slug)
         .maybeSingle();
@@ -482,6 +482,7 @@ export default function PublicReview() {
   const menuTemplate = p.menu_template_id || 'editorial';
   const menuDisplayMode = p.menu_display_mode || 'digital';
   const menuPdfUrl = p.menu_pdf_url || '';
+  const menuAiDesign = p.menu_ai_design || null;
 
   const directionsUrl =
     address || city
@@ -785,12 +786,22 @@ export default function PublicReview() {
                 </a>
               </section>
             ) : (
-              <MenuTemplate
-                template={menuTemplate}
-                place={p}
-                categories={categories}
-                itemsByCategory={itemsByCategory}
-              />
+              {menuAiDesign ? (
+                <AIPremiumMenu
+                  design={menuAiDesign}
+                  place={p}
+                  categories={categories}
+                  items={items}
+                  itemsByCategory={itemsByCategory}
+                />
+              ) : (
+                <MenuTemplate
+                  template={menuTemplate}
+                  place={p}
+                  categories={categories}
+                  itemsByCategory={itemsByCategory}
+                />
+              )}
             )}
           </main>
         )}
@@ -1370,6 +1381,167 @@ function ActionRow({
     <button type="button" onClick={onClick} className={className}>
       {contentNode}
     </button>
+  );
+}
+
+function AIPremiumMenu({
+  design,
+  place,
+  categories,
+  items,
+  itemsByCategory,
+}: {
+  design: any;
+  place: any;
+  categories: MenuCategory[];
+  items: MenuItem[];
+  itemsByCategory: Record<string, MenuItem[]>;
+}) {
+  const style = design?.style ?? 'editorial';
+  const sections = Array.isArray(design?.sections) ? design.sections : [];
+  const itemMap = new Map(items.map((item) => [item.id, item]));
+  const categoryMap = new Map(categories.map((category) => [category.id, category]));
+
+  const visibleSections = sections.filter((section: any) => {
+    if (section?.type === 'featured') {
+      return Array.isArray(section.item_ids) && section.item_ids.some((id: string) => itemMap.has(id));
+    }
+    return Boolean(section?.category_id && categoryMap.has(section.category_id) && (itemsByCategory[section.category_id] ?? []).length);
+  });
+
+  const heroImage =
+    items.find((item) => item.image_url)?.image_url ??
+    place.logo_url ??
+    null;
+
+  const palette =
+    style === 'dark'
+      ? {
+          page: 'bg-[#102b24] text-white',
+          muted: 'text-white/50',
+          accent: 'text-gold',
+          card: 'bg-white/[0.04] border-white/10',
+        }
+      : style === 'luxury'
+        ? {
+            page: 'bg-[#fbf8ee] text-forest',
+            muted: 'text-ink/45',
+            accent: 'text-gold',
+            card: 'bg-white border-gold/10',
+          }
+        : style === 'immersive'
+          ? {
+              page: 'bg-[#f2eee5] text-forest',
+              muted: 'text-ink/45',
+              accent: 'text-gold',
+              card: 'bg-white/90 border-ink/5',
+            }
+          : {
+              page: 'bg-[#f7f7f3] text-forest',
+              muted: 'text-ink/45',
+              accent: 'text-gold',
+              card: 'bg-white border-ink/5',
+            };
+
+  return (
+    <div className={`mt-2 -mx-5 overflow-hidden ${palette.page}`}>
+      <section className={`relative overflow-hidden px-5 pb-10 pt-5 ${style === 'dark' ? 'bg-[#102b24]' : ''}`}>
+        {heroImage && (
+          <div className="mb-5 overflow-hidden rounded-[28px] border border-black/5 shadow-sm">
+            <img src={heroImage} alt="" className="h-48 w-full object-cover" />
+          </div>
+        )}
+        {!heroImage && (
+          <div className="mb-5 flex h-20 items-center justify-center rounded-[24px] border border-gold/20">
+            <span className={`font-display text-2xl ${palette.accent}`}>{place.name}</span>
+          </div>
+        )}
+        <p className={`text-[9px] font-bold uppercase tracking-[0.32em] ${palette.accent}`}>
+          {design.hero?.eyebrow || 'La carte'}
+        </p>
+        <h1 className={`mt-2 font-display text-5xl leading-[0.95] ${style === 'dark' ? 'text-white' : 'text-forest'}`}>
+          {design.hero?.title || place.name || 'Notre menu'}
+        </h1>
+        {design.hero?.subtitle && (
+          <p className={`mt-4 max-w-[380px] text-sm leading-6 ${palette.muted}`}>
+            {design.hero.subtitle}
+          </p>
+        )}
+      </section>
+
+      {(design.intro?.title || design.intro?.text) && (
+        <section className="px-5 pb-7">
+          {design.intro.title && <h2 className={`font-display text-2xl ${style === 'dark' ? 'text-white' : 'text-forest'}`}>{design.intro.title}</h2>}
+          {design.intro.text && <p className={`mt-2 text-sm leading-6 ${palette.muted}`}>{design.intro.text}</p>}
+        </section>
+      )}
+
+      <div className="space-y-10 px-5 pb-12">
+        {visibleSections.map((section: any, index: number) => {
+          const sectionItems = section.type === 'featured'
+            ? (section.item_ids ?? []).map((id: string) => itemMap.get(id)).filter(Boolean) as MenuItem[]
+            : (itemsByCategory[section.category_id] ?? []);
+
+          if (!sectionItems.length) return null;
+
+          return (
+            <section key={`${section.type}-${section.category_id ?? index}-${index}`}>
+              <div className="mb-4">
+                <p className={`text-[8px] font-bold uppercase tracking-[0.3em] ${palette.accent}`}>
+                  {section.type === 'featured' ? 'À découvrir' : 'Sélection'}
+                </p>
+                <h2 className={`mt-1 font-display text-3xl ${style === 'dark' ? 'text-white' : 'text-forest'}`}>
+                  {section.title}
+                </h2>
+                {section.subtitle && <p className={`mt-1 text-xs leading-5 ${palette.muted}`}>{section.subtitle}</p>}
+              </div>
+
+              {section.type === 'featured' || section.layout === 'feature' ? (
+                <div className="space-y-3">
+                  {sectionItems.slice(0, 4).map((item) => (
+                    <article key={item.id} className={`overflow-hidden rounded-[26px] border shadow-sm ${palette.card}`}>
+                      {item.image_url && <img src={item.image_url} alt="" className="h-44 w-full object-cover" />}
+                      <div className="p-5">
+                        <div className="flex items-start justify-between gap-4">
+                          <h3 className={`text-base font-bold ${style === 'dark' ? 'text-white' : 'text-forest'}`}>{item.name}</h3>
+                          <span className={`shrink-0 text-sm font-bold ${palette.accent}`}>{Number(item.price).toLocaleString('fr-FR')} MAD</span>
+                        </div>
+                        {item.description && <p className={`mt-2 text-xs leading-5 ${palette.muted}`}>{item.description}</p>}
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              ) : section.layout === 'grid' ? (
+                <div className="grid grid-cols-2 gap-3">
+                  {sectionItems.map((item) => (
+                    <article key={item.id} className={`overflow-hidden rounded-[22px] border shadow-sm ${palette.card}`}>
+                      {item.image_url && <img src={item.image_url} alt="" className="aspect-square w-full object-cover" />}
+                      <div className="p-3.5">
+                        <h3 className={`line-clamp-2 text-sm font-bold ${style === 'dark' ? 'text-white' : 'text-forest'}`}>{item.name}</h3>
+                        {item.description && <p className={`mt-1.5 line-clamp-3 text-[10px] leading-4 ${palette.muted}`}>{item.description}</p>}
+                        <p className={`mt-3 text-sm font-bold ${palette.accent}`}>{Number(item.price).toLocaleString('fr-FR')} MAD</p>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <div className={`overflow-hidden rounded-[24px] border ${palette.card}`}>
+                  {sectionItems.map((item) => (
+                    <article key={item.id} className="flex items-start justify-between gap-4 border-b border-current/10 p-4 last:border-b-0">
+                      <div className="min-w-0">
+                        <h3 className={`text-[15px] font-semibold ${style === 'dark' ? 'text-white' : 'text-forest'}`}>{item.name}</h3>
+                        {item.description && <p className={`mt-1 text-[11px] leading-5 ${palette.muted}`}>{item.description}</p>}
+                      </div>
+                      <span className={`shrink-0 text-sm font-bold ${palette.accent}`}>{Number(item.price).toLocaleString('fr-FR')} MAD</span>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </section>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
