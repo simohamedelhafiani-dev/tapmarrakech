@@ -440,26 +440,48 @@ export default function Establishments() {
                 </button>
               </div>
 
-              <div className="mt-5 rounded-xl bg-[#f7f7f3] p-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-forest/50">Accès scanner fidélité</p>
-                <p className="mt-1 truncate text-[11px] text-ink/40">{scannerLinks[place.id] ?? 'Génération du lien…'}</p>
-                {scannerLinks[place.id] && (
-                  <div className="mt-2 flex flex-wrap gap-2">
+              <div className="mt-5 rounded-2xl border border-gold/20 bg-[#f7f7f3] p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-forest">
+                      Scanner fidélité
+                    </p>
+                    <p className="mt-1 text-[11px] text-ink/50">
+                      Lien permanent pour les employés
+                    </p>
+                  </div>
+                  <QrCode size={20} className="shrink-0 text-gold" />
+                </div>
+
+                <div className="mt-3 rounded-xl bg-white px-3 py-2.5">
+                  <p className="truncate text-[11px] text-ink/50">
+                    {scannerLinks[place.id] ?? 'Génération du lien…'}
+                  </p>
+                </div>
+
+                {scannerLinks[place.id] ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
                     <button
                       onClick={() => copy(scannerLinks[place.id])}
-                      className="rounded-lg bg-white px-3 py-2 text-[11px] font-semibold text-forest"
+                      className="flex items-center gap-1.5 rounded-lg bg-forest px-3 py-2 text-[11px] font-semibold text-white"
                     >
-                      Copier le scanner
+                      <Copy size={13} />
+                      Copier le lien
                     </button>
                     <a
                       href={scannerLinks[place.id]}
                       target="_blank"
                       rel="noreferrer"
-                      className="rounded-lg bg-white px-3 py-2 text-[11px] font-semibold text-forest"
+                      className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[11px] font-semibold text-forest"
                     >
-                      Ouvrir le scanner
+                      <ExternalLink size={13} />
+                      Ouvrir
                     </a>
                   </div>
+                ) : (
+                  <p className="mt-2 text-[11px] text-red-600">
+                    Le lien n’a pas pu être généré. Rechargez la page.
+                  </p>
                 )}
               </div>
 
