@@ -1404,8 +1404,14 @@ function AIPremiumMenu({
     if (section?.type === 'featured') {
       return Array.isArray(section.item_ids) && section.item_ids.some((id: string) => itemMap.has(id));
     }
-    return Boolean(section?.category_id && categoryMap.has(section.category_id) && (itemsByCategory[section.category_id] ?? []).length);
+    return Boolean(
+      section?.category_id &&
+      categoryMap.has(section.category_id) &&
+      (itemsByCategory[section.category_id] ?? []).length
+    );
   });
+
+  const navSections = visibleSections.filter((section: any) => section?.title).slice(0, 12);
 
   const heroImage =
     items.find((item) => item.image_url)?.image_url ??
@@ -1416,128 +1422,247 @@ function AIPremiumMenu({
     style === 'dark'
       ? {
           page: 'bg-[#102b24] text-white',
-          muted: 'text-white/50',
+          body: 'bg-[#102b24]',
+          muted: 'text-white/55',
           accent: 'text-gold',
-          card: 'bg-white/[0.04] border-white/10',
+          line: 'border-white/10',
+          card: 'bg-white/[0.055] border-white/10',
+          product: 'text-white',
         }
       : style === 'luxury'
         ? {
-            page: 'bg-[#fbf8ee] text-forest',
-            muted: 'text-ink/45',
+            page: 'bg-[#f3eee2] text-forest',
+            body: 'bg-[#f3eee2]',
+            muted: 'text-ink/55',
             accent: 'text-gold',
-            card: 'bg-white border-gold/10',
+            line: 'border-gold/20',
+            card: 'bg-[#fffdf7] border-gold/15',
+            product: 'text-forest',
           }
         : style === 'immersive'
           ? {
-              page: 'bg-[#f2eee5] text-forest',
-              muted: 'text-ink/45',
+              page: 'bg-[#ebe5d8] text-forest',
+              body: 'bg-[#ebe5d8]',
+              muted: 'text-ink/55',
               accent: 'text-gold',
-              card: 'bg-white/90 border-ink/5',
+              line: 'border-forest/10',
+              card: 'bg-[#fffaf0] border-forest/10',
+              product: 'text-forest',
             }
           : {
-              page: 'bg-[#f7f7f3] text-forest',
-              muted: 'text-ink/45',
+              page: 'bg-[#f0ece2] text-forest',
+              body: 'bg-[#f0ece2]',
+              muted: 'text-ink/55',
               accent: 'text-gold',
-              card: 'bg-white border-ink/5',
+              line: 'border-forest/10',
+              card: 'bg-[#fffdf8] border-ink/10',
+              product: 'text-forest',
             };
 
+  const scrollToSection = (index: number) => {
+    document.getElementById(`ai-menu-section-${index}`)?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  };
+
   return (
-    <div className={`mt-2 -mx-5 overflow-hidden ${palette.page}`}>
-      <section className={`relative overflow-hidden px-5 pb-10 pt-5 ${style === 'dark' ? 'bg-[#102b24]' : ''}`}>
-        {heroImage && (
-          <div className="mb-5 overflow-hidden rounded-[28px] border border-black/5 shadow-sm">
-            <img src={heroImage} alt="" className="h-48 w-full object-cover" />
-          </div>
-        )}
-        {!heroImage && (
-          <div className="mb-5 flex h-20 items-center justify-center rounded-[24px] border border-gold/20">
-            <span className={`font-display text-2xl ${palette.accent}`}>{place.name}</span>
-          </div>
-        )}
-        <p className={`text-[9px] font-bold uppercase tracking-[0.32em] ${palette.accent}`}>
-          {design.hero?.eyebrow || 'La carte'}
-        </p>
-        <h1 className={`mt-2 font-display text-5xl leading-[0.95] ${style === 'dark' ? 'text-white' : 'text-forest'}`}>
-          {design.hero?.title || place.name || 'Notre menu'}
-        </h1>
-        {design.hero?.subtitle && (
-          <p className={`mt-4 max-w-[380px] text-sm leading-6 ${palette.muted}`}>
-            {design.hero.subtitle}
+    <div className={`-mx-5 mt-2 overflow-hidden ${palette.page}`}>
+      <section
+        className={`relative overflow-hidden px-5 pb-10 pt-7 ${
+          style === 'dark' ? 'bg-[#0d241e]' : 'bg-[#173d32]'
+        }`}
+      >
+        <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-gold/10 blur-3xl" />
+        <div className="absolute -bottom-32 -left-20 h-72 w-72 rounded-full bg-black/20 blur-3xl" />
+
+        <div className="relative">
+          {heroImage ? (
+            <div className="mb-6 overflow-hidden rounded-[30px] border border-white/10 bg-black/10 shadow-2xl">
+              <img src={heroImage} alt="" className="h-52 w-full object-cover" />
+            </div>
+          ) : (
+            <div className="mb-6 flex h-28 items-center justify-center rounded-[28px] border border-gold/20 bg-white/5">
+              <span className="font-display text-3xl text-gold">{place.name}</span>
+            </div>
+          )}
+
+          <p className="text-[9px] font-bold uppercase tracking-[0.34em] text-gold">
+            {design.hero?.eyebrow || 'La carte'}
           </p>
-        )}
+          <h1 className="mt-2 max-w-[430px] font-display text-[42px] leading-[0.94] text-white">
+            {design.hero?.title || place.name || 'Notre menu'}
+          </h1>
+          {design.hero?.subtitle && (
+            <p className="mt-4 max-w-[390px] text-sm leading-6 text-white/60">
+              {design.hero.subtitle}
+            </p>
+          )}
+        </div>
       </section>
 
-      {(design.intro?.title || design.intro?.text) && (
-        <section className="px-5 pb-7">
-          {design.intro.title && <h2 className={`font-display text-2xl ${style === 'dark' ? 'text-white' : 'text-forest'}`}>{design.intro.title}</h2>}
-          {design.intro.text && <p className={`mt-2 text-sm leading-6 ${palette.muted}`}>{design.intro.text}</p>}
-        </section>
+      {navSections.length > 1 && (
+        <div className="sticky top-0 z-20 overflow-x-auto border-b border-ink/10 bg-[#f0ece2]/95 px-5 py-3 backdrop-blur-md scrollbar-hide">
+          <div className="flex min-w-max gap-2">
+            {navSections.map((section: any, index: number) => (
+              <button
+                key={`nav-${index}`}
+                type="button"
+                onClick={() => scrollToSection(visibleSections.indexOf(section))}
+                className="rounded-full border border-forest/10 bg-white/75 px-4 py-2 text-[10px] font-semibold text-forest shadow-sm"
+              >
+                {section.title}
+              </button>
+            ))}
+          </div>
+        </div>
       )}
 
-      <div className="space-y-10 px-5 pb-12">
-        {visibleSections.map((section: any, index: number) => {
-          const sectionItems = section.type === 'featured'
-            ? (section.item_ids ?? []).map((id: string) => itemMap.get(id)).filter(Boolean) as MenuItem[]
-            : (itemsByCategory[section.category_id] ?? []);
+      <div className={`px-5 pb-14 pt-8 ${palette.body}`}>
+        {(design.intro?.title || design.intro?.text) && (
+          <section className={`mb-10 rounded-[28px] border p-5 shadow-sm ${palette.card}`}>
+            {design.intro.title && (
+              <h2 className={`font-display text-2xl ${palette.product}`}>
+                {design.intro.title}
+              </h2>
+            )}
+            {design.intro.text && (
+              <p className={`mt-2 text-sm leading-6 ${palette.muted}`}>
+                {design.intro.text}
+              </p>
+            )}
+          </section>
+        )}
 
-          if (!sectionItems.length) return null;
+        <div className="space-y-12">
+          {visibleSections.map((section: any, index: number) => {
+            const sectionItems =
+              section.type === 'featured'
+                ? (section.item_ids ?? [])
+                    .map((id: string) => itemMap.get(id))
+                    .filter(Boolean) as MenuItem[]
+                : (itemsByCategory[section.category_id] ?? []);
 
-          return (
-            <section key={`${section.type}-${section.category_id ?? index}-${index}`}>
-              <div className="mb-4">
-                <p className={`text-[8px] font-bold uppercase tracking-[0.3em] ${palette.accent}`}>
-                  {section.type === 'featured' ? 'À découvrir' : 'Sélection'}
-                </p>
-                <h2 className={`mt-1 font-display text-3xl ${style === 'dark' ? 'text-white' : 'text-forest'}`}>
-                  {section.title}
-                </h2>
-                {section.subtitle && <p className={`mt-1 text-xs leading-5 ${palette.muted}`}>{section.subtitle}</p>}
-              </div>
+            if (!sectionItems.length) return null;
 
-              {section.type === 'featured' || section.layout === 'feature' ? (
-                <div className="space-y-3">
-                  {sectionItems.slice(0, 4).map((item) => (
-                    <article key={item.id} className={`overflow-hidden rounded-[26px] border shadow-sm ${palette.card}`}>
-                      {item.image_url && <img src={item.image_url} alt="" className="h-44 w-full object-cover" />}
-                      <div className="p-5">
-                        <div className="flex items-start justify-between gap-4">
-                          <h3 className={`text-base font-bold ${style === 'dark' ? 'text-white' : 'text-forest'}`}>{item.name}</h3>
-                          <span className={`shrink-0 text-sm font-bold ${palette.accent}`}>{Number(item.price).toLocaleString('fr-FR')} MAD</span>
+            const layout =
+              section.type === 'featured'
+                ? 'feature'
+                : section.layout === 'list'
+                  ? 'list'
+                  : section.layout === 'feature'
+                    ? 'feature'
+                    : 'grid';
+
+            return (
+              <section
+                id={`ai-menu-section-${index}`}
+                key={`${section.type}-${section.category_id ?? index}-${index}`}
+                className="scroll-mt-20"
+              >
+                <div className="mb-5">
+                  <div className="flex items-center gap-3">
+                    <span className={`h-px w-8 ${style === 'dark' ? 'bg-gold/50' : 'bg-gold'}`} />
+                    <p className={`text-[8px] font-bold uppercase tracking-[0.3em] ${palette.accent}`}>
+                      {section.type === 'featured' ? 'Les signatures' : 'La sélection'}
+                    </p>
+                  </div>
+                  <h2 className={`mt-2 font-display text-[30px] leading-tight ${palette.product}`}>
+                    {section.title}
+                  </h2>
+                  {section.subtitle && (
+                    <p className={`mt-1.5 max-w-[390px] text-xs leading-5 ${palette.muted}`}>
+                      {section.subtitle}
+                    </p>
+                  )}
+                </div>
+
+                {layout === 'feature' ? (
+                  <div className="space-y-4">
+                    {sectionItems.slice(0, 4).map((item) => (
+                      <article
+                        key={item.id}
+                        className={`overflow-hidden rounded-[26px] border shadow-sm ${palette.card}`}
+                      >
+                        {item.image_url && (
+                          <img src={item.image_url} alt="" className="h-48 w-full object-cover" />
+                        )}
+                        <div className="p-5">
+                          <div className="flex items-start justify-between gap-4">
+                            <h3 className={`text-[16px] font-bold leading-5 ${palette.product}`}>
+                              {item.name}
+                            </h3>
+                            <span className={`shrink-0 text-sm font-bold ${palette.accent}`}>
+                              {Number(item.price).toLocaleString('fr-FR')} MAD
+                            </span>
+                          </div>
+                          {item.description && (
+                            <p className={`mt-2 text-xs leading-5 ${palette.muted}`}>
+                              {item.description}
+                            </p>
+                          )}
                         </div>
-                        {item.description && <p className={`mt-2 text-xs leading-5 ${palette.muted}`}>{item.description}</p>}
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              ) : section.layout === 'grid' ? (
-                <div className="grid grid-cols-2 gap-3">
-                  {sectionItems.map((item) => (
-                    <article key={item.id} className={`overflow-hidden rounded-[22px] border shadow-sm ${palette.card}`}>
-                      {item.image_url && <img src={item.image_url} alt="" className="aspect-square w-full object-cover" />}
-                      <div className="p-3.5">
-                        <h3 className={`line-clamp-2 text-sm font-bold ${style === 'dark' ? 'text-white' : 'text-forest'}`}>{item.name}</h3>
-                        {item.description && <p className={`mt-1.5 line-clamp-3 text-[10px] leading-4 ${palette.muted}`}>{item.description}</p>}
-                        <p className={`mt-3 text-sm font-bold ${palette.accent}`}>{Number(item.price).toLocaleString('fr-FR')} MAD</p>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              ) : (
-                <div className={`overflow-hidden rounded-[24px] border ${palette.card}`}>
-                  {sectionItems.map((item) => (
-                    <article key={item.id} className="flex items-start justify-between gap-4 border-b border-current/10 p-4 last:border-b-0">
-                      <div className="min-w-0">
-                        <h3 className={`text-[15px] font-semibold ${style === 'dark' ? 'text-white' : 'text-forest'}`}>{item.name}</h3>
-                        {item.description && <p className={`mt-1 text-[11px] leading-5 ${palette.muted}`}>{item.description}</p>}
-                      </div>
-                      <span className={`shrink-0 text-sm font-bold ${palette.accent}`}>{Number(item.price).toLocaleString('fr-FR')} MAD</span>
-                    </article>
-                  ))}
-                </div>
-              )}
-            </section>
-          );
-        })}
+                      </article>
+                    ))}
+                  </div>
+                ) : layout === 'grid' ? (
+                  <div className="grid grid-cols-2 gap-3">
+                    {sectionItems.map((item) => (
+                      <article
+                        key={item.id}
+                        className={`overflow-hidden rounded-[22px] border shadow-sm ${palette.card}`}
+                      >
+                        {item.image_url ? (
+                          <img src={item.image_url} alt="" className="aspect-[1.15] w-full object-cover" />
+                        ) : (
+                          <div className="grid aspect-[1.15] place-items-center bg-forest/[0.04]">
+                            <UtensilsCrossed size={22} className="text-forest/15" />
+                          </div>
+                        )}
+                        <div className="p-3.5">
+                          <h3 className={`line-clamp-2 text-sm font-bold leading-5 ${palette.product}`}>
+                            {item.name}
+                          </h3>
+                          {item.description && (
+                            <p className={`mt-1.5 line-clamp-3 text-[10px] leading-4 ${palette.muted}`}>
+                              {item.description}
+                            </p>
+                          )}
+                          <p className={`mt-3 text-sm font-bold ${palette.accent}`}>
+                            {Number(item.price).toLocaleString('fr-FR')} MAD
+                          </p>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                ) : (
+                  <div className={`overflow-hidden rounded-[24px] border shadow-sm ${palette.card}`}>
+                    {sectionItems.map((item) => (
+                      <article
+                        key={item.id}
+                        className="flex items-start justify-between gap-4 border-b border-current/10 p-4 last:border-b-0"
+                      >
+                        <div className="min-w-0">
+                          <h3 className={`text-[15px] font-semibold leading-5 ${palette.product}`}>
+                            {item.name}
+                          </h3>
+                          {item.description && (
+                            <p className={`mt-1 text-[11px] leading-5 ${palette.muted}`}>
+                              {item.description}
+                            </p>
+                          )}
+                        </div>
+                        <span className={`shrink-0 text-sm font-bold ${palette.accent}`}>
+                          {Number(item.price).toLocaleString('fr-FR')} MAD
+                        </span>
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </section>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
