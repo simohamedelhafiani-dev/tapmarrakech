@@ -99,6 +99,24 @@ export default function LoyaltyCard() {
         setCard(nextCard);
         setTransactions((txData ?? []) as Transaction[]);
 
+        // Make the installed PWA belong to the establishment, not TapMarrakech:
+        // the name and icon are generated from the establishment branding.
+        document.title = nextCard.establishment_name || 'Carte fidélité';
+        const manifest = document.querySelector('link[rel="manifest"]') as HTMLLinkElement | null;
+        if (manifest) {
+          manifest.href =
+            `/api/loyalty-manifest?name=${encodeURIComponent(
+              nextCard.establishment_name || 'Carte fidélité'
+            )}&logo=${encodeURIComponent(
+              nextCard.establishment_logo_url || ''
+            )}&start_url=${encodeURIComponent(cardUrl)}`;
+        }
+
+        const appleIcon = document.querySelector('link[rel="apple-touch-icon"]') as HTMLLinkElement | null;
+        if (appleIcon && nextCard.establishment_logo_url) {
+          appleIcon.href = nextCard.establishment_logo_url;
+        }
+
         try {
           const dataUrl = await QRCode.toDataURL(cardUrl, {
             width: 240,
