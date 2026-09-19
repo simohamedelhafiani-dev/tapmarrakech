@@ -114,15 +114,21 @@ export default function LoyaltyCard() {
         // Make the installed PWA belong to the establishment, not TapMarrakech:
         // the name and icon are generated from the establishment branding.
         document.title = nextCard.establishment_name || 'Carte fidélité';
-        const manifest = document.querySelector('link[rel="manifest"]') as HTMLLinkElement | null;
-        if (manifest) {
-          manifest.href =
-            `/api/loyalty-manifest?name=${encodeURIComponent(
-              nextCard.establishment_name || 'Carte fidélité'
-            )}&logo=${encodeURIComponent(
-              nextCard.establishment_logo_url || ''
-            )}&start_url=${encodeURIComponent(cardUrl)}`;
+        let manifest = document.querySelector('link[rel="manifest"]') as HTMLLinkElement | null;
+        if (!manifest) {
+          manifest = document.createElement('link');
+          manifest.rel = 'manifest';
+          document.head.appendChild(manifest);
         }
+        manifest.href =
+          `/api/loyalty-manifest?name=${encodeURIComponent(
+            nextCard.establishment_name || 'Carte fidélité'
+          )}&logo=${encodeURIComponent(
+            nextCard.establishment_logo_url || ''
+          )}&start_url=${encodeURIComponent(cardUrl)}`;
+
+        const appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]') as HTMLMetaElement | null;
+        if (appleTitle) appleTitle.content = nextCard.establishment_name || 'Carte fidélité';
 
         const appleIcon = document.querySelector('link[rel="apple-touch-icon"]') as HTMLLinkElement | null;
         if (appleIcon && nextCard.establishment_logo_url) {

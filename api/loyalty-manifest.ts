@@ -28,6 +28,7 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
   const startUrl = first(req.query.start_url).trim() || '/loyalty';
 
   const manifest = {
+    id: startUrl,
     name,
     short_name: name.slice(0, 30),
     description: `Carte fidélité de ${name}`,
