@@ -145,7 +145,7 @@ AS $$
   SELECT
     t.id,
     t.points,
-    t.transaction_type,
+    t.type,
     t.description,
     t.created_at
   FROM public.loyalty_customer_links l
