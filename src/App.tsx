@@ -231,6 +231,15 @@ function RoleRedirect() {
     );
   }
 
+  const launchSource = new URLSearchParams(window.location.search).get('source');
+
+  // When the installed customer PWA opens, return directly to that customer's
+  // permanent card instead of the authenticated dashboard.
+  if (launchSource === 'pwa') {
+    const customerToken = window.localStorage.getItem('tapmarrakech:customer-card-token');
+    if (customerToken) return <Navigate to={`/loyalty/${customerToken}`} replace />;
+  }
+
   if (!user) {
     const scannerToken = window.localStorage.getItem('tapmarrakech:scanner-token');
     if (scannerToken) return <Navigate to={`/employee?scanner=${scannerToken}`} replace />;
