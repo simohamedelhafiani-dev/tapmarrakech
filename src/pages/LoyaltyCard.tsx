@@ -39,6 +39,7 @@ export default function LoyaltyCard() {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showIosInstallHelp, setShowIosInstallHelp] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [installDone, setInstallDone] = useState(false);
 
   const cardUrl = useMemo(() => window.location.href, []);
 
@@ -80,7 +81,10 @@ export default function LoyaltyCard() {
 
     await installPrompt.prompt();
     const result = await installPrompt.userChoice;
-    if (result.outcome === 'accepted') setInstallPrompt(null);
+    if (result.outcome === 'accepted') {
+      setInstallPrompt(null);
+      setInstallDone(true);
+    }
   }
 
   useEffect(() => {
@@ -219,24 +223,57 @@ export default function LoyaltyCard() {
             </div>
           )}
 
-          {!isStandalone && (
+{!isStandalone ? (
             <div className="mt-5 rounded-2xl border border-forest/10 bg-forest/5 p-4">
-              <p className="text-sm font-semibold text-forest">Votre carte sur votre téléphone</p>
-              <p className="mt-1 text-xs leading-5 text-ink/50">
-                Installez votre carte pour la retrouver comme une application, sans chercher le lien à chaque visite.
-              </p>
+              <div className="flex items-start gap-3">
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-forest text-gold">
+                  <WalletCards size={18} />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-forest">Gardez votre carte sur votre téléphone</p>
+                  <p className="mt-1 text-xs leading-5 text-ink/50">
+                    Ajoutez-la à votre écran d’accueil pour la retrouver en un geste à chaque visite.
+                  </p>
+                </div>
+              </div>
+
               <button
                 type="button"
                 onClick={installCard}
-                className="mt-3 w-full rounded-xl bg-forest px-4 py-3 text-xs font-semibold text-white"
+                className="mt-4 w-full rounded-xl bg-forest px-4 py-3 text-xs font-semibold text-white"
               >
-                {installPrompt ? 'Ajouter ma carte à l’écran d’accueil' : 'Installer ma carte'}
+                {installPrompt
+                  ? 'Ajouter ma carte à l’écran d’accueil'
+                  : isIos
+                    ? 'Ajouter ma carte sur mon iPhone'
+                    : 'Ajouter ma carte sur mon téléphone'}
               </button>
-              {isIos && showIosInstallHelp && (
-                <p className="mt-3 rounded-xl bg-white p-3 text-[11px] leading-5 text-ink/55">
-                  Sur iPhone : touchez <strong>Partager</strong> dans Safari, puis <strong>Sur l’écran d’accueil</strong>.
+
+              {installDone && (
+                <p className="mt-3 rounded-xl bg-white p-3 text-[11px] font-medium leading-5 text-forest">
+                  ✓ Votre carte a été ajoutée à votre écran d’accueil.
                 </p>
               )}
+
+              {isIos && showIosInstallHelp && (
+                <div className="mt-3 rounded-xl bg-white p-3 text-[11px] leading-5 text-ink/55">
+                  <p className="font-semibold text-forest">Sur iPhone</p>
+                  <p className="mt-1">
+                    1. Touchez <strong>Partager</strong> dans Safari.
+                    <br />
+                    2. Choisissez <strong>Sur l’écran d’accueil</strong>.
+                    <br />
+                    3. Touchez <strong>Ajouter</strong>.
+                  </p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="mt-5 rounded-2xl border border-forest/10 bg-forest/5 p-4">
+              <p className="text-sm font-semibold text-forest">✓ Votre carte est déjà enregistrée</p>
+              <p className="mt-1 text-xs leading-5 text-ink/50">
+                Retrouvez-la directement depuis l’icône de votre établissement sur votre écran d’accueil.
+              </p>
             </div>
           )}
 
