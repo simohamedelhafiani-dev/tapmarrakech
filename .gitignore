@@ -11,6 +11,8 @@ dist
 dist-ssr
 *.local
 
+gitleaks-report.json
+
 .vscode/*
 !.vscode/extensions.json
 .idea
