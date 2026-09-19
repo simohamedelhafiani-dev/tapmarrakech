@@ -2,7 +2,7 @@
   "name": "TapMarrakech",
   "short_name": "TapMarrakech",
   "description": "Carte fidélité et expérience client TapMarrakech",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
   "background_color": "#f7f7f3",
