@@ -43,7 +43,19 @@ export default function LoyaltyCard() {
   const cardUrl = useMemo(() => window.location.href, []);
 
   useEffect(() => {
-    if (token) window.localStorage.setItem('tapmarrakech:customer-card-token', token);
+    if (token) {
+      window.localStorage.setItem('tapmarrakech:customer-card-token', token);
+      const request = indexedDB.open('tapmarrakech-pwa', 1);
+      request.onupgradeneeded = () => {
+        request.result.createObjectStore('settings');
+      };
+      request.onsuccess = () => {
+        const db = request.result;
+        const tx = db.transaction('settings', 'readwrite');
+        tx.objectStore('settings').put(token, 'customer-card-token');
+        tx.oncomplete = () => db.close();
+      };
+    }
 
     const standalone =
       window.matchMedia?.('(display-mode: standalone)').matches ||
