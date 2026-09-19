@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 import { Clock3, History, Star, WalletCards } from 'lucide-react';
 import QRCode from 'qrcode';
 import { supabase } from '@/lib/supabase';
@@ -35,12 +36,40 @@ export default function LoyaltyCard() {
   const [qr, setQr] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [showIosInstallHelp, setShowIosInstallHelp] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
 
   const cardUrl = useMemo(() => window.location.href, []);
 
   useEffect(() => {
     if (token) window.localStorage.setItem('tapmarrakech:customer-card-token', token);
+
+    const standalone =
+      window.matchMedia?.('(display-mode: standalone)').matches ||
+      (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+    setIsStandalone(standalone);
+
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event as BeforeInstallPromptEvent);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
   }, [token]);
+
+
+  async function installCard() {
+    if (!installPrompt) {
+      setShowIosInstallHelp(true);
+      return;
+    }
+
+    await installPrompt.prompt();
+    const result = await installPrompt.userChoice;
+    if (result.outcome === 'accepted') setInstallPrompt(null);
+  }
 
   useEffect(() => {
     let active = true;
@@ -108,6 +137,7 @@ export default function LoyaltyCard() {
   }
 
   const fullName = `${card.first_name} ${card.last_name ?? ''}`.trim();
+  const isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
 
   return (
     <PageShell>
@@ -153,6 +183,27 @@ export default function LoyaltyCard() {
             </div>
           )}
 
+          {!isStandalone && (
+            <div className="mt-5 rounded-2xl border border-forest/10 bg-forest/5 p-4">
+              <p className="text-sm font-semibold text-forest">Votre carte sur votre téléphone</p>
+              <p className="mt-1 text-xs leading-5 text-ink/50">
+                Installez votre carte pour la retrouver comme une application, sans chercher le lien à chaque visite.
+              </p>
+              <button
+                type="button"
+                onClick={installCard}
+                className="mt-3 w-full rounded-xl bg-forest px-4 py-3 text-xs font-semibold text-white"
+              >
+                {installPrompt ? 'Ajouter ma carte à l’écran d’accueil' : 'Installer ma carte'}
+              </button>
+              {isIos && showIosInstallHelp && (
+                <p className="mt-3 rounded-xl bg-white p-3 text-[11px] leading-5 text-ink/55">
+                  Sur iPhone : touchez <strong>Partager</strong> dans Safari, puis <strong>Sur l’écran d’accueil</strong>.
+                </p>
+              )}
+            </div>
+          )}
+
           <div className="mt-6 grid grid-cols-3 gap-2">
             <Metric label="Gagnés" value={card.total_points_earned} />
             <Metric label="Utilisés" value={card.total_points_redeemed} />
@@ -172,7 +223,7 @@ export default function LoyaltyCard() {
                 {transactions.map((tx) => (
                   <div key={tx.id} className="flex items-center justify-between gap-4 p-4">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium">{tx.description || tx.type || 'Opération fidélité'}</p>
+                      <p className="truncate text-sm font-medium">{tx.description || tx.transaction_type || 'Opération fidélité'}</p>
                       <p className="mt-1 flex items-center gap-1 text-[11px] text-ink/40">
                         <Clock3 size={11} />
                         {new Date(tx.created_at).toLocaleDateString('fr-FR')}
@@ -194,7 +245,7 @@ export default function LoyaltyCard() {
   );
 }
 
-function PageShell({ children }: { children: React.ReactNode }) {
+function PageShell({ children }: { children: ReactNode }) {
   return (
     <main className="min-h-screen bg-[#f7f7f3] px-4 py-6 sm:py-10">
       <div className="mx-auto w-full max-w-md">{children}</div>
@@ -218,3 +269,9 @@ function Metric({ label, value }: { label: string; value: number }) {
     </div>
   );
 }
+
+
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+};
