@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import QrScannerLib from 'qr-scanner';
 
 type QrScannerProps = {
   onScan: (value: string) => void;
@@ -7,9 +8,7 @@ type QrScannerProps = {
 
 export default function QrScanner({ onScan, onClose }: QrScannerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const scanTimerRef = useRef<number | null>(null);
-  const lastValueRef = useRef('');
+  const scannerRef = useRef<QrScannerLib | null>(null);
   const onScanRef = useRef(onScan);
   const [error, setError] = useState('');
   const [torch, setTorch] = useState(false);
@@ -25,7 +24,7 @@ export default function QrScanner({ onScan, onClose }: QrScannerProps) {
       setError('');
 
       if (!navigator.mediaDevices?.getUserMedia) {
-        setError('La caméra n’est pas disponible. Ouvrez le lien dans Safari ou Chrome avec HTTPS.');
+        setError('La caméra n’est pas disponible. Ouvrez le lien dans Safari avec HTTPS.');
         return;
       }
 
@@ -34,83 +33,41 @@ export default function QrScanner({ onScan, onClose }: QrScannerProps) {
         return;
       }
 
+      if (!videoRef.current) return;
+
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: false,
-          video: {
-            facingMode: { exact: 'environment' },
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
+        const scanner = new QrScannerLib(
+          videoRef.current,
+          result => {
+            if (!active) return;
+            const value = typeof result === 'string' ? result : result.data;
+            if (value?.trim()) onScanRef.current(value.trim());
           },
-        });
+          {
+            preferredCamera: 'environment',
+            highlightScanRegion: false,
+            highlightCodeOutline: false,
+            maxScansPerSecond: 5,
+            returnDetailedScanResult: true,
+          }
+        );
+
+        scannerRef.current = scanner;
+        await scanner.start();
 
         if (!active) {
-          stream.getTracks().forEach(track => track.stop());
-          return;
+          scanner.stop();
+          scanner.destroy();
         }
-
-        streamRef.current = stream;
-
-        if (!videoRef.current) return;
-
-        videoRef.current.srcObject = stream;
-        videoRef.current.muted = true;
-        videoRef.current.setAttribute('playsinline', 'true');
-        videoRef.current.setAttribute('webkit-playsinline', 'true');
-
-        await videoRef.current.play();
-
-        const scanWithBarcodeDetector = async () => {
-          const Detector = (window as typeof window & {
-            BarcodeDetector?: new (options?: { formats?: string[] }) => {
-              detect: (source: HTMLVideoElement) => Promise<Array<{ rawValue: string }>>;
-            };
-          }).BarcodeDetector;
-
-          if (!Detector || !videoRef.current || !active) return false;
-
-          try {
-            const detector = new Detector({ formats: ['qr_code'] });
-            const results = await detector.detect(videoRef.current);
-            const value = results[0]?.rawValue?.trim() ?? '';
-
-            if (value && value !== lastValueRef.current) {
-              lastValueRef.current = value;
-              onScanRef.current(value);
-              return true;
-            }
-          } catch {
-            return false;
-          }
-
-          return false;
-        };
-
-        // BarcodeDetector is used when the browser supports it.
-        // On iPhone Safari, the fallback below uses the video frames + native
-        // image processing path instead of refusing to open the camera.
-        const tick = async () => {
-          if (!active) return;
-
-          const detected = await scanWithBarcodeDetector();
-
-          if (detected) return;
-
-          scanTimerRef.current = window.setTimeout(() => {
-            void tick();
-          }, 180);
-        };
-
-        void tick();
       } catch (err) {
         const name = err instanceof DOMException ? err.name : '';
 
         if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
           setError('Accès caméra refusé. Sur iPhone : Réglages → Safari → Caméra → Autoriser, puis rechargez la page.');
-        } else if (name === 'NotFoundError' || name === 'OverconstrainedError') {
-          setError('Caméra arrière introuvable. Vérifiez les autorisations de caméra puis réessayez.');
+        } else if (name === 'NotFoundError') {
+          setError('Aucune caméra disponible sur cet appareil.');
         } else {
-          setError('Impossible d’ouvrir la caméra. Vérifiez que le site est ouvert en HTTPS et autorisez la caméra.');
+          setError('Impossible d’ouvrir la caméra. Autorisez la caméra et rechargez la page.');
         }
       }
     };
@@ -119,29 +76,25 @@ export default function QrScanner({ onScan, onClose }: QrScannerProps) {
 
     return () => {
       active = false;
-      if (scanTimerRef.current !== null) window.clearTimeout(scanTimerRef.current);
-      streamRef.current?.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
+      scannerRef.current?.stop();
+      scannerRef.current?.destroy();
+      scannerRef.current = null;
     };
   }, []);
 
   const toggleTorch = async () => {
-    const track = streamRef.current?.getVideoTracks()[0];
-    if (!track) return;
-
-    const capabilities = track.getCapabilities?.() as MediaTrackCapabilities & { torch?: boolean };
-    if (!capabilities?.torch) {
-      setError('La lampe n’est pas disponible sur cette caméra.');
-      return;
-    }
+    const scanner = scannerRef.current;
+    if (!scanner) return;
 
     try {
-      await track.applyConstraints({
-        advanced: [{ torch: !torch }],
-      } as MediaTrackConstraints);
+      if (torch) {
+        await scanner.turnFlashOff();
+      } else {
+        await scanner.turnFlashOn();
+      }
       setTorch(value => !value);
     } catch {
-      setError('Impossible de contrôler la lampe.');
+      setError('La lampe n’est pas disponible sur cette caméra.');
     }
   };
 
