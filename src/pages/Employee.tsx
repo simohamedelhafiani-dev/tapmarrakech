@@ -76,7 +76,12 @@ export default function Employee() {
   const [employeeCode, setEmployeeCode] = useState('');
   const [loginLoading, setLoginLoading] = useState(true);
   const [loginSaving, setLoginSaving] = useState(false);
-  const scannerToken = useMemo(() => new URLSearchParams(window.location.search).get('scanner') ?? '', []);
+  const scannerToken = useMemo(() => new URLSearchParams(window.location.search).get('scanner') ?? window.localStorage.getItem('tapmarrakech:scanner-token') ?? '', []);
+
+  useEffect(() => {
+    const fromUrl = new URLSearchParams(window.location.search).get('scanner');
+    if (fromUrl) window.localStorage.setItem('tapmarrakech:scanner-token', fromUrl);
+  }, []);
   const [scannerReady, setScannerReady] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [scannerLoading, setScannerLoading] = useState(false);
