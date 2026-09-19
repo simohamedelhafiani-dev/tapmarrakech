@@ -1,4 +1,4 @@
-const CACHE = 'tapmarrakech-shell-v3';
+const CACHE = 'tapmarrakech-shell-v4';
 const APP_SHELL = ['/', '/index.html', '/tapmarrakech-logo.png', '/manifest.webmanifest'];
 
 self.addEventListener('install', (event) => {
@@ -45,8 +45,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
 
-  if (event.request.mode === 'navigate' && (url.pathname === '/' || url.pathname === '/loyalty')) {
-    event.respondWith(
+  event.respondWith(
       getCustomerCardToken().then((token) => {
         if (token) {
           return Response.redirect(new URL(`/loyalty/${token}`, self.location.origin).toString(), 302);
