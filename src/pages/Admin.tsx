@@ -1028,6 +1028,7 @@ function EstablishmentWorkspace({
   const [menuTemplate, setMenuTemplate] = useState('editorial');
   const [menuDisplayMode, setMenuDisplayMode] = useState<'digital' | 'pdf'>('digital');
   const [menuPdfUrl, setMenuPdfUrl] = useState<string | null>(null);
+  const [menuAiPhotoMode, setMenuAiPhotoMode] = useState<'with_photos' | 'without_photos'>('with_photos');
   const [menuPdfUploading, setMenuPdfUploading] = useState(false);
   const [menuCategoryName, setMenuCategoryName] = useState('');
   const [menuItem, setMenuItem] = useState({ name: '', description: '', price: '', category_id: '' });
@@ -1065,13 +1066,14 @@ function EstablishmentWorkspace({
       const [{ data: c }, { data: i }, { data: establishmentRow }] = await Promise.all([
         supabase.from('menu_categories').select('*').eq('establishment_id', establishment.id).order('display_order'),
         supabase.from('menu_items').select('*').eq('establishment_id', establishment.id).order('display_order'),
-        supabase.from('establishments').select('menu_template_id,menu_display_mode,menu_pdf_url,menu_ai_design').eq('id', establishment.id).maybeSingle(),
+        supabase.from('establishments').select('menu_template_id,menu_display_mode,menu_pdf_url,menu_ai_design,menu_ai_photo_mode').eq('id', establishment.id).maybeSingle(),
       ]);
       setCategories(c ?? []);
       setMenuTemplate(establishmentRow?.menu_template_id ?? 'editorial');
       setMenuDisplayMode(establishmentRow?.menu_display_mode === 'pdf' ? 'pdf' : 'digital');
       setMenuPdfUrl(establishmentRow?.menu_pdf_url ?? null);
       setMenuAiDesign(establishmentRow?.menu_ai_design ?? null);
+      setMenuAiPhotoMode(establishmentRow?.menu_ai_photo_mode === 'without_photos' ? 'without_photos' : 'with_photos');
       setItems(i ?? []);
       if (!menuItem.category_id && c?.[0]) setMenuItem((v) => ({ ...v, category_id: c[0].id }));
     }
@@ -1790,7 +1792,11 @@ function EstablishmentWorkspace({
                     })),
                   };
                   const { data, error } = await supabase.functions.invoke('design-menu', {
-                    body: { establishment_id: establishment.id, menu: designMenu },
+                    body: {
+                      establishment_id: establishment.id,
+                      menu: designMenu,
+                      photo_mode: menuAiPhotoMode,
+                    },
                   });
                   if (error || !data?.success || !data?.design) throw new Error(error?.message || data?.error || 'Design IA indisponible.');
                   setMenuAiDesign(data.design);
@@ -1807,6 +1813,49 @@ function EstablishmentWorkspace({
             >
               <Sparkles size={14} />
               {menuAiDesignLoading ? 'Création du design…' : 'Générer le design premium'}
+            </button>
+          </div>
+
+          <div className="mt-5">
+            <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/35">Photos du menu</p>
+            <div className="grid gap-3 md:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => setMenuAiPhotoMode('with_photos')}
+                className={`rounded-2xl border p-4 text-left transition ${menuAiPhotoMode === 'with_photos' ? 'border-gold bg-white ring-2 ring-gold/20' : 'border-ink/10 bg-white/60 hover:border-gold/50'}`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="font-semibold text-forest">Avec photos</p>
+                    <p className="mt-1 text-xs leading-5 text-ink/45">Les photos réellement ajoutées aux produits peuvent être affichées.</p>
+                  </div>
+                  {menuAiPhotoMode === 'with_photos' && <span className="rounded-full bg-forest px-2.5 py-1 text-[9px] font-bold uppercase text-white">Actif</span>}
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setMenuAiPhotoMode('without_photos')}
+                className={`rounded-2xl border p-4 text-left transition ${menuAiPhotoMode === 'without_photos' ? 'border-gold bg-white ring-2 ring-gold/20' : 'border-ink/10 bg-white/60 hover:border-gold/50'}`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="font-semibold text-forest">Sans photos</p>
+                    <p className="mt-1 text-xs leading-5 text-ink/45">Le menu reste éditorial et aucun espace photo n'est réservé.</p>
+                  </div>
+                  {menuAiPhotoMode === 'without_photos' && <span className="rounded-full bg-forest px-2.5 py-1 text-[9px] font-bold uppercase text-white">Actif</span>}
+                </div>
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={async () => {
+                const { error } = await supabase.from('establishments').update({ menu_ai_photo_mode: menuAiPhotoMode }).eq('id', establishment.id);
+                if (error) return alert(error.message);
+                alert('Préférence photos enregistrée.');
+              }}
+              className="mt-3 rounded-xl border border-ink/10 bg-white px-4 py-2.5 text-xs font-semibold text-forest"
+            >
+              Enregistrer la préférence
             </button>
           </div>
 
