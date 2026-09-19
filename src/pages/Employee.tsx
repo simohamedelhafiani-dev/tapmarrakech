@@ -1583,7 +1583,7 @@ export default function Employee() {
                       <label className="mb-2 block text-xs font-semibold text-ink/50">
                         Paiement
                       </label>
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-3 gap-2 sm:gap-3">
                         {[
                           ['CASH', 'Espèces'],
                           ['CARD', 'Carte'],
