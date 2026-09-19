@@ -1028,6 +1028,7 @@ function EstablishmentWorkspace({
   const [reward, setReward] = useState({ name: '', description: '', points_required: '' });
 
   const publicLink = `${window.location.origin}/r/${establishment.slug}`;
+  const [scannerLink, setScannerLink] = useState<string | null>(null);
   const businessType = businessTypes.find((x) => x.id === establishment.ai_business_type_id)?.name ?? profile.business_type ?? 'Établissement';
 
   const loadTab = async () => {
@@ -1110,7 +1111,18 @@ function EstablishmentWorkspace({
     }
   };
 
-  useEffect(() => { loadTab(); }, [tab, establishment.id]);
+  useEffect(() => {
+    loadTab();
+    void supabase.rpc('get_or_create_establishment_scanner_link', { p_establishment_id: establishment.id }).then(({ data, error }) => {
+      if (error) {
+        console.error('Erreur lien scanner:', error);
+        setScannerLink(null);
+        return;
+      }
+      const token = Array.isArray(data) ? data[0]?.access_token : data?.access_token;
+      setScannerLink(token ? `${window.location.origin}/employee?scanner=${encodeURIComponent(token)}` : null);
+    });
+  }, [tab, establishment.id]);
 
   const saveProfile = async () => {
     setSaving(true);
@@ -1272,7 +1284,24 @@ function EstablishmentWorkspace({
     <div>
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div><button onClick={onBack} className="mb-3 text-xs font-semibold text-forest">← Retour aux établissements</button><h2 className="font-display text-3xl text-forest">{profile.name ?? establishment.name}</h2><p className="mt-1 text-sm text-ink/45">{businessType} · espace de gestion complet</p></div>
-        <a href={publicLink} target="_blank" rel="noreferrer" className="rounded-xl bg-forest px-4 py-3 text-center text-xs font-semibold text-white">Ouvrir la page publique ↗</a>
+        <div className="flex flex-wrap gap-2">
+          {scannerLink && <a href={scannerLink} target="_blank" rel="noreferrer" className="rounded-xl border border-gold/30 bg-white px-4 py-3 text-xs font-semibold text-forest">Scanner fidélité ↗</a>}
+          <a href={publicLink} target="_blank" rel="noreferrer" className="rounded-xl bg-forest px-4 py-3 text-center text-xs font-semibold text-white">Ouvrir la page publique ↗</a>
+        </div>
+      </div>
+
+      <div className="mb-6 rounded-2xl border border-gold/20 bg-[#fbf8ee] p-5 shadow-sm">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-forest">Scanner fidélité</p>
+            <p className="mt-1 text-xs text-ink/50">Lien permanent à donner aux employés pour scanner les cartes et ajouter les points.</p>
+            <p className="mt-2 break-all text-[11px] text-ink/35">{scannerLink ?? 'Génération du lien…'}</p>
+          </div>
+          {scannerLink && <div className="flex gap-2">
+            <button type="button" onClick={() => navigator.clipboard.writeText(scannerLink).then(() => alert('Lien scanner copié.'))} className="rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Copier le lien</button>
+            <a href={scannerLink} target="_blank" rel="noreferrer" className="rounded-xl border border-ink/10 bg-white px-4 py-2.5 text-xs font-semibold text-forest">Ouvrir</a>
+          </div>}
+        </div>
       </div>
 
       <div className="mb-6 flex gap-2 overflow-x-auto rounded-2xl border border-ink/5 bg-white p-2 shadow-sm">
