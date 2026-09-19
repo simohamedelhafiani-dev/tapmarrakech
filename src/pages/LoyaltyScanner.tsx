@@ -202,8 +202,8 @@ export default function LoyaltyScanner() {
     setShowScanner(false);
   }
 
-  async function searchCustomer() {
-    const value = manualSearch.trim();
+  async function searchCustomer(query = manualSearch) {
+    const value = query.trim();
 
     if (value.length < 2) {
       setManualMatches([]);
