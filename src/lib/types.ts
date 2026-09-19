@@ -1,3 +1,3 @@
-export type Establishment = { id: string; user_id: string; name: string; slug: string; logo_url: string | null; google_review_url: string; redirect_threshold: number; created_at: string };
+export type Establishment = { id: string; user_id: string; name: string; slug: string; logo_url: string | null; google_review_url: string; redirect_threshold: number; created_at: string; page_template_id?: string | null; menu_template_id?: string | null };
 export type Review = { id: string; establishment_id: string; rating: number; type: 'positive' | 'negative'; comment: string | null; name: string | null; phone: string | null; email: string | null; status: 'Nouveau' | 'En cours' | 'Traité'; created_at: string; establishment?: { name: string } };
 export type AnalyticsEvent = { id: string; establishment_id: string; event_type: string; rating: number | null; created_at: string };
