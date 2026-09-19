@@ -1250,6 +1250,19 @@ function EstablishmentWorkspace({
     await onReload();
   };
 
+  const saveMenuAiPhotoMode = async (mode: 'with_photos' | 'without_photos') => {
+    setMenuAiPhotoMode(mode);
+    const { error } = await supabase
+      .from('establishments')
+      .update({ menu_ai_photo_mode: mode })
+      .eq('id', establishment.id);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+  };
+
   const importMenuWithAI = async () => {
     if (!menuImportFile) {
       setMenuImportError('Sélectionne un PDF ou une photo de menu.');
@@ -1821,7 +1834,7 @@ function EstablishmentWorkspace({
             <div className="grid gap-3 md:grid-cols-2">
               <button
                 type="button"
-                onClick={() => setMenuAiPhotoMode('with_photos')}
+                onClick={() => void saveMenuAiPhotoMode('with_photos')}
                 className={`rounded-2xl border p-4 text-left transition ${menuAiPhotoMode === 'with_photos' ? 'border-gold bg-white ring-2 ring-gold/20' : 'border-ink/10 bg-white/60 hover:border-gold/50'}`}
               >
                 <div className="flex items-center justify-between gap-3">
@@ -1834,7 +1847,7 @@ function EstablishmentWorkspace({
               </button>
               <button
                 type="button"
-                onClick={() => setMenuAiPhotoMode('without_photos')}
+                onClick={() => void saveMenuAiPhotoMode('without_photos')}
                 className={`rounded-2xl border p-4 text-left transition ${menuAiPhotoMode === 'without_photos' ? 'border-gold bg-white ring-2 ring-gold/20' : 'border-ink/10 bg-white/60 hover:border-gold/50'}`}
               >
                 <div className="flex items-center justify-between gap-3">
@@ -1846,17 +1859,6 @@ function EstablishmentWorkspace({
                 </div>
               </button>
             </div>
-            <button
-              type="button"
-              onClick={async () => {
-                const { error } = await supabase.from('establishments').update({ menu_ai_photo_mode: menuAiPhotoMode }).eq('id', establishment.id);
-                if (error) return alert(error.message);
-                alert('Préférence photos enregistrée.');
-              }}
-              className="mt-3 rounded-xl border border-ink/10 bg-white px-4 py-2.5 text-xs font-semibold text-forest"
-            >
-              Enregistrer la préférence
-            </button>
           </div>
 
           {menuAiDesign && (
