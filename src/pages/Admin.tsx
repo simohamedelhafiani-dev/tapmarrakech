@@ -1043,6 +1043,8 @@ function EstablishmentWorkspace({
   const [menuImportPreview, setMenuImportPreview] = useState<{
     categories: { name: string; description: string | null; items: { name: string; description: string | null; price: number }[] }[];
   } | null>(null);
+  const [menuAiDesign, setMenuAiDesign] = useState<any | null>(null);
+  const [menuAiDesignLoading, setMenuAiDesignLoading] = useState(false);
   const [promotion, setPromotion] = useState({ name: '', description: '', normal_price: '', promo_price: '' });
   const [reward, setReward] = useState({ name: '', description: '', points_required: '' });
 
@@ -1063,12 +1065,13 @@ function EstablishmentWorkspace({
       const [{ data: c }, { data: i }, { data: establishmentRow }] = await Promise.all([
         supabase.from('menu_categories').select('*').eq('establishment_id', establishment.id).order('display_order'),
         supabase.from('menu_items').select('*').eq('establishment_id', establishment.id).order('display_order'),
-        supabase.from('establishments').select('menu_template_id,menu_display_mode,menu_pdf_url').eq('id', establishment.id).maybeSingle(),
+        supabase.from('establishments').select('menu_template_id,menu_display_mode,menu_pdf_url,menu_ai_design').eq('id', establishment.id).maybeSingle(),
       ]);
       setCategories(c ?? []);
       setMenuTemplate(establishmentRow?.menu_template_id ?? 'editorial');
       setMenuDisplayMode(establishmentRow?.menu_display_mode === 'pdf' ? 'pdf' : 'digital');
       setMenuPdfUrl(establishmentRow?.menu_pdf_url ?? null);
+      setMenuAiDesign(establishmentRow?.menu_ai_design ?? null);
       setItems(i ?? []);
       if (!menuItem.category_id && c?.[0]) setMenuItem((v) => ({ ...v, category_id: c[0].id }));
     }
@@ -1310,20 +1313,24 @@ function EstablishmentWorkspace({
 
     setMenuImportApplying(true);
     try {
-      for (const category of menuImportPreview.categories) {
+      const createdCategories: any[] = [];
+      const createdItems: any[] = [];
+
+      for (const [categoryIndex, category] of menuImportPreview.categories.entries()) {
         const { data: categoryRow, error: categoryError } = await supabase
           .from('menu_categories')
           .insert({
             establishment_id: establishment.id,
             name: category.name.trim(),
             description: category.description?.trim() || null,
-            display_order: categories.length,
+            display_order: categories.length + categoryIndex,
             active: true,
           })
-          .select('id')
+          .select('id, name, description')
           .single();
 
         if (categoryError) throw categoryError;
+        createdCategories.push({ ...categoryRow, sourceName: category.name });
 
         const rows = category.items
           .filter((item) => item.name?.trim())
@@ -1339,9 +1346,52 @@ function EstablishmentWorkspace({
           }));
 
         if (rows.length) {
-          const { error: itemsError } = await supabase.from('menu_items').insert(rows);
+          const { data: insertedItems, error: itemsError } = await supabase
+            .from('menu_items')
+            .insert(rows)
+            .select('id,name,description,price,image_url,category_id');
           if (itemsError) throw itemsError;
+          createdItems.push(...(insertedItems ?? []));
         }
+      }
+
+      const designMenu = {
+        categories: createdCategories.map((category) => ({
+          id: category.id,
+          name: category.name,
+          description: category.description ?? null,
+          items: createdItems
+            .filter((item) => item.category_id === category.id)
+            .map((item) => ({
+              id: item.id,
+              name: item.name,
+              description: item.description ?? null,
+              price: item.price,
+              image_url: item.image_url ?? null,
+            })),
+        })),
+      };
+
+      setMenuAiDesignLoading(true);
+      try {
+        const { data: designData, error: designError } = await supabase.functions.invoke(
+          'design-menu',
+          { body: { establishment_id: establishment.id, menu: designMenu } },
+        );
+
+        if (designError || !designData?.success || !designData?.design) {
+          console.error('Design IA menu:', designError ?? designData);
+        } else {
+          setMenuAiDesign(designData.design);
+          await supabase
+            .from('establishments')
+            .update({ menu_ai_design: designData.design })
+            .eq('id', establishment.id);
+        }
+      } catch (designError) {
+        console.error('Erreur génération design IA:', designError);
+      } finally {
+        setMenuAiDesignLoading(false);
       }
 
       setMenuImportOpen(false);
@@ -1349,7 +1399,7 @@ function EstablishmentWorkspace({
       setMenuImportPreview(null);
       setMenuImportError('');
       await loadTab();
-      alert('Menu importé avec succès. Tu peux maintenant modifier chaque produit.');
+      alert('Menu importé avec succès. Le design premium IA a également été généré. Tu peux maintenant modifier chaque produit.');
     } catch (error) {
       console.error('Erreur création menu importé:', error);
       setMenuImportError(error instanceof Error ? error.message : 'Impossible d’enregistrer le menu.');
@@ -1714,6 +1764,74 @@ function EstablishmentWorkspace({
           <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Design du menu</p>
+              <h3 className="mt-1 text-xl font-semibold text-forest">Design premium par l’IA</h3>
+              <p className="mt-1 max-w-2xl text-xs leading-5 text-ink/45">
+                Après l’import, l’IA construit automatiquement la hiérarchie du menu : couverture, introduction, produits mis en avant et catégories. Le contenu produit reste celui de l’établissement.
+              </p>
+            </div>
+            <button
+              type="button"
+              disabled={menuAiDesignLoading || categories.length === 0}
+              onClick={async () => {
+                setMenuAiDesignLoading(true);
+                try {
+                  const designMenu = {
+                    categories: categories.map((category) => ({
+                      id: category.id,
+                      name: category.name,
+                      description: category.description ?? null,
+                      items: (items.filter((item) => item.category_id === category.id)).map((item) => ({
+                        id: item.id,
+                        name: item.name,
+                        description: item.description ?? null,
+                        price: item.price,
+                        image_url: item.image_url ?? null,
+                      })),
+                    })),
+                  };
+                  const { data, error } = await supabase.functions.invoke('design-menu', {
+                    body: { establishment_id: establishment.id, menu: designMenu },
+                  });
+                  if (error || !data?.success || !data?.design) throw new Error(error?.message || data?.error || 'Design IA indisponible.');
+                  setMenuAiDesign(data.design);
+                  const { error: saveError } = await supabase.from('establishments').update({ menu_ai_design: data.design }).eq('id', establishment.id);
+                  if (saveError) throw saveError;
+                  alert('Design premium IA généré.');
+                } catch (error) {
+                  alert(error instanceof Error ? error.message : 'Impossible de générer le design IA.');
+                } finally {
+                  setMenuAiDesignLoading(false);
+                }
+              }}
+              className="inline-flex items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-50"
+            >
+              <Sparkles size={14} />
+              {menuAiDesignLoading ? 'Création du design…' : 'Générer le design premium'}
+            </button>
+          </div>
+
+          {menuAiDesign && (
+            <div className="mt-5 grid gap-3 md:grid-cols-3">
+              <div className="rounded-xl bg-white p-4">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-ink/35">Direction</p>
+                <p className="mt-1 font-semibold text-forest capitalize">{menuAiDesign.style ?? 'editorial'}</p>
+              </div>
+              <div className="rounded-xl bg-white p-4">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-ink/35">Hero</p>
+                <p className="mt-1 font-semibold text-forest">{menuAiDesign.hero?.title ?? establishment.name}</p>
+              </div>
+              <div className="rounded-xl bg-white p-4">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-ink/35">Sections</p>
+                <p className="mt-1 font-semibold text-forest">{Array.isArray(menuAiDesign.sections) ? menuAiDesign.sections.length : 0}</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="rounded-2xl border border-gold/20 bg-[#fbf8ee] p-6 shadow-sm">
+          <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Design manuel</p>
               <h3 className="mt-1 text-xl font-semibold text-forest">Choisir le template</h3>
               <p className="mt-1 text-xs text-ink/45">Le template sélectionné sera utilisé automatiquement sur la page publique de cet établissement.</p>
             </div>
