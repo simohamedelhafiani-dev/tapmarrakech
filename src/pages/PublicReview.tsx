@@ -785,23 +785,21 @@ export default function PublicReview() {
                   <ExternalLink size={15} />
                 </a>
               </section>
+            ) : menuAiDesign ? (
+              <AIPremiumMenu
+                design={menuAiDesign}
+                place={p}
+                categories={categories}
+                items={items}
+                itemsByCategory={itemsByCategory}
+              />
             ) : (
-              {menuAiDesign ? (
-                <AIPremiumMenu
-                  design={menuAiDesign}
-                  place={p}
-                  categories={categories}
-                  items={items}
-                  itemsByCategory={itemsByCategory}
-                />
-              ) : (
-                <MenuTemplate
-                  template={menuTemplate}
-                  place={p}
-                  categories={categories}
-                  itemsByCategory={itemsByCategory}
-                />
-              )}
+              <MenuTemplate
+                template={menuTemplate}
+                place={p}
+                categories={categories}
+                itemsByCategory={itemsByCategory}
+              />
             )}
           </main>
         )}
