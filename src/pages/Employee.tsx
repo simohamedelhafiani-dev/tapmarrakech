@@ -76,11 +76,21 @@ export default function Employee() {
   const [employeeCode, setEmployeeCode] = useState('');
   const [loginLoading, setLoginLoading] = useState(true);
   const [loginSaving, setLoginSaving] = useState(false);
+  const [deferredInstallPrompt, setDeferredInstallPrompt] = useState<any>(null);
+  const [showInstallHelp, setShowInstallHelp] = useState(false);
   const scannerToken = useMemo(() => new URLSearchParams(window.location.search).get('scanner') ?? window.localStorage.getItem('tapmarrakech:scanner-token') ?? '', []);
 
   useEffect(() => {
     const fromUrl = new URLSearchParams(window.location.search).get('scanner');
     if (fromUrl) window.localStorage.setItem('tapmarrakech:scanner-token', fromUrl);
+
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setDeferredInstallPrompt(event);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
   }, []);
   const [scannerReady, setScannerReady] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
@@ -217,6 +227,43 @@ export default function Employee() {
     if (!session || !employeeSupabase) return;
     setEstablishmentId(session.establishment_id);
   }, [session, employeeSupabase]);
+
+  useEffect(() => {
+    if (!session || !scannerToken) return;
+
+    const scannerUrl = window.location.origin + '/employee?scanner=' + encodeURIComponent(scannerToken);
+    const manifestUrl =
+      '/api/loyalty-manifest?name=' + encodeURIComponent(session.establishment_name || 'Scanner fidélité') +
+      '&logo=' + encodeURIComponent(establishmentLogoUrl || '') +
+      '&start_url=' + encodeURIComponent(scannerUrl);
+
+    let manifest = document.querySelector('link[rel="manifest"]') as HTMLLinkElement | null;
+    if (!manifest) {
+      manifest = document.createElement('link');
+      manifest.rel = 'manifest';
+      document.head.appendChild(manifest);
+    }
+    manifest.href = manifestUrl;
+
+    const titleMeta = document.querySelector('meta[name="apple-mobile-web-app-title"]') as HTMLMetaElement | null;
+    if (titleMeta) titleMeta.content = 'Scanner fidélité';
+
+    return () => {
+      const currentManifest = document.querySelector('link[rel="manifest"]');
+      if (currentManifest) currentManifest.remove();
+    };
+  }, [session, scannerToken, establishmentLogoUrl]);
+
+  async function installEmployeeScanner() {
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      const choice = await deferredInstallPrompt.userChoice;
+      if (choice?.outcome === 'accepted') setDeferredInstallPrompt(null);
+      return;
+    }
+
+    setShowInstallHelp(true);
+  }
 
   useEffect(() => {
     if (!session || !employeeSupabase) {
@@ -932,27 +979,39 @@ export default function Employee() {
             </p>
           </div>
 
-          {scannerReady && (
-            <button
-              onClick={() => {
-                setScannerMessage('');
-                setManualCustomerSearch('');
-                setShowScanner(true);
-              }}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gold px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90"
-            >
-              <CreditCard size={17} />
-              Scanner fidélité
-            </button>
-          )}
+          <div className="flex flex-wrap items-center justify-end gap-3">
+            {scannerReady && (
+              <button
+                onClick={() => {
+                  setScannerMessage('');
+                  setManualCustomerSearch('');
+                  setShowScanner(true);
+                }}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gold px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+              >
+                <CreditCard size={17} />
+                Scanner fidélité
+              </button>
+            )}
 
-          <button
-            onClick={logoutEmployee}
-            className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
-          >
-            <LogOut size={17} />
-            Déconnexion
-          </button>
+            {scannerReady && (
+              <button
+                onClick={installEmployeeScanner}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-forest/15 bg-white px-4 py-3 text-sm font-semibold text-forest transition hover:bg-forest/5"
+              >
+                <WalletCards size={17} />
+                Installer sur le téléphone
+              </button>
+            )}
+
+            <button
+              onClick={logoutEmployee}
+              className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+            >
+              <LogOut size={17} />
+              Déconnexion
+            </button>
+          </div>
         </div>
 
         <div className="mb-6 grid gap-4 md:grid-cols-[1fr_auto]">
@@ -1085,6 +1144,22 @@ export default function Employee() {
           )}
         </div>
       </div>
+
+      {showInstallHelp && (
+        <Modal title="Installer le scanner" onClose={() => setShowInstallHelp(false)}>
+          <div className="space-y-4 text-sm text-ink/60">
+            <div className="rounded-2xl bg-[#f7f7f3] p-4">
+              <p className="font-semibold text-forest">Scanner fidélité</p>
+              <p className="mt-1 leading-6">Ce raccourci est lié à cet établissement et ouvrira directement le scanner.</p>
+            </div>
+            <div className="space-y-3 leading-6">
+              <p><strong className="text-forest">iPhone :</strong> Safari → Partager → « Sur l’écran d’accueil » → Ajouter.</p>
+              <p><strong className="text-forest">Android :</strong> Chrome → menu ⋮ → « Ajouter à l’écran d’accueil » ou « Installer l’application ».</p>
+            </div>
+            <button onClick={() => setShowInstallHelp(false)} className="w-full rounded-xl bg-forest py-3.5 text-sm font-semibold text-white">Compris</button>
+          </div>
+        </Modal>
+      )}
 
       {showNewCustomer && (
         <Modal title="Nouveau client" onClose={() => setShowNewCustomer(false)}>
