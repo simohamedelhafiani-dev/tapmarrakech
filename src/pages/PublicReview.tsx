@@ -114,7 +114,7 @@ export default function PublicReview() {
       const { data: establishment } = await supabase
         .from('establishments')
         .select(
-          'id,name,slug,logo_url,google_review_url,redirect_threshold,phone,email,address,city,description,website_url,instagram_url,facebook_url,tiktok_url,whatsapp_number,page_template_id,menu_template_id'
+          'id,name,slug,logo_url,google_review_url,redirect_threshold,phone,email,address,city,description,website_url,instagram_url,facebook_url,tiktok_url,whatsapp_number,page_template_id,menu_template_id,menu_display_mode,menu_pdf_url'
         )
         .eq('slug', slug)
         .maybeSingle();
@@ -480,6 +480,8 @@ export default function PublicReview() {
   const googleReviewCount =
     p.google_review_count ?? p.review_count ?? null;
   const menuTemplate = p.menu_template_id || 'editorial';
+  const menuDisplayMode = p.menu_display_mode || 'digital';
+  const menuPdfUrl = p.menu_pdf_url || '';
 
   const directionsUrl =
     address || city
@@ -600,7 +602,7 @@ export default function PublicReview() {
                 />
               )}
 
-              {(categories.length > 0 || items.length > 0) && (
+              {(menuPdfUrl || categories.length > 0 || items.length > 0) && (
                 <ActionRow
                   icon={<UtensilsCrossed size={22} />}
                   title="Voir le menu"
@@ -763,12 +765,33 @@ export default function PublicReview() {
         {section === 'menu' && (
           <main className="px-5 pt-6">
             <BackButton onClick={() => navigate('home')} />
-            <MenuTemplate
-              template={menuTemplate}
-              place={p}
-              categories={categories}
-              itemsByCategory={itemsByCategory}
-            />
+            {menuDisplayMode === 'pdf' && menuPdfUrl ? (
+              <section className="mt-6">
+                <div className="mb-4">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-gold">Menu</p>
+                  <h1 className="mt-1 font-display text-4xl text-forest">Notre menu</h1>
+                  <p className="mt-2 text-sm text-ink/45">Le menu original de l’établissement.</p>
+                </div>
+                <div className="overflow-hidden rounded-[24px] bg-white shadow-sm ring-1 ring-ink/5">
+                  <iframe
+                    src={menuPdfUrl}
+                    title={`Menu PDF de ${p.name}`}
+                    className="h-[75vh] min-h-[620px] w-full"
+                  />
+                </div>
+                <a href={menuPdfUrl} target="_blank" rel="noreferrer" className="mt-4 flex items-center justify-center gap-2 rounded-full bg-forest px-5 py-3.5 text-sm font-semibold text-white">
+                  Ouvrir le menu en plein écran
+                  <ExternalLink size={15} />
+                </a>
+              </section>
+            ) : (
+              <MenuTemplate
+                template={menuTemplate}
+                place={p}
+                categories={categories}
+                itemsByCategory={itemsByCategory}
+              />
+            )}
           </main>
         )}
 
