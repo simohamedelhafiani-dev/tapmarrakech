@@ -479,6 +479,7 @@ export default function PublicReview() {
     p.google_rating ?? p.rating ?? null;
   const googleReviewCount =
     p.google_review_count ?? p.review_count ?? null;
+  const menuTemplate = p.menu_template_id || 'editorial';
 
   const directionsUrl =
     address || city
@@ -762,91 +763,12 @@ export default function PublicReview() {
         {section === 'menu' && (
           <main className="px-5 pt-6">
             <BackButton onClick={() => navigate('home')} />
-
-            <div className="mt-7">
-              <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-gold">
-                Découvrez
-              </p>
-
-              <h1 className="mt-1 font-display text-4xl text-forest">
-                Notre menu
-              </h1>
-
-              <p className="mt-2 text-sm text-ink/45">
-                Une sélection préparée pour vous.
-              </p>
-            </div>
-
-            {categories.length === 0 ? (
-              <Empty
-                icon={<UtensilsCrossed size={22} />}
-                title="Menu bientôt disponible"
-                text="Le contenu apparaîtra ici dès qu’il sera ajouté."
-              />
-            ) : (
-              <div className="mt-8 space-y-8">
-                {categories.map((category) => {
-                  const categoryItems =
-                    itemsByCategory[category.id] ?? [];
-
-                  if (!categoryItems.length) return null;
-
-                  return (
-                    <section key={category.id}>
-                      <div className="mb-4">
-                        <h2 className="font-display text-2xl text-forest">
-                          {category.name}
-                        </h2>
-
-                        {category.description && (
-                          <p className="mt-1 text-xs leading-5 text-ink/45">
-                            {category.description}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="space-y-3">
-                        {categoryItems.map((item) => (
-                          <article
-                            key={item.id}
-                            className="flex overflow-hidden rounded-[22px] bg-white p-3 shadow-sm ring-1 ring-ink/5"
-                          >
-                            {item.image_url && (
-                              <img
-                                src={item.image_url}
-                                alt=""
-                                className="h-24 w-24 shrink-0 rounded-[16px] object-cover"
-                              />
-                            )}
-
-                            <div className="min-w-0 flex-1 p-2">
-                              <div className="flex items-start justify-between gap-3">
-                                <h3 className="font-semibold text-forest">
-                                  {item.name}
-                                </h3>
-
-                                <span className="shrink-0 text-sm font-bold text-gold">
-                                  {Number(
-                                    item.price
-                                  ).toLocaleString('fr-FR')}{' '}
-                                  MAD
-                                </span>
-                              </div>
-
-                              {item.description && (
-                                <p className="mt-2 text-xs leading-5 text-ink/45">
-                                  {item.description}
-                                </p>
-                              )}
-                            </div>
-                          </article>
-                        ))}
-                      </div>
-                    </section>
-                  );
-                })}
-              </div>
-            )}
+            <MenuTemplate
+              template={menuTemplate}
+              place={p}
+              categories={categories}
+              itemsByCategory={itemsByCategory}
+            />
           </main>
         )}
 
@@ -1425,6 +1347,156 @@ function ActionRow({
     <button type="button" onClick={onClick} className={className}>
       {contentNode}
     </button>
+  );
+}
+
+function MenuTemplate({
+  template,
+  place,
+  categories,
+  itemsByCategory,
+}: {
+  template: string;
+  place: any;
+  categories: MenuCategory[];
+  itemsByCategory: Record<string, MenuItem[]>;
+}) {
+  const visible = categories.filter((category) => (itemsByCategory[category.id] ?? []).length > 0);
+
+  if (!visible.length) {
+    return (
+      <div className="mt-7">
+        <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-gold">Découvrez</p>
+        <h1 className="mt-1 font-display text-4xl text-forest">Notre menu</h1>
+        <Empty icon={<UtensilsCrossed size={22} />} title="Menu bientôt disponible" text="Le contenu apparaîtra ici dès qu’il sera ajouté." />
+      </div>
+    );
+  }
+
+  if (template === 'dark') {
+    return (
+      <div className="mt-6 -mx-5 overflow-hidden bg-[#102b24] px-5 pb-10 pt-7 text-white">
+        <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold">Menu</p>
+        <h1 className="mt-2 font-display text-5xl leading-none">{place.name || 'Notre carte'}</h1>
+        <p className="mt-3 text-sm text-white/45">Une carte pensée pour être consultée simplement.</p>
+        <div className="mt-8 space-y-8">
+          {visible.map((category) => (
+            <section key={category.id}>
+              <div className="mb-4 flex items-end justify-between gap-4">
+                <h2 className="font-display text-2xl text-gold">{category.name}</h2>
+                {category.description && <p className="max-w-[180px] text-right text-[10px] leading-4 text-white/35">{category.description}</p>}
+              </div>
+              <div className="divide-y divide-white/10 rounded-2xl border border-white/10 bg-white/[0.03]">
+                {(itemsByCategory[category.id] ?? []).map((item) => (
+                  <article key={item.id} className="flex items-start justify-between gap-4 p-4">
+                    <div className="min-w-0">
+                      <h3 className="font-semibold">{item.name}</h3>
+                      {item.description && <p className="mt-1 text-xs leading-5 text-white/40">{item.description}</p>}
+                    </div>
+                    <span className="shrink-0 font-semibold text-gold">{Number(item.price).toLocaleString('fr-FR')} MAD</span>
+                  </article>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (template === 'cards') {
+    return (
+      <div className="mt-7">
+        <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold">Découvrez</p>
+        <h1 className="mt-1 font-display text-4xl text-forest">Notre carte</h1>
+        <p className="mt-2 text-sm text-ink/45">Choisissez votre envie.</p>
+        <div className="mt-7 space-y-8">
+          {visible.map((category) => (
+            <section key={category.id}>
+              <div className="mb-4 flex items-end justify-between">
+                <h2 className="font-display text-2xl text-forest">{category.name}</h2>
+                <span className="text-[9px] uppercase tracking-widest text-ink/30">{(itemsByCategory[category.id] ?? []).length} choix</span>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {(itemsByCategory[category.id] ?? []).map((item) => (
+                  <article key={item.id} className="overflow-hidden rounded-[24px] bg-white shadow-sm ring-1 ring-ink/5">
+                    <div className="aspect-[1.15] overflow-hidden bg-[#eee9df]">
+                      {item.image_url ? <img src={item.image_url} alt="" className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-ink/15"><UtensilsCrossed size={25} /></div>}
+                    </div>
+                    <div className="p-3.5">
+                      <h3 className="line-clamp-2 text-sm font-bold text-forest">{item.name}</h3>
+                      {item.description && <p className="mt-1.5 line-clamp-2 text-[10px] leading-4 text-ink/40">{item.description}</p>}
+                      <p className="mt-3 text-sm font-bold text-gold">{Number(item.price).toLocaleString('fr-FR')} MAD</p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (template === 'luxury') {
+    return (
+      <div className="mt-7">
+        <div className="border-y border-gold/30 py-7 text-center">
+          <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-gold">La carte</p>
+          <h1 className="mt-2 font-display text-5xl text-forest">{place.name || 'Menu'}</h1>
+          <p className="mx-auto mt-3 max-w-xs text-xs leading-5 text-ink/45">Une sélection préparée avec soin.</p>
+        </div>
+        <div className="mt-8 space-y-10">
+          {visible.map((category) => (
+            <section key={category.id}>
+              <div className="mb-5 text-center">
+                <span className="text-[8px] font-bold uppercase tracking-[0.35em] text-gold">Sélection</span>
+                <h2 className="mt-1 font-display text-3xl text-forest">{category.name}</h2>
+                {category.description && <p className="mt-1 text-xs text-ink/40">{category.description}</p>}
+              </div>
+              <div className="space-y-5">
+                {(itemsByCategory[category.id] ?? []).map((item) => (
+                  <article key={item.id} className="group">
+                    <div className="flex items-baseline gap-3">
+                      <h3 className="text-[15px] font-semibold text-forest">{item.name}</h3>
+                      <div className="h-px flex-1 border-t border-dotted border-ink/15" />
+                      <span className="text-sm font-bold text-gold">{Number(item.price).toLocaleString('fr-FR')} MAD</span>
+                    </div>
+                    {item.description && <p className="mt-1.5 max-w-[85%] text-[11px] leading-5 text-ink/40">{item.description}</p>}
+                  </article>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-7">
+      <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold">Découvrez</p>
+      <h1 className="mt-1 font-display text-4xl text-forest">Notre menu</h1>
+      <p className="mt-2 text-sm text-ink/45">Une sélection préparée pour vous.</p>
+      <div className="mt-8 space-y-8">
+        {visible.map((category) => (
+          <section key={category.id}>
+            <h2 className="mb-4 font-display text-2xl text-forest">{category.name}</h2>
+            <div className="space-y-3">
+              {(itemsByCategory[category.id] ?? []).map((item) => (
+                <article key={item.id} className="flex overflow-hidden rounded-[22px] bg-white p-3 shadow-sm ring-1 ring-ink/5">
+                  {item.image_url && <img src={item.image_url} alt="" className="h-24 w-24 shrink-0 rounded-[16px] object-cover" />}
+                  <div className="min-w-0 flex-1 p-2">
+                    <div className="flex items-start justify-between gap-3"><h3 className="font-semibold text-forest">{item.name}</h3><span className="shrink-0 text-sm font-bold text-gold">{Number(item.price).toLocaleString('fr-FR')} MAD</span></div>
+                    {item.description && <p className="mt-2 text-xs leading-5 text-ink/45">{item.description}</p>}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    </div>
   );
 }
 
