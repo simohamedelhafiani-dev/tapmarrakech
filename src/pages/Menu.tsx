@@ -20,6 +20,7 @@ type Establishment = {
   id: string;
   name: string;
   ai_business_type_id: string | null;
+  menu_template_id: string | null;
 };
 
 type MenuCategory = {
@@ -97,6 +98,7 @@ export default function Menu() {
   const [itemForm, setItemForm] = useState<ItemForm>(emptyItemForm);
 
   const [expandedCategoryIds, setExpandedCategoryIds] = useState<string[]>([]);
+  const [savingTemplate, setSavingTemplate] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
@@ -128,10 +130,12 @@ export default function Menu() {
         id: string;
         name: string;
         ai_business_type_id?: string | null;
+        menu_template_id?: string | null;
       }) => ({
         id: establishment.id,
         name: establishment.name,
         ai_business_type_id: establishment.ai_business_type_id ?? null,
+        menu_template_id: establishment.menu_template_id ?? null,
       })
     );
 
@@ -524,11 +528,12 @@ export default function Menu() {
           </div>
 
           <div className="flex flex-col gap-2 sm:flex-row">
-            <select
-              value={establishmentId}
-              onChange={(event) => setEstablishmentId(event.target.value)}
-              className="rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white outline-none"
-            >
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <select
+                value={establishmentId}
+                onChange={(event) => setEstablishmentId(event.target.value)}
+                className="rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white outline-none"
+              >
               {establishments.map((establishment) => (
                 <option
                   key={establishment.id}
@@ -538,11 +543,44 @@ export default function Menu() {
                   {establishment.name}
                 </option>
               ))}
-            </select>
+              </select>
 
-            <button
-              type="button"
-              onClick={openNewCategory}
+              <select
+                value={selectedEstablishment?.menu_template_id ?? 'editorial'}
+                disabled={savingTemplate || !selectedEstablishment}
+                onChange={async (event) => {
+                  const templateId = event.target.value;
+                  if (!selectedEstablishment) return;
+                  setSavingTemplate(true);
+                  const { error } = await supabase
+                    .from('establishments')
+                    .update({ menu_template_id: templateId })
+                    .eq('id', selectedEstablishment.id);
+                  setSavingTemplate(false);
+                  if (error) {
+                    alert(error.message);
+                    return;
+                  }
+                  setEstablishments((current) =>
+                    current.map((item) =>
+                      item.id === selectedEstablishment.id
+                        ? { ...item, menu_template_id: templateId }
+                        : item
+                    )
+                  );
+                }}
+                className="rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white outline-none disabled:opacity-60"
+                title="Choisir le design du menu public"
+              >
+                <option value="editorial" className="text-ink">Template Éditorial</option>
+                <option value="luxury" className="text-ink">Template Luxury</option>
+                <option value="cards" className="text-ink">Template Cards</option>
+                <option value="dark" className="text-ink">Template Dark</option>
+              </select>
+
+              <button
+                type="button"
+                onClick={openNewCategory}
               className="flex items-center justify-center gap-2 rounded-xl bg-gold px-4 py-3 text-sm font-semibold text-forest transition hover:brightness-105"
             >
               <Plus size={17} />
