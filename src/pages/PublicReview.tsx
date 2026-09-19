@@ -1181,6 +1181,7 @@ export default function PublicReview() {
             )}
           </main>
         )}
+      </div>
 
       {/* =====================================================
           LOYALTY MODAL
