@@ -39,6 +39,10 @@ export default function LoyaltyCard() {
   const cardUrl = useMemo(() => window.location.href, []);
 
   useEffect(() => {
+    if (token) window.localStorage.setItem('tapmarrakech:customer-card-token', token);
+  }, [token]);
+
+  useEffect(() => {
     let active = true;
 
     const load = async () => {
