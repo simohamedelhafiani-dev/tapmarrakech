@@ -130,7 +130,17 @@ Deno.serve(async (request) => {
     const fileId = uploadPayload.id;
 
     try {
+      const { data: menuPromptConfig } = await serviceClient
+        .from('ai_business_types')
+        .select('ai_prompt')
+        .eq('name', 'Menu IA — Extraction')
+        .eq('active', true)
+        .maybeSingle();
+
+      const configuredMenuPrompt = String(menuPromptConfig?.ai_prompt ?? '').trim();
+
       const systemPrompt = [
+        configuredMenuPrompt,
         'Tu es l’assistant d’import de menus de TapMarrakech.',
         'Analyse le document fourni, qui peut être un PDF ou une image contenant un menu de restaurant, café, hôtel, spa ou commerce.',
         'Extrais uniquement ce qui est réellement visible dans le document. Ne fabrique jamais de produit, prix ou ingrédient.',
