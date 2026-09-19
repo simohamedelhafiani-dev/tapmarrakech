@@ -34,6 +34,9 @@ import {
   ShieldCheck,
   WalletCards,
   Trash2,
+  Upload,
+  Sparkles,
+  FileText,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -1025,6 +1028,14 @@ function EstablishmentWorkspace({
   const [menuTemplate, setMenuTemplate] = useState('editorial');
   const [menuCategoryName, setMenuCategoryName] = useState('');
   const [menuItem, setMenuItem] = useState({ name: '', description: '', price: '', category_id: '' });
+  const [menuImportOpen, setMenuImportOpen] = useState(false);
+  const [menuImportFile, setMenuImportFile] = useState<File | null>(null);
+  const [menuImportLoading, setMenuImportLoading] = useState(false);
+  const [menuImportApplying, setMenuImportApplying] = useState(false);
+  const [menuImportError, setMenuImportError] = useState('');
+  const [menuImportPreview, setMenuImportPreview] = useState<{
+    categories: { name: string; description: string | null; items: { name: string; description: string | null; price: number }[] }[];
+  } | null>(null);
   const [promotion, setPromotion] = useState({ name: '', description: '', normal_price: '', promo_price: '' });
   const [reward, setReward] = useState({ name: '', description: '', points_required: '' });
 
@@ -1179,6 +1190,92 @@ function EstablishmentWorkspace({
     }
 
     await onReload();
+  };
+
+  const importMenuWithAI = async () => {
+    if (!menuImportFile) {
+      setMenuImportError('Sélectionne un PDF ou une photo de menu.');
+      return;
+    }
+
+    setMenuImportLoading(true);
+    setMenuImportError('');
+    setMenuImportPreview(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', menuImportFile);
+      formData.append('establishment_id', establishment.id);
+
+      const { data, error } = await supabase.functions.invoke('import-menu', {
+        body: formData,
+      });
+
+      if (error) throw error;
+      if (!data?.success || !data?.menu) {
+        throw new Error(data?.error || 'Impossible d’analyser le menu.');
+      }
+
+      setMenuImportPreview(data.menu);
+    } catch (error) {
+      console.error('Erreur import menu IA:', error);
+      setMenuImportError(error instanceof Error ? error.message : 'Erreur pendant l’analyse du menu.');
+    } finally {
+      setMenuImportLoading(false);
+    }
+  };
+
+  const applyImportedMenu = async () => {
+    if (!menuImportPreview) return;
+
+    setMenuImportApplying(true);
+    try {
+      for (const category of menuImportPreview.categories) {
+        const { data: categoryRow, error: categoryError } = await supabase
+          .from('menu_categories')
+          .insert({
+            establishment_id: establishment.id,
+            name: category.name.trim(),
+            description: category.description?.trim() || null,
+            display_order: categories.length,
+            active: true,
+          })
+          .select('id')
+          .single();
+
+        if (categoryError) throw categoryError;
+
+        const rows = category.items
+          .filter((item) => item.name?.trim())
+          .map((item, index) => ({
+            establishment_id: establishment.id,
+            category_id: categoryRow.id,
+            name: item.name.trim(),
+            description: item.description?.trim() || null,
+            price: Number.isFinite(Number(item.price)) ? Number(item.price) : 0,
+            image_url: null,
+            display_order: index,
+            active: true,
+          }));
+
+        if (rows.length) {
+          const { error: itemsError } = await supabase.from('menu_items').insert(rows);
+          if (itemsError) throw itemsError;
+        }
+      }
+
+      setMenuImportOpen(false);
+      setMenuImportFile(null);
+      setMenuImportPreview(null);
+      setMenuImportError('');
+      await loadTab();
+      alert('Menu importé avec succès. Tu peux maintenant modifier chaque produit.');
+    } catch (error) {
+      console.error('Erreur création menu importé:', error);
+      setMenuImportError(error instanceof Error ? error.message : 'Impossible d’enregistrer le menu.');
+    } finally {
+      setMenuImportApplying(false);
+    }
   };
 
   const addCategory = async () => {
@@ -1366,6 +1463,99 @@ function EstablishmentWorkspace({
       {tab === 'wifi' && <div className="max-w-xl rounded-2xl border border-ink/5 bg-white p-6 shadow-sm"><h3 className="text-lg font-semibold">Wi-Fi client</h3><p className="mt-1 mb-5 text-xs text-ink/45">Ces informations alimenteront le module Wi-Fi de la page publique.</p><div className="space-y-4"><label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">Nom du réseau</span><input value={wifi.ssid} onChange={(e) => setWifi({ ...wifi, ssid: e.target.value })} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></label><label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">Mot de passe</span><input value={wifi.password} onChange={(e) => setWifi({ ...wifi, password: e.target.value })} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></label><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={wifi.active} onChange={(e) => setWifi({ ...wifi, active: e.target.checked })} /> Module actif</label><button disabled={saving} onClick={saveWifi} className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white">Enregistrer le Wi-Fi</button></div></div>}
 
       {tab === 'menu' && <div className="space-y-5">
+        <div className="rounded-2xl border border-forest/10 bg-white p-6 shadow-sm">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-start gap-4">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-forest/10 text-forest">
+                <Sparkles size={21} />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Import intelligent</p>
+                <h3 className="mt-1 text-xl font-semibold text-forest">Créer le menu avec l’IA</h3>
+                <p className="mt-1 max-w-2xl text-xs leading-5 text-ink/45">
+                  Envoie le PDF ou des photos du menu. L’IA détecte les catégories, plats, descriptions et prix, puis tu vérifies avant publication.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => { setMenuImportOpen(true); setMenuImportError(''); }}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-forest px-5 py-3 text-xs font-semibold text-white"
+            >
+              <Upload size={15} />
+              Importer mon menu
+            </button>
+          </div>
+        </div>
+
+        {menuImportOpen && (
+          <div className="rounded-2xl border border-gold/20 bg-[#fbf8ee] p-6 shadow-sm">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-semibold text-forest">Importer un menu</h3>
+                <p className="mt-1 text-xs text-ink/45">PDF, JPG, PNG ou WEBP. Tu peux commencer avec un menu complet en PDF.</p>
+              </div>
+              <button type="button" onClick={() => { setMenuImportOpen(false); setMenuImportPreview(null); setMenuImportError(''); }} className="text-xs font-semibold text-ink/40">Fermer</button>
+            </div>
+
+            <div className="mt-5 rounded-2xl border border-dashed border-ink/15 bg-white p-5">
+              <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl py-8 text-center">
+                <FileText size={28} className="text-gold" />
+                <span className="text-sm font-semibold text-forest">{menuImportFile ? menuImportFile.name : 'Choisir le PDF ou les photos du menu'}</span>
+                <span className="text-xs text-ink/40">Le fichier est analysé uniquement pour construire le brouillon du menu.</span>
+                <input
+                  type="file"
+                  accept=".pdf,image/jpeg,image/png,image/webp"
+                  className="sr-only"
+                  onChange={(e) => { setMenuImportFile(e.target.files?.[0] ?? null); setMenuImportPreview(null); setMenuImportError(''); }}
+                />
+              </label>
+            </div>
+
+            <div className="mt-4 flex flex-wrap justify-end gap-2">
+              <button type="button" onClick={importMenuWithAI} disabled={!menuImportFile || menuImportLoading} className="inline-flex items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-50">
+                <Sparkles size={14} />
+                {menuImportLoading ? 'Analyse du menu…' : 'Analyser avec l’IA'}
+              </button>
+            </div>
+
+            {menuImportError && <div className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-xs text-red-700">{menuImportError}</div>}
+
+            {menuImportPreview && (
+              <div className="mt-5 rounded-2xl border border-ink/5 bg-white p-5">
+                <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <h4 className="font-semibold text-forest">Menu détecté</h4>
+                    <p className="mt-1 text-xs text-ink/40">
+                      {menuImportPreview.categories.length} catégorie(s) · {menuImportPreview.categories.reduce((sum, c) => sum + c.items.length, 0)} produit(s)
+                    </p>
+                  </div>
+                  <button type="button" onClick={applyImportedMenu} disabled={menuImportApplying} className="rounded-xl bg-gold px-4 py-2.5 text-xs font-bold text-forest disabled:opacity-50">
+                    {menuImportApplying ? 'Création du menu…' : 'Créer ce menu'}
+                  </button>
+                </div>
+
+                <div className="mt-5 space-y-4">
+                  {menuImportPreview.categories.map((category, categoryIndex) => (
+                    <div key={categoryIndex} className="rounded-xl bg-[#f7f7f3] p-4">
+                      <div className="font-semibold text-forest">{category.name}</div>
+                      <div className="mt-3 space-y-2">
+                        {category.items.map((item, itemIndex) => (
+                          <div key={itemIndex} className="grid gap-2 rounded-xl bg-white p-3 md:grid-cols-[1.2fr_.7fr_1.8fr]">
+                            <input value={item.name} onChange={(e) => setMenuImportPreview((current) => current ? ({ ...current, categories: current.categories.map((c, ci) => ci === categoryIndex ? ({ ...c, items: c.items.map((it, ii) => ii === itemIndex ? ({ ...it, name: e.target.value }) : it) }) : c) }) : current)} className="rounded-lg border border-ink/10 px-3 py-2 text-xs" />
+                            <input type="number" value={item.price} onChange={(e) => setMenuImportPreview((current) => current ? ({ ...current, categories: current.categories.map((c, ci) => ci === categoryIndex ? ({ ...c, items: c.items.map((it, ii) => ii === itemIndex ? ({ ...it, price: Number(e.target.value) }) : it) }) : c) }) : current)} className="rounded-lg border border-ink/10 px-3 py-2 text-xs" />
+                            <input value={item.description ?? ''} onChange={(e) => setMenuImportPreview((current) => current ? ({ ...current, categories: current.categories.map((c, ci) => ci === categoryIndex ? ({ ...c, items: c.items.map((it, ii) => ii === itemIndex ? ({ ...it, description: e.target.value }) : it) }) : c) }) : current)} className="rounded-lg border border-ink/10 px-3 py-2 text-xs" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="rounded-2xl border border-gold/20 bg-[#fbf8ee] p-6 shadow-sm">
           <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
             <div>
