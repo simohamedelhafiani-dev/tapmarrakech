@@ -1263,6 +1263,21 @@ function EstablishmentWorkspace({
     }
   };
 
+  const saveMenuAiStyle = async (style: 'editorial' | 'immersive' | 'minimal' | 'luxury') => {
+    if (!menuAiDesign) return;
+    const nextDesign = { ...menuAiDesign, style };
+    setMenuAiDesign(nextDesign);
+    const { error } = await supabase
+      .from('establishments')
+      .update({ menu_ai_design: nextDesign })
+      .eq('id', establishment.id);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+  };
+
   const importMenuWithAI = async () => {
     if (!menuImportFile) {
       setMenuImportError('Sélectionne un PDF ou une photo de menu.');
@@ -1862,18 +1877,47 @@ function EstablishmentWorkspace({
           </div>
 
           {menuAiDesign && (
-            <div className="mt-5 grid gap-3 md:grid-cols-3">
-              <div className="rounded-xl bg-white p-4">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-ink/35">Direction</p>
-                <p className="mt-1 font-semibold text-forest capitalize">{menuAiDesign.style ?? 'editorial'}</p>
+            <div className="mt-5 space-y-4">
+              <div>
+                <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/35">Direction visuelle</p>
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  {[
+                    { id: 'editorial', name: 'Editorial', text: 'Éditorial, élégant et très lisible.', tone: 'bg-[#f0ece2]' },
+                    { id: 'luxury', name: 'Luxury', text: 'Premium, raffiné avec accents dorés.', tone: 'bg-[#f3eee2]' },
+                    { id: 'immersive', name: 'Immersive', text: 'Plus visuel et immersif.', tone: 'bg-[#ebe5d8]' },
+                    { id: 'minimal', name: 'Minimal', text: 'Sobre, moderne et épuré.', tone: 'bg-white' },
+                  ].map((styleOption) => (
+                    <button
+                      key={styleOption.id}
+                      type="button"
+                      onClick={() => void saveMenuAiStyle(styleOption.id as 'editorial' | 'immersive' | 'minimal' | 'luxury')}
+                      className={`rounded-2xl border p-4 text-left transition ${menuAiDesign.style === styleOption.id ? 'border-gold bg-white ring-2 ring-gold/20' : 'border-ink/10 bg-white/60 hover:border-gold/50'}`}
+                    >
+                      <div className={`mb-3 h-12 rounded-xl ${styleOption.tone}`}>
+                        <div className="flex h-full items-center gap-2 px-3">
+                          <span className="h-1.5 w-12 rounded-full bg-forest/70" />
+                          <span className="h-1.5 w-6 rounded-full bg-gold" />
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <strong className="text-sm text-forest">{styleOption.name}</strong>
+                        {menuAiDesign.style === styleOption.id && <span className="rounded-full bg-forest px-2 py-1 text-[9px] font-bold uppercase text-white">Actif</span>}
+                      </div>
+                      <p className="mt-1 text-[11px] leading-4 text-ink/40">{styleOption.text}</p>
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="rounded-xl bg-white p-4">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-ink/35">Hero</p>
-                <p className="mt-1 font-semibold text-forest">{menuAiDesign.hero?.title ?? establishment.name}</p>
-              </div>
-              <div className="rounded-xl bg-white p-4">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-ink/35">Sections</p>
-                <p className="mt-1 font-semibold text-forest">{Array.isArray(menuAiDesign.sections) ? menuAiDesign.sections.length : 0}</p>
+
+              <div className="grid gap-3 md:grid-cols-2">
+                <div className="rounded-xl bg-white p-4">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-ink/35">Hero</p>
+                  <p className="mt-1 font-semibold text-forest">{menuAiDesign.hero?.title ?? establishment.name}</p>
+                </div>
+                <div className="rounded-xl bg-white p-4">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-ink/35">Sections</p>
+                  <p className="mt-1 font-semibold text-forest">{Array.isArray(menuAiDesign.sections) ? menuAiDesign.sections.length : 0} catégorie(s)</p>
+                </div>
               </div>
             </div>
           )}
