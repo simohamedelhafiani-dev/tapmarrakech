@@ -232,12 +232,16 @@ function RoleRedirect() {
   }
 
   const launchSource = new URLSearchParams(window.location.search).get('source');
+  const customerToken = window.localStorage.getItem('tapmarrakech:customer-card-token');
+  const isStandalone =
+    window.matchMedia?.('(display-mode: standalone)').matches ||
+    (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
 
-  // When the installed customer PWA opens, return directly to that customer's
-  // permanent card instead of the authenticated dashboard.
-  if (launchSource === 'pwa') {
-    const customerToken = window.localStorage.getItem('tapmarrakech:customer-card-token');
-    if (customerToken) return <Navigate to={`/loyalty/${customerToken}`} replace />;
+  // A customer-installed PWA must always reopen the saved customer card,
+  // even if the installation was created from an older manifest whose
+  // start_url was "/".
+  if ((launchSource === 'pwa' || isStandalone) && customerToken) {
+    return <Navigate to={`/loyalty/${customerToken}`} replace />;
   }
 
   if (!user) {
