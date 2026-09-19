@@ -4907,7 +4907,6 @@ function BillingSection({
             </div>
           );
         })}
-        </div>
       </div>
 
       <div className="mt-8 rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
