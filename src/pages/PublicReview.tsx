@@ -24,6 +24,7 @@ import { useParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import type { Establishment } from '@/lib/types';
 import { Stars } from '@/components/Stars';
+import QRCode from 'qrcode';
 
 type Section = 'home' | 'menu' | 'reviews' | 'loyalty';
 
@@ -472,63 +473,52 @@ export default function PublicReview() {
         ===================================================== */}
         {section === 'home' && (
           <>
-            {/* PREMIUM HERO */}
-            <section className="relative min-h-[520px] overflow-hidden bg-forest">
-              <div className="absolute inset-0">
-                <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-gold/10 blur-3xl" />
-                <div className="absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-black/20 blur-3xl" />
-              </div>
+            {/* PREMIUM ESTABLISHMENT HEADER */}
+            <section className="relative overflow-hidden bg-forest px-5 pb-8 pt-5 text-white">
+              <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-gold/10 blur-3xl" />
+              <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-black/20 blur-3xl" />
 
-              <div className="relative px-6 pb-8 pt-7">
+              <div className="relative">
                 <div className="flex items-center justify-between">
-                  <img
-                    src="/tapmarrakech-logo.png"
-                    alt="TapMarrakech"
-                    className="h-8 w-auto object-contain brightness-0 invert opacity-80"
-                  />
-
-                  <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-white/60">
-                    Votre expérience
-                  </div>
+                  <span className="text-[9px] font-semibold uppercase tracking-[0.28em] text-white/45">
+                    Bienvenue
+                  </span>
+                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.16em] text-white/55">
+                    Expérience client
+                  </span>
                 </div>
 
-                <div className="mt-14 text-center">
+                <div className="mt-8 text-center">
                   {p.logo_url ? (
-                    <div className="mx-auto mb-6 flex h-28 w-28 items-center justify-center rounded-[30px] bg-white p-2 shadow-2xl">
+                    <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-[26px] bg-white p-2 shadow-2xl">
                       <img
                         src={p.logo_url}
                         alt={p.name}
-                        className="h-full w-full rounded-[22px] object-cover"
+                        className="h-full w-full rounded-[18px] object-contain"
                       />
                     </div>
                   ) : (
-                    <div className="mx-auto mb-6 grid h-28 w-28 place-items-center rounded-[30px] bg-white/10 font-display text-5xl text-gold ring-1 ring-white/10">
+                    <div className="mx-auto grid h-24 w-24 place-items-center rounded-[26px] bg-white/10 font-display text-4xl text-gold ring-1 ring-white/10">
                       {p.name?.[0] || 'E'}
                     </div>
                   )}
 
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-gold">
-                    Bienvenue
-                  </p>
-
-                  <h1 className="mt-3 font-display text-4xl leading-tight text-white">
+                  <h1 className="mt-5 font-display text-[34px] leading-tight">
                     {p.name}
                   </h1>
 
-                  {(googleRating || p.google_review_url) && (
-                    <div className="mt-5 flex items-center justify-center gap-2">
-                      <Star
-                        size={16}
-                        fill="currentColor"
-                        className="text-gold"
-                      />
+                  {description && (
+                    <p className="mx-auto mt-2 max-w-[360px] text-sm leading-5 text-white/50">
+                      {description}
+                    </p>
+                  )}
 
-                      <span className="text-sm font-semibold text-white">
-                        {googleRating
-                          ? Number(googleRating).toFixed(1)
-                          : 'Google'}
+                  {(googleRating || googleReviewCount) && (
+                    <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/8 px-4 py-2">
+                      <Star size={14} fill="currentColor" className="text-gold" />
+                      <span className="text-sm font-semibold">
+                        {googleRating ? Number(googleRating).toFixed(1) : 'Google'}
                       </span>
-
                       {googleReviewCount && (
                         <span className="text-xs text-white/40">
                           · {googleReviewCount} avis
@@ -536,16 +526,9 @@ export default function PublicReview() {
                       )}
                     </div>
                   )}
-
-                  {description && (
-                    <p className="mx-auto mt-5 max-w-[390px] text-sm leading-6 text-white/55">
-                      {description}
-                    </p>
-                  )}
                 </div>
 
-                {/* ACTION PILLS */}
-                <div className="mt-8 flex flex-wrap justify-center gap-2">
+                <div className="mt-7 flex flex-wrap justify-center gap-2">
                   {phone && (
                     <a
                       href={`tel:${phone}`}
@@ -558,10 +541,7 @@ export default function PublicReview() {
 
                   {whatsapp && (
                     <a
-                      href={`https://wa.me/${whatsapp.replace(
-                        /\D/g,
-                        ''
-                      )}`}
+                      href={`https://wa.me/${whatsapp.replace(/\D/g, '')}`}
                       target="_blank"
                       rel="noreferrer"
                       className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2.5 text-xs font-semibold text-white ring-1 ring-white/10"
@@ -570,73 +550,96 @@ export default function PublicReview() {
                       WhatsApp
                     </a>
                   )}
-
-                  {directionsUrl && (
-                    <a
-                      href={directionsUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2.5 text-xs font-semibold text-white ring-1 ring-white/10"
-                    >
-                      <MapPin size={14} />
-                      Itinéraire
-                    </a>
-                  )}
                 </div>
               </div>
             </section>
 
-            {/* MAIN CONTENT */}
-            <main className="space-y-6 px-5 pt-6">
+            {/* PUBLIC ACTIONS */}
+            <main className="space-y-3 px-5 pt-5">
+              {loyaltyEnabled && (
+                <ActionRow
+                  icon={<Heart size={22} />}
+                  title="Rejoindre notre programme fidélité"
+                  subtitle="Cumulez des points et profitez d’avantages exclusifs"
+                  onClick={() => navigate('loyalty')}
+                  accent="rose"
+                />
+              )}
 
-              {/* PROMOTIONS */}
+              {place.google_review_url && (
+                <ActionRow
+                  icon={<Star size={22} />}
+                  title="Laisser un avis Google"
+                  subtitle="Votre avis compte beaucoup pour nous"
+                  onClick={() => navigate('reviews')}
+                  accent="blue"
+                />
+              )}
+
+              {(categories.length > 0 || items.length > 0) && (
+                <ActionRow
+                  icon={<UtensilsCrossed size={22} />}
+                  title="Voir le menu"
+                  subtitle="Découvrez nos plats et boissons"
+                  onClick={() => navigate('menu')}
+                  accent="orange"
+                />
+              )}
+
+              <WifiActionRow establishmentId={p.id} />
+
+              {directionsUrl && (
+                <ActionRow
+                  icon={<MapPin size={22} />}
+                  title="Nous trouver"
+                  subtitle={[address, city].filter(Boolean).join(', ')}
+                  href={directionsUrl}
+                  accent="gold"
+                />
+              )}
+
               {promotions.length > 0 && (
-                <section>
-                  <div className="mb-4 flex items-end justify-between">
+                <section className="pt-5">
+                  <div className="mb-3 flex items-end justify-between">
                     <div>
                       <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-gold">
                         En ce moment
                       </p>
-                      <h2 className="mt-1 font-display text-3xl text-forest">
+                      <h2 className="mt-1 font-display text-2xl text-forest">
                         À découvrir
                       </h2>
                     </div>
-
-                    <Sparkles
-                      size={20}
-                      className="mb-1 text-gold"
-                    />
+                    <Sparkles size={19} className="text-gold" />
                   </div>
 
-                  <div className="-mx-5 flex gap-4 overflow-x-auto px-5 pb-2 scrollbar-hide">
+                  <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-2 scrollbar-hide">
                     {promotions.map((promotion) => (
                       <article
                         key={promotion.id}
-                        className="relative min-w-[310px] overflow-hidden rounded-[28px] bg-forest shadow-xl"
+                        className="min-w-[290px] overflow-hidden rounded-[26px] bg-forest shadow-lg"
                       >
                         {promotion.image_url ? (
                           <img
                             src={promotion.image_url}
                             alt=""
-                            className="h-52 w-full object-cover"
+                            className="h-40 w-full object-cover"
                           />
                         ) : (
-                          <div className="h-36 bg-gradient-to-br from-forest via-[#214d40] to-[#0e2923]" />
+                          <div className="h-28 bg-gradient-to-br from-forest via-[#214d40] to-[#0e2923]" />
                         )}
 
-                        <div className="p-5 text-white">
-                          <span className="inline-flex items-center rounded-full bg-gold px-3 py-1 text-[9px] font-bold uppercase tracking-wider text-forest">
+                        <div className="p-4 text-white">
+                          <span className="inline-flex rounded-full bg-gold px-3 py-1 text-[9px] font-bold uppercase tracking-wider text-forest">
                             Offre exclusive
                           </span>
 
-                          <div className="mt-3 flex items-end justify-between gap-4">
+                          <div className="mt-2 flex items-end justify-between gap-3">
                             <div>
-                              <h3 className="font-display text-2xl">
+                              <h3 className="font-display text-xl">
                                 {promotion.name}
                               </h3>
-
                               {promotion.description && (
-                                <p className="mt-1.5 text-xs leading-5 text-white/50">
+                                <p className="mt-1 text-xs leading-5 text-white/50">
                                   {promotion.description}
                                 </p>
                               )}
@@ -646,18 +649,11 @@ export default function PublicReview() {
                               <div className="shrink-0 text-right">
                                 {promotion.normal_price !== null && (
                                   <p className="text-[10px] text-white/35 line-through">
-                                    {Number(
-                                      promotion.normal_price
-                                    ).toLocaleString('fr-FR')}{' '}
-                                    MAD
+                                    {Number(promotion.normal_price).toLocaleString('fr-FR')} MAD
                                   </p>
                                 )}
-
-                                <p className="text-xl font-bold text-gold">
-                                  {Number(
-                                    promotion.promo_price
-                                  ).toLocaleString('fr-FR')}{' '}
-                                  MAD
+                                <p className="text-lg font-bold text-gold">
+                                  {Number(promotion.promo_price).toLocaleString('fr-FR')} MAD
                                 </p>
                               </div>
                             )}
@@ -669,133 +665,70 @@ export default function PublicReview() {
                 </section>
               )}
 
-              {/* 3 PRIMARY EXPERIENCES */}
-              <section className="grid grid-cols-3 gap-3">
-                <FeatureCard
-                  icon={<UtensilsCrossed size={21} />}
-                  title="Menu"
-                  subtitle="Découvrir"
-                  onClick={() => navigate('menu')}
-                />
-
-                <FeatureCard
-                  icon={<Heart size={21} />}
-                  title="Avis"
-                  subtitle="Votre expérience"
-                  onClick={() => navigate('reviews')}
-                />
-
-                {loyaltyEnabled ? (
-                  <FeatureCard
-                    icon={<Gift size={21} />}
-                    title="Fidélité"
-                    subtitle="Vos avantages"
-                    onClick={() => navigate('loyalty')}
-                    featured
-                  />
-                ) : (
-                  <FeatureCard
-                    icon={<Sparkles size={21} />}
-                    title="Découvrir"
-                    subtitle="Nos services"
-                    onClick={() => {}}
-                  />
-                )}
-              </section>
-
-              {/* LOYALTY TEASER */}
-              {loyaltyEnabled && (
-                <section className="relative overflow-hidden rounded-[30px] bg-[#e9dfca] p-6">
-                  <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gold/20 blur-2xl" />
-
-                  <div className="relative">
-                    <div className="flex items-center gap-2 text-gold">
-                      <Gift size={17} />
-                      <span className="text-[9px] font-bold uppercase tracking-[0.25em]">
-                        Programme fidélité
-                      </span>
-                    </div>
-
-                    <h2 className="mt-3 max-w-[300px] font-display text-2xl leading-tight text-forest">
-                      Plus vous revenez,
-                      plus vous êtes récompensé.
-                    </h2>
-
-                    <button
-                      onClick={() => navigate('loyalty')}
-                      className="mt-5 inline-flex items-center gap-2 rounded-full bg-forest px-5 py-3 text-xs font-semibold text-white"
-                    >
-                      Rejoindre le programme
-                      <ArrowRight size={14} />
-                    </button>
+              {(website || instagram || p.facebook_url || p.tiktok_url) && (
+                <section className="pt-7 text-center">
+                  <div className="flex items-center gap-3">
+                    <div className="h-px flex-1 bg-ink/10" />
+                    <span className="text-xs font-semibold text-ink/45">Suivez-nous</span>
+                    <div className="h-px flex-1 bg-ink/10" />
                   </div>
-                </section>
-              )}
 
-              {/* WIFI */}
-              <WifiCard establishmentId={p.id} />
-
-              {/* CONTACT */}
-              {(address ||
-                city ||
-                website ||
-                instagram) && (
-                <section className="border-t border-ink/5 pt-6">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-gold">
-                    Informations
-                  </p>
-
-                  <div className="mt-4 space-y-3">
-                    {(address || city) && (
-                      <div className="flex gap-3">
-                        <MapPin
-                          size={16}
-                          className="mt-0.5 shrink-0 text-forest"
-                        />
-                        <span className="text-sm text-ink/55">
-                          {[address, city]
-                            .filter(Boolean)
-                            .join(', ')}
-                        </span>
-                      </div>
-                    )}
-
-                    {website && (
-                      <a
-                        href={
-                          website.startsWith('http')
-                            ? website
-                            : `https://${website}`
-                        }
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center gap-3 text-sm text-ink/55"
-                      >
-                        <ExternalLink
-                          size={16}
-                          className="text-forest"
-                        />
-                        Site internet
-                      </a>
-                    )}
-
+                  <div className="mt-4 flex justify-center gap-3">
                     {instagram && (
                       <a
                         href={instagram}
                         target="_blank"
                         rel="noreferrer"
-                        className="flex items-center gap-3 text-sm text-ink/55"
+                        aria-label="Instagram"
+                        className="grid h-11 w-11 place-items-center rounded-full bg-forest text-white"
                       >
-                        <Instagram
-                          size={16}
-                          className="text-forest"
-                        />
-                        Instagram
+                        <Instagram size={19} />
+                      </a>
+                    )}
+                    {p.facebook_url && (
+                      <a
+                        href={p.facebook_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label="Facebook"
+                        className="grid h-11 w-11 place-items-center rounded-full bg-forest text-sm font-bold text-white"
+                      >
+                        f
+                      </a>
+                    )}
+                    {p.tiktok_url && (
+                      <a
+                        href={p.tiktok_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label="TikTok"
+                        className="grid h-11 w-11 place-items-center rounded-full bg-forest text-sm font-bold text-white"
+                      >
+                        ♪
+                      </a>
+                    )}
+                    {website && (
+                      <a
+                        href={website.startsWith('http') ? website : `https://${website}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label="Site internet"
+                        className="grid h-11 w-11 place-items-center rounded-full bg-forest text-white"
+                      >
+                        <ExternalLink size={18} />
                       </a>
                     )}
                   </div>
                 </section>
               )}
+
+              <footer className="pb-4 pt-6 text-center">
+                <div className="flex items-center justify-center gap-2 text-[9px] font-semibold uppercase tracking-[0.18em] text-ink/25">
+                  <div className="h-px w-12 bg-ink/10" />
+                  <span>Propulsé par <strong className="text-ink/45">TapMarrakech</strong></span>
+                  <div className="h-px w-12 bg-ink/10" />
+                </div>
+              </footer>
             </main>
           </>
         )}
@@ -1415,47 +1348,57 @@ export default function PublicReview() {
    COMPONENTS
 ========================================================= */
 
-function FeatureCard({
+function ActionRow({
   icon,
   title,
   subtitle,
   onClick,
-  featured = false,
+  href,
+  accent = 'green',
 }: {
   icon: React.ReactNode;
   title: string;
   subtitle: string;
-  onClick: () => void;
-  featured?: boolean;
+  onClick?: () => void;
+  href?: string;
+  accent?: 'green' | 'rose' | 'blue' | 'orange' | 'gold';
 }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`rounded-[22px] p-4 text-left transition active:scale-[0.98] ${
-        featured
-          ? 'bg-forest text-white shadow-lg'
-          : 'bg-white text-forest shadow-sm ring-1 ring-ink/5'
-      }`}
-    >
-      <div
-        className={`grid h-10 w-10 place-items-center rounded-xl ${
-          featured
-            ? 'bg-white/10 text-gold'
-            : 'bg-forest/5 text-forest'
-        }`}
-      >
+  const accentClasses = {
+    green: 'bg-emerald-50 text-emerald-600',
+    rose: 'bg-rose-50 text-rose-500',
+    blue: 'bg-blue-50 text-blue-500',
+    orange: 'bg-orange-50 text-orange-500',
+    gold: 'bg-amber-50 text-amber-600',
+  } as const;
+
+  const className = "group flex w-full items-center gap-4 rounded-[24px] bg-white p-4 text-left shadow-sm ring-1 ring-ink/5 transition active:scale-[0.99]";
+
+  const contentNode = (
+    <>
+      <div className={`grid h-12 w-12 shrink-0 place-items-center rounded-[17px] ${accentClasses[accent]}`}>
         {icon}
       </div>
 
-      <p className="mt-4 text-sm font-bold">{title}</p>
+      <div className="min-w-0 flex-1">
+        <p className="text-[15px] font-bold text-forest">{title}</p>
+        <p className="mt-1 line-clamp-2 text-[11px] leading-5 text-ink/45">{subtitle}</p>
+      </div>
 
-      <p
-        className={`mt-1 text-[9px] ${
-          featured ? 'text-white/45' : 'text-ink/35'
-        }`}
-      >
-        {subtitle}
-      </p>
+      <ArrowRight size={19} className="shrink-0 text-ink/35 transition-transform group-hover:translate-x-0.5" />
+    </>
+  );
+
+  if (href) {
+    return (
+      <a href={href} target="_blank" rel="noreferrer" className={className}>
+        {contentNode}
+      </a>
+    );
+  }
+
+  return (
+    <button type="button" onClick={onClick} className={className}>
+      {contentNode}
     </button>
   );
 }
@@ -1559,7 +1502,7 @@ function NavButton({
   );
 }
 
-function WifiCard({
+function WifiActionRow({
   establishmentId,
 }: {
   establishmentId: string;
@@ -1568,6 +1511,8 @@ function WifiCard({
     network_name: string;
     wifi_password: string;
   } | null>(null);
+  const [qr, setQr] = useState('');
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -1596,44 +1541,102 @@ function WifiCard({
       }
     };
 
-    loadWifi();
+    void loadWifi();
 
     return () => {
       cancelled = true;
     };
   }, [establishmentId]);
 
-  if (!wifi) return null;
+  const escapeWifi = (value: string) =>
+    value.replace(/([\\;,:"'])/g, '\\$1');
+
+  const openWifi = async () => {
+    if (!wifi) return;
+
+    try {
+      const security = wifi.wifi_password ? 'WPA' : 'nopass';
+      const payload = `WIFI:T:${security};S:${escapeWifi(wifi.network_name)};P:${escapeWifi(wifi.wifi_password)};;`;
+      const dataUrl = await QRCode.toDataURL(payload, {
+        width: 260,
+        margin: 2,
+        color: { dark: '#17352a', light: '#ffffff' },
+      });
+      setQr(dataUrl);
+      setOpen(true);
+    } catch (error) {
+      console.error('Impossible de générer le QR Wi-Fi:', error);
+    }
+  };
 
   return (
-    <section className="rounded-[28px] bg-white p-5 shadow-sm ring-1 ring-ink/5">
-      <div className="flex items-start gap-4">
-        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-forest/5 text-forest">
-          <Wifi size={20} />
+    <>
+      <button
+        type="button"
+        onClick={openWifi}
+        disabled={!wifi}
+        className="group flex w-full items-center gap-4 rounded-[24px] bg-white p-4 text-left shadow-sm ring-1 ring-ink/5 transition active:scale-[0.99] disabled:opacity-60"
+      >
+        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-[17px] bg-emerald-50 text-emerald-600">
+          <Wifi size={22} />
         </div>
 
-        <div>
-          <p className="font-display text-xl text-forest">
-            Wi-Fi gratuit
+        <div className="min-w-0 flex-1">
+          <p className="text-[15px] font-bold text-forest">Se connecter au Wi-Fi</p>
+          <p className="mt-1 text-[11px] leading-5 text-ink/45">
+            {wifi?.network_name ? `Wi-Fi gratuit · ${wifi.network_name}` : 'Wi-Fi gratuit pour nos clients'}
           </p>
+        </div>
 
-          <p className="mt-1 text-xs text-ink/40">
-            Connectez-vous pendant votre visite.
-          </p>
+        <ArrowRight size={19} className="shrink-0 text-ink/35" />
+      </button>
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            <span className="rounded-full bg-[#f7f5ef] px-3 py-1.5 text-xs font-semibold text-forest">
+      {open && wifi && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-ink/50 px-4 py-6 backdrop-blur-sm">
+          <div className="w-full max-w-[380px] rounded-[30px] bg-[#fffdf9] p-6 text-center shadow-2xl">
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="ml-auto grid h-9 w-9 place-items-center rounded-full bg-ink/5 text-ink/45"
+              aria-label="Fermer"
+            >
+              <X size={17} />
+            </button>
+
+            <div className="mx-auto mt-1 grid h-12 w-12 place-items-center rounded-2xl bg-emerald-50 text-emerald-600">
+              <Wifi size={23} />
+            </div>
+
+            <h2 className="mt-4 font-display text-2xl text-forest">
+              Connexion Wi-Fi
+            </h2>
+
+            <p className="mt-1 text-sm text-ink/45">
+              Scannez ce QR code avec l’appareil photo de votre téléphone.
+            </p>
+
+            <div className="mx-auto mt-5 w-fit rounded-2xl bg-white p-3 shadow-sm ring-1 ring-ink/5">
+              {qr && <img src={qr} alt="QR de connexion Wi-Fi" className="h-56 w-56" />}
+            </div>
+
+            <p className="mt-4 text-sm font-semibold text-forest">
               {wifi.network_name}
-            </span>
+            </p>
 
-            {wifi.wifi_password && (
-              <span className="rounded-full bg-gold/10 px-3 py-1.5 text-xs font-semibold text-gold">
-                {wifi.wifi_password}
-              </span>
-            )}
+            <p className="mt-1 text-[11px] text-ink/35">
+              Le mot de passe n’est pas affiché.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="mt-5 w-full rounded-full bg-forest px-5 py-3.5 text-sm font-semibold text-white"
+            >
+              Fermer
+            </button>
           </div>
         </div>
-      </div>
-    </section>
+      )}
+    </>
   );
 }
