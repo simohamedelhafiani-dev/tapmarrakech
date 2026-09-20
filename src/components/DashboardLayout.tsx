@@ -339,35 +339,6 @@ export function DashboardLayout() {
           </div>
         )}
 
-        <div className="mt-5 grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={() => navigate('/dashboard/menu')}
-            className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-2 py-2 text-[10px] font-semibold text-white hover:bg-white/10"
-          >
-            <UtensilsCrossed size={12} />
-            Gérer le menu
-          </button>
-          {establishmentName && (
-            <button
-              type="button"
-              onClick={async () => {
-                const { data } = await supabase
-                  .from('establishments')
-                  .select('slug')
-                  .eq('id', (await supabase.rpc('get_my_establishments')).data?.[0]?.id)
-                  .maybeSingle();
-                if (data?.slug) {
-                  window.open(window.location.origin + '/r/' + encodeURIComponent(data.slug) + '?section=menu', '_blank', 'noopener,noreferrer');
-                }
-              }}
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-gold px-2 py-2 text-[10px] font-semibold text-forest hover:bg-gold/90"
-            >
-              <ExternalLink size={12} />
-              Voir le menu
-            </button>
-          )}
-        </div>
         <div className="mt-auto border-t border-white/10 pt-5">
           <div className="mb-4 flex items-center gap-3 px-2">
             <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gold font-semibold text-forest">
