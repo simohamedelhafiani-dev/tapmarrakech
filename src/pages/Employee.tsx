@@ -22,6 +22,7 @@ import {
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import QrScanner from '@/components/QrScanner';
 import { LoyaltyCardVisual, defaultLoyaltyDesignConfig } from '@/components/LoyaltyCardVisual';
+import { supabase } from '@/lib/supabase';
 
 type Establishment = {
   id: string;
