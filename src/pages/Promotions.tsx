@@ -47,6 +47,7 @@ export default function Promotions() {
   const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
@@ -147,6 +148,35 @@ export default function Promotions() {
     setForm(emptyForm);
     await loadPromotions();
     setSaving(false);
+  }
+
+  async function regeneratePromotion(promotion: Promotion) {
+    if (!window.confirm(`Générer un nouveau visuel pour « ${promotion.name} » ?`)) return;
+
+    setRegeneratingId(promotion.id);
+    setErrorMessage('');
+
+    const { data, error } = await supabase.functions.invoke(
+      'generate-promotion-image',
+      {
+        body: {
+          promotion_id: promotion.id,
+          establishment_id: establishmentId,
+        },
+      }
+    );
+
+    if (error || !data?.success) {
+      console.error('Erreur régénération promotion IA:', error ?? data);
+      setErrorMessage(
+        data?.error || error?.message || 'Impossible de régénérer le visuel.'
+      );
+      setRegeneratingId(null);
+      return;
+    }
+
+    await loadPromotions();
+    setRegeneratingId(null);
   }
 
   async function togglePromotion(promotion: Promotion) {
@@ -377,6 +407,15 @@ export default function Promotions() {
                     </div>
 
                     <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => void regeneratePromotion(promotion)}
+                        disabled={regeneratingId === promotion.id}
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-gold/30 bg-gold/5 px-3 py-2 text-xs font-semibold text-gold disabled:opacity-50"
+                      >
+                        {regeneratingId === promotion.id ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                        {regeneratingId === promotion.id ? 'Génération…' : 'Nouveau visuel'}
+                      </button>
                       <button
                         type="button"
                         onClick={() => void togglePromotion(promotion)}
