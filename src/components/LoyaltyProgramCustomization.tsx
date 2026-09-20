@@ -15,6 +15,21 @@ type Design = {
   published: boolean;
 };
 
+type AIGeneration = {
+  id: string;
+  image_url: string;
+  prompt: string;
+  template_id: string;
+  primary_color: string;
+  secondary_color: string;
+  background_color: string;
+  text_color: string;
+  button_color: string;
+  design_config: Partial<LoyaltyDesignConfig>;
+  created_at: string;
+  selected: boolean;
+};
+
 type Reward = {
   id: string;
   name: string;
@@ -50,6 +65,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
   const [design, setDesign] = useState<Design>(baseDesign);
   const [establishment, setEstablishment] = useState<{ name: string; logo_url: string | null; phone?: string | null; address?: string | null }>({ name: 'Votre établissement', logo_url: null });
   const [rewards, setRewards] = useState<Reward[]>([]);
+  const [aiGenerations, setAiGenerations] = useState<AIGeneration[]>([]);
   const [side, setSide] = useState<'front' | 'back'>('front');
   const [mobile, setMobile] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -66,10 +82,11 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
 
   async function load() {
     if (!establishmentId) return;
-    const [{ data: designData }, { data: rewardsData }, { data: place }] = await Promise.all([
+    const [{ data: designData }, { data: rewardsData }, { data: place }, { data: generationsData }] = await Promise.all([
       supabase.rpc('get_loyalty_card_config', { p_establishment_id: establishmentId }),
       supabase.from('loyalty_rewards').select('id,name,description,points_required,reward_type,discount_percent,discount_max_amount').eq('establishment_id', establishmentId).eq('active', true).order('points_required'),
       supabase.from('establishments').select('name,logo_url,phone,address').eq('id', establishmentId).maybeSingle(),
+      supabase.rpc('get_loyalty_ai_generations', { p_establishment_id: establishmentId }),
     ]);
     const row = Array.isArray(designData) ? designData[0] : designData;
     if (row) {
@@ -87,9 +104,32 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     }
     if (place) setEstablishment({ name: place.name || 'Votre établissement', logo_url: place.logo_url || null, phone: place.phone, address: place.address });
     setRewards((rewardsData ?? []) as Reward[]);
+    setAiGenerations((generationsData ?? []) as AIGeneration[]);
   }
 
   useEffect(() => { void load(); }, [establishmentId]);
+
+  function selectAIGeneration(generation: AIGeneration) {
+    setDesign(d => ({
+      ...d,
+      template_id: generation.template_id,
+      primary_color: generation.primary_color,
+      secondary_color: generation.secondary_color,
+      background_color: generation.background_color,
+      text_color: generation.text_color,
+      button_color: generation.button_color,
+      design_config: {
+        ...d.design_config,
+        ...(generation.design_config ?? {}),
+        background_image_url: generation.image_url,
+        ai_prompt: generation.prompt,
+        ai_generation_id: generation.id,
+      },
+      published: false,
+    }));
+    setAiGenerations(list => list.map(item => ({ ...item, selected: item.id === generation.id })));
+    setSide('front');
+  }
 
   function applyTemplate(id: string) {
     const t = templates.find(x => x.id === id);
@@ -139,6 +179,21 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
         design_config: { ...d.design_config, ...(data.design_config || {}), background_image_url: data.image_url || d.design_config.background_image_url, ai_prompt: aiPrompt },
         published: false,
       }));
+      const generated = data.generation_id ? {
+        id: data.generation_id,
+        image_url: data.image_url,
+        prompt: aiPrompt.trim() || 'Carte fidélité premium, élégante, adaptée à mon établissement.',
+        template_id: data.template_id || 'luxury',
+        primary_color: data.primary_color || '#173D32',
+        secondary_color: data.secondary_color || '#D3A84C',
+        background_color: data.background_color || '#F7F7F3',
+        text_color: data.text_color || '#FFFFFF',
+        button_color: data.button_color || '#173D32',
+        design_config: data.design_config || {},
+        created_at: new Date().toISOString(),
+        selected: true,
+      } as AIGeneration : null;
+      if (generated) setAiGenerations(list => [generated, ...list.map(item => ({ ...item, selected: false }))]);
     } catch (e) {
       alert(e instanceof Error ? e.message : 'Génération IA impossible.');
     } finally { setAiLoading(false); }
@@ -184,6 +239,44 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                   {design.template_id === t.id && <span className="absolute right-2 top-2 grid h-5 w-5 place-items-center rounded-full bg-gold text-white"><Check size={12}/></span>}
                 </button>)}
               </div>
+            </div>
+
+            <div className="rounded-2xl border border-ink/10 bg-white p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[.16em] text-gold">2 · Mes créations IA</p>
+                  <p className="mt-1 text-xs text-ink/45">Toutes les cartes générées restent disponibles ici. Sélectionnez celle à utiliser.</p>
+                </div>
+                <span className="rounded-full bg-[#f7f7f3] px-3 py-1 text-[10px] text-ink/50">{aiGenerations.length} création{aiGenerations.length > 1 ? 's' : ''}</span>
+              </div>
+              {aiGenerations.length === 0 ? (
+                <div className="mt-4 rounded-xl border border-dashed border-ink/10 bg-[#fafaf8] p-5 text-center">
+                  <Sparkles className="mx-auto text-gold" size={20}/>
+                  <p className="mt-2 text-xs font-semibold text-forest">Aucune création IA pour le moment</p>
+                  <p className="mt-1 text-[10px] text-ink/40">Générez une carte ci-dessous : elle sera automatiquement ajoutée à cette galerie.</p>
+                </div>
+              ) : (
+                <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-3">
+                  {aiGenerations.map(generation => (
+                    <div key={generation.id} className={`group overflow-hidden rounded-xl border bg-[#f7f7f3] ${generation.selected ? 'border-gold ring-2 ring-gold/20' : 'border-ink/10'}`}>
+                      <button type="button" onClick={() => selectAIGeneration(generation)} className="block w-full text-left">
+                        <div className="relative aspect-[1.62/1] overflow-hidden" style={{ background: generation.primary_color }}>
+                          <img src={generation.image_url} alt="Carte fidélité générée par IA" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
+                          {generation.selected && <span className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-gold px-2 py-1 text-[9px] font-bold text-white"><Check size={10}/> Sélectionnée</span>}
+                        </div>
+                        <div className="p-2.5">
+                          <p className="truncate text-[10px] font-semibold text-forest">{generation.prompt}</p>
+                          <p className="mt-1 text-[9px] text-ink/35">{new Date(generation.created_at).toLocaleDateString('fr-FR')}</p>
+                        </div>
+                      </button>
+                      <button type="button" onClick={() => selectAIGeneration(generation)} className="m-2 mt-0 w-[calc(100%-1rem)] rounded-lg bg-forest px-3 py-2 text-[10px] font-bold text-white">
+                        {generation.selected ? 'Carte active' : 'Utiliser cette carte'}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="rounded-2xl border border-gold/20 bg-[#fbf8ee] p-4">
