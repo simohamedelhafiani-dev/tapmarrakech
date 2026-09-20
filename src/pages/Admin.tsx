@@ -5064,15 +5064,6 @@ function SystemSection({
     </div>
   );
 
-
-  billing,
-  globalStats,
-  establishments,
-}: {
-  billing: BillingSnapshot;
-  globalStats: GlobalStats;
-  establishments: Establishment[];
-}) {
   type CheckStatus = 'checking' | 'ok' | 'error';
 
   type Check = {
