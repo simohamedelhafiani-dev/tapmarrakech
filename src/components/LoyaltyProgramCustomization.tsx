@@ -112,7 +112,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
   function selectAIGeneration(generation: AIGeneration) {
     setDesign(d => ({
       ...d,
-      template_id: generation.template_id,
+      template_id: 'ai',
       primary_color: generation.primary_color,
       secondary_color: generation.secondary_color,
       background_color: generation.background_color,
@@ -170,7 +170,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
       if (error || !data?.success) throw new Error(data?.error || error?.message || 'Génération IA impossible.');
       setDesign(d => ({
         ...d,
-        template_id: data.template_id || 'luxury',
+        template_id: 'ai',
         primary_color: data.primary_color || d.primary_color,
         secondary_color: data.secondary_color || d.secondary_color,
         background_color: data.background_color || d.background_color,
