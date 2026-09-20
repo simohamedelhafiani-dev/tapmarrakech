@@ -23,12 +23,12 @@ type Reward = {
 };
 
 const templates = [
-  { id: 'luxury', name: 'Luxury', description: 'Sombre, premium, doré', colors: ['#173D32', '#D3A84C', '#F7F7F3'] },
-  { id: 'minimal', name: 'Minimal', description: 'Clair, propre, discret', colors: ['#111827', '#64748B', '#FFFFFF'] },
-  { id: 'elegant', name: 'Elegant', description: 'Crème, chaleureux, chic', colors: ['#5B4636', '#B89470', '#F6F0E7'] },
-  { id: 'modern', name: 'Modern', description: 'Frais, contemporain', colors: ['#164E63', '#06B6D4', '#ECFEFF'] },
-  { id: 'bold', name: 'Bold', description: 'Contrasté, énergique', colors: ['#3B1D5A', '#E879F9', '#FAF5FF'] },
-  { id: 'classic', name: 'Classic', description: 'Sobre, intemporel', colors: ['#1F2937', '#C9A227', '#F9FAFB'] },
+  { id: 'luxury', name: 'Signature Luxe', description: 'Club premium, vert profond et or', colors: ['#173D32', '#D3A84C', '#F7F7F3'], style: 'luxury' },
+  { id: 'minimal', name: 'Pure', description: 'Minimalisme haut de gamme, très épuré', colors: ['#111827', '#64748B', '#FFFFFF'], style: 'minimal' },
+  { id: 'elegant', name: 'Maison', description: 'Crème, chaleureux, inspiration boutique', colors: ['#5B4636', '#B89470', '#F6F0E7'], style: 'elegant' },
+  { id: 'modern', name: 'Contemporary', description: 'SaaS premium, frais et contemporain', colors: ['#164E63', '#06B6D4', '#ECFEFF'], style: 'modern' },
+  { id: 'bold', name: 'Night Club', description: 'Contrasté, spectaculaire, très visuel', colors: ['#3B1D5A', '#E879F9', '#FAF5FF'], style: 'bold' },
+  { id: 'classic', name: 'Heritage', description: 'Intemporel, élégant, maison traditionnelle', colors: ['#1F2937', '#C9A227', '#F9FAFB'], style: 'classic' },
 ] as const;
 
 const defaultDesign: Design = {
@@ -202,12 +202,36 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
               onClick={() => applyTemplate(template.id)}
               className={`relative overflow-hidden rounded-2xl border p-4 text-left transition ${design.template_id === template.id ? 'border-gold ring-2 ring-gold/20' : 'border-ink/10 hover:border-gold/50'}`}
             >
-              <div className="mb-4 h-20 rounded-xl p-3" style={{ background: template.colors[0] }}>
-                <div className="flex justify-between">
-                  <span className="h-3 w-12 rounded-full" style={{ background: template.colors[1] }} />
-                  <span className="h-3 w-3 rounded-full" style={{ background: template.colors[2] }} />
+              <div
+                className="relative mb-4 h-32 overflow-hidden rounded-2xl p-4 shadow-lg"
+                style={{ background: template.colors[0], borderRadius: 18 }}
+              >
+                <div className="absolute -right-8 -top-10 h-28 w-28 rounded-full opacity-20" style={{ background: template.colors[1] }} />
+                <div className="absolute -bottom-12 -left-8 h-24 w-24 rounded-full opacity-10" style={{ background: template.colors[1] }} />
+                <div className="relative flex items-start justify-between">
+                  <div>
+                    <p className="text-[7px] font-semibold uppercase tracking-[0.22em]" style={{ color: template.colors[2] }}>
+                      Programme fidélité
+                    </p>
+                    <p className="mt-1 font-display text-base" style={{ color: template.colors[2] }}>
+                      Votre carte
+                    </p>
+                  </div>
+                  <div className="grid h-8 w-8 place-items-center rounded-full border" style={{ borderColor: template.colors[1], color: template.colors[1] }}>
+                    <Gift size={13} />
+                  </div>
                 </div>
-                <div className="mt-7 h-2 w-20 rounded-full" style={{ background: template.colors[1] }} />
+                <div className="relative mt-5 flex items-end justify-between">
+                  <div>
+                    <p className="text-[7px] uppercase tracking-wider" style={{ color: template.colors[2], opacity: 0.55 }}>Solde</p>
+                    <p className="mt-0.5 text-xl font-semibold" style={{ color: template.colors[1] }}>250</p>
+                  </div>
+                  <div className="flex gap-1.5">
+                    {[0, 1, 2, 3, 4].map((step) => (
+                      <span key={step} className="h-3.5 w-3.5 rounded-full border" style={{ borderColor: template.colors[1], background: step < 3 ? template.colors[1] : 'transparent' }} />
+                    ))}
+                  </div>
+                </div>
               </div>
               <p className="text-sm font-semibold text-forest">{template.name}</p>
               <p className="mt-1 text-[11px] text-ink/45">{template.description}</p>
