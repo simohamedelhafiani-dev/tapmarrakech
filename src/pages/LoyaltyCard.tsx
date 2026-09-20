@@ -289,19 +289,6 @@ export default function LoyaltyCard() {
           }}
           side="front"
         />
-        <LoyaltyCardVisual
-          design={{ ...design, config: designConfig }}
-          card={{
-            establishmentName: card.establishment_name,
-            logoUrl: card.establishment_logo_url,
-            points: card.points_balance,
-            customerName: fullName,
-            loyaltyNumber: card.loyalty_number,
-            cardUrl,
-          }}
-          side="back"
-        />
-
         <div className="overflow-hidden border shadow-soft" style={{ borderRadius: design.border_radius, borderColor: `${design.primary_color}18`, background: design.background_color }}>
           <div className="p-6" style={{ color: design.text_color }}>
             {qr && (
