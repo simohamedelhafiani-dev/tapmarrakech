@@ -121,6 +121,7 @@ export default function Employee() {
 
   const [establishmentId, setEstablishmentId] = useState('');
   const [establishmentLogoUrl, setEstablishmentLogoUrl] = useState<string | null>(null);
+  const [loyaltyProgram, setLoyaltyProgram] = useState({ program_type: 'POINTS' as 'STAMP'|'DISCOUNT'|'POINTS', stamp_goal: 10 });
   const [loyaltyDesign, setLoyaltyDesign] = useState({
     template_id: 'luxury',
     primary_color: '#173D32',
@@ -315,9 +316,13 @@ export default function Employee() {
   useEffect(() => {
     if (!session || !employeeSupabase) return;
     let active = true;
-    void employeeSupabase.rpc('get_employee_loyalty_card_config', { p_session_token: session.session_token }).then(({ data }) => {
+    void Promise.all([
+      employeeSupabase.rpc('get_employee_loyalty_card_config', { p_session_token: session.session_token }),
+      employeeSupabase.from('loyalty_settings').select('program_type,stamp_goal').eq('establishment_id', session.establishment_id).maybeSingle(),
+    ]).then(([{ data }, { data: program }]) => {
       const row = Array.isArray(data) ? data[0] : data;
       if (active && row) setLoyaltyDesign({ ...row, design_config: { ...defaultLoyaltyDesignConfig, ...(row.design_config ?? {}) } });
+      if (active && program) setLoyaltyProgram({ program_type: program.program_type ?? 'POINTS', stamp_goal: Number(program.stamp_goal ?? 10) });
     });
     return () => { active = false; };
   }, [session, employeeSupabase]);
@@ -495,6 +500,21 @@ export default function Employee() {
       );
     });
   }, [customers, search]);
+
+  async function addStamp(customer: LoyaltyCustomer) {
+    if (!employeeSupabase || !session) return;
+    setSaving(true);
+    const { data, error } = await employeeSupabase.rpc('add_loyalty_stamp_by_employee', {
+      p_session_token: session.session_token,
+      p_customer_id: customer.id,
+    });
+    setSaving(false);
+    if (error) return alert(error.message);
+    const row = Array.isArray(data) ? data[0] : data;
+    await loadCustomers();
+    setShowCard({ ...customer, stamps_balance: Number(row?.stamps_balance ?? 0), stamps_total: Number(row?.stamps_total ?? 0) } as LoyaltyCustomer);
+    alert(row?.reward_ready ? `Tampon ajouté. Récompense disponible : ${row.reward_name || 'cadeau'}` : `Tampon ajouté. ${row?.stamps_balance ?? 0} / ${loyaltyProgram.stamp_goal}`);
+  }
 
   async function createCustomer() {
     if (!employeeSupabase) return;
@@ -1273,9 +1293,13 @@ export default function Employee() {
                 customerName: `${showCard.first_name} ${showCard.last_name ?? ''}`.trim(),
                 loyaltyNumber: showCard.loyalty_number,
                 cardUrl: showCardLink,
+                stampsBalance: (showCard as LoyaltyCustomer & { stamps_balance?: number }).stamps_balance,
+                stampGoal: loyaltyProgram.stamp_goal,
               }}
               side="front"
+              programType={loyaltyProgram.program_type}
             />
+            {loyaltyProgram.program_type === 'STAMP' && <button disabled={saving} onClick={() => void addStamp(showCard)} className="w-full rounded-xl bg-gold py-3.5 text-xs font-bold text-forest disabled:opacity-50">+ Ajouter 1 tampon</button>}
             {showCardLink && <button onClick={async () => { await navigator.clipboard.writeText(showCardLink); alert('Lien de la carte copié.'); }} className="w-full rounded-xl border border-ink/10 bg-white py-3 text-xs font-semibold text-forest">Copier le lien client</button>}
             <div className="flex gap-3">
               <button onClick={() => printLoyaltyCard(showCard)} className="flex-1 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white">Imprimer / PDF</button>
