@@ -507,17 +507,6 @@ export default function Establishments() {
                   Voir le menu
                 </a>
 
-                  className="flex items-center gap-1.5 rounded-lg bg-[#f7f7f3] px-3 py-2 text-[11px] font-semibold text-forest"
-                >
-                  <Copy size={13} />
-                  Copier le lien
-                </button>
-                  className="flex items-center gap-1.5 rounded-lg bg-[#f7f7f3] px-3 py-2 text-[11px] font-semibold text-forest"
-                >
-                  <Copy size={13} />
-                  Copier le lien
-                </button>
-
                 <a
                   href={`/r/${place.slug}`}
                   target="_blank"
@@ -527,6 +516,14 @@ export default function Establishments() {
                   <ExternalLink size={13} />
                   Voir la page
                 </a>
+
+                <button
+                  onClick={() => copy(publicUrl(place.slug))}
+                  className="flex items-center gap-1.5 rounded-lg bg-[#f7f7f3] px-3 py-2 text-[11px] font-semibold text-forest"
+                >
+                  <Copy size={13} />
+                  Copier le lien
+                </button>
 
                 <button
                   onClick={() => setQr(place)}
