@@ -339,7 +339,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                 </div>
               </div>
             </div>
-            <div className="mt-4 rounded-xl border border-green-200 bg-green-50 p-3 text-xs text-green-800"><strong>Prêt à publier.</strong> Vérifiez le recto, le verso, le logo et le QR puis cliquez sur « Valider et publier ».</div>
+            <div className="mt-4 rounded-xl border border-green-200 bg-green-50 p-3 text-xs text-green-800"><strong>Prêt à publier.</strong> Vérifiez le type de programme, le design, le logo et le QR puis cliquez sur « Valider et publier ».</div>
           </div>
         </div>
       </div>
