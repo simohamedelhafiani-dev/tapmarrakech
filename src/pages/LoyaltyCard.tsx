@@ -19,6 +19,8 @@ type Card = {
   visit_count: number;
   last_visit_at: string | null;
   created_at: string;
+  stamps_balance?: number;
+  stamps_total?: number;
 };
 
 type Transaction = {
@@ -87,6 +89,7 @@ export default function LoyaltyCard() {
   const [isStandalone, setIsStandalone] = useState(false);
   const [installDone, setInstallDone] = useState(false);
   const [designConfig, setDesignConfig] = useState(defaultLoyaltyDesignConfig);
+  const [program, setProgram] = useState({ program_type: 'POINTS' as 'STAMP'|'DISCOUNT'|'POINTS', stamp_goal: 10, discount_percent: 0, discount_valid_days: 7, stamps_balance: 0, stamps_total: 0 });
 
   const cardUrl = useMemo(() => window.location.href, []);
 
@@ -150,11 +153,13 @@ export default function LoyaltyCard() {
         { data: txData },
         { data: designData },
         { data: rewardsData },
+        { data: programData },
       ] = await Promise.all([
         supabase.rpc('get_public_loyalty_card', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_transactions', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_card_config', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_rewards', { p_access_token: token }),
+        supabase.rpc('get_public_loyalty_program_context', { p_access_token: token }),
       ]);
 
       if (!active) return;
@@ -180,6 +185,8 @@ export default function LoyaltyCard() {
           setDesignConfig({ ...defaultLoyaltyDesignConfig, ...(designRow.design_config ?? {}) });
         }
         setRewards((rewardsData ?? []) as Reward[]);
+        const programRow = Array.isArray(programData) ? programData[0] : programData;
+        if (programRow) setProgram({ program_type: programRow.program_type ?? 'POINTS', stamp_goal: Number(programRow.stamp_goal ?? 10), discount_percent: Number(programRow.discount_percent ?? 0), discount_valid_days: Number(programRow.discount_valid_days ?? 7), stamps_balance: Number(programRow.stamps_balance ?? 0), stamps_total: Number(programRow.stamps_total ?? 0) });
 
         document.title = nextCard.establishment_name || 'Carte fidélité';
         let manifest = document.querySelector('link[rel="manifest"]') as HTMLLinkElement | null;
@@ -286,8 +293,12 @@ export default function LoyaltyCard() {
             customerName: fullName,
             loyaltyNumber: card.loyalty_number,
             cardUrl,
+            stampsBalance: program.stamps_balance,
+            stampGoal: program.stamp_goal,
+            discountPercent: program.discount_percent,
           }}
           side="front"
+          programType={program.program_type}
         />
         <div className="overflow-hidden border shadow-soft" style={{ borderRadius: design.border_radius, borderColor: `${design.primary_color}18`, background: design.background_color }}>
           <div className="p-6" style={{ color: design.text_color }}>
