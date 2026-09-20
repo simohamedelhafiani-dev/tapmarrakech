@@ -42,6 +42,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import Templates from '@/pages/Templates';
+import LoyaltyProgramCustomization from '@/components/LoyaltyProgramCustomization';
 
 type Establishment = {
   id: string;
@@ -1996,6 +1997,7 @@ function EstablishmentWorkspace({
 
       {tab === 'loyalty' && (
         <div className="space-y-5">
+          <LoyaltyProgramCustomization establishmentId={establishment.id} />
           <div className="grid gap-3 md:grid-cols-3">
             <StatCard label="Clients fidélité" value={customersCount} />
             <StatCard label="Récompenses" value={rewards.length} />
