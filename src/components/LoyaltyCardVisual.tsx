@@ -14,6 +14,7 @@ export type LoyaltyDesignConfig = {
   stamp_style: 'circles' | 'squares' | 'stars' | 'hearts';
   background_image_url: string | null;
   ai_prompt?: string;
+  ai_generation_id?: string;
 };
 
 export const defaultLoyaltyDesignConfig: LoyaltyDesignConfig = {
