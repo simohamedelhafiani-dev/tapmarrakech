@@ -5057,6 +5057,22 @@ function SystemSection({
   globalStats: GlobalStats;
   establishments: Establishment[];
 }) {
+  const SystemMetric = ({ label, value }: { label: string; value: string | number }) => (
+    <div className="rounded-2xl border border-ink/5 bg-white p-5 shadow-sm">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink/35">{label}</p>
+      <p className="mt-2 text-2xl font-semibold text-forest">{value}</p>
+    </div>
+  );
+
+
+  billing,
+  globalStats,
+  establishments,
+}: {
+  billing: BillingSnapshot;
+  globalStats: GlobalStats;
+  establishments: Establishment[];
+}) {
   type CheckStatus = 'checking' | 'ok' | 'error';
 
   type Check = {
@@ -5166,9 +5182,9 @@ function SystemSection({
       </div>
 
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
-        <MiniMetric label="Contrôles OK" value={okCount} />
-        <MiniMetric label="Erreurs" value={errorCount} />
-        <MiniMetric label="Établissements" value={establishments.length} />
+        <SystemMetric label="Contrôles OK" value={okCount} />
+        <SystemMetric label="Erreurs" value={errorCount} />
+        <SystemMetric label="Établissements" value={establishments.length} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -5192,9 +5208,9 @@ function SystemSection({
           {errorCount === 0 && checks.length > 0 ? <span className="font-semibold text-forest">Tous les contrôles exécutés sont opérationnels.</span> : <span className="font-semibold text-[#a15c50]">{errorCount} contrôle{errorCount > 1 ? 's' : ''} nécessite{errorCount > 1 ? 'nt' : ''} une vérification.</span>}
         </div>
         <div className="mt-4 grid gap-3 md:grid-cols-3">
-          <MiniMetric label="Avis" value={globalStats.reviews} />
-          <MiniMetric label="Événements" value={globalStats.analyticsEvents} />
-          <MiniMetric label="Abonnements" value={billing.available ? billing.subscriptions.length : 0} />
+          <SystemMetric label="Avis" value={globalStats.reviews} />
+          <SystemMetric label="Événements" value={globalStats.analyticsEvents} />
+          <SystemMetric label="Abonnements" value={billing.available ? billing.subscriptions.length : 0} />
         </div>
         <p className="mt-4 text-xs leading-5 text-ink/40">Dernier diagnostic : {lastChecked ? new Date(lastChecked).toLocaleString('fr-FR') : 'en cours'}. Les métriques d’uptime et de temps de chargement restent distinctes d’un diagnostic fonctionnel.</p>
       </div>
