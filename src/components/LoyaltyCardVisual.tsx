@@ -72,6 +72,7 @@ export function LoyaltyCardVisual({
       .catch(() => setQr(''));
   }, [card.cardUrl, config.show_qr, design.primary_color, side]);
 
+  const isAIDesign = Boolean(config.ai_generation_id && config.background_image_url);
   const logoStyle = {
     transform: `translate(${config.logo_x}px, ${config.logo_y}px)`,
   };
@@ -80,14 +81,18 @@ export function LoyaltyCardVisual({
     <div
       className={`relative aspect-[1.62/1] w-full overflow-hidden text-white shadow-2xl ${compact ? 'p-4' : 'p-6 md:p-7'}`}
       style={{
-        background: config.background_image_url
-          ? `linear-gradient(135deg, ${design.primary_color}dd, ${design.primary_color}bb), url(${config.background_image_url}) center/cover`
-          : `linear-gradient(135deg, ${design.primary_color}, ${design.primary_color}ee)`,
+        background: isAIDesign
+          ? `url(${config.background_image_url}) center/cover no-repeat`
+          : config.background_image_url
+            ? `linear-gradient(135deg, ${design.primary_color}dd, ${design.primary_color}bb), url(${config.background_image_url}) center/cover`
+            : `linear-gradient(135deg, ${design.primary_color}, ${design.primary_color}ee)`,
         borderRadius: design.border_radius,
       }}
     >
-      <div className="absolute -right-20 -top-24 h-64 w-64 rounded-full opacity-20" style={{ background: design.secondary_color }} />
-      <div className="absolute -bottom-28 -left-20 h-64 w-64 rounded-full opacity-10" style={{ background: design.secondary_color }} />
+      {!isAIDesign && <>
+        <div className="absolute -right-20 -top-24 h-64 w-64 rounded-full opacity-20" style={{ background: design.secondary_color }} />
+        <div className="absolute -bottom-28 -left-20 h-64 w-64 rounded-full opacity-10" style={{ background: design.secondary_color }} />
+      </>}
 
       {side === 'front' ? (
         <div className="relative flex h-full flex-col justify-between">
