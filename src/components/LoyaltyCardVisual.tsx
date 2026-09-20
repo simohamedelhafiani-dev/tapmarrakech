@@ -34,6 +34,10 @@ export type LoyaltyVisualCard = {
   establishmentName: string;
   logoUrl?: string | null;
   points?: number;
+  stampsBalance?: number;
+  stampGoal?: number;
+  discountPercent?: number;
+  discountExpiresAt?: string | null;
   customerName?: string;
   loyaltyNumber?: string;
   cardUrl?: string;
@@ -46,6 +50,7 @@ export function LoyaltyCardVisual({
   card,
   side = 'front',
   compact = false,
+  programType = 'POINTS',
 }: {
   design: {
     primary_color: string;
@@ -123,7 +128,18 @@ export function LoyaltyCardVisual({
           </div>
 
           <div className="flex items-end justify-between gap-4">
-            {config.show_points ? (
+            {programType === 'STAMP' ? (
+              <div className="min-w-0">
+                <p className="text-[8px] uppercase tracking-[0.18em] opacity-50">Tampons</p>
+                <p className={`font-semibold ${compact ? 'text-xl' : 'text-3xl'}`} style={{ color: design.secondary_color }}>{card.stampsBalance ?? 0}<span className="text-sm opacity-50"> / {card.stampGoal ?? 10}</span></p>
+              </div>
+            ) : programType === 'DISCOUNT' ? (
+              <div className="min-w-0">
+                <p className="text-[8px] uppercase tracking-[0.18em] opacity-50">Réduction</p>
+                <p className={`font-semibold ${compact ? 'text-xl' : 'text-3xl'}`} style={{ color: design.secondary_color }}>{card.discountPercent ?? 0}%</p>
+                {card.discountExpiresAt && <p className="text-[9px] opacity-60">Valable jusqu’au {new Date(card.discountExpiresAt).toLocaleDateString('fr-FR')}</p>}
+              </div>
+            ) : config.show_points ? (
               <div>
                 <p className="text-[8px] uppercase tracking-[0.18em] opacity-50">Solde</p>
                 <p className={`font-semibold ${compact ? 'text-xl' : 'text-3xl'}`} style={{ color: design.secondary_color }}>{card.points ?? 250}</p>
