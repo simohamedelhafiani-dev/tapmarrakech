@@ -76,13 +76,13 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
   const [rewardDescription, setRewardDescription] = useState('');
   const [rewardPoints, setRewardPoints] = useState('500');
   const [rewardType, setRewardType] = useState<'GIFT' | 'DISCOUNT'>('GIFT');
-  const [discountPercent, setDiscountPercent] = useState('10');
+  const [rewardDiscountPercent, setRewardDiscountPercent] = useState('10');
   const [discountMaxAmount, setDiscountMaxAmount] = useState('');
   const [programType, setProgramType] = useState<'STAMP' | 'DISCOUNT' | 'POINTS'>('POINTS');
   const [stampGoal, setStampGoal] = useState('10');
   const [stampRewardName, setStampRewardName] = useState('Cadeau fidélité');
   const [stampRewardDescription, setStampRewardDescription] = useState('');
-  const [discountPercent, setProgramDiscountPercent] = useState('20');
+  const [programDiscountPercent, setProgramDiscountPercent] = useState('20');
   const [discountValidDays, setDiscountValidDays] = useState('7');
   const [pointsPerCurrency, setPointsPerCurrency] = useState('1');
 
@@ -165,7 +165,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
       p_stamp_goal: Number(stampGoal) || 10,
       p_stamp_reward_name: stampRewardName,
       p_stamp_reward_description: stampRewardDescription,
-      p_discount_percent: Number(discountPercent) || null,
+      p_discount_percent: Number(programDiscountPercent) || null,
       p_discount_valid_days: Number(discountValidDays) || 7,
       p_points_per_currency: Number(pointsPerCurrency) || 1,
       p_currency: 'MAD',
@@ -230,13 +230,13 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
 
   async function createReward() {
     const points = Number(rewardPoints);
-    const percent = Number(discountPercent);
+    const percent = Number(rewardDiscountPercent);
     const maxAmount = discountMaxAmount.trim() ? Number(discountMaxAmount) : null;
     if (!rewardName.trim() || !Number.isInteger(points) || points <= 0) return alert('Saisis un nom et un nombre de points valide.');
     if (rewardType === 'DISCOUNT' && (!Number.isFinite(percent) || percent <= 0 || percent > 20)) return alert('La réduction doit être comprise entre 1% et 20%.');
     const { error } = await supabase.rpc('create_loyalty_reward', { p_establishment_id: establishmentId, p_name: rewardName.trim(), p_description: rewardDescription.trim() || null, p_points_required: points, p_reward_type: rewardType, p_discount_percent: rewardType === 'DISCOUNT' ? percent : null, p_discount_max_amount: rewardType === 'DISCOUNT' ? maxAmount : null });
     if (error) return alert(error.message);
-    setRewardName(''); setRewardDescription(''); setRewardPoints('500'); setRewardType('GIFT'); setDiscountPercent('10'); setDiscountMaxAmount(''); setShowNewReward(false); await load();
+    setRewardName(''); setRewardDescription(''); setRewardPoints('500'); setRewardType('GIFT'); setRewardDiscountPercent('10'); setDiscountMaxAmount(''); setShowNewReward(false); await load();
   }
 
   async function removeReward(id: string) {
