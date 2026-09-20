@@ -131,7 +131,7 @@ export default function PublicReview() {
         return;
       }
 
-      setPlace(establishment as Establishment);
+      setPlace(establishment as unknown as Establishment);
 
       await supabase.from('analytics_events').insert({
         establishment_id: establishment.id,
