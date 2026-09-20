@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Check, Palette, Plus, Save, Sparkles, Trash2 } from 'lucide-react';
+import { Check, Gift, Palette, Plus, Save, Sparkles, Trash2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 type Design = {
