@@ -335,7 +335,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
               <div className={mobile?'overflow-hidden rounded-[1.4rem] bg-white p-3':''}>
                 <div>
                   <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-ink/40">Carte digitale</p>
-                  <LoyaltyCardVisual design={visualDesign} card={visualCard} side="front" compact={mobile}/>
+                  <LoyaltyCardVisual design={visualDesign} card={visualCard} side="front" compact={mobile} programType={programType}/>
                 </div>
               </div>
             </div>
