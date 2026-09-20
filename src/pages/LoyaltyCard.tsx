@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Clock3, History, Star, WalletCards, Gift, X } from 'lucide-react';
 import QRCode from 'qrcode';
+import { LoyaltyCardVisual, defaultLoyaltyDesignConfig } from '@/components/LoyaltyCardVisual';
 import { supabase } from '@/lib/supabase';
 
 type Card = {
@@ -85,6 +86,7 @@ export default function LoyaltyCard() {
   const [showIosInstallHelp, setShowIosInstallHelp] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const [installDone, setInstallDone] = useState(false);
+  const [designConfig, setDesignConfig] = useState(defaultLoyaltyDesignConfig);
 
   const cardUrl = useMemo(() => window.location.href, []);
 
@@ -175,6 +177,7 @@ export default function LoyaltyCard() {
             button_color: designRow.button_color ?? defaultDesign.button_color,
             border_radius: Number(designRow.border_radius ?? defaultDesign.border_radius),
           });
+          setDesignConfig({ ...defaultLoyaltyDesignConfig, ...(designRow.design_config ?? {}) });
         }
         setRewards((rewardsData ?? []) as Reward[]);
 
@@ -273,146 +276,60 @@ export default function LoyaltyCard() {
 
   return (
     <PageShell>
-      <div
-        className="overflow-hidden border shadow-2xl"
-        style={{ borderRadius: design.border_radius, borderColor: `${design.primary_color}18`, background: design.background_color }}
-      >
-        <div className="px-6 pb-7 pt-7 text-white" style={{ background: design.primary_color }}>
-          <div className="flex items-center gap-3">
-            {card.establishment_logo_url ? (
-              <img src={card.establishment_logo_url} alt="" className="h-12 w-12 rounded-xl bg-white object-contain p-1" />
-            ) : (
-              <div className="grid h-12 w-12 place-items-center rounded-xl bg-white/10 font-display text-xl" style={{ color: design.secondary_color }}>
-                {card.establishment_name?.[0] ?? 'T'}
+      <div className="space-y-5">
+        <LoyaltyCardVisual
+          design={{ ...design, config: designConfig }}
+          card={{
+            establishmentName: card.establishment_name,
+            logoUrl: card.establishment_logo_url,
+            points: card.points_balance,
+            customerName: fullName,
+            loyaltyNumber: card.loyalty_number,
+            cardUrl,
+          }}
+          side="front"
+        />
+        <LoyaltyCardVisual
+          design={{ ...design, config: designConfig }}
+          card={{
+            establishmentName: card.establishment_name,
+            logoUrl: card.establishment_logo_url,
+            points: card.points_balance,
+            customerName: fullName,
+            loyaltyNumber: card.loyalty_number,
+            cardUrl,
+          }}
+          side="back"
+        />
+
+        <div className="overflow-hidden border shadow-soft" style={{ borderRadius: design.border_radius, borderColor: `${design.primary_color}18`, background: design.background_color }}>
+          <div className="p-6" style={{ color: design.text_color }}>
+            {qr && (
+              <div className="rounded-2xl p-5 text-center" style={{ background: `${design.primary_color}08` }}>
+                <img src={qr} alt="QR de votre carte fidélité" className="mx-auto h-44 w-44 rounded-xl bg-white p-2" />
+                <p className="mt-3 text-xs opacity-55">Présentez ce QR au personnel pour accéder à votre carte.</p>
               </div>
             )}
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] opacity-60">Carte fidélité</p>
-              <h1 className="mt-1 text-lg font-semibold">{card.establishment_name}</h1>
-            </div>
-          </div>
-
-          <div className="mt-8 rounded-2xl p-5" style={{ background: 'rgba(255,255,255,.10)' }}>
-            <p className="text-sm opacity-70">{fullName}</p>
-            <p className="mt-1 text-xs opacity-50">N° {card.loyalty_number}</p>
-            <div className="mt-5 flex items-end justify-between">
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.16em] opacity-50">Solde actuel</p>
-                <p className="mt-1 font-display text-5xl" style={{ color: design.secondary_color }}>{card.points_balance}</p>
-                <p className="text-xs opacity-60">points</p>
-              </div>
-              <Star size={30} fill="currentColor" style={{ color: design.secondary_color }} />
-            </div>
-          </div>
-        </div>
-
-        <div className="p-6" style={{ color: design.text_color }}>
-          {qr && (
-            <div className="rounded-2xl p-5 text-center" style={{ background: `${design.primary_color}08` }}>
-              <img src={qr} alt="QR de votre carte fidélité" className="mx-auto h-44 w-44 rounded-xl bg-white p-2" />
-              <p className="mt-3 text-xs opacity-55">Présentez ce QR au personnel pour accéder à votre carte.</p>
-            </div>
-          )}
-
-          <section className="mt-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Gift size={17} style={{ color: design.secondary_color }} />
-                <h2 className="font-semibold">Récompenses</h2>
-              </div>
-              <span className="text-[10px] opacity-45">Vos points = vos avantages</span>
-            </div>
-
-            {rewards.length === 0 ? (
-              <p className="mt-3 rounded-xl p-4 text-xs opacity-50" style={{ background: `${design.primary_color}08` }}>Aucune récompense disponible pour le moment.</p>
-            ) : (
-              <div className="mt-3 space-y-2">
-                {rewards.map(reward => {
+            <section className="mt-6">
+              <div className="flex items-center gap-2"><Gift size={17} style={{ color: design.secondary_color }} /><h2 className="font-semibold">Récompenses</h2></div>
+              {rewards.length === 0 ? <p className="mt-3 rounded-xl p-4 text-xs opacity-50" style={{ background: `${design.primary_color}08` }}>Aucune récompense disponible pour le moment.</p> :
+                <div className="mt-3 space-y-2">{rewards.map(reward => {
                   const available = card.points_balance >= reward.points_required;
-                  return (
-                    <div key={reward.id} className="rounded-2xl border p-4" style={{ borderColor: `${design.primary_color}12`, background: available ? '#ffffff' : `${design.primary_color}05` }}>
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="font-semibold">{reward.name}</p>
-                          <p className="mt-1 text-[11px] opacity-50">
-                            {reward.points_required} points · {reward.reward_type === 'DISCOUNT' ? `-${reward.discount_percent}%${reward.discount_max_amount ? ` · max ${reward.discount_max_amount} MAD` : ''}` : 'cadeau'}
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          disabled={!available || claiming}
-                          onClick={() => void chooseReward(reward)}
-                          className="shrink-0 rounded-xl px-3 py-2 text-[11px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-30"
-                          style={{ background: design.button_color }}
-                        >
-                          Utiliser
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </section>
-
-          {!isStandalone ? (
-            <div className="mt-5 rounded-2xl p-4" style={{ background: `${design.primary_color}08` }}>
-              <div className="flex items-start gap-3">
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-white" style={{ background: design.primary_color }}>
-                  <WalletCards size={18} style={{ color: design.secondary_color }} />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold">Gardez votre carte sur votre téléphone</p>
-                  <p className="mt-1 text-xs leading-5 opacity-55">Ajoutez-la à votre écran d’accueil pour la retrouver à chaque visite.</p>
-                </div>
-              </div>
-              <button type="button" onClick={installCard} className="mt-4 w-full rounded-xl px-4 py-3 text-xs font-semibold text-white" style={{ background: design.button_color }}>
-                {installPrompt ? 'Ajouter ma carte à l’écran d’accueil' : isIos ? 'Ajouter ma carte sur mon iPhone' : 'Ajouter ma carte sur mon téléphone'}
-              </button>
+                  return <div key={reward.id} className="rounded-2xl border p-4" style={{ borderColor: `${design.primary_color}12`, background: available ? '#fff' : `${design.primary_color}05` }}>
+                    <div className="flex items-center justify-between gap-3"><div><p className="font-semibold">{reward.name}</p><p className="mt-1 text-[11px] opacity-50">{reward.points_required} points · {reward.reward_type === 'DISCOUNT' ? `-${reward.discount_percent}%` : 'cadeau'}</p></div><button type="button" disabled={!available || claiming} onClick={() => void chooseReward(reward)} className="rounded-xl px-3 py-2 text-[11px] font-semibold text-white disabled:opacity-30" style={{ background: design.button_color }}>Utiliser</button></div>
+                  </div>;
+                })}</div>}
+            </section>
+            {!isStandalone ? <div className="mt-5 rounded-2xl p-4" style={{ background: `${design.primary_color}08` }}>
+              <p className="text-sm font-semibold">Gardez votre carte sur votre téléphone</p>
+              <p className="mt-1 text-xs leading-5 opacity-55">Ajoutez-la à votre écran d’accueil pour la retrouver à chaque visite.</p>
+              <button type="button" onClick={installCard} className="mt-4 w-full rounded-xl px-4 py-3 text-xs font-semibold text-white" style={{ background: design.button_color }}>{installPrompt ? 'Ajouter ma carte à l’écran d’accueil' : isIos ? 'Ajouter ma carte sur mon iPhone' : 'Ajouter ma carte sur mon téléphone'}</button>
               {installDone && <p className="mt-3 rounded-xl bg-white p-3 text-[11px] font-medium text-forest">✓ Votre carte a été ajoutée à votre écran d’accueil.</p>}
-              {isIos && showIosInstallHelp && (
-                <div className="mt-3 rounded-xl bg-white p-3 text-[11px] leading-5 text-ink/55">
-                  <p className="font-semibold text-forest">Sur iPhone</p>
-                  <p className="mt-1">1. Touchez <strong>Partager</strong> dans Safari.<br />2. Choisissez <strong>Sur l’écran d’accueil</strong>.<br />3. Touchez <strong>Ajouter</strong>.</p>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="mt-5 rounded-2xl p-4" style={{ background: `${design.primary_color}08` }}>
-              <p className="text-sm font-semibold">✓ Votre carte est déjà enregistrée</p>
-              <p className="mt-1 text-xs leading-5 opacity-55">Retrouvez-la depuis l’icône de votre établissement.</p>
-            </div>
-          )}
-
-          <div className="mt-6 grid grid-cols-3 gap-2">
-            <Metric label="Gagnés" value={card.total_points_earned} />
-            <Metric label="Utilisés" value={card.total_points_redeemed} />
-            <Metric label="Visites" value={card.visit_count} />
+              {isIos && showIosInstallHelp && <div className="mt-3 rounded-xl bg-white p-3 text-[11px] leading-5 text-ink/55"><p className="font-semibold text-forest">Sur iPhone</p><p className="mt-1">1. Touchez <strong>Partager</strong> dans Safari.<br/>2. Choisissez <strong>Sur l’écran d’accueil</strong>.<br/>3. Touchez <strong>Ajouter</strong>.</p></div>}
+            </div> : <div className="mt-5 rounded-2xl p-4" style={{ background: `${design.primary_color}08` }}><p className="text-sm font-semibold">✓ Votre carte est déjà enregistrée</p></div>}
+            <div className="mt-6 grid grid-cols-3 gap-2"><Metric label="Gagnés" value={card.total_points_earned}/><Metric label="Utilisés" value={card.total_points_redeemed}/><Metric label="Visites" value={card.visit_count}/></div>
+            <section className="mt-7"><div className="flex items-center gap-2"><History size={17}/><h2 className="font-semibold">Historique</h2></div>{transactions.length===0?<p className="mt-4 rounded-xl p-4 text-xs opacity-50" style={{background:`${design.primary_color}08`}}>Aucune opération enregistrée pour le moment.</p>:<div className="mt-3 divide-y rounded-2xl border" style={{borderColor:`${design.primary_color}12`}}>{transactions.map(tx=><div key={tx.id} className="flex items-center justify-between gap-4 p-4"><div><p className="text-sm font-medium">{tx.description||tx.transaction_type||'Opération fidélité'}</p><p className="mt-1 text-[11px] opacity-40">{new Date(tx.created_at).toLocaleDateString('fr-FR')}</p></div><span className={tx.points>=0?'font-semibold text-forest':'font-semibold text-[#a15c50]'}>{tx.points>=0?'+':''}{tx.points}</span></div>)}</div>}</section>
           </div>
-
-          <section className="mt-7">
-            <div className="flex items-center gap-2">
-              <History size={17} />
-              <h2 className="font-semibold">Historique</h2>
-            </div>
-            {transactions.length === 0 ? (
-              <p className="mt-4 rounded-xl p-4 text-xs opacity-50" style={{ background: `${design.primary_color}08` }}>Aucune opération enregistrée pour le moment.</p>
-            ) : (
-              <div className="mt-3 divide-y rounded-2xl border" style={{ borderColor: `${design.primary_color}12` }}>
-                {transactions.map(tx => (
-                  <div key={tx.id} className="flex items-center justify-between gap-4 p-4">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium">{tx.description || tx.transaction_type || 'Opération fidélité'}</p>
-                      <p className="mt-1 flex items-center gap-1 text-[11px] opacity-40"><Clock3 size={11} />{new Date(tx.created_at).toLocaleDateString('fr-FR')}</p>
-                    </div>
-                    <span className={tx.points >= 0 ? 'font-semibold text-forest' : 'font-semibold text-[#a15c50]'}>{tx.points >= 0 ? '+' : ''}{tx.points}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-
-          <p className="mt-7 text-center text-[10px] opacity-30">TapMarrakech · carte permanente</p>
         </div>
       </div>
 
