@@ -631,62 +631,31 @@ export default function PublicReview() {
               )}
 
               {promotions.length > 0 && (
-                <section className="pt-5">
-                  <div className="mb-3 flex items-end justify-between">
+                <section className="pt-2">
+                  <div className="mb-4 flex items-end justify-between">
                     <div>
-                      <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-gold">
-                        En ce moment
-                      </p>
-                      <h2 className="mt-1 font-display text-2xl text-forest">
-                        À découvrir
-                      </h2>
+                      <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-gold">Offres du moment</p>
+                      <h2 className="mt-1 font-display text-2xl text-forest">Nos promotions</h2>
                     </div>
                     <Sparkles size={19} className="text-gold" />
                   </div>
-
                   <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-2 scrollbar-hide">
                     {promotions.map((promotion) => (
-                      <article
-                        key={promotion.id}
-                        className="min-w-[290px] overflow-hidden rounded-[26px] bg-forest shadow-lg"
-                      >
+                      <article key={promotion.id} className="min-w-[290px] overflow-hidden rounded-[26px] bg-forest shadow-lg">
                         {promotion.image_url ? (
-                          <img
-                            src={promotion.image_url}
-                            alt=""
-                            className="h-40 w-full object-cover"
-                          />
+                          <img src={promotion.image_url} alt={promotion.name} className="h-44 w-full object-cover" />
                         ) : (
-                          <div className="h-28 bg-gradient-to-br from-forest via-[#214d40] to-[#0e2923]" />
+                          <div className="grid h-32 place-items-center bg-forest text-white/30"><Gift size={30} /></div>
                         )}
-
                         <div className="p-4 text-white">
-                          <span className="inline-flex rounded-full bg-gold px-3 py-1 text-[9px] font-bold uppercase tracking-wider text-forest">
-                            Offre exclusive
-                          </span>
-
-                          <div className="mt-2 flex items-end justify-between gap-3">
-                            <div>
-                              <h3 className="font-display text-xl">
-                                {promotion.name}
-                              </h3>
-                              {promotion.description && (
-                                <p className="mt-1 text-xs leading-5 text-white/50">
-                                  {promotion.description}
-                                </p>
-                              )}
-                            </div>
-
+                          <h3 className="font-display text-xl">{promotion.name}</h3>
+                          {promotion.description && <p className="mt-1 text-xs leading-5 text-white/50">{promotion.description}</p>}
+                          <div className="mt-3 flex items-end justify-between gap-3">
+                            <span className="inline-flex rounded-full bg-gold px-3 py-1 text-[9px] font-bold uppercase tracking-wider text-forest">Offre exclusive</span>
                             {promotion.promo_price !== null && (
-                              <div className="shrink-0 text-right">
-                                {promotion.normal_price !== null && (
-                                  <p className="text-[10px] text-white/35 line-through">
-                                    {Number(promotion.normal_price).toLocaleString('fr-FR')} MAD
-                                  </p>
-                                )}
-                                <p className="text-lg font-bold text-gold">
-                                  {Number(promotion.promo_price).toLocaleString('fr-FR')} MAD
-                                </p>
+                              <div className="text-right">
+                                {promotion.normal_price !== null && <p className="text-[10px] text-white/35 line-through">{Number(promotion.normal_price).toLocaleString('fr-FR')} MAD</p>}
+                                <p className="text-lg font-bold text-gold">{Number(promotion.promo_price).toLocaleString('fr-FR')} MAD</p>
                               </div>
                             )}
                           </div>
