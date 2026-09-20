@@ -164,23 +164,25 @@ export function DashboardLayout() {
       }
 
       setScannerLoading(true);
-      const { data: scannerData, error: scannerError } = await supabase.rpc(
-        'get_or_create_establishment_scanner_link',
-        { p_establishment_id: establishment.id }
-      );
+      const { data: scannerRow, error: scannerError } = await supabase
+        .from('establishment_scanner_links')
+        .select('access_token')
+        .eq('establishment_id', establishment.id)
+        .maybeSingle();
 
       if (!active) return;
 
-      if (scannerError) {
-        console.error('Erreur chargement du lien scanner fidélité:', scannerError);
+      if (scannerError || !scannerRow?.access_token) {
+        console.error(
+          'Erreur lecture du lien scanner fidélité:',
+          scannerError ?? new Error('Aucun lien scanner pour cet établissement')
+        );
         setScannerUrl(null);
       } else {
-        const scanner = Array.isArray(scannerData) ? scannerData[0] : scannerData;
-        const token = scanner?.scanner_token;
         setScannerUrl(
-          token
-            ? window.location.origin + '/employee?scanner=' + encodeURIComponent(token)
-            : null
+          window.location.origin +
+            '/employee?scanner=' +
+            encodeURIComponent(scannerRow.access_token)
         );
       }
 
