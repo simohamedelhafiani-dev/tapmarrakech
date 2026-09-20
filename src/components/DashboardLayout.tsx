@@ -10,6 +10,9 @@ import {
   Settings2,
   UtensilsCrossed,
   X,
+  QrCode,
+  Copy,
+  ExternalLink,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -76,6 +79,8 @@ export function DashboardLayout() {
   const [establishmentLogoUrl, setEstablishmentLogoUrl] = useState<
     string | null
   >(null);
+  const [scannerUrl, setScannerUrl] = useState<string | null>(null);
+  const [scannerLoading, setScannerLoading] = useState(false);
 
   const { signOut, user, role } = useAuth();
   const navigate = useNavigate();
@@ -124,6 +129,7 @@ export function DashboardLayout() {
       if (role !== 'responsible' || !user?.id) {
         setEstablishmentName(null);
         setEstablishmentLogoUrl(null);
+        setScannerUrl(null);
         return;
       }
 
@@ -138,17 +144,47 @@ export function DashboardLayout() {
         if (active) {
           setEstablishmentName(null);
           setEstablishmentLogoUrl(null);
+          setScannerUrl(null);
         }
 
         return;
       }
 
       const establishments = (data ?? []) as Establishment[];
+      const establishment = establishments[0];
 
       if (active) {
-        setEstablishmentName(establishments[0]?.name ?? null);
-        setEstablishmentLogoUrl(establishments[0]?.logo_url ?? null);
+        setEstablishmentName(establishment?.name ?? null);
+        setEstablishmentLogoUrl(establishment?.logo_url ?? null);
       }
+
+      if (!establishment?.id) {
+        if (active) setScannerUrl(null);
+        return;
+      }
+
+      setScannerLoading(true);
+      const { data: scannerData, error: scannerError } = await supabase.rpc(
+        'get_or_create_establishment_scanner_link',
+        { p_establishment_id: establishment.id }
+      );
+
+      if (!active) return;
+
+      if (scannerError) {
+        console.error('Erreur chargement du lien scanner fidélité:', scannerError);
+        setScannerUrl(null);
+      } else {
+        const scanner = Array.isArray(scannerData) ? scannerData[0] : scannerData;
+        const token = scanner?.scanner_token;
+        setScannerUrl(
+          token
+            ? window.location.origin + '/employee?scanner=' + encodeURIComponent(token)
+            : null
+        );
+      }
+
+      setScannerLoading(false);
     };
 
     loadEstablishment();
@@ -249,6 +285,57 @@ export function DashboardLayout() {
             </NavLink>
           ))}
         </nav>
+
+        {role === 'responsible' && (
+          <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-3">
+            <div className="flex items-center gap-2 text-xs font-semibold text-white">
+              <QrCode size={16} />
+              Scanner fidélité
+            </div>
+            <p className="mt-1 text-[10px] leading-4 text-white/45">
+              Lien permanent de votre scanner pour valider les récompenses.
+            </p>
+
+            {scannerLoading ? (
+              <div className="mt-3 text-[10px] text-white/45">Génération du lien…</div>
+            ) : scannerUrl ? (
+              <>
+                <div className="mt-3 rounded-lg bg-black/20 px-2.5 py-2 text-[9px] leading-3 text-white/55 break-all">
+                  {scannerUrl}
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => window.open(scannerUrl, '_blank', 'noopener,noreferrer')}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-gold px-2 py-2 text-[10px] font-semibold text-forest hover:bg-gold/90"
+                  >
+                    <ExternalLink size={12} />
+                    Ouvrir
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(scannerUrl);
+                        alert('Lien scanner copié.');
+                      } catch {
+                        alert('Impossible de copier le lien.');
+                      }
+                    }}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2 py-2 text-[10px] font-semibold text-white hover:bg-white/10"
+                  >
+                    <Copy size={12} />
+                    Copier
+                  </button>
+                </div>
+              </>
+            ) : (
+              <p className="mt-3 text-[10px] leading-4 text-red-200">
+                Impossible de charger le lien scanner.
+              </p>
+            )}
+          </div>
+        )}
 
         <div className="mt-auto border-t border-white/10 pt-5">
           <div className="mb-4 flex items-center gap-3 px-2">
