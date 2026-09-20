@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, Coins, Search, Smartphone } from 'lucide-react';
+import { CheckCircle2, Coins, Search, Smartphone, X } from 'lucide-react';
 import QrScanner from '@/components/QrScanner';
 import { supabase } from '@/lib/supabase';
 
@@ -17,6 +17,19 @@ type Customer = {
   last_name: string | null;
   phone: string;
   points_balance: number;
+};
+
+type PendingRewardClaim = {
+  claim_token: string;
+  establishment_id: string;
+  customer_id: string;
+  reward_name: string;
+  reward_type: 'GIFT' | 'DISCOUNT';
+  points_required: number;
+  discount_percent: number | null;
+  discount_max_amount: number | null;
+  status: 'PENDING' | 'REDEEMED' | 'EXPIRED' | 'CANCELLED';
+  expires_at: string;
 };
 
 type Settings = {
@@ -48,6 +61,10 @@ export default function LoyaltyScanner() {
   const [message, setMessage] = useState('');
   const [showScanner, setShowScanner] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [pendingReward, setPendingReward] = useState<PendingRewardClaim | null>(null);
+  const [rewardInvoiceAmount, setRewardInvoiceAmount] = useState('');
+  const [rewardInvoiceNumber, setRewardInvoiceNumber] = useState('');
+  const [redeemingReward, setRedeemingReward] = useState(false);
 
   useEffect(() => {
     if (!scannerToken) {
@@ -157,13 +174,49 @@ export default function LoyaltyScanner() {
     if (!value) return;
 
     let token = value;
+    let isRewardClaim = false;
 
     try {
       const url = new URL(value);
       const parts = url.pathname.split('/').filter(Boolean);
-      if (parts[0] === 'loyalty' && parts[1]) token = parts[1];
+
+      if (parts[0] === 'loyalty' && parts[1] === 'reward' && parts[2]) {
+        token = parts[2];
+        isRewardClaim = true;
+      } else if (parts[0] === 'loyalty' && parts[1]) {
+        token = parts[1];
+      }
     } catch {
-      // A raw customer UUID token is also accepted.
+      // Raw UUID tokens are also accepted.
+    }
+
+    if (isRewardClaim) {
+      setSearching(true);
+      setMessage('');
+
+      const { data, error } = await supabase.rpc('get_public_loyalty_reward_claim', {
+        p_claim_token: token,
+      });
+
+      setSearching(false);
+
+      const row = Array.isArray(data) ? data[0] : data;
+
+      if (error || !row) {
+        setMessage('QR de récompense invalide.');
+        return;
+      }
+
+      if (row.establishment_id !== context?.establishment_id) {
+        setMessage('Cette récompense appartient à un autre établissement.');
+        return;
+      }
+
+      setPendingReward(row as PendingRewardClaim);
+      setRewardInvoiceAmount('');
+      setRewardInvoiceNumber('');
+      setShowScanner(false);
+      return;
     }
 
     setSearching(true);
@@ -201,6 +254,54 @@ export default function LoyaltyScanner() {
     setInvoiceNumber('');
     setShowScanner(false);
   }
+
+  async function redeemPendingReward() {
+    if (!pendingReward) return;
+
+    const invoiceAmount = rewardInvoiceAmount.trim() ? Number(rewardInvoiceAmount) : null;
+
+    if (pendingReward.reward_type === 'DISCOUNT' && (!invoiceAmount || invoiceAmount <= 0)) {
+      setMessage('Le montant de la facture est obligatoire pour appliquer la réduction.');
+      return;
+    }
+
+    setRedeemingReward(true);
+    setMessage('');
+
+    const { data, error } = await supabase.rpc('redeem_loyalty_reward_claim', {
+      p_scanner_token: scannerToken,
+      p_claim_token: pendingReward.claim_token,
+      p_invoice_amount: invoiceAmount,
+      p_invoice_number: rewardInvoiceNumber.trim() || null,
+    });
+
+    setRedeemingReward(false);
+
+    if (error) {
+      setMessage(error.message);
+      return;
+    }
+
+    const result = Array.isArray(data) ? data[0] : data;
+    const discountAmount = Number(result?.discount_amount ?? 0);
+    const finalAmount = result?.final_amount == null ? null : Number(result.final_amount);
+    const newBalance = Number(result?.new_points_balance ?? 0);
+
+    setPendingReward(null);
+    setRewardInvoiceAmount('');
+    setRewardInvoiceNumber('');
+
+    if (pendingReward.reward_type === 'DISCOUNT') {
+      alert(
+        `Réduction appliquée !\\n\\n${pendingReward.reward_name}\\n-${discountAmount.toFixed(2)} MAD\\nMontant final : ${finalAmount?.toFixed(2) ?? '0.00'} MAD\\n\\nNouveau solde : ${newBalance} points.`
+      );
+    } else {
+      alert(
+        `Récompense validée !\\n\\n${pendingReward.reward_name}\\n${pendingReward.points_required} points utilisés.\\nNouveau solde : ${newBalance} points.`
+      );
+    }
+  }
+
 
   async function searchCustomer(query = manualSearch) {
     const value = query.trim();
@@ -515,6 +616,93 @@ export default function LoyaltyScanner() {
                   </p>
                 )}
               </div>
+            </div>
+          </div>
+        )}
+
+        {pendingReward && (
+          <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4">
+            <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">Récompense</p>
+                  <h2 className="mt-1 font-display text-2xl text-forest">{pendingReward.reward_name}</h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setPendingReward(null)}
+                  disabled={redeemingReward}
+                  className="rounded-xl p-2 text-ink/40"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="mt-5 rounded-2xl bg-[#f7f7f3] p-4">
+                <p className="text-sm font-semibold text-forest">
+                  {pendingReward.reward_type === 'DISCOUNT'
+                    ? `Réduction de ${pendingReward.discount_percent}%`
+                    : 'Récompense à valider'}
+                </p>
+                <p className="mt-1 text-xs text-ink/45">
+                  {pendingReward.points_required} points seront déduits du compte client.
+                </p>
+                {pendingReward.discount_max_amount && (
+                  <p className="mt-2 text-xs font-medium text-forest">
+                    Plafond de réduction : {pendingReward.discount_max_amount} MAD
+                  </p>
+                )}
+              </div>
+
+              {pendingReward.reward_type === 'DISCOUNT' && (
+                <div className="mt-4">
+                  <label className="mb-2 block text-xs font-semibold text-ink/50">
+                    Montant de la facture (MAD)
+                  </label>
+                  <input
+                    autoFocus
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={rewardInvoiceAmount}
+                    onChange={e => setRewardInvoiceAmount(e.target.value)}
+                    placeholder="500"
+                    className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-lg outline-none focus:border-forest"
+                  />
+                  {rewardInvoiceAmount && Number(rewardInvoiceAmount) > 0 && (
+                    <div className="mt-2 rounded-xl bg-forest/5 p-3 text-xs text-forest">
+                      Réduction estimée : <strong>
+                        {Math.min(
+                          Number(rewardInvoiceAmount) * Number(pendingReward.discount_percent ?? 0) / 100,
+                          pendingReward.discount_max_amount ?? Number.POSITIVE_INFINITY
+                        ).toFixed(2)} MAD
+                      </strong>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="mt-4">
+                <label className="mb-2 block text-xs font-semibold text-ink/50">
+                  Numéro de facture <span className="font-normal">(optionnel)</span>
+                </label>
+                <input
+                  value={rewardInvoiceNumber}
+                  onChange={e => setRewardInvoiceNumber(e.target.value)}
+                  placeholder="FAC-2026-001"
+                  className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+                />
+              </div>
+
+              <button
+                type="button"
+                disabled={redeemingReward}
+                onClick={() => void redeemPendingReward()}
+                className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-4 text-sm font-semibold text-white disabled:opacity-50"
+              >
+                <CheckCircle2 size={18} />
+                {redeemingReward ? 'Validation...' : 'Appliquer et déduire les points'}
+              </button>
             </div>
           </div>
         )}
