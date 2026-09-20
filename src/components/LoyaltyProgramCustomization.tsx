@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Check, Gift, Palette, Plus, Save, Sparkles, Trash2 } from 'lucide-react';
+import { Check, Gift, Palette, Plus, Sparkles, Trash2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 type Design = {
@@ -52,11 +52,12 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
   const [rewardType, setRewardType] = useState<'GIFT' | 'DISCOUNT'>('GIFT');
   const [discountPercent, setDiscountPercent] = useState('10');
   const [discountMaxAmount, setDiscountMaxAmount] = useState('');
+  const [establishment, setEstablishment] = useState<{ name: string; logo_url: string | null }>({ name: 'Votre établissement', logo_url: null });
 
   async function load() {
     if (!establishmentId) return;
 
-    const [{ data: designData }, { data: rewardsData }] = await Promise.all([
+    const [{ data: designData }, { data: rewardsData }, { data: establishmentData }] = await Promise.all([
       supabase.rpc('get_loyalty_card_config', { p_establishment_id: establishmentId }),
       supabase
         .from('loyalty_rewards')
@@ -64,6 +65,11 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
         .eq('establishment_id', establishmentId)
         .eq('active', true)
         .order('points_required', { ascending: true }),
+      supabase
+        .from('establishments')
+        .select('name,logo_url')
+        .eq('id', establishmentId)
+        .maybeSingle(),
     ]);
 
     const row = Array.isArray(designData) ? designData[0] : designData;
@@ -80,6 +86,12 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     }
 
     if (rewardsData) setRewards(rewardsData as Reward[]);
+    if (establishmentData) {
+      setEstablishment({
+        name: establishmentData.name || 'Votre établissement',
+        logo_url: establishmentData.logo_url || null,
+      });
+    }
   }
 
   useEffect(() => {
@@ -189,57 +201,181 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
             <h2 className="mt-1 font-display text-2xl text-forest">Templates & personnalisation</h2>
             <p className="mt-1 text-xs text-ink/45">Chaque établissement peut avoir sa propre identité visuelle.</p>
           </div>
-          <button onClick={saveDesign} disabled={saving} className="inline-flex items-center justify-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-50">
-            <Save size={15} /> {saving ? 'Enregistrement...' : 'Enregistrer'}
-          </button>
+          <span className="rounded-full border border-ink/10 bg-[#fafaf7] px-3 py-2 text-[10px] font-semibold text-ink/45">
+            Aperçu avant validation →
+          </span>
         </div>
 
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {templates.map(template => (
-            <button
-              key={template.id}
-              type="button"
-              onClick={() => applyTemplate(template.id)}
-              className={`relative overflow-hidden rounded-2xl border p-4 text-left transition ${design.template_id === template.id ? 'border-gold ring-2 ring-gold/20' : 'border-ink/10 hover:border-gold/50'}`}
-            >
+        <div className="mt-6 grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+          <div>
+            <div className="mb-3 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink/40">Choisir un template</p>
+                <p className="mt-1 text-xs text-ink/45">Le visuel à droite se met à jour immédiatement.</p>
+              </div>
+              <span className="rounded-full bg-[#f7f7f3] px-3 py-1 text-[10px] font-semibold text-ink/45">{templates.length} modèles</span>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              {templates.map(template => (
+                <button
+                  key={template.id}
+                  type="button"
+                  onClick={() => applyTemplate(template.id)}
+                  className={`relative overflow-hidden rounded-2xl border p-3 text-left transition ${design.template_id === template.id ? 'border-gold ring-2 ring-gold/20' : 'border-ink/10 hover:border-gold/50'}`}
+                >
+                  <div
+                    className="relative mb-3 h-28 overflow-hidden p-4 shadow-md"
+                    style={{ background: template.colors[0], borderRadius: 16 }}
+                  >
+                    <div className="absolute -right-8 -top-10 h-28 w-28 rounded-full opacity-20" style={{ background: template.colors[1] }} />
+                    <div className="absolute -bottom-12 -left-8 h-24 w-24 rounded-full opacity-10" style={{ background: template.colors[1] }} />
+                    <div className="relative flex items-start justify-between">
+                      <div className="flex min-w-0 items-center gap-2">
+                        {establishment.logo_url ? (
+                          <img src={establishment.logo_url} alt="" className="h-8 w-8 rounded-full object-cover ring-1 ring-white/40" />
+                        ) : (
+                          <div className="grid h-8 w-8 place-items-center rounded-full border text-[8px] font-bold" style={{ borderColor: template.colors[1], color: template.colors[2] }}>
+                            {establishment.name.slice(0, 2).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="truncate text-[8px] font-semibold uppercase tracking-[0.14em]" style={{ color: template.colors[2] }}>{establishment.name}</p>
+                          <p className="mt-0.5 text-[7px] uppercase tracking-[0.18em]" style={{ color: template.colors[2], opacity: 0.6 }}>Programme fidélité</p>
+                        </div>
+                      </div>
+                      <Gift size={14} style={{ color: template.colors[1] }} />
+                    </div>
+                    <div className="relative mt-5 flex items-end justify-between">
+                      <div>
+                        <p className="text-[7px] uppercase tracking-wider" style={{ color: template.colors[2], opacity: 0.55 }}>Solde</p>
+                        <p className="mt-0.5 text-xl font-semibold" style={{ color: template.colors[1] }}>250</p>
+                      </div>
+                      <div className="flex gap-1">
+                        {[0, 1, 2, 3, 4].map(step => (
+                          <span key={step} className="h-3 w-3 rounded-full border" style={{ borderColor: template.colors[1], background: step < 3 ? template.colors[1] : 'transparent' }} />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-sm font-semibold text-forest">{template.name}</p>
+                  <p className="mt-1 text-[11px] text-ink/45">{template.description}</p>
+                  {design.template_id === template.id && (
+                    <span className="absolute right-3 top-3 grid h-6 w-6 place-items-center rounded-full bg-gold text-white"><Check size={14} /></span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-ink/10 bg-[#f7f7f3] p-4 md:p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-forest">
+                  <Sparkles size={14} className="text-gold" /> Aperçu en temps réel
+                </p>
+                <p className="mt-1 text-xs text-ink/45">Ce que le client verra sur sa carte.</p>
+              </div>
+              <span className="rounded-full bg-white px-3 py-1 text-[10px] font-semibold text-ink/45 shadow-sm">Non publié</span>
+            </div>
+
+            <div className="mt-5">
               <div
-                className="relative mb-4 h-32 overflow-hidden rounded-2xl p-4 shadow-lg"
-                style={{ background: template.colors[0], borderRadius: 18 }}
+                className="relative aspect-[1.62/1] w-full overflow-hidden p-6 text-white shadow-2xl"
+                style={{
+                  background: `linear-gradient(135deg, ${design.primary_color}, ${design.primary_color}dd)`,
+                  borderRadius: Math.min(design.border_radius, 28),
+                }}
               >
-                <div className="absolute -right-8 -top-10 h-28 w-28 rounded-full opacity-20" style={{ background: template.colors[1] }} />
-                <div className="absolute -bottom-12 -left-8 h-24 w-24 rounded-full opacity-10" style={{ background: template.colors[1] }} />
-                <div className="relative flex items-start justify-between">
+                <div className="absolute -right-16 -top-20 h-52 w-52 rounded-full opacity-20" style={{ background: design.secondary_color }} />
+                <div className="absolute -bottom-24 -left-16 h-56 w-56 rounded-full opacity-10" style={{ background: design.secondary_color }} />
+                <div className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: 'radial-gradient(circle at 20% 20%, white 0 1px, transparent 1px)', backgroundSize: '18px 18px' }} />
+
+                <div className="relative flex h-full flex-col justify-between">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex min-w-0 items-center gap-3">
+                      {establishment.logo_url ? (
+                        <img
+                          src={establishment.logo_url}
+                          alt={establishment.name}
+                          className="h-14 w-14 rounded-full object-contain bg-white/95 p-1.5 shadow-sm"
+                        />
+                      ) : (
+                        <div
+                          className="grid h-14 w-14 shrink-0 place-items-center rounded-full border text-xs font-bold"
+                          style={{ borderColor: design.secondary_color, color: design.secondary_color }}
+                        >
+                          {establishment.name.slice(0, 2).toUpperCase()}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold uppercase tracking-[0.12em]" style={{ color: design.background_color }}>
+                          {establishment.name}
+                        </p>
+                        <p className="mt-1 text-[9px] uppercase tracking-[0.2em]" style={{ color: design.background_color, opacity: 0.6 }}>
+                          Programme fidélité
+                        </p>
+                      </div>
+                    </div>
+                    <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full border" style={{ borderColor: design.secondary_color, color: design.secondary_color }}>
+                      <Gift size={17} />
+                    </div>
+                  </div>
+
                   <div>
-                    <p className="text-[7px] font-semibold uppercase tracking-[0.22em]" style={{ color: template.colors[2] }}>
-                      Programme fidélité
-                    </p>
-                    <p className="mt-1 font-display text-base" style={{ color: template.colors[2] }}>
-                      Votre carte
+                    <p className="font-display text-2xl" style={{ color: design.background_color }}>Votre carte</p>
+                    <p className="mt-1 text-[10px]" style={{ color: design.background_color, opacity: 0.62 }}>
+                      Cumulez vos points et profitez de vos récompenses.
                     </p>
                   </div>
-                  <div className="grid h-8 w-8 place-items-center rounded-full border" style={{ borderColor: template.colors[1], color: template.colors[1] }}>
-                    <Gift size={13} />
-                  </div>
-                </div>
-                <div className="relative mt-5 flex items-end justify-between">
-                  <div>
-                    <p className="text-[7px] uppercase tracking-wider" style={{ color: template.colors[2], opacity: 0.55 }}>Solde</p>
-                    <p className="mt-0.5 text-xl font-semibold" style={{ color: template.colors[1] }}>250</p>
-                  </div>
-                  <div className="flex gap-1.5">
-                    {[0, 1, 2, 3, 4].map((step) => (
-                      <span key={step} className="h-3.5 w-3.5 rounded-full border" style={{ borderColor: template.colors[1], background: step < 3 ? template.colors[1] : 'transparent' }} />
-                    ))}
+
+                  <div className="flex items-end justify-between gap-4">
+                    <div>
+                      <p className="text-[8px] uppercase tracking-[0.18em]" style={{ color: design.background_color, opacity: 0.55 }}>Solde</p>
+                      <p className="mt-1 text-3xl font-semibold" style={{ color: design.secondary_color }}>250</p>
+                    </div>
+                    <div className="flex gap-2">
+                      {[0, 1, 2, 3, 4].map(step => (
+                        <span
+                          key={step}
+                          className="h-4 w-4 rounded-full border"
+                          style={{
+                            borderColor: design.secondary_color,
+                            background: step < 3 ? design.secondary_color : 'transparent',
+                          }}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
-              <p className="text-sm font-semibold text-forest">{template.name}</p>
-              <p className="mt-1 text-[11px] text-ink/45">{template.description}</p>
-              {design.template_id === template.id && (
-                <span className="absolute right-3 top-3 grid h-6 w-6 place-items-center rounded-full bg-gold text-white"><Check size={14} /></span>
-              )}
-            </button>
-          ))}
+
+              <div className="mt-4 rounded-xl border border-ink/5 bg-white p-4">
+                <div className="flex items-center gap-3">
+                  {establishment.logo_url ? (
+                    <img src={establishment.logo_url} alt="" className="h-9 w-9 rounded-full object-contain border border-ink/10 bg-white p-1" />
+                  ) : (
+                    <div className="grid h-9 w-9 place-items-center rounded-full bg-forest text-[10px] font-bold text-white">
+                      {establishment.name.slice(0, 2).toUpperCase()}
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-xs font-semibold text-forest">{establishment.name}</p>
+                    <p className="mt-0.5 text-[10px] text-ink/40">Logo de l'établissement • aperçu uniquement</p>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={saveDesign}
+                disabled={saving}
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-forest px-4 py-3 text-xs font-semibold text-white shadow-sm transition hover:bg-forest/90 disabled:opacity-50"
+              >
+                <Check size={15} /> {saving ? 'Validation...' : 'Valider ce design'}
+              </button>
+              <p className="mt-2 text-center text-[10px] text-ink/40">Le design n'est enregistré qu'après validation.</p>
+            </div>
+          </div>
         </div>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
