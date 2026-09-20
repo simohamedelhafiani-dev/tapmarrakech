@@ -7,6 +7,7 @@ import {
   Plus,
   QrCode,
   Save,
+  UtensilsCrossed,
   X,
 } from 'lucide-react';
 import QRCode from 'qrcode';
@@ -496,10 +497,21 @@ export default function Establishments() {
               </div>
 
               <div className="mt-5 flex flex-wrap gap-2 border-t border-ink/5 pt-4">
-                <button
-                  onClick={() =>
-                    copy(publicUrl(place.slug))
-                  }
+                <a
+                  href={`/r/${place.slug}?section=menu`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-1.5 rounded-lg bg-forest px-3 py-2 text-[11px] font-semibold text-white"
+                >
+                  <UtensilsCrossed size={13} />
+                  Voir le menu
+                </a>
+
+                  className="flex items-center gap-1.5 rounded-lg bg-[#f7f7f3] px-3 py-2 text-[11px] font-semibold text-forest"
+                >
+                  <Copy size={13} />
+                  Copier le lien
+                </button>
                   className="flex items-center gap-1.5 rounded-lg bg-[#f7f7f3] px-3 py-2 text-[11px] font-semibold text-forest"
                 >
                   <Copy size={13} />
