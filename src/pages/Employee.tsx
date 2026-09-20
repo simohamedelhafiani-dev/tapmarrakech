@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import QrScanner from '@/components/QrScanner';
+import { LoyaltyCardVisual, defaultLoyaltyDesignConfig } from '@/components/LoyaltyCardVisual';
 
 type Establishment = {
   id: string;
@@ -120,6 +121,7 @@ export default function Employee() {
 
   const [establishmentId, setEstablishmentId] = useState('');
   const [establishmentLogoUrl, setEstablishmentLogoUrl] = useState<string | null>(null);
+  const [loyaltyDesign, setLoyaltyDesign] = useState<any>({ template_id:'luxury', primary_color:'#173D32', secondary_color:'#D3A84C', background_color:'#F7F7F3', text_color:'#173D32', button_color:'#173D32', border_radius:24, design_config: defaultLoyaltyDesignConfig });
   const [customers, setCustomers] = useState<LoyaltyCustomer[]>([]);
   const [rewards, setRewards] = useState<LoyaltyReward[]>([]);
   const [settings, setSettings] = useState<ProgramSettings>({
@@ -300,6 +302,17 @@ export default function Employee() {
       cancelled = true;
     };
   }, [session, employeeSupabase]);
+  
+  useEffect(() => {
+    if (!session || !employeeSupabase) return;
+    let active = true;
+    void employeeSupabase.rpc('get_loyalty_card_config', { p_establishment_id: session.establishment_id }).then(({ data }: any) => {
+      const row = Array.isArray(data) ? data[0] : data;
+      if (active && row) setLoyaltyDesign({ ...row, design_config: { ...defaultLoyaltyDesignConfig, ...(row.design_config ?? {}) } });
+    });
+    return () => { active = false; };
+  }, [session, employeeSupabase]);
+
 
   useEffect(() => {
     if (!establishmentId || !employeeSupabase) {
@@ -1240,84 +1253,37 @@ export default function Employee() {
       )}
 
       {showCard && (
-        <Modal
-          title="Carte de fidélité"
-          onClose={() => setShowCard(null)}
-        >
-          <div className="overflow-hidden rounded-[1.75rem] bg-forest p-6 text-white shadow-xl">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex min-w-0 items-center gap-4">
-                {establishmentLogoUrl ? (
-                  <img
-                    src={establishmentLogoUrl}
-                    alt={`Logo ${session.establishment_name}`}
-                    className="h-14 w-14 rounded-xl bg-white object-contain p-1.5"
-                  />
-                ) : (
-                  <div className="grid h-14 w-14 place-items-center rounded-xl bg-white/10">
-                    <Building2 size={24} className="text-gold" />
-                  </div>
-                )}
-
-                <div className="min-w-0">
-                  <p className="text-2xl font-bold tracking-tight">
-                    Carte de fidélité
-                  </p>
-                  <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/55">
-                    {session.establishment_name}
-                  </p>
-                </div>
-              </div>
-              <CreditCard size={28} className="shrink-0 text-gold/80" />
+        <Modal title="Carte de fidélité" onClose={() => setShowCard(null)}>
+          <div className="space-y-4">
+            <LoyaltyCardVisual
+              design={{ ...loyaltyDesign, config: loyaltyDesign.design_config }}
+              card={{
+                establishmentName: session.establishment_name,
+                logoUrl: establishmentLogoUrl,
+                points: showCard.points_balance,
+                customerName: `${showCard.first_name} ${showCard.last_name ?? ''}`.trim(),
+                loyaltyNumber: showCard.loyalty_number,
+                cardUrl: showCardLink,
+              }}
+              side="front"
+            />
+            <LoyaltyCardVisual
+              design={{ ...loyaltyDesign, config: loyaltyDesign.design_config }}
+              card={{
+                establishmentName: session.establishment_name,
+                logoUrl: establishmentLogoUrl,
+                points: showCard.points_balance,
+                customerName: `${showCard.first_name} ${showCard.last_name ?? ''}`.trim(),
+                loyaltyNumber: showCard.loyalty_number,
+                cardUrl: showCardLink,
+              }}
+              side="back"
+            />
+            {showCardLink && <button onClick={async () => { await navigator.clipboard.writeText(showCardLink); alert('Lien de la carte copié.'); }} className="w-full rounded-xl border border-ink/10 bg-white py-3 text-xs font-semibold text-forest">Copier le lien client</button>}
+            <div className="flex gap-3">
+              <button onClick={() => printLoyaltyCard(showCard)} className="flex-1 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white">Imprimer / PDF</button>
+              <button onClick={() => setShowCard(null)} className="rounded-xl border border-ink/10 px-5 py-3.5 text-sm font-semibold">Fermer</button>
             </div>
-
-            <div className="mt-12">
-              <p className="text-xl font-bold">
-                {showCard.first_name} {showCard.last_name ?? ''}
-              </p>
-              <p className="mt-1 text-xs text-white/55">{session.establishment_name}</p>
-            </div>
-
-            <div className="mt-7 rounded-2xl bg-white/10 p-4">
-              <p className="text-[10px] uppercase tracking-[0.18em] text-white/50">
-                Numéro de fidélité
-              </p>
-              <p className="mt-1 text-2xl font-bold tracking-[0.18em] text-gold">
-                {showCard.loyalty_number}
-              </p>
-            </div>
-          </div>
-
-          {showCardLink && (
-            <div className="mt-5 rounded-2xl border border-ink/5 bg-[#f7f7f3] p-4">
-              <p className="text-xs font-semibold text-forest">Lien permanent de la carte</p>
-              <p className="mt-2 break-all text-[11px] leading-5 text-ink/45">{showCardLink}</p>
-              <button
-                onClick={async () => {
-                  await navigator.clipboard.writeText(showCardLink);
-                  alert('Lien de la carte copié.');
-                }}
-                className="mt-3 w-full rounded-xl bg-white px-3 py-2.5 text-xs font-semibold text-forest"
-              >
-                Copier le lien client
-              </button>
-            </div>
-          )}
-
-          <div className="mt-5 flex gap-3">
-            <button
-              onClick={() => printLoyaltyCard(showCard)}
-              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white"
-            >
-              <Printer size={17} />
-              Imprimer / PDF
-            </button>
-            <button
-              onClick={() => setShowCard(null)}
-              className="rounded-xl border border-ink/10 px-5 py-3.5 text-sm font-semibold text-ink/60"
-            >
-              Fermer
-            </button>
           </div>
         </Modal>
       )}
