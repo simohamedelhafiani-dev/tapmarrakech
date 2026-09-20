@@ -2419,6 +2419,46 @@ function ResponsiblesSection({
         </select>
       </div>
 
+      <div className="mb-6 rounded-2xl border border-gold/20 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
+              Génération des promotions
+            </p>
+            <h3 className="mt-1 font-display text-2xl text-forest">
+              Prompt IA des visuels promotionnels
+            </h3>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-ink/50">
+              C’est ici que l’administrateur définit les instructions utilisées par l’IA
+              pour créer les images des promotions. Le responsable ne peut pas modifier ce prompt.
+            </p>
+          </div>
+          <span className="rounded-full bg-forest/5 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-forest">
+            Admin uniquement
+          </span>
+        </div>
+
+        <div className="mt-5">
+          <textarea
+            value={promotionPrompt}
+            onChange={(e) => setPromotionPrompt(e.target.value)}
+            rows={10}
+            placeholder="Décris le style visuel, la direction artistique, les règles de texte dans l’image et les contraintes à respecter..."
+            className="w-full resize-y rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm leading-6 outline-none focus:border-forest"
+          />
+        </div>
+
+        <div className="mt-4 flex justify-end">
+          <button
+            onClick={savePromotionPrompt}
+            disabled={promotionPromptSaving}
+            className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+          >
+            {promotionPromptSaving ? 'Enregistrement...' : 'Enregistrer le prompt promotions'}
+          </button>
+        </div>
+      </div>
+
       {showForm && (
         <CreateStaffForm
           role="responsible"
@@ -4342,10 +4382,19 @@ function AIConfigurationSection({
   const [aiSettings, setAISettings] = useState<any>({ provider: 'openai', model: 'gpt-5.6-luna', enabled: true, temperature: 0.2, max_output_tokens: 4000, system_instructions: '', has_api_key: false });
   const [aiApiKey, setAIApiKey] = useState('');
   const [aiSettingsSaving, setAISettingsSaving] = useState(false);
+  const [promotionPrompt, setPromotionPrompt] = useState('');
+  const [promotionPromptSaving, setPromotionPromptSaving] = useState(false);
 
   useEffect(() => {
     (async () => { const { data, error } = await supabase.rpc('admin_get_ai_settings'); if (!error && data?.[0]) setAISettings(data[0]); })();
   }, []);
+
+  useEffect(() => {
+    const promotionType = businessTypes.find(
+      (type) => type.name === 'Promotion IA — Image'
+    );
+    setPromotionPrompt(promotionType?.ai_prompt ?? '');
+  }, [businessTypes]);
 
   const saveAISettings = async () => {
     if (!aiSettings.provider?.trim() || !aiSettings.model?.trim()) return alert('Provider et modèle sont obligatoires.');
@@ -4358,6 +4407,49 @@ function AIConfigurationSection({
     if (data?.[0]) setAISettings(data[0]);
     setAIApiKey('');
     alert('Configuration IA enregistrée.');
+  };
+
+  const savePromotionPrompt = async () => {
+    const value = promotionPrompt.trim();
+    if (!value) {
+      alert('Veuillez saisir le prompt de génération des promotions.');
+      return;
+    }
+
+    setPromotionPromptSaving(true);
+
+    const existing = businessTypes.find(
+      (type) => type.name === 'Promotion IA — Image'
+    );
+
+    const result = existing
+      ? await supabase
+          .from('ai_business_types')
+          .update({
+            ai_prompt: value,
+            active: true,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', existing.id)
+      : await supabase
+          .from('ai_business_types')
+          .insert({
+            name: 'Promotion IA — Image',
+            description: 'Prompt directeur artistique utilisé pour générer les visuels de promotions.',
+            ai_prompt: value,
+            active: true,
+          });
+
+    setPromotionPromptSaving(false);
+
+    if (result.error) {
+      console.error('Erreur prompt promotions IA:', result.error);
+      alert(`Impossible d’enregistrer le prompt promotions : ${result.error.message}`);
+      return;
+    }
+
+    alert('Prompt de génération des promotions enregistré.');
+    await reload();
   };
 
   const resetForm = () => {
