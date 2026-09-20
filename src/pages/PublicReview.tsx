@@ -195,7 +195,7 @@ export default function PublicReview() {
       setPromotions(promotionRows ?? []);
       setRewards(rewardRows ?? []);
       setLoyaltyEnabled(loyaltySettings?.enabled ?? true);
-      setMenuTemplateConfig(selectedMenuTemplate?.data?.config ?? null);
+      setMenuTemplateConfig(selectedMenuTemplate?.config ?? null);
 
       setLoading(false);
     };
