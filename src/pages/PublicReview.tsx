@@ -82,6 +82,7 @@ export default function PublicReview() {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [rewards, setRewards] = useState<LoyaltyReward[]>([]);
   const [loyaltyEnabled, setLoyaltyEnabled] = useState(true);
+  const [menuTemplateConfig, setMenuTemplateConfig] = useState<Record<string, any> | null>(null);
 
   const [rating, setRating] = useState(0);
   const [sent, setSent] = useState(false);
@@ -143,6 +144,7 @@ export default function PublicReview() {
         { data: promotionRows },
         { data: rewardRows },
         { data: loyaltySettings },
+        { data: selectedMenuTemplate },
       ] = await Promise.all([
         supabase
           .from('menu_categories')
@@ -177,6 +179,15 @@ export default function PublicReview() {
           .select('enabled')
           .eq('establishment_id', establishment.id)
           .maybeSingle(),
+
+        establishment.menu_template_id && establishment.menu_template_id.length > 20
+          ? supabase
+              .from('templates')
+              .select('id,kind,config,active')
+              .eq('id', establishment.menu_template_id)
+              .eq('kind', 'menu')
+              .maybeSingle()
+          : Promise.resolve({ data: null }),
       ]);
 
       setCategories(menuCategories ?? []);
@@ -184,6 +195,7 @@ export default function PublicReview() {
       setPromotions(promotionRows ?? []);
       setRewards(rewardRows ?? []);
       setLoyaltyEnabled(loyaltySettings?.enabled ?? true);
+      setMenuTemplateConfig(selectedMenuTemplate?.data?.config ?? null);
 
       setLoading(false);
     };
@@ -484,7 +496,11 @@ export default function PublicReview() {
     p.google_rating ?? p.rating ?? null;
   const googleReviewCount =
     p.google_review_count ?? p.review_count ?? null;
-  const menuTemplate = p.menu_template_id || 'editorial';
+  const menuTemplate =
+    menuTemplateConfig?.layout ||
+    (p.menu_template_id === 'dark' || p.menu_template_id === 'cards' || p.menu_template_id === 'luxury'
+      ? p.menu_template_id
+      : 'editorial');
   const menuDisplayMode = p.menu_display_mode || 'digital';
   const menuPdfUrl = p.menu_pdf_url || '';
   const menuAiDesign = p.menu_ai_design || null;
