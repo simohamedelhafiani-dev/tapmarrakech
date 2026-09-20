@@ -20,6 +20,7 @@ import Analytics from '@/pages/Analytics';
 import Loyalty from '@/pages/Loyalty';
 import LoyaltySettings from '@/pages/LoyaltySettings';
 import Menu from '@/pages/Menu';
+import Promotions from '@/pages/Promotions';
 import Admin from '@/pages/Admin';
 import Employee from '@/pages/Employee';
 import LoyaltyScanner from '@/pages/LoyaltyScanner';
@@ -190,6 +191,14 @@ function App() {
                 element={
                   <SubscriptionFeatureRoute feature="menu">
                     <Menu />
+                  </SubscriptionFeatureRoute>
+                }
+              />
+              <Route
+                path="/dashboard/promotions"
+                element={
+                  <SubscriptionFeatureRoute feature="promotions">
+                    <Promotions />
                   </SubscriptionFeatureRoute>
                 }
               />

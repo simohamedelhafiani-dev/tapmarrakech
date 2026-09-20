@@ -51,6 +51,12 @@ const links = [
     feature: 'menu' as const,
   },
   {
+    to: '/dashboard/promotions',
+    label: 'Promotions',
+    icon: Gift,
+    feature: 'promotions' as const,
+  },
+  {
     to: '/dashboard/loyalty',
     label: 'Fidélité',
     icon: Gift,

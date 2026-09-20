@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import { getBusinessModules } from '@/lib/businessModules';
 
 type Establishment = {
   id: string;
@@ -187,13 +186,6 @@ export default function Menu() {
   const selectedEstablishment = establishments.find(
     (establishment) => establishment.id === establishmentId
   );
-
-  const hasMenuModule = useMemo(() => {
-    if (!selectedEstablishment) return true;
-    return getBusinessModules(
-      selectedEstablishment.ai_business_type_id
-    ).includes('menu');
-  }, [selectedEstablishment]);
 
   const itemsByCategory = useMemo(() => {
     const map: Record<string, MenuItem[]> = {};
@@ -485,21 +477,6 @@ export default function Menu() {
         </h1>
         <p className="mt-2 text-sm text-ink/50">
           Crée d’abord ton établissement pour gérer son menu.
-        </p>
-      </div>
-    );
-  }
-
-  if (!hasMenuModule) {
-    return (
-      <div className="rounded-3xl border border-ink/10 bg-white p-10 text-center">
-        <UtensilsCrossed className="mx-auto mb-4 text-gold" size={34} />
-        <h1 className="text-2xl font-semibold text-forest">
-          Le menu n’est pas disponible
-        </h1>
-        <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-ink/55">
-          Le module Menu est réservé aux établissements dont le type active
-          cette fonctionnalité.
         </p>
       </div>
     );
