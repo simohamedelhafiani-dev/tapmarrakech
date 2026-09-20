@@ -48,6 +48,7 @@ Deno.serve(async (request) => {
     }
 
     let body: {
+      promotion_id?: string;
       establishment_id?: string;
       name?: string;
       description?: string | null;
@@ -61,13 +62,14 @@ Deno.serve(async (request) => {
       return json({ success: false, error: 'Données de promotion invalides.' }, 400);
     }
 
+    const promotionId = String(body.promotion_id ?? '').trim();
     const establishmentId = String(body.establishment_id ?? '').trim();
     const name = String(body.name ?? '').trim().slice(0, 160);
     const description = body.description ? String(body.description).trim().slice(0, 1000) : null;
     const normalPrice = toNumberOrNull(body.normal_price);
     const promoPrice = toNumberOrNull(body.promo_price);
 
-    if (!establishmentId || !name) {
+    if (!establishmentId || (!promotionId && !name)) {
       return json({ success: false, error: 'Établissement et nom de promotion obligatoires.' }, 400);
     }
 
@@ -126,6 +128,28 @@ Deno.serve(async (request) => {
       return json({ success: false, error: 'Le prompt de génération des promotions n’est pas configuré par l’administrateur.' }, 503);
     }
 
+    let existingPromotion: any = null;
+
+    if (promotionId) {
+      const { data, error } = await userClient
+        .from('promotions')
+        .select('*')
+        .eq('id', promotionId)
+        .eq('establishment_id', establishmentId)
+        .maybeSingle();
+
+      if (error || !data) {
+        return json({ success: false, error: 'Promotion introuvable ou accès refusé.' }, 404);
+      }
+
+      existingPromotion = data;
+    }
+
+    const promotionName = promotionId ? String(existingPromotion.name ?? '').trim() : name;
+    const promotionDescription = promotionId ? (existingPromotion.description ? String(existingPromotion.description).trim() : null) : description;
+    const promotionNormalPrice = promotionId ? toNumberOrNull(existingPromotion.normal_price) : normalPrice;
+    const promotionPromoPrice = promotionId ? toNumberOrNull(existingPromotion.promo_price) : promoPrice;
+
     const establishmentName = String(establishment.name ?? 'Établissement').trim();
 
     const prompt = [
@@ -133,10 +157,10 @@ Deno.serve(async (request) => {
       '',
       'CONTEXTE FOURNI PAR LE RESPONSABLE :',
       `Établissement : ${establishmentName}`,
-      `Promotion : ${name}`,
-      description ? `Description : ${description}` : '',
-      normalPrice !== null ? `Prix normal : ${normalPrice} MAD` : '',
-      promoPrice !== null ? `Prix promotionnel : ${promoPrice} MAD` : '',
+      `Promotion : ${promotionName}`,
+      promotionDescription ? `Description : ${promotionDescription}` : '',
+      promotionNormalPrice !== null ? `Prix normal : ${promotionNormalPrice} MAD` : '',
+      promotionPromoPrice !== null ? `Prix promotionnel : ${promotionPromoPrice} MAD` : '',
       '',
       'Génère un visuel promotionnel carré, propre et premium. Ne remplace pas les informations commerciales par des inventions.',
     ].filter(Boolean).join('\n');
@@ -218,6 +242,37 @@ Deno.serve(async (request) => {
     if (!imageUrl) {
       await serviceClient.storage.from('promotion-images').remove([imagePath]).catch(() => undefined);
       return json({ success: false, error: 'Impossible de créer le lien public du visuel.' }, 500);
+    }
+
+    if (promotionId) {
+      const oldImageUrl = existingPromotion?.image_url as string | null;
+
+      const { data: promotion, error: updateError } = await userClient
+        .from('promotions')
+        .update({ image_url: imageUrl })
+        .eq('id', promotionId)
+        .eq('establishment_id', establishmentId)
+        .select('*')
+        .single();
+
+      if (updateError) {
+        await serviceClient.storage.from('promotion-images').remove([imagePath]).catch(() => undefined);
+        console.error('Promotion regeneration update failed', updateError);
+        return json({ success: false, error: 'Impossible de remplacer le visuel de la promotion.' }, 500);
+      }
+
+      if (oldImageUrl) {
+        const marker = '/storage/v1/object/public/promotion-images/';
+        const oldIndex = oldImageUrl.indexOf(marker);
+        if (oldIndex >= 0) {
+          const oldPath = decodeURIComponent(oldImageUrl.slice(oldIndex + marker.length));
+          if (oldPath && oldPath !== imagePath) {
+            await serviceClient.storage.from('promotion-images').remove([oldPath]).catch(() => undefined);
+          }
+        }
+      }
+
+      return json({ success: true, promotion, regenerated: true });
     }
 
     const { data: existingPromotions, error: orderError } = await userClient
