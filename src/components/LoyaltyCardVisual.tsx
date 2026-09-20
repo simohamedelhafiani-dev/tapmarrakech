@@ -145,10 +145,18 @@ export function LoyaltyCardVisual({
                 <p className={`font-semibold ${compact ? 'text-xl' : 'text-3xl'}`} style={{ color: design.secondary_color }}>{card.points ?? 250}</p>
               </div>
             ) : <span />}
-            <div className="text-right">
-              <p className="text-[8px] uppercase tracking-[0.18em] opacity-50">Fidélité digitale</p>
-              <p className="mt-1 text-[9px] font-medium opacity-70">Scannez le QR pour accéder à votre carte</p>
-            </div>
+            {programType === 'STAMP' ? (
+              <div className="flex gap-1.5">
+                {Array.from({ length: Math.min(card.stampGoal ?? 10, 10) }).map((_, i) => (
+                  <span key={i} className={`rounded-full border ${compact ? 'h-3 w-3' : 'h-4 w-4'}`} style={{ borderColor: design.secondary_color, background: i < (card.stampsBalance ?? 0) ? design.secondary_color : 'transparent' }} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-right">
+                <p className="text-[8px] uppercase tracking-[0.18em] opacity-50">Fidélité digitale</p>
+                <p className="mt-1 text-[9px] font-medium opacity-70">Scannez le QR pour accéder à votre carte</p>
+              </div>
+            )}
           </div>
         </div>
       ) : (
