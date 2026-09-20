@@ -80,20 +80,30 @@ export default function Establishments() {
         const nextPlaces = (data ?? []) as Establishment[];
         setPlaces(nextPlaces);
 
-        const links = await Promise.all(
-          nextPlaces.map(async (place) => {
-            const { data: linkData, error: linkError } = await supabase.rpc(
-              'get_or_create_establishment_scanner_link',
-              { p_establishment_id: place.id }
-            );
-            const row = Array.isArray(linkData) ? linkData[0] : linkData;
-            return linkError || !row?.scanner_token
-              ? null
-              : [place.id, `${window.location.origin}/employee?scanner=${row.scanner_token}`] as const;
-          })
-        );
+        const { data: scannerRows, error: scannerError } = await supabase
+          .from('establishment_scanner_links')
+          .select('establishment_id, access_token')
+          .in(
+            'establishment_id',
+            nextPlaces.map((place) => place.id)
+          );
 
-        setScannerLinks(Object.fromEntries(links.filter(Boolean) as Array<readonly [string, string]>));
+        if (scannerError) {
+          console.error('Erreur lecture des liens scanner fidélité:', scannerError);
+          setScannerLinks({});
+        } else {
+          const links = (scannerRows ?? []).reduce<Record<string, string>>(
+            (acc, row) => {
+              if (row.access_token) {
+                acc[row.establishment_id] =
+                  window.location.origin + '/employee?scanner=' + row.access_token;
+              }
+              return acc;
+            },
+            {}
+          );
+          setScannerLinks(links);
+        }
         setLoading(false);
       } catch (error) {
         console.error(
