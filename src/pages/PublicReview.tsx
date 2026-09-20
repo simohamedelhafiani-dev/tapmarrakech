@@ -70,7 +70,12 @@ export default function PublicReview() {
   const { slug } = useParams<{ slug: string }>();
 
   const [place, setPlace] = useState<Establishment | null>(null);
-  const [section, setSection] = useState<Section>('home');
+  const [section, setSection] = useState<Section>(() => {
+    const requested = new URLSearchParams(window.location.search).get('section');
+    return requested === 'menu' || requested === 'reviews' || requested === 'loyalty'
+      ? requested
+      : 'home';
+  });
 
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
