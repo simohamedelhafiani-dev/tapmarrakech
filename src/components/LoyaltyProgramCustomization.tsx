@@ -78,14 +78,22 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
   const [rewardType, setRewardType] = useState<'GIFT' | 'DISCOUNT'>('GIFT');
   const [discountPercent, setDiscountPercent] = useState('10');
   const [discountMaxAmount, setDiscountMaxAmount] = useState('');
+  const [programType, setProgramType] = useState<'STAMP' | 'DISCOUNT' | 'POINTS'>('POINTS');
+  const [stampGoal, setStampGoal] = useState('10');
+  const [stampRewardName, setStampRewardName] = useState('Cadeau fidélité');
+  const [stampRewardDescription, setStampRewardDescription] = useState('');
+  const [discountPercent, setProgramDiscountPercent] = useState('20');
+  const [discountValidDays, setDiscountValidDays] = useState('7');
+  const [pointsPerCurrency, setPointsPerCurrency] = useState('1');
 
   async function load() {
     if (!establishmentId) return;
-    const [{ data: designData }, { data: rewardsData }, { data: place }, { data: generationsData }] = await Promise.all([
+    const [{ data: designData }, { data: rewardsData }, { data: place }, { data: generationsData }, { data: programData }] = await Promise.all([
       supabase.rpc('get_loyalty_card_config', { p_establishment_id: establishmentId }),
       supabase.from('loyalty_rewards').select('id,name,description,points_required,reward_type,discount_percent,discount_max_amount').eq('establishment_id', establishmentId).eq('active', true).order('points_required'),
       supabase.from('establishments').select('name,logo_url,phone,address').eq('id', establishmentId).maybeSingle(),
       supabase.rpc('get_loyalty_ai_generations', { p_establishment_id: establishmentId }),
+      supabase.rpc('get_loyalty_program_settings', { p_establishment_id: establishmentId }),
     ]);
     const row = Array.isArray(designData) ? designData[0] : designData;
     if (row) {
@@ -104,6 +112,16 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     if (place) setEstablishment({ name: place.name || 'Votre établissement', logo_url: place.logo_url || null, phone: place.phone, address: place.address });
     setRewards((rewardsData ?? []) as Reward[]);
     setAiGenerations((generationsData ?? []) as AIGeneration[]);
+    const program = Array.isArray(programData) ? programData[0] : programData;
+    if (program) {
+      setProgramType(program.program_type ?? 'POINTS');
+      setStampGoal(String(program.stamp_goal ?? 10));
+      setStampRewardName(program.stamp_reward_name ?? 'Cadeau fidélité');
+      setStampRewardDescription(program.stamp_reward_description ?? '');
+      setProgramDiscountPercent(String(program.discount_percent ?? 20));
+      setDiscountValidDays(String(program.discount_valid_days ?? 7));
+      setPointsPerCurrency(String(program.points_per_currency ?? 1));
+    }
   }
 
   useEffect(() => { void load(); }, [establishmentId]);
@@ -141,6 +159,19 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
 
   async function save(publish: boolean) {
     setSaving(true);
+    const { error: programError } = await supabase.rpc('save_loyalty_program_settings', {
+      p_establishment_id: establishmentId,
+      p_program_type: programType,
+      p_stamp_goal: Number(stampGoal) || 10,
+      p_stamp_reward_name: stampRewardName,
+      p_stamp_reward_description: stampRewardDescription,
+      p_discount_percent: Number(discountPercent) || null,
+      p_discount_valid_days: Number(discountValidDays) || 7,
+      p_points_per_currency: Number(pointsPerCurrency) || 1,
+      p_currency: 'MAD',
+      p_enabled: true,
+    });
+    if (programError) { setSaving(false); return alert(programError.message); }
     const { error } = await supabase.rpc('save_loyalty_card_design', {
       p_establishment_id: establishmentId,
       p_template_id: design.template_id,
@@ -294,7 +325,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
               <div className="rounded-xl border border-ink/10 bg-white p-3"><p className="text-[10px] font-semibold uppercase tracking-wider text-ink/40">Logo</p><p className="mt-1 text-xs text-ink/45">Position horizontale / verticale</p><div className="mt-3 grid grid-cols-3 gap-1">{[-24,0,24].map(y=><button key={y} type="button" onClick={()=>updateConfig({logo_y:y})} className={`h-7 rounded border text-[9px] ${design.design_config.logo_y===y?'border-gold bg-gold/10':'border-ink/10'}`}>{y===0?'Centre':y<0?'Haut':'Bas'}</button>)}</div><input type="range" min="-50" max="50" value={design.design_config.logo_x} onChange={e=>updateConfig({logo_x:Number(e.target.value)})} className="mt-3 w-full"/></div>
               <label className="flex items-center justify-between rounded-xl border border-ink/10 bg-white p-3 text-xs"><span className="flex items-center gap-2"><QrCode size={15}/> QR fidélité</span><input type="checkbox" checked={design.design_config.show_qr} onChange={e=>updateConfig({show_qr:e.target.checked})}/></label>
               <label className="flex items-center justify-between rounded-xl border border-ink/10 bg-white p-3 text-xs"><span>Afficher le solde</span><input type="checkbox" checked={design.design_config.show_points} onChange={e=>updateConfig({show_points:e.target.checked})}/></label>
-              {showAdvanced && <div className="space-y-3 rounded-xl border border-ink/10 bg-white p-3"><label className="block text-[10px] uppercase text-ink/40">Style des tampons<select value={design.design_config.stamp_style} onChange={e=>updateConfig({stamp_style:e.target.value as LoyaltyDesignConfig['stamp_style']})} className="mt-1 w-full rounded-lg border border-ink/10 px-2 py-2 text-xs"><option value="circles">Cercles</option><option value="squares">Carrés</option><option value="stars">Étoiles</option><option value="hearts">Cœurs</option></select></label><label className="block text-[10px] uppercase text-ink/40">Rayon<select value={design.border_radius} onChange={e=>setDesign(d=>({...d,border_radius:Number(e.target.value),published:false}))} className="mt-1 w-full rounded-lg border border-ink/10 px-2 py-2 text-xs">{[12,16,20,24,28,32].map(x=><option key={x}>{x}</option>)}</select></label></div>}
+              {programType === 'STAMP' && showAdvanced && <div className="space-y-3 rounded-xl border border-ink/10 bg-white p-3"><label className="block text-[10px] uppercase text-ink/40">Style des tampons<select value={design.design_config.stamp_style} onChange={e=>updateConfig({stamp_style:e.target.value as LoyaltyDesignConfig['stamp_style']})} className="mt-1 w-full rounded-lg border border-ink/10 px-2 py-2 text-xs"><option value="circles">Cercles</option><option value="squares">Carrés</option><option value="stars">Étoiles</option><option value="hearts">Cœurs</option></select></label><label className="block text-[10px] uppercase text-ink/40">Rayon<select value={design.border_radius} onChange={e=>setDesign(d=>({...d,border_radius:Number(e.target.value),published:false}))} className="mt-1 w-full rounded-lg border border-ink/10 px-2 py-2 text-xs">{[12,16,20,24,28,32].map(x=><option key={x}>{x}</option>)}</select></label></div>}
             </div>
           </div>
 
