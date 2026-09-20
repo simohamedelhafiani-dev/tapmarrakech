@@ -1276,18 +1276,6 @@ export default function Employee() {
               }}
               side="front"
             />
-            <LoyaltyCardVisual
-              design={{ ...loyaltyDesign, config: loyaltyDesign.design_config }}
-              card={{
-                establishmentName: session.establishment_name,
-                logoUrl: establishmentLogoUrl,
-                points: showCard.points_balance,
-                customerName: `${showCard.first_name} ${showCard.last_name ?? ''}`.trim(),
-                loyaltyNumber: showCard.loyalty_number,
-                cardUrl: showCardLink,
-              }}
-              side="back"
-            />
             {showCardLink && <button onClick={async () => { await navigator.clipboard.writeText(showCardLink); alert('Lien de la carte copié.'); }} className="w-full rounded-xl border border-ink/10 bg-white py-3 text-xs font-semibold text-forest">Copier le lien client</button>}
             <div className="flex gap-3">
               <button onClick={() => printLoyaltyCard(showCard)} className="flex-1 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white">Imprimer / PDF</button>
