@@ -63,6 +63,7 @@ export function LoyaltyCardVisual({
   card: LoyaltyVisualCard;
   side?: 'front' | 'back';
   compact?: boolean;
+  programType?: 'STAMP' | 'DISCOUNT' | 'POINTS';
 }) {
   const config = { ...defaultLoyaltyDesignConfig, ...(design.config ?? {}) };
   const [qr, setQr] = useState('');
