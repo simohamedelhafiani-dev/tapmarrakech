@@ -2419,46 +2419,6 @@ function ResponsiblesSection({
         </select>
       </div>
 
-      <div className="mb-6 rounded-2xl border border-gold/20 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
-              Génération des promotions
-            </p>
-            <h3 className="mt-1 font-display text-2xl text-forest">
-              Prompt IA des visuels promotionnels
-            </h3>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-ink/50">
-              C’est ici que l’administrateur définit les instructions utilisées par l’IA
-              pour créer les images des promotions. Le responsable ne peut pas modifier ce prompt.
-            </p>
-          </div>
-          <span className="rounded-full bg-forest/5 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-forest">
-            Admin uniquement
-          </span>
-        </div>
-
-        <div className="mt-5">
-          <textarea
-            value={promotionPrompt}
-            onChange={(e) => setPromotionPrompt(e.target.value)}
-            rows={10}
-            placeholder="Décris le style visuel, la direction artistique, les règles de texte dans l’image et les contraintes à respecter..."
-            className="w-full resize-y rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm leading-6 outline-none focus:border-forest"
-          />
-        </div>
-
-        <div className="mt-4 flex justify-end">
-          <button
-            onClick={savePromotionPrompt}
-            disabled={promotionPromptSaving}
-            className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
-          >
-            {promotionPromptSaving ? 'Enregistrement...' : 'Enregistrer le prompt promotions'}
-          </button>
-        </div>
-      </div>
-
       {showForm && (
         <CreateStaffForm
           role="responsible"
@@ -4581,6 +4541,46 @@ function AIConfigurationSection({
           <Plus size={16} />
           Nouveau type
         </button>
+      </div>
+
+      <div className="mb-6 rounded-2xl border border-gold/20 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
+              Génération des promotions
+            </p>
+            <h3 className="mt-1 font-display text-2xl text-forest">
+              Prompt IA des visuels promotionnels
+            </h3>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-ink/50">
+              C’est ici que l’administrateur définit les instructions utilisées par l’IA
+              pour créer les images des promotions. Le responsable ne peut pas modifier ce prompt.
+            </p>
+          </div>
+          <span className="rounded-full bg-forest/5 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-forest">
+            Admin uniquement
+          </span>
+        </div>
+
+        <div className="mt-5">
+          <textarea
+            value={promotionPrompt}
+            onChange={(e) => setPromotionPrompt(e.target.value)}
+            rows={10}
+            placeholder="Décris le style visuel, la direction artistique, les règles de texte dans l’image et les contraintes à respecter..."
+            className="w-full resize-y rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm leading-6 outline-none focus:border-forest"
+          />
+        </div>
+
+        <div className="mt-4 flex justify-end">
+          <button
+            onClick={savePromotionPrompt}
+            disabled={promotionPromptSaving}
+            className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+          >
+            {promotionPromptSaving ? 'Enregistrement...' : 'Enregistrer le prompt promotions'}
+          </button>
+        </div>
       </div>
 
       <div className="mb-6 rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
