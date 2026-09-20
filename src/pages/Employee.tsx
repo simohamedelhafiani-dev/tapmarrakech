@@ -121,7 +121,16 @@ export default function Employee() {
 
   const [establishmentId, setEstablishmentId] = useState('');
   const [establishmentLogoUrl, setEstablishmentLogoUrl] = useState<string | null>(null);
-  const [loyaltyDesign, setLoyaltyDesign] = useState<any>({ template_id:'luxury', primary_color:'#173D32', secondary_color:'#D3A84C', background_color:'#F7F7F3', text_color:'#173D32', button_color:'#173D32', border_radius:24, design_config: defaultLoyaltyDesignConfig });
+  const [loyaltyDesign, setLoyaltyDesign] = useState({
+    template_id: 'luxury',
+    primary_color: '#173D32',
+    secondary_color: '#D3A84C',
+    background_color: '#F7F7F3',
+    text_color: '#173D32',
+    button_color: '#173D32',
+    border_radius: 24,
+    design_config: defaultLoyaltyDesignConfig,
+  });
   const [customers, setCustomers] = useState<LoyaltyCustomer[]>([]);
   const [rewards, setRewards] = useState<LoyaltyReward[]>([]);
   const [settings, setSettings] = useState<ProgramSettings>({
@@ -306,7 +315,7 @@ export default function Employee() {
   useEffect(() => {
     if (!session || !employeeSupabase) return;
     let active = true;
-    void employeeSupabase.rpc('get_loyalty_card_config', { p_establishment_id: session.establishment_id }).then(({ data }: any) => {
+    void employeeSupabase.rpc('get_employee_loyalty_card_config', { p_session_token: session.session_token }).then(({ data }) => {
       const row = Array.isArray(data) ? data[0] : data;
       if (active && row) setLoyaltyDesign({ ...row, design_config: { ...defaultLoyaltyDesignConfig, ...(row.design_config ?? {}) } });
     });
