@@ -66,7 +66,6 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
   const [establishment, setEstablishment] = useState<{ name: string; logo_url: string | null; phone?: string | null; address?: string | null }>({ name: 'Votre établissement', logo_url: null });
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [aiGenerations, setAiGenerations] = useState<AIGeneration[]>([]);
-  const [side, setSide] = useState<'front' | 'back'>('front');
   const [mobile, setMobile] = useState(false);
   const [saving, setSaving] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
@@ -128,7 +127,6 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
       published: false,
     }));
     setAiGenerations(list => list.map(item => ({ ...item, selected: item.id === generation.id })));
-    setSide('front');
   }
 
   function applyTemplate(id: string) {
@@ -224,7 +222,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     <section className="space-y-6">
       <div className="rounded-[2rem] border border-ink/5 bg-white p-5 shadow-soft md:p-7">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">Fidélité</p><h2 className="mt-1 font-display text-3xl text-forest">Créer votre carte fidélité</h2><p className="mt-1 text-sm text-ink/45">Concevez le recto, le verso et l’expérience mobile avant publication.</p></div>
+          <div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">Fidélité</p><h2 className="mt-1 font-display text-3xl text-forest">Créer votre carte fidélité</h2><p className="mt-1 text-sm text-ink/45">Concevez une seule carte digitale premium, pensée pour le téléphone et mise à jour en temps réel.</p></div>
           <div className="flex gap-2"><button type="button" onClick={() => void save(false)} disabled={saving} className="rounded-xl border border-forest/20 bg-white px-4 py-3 text-xs font-semibold text-forest">Enregistrer brouillon</button><button type="button" onClick={() => void save(true)} disabled={saving} className="rounded-xl bg-forest px-5 py-3 text-xs font-semibold text-white">{saving ? 'Publication…' : '✓ Valider et publier'}</button></div>
         </div>
 
@@ -289,10 +287,9 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
 
           <div className="rounded-2xl border border-ink/10 bg-[#f7f7f3] p-4">
             <div className="flex items-center justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[.16em] text-gold">2 · Personnaliser</p><p className="mt-1 text-xs text-ink/45">Logo, texte, couleurs et éléments.</p></div><button type="button" onClick={() => setShowAdvanced(v => !v)} className="text-[10px] font-semibold text-forest">{showAdvanced ? 'Simple' : 'Mode avancé'}</button></div>
-            <div className="mt-4 flex rounded-xl bg-white p-1"><button onClick={() => setSide('front')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${side==='front'?'bg-forest text-white':'text-ink/45'}`}>Recto</button><button onClick={() => setSide('back')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${side==='back'?'bg-forest text-white':'text-ink/45'}`}>Verso</button></div>
             <div className="mt-4 space-y-4">
-              <label className="block text-xs font-medium text-ink/50">Titre {side}<input value={side==='front'?design.design_config.front_title:design.design_config.back_title} onChange={e => updateConfig(side==='front'?{front_title:e.target.value}:{back_title:e.target.value})} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm"/></label>
-              <label className="block text-xs font-medium text-ink/50">{side==='front'?'Sous-titre':'Message'}<textarea value={side==='front'?design.design_config.front_subtitle:design.design_config.back_message} onChange={e => updateConfig(side==='front'?{front_subtitle:e.target.value}:{back_message:e.target.value})} rows={3} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm"/></label>
+              <label className="block text-xs font-medium text-ink/50">Titre de la carte<input value={design.design_config.front_title} onChange={e => updateConfig({front_title:e.target.value})} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm"/></label>
+              <label className="block text-xs font-medium text-ink/50">Sous-titre<textarea value={design.design_config.front_subtitle} onChange={e => updateConfig({front_subtitle:e.target.value})} rows={3} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm"/></label>
               <div className="grid grid-cols-3 gap-2">{[['principal','primary_color'],['accent','secondary_color'],['fond','background_color']].map(([label,key])=><label key={key} className="text-[10px] uppercase text-ink/40">{label}<input type="color" value={(design as any)[key]} onChange={e=>setDesign(d=>({...d,[key]:e.target.value,published:false}))} className="mt-1 h-9 w-full cursor-pointer rounded-lg border-0 bg-transparent p-0"/></label>)}</div>
               <div className="rounded-xl border border-ink/10 bg-white p-3"><p className="text-[10px] font-semibold uppercase tracking-wider text-ink/40">Logo</p><p className="mt-1 text-xs text-ink/45">Position horizontale / verticale</p><div className="mt-3 grid grid-cols-3 gap-1">{[-24,0,24].map(y=><button key={y} type="button" onClick={()=>updateConfig({logo_y:y})} className={`h-7 rounded border text-[9px] ${design.design_config.logo_y===y?'border-gold bg-gold/10':'border-ink/10'}`}>{y===0?'Centre':y<0?'Haut':'Bas'}</button>)}</div><input type="range" min="-50" max="50" value={design.design_config.logo_x} onChange={e=>updateConfig({logo_x:Number(e.target.value)})} className="mt-3 w-full"/></div>
               <label className="flex items-center justify-between rounded-xl border border-ink/10 bg-white p-3 text-xs"><span className="flex items-center gap-2"><QrCode size={15}/> QR fidélité</span><input type="checkbox" checked={design.design_config.show_qr} onChange={e=>updateConfig({show_qr:e.target.checked})}/></label>
@@ -305,9 +302,9 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
             <div className="flex items-center justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[.16em] text-gold">3 · Aperçu</p><p className="mt-1 text-xs text-ink/45">{design.published ? 'Publié' : 'Brouillon non publié'}</p></div><div className="flex gap-1 rounded-xl bg-[#f7f7f3] p-1"><button onClick={()=>setMobile(false)} className={`rounded-lg px-3 py-2 text-[10px] ${!mobile?'bg-white shadow-sm text-forest':'text-ink/40'}`}>Carte</button><button onClick={()=>setMobile(true)} className={`rounded-lg px-3 py-2 text-[10px] ${mobile?'bg-white shadow-sm text-forest':'text-ink/40'}`}>Mobile</button></div></div>
             <div className={`mt-5 mx-auto transition-all ${mobile?'max-w-[280px] rounded-[2rem] border-[8px] border-[#20252b] bg-[#20252b] p-2':'max-w-2xl'}`}>
               <div className={mobile?'overflow-hidden rounded-[1.4rem] bg-white p-3':''}>
-                <div className="space-y-4">
-                  <div><p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-ink/40">Recto de la carte</p><LoyaltyCardVisual design={visualDesign} card={visualCard} side="front" compact={mobile}/></div>
-                  {!mobile && <div><p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-ink/40">Verso de la carte</p><LoyaltyCardVisual design={visualDesign} card={visualCard} side="back" compact={false}/></div>}
+                <div>
+                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-ink/40">Carte digitale</p>
+                  <LoyaltyCardVisual design={visualDesign} card={visualCard} side="front" compact={mobile}/>
                 </div>
               </div>
             </div>
