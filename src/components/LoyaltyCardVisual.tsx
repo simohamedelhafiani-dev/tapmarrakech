@@ -16,6 +16,7 @@ export type LoyaltyDesignConfig = {
   logo_url?: string | null;
   ai_prompt?: string;
   ai_generation_id?: string;
+  card_mode?: 'QR' | 'STAMP';
 };
 
 export const defaultLoyaltyDesignConfig: LoyaltyDesignConfig = {
@@ -30,6 +31,7 @@ export const defaultLoyaltyDesignConfig: LoyaltyDesignConfig = {
   stamp_style: 'circles',
   background_image_url: null,
   logo_url: null,
+  card_mode: 'QR',
 };
 
 export type LoyaltyVisualCard = {
@@ -81,6 +83,7 @@ export function LoyaltyCardVisual({
   }, [card.cardUrl, config.show_qr, design.primary_color, side]);
 
   const isAIDesign = Boolean(config.ai_generation_id && config.background_image_url);
+  const cardMode = config.card_mode ?? (programType === 'STAMP' ? 'STAMP' : 'QR');
   const logoUrl = config.logo_url || card.logoUrl;
   const logoStyle = {
     transform: `translate(${config.logo_x}px, ${config.logo_y}px)`,
@@ -128,39 +131,35 @@ export function LoyaltyCardVisual({
               <p className="mt-1 max-w-[340px] text-[10px] opacity-65">{config.front_subtitle}</p>
               {card.customerName && <p className="mt-3 text-xs font-semibold">{card.customerName}</p>}
             </div>
-            {config.show_qr && qr && <div className={`shrink-0 rounded-xl bg-white p-1.5 ${compact ? 'h-14 w-14' : 'h-20 w-20'}`}><img src={qr} alt="" className="h-full w-full" /></div>}
+            {cardMode === 'QR' && qr && <div className={`shrink-0 rounded-xl bg-white p-1.5 ${compact ? 'h-14 w-14' : 'h-20 w-20'}`}><img src={qr} alt="" className="h-full w-full" /></div>}
           </div>
 
           <div className="flex items-end justify-between gap-4">
-            {programType === 'STAMP' ? (
-              <div className="min-w-0">
-                <p className="text-[8px] uppercase tracking-[0.18em] opacity-50">Tampons</p>
-                <p className={`font-semibold ${compact ? 'text-xl' : 'text-3xl'}`} style={{ color: design.secondary_color }}>{card.stampsBalance ?? 0}<span className="text-sm opacity-50"> / {card.stampGoal ?? 10}</span></p>
-              </div>
-            ) : programType === 'DISCOUNT' ? (
-              <div className="min-w-0">
-                <p className="text-[8px] uppercase tracking-[0.18em] opacity-50">Réduction</p>
-                <p className={`font-semibold ${compact ? 'text-xl' : 'text-3xl'}`} style={{ color: design.secondary_color }}>{card.discountPercent ?? 0}%</p>
-                {card.discountExpiresAt && <p className="text-[9px] opacity-60">Valable jusqu’au {new Date(card.discountExpiresAt).toLocaleDateString('fr-FR')}</p>}
-              </div>
-            ) : config.show_points ? (
-              <div>
-                <p className="text-[8px] uppercase tracking-[0.18em] opacity-50">Solde</p>
-                <p className={`font-semibold ${compact ? 'text-xl' : 'text-3xl'}`} style={{ color: design.secondary_color }}>{card.points ?? 250}</p>
-              </div>
-            ) : <span />}
-            {programType === 'STAMP' ? (
-              <div className="flex gap-1.5">
-                {Array.from({ length: Math.min(card.stampGoal ?? 10, 10) }).map((_, i) => (
-                  <span key={i} className={`rounded-full border ${compact ? 'h-3 w-3' : 'h-4 w-4'}`} style={{ borderColor: design.secondary_color, background: i < (card.stampsBalance ?? 0) ? design.secondary_color : 'transparent' }} />
-                ))}
+            {cardMode === 'STAMP' ? (
+              <div className="w-full">
+                <div className="flex items-center justify-between">
+                  <p className="text-[8px] uppercase tracking-[0.18em] opacity-55">Visites</p>
+                  <p className="text-[9px] font-medium opacity-70">{card.stampsBalance ?? 0} / {card.stampGoal ?? 10}</p>
+                </div>
+                <div className="mt-2 flex gap-1.5">
+                  {Array.from({ length: Math.min(card.stampGoal ?? 10, 12) }).map((_, i) => (
+                    <span key={i} className={`grid place-items-center border ${compact ? 'h-4 w-4' : 'h-5 w-5'} ${config.stamp_style === 'squares' ? 'rounded-md' : 'rounded-full'}`} style={{ borderColor: design.secondary_color, background: i < (card.stampsBalance ?? 0) ? design.secondary_color : 'transparent' }}>
+                      {i < (card.stampsBalance ?? 0) && <span className="h-1.5 w-1.5 rounded-full bg-white/90" />}
+                    </span>
+                  ))}
+                </div>
               </div>
             ) : (
-              <div className="text-right">
-                <p className="text-[8px] uppercase tracking-[0.18em] opacity-50">Fidélité digitale</p>
-                <p className="mt-1 text-[9px] font-medium opacity-70">Scannez le QR pour accéder à votre carte</p>
+              <div className="w-full text-right">
+                <p className="text-[8px] uppercase tracking-[0.18em] opacity-55">Carte digitale</p>
+                <p className="mt-1 text-[9px] font-medium opacity-70">Présentez ou scannez votre QR code</p>
               </div>
             )}
+          </div>
+          <div className="mt-3 flex items-center justify-center gap-3 text-[8px] uppercase tracking-[0.25em] opacity-70">
+            <span className="h-px w-8" style={{ background: design.secondary_color }} />
+            <span>by Tap Marrakech</span>
+            <span className="h-px w-8" style={{ background: design.secondary_color }} />
           </div>
         </div>
       ) : (
