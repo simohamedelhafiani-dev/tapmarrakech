@@ -103,7 +103,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     try {
       const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
       const path = `loyalty-cards/${establishmentId}/${kind}-${Date.now()}.${extension}`;
-      const { error } = await supabase.storage.from('loyalty-assets').upload(path, file, { upsert: true, contentType: file.type });
+      const { error } = await supabase.storage.from('promotion-images').upload(path, file, { upsert: true, contentType: file.type });
       if (error) throw error;
       const { data } = supabase.storage.from('promotion-images').getPublicUrl(path);
       updateConfig(kind === 'logo' ? { logo_url: data.publicUrl } : { background_image_url: data.publicUrl, ai_generation_id: undefined });
