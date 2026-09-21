@@ -9,7 +9,6 @@ import {
   Heart,
   Instagram,
   MapPin,
-  Menu as MenuIcon,
   MessageCircle,
   Phone,
   Send,
@@ -1874,35 +1873,6 @@ function Step({
         </p>
       </div>
     </div>
-  );
-}
-
-function NavButton({
-  active,
-  icon,
-  label,
-  onClick,
-}: {
-  active: boolean;
-  icon: React.ReactNode;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex min-h-[58px] flex-col items-center justify-center gap-1 rounded-[18px] px-2 py-2 transition-all duration-200 active:scale-95 ${
-        active
-          ? 'bg-forest text-white shadow-lg shadow-forest/20'
-          : 'text-ink/40 hover:bg-forest/5 hover:text-forest'
-      }`}
-    >
-      {icon}
-
-      <span className="text-[9px] font-semibold">
-        {label}
-      </span>
-    </button>
   );
 }
 
