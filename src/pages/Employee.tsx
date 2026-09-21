@@ -17,7 +17,6 @@ import {
   KeyRound,
   CreditCard,
   Pencil,
-  Printer,
 } from 'lucide-react';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import QrScanner from '@/components/QrScanner';
