@@ -14,7 +14,10 @@ type Card = {
   points_balance: number;
   stamps_balance?: number;
   stamps_total?: number;
+  total_points_earned?: number;
 };
+
+type HistoryItem = { id: string; points: number; type: string; description: string | null; amount: number | null; created_at: string; };
 
 type Design = {
   template_id: string;
@@ -43,7 +46,9 @@ export default function LoyaltyCard() {
     program_type: 'POINTS' as 'STAMP' | 'DISCOUNT' | 'POINTS',
     stamp_goal: 10,
     stamps_balance: 0,
+    stamp_reward_name: null as string | null,
   });
+  const [history, setHistory] = useState<HistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -82,6 +87,7 @@ export default function LoyaltyCard() {
         supabase.rpc('get_public_loyalty_card', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_card_config', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_program_context', { p_access_token: token }),
+        supabase.rpc('get_public_loyalty_history', { p_access_token: token, p_limit: 20 }),
       ]);
 
       if (cardError || !cardData?.[0]) {
@@ -92,6 +98,7 @@ export default function LoyaltyCard() {
 
       const nextCard = cardData[0] as Card;
       setCard(nextCard);
+      setHistory((historyData ?? []) as HistoryItem[]);
 
       const designRow = Array.isArray(designData) ? designData[0] : designData;
       if (designRow) {
@@ -113,6 +120,7 @@ export default function LoyaltyCard() {
           program_type: programRow.program_type ?? 'POINTS',
           stamp_goal: Number(programRow.stamp_goal ?? 10),
           stamps_balance: Number(programRow.stamps_balance ?? 0),
+          stamp_reward_name: programRow.stamp_reward_name ?? null,
         });
       }
 
@@ -150,12 +158,14 @@ export default function LoyaltyCard() {
     if (!card?.customer_id) return;
 
     const refreshCard = async () => {
-      const [{ data: cardData }, { data: programData }] = await Promise.all([
+      const [{ data: cardData }, { data: programData }, { data: historyData }] = await Promise.all([
         supabase.rpc('get_public_loyalty_card', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_program_context', { p_access_token: token }),
+        supabase.rpc('get_public_loyalty_history', { p_access_token: token, p_limit: 20 }),
       ]);
 
       if (cardData?.[0]) setCard(cardData[0] as Card);
+      setHistory((historyData ?? []) as HistoryItem[]);
       const programRow = Array.isArray(programData) ? programData[0] : programData;
       if (programRow) {
         setProgram({
@@ -223,16 +233,38 @@ export default function LoyaltyCard() {
           card={{
             establishmentName: card.establishment_name,
             logoUrl: designConfig.logo_url || card.establishment_logo_url,
-            points: 0,
+            points: card.points_balance,
             customerName: fullName,
             loyaltyNumber: card.loyalty_number,
             cardUrl,
             stampsBalance: program.stamps_balance,
             stampGoal: program.stamp_goal,
+            stampRewardName: program.stamp_reward_name,
           }}
           side="front"
           programType={mode === 'STAMP' ? 'STAMP' : 'POINTS'}
         />
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <div className="rounded-2xl bg-white p-4 shadow-sm">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink/40">Total des points</p>
+            <p className="mt-1 text-2xl font-bold text-forest">{card.points_balance ?? 0}</p>
+          </div>
+          <div className="rounded-2xl bg-white p-4 shadow-sm">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink/40">Visites</p>
+            <p className="mt-1 text-2xl font-bold text-forest">{card.stamps_total ?? 0}</p>
+          </div>
+        </div>
+        <div className="mt-4 rounded-2xl bg-white p-4 shadow-sm">
+          <div className="flex items-center justify-between"><h2 className="text-sm font-semibold text-forest">Historique</h2><span className="text-[10px] text-ink/35">{history.length} opération{history.length > 1 ? 's' : ''}</span></div>
+          <div className="mt-3 space-y-2">
+            {history.length ? history.map(item => (
+              <div key={item.id} className="flex items-center justify-between rounded-xl bg-[#f7f7f3] px-3 py-2.5">
+                <div className="min-w-0"><p className="truncate text-xs font-medium text-ink">{item.description || item.type || 'Opération fidélité'}</p><p className="mt-0.5 text-[10px] text-ink/40">{new Date(item.created_at).toLocaleDateString('fr-FR')}</p></div>
+                <span className={`ml-3 shrink-0 text-xs font-bold ${item.points >= 0 ? 'text-forest' : 'text-red-500'}`}>{item.points > 0 ? '+' : ''}{item.points} pts</span>
+              </div>
+            )) : <p className="py-3 text-center text-xs text-ink/35">Aucune opération pour le moment.</p>}
+          </div>
+        </div>
       </div>
     </main>
   );
