@@ -31,24 +31,6 @@ function extractOutputText(payload: any): string {
   return chunks.join('').trim();
 }
 
-function parseMenuJson(outputText: string): any {
-  const cleaned = outputText
-    .replace(/^\u0060\u0060\u0060(?:json)?\s*/i, '')
-    .replace(/\s*\u0060\u0060\u0060\s*$/i, '')
-    .trim();
-
-  try {
-    return JSON.parse(cleaned);
-  } catch {
-    const firstBrace = cleaned.indexOf('{');
-    const lastBrace = cleaned.lastIndexOf('}');
-    if (firstBrace >= 0 && lastBrace > firstBrace) {
-      return JSON.parse(cleaned.slice(firstBrace, lastBrace + 1));
-    }
-    throw new Error('Le moteur IA n’a pas retourné un JSON valide.');
-  }
-}
-
 const menuSchema = {
   type: 'object',
   additionalProperties: false,
