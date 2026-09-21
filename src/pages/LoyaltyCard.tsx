@@ -83,6 +83,7 @@ export default function LoyaltyCard() {
         { data: cardData, error: cardError },
         { data: designData },
         { data: programData },
+        { data: historyData },
       ] = await Promise.all([
         supabase.rpc('get_public_loyalty_card', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_card_config', { p_access_token: token }),
@@ -172,6 +173,7 @@ export default function LoyaltyCard() {
           program_type: programRow.program_type ?? 'POINTS',
           stamp_goal: Number(programRow.stamp_goal ?? 10),
           stamps_balance: Number(programRow.stamps_balance ?? 0),
+          stamp_reward_name: programRow.stamp_reward_name ?? null,
         });
       }
     };
