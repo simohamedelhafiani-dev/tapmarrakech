@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { Clock3, History, WalletCards, Gift, X } from 'lucide-react';
+import { History, WalletCards, Gift, X } from 'lucide-react';
 import QRCode from 'qrcode';
 import { LoyaltyCardVisual, defaultLoyaltyDesignConfig } from '@/components/LoyaltyCardVisual';
 import { supabase } from '@/lib/supabase';
