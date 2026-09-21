@@ -169,7 +169,7 @@ export function LoyaltyCardVisual({
             <span className="h-px w-8" style={{ background: design.secondary_color }} />
           </div>
         </div>
-      ) : null
+      ) : null}
     </div>
   );
 }
