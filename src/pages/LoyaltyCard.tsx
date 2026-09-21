@@ -1,7 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
-import type { ReactNode } from 'react';
-import { History, WalletCards, Gift, X } from 'lucide-react';
-import QRCode from 'qrcode';
+import { useEffect, useState } from 'react';
 import { LoyaltyCardVisual, defaultLoyaltyDesignConfig } from '@/components/LoyaltyCardVisual';
 import { supabase } from '@/lib/supabase';
 
@@ -14,22 +11,8 @@ type Card = {
   first_name: string;
   last_name: string | null;
   points_balance: number;
-  total_points_earned: number;
-  total_points_redeemed: number;
-  visit_count: number;
-  last_visit_at: string | null;
-  created_at: string;
   stamps_balance?: number;
   stamps_total?: number;
-};
-
-type Transaction = {
-  id: string;
-  points: number;
-  transaction_type: string;
-  description: string | null;
-  type: string;
-  created_at: string;
 };
 
 type Design = {
@@ -42,227 +25,121 @@ type Design = {
   border_radius: number;
 };
 
-type Reward = {
-  id: string;
-  name: string;
-  description: string | null;
-  points_required: number;
-  reward_type: 'GIFT' | 'DISCOUNT';
-  discount_percent: number | null;
-  discount_max_amount: number | null;
-};
-
-type Claim = {
-  claim_token: string;
-  reward_name: string;
-  reward_type: 'GIFT' | 'DISCOUNT';
-  points_required: number;
-  discount_percent: number | null;
-  discount_max_amount: number | null;
-  expires_at: string;
-};
-
-const defaultDesign: Design = {
-  template_id: 'luxury',
-  primary_color: '#173D32',
-  secondary_color: '#D3A84C',
-  background_color: '#F7F7F3',
-  text_color: '#173D32',
-  button_color: '#173D32',
-  border_radius: 24,
-};
-
 export default function LoyaltyCard() {
   const token = window.location.pathname.split('/').filter(Boolean).pop() ?? '';
   const [card, setCard] = useState<Card | null>(null);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [rewards, setRewards] = useState<Reward[]>([]);
-  const [design, setDesign] = useState<Design>(defaultDesign);
-  const [qr, setQr] = useState('');
-  const [claim, setClaim] = useState<Claim | null>(null);
-  const [claimQr, setClaimQr] = useState('');
-  const [claiming, setClaiming] = useState(false);
+  const [design, setDesign] = useState<Design>({
+    template_id: 'custom',
+    primary_color: '#173D32',
+    secondary_color: '#D3A84C',
+    background_color: '#F7F7F3',
+    text_color: '#FFFFFF',
+    button_color: '#173D32',
+    border_radius: 24,
+  });
+  const [designConfig, setDesignConfig] = useState(defaultLoyaltyDesignConfig);
+  const [program, setProgram] = useState({
+    program_type: 'POINTS' as 'STAMP' | 'DISCOUNT' | 'POINTS',
+    stamp_goal: 10,
+    stamps_balance: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [showIosInstallHelp, setShowIosInstallHelp] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
-  const [installDone, setInstallDone] = useState(false);
-  const [designConfig, setDesignConfig] = useState(defaultLoyaltyDesignConfig);
-  const [program, setProgram] = useState({ program_type: 'POINTS' as 'STAMP'|'DISCOUNT'|'POINTS', stamp_goal: 10, discount_percent: 0, discount_valid_days: 7, stamps_balance: 0, stamps_total: 0 });
 
-  const cardUrl = useMemo(() => window.location.href, []);
+  const cardUrl = window.location.href;
 
   useEffect(() => {
-    if (token) {
-      window.localStorage.setItem('tapmarrakech:customer-card-token', token);
-      const request = indexedDB.open('tapmarrakech-pwa', 1);
-      request.onupgradeneeded = () => {
-        if (!request.result.objectStoreNames.contains('settings')) request.result.createObjectStore('settings');
-      };
-      request.onsuccess = () => {
-        const db = request.result;
-        const tx = db.transaction('settings', 'readwrite');
-        tx.objectStore('settings').put(token, 'customer-card-token');
-        tx.oncomplete = () => db.close();
-      };
+    if (!token) {
+      setError('Carte de fidélité introuvable.');
+      setLoading(false);
+      return;
     }
+
+    window.localStorage.setItem('tapmarrakech:customer-card-token', token);
 
     const standalone =
       window.matchMedia?.('(display-mode: standalone)').matches ||
       (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
-    setIsStandalone(standalone);
 
-    const handleBeforeInstallPrompt = (event: Event) => {
-      event.preventDefault();
-      setInstallPrompt(event as BeforeInstallPromptEvent);
+    const request = indexedDB.open('tapmarrakech-pwa', 1);
+    request.onupgradeneeded = () => {
+      if (!request.result.objectStoreNames.contains('settings')) request.result.createObjectStore('settings');
+    };
+    request.onsuccess = () => {
+      const db = request.result;
+      const tx = db.transaction('settings', 'readwrite');
+      tx.objectStore('settings').put(token, 'customer-card-token');
+      tx.oncomplete = () => db.close();
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-  }, [token]);
-
-  async function installCard() {
-    if (!installPrompt) {
-      setShowIosInstallHelp(true);
-      return;
-    }
-    await installPrompt.prompt();
-    const result = await installPrompt.userChoice;
-    if (result.outcome === 'accepted') {
-      setInstallPrompt(null);
-      setInstallDone(true);
-    }
-  }
-
-  useEffect(() => {
-    let active = true;
-
     const load = async () => {
-      if (!token) {
-        setError('Carte de fidélité introuvable.');
+      const [
+        { data: cardData, error: cardError },
+        { data: designData },
+        { data: programData },
+      ] = await Promise.all([
+        supabase.rpc('get_public_loyalty_card', { p_access_token: token }),
+        supabase.rpc('get_public_loyalty_card_config', { p_access_token: token }),
+        supabase.rpc('get_public_loyalty_program_context', { p_access_token: token }),
+      ]);
+
+      if (cardError || !cardData?.[0]) {
+        setError('Cette carte de fidélité est introuvable ou indisponible.');
         setLoading(false);
         return;
       }
 
-      setLoading(true);
-      setError('');
+      const nextCard = cardData[0] as Card;
+      setCard(nextCard);
 
-      const [
-        { data: cardData, error: cardError },
-        { data: txData },
-        { data: designData },
-        { data: rewardsData },
-        { data: programData },
-      ] = await Promise.all([
-        supabase.rpc('get_public_loyalty_card', { p_access_token: token }),
-        supabase.rpc('get_public_loyalty_transactions', { p_access_token: token }),
-        supabase.rpc('get_public_loyalty_card_config', { p_access_token: token }),
-        supabase.rpc('get_public_loyalty_rewards', { p_access_token: token }),
-        supabase.rpc('get_public_loyalty_program_context', { p_access_token: token }),
-      ]);
-
-      if (!active) return;
-
-      if (cardError || !cardData?.[0]) {
-        setCard(null);
-        setError('Cette carte de fidélité est introuvable ou indisponible.');
-      } else {
-        const nextCard = cardData[0] as Card;
-        setCard(nextCard);
-        setTransactions((txData ?? []) as Transaction[]);
-        const designRow = Array.isArray(designData) ? designData[0] : designData;
-        if (designRow) {
-          setDesign({
-            template_id: designRow.template_id ?? defaultDesign.template_id,
-            primary_color: designRow.primary_color ?? defaultDesign.primary_color,
-            secondary_color: designRow.secondary_color ?? defaultDesign.secondary_color,
-            background_color: designRow.background_color ?? defaultDesign.background_color,
-            text_color: designRow.text_color ?? defaultDesign.text_color,
-            button_color: designRow.button_color ?? defaultDesign.button_color,
-            border_radius: Number(designRow.border_radius ?? defaultDesign.border_radius),
-          });
-          setDesignConfig({ ...defaultLoyaltyDesignConfig, ...(designRow.design_config ?? {}) });
-        }
-        setRewards((rewardsData ?? []) as Reward[]);
-        const programRow = Array.isArray(programData) ? programData[0] : programData;
-        if (programRow) setProgram({ program_type: programRow.program_type ?? 'POINTS', stamp_goal: Number(programRow.stamp_goal ?? 10), discount_percent: Number(programRow.discount_percent ?? 0), discount_valid_days: Number(programRow.discount_valid_days ?? 7), stamps_balance: Number(programRow.stamps_balance ?? 0), stamps_total: Number(programRow.stamps_total ?? 0) });
-
-        document.title = nextCard.establishment_name || 'Carte fidélité';
-        let manifest = document.querySelector('link[rel="manifest"]') as HTMLLinkElement | null;
-        if (!manifest) {
-          manifest = document.createElement('link');
-          manifest.rel = 'manifest';
-          document.head.appendChild(manifest);
-        }
-        manifest.href =
-          `/api/loyalty-manifest?name=${encodeURIComponent(nextCard.establishment_name || 'Carte fidélité')}&logo=${encodeURIComponent(nextCard.establishment_logo_url || '')}&start_url=${encodeURIComponent(cardUrl)}`;
-
-        const appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]') as HTMLMetaElement | null;
-        if (appleTitle) appleTitle.content = nextCard.establishment_name || 'Carte fidélité';
-
-        const appleIcon = document.querySelector('link[rel="apple-touch-icon"]') as HTMLLinkElement | null;
-        if (appleIcon && nextCard.establishment_logo_url) appleIcon.href = nextCard.establishment_logo_url;
-
-        try {
-          const dataUrl = await QRCode.toDataURL(cardUrl, {
-            width: 240,
-            margin: 2,
-            color: { dark: nextCard.establishment_logo_url ? '#17352a' : '#17352a', light: '#ffffff' },
-          });
-          if (active) setQr(dataUrl);
-        } catch {
-          // QR enhancement only.
-        }
+      const designRow = Array.isArray(designData) ? designData[0] : designData;
+      if (designRow) {
+        setDesign({
+          template_id: 'custom',
+          primary_color: designRow.primary_color ?? '#173D32',
+          secondary_color: designRow.secondary_color ?? '#D3A84C',
+          background_color: designRow.background_color ?? '#F7F7F3',
+          text_color: designRow.text_color ?? '#FFFFFF',
+          button_color: designRow.button_color ?? '#173D32',
+          border_radius: Number(designRow.border_radius ?? 24),
+        });
+        setDesignConfig({ ...defaultLoyaltyDesignConfig, ...(designRow.design_config ?? {}) });
       }
 
+      const programRow = Array.isArray(programData) ? programData[0] : programData;
+      if (programRow) {
+        setProgram({
+          program_type: programRow.program_type ?? 'POINTS',
+          stamp_goal: Number(programRow.stamp_goal ?? 10),
+          stamps_balance: Number(programRow.stamps_balance ?? 0),
+        });
+      }
+
+      document.title = nextCard.establishment_name || 'Carte fidélité';
+
+      let manifest = document.querySelector('link[rel="manifest"]') as HTMLLinkElement | null;
+      if (!manifest) {
+        manifest = document.createElement('link');
+        manifest.rel = 'manifest';
+        document.head.appendChild(manifest);
+      }
+      manifest.href = `/api/loyalty-manifest?name=${encodeURIComponent(nextCard.establishment_name || 'Carte fidélité')}&logo=${encodeURIComponent(nextCard.establishment_logo_url || '')}&start_url=${encodeURIComponent(cardUrl)}`;
+
+      const appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]') as HTMLMetaElement | null;
+      if (appleTitle) appleTitle.content = nextCard.establishment_name || 'Carte fidélité';
+
+      const appleIcon = document.querySelector('link[rel="apple-touch-icon"]') as HTMLLinkElement | null;
+      if (appleIcon && nextCard.establishment_logo_url) appleIcon.href = nextCard.establishment_logo_url;
+
       setLoading(false);
+
+      if (standalone) {
+        document.body.style.background = '#f7f7f3';
+      }
     };
 
     void load();
-    return () => { active = false; };
   }, [token, cardUrl]);
-
-  async function chooseReward(reward: Reward) {
-    if (!card || claiming) return;
-    if (card.points_balance < reward.points_required) {
-      alert(`Il vous manque ${reward.points_required - card.points_balance} points.`);
-      return;
-    }
-
-    setClaiming(true);
-    const { data, error: claimError } = await supabase.rpc('create_public_loyalty_reward_claim', {
-      p_access_token: token,
-      p_reward_id: reward.id,
-    });
-    setClaiming(false);
-
-    const row = Array.isArray(data) ? data[0] : data;
-    if (claimError || !row) {
-      alert(claimError?.message ?? 'Impossible de préparer la récompense.');
-      return;
-    }
-
-    const nextClaim = row as Claim;
-    try {
-      const url = `${window.location.origin}/loyalty/reward/${nextClaim.claim_token}`;
-      const dataUrl = await QRCode.toDataURL(url, {
-        width: 320,
-        margin: 2,
-        color: { dark: design.primary_color, light: '#ffffff' },
-      });
-      setClaim(nextClaim);
-      setClaimQr(dataUrl);
-    } catch {
-      alert('Impossible de générer le QR de récompense.');
-    }
-  }
-
-  function closeClaim() {
-    if (claiming) return;
-    setClaim(null);
-    setClaimQr('');
-  }
 
   if (loading) return <PageShell><Loader /></PageShell>;
 
@@ -270,8 +147,7 @@ export default function LoyaltyCard() {
     return (
       <PageShell>
         <div className="rounded-[2rem] bg-white p-8 text-center shadow-xl">
-          <WalletCards className="mx-auto text-gold" size={42} />
-          <h1 className="mt-5 font-display text-2xl text-forest">Carte indisponible</h1>
+          <h1 className="font-display text-2xl text-forest">Carte indisponible</h1>
           <p className="mt-2 text-sm text-ink/50">{error}</p>
         </div>
       </PageShell>
@@ -279,92 +155,35 @@ export default function LoyaltyCard() {
   }
 
   const fullName = `${card.first_name} ${card.last_name ?? ''}`.trim();
-  const isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+  const mode = designConfig.card_mode === 'STAMP' || program.program_type === 'STAMP' ? 'STAMP' : 'QR';
 
   return (
-    <PageShell>
-      <div className="space-y-5">
+    <main className="min-h-screen bg-[#eef0ed] px-3 py-5 sm:grid sm:min-h-screen sm:place-items-center sm:px-6 sm:py-8">
+      <div className="w-full max-w-[430px]">
         <LoyaltyCardVisual
-          design={{ ...design, config: designConfig }}
+          design={{ ...design, config: { ...designConfig, card_mode: mode } }}
           card={{
             establishmentName: card.establishment_name,
-            logoUrl: card.establishment_logo_url,
-            points: card.points_balance,
+            logoUrl: designConfig.logo_url || card.establishment_logo_url,
+            points: 0,
             customerName: fullName,
             loyaltyNumber: card.loyalty_number,
             cardUrl,
             stampsBalance: program.stamps_balance,
             stampGoal: program.stamp_goal,
-            discountPercent: program.discount_percent,
           }}
           side="front"
-          programType={program.program_type}
+          programType={mode === 'STAMP' ? 'STAMP' : 'POINTS'}
         />
-        <div className="overflow-hidden border shadow-soft" style={{ borderRadius: design.border_radius, borderColor: `${design.primary_color}18`, background: design.background_color }}>
-          <div className="p-6" style={{ color: design.text_color }}>
-            {qr && (
-              <div className="rounded-2xl p-5 text-center" style={{ background: `${design.primary_color}08` }}>
-                <img src={qr} alt="QR de votre carte fidélité" className="mx-auto h-44 w-44 rounded-xl bg-white p-2" />
-                <p className="mt-3 text-xs opacity-55">Présentez ce QR au personnel pour accéder à votre carte.</p>
-              </div>
-            )}
-            <section className="mt-6">
-              <div className="flex items-center gap-2"><Gift size={17} style={{ color: design.secondary_color }} /><h2 className="font-semibold">Récompenses</h2></div>
-              {rewards.length === 0 ? <p className="mt-3 rounded-xl p-4 text-xs opacity-50" style={{ background: `${design.primary_color}08` }}>Aucune récompense disponible pour le moment.</p> :
-                <div className="mt-3 space-y-2">{rewards.map(reward => {
-                  const available = card.points_balance >= reward.points_required;
-                  return <div key={reward.id} className="rounded-2xl border p-4" style={{ borderColor: `${design.primary_color}12`, background: available ? '#fff' : `${design.primary_color}05` }}>
-                    <div className="flex items-center justify-between gap-3"><div><p className="font-semibold">{reward.name}</p><p className="mt-1 text-[11px] opacity-50">{reward.points_required} points · {reward.reward_type === 'DISCOUNT' ? `-${reward.discount_percent}%` : 'cadeau'}</p></div><button type="button" disabled={!available || claiming} onClick={() => void chooseReward(reward)} className="rounded-xl px-3 py-2 text-[11px] font-semibold text-white disabled:opacity-30" style={{ background: design.button_color }}>Utiliser</button></div>
-                  </div>;
-                })}</div>}
-            </section>
-            {!isStandalone ? <div className="mt-5 rounded-2xl p-4" style={{ background: `${design.primary_color}08` }}>
-              <p className="text-sm font-semibold">Gardez votre carte sur votre téléphone</p>
-              <p className="mt-1 text-xs leading-5 opacity-55">Ajoutez-la à votre écran d’accueil pour la retrouver à chaque visite.</p>
-              <button type="button" onClick={installCard} className="mt-4 w-full rounded-xl px-4 py-3 text-xs font-semibold text-white" style={{ background: design.button_color }}>{installPrompt ? 'Ajouter ma carte à l’écran d’accueil' : isIos ? 'Ajouter ma carte sur mon iPhone' : 'Ajouter ma carte sur mon téléphone'}</button>
-              {installDone && <p className="mt-3 rounded-xl bg-white p-3 text-[11px] font-medium text-forest">✓ Votre carte a été ajoutée à votre écran d’accueil.</p>}
-              {isIos && showIosInstallHelp && <div className="mt-3 rounded-xl bg-white p-3 text-[11px] leading-5 text-ink/55"><p className="font-semibold text-forest">Sur iPhone</p><p className="mt-1">1. Touchez <strong>Partager</strong> dans Safari.<br/>2. Choisissez <strong>Sur l’écran d’accueil</strong>.<br/>3. Touchez <strong>Ajouter</strong>.</p></div>}
-            </div> : <div className="mt-5 rounded-2xl p-4" style={{ background: `${design.primary_color}08` }}><p className="text-sm font-semibold">✓ Votre carte est déjà enregistrée</p></div>}
-            <div className="mt-6 grid grid-cols-3 gap-2"><Metric label="Gagnés" value={card.total_points_earned}/><Metric label="Utilisés" value={card.total_points_redeemed}/><Metric label="Visites" value={card.visit_count}/></div>
-            <section className="mt-7"><div className="flex items-center gap-2"><History size={17}/><h2 className="font-semibold">Historique</h2></div>{transactions.length===0?<p className="mt-4 rounded-xl p-4 text-xs opacity-50" style={{background:`${design.primary_color}08`}}>Aucune opération enregistrée pour le moment.</p>:<div className="mt-3 divide-y rounded-2xl border" style={{borderColor:`${design.primary_color}12`}}>{transactions.map(tx=><div key={tx.id} className="flex items-center justify-between gap-4 p-4"><div><p className="text-sm font-medium">{tx.description||tx.transaction_type||'Opération fidélité'}</p><p className="mt-1 text-[11px] opacity-40">{new Date(tx.created_at).toLocaleDateString('fr-FR')}</p></div><span className={tx.points>=0?'font-semibold text-forest':'font-semibold text-[#a15c50]'}>{tx.points>=0?'+':''}{tx.points}</span></div>)}</div>}</section>
-          </div>
-        </div>
       </div>
-
-      {claim && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4">
-          <div className="w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-2xl">
-            <div className="flex items-center justify-between">
-              <div className="text-left">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">Récompense</p>
-                <h2 className="mt-1 font-display text-xl text-forest">{claim.reward_name}</h2>
-              </div>
-              <button type="button" onClick={closeClaim} className="rounded-xl p-2 text-ink/40"><X size={18} /></button>
-            </div>
-            <img src={claimQr} alt="QR de récompense" className="mx-auto mt-5 h-64 w-64 rounded-2xl bg-white p-2 shadow-soft" />
-            <p className="mt-4 text-sm font-semibold text-forest">{claim.reward_type === 'DISCOUNT' ? `Réduction de ${claim.discount_percent}%` : 'Récompense offerte'}</p>
-            <p className="mt-1 text-xs text-ink/45">{claim.points_required} points seront utilisés lors de la validation.</p>
-            <p className="mt-3 rounded-xl bg-[#f7f7f3] p-3 text-[11px] text-ink/45">Présentez ce QR au personnel. Il est valable 2 minutes et ne peut être utilisé qu'une seule fois.</p>
-          </div>
-        </div>
-      )}
-    </PageShell>
+    </main>
   );
 }
 
-function PageShell({ children }: { children: ReactNode }) {
+function PageShell({ children }: { children: React.ReactNode }) {
   return <main className="min-h-screen bg-[#f7f7f3] px-4 py-6 sm:py-10"><div className="mx-auto w-full max-w-md">{children}</div></main>;
 }
 
 function Loader() {
-  return <div className="grid min-h-[70vh] place-items-center"><div className="h-9 w-9 animate-spin rounded-full border-2 border-forest border-t-transparent" /></div>;
+  return <div className="grid min-h-screen place-items-center"><div className="h-9 w-9 animate-spin rounded-full border-2 border-forest border-t-transparent" /></div>;
 }
-
-function Metric({ label, value }: { label: string; value: number }) {
-  return <div className="rounded-xl bg-[#f7f7f3] p-3 text-center"><p className="text-[10px] text-ink/40">{label}</p><p className="mt-1 text-sm font-semibold text-forest">{value}</p></div>;
-}
-
-type BeforeInstallPromptEvent = Event & {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
-};
