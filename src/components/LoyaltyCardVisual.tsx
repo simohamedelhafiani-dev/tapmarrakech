@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Gift, MapPin, Phone } from 'lucide-react';
+import { Gift } from 'lucide-react';
 import QRCode from 'qrcode';
 
 export type LoyaltyDesignConfig = {
@@ -40,6 +40,7 @@ export type LoyaltyVisualCard = {
   points?: number;
   stampsBalance?: number;
   stampGoal?: number;
+  stampRewardName?: string | null;
   discountPercent?: number;
   discountExpiresAt?: string | null;
   customerName?: string;
@@ -141,12 +142,18 @@ export function LoyaltyCardVisual({
                   <p className="text-[8px] uppercase tracking-[0.18em] opacity-55">Visites</p>
                   <p className="text-[9px] font-medium opacity-70">{card.stampsBalance ?? 0} / {card.stampGoal ?? 10}</p>
                 </div>
-                <div className="mt-2 flex gap-1.5">
-                  {Array.from({ length: Math.min(card.stampGoal ?? 10, 12) }).map((_, i) => (
-                    <span key={i} className={`grid place-items-center border ${compact ? 'h-4 w-4' : 'h-5 w-5'} ${config.stamp_style === 'squares' ? 'rounded-md' : 'rounded-full'}`} style={{ borderColor: design.secondary_color, background: i < (card.stampsBalance ?? 0) ? design.secondary_color : 'transparent' }}>
-                      {i < (card.stampsBalance ?? 0) && <span className="h-1.5 w-1.5 rounded-full bg-white/90" />}
-                    </span>
-                  ))}
+                <div className="mt-2 flex items-center gap-2">
+                  <div className="flex min-w-0 flex-1 gap-1.5">
+                    {Array.from({ length: Math.min(card.stampGoal ?? 10, 12) }).map((_, i) => (
+                      <span key={i} className={`grid place-items-center border ${compact ? 'h-4 w-4' : 'h-5 w-5'} ${config.stamp_style === 'squares' ? 'rounded-md' : 'rounded-full'}`} style={{ borderColor: design.secondary_color, background: i < (card.stampsBalance ?? 0) ? design.secondary_color : 'transparent' }}>
+                        {i < (card.stampsBalance ?? 0) && <span className="h-1.5 w-1.5 rounded-full bg-white/90" />}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="shrink-0 rounded-xl border px-2 py-1.5 text-right" style={{ borderColor: design.secondary_color }}>
+                    <Gift size={compact ? 12 : 14} style={{ color: design.secondary_color }} className="ml-auto" />
+                    <p className="mt-0.5 max-w-[92px] truncate text-[8px] font-semibold">{card.stampRewardName || 'Récompense'}</p>
+                  </div>
                 </div>
               </div>
             ) : (
@@ -162,22 +169,7 @@ export function LoyaltyCardVisual({
             <span className="h-px w-8" style={{ background: design.secondary_color }} />
           </div>
         </div>
-      ) : (
-        <div className="relative flex h-full flex-col justify-between">
-          <div>
-            <p className={`font-display ${compact ? 'text-lg' : 'text-2xl'}`} style={{ color: design.background_color }}>{config.back_title}</p>
-            <p className="mt-3 max-w-[70%] text-xs leading-5 opacity-75">{config.back_message}</p>
-          </div>
-          <div className="flex items-end justify-between gap-4">
-            <div className="space-y-1 text-[10px] opacity-65">
-              {card.phone && <p className="flex items-center gap-1.5"><Phone size={11} />{card.phone}</p>}
-              {card.address && <p className="flex items-center gap-1.5"><MapPin size={11} />{card.address}</p>}
-              {card.loyaltyNumber && <p>N° {card.loyaltyNumber}</p>}
-            </div>
-            {logoUrl && <img src={logoUrl} alt="" className={`rounded-full bg-white object-contain p-2 ${compact ? 'h-12 w-12' : 'h-20 w-20'}`} />}
-          </div>
-        </div>
-      )}
+      ) : null
     </div>
   );
 }
