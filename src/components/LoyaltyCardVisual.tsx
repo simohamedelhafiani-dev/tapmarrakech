@@ -13,6 +13,7 @@ export type LoyaltyDesignConfig = {
   show_points: boolean;
   stamp_style: 'circles' | 'squares' | 'stars' | 'hearts';
   background_image_url: string | null;
+  logo_url?: string | null;
   ai_prompt?: string;
   ai_generation_id?: string;
 };
@@ -28,6 +29,7 @@ export const defaultLoyaltyDesignConfig: LoyaltyDesignConfig = {
   show_points: true,
   stamp_style: 'circles',
   background_image_url: null,
+  logo_url: null,
 };
 
 export type LoyaltyVisualCard = {
@@ -79,6 +81,7 @@ export function LoyaltyCardVisual({
   }, [card.cardUrl, config.show_qr, design.primary_color, side]);
 
   const isAIDesign = Boolean(config.ai_generation_id && config.background_image_url);
+  const logoUrl = config.logo_url || card.logoUrl;
   const logoStyle = {
     transform: `translate(${config.logo_x}px, ${config.logo_y}px)`,
   };
@@ -104,8 +107,8 @@ export function LoyaltyCardVisual({
         <div className="relative flex h-full flex-col justify-between">
           <div className="flex items-start justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3" style={logoStyle}>
-              {card.logoUrl ? (
-                <img src={card.logoUrl} alt="" className={`rounded-full bg-white object-contain p-1.5 shadow-sm ${compact ? 'h-9 w-9' : 'h-14 w-14'}`} />
+              {logoUrl ? (
+                <img src={logoUrl ?? undefined} alt="" className={`rounded-full bg-white object-contain p-1.5 shadow-sm ${compact ? 'h-9 w-9' : 'h-14 w-14'}`} />
               ) : (
                 <div className={`grid place-items-center rounded-full border font-semibold ${compact ? 'h-9 w-9 text-[9px]' : 'h-14 w-14 text-xs'}`} style={{ borderColor: design.secondary_color, color: design.secondary_color }}>
                   {card.establishmentName.slice(0, 2).toUpperCase()}
@@ -172,7 +175,7 @@ export function LoyaltyCardVisual({
               {card.address && <p className="flex items-center gap-1.5"><MapPin size={11} />{card.address}</p>}
               {card.loyaltyNumber && <p>N° {card.loyaltyNumber}</p>}
             </div>
-            {card.logoUrl && <img src={card.logoUrl} alt="" className={`rounded-full bg-white object-contain p-2 ${compact ? 'h-12 w-12' : 'h-20 w-20'}`} />}
+            {logoUrl && <img src={logoUrl} alt="" className={`rounded-full bg-white object-contain p-2 ${compact ? 'h-12 w-12' : 'h-20 w-20'}`} />}
           </div>
         </div>
       )}
