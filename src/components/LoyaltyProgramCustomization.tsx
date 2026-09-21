@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Check, Gift, Loader2, QrCode, Sparkles, Trash2 } from 'lucide-react';
+import { Check, Loader2, QrCode, Sparkles, Trash2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { defaultLoyaltyDesignConfig, LoyaltyCardVisual, type LoyaltyDesignConfig } from './LoyaltyCardVisual';
 
