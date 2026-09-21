@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import { LoyaltyCardVisual, defaultLoyaltyDesignConfig } from '@/components/LoyaltyCardVisual';
 import { supabase } from '@/lib/supabase';
 
@@ -180,7 +181,7 @@ export default function LoyaltyCard() {
   );
 }
 
-function PageShell({ children }: { children: React.ReactNode }) {
+function PageShell({ children }: { children: ReactNode }) {
   return <main className="min-h-screen bg-[#f7f7f3] px-4 py-6 sm:py-10"><div className="mx-auto w-full max-w-md">{children}</div></main>;
 }
 
