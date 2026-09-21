@@ -247,7 +247,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
   );
 }
 
-function AssetPicker({ title, description, value, fallback, loading, inputRef, onPick }: { title: string; description: string; value?: string | null; fallback?: string | null; loading: boolean; inputRef: React.RefObject<HTMLInputElement | null> }) {
+function AssetPicker({ title, description, value, fallback, loading, inputRef }: { title: string; description: string; value?: string | null; fallback?: string | null; loading: boolean; inputRef: React.RefObject<HTMLInputElement | null> }) {
   const image = value || fallback;
   return (
     <button type="button" onClick={() => inputRef.current?.click()} className="group overflow-hidden rounded-2xl border border-dashed border-ink/15 bg-[#fafaf8] text-left">
