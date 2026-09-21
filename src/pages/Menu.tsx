@@ -183,10 +183,6 @@ export default function Menu() {
     setLoading(false);
   }
 
-  const selectedEstablishment = establishments.find(
-    (establishment) => establishment.id === establishmentId
-  );
-
   const itemsByCategory = useMemo(() => {
     const map: Record<string, MenuItem[]> = {};
 
