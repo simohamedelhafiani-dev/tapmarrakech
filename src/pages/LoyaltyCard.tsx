@@ -140,7 +140,64 @@ export default function LoyaltyCard() {
     };
 
     void load();
+
+    return () => {
+      // Realtime is attached after the initial load below.
+    };
   }, [token, cardUrl]);
+
+  useEffect(() => {
+    if (!card?.customer_id) return;
+
+    const refreshCard = async () => {
+      const [{ data: cardData }, { data: programData }] = await Promise.all([
+        supabase.rpc('get_public_loyalty_card', { p_access_token: token }),
+        supabase.rpc('get_public_loyalty_program_context', { p_access_token: token }),
+      ]);
+
+      if (cardData?.[0]) setCard(cardData[0] as Card);
+      const programRow = Array.isArray(programData) ? programData[0] : programData;
+      if (programRow) {
+        setProgram({
+          program_type: programRow.program_type ?? 'POINTS',
+          stamp_goal: Number(programRow.stamp_goal ?? 10),
+          stamps_balance: Number(programRow.stamps_balance ?? 0),
+        });
+      }
+    };
+
+    const channel = supabase
+      .channel(`loyalty-card-${card.customer_id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'loyalty_customers',
+          filter: `id=eq.${card.customer_id}`,
+        },
+        () => {
+          void refreshCard();
+        },
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'loyalty_transactions',
+          filter: `customer_id=eq.${card.customer_id}`,
+        },
+        () => {
+          void refreshCard();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [card?.customer_id, token]);
 
   if (loading) return <PageShell><Loader /></PageShell>;
 
