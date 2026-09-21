@@ -321,7 +321,22 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
             <div className="mt-4 space-y-4">
               <label className="block text-xs font-medium text-ink/50">Titre de la carte<input value={design.design_config.front_title} onChange={e => updateConfig({front_title:e.target.value})} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm"/></label>
               <label className="block text-xs font-medium text-ink/50">Sous-titre<textarea value={design.design_config.front_subtitle} onChange={e => updateConfig({front_subtitle:e.target.value})} rows={3} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm"/></label>
-              <div className="grid grid-cols-3 gap-2">{[['principal','primary_color'],['accent','secondary_color'],['fond','background_color']].map(([label,key])=><label key={key} className="text-[10px] uppercase text-ink/40">{label}<input type="color" value={(design as any)[key]} onChange={e=>setDesign(d=>({...d,[key]:e.target.value,published:false}))} className="mt-1 h-9 w-full cursor-pointer rounded-lg border-0 bg-transparent p-0"/></label>)}</div>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {([['principal','primary_color'],['accent','secondary_color'],['fond','background_color'],['texte','text_color']] as const).map(([label,key])=><label key={key} className="text-[10px] uppercase text-ink/40">{label}<input type="color" value={design[key]} onChange={e=>setDesign(d=>({...d,[key]:e.target.value,published:false}))} className="mt-1 h-9 w-full cursor-pointer rounded-lg border-0 bg-transparent p-0"/></label>)}
+              </div>
+              <div className="space-y-3 rounded-xl border border-ink/10 bg-white p-3">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-ink/40">Identité visuelle</p>
+                  <p className="mt-1 text-[11px] text-ink/40">Chaque établissement peut remplacer son logo et sa photo sans changer le template.</p>
+                </div>
+                <label className="block text-[10px] uppercase text-ink/40">Logo personnalisé · URL
+                  <input value={design.design_config.logo_url ?? ''} onChange={e=>updateConfig({logo_url:e.target.value || null})} placeholder="https://..." className="mt-1 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-xs outline-none focus:border-gold"/>
+                </label>
+                <label className="block text-[10px] uppercase text-ink/40">Photo de couverture · URL
+                  <input value={design.design_config.background_image_url ?? ''} onChange={e=>updateConfig({background_image_url:e.target.value || null, ai_generation_id: undefined})} placeholder="https://..." className="mt-1 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-xs outline-none focus:border-gold"/>
+                </label>
+                <button type="button" onClick={()=>updateConfig({logo_url:null,background_image_url:null,ai_generation_id:undefined,ai_prompt:undefined})} className="text-[10px] font-semibold text-ink/45 hover:text-forest">Réinitialiser les images</button>
+              </div>
               <div className="rounded-xl border border-ink/10 bg-white p-3"><p className="text-[10px] font-semibold uppercase tracking-wider text-ink/40">Logo</p><p className="mt-1 text-xs text-ink/45">Position horizontale / verticale</p><div className="mt-3 grid grid-cols-3 gap-1">{[-24,0,24].map(y=><button key={y} type="button" onClick={()=>updateConfig({logo_y:y})} className={`h-7 rounded border text-[9px] ${design.design_config.logo_y===y?'border-gold bg-gold/10':'border-ink/10'}`}>{y===0?'Centre':y<0?'Haut':'Bas'}</button>)}</div><input type="range" min="-50" max="50" value={design.design_config.logo_x} onChange={e=>updateConfig({logo_x:Number(e.target.value)})} className="mt-3 w-full"/></div>
               <label className="flex items-center justify-between rounded-xl border border-ink/10 bg-white p-3 text-xs"><span className="flex items-center gap-2"><QrCode size={15}/> QR fidélité</span><input type="checkbox" checked={design.design_config.show_qr} onChange={e=>updateConfig({show_qr:e.target.checked})}/></label>
               <label className="flex items-center justify-between rounded-xl border border-ink/10 bg-white p-3 text-xs"><span>Afficher le solde</span><input type="checkbox" checked={design.design_config.show_points} onChange={e=>updateConfig({show_points:e.target.checked})}/></label>
