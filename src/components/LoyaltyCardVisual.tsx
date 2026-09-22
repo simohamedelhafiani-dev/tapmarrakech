@@ -169,7 +169,7 @@ export function LoyaltyCardVisual({
       ) : (
         <div
           className="pointer-events-none absolute inset-0 z-0"
-          style={{ background }}}
+          style={{ background }}
         />
       )}
       <div
