@@ -407,9 +407,37 @@ export function LoyaltyExperience({ config }: { config: LoyaltyExperienceConfig 
   const compact = sector === 'cafe' || sector === 'bakery';
 
   return (
-    <div className="mx-auto w-full max-w-[430px] overflow-hidden bg-white shadow-[0_25px_80px_rgba(0,0,0,.14)]" style={{ borderRadius: radius }}>
-      <div style={{ background: config.backgroundColor, color: config.textColor }}>
-        <SectorHero config={config} sector={sector} />
+    <div
+      className="relative mx-auto w-full max-w-[430px] overflow-hidden shadow-[0_25px_80px_rgba(0,0,0,.14)]"
+      style={{ borderRadius: radius }}
+    >
+      {config.coverImageUrl ? (
+        <>
+          <div
+            className="pointer-events-none absolute inset-0 z-0 bg-cover bg-center"
+            style={{
+              backgroundImage: `url("${config.coverImageUrl}")`,
+              backgroundPosition: 'center',
+              backgroundSize: 'cover',
+              backgroundRepeat: 'no-repeat',
+            }}
+          />
+          <div
+            className="pointer-events-none absolute inset-0 z-0"
+            style={{
+              background: `linear-gradient(180deg, ${config.primaryColor}99 0%, ${config.primaryColor}55 38%, ${config.backgroundColor}e8 72%, ${config.backgroundColor}f5 100%)`,
+            }}
+          />
+        </>
+      ) : (
+        <div
+          className="pointer-events-none absolute inset-0 z-0"
+          style={{ background: config.backgroundColor }}
+        />
+      )}
+
+      <div className="relative z-10" style={{ color: config.textColor }}>
+        <SectorHero config={{ ...config, coverImageUrl: null }} sector={sector} />
         <SectorProgress config={config} sector={sector} />
         <div className={`px-4 pb-6 sm:px-5 ${compact ? 'pt-1' : 'pt-5'}`}>
           <LoyaltyReward config={config} />
