@@ -86,7 +86,7 @@ export default function LoyaltyCard() {
         { data: historyData },
       ] = await Promise.all([
         supabase.rpc('get_public_loyalty_card', { p_access_token: token }),
-        supabase.rpc('get_public_loyalty_card_config', { p_access_token: token }),
+        supabase.rpc('get_public_loyalty_card_builder_config', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_program_context', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_history', { p_access_token: token, p_limit: 20 }),
       ]);
@@ -225,13 +225,45 @@ export default function LoyaltyCard() {
   }
 
   const fullName = `${card.first_name} ${card.last_name ?? ''}`.trim();
-  const mode = designConfig.card_mode === 'STAMP' || program.program_type === 'STAMP' ? 'STAMP' : 'QR';
+  const configuredType = (designConfig as typeof designConfig & { loyaltyType?: string }).loyaltyType;
+  const mode = configuredType === 'STAMP' || designConfig.card_mode === 'STAMP' || program.program_type === 'STAMP'
+    ? 'STAMP'
+    : configuredType === 'DISCOUNT'
+      ? 'DISCOUNT'
+      : configuredType === 'REWARD'
+        ? 'REWARD'
+        : configuredType === 'TIER'
+          ? 'TIER'
+          : 'POINTS';
+
+  const builderConfig = designConfig as typeof designConfig & {
+    logoUrl?: string | null;
+    coverImageUrl?: string | null;
+    cardTitle?: string;
+    cardSubtitle?: string;
+    rewardTitle?: string;
+    rewardDescription?: string;
+    rewardName?: string;
+    stampGoal?: number;
+    discountPercent?: number;
+  };
+
+  const visualCardMode: 'QR' | 'STAMP' = mode === 'STAMP' ? 'STAMP' : 'QR';
+
+  const visualConfig = {
+    ...designConfig,
+    logo_url: builderConfig.logoUrl || designConfig.logo_url,
+    background_image_url: builderConfig.coverImageUrl || designConfig.background_image_url,
+    front_title: builderConfig.cardTitle || designConfig.front_title,
+    front_subtitle: builderConfig.cardSubtitle || designConfig.front_subtitle,
+    card_mode: visualCardMode,
+  };
 
   return (
     <main className="min-h-screen bg-[#eef0ed] px-3 py-5 sm:grid sm:min-h-screen sm:place-items-center sm:px-6 sm:py-8">
       <div className="w-full max-w-[430px]">
         <LoyaltyCardVisual
-          design={{ ...design, config: { ...designConfig, card_mode: mode } }}
+          design={{ ...design, config: visualConfig }}
           card={{
             establishmentName: card.establishment_name,
             logoUrl: designConfig.logo_url || card.establishment_logo_url,
@@ -244,7 +276,7 @@ export default function LoyaltyCard() {
             stampRewardName: program.stamp_reward_name,
           }}
           side="front"
-          programType={mode === 'STAMP' ? 'STAMP' : 'POINTS'}
+          programType={mode}
         />
         <div className="mt-4 grid grid-cols-2 gap-3">
           <div className="rounded-2xl bg-white p-4 shadow-sm">
