@@ -755,15 +755,19 @@ export default function PublicReview() {
         {section === 'menu' && (
           <main className="relative -mx-5 min-h-screen overflow-hidden px-5 pb-16 pt-4 text-white">
             {menuAiDesign?.background_image_url && (
-              <div
-                className="pointer-events-none absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: 'url("' + menuAiDesign.background_image_url + '")' }}
+              <img
+                src={menuAiDesign.background_image_url}
+                alt=""
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 h-full w-full object-cover"
               />
             )}
             {Array.isArray(menuAiDesign?.wallpaper_library) && menuAiDesign.wallpaper_library[0] && !menuAiDesign?.background_image_url && (
-              <div
-                className="pointer-events-none absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: 'url("' + menuAiDesign.wallpaper_library[0] + '")' }}
+              <img
+                src={menuAiDesign.wallpaper_library[0]}
+                alt=""
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 h-full w-full object-cover"
               />
             )}
             <div className="pointer-events-none absolute inset-0 bg-black/18" />
@@ -787,7 +791,7 @@ export default function PublicReview() {
                 <button
                   type="button"
                   onClick={() => navigate('home')}
-                  className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/20 px-3.5 py-2 text-xs font-semibold text-white/85 backdrop-blur-md"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/20 px-3.5 py-2 text-xs font-semibold text-white/85"
                 >
                   <ArrowLeft size={15} />
                   Accueil
@@ -1457,7 +1461,7 @@ function AIPremiumMenu({
         muted: 'text-white/65',
         accent: 'text-gold',
         line: 'border-white/15',
-        card: 'bg-black/35 border-white/15 backdrop-blur-xl',
+        card: 'bg-black/35 border-white/15',
         product: 'text-white',
       }
     : style === 'dark'
@@ -1533,7 +1537,7 @@ function AIPremiumMenu({
       </section>
 
       {navSections.length > 1 && (
-        <div className={`sticky top-0 z-20 overflow-x-auto border-b px-5 py-3 backdrop-blur-md scrollbar-hide ${
+        <div className={`sticky top-0 z-20 overflow-x-auto border-b px-5 py-3 scrollbar-hide ${
           wallpaper ? 'border-white/10 bg-black/45' : 'border-ink/10 bg-[#f0ece2]/95'
         }`}>
           <div className="flex min-w-max gap-2">
@@ -1543,7 +1547,7 @@ function AIPremiumMenu({
                 type="button"
                 onClick={() => scrollToSection(visibleSections.indexOf(section))}
                 className={
-                  'rounded-full border px-4 py-2 text-[10px] font-semibold shadow-sm backdrop-blur-md ' +
+                  'rounded-full border px-4 py-2 text-[10px] font-semibold shadow-sm ' +
                   (index === 0
                     ? 'border-gold/60 bg-gold text-forest'
                     : wallpaper
