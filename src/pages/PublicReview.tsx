@@ -770,15 +770,6 @@ export default function PublicReview() {
 
             <div className="relative z-10">
               <div className="flex items-center justify-between">
-                <button
-                  type="button"
-                  onClick={() => navigate('home')}
-                  className="inline-flex items-center gap-2 text-xs font-semibold text-white/85"
-                >
-                  <ArrowLeft size={15} />
-                  Accueil
-                </button>
-
                 {p.logo_url ? (
                   <div className="grid h-14 w-14 place-items-center overflow-hidden rounded-[17px] border border-white/15 bg-white/95 p-1.5 shadow-xl">
                     <img
@@ -792,6 +783,15 @@ export default function PublicReview() {
                     {p.name?.[0] || 'E'}
                   </div>
                 )}
+
+                <button
+                  type="button"
+                  onClick={() => navigate('home')}
+                  className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/20 px-3.5 py-2 text-xs font-semibold text-white/85 backdrop-blur-md"
+                >
+                  <ArrowLeft size={15} />
+                  Accueil
+                </button>
               </div>
 
               {menuDisplayMode === 'pdf' && menuPdfUrl ? (
