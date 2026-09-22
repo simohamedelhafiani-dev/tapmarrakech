@@ -111,7 +111,7 @@ export default function LoyaltyCard() {
       const designRow = Array.isArray(designData) ? designData[0] : designData;
       if (designRow) {
         setDesign({
-          template_id: 'custom',
+          template_id: designRow.template_id ?? 'custom',
           primary_color: designRow.primary_color ?? '#173D32',
           secondary_color: designRow.secondary_color ?? '#D3A84C',
           background_color: designRow.background_color ?? '#F7F7F3',
