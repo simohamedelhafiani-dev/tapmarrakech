@@ -753,44 +753,84 @@ export default function PublicReview() {
             MENU
         ===================================================== */}
         {section === 'menu' && (
-          <main className="px-5 pt-6">
-            <BackButton onClick={() => navigate('home')} />
-            {menuDisplayMode === 'pdf' && menuPdfUrl ? (
-              <section className="mt-6">
-                <div className="mb-4">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-gold">Menu</p>
-                  <h1 className="mt-1 font-display text-4xl text-forest">Notre menu</h1>
-                  <p className="mt-2 text-sm text-ink/45">Le menu original de l’établissement.</p>
-                </div>
-                <div className="overflow-hidden rounded-[24px] bg-white shadow-sm ring-1 ring-ink/5">
-                  <iframe
-                    src={menuPdfUrl}
-                    title={`Menu PDF de ${p.name}`}
-                    className="h-[75vh] min-h-[620px] w-full"
-                  />
-                </div>
-                <a href={menuPdfUrl} target="_blank" rel="noreferrer" className="mt-4 flex items-center justify-center gap-2 rounded-full bg-forest px-5 py-3.5 text-sm font-semibold text-white">
-                  Ouvrir le menu en plein écran
-                  <ExternalLink size={15} />
-                </a>
-              </section>
-            ) : menuAiDesign?.sections?.length ? (
-              <AIPremiumMenu
-                design={menuAiDesign}
-                place={p}
-                categories={categories}
-                items={items}
-                itemsByCategory={itemsByCategory}
-                photoMode={(p as any).menu_ai_photo_mode === 'without_photos' ? 'without_photos' : 'with_photos'}
-              />
-            ) : (
-              <MenuTemplate
-                template={menuTemplate}
-                place={p}
-                categories={categories}
-                itemsByCategory={itemsByCategory}
+          <main className="relative -mx-5 min-h-screen overflow-hidden px-5 pb-16 pt-4 text-white">
+            {menuAiDesign?.background_image_url && (
+              <div
+                className="pointer-events-none absolute inset-0 bg-cover bg-center bg-fixed"
+                style={{ backgroundImage: 'url("' + menuAiDesign.background_image_url + '")' }}
               />
             )}
+            {Array.isArray(menuAiDesign?.wallpaper_library) && menuAiDesign.wallpaper_library[0] && !menuAiDesign?.background_image_url && (
+              <div
+                className="pointer-events-none absolute inset-0 bg-cover bg-center bg-fixed"
+                style={{ backgroundImage: 'url("' + menuAiDesign.wallpaper_library[0] + '")' }}
+              />
+            )}
+            <div className="pointer-events-none absolute inset-0 bg-black/55" />
+
+            <div className="relative z-10">
+              <div className="flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => navigate('home')}
+                  className="inline-flex items-center gap-2 text-xs font-semibold text-white/85"
+                >
+                  <ArrowLeft size={15} />
+                  Accueil
+                </button>
+
+                {p.logo_url ? (
+                  <div className="grid h-14 w-14 place-items-center overflow-hidden rounded-[17px] border border-white/15 bg-white/95 p-1.5 shadow-xl">
+                    <img
+                      src={p.logo_url}
+                      alt={p.name}
+                      className="h-full w-full object-contain"
+                    />
+                  </div>
+                ) : (
+                  <div className="grid h-14 w-14 place-items-center rounded-[17px] border border-gold/30 bg-black/20 font-display text-2xl text-gold backdrop-blur-md">
+                    {p.name?.[0] || 'E'}
+                  </div>
+                )}
+              </div>
+
+              {menuDisplayMode === 'pdf' && menuPdfUrl ? (
+                <section className="mt-6">
+                  <div className="mb-4">
+                    <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-gold">Menu</p>
+                    <h1 className="mt-1 font-display text-4xl text-white">Notre menu</h1>
+                    <p className="mt-2 text-sm text-white/65">Le menu original de l’établissement.</p>
+                  </div>
+                  <div className="overflow-hidden rounded-[24px] bg-black/30 shadow-xl ring-1 ring-white/15 backdrop-blur-md">
+                    <iframe
+                      src={menuPdfUrl}
+                      title={`Menu PDF de ${p.name}`}
+                      className="h-[75vh] min-h-[620px] w-full"
+                    />
+                  </div>
+                  <a href={menuPdfUrl} target="_blank" rel="noreferrer" className="mt-4 flex items-center justify-center gap-2 rounded-full bg-gold px-5 py-3.5 text-sm font-semibold text-forest">
+                    Ouvrir le menu en plein écran
+                    <ExternalLink size={15} />
+                  </a>
+                </section>
+              ) : menuAiDesign?.sections?.length ? (
+                <AIPremiumMenu
+                  design={menuAiDesign}
+                  place={p}
+                  categories={categories}
+                  items={items}
+                  itemsByCategory={itemsByCategory}
+                  photoMode={(p as any).menu_ai_photo_mode === 'without_photos' ? 'without_photos' : 'with_photos'}
+                />
+              ) : (
+                <MenuTemplate
+                  template={menuTemplate}
+                  place={p}
+                  categories={categories}
+                  itemsByCategory={itemsByCategory}
+                />
+              )}
+            </div>
           </main>
         )}
 
@@ -1445,15 +1485,25 @@ function AIPremiumMenu({
               card: 'bg-[#fffaf0] border-forest/10',
               product: 'text-forest',
             }
-          : {
-              page: 'bg-[#f0ece2] text-forest',
-              body: 'bg-[#f0ece2]',
-              muted: 'text-ink/55',
-              accent: 'text-gold',
-              line: 'border-forest/10',
-              card: 'bg-[#fffdf8] border-ink/10',
-              product: 'text-forest',
-            };
+          : wallpaper
+            ? {
+                page: 'bg-transparent text-white',
+                body: 'bg-transparent',
+                muted: 'text-white/65',
+                accent: 'text-gold',
+                line: 'border-white/15',
+                card: 'bg-black/35 border-white/15 backdrop-blur-md',
+                product: 'text-white',
+              }
+            : {
+                page: 'bg-[#f0ece2] text-forest',
+                body: 'bg-[#f0ece2]',
+                muted: 'text-ink/55',
+                accent: 'text-gold',
+                line: 'border-forest/10',
+                card: 'bg-[#fffdf8] border-ink/10',
+                product: 'text-forest',
+              };
 
   const scrollToSection = (index: number) => {
     document.getElementById(`ai-menu-section-${index}`)?.scrollIntoView({
@@ -1463,14 +1513,11 @@ function AIPremiumMenu({
   };
 
   return (
-    <div className={`relative -mx-5 mt-2 overflow-hidden ${wallpaper ? 'bg-black/5' : palette.page}`}>
-      {wallpaper && <div className="pointer-events-none absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url("' + wallpaper + '")' }} />}
-      {wallpaper && <div className="pointer-events-none absolute inset-0 bg-white/35" />}
+    <div className={`relative mt-2 overflow-hidden ${wallpaper ? 'bg-transparent' : palette.page}`}>
       <section
         className={`relative overflow-hidden px-5 pb-10 pt-7 ${
-          style === 'dark' ? 'bg-[#0d241e]' : 'bg-[#173d32]'
+          wallpaper ? 'bg-black/20' : style === 'dark' ? 'bg-[#0d241e]' : 'bg-[#173d32]'
         }`}
-        style={wallpaper ? { backgroundColor: 'rgba(13, 36, 30, 0.58)' } : undefined}
       >
         <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-gold/10 blur-3xl" />
         <div className="absolute -bottom-32 -left-20 h-72 w-72 rounded-full bg-black/20 blur-3xl" />
@@ -1501,7 +1548,9 @@ function AIPremiumMenu({
       </section>
 
       {navSections.length > 1 && (
-        <div className="sticky top-0 z-20 overflow-x-auto border-b border-ink/10 bg-[#f0ece2]/95 px-5 py-3 backdrop-blur-md scrollbar-hide">
+        <div className={`sticky top-0 z-20 overflow-x-auto border-b px-5 py-3 backdrop-blur-md scrollbar-hide ${
+          wallpaper ? 'border-white/10 bg-black/45' : 'border-ink/10 bg-[#f0ece2]/95'
+        }`}>
           <div className="flex min-w-max gap-2">
             {navSections.map((section: any, index: number) => (
               <button
