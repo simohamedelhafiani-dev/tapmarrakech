@@ -83,7 +83,7 @@ const baseDesign: Design = {
 
 export default function LoyaltyProgramCustomization({ establishmentId }: { establishmentId: string }) {
   const [design, setDesign] = useState<Design>(baseDesign);
-  const [establishment, setEstablishment] = useState<{ name: string; logo_url: string | null }>({ name: 'Votre établissement', logo_url: null });
+  const [establishment, setEstablishment] = useState<{ name: string; logo_url: string | null; business_type: string | null }>({ name: 'Votre établissement', logo_url: null, business_type: null });
   const [cardMode, setCardMode] = useState<CardMode>('QR');
   const [stampGoal, setStampGoal] = useState('10');
   const [stampRewardName, setStampRewardName] = useState('Cadeau fidélité');
@@ -97,7 +97,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     if (!establishmentId) return;
     const [{ data: designData }, { data: place }, { data: programData }] = await Promise.all([
       supabase.rpc('get_loyalty_card_config', { p_establishment_id: establishmentId }),
-      supabase.from('establishments').select('name,logo_url').eq('id', establishmentId).maybeSingle(),
+      supabase.from('establishments').select('name,logo_url,business_type').eq('id', establishmentId).maybeSingle(),
       supabase.rpc('get_loyalty_program_settings', { p_establishment_id: establishmentId }),
     ]);
 
@@ -117,7 +117,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
       });
       setCardMode(nextConfig.card_mode === 'STAMP' ? 'STAMP' : 'QR');
     }
-    if (place) setEstablishment({ name: place.name || 'Votre établissement', logo_url: place.logo_url || null });
+    if (place) setEstablishment({ name: place.name || 'Votre établissement', logo_url: place.logo_url || null, business_type: place.business_type || null });
 
     const program = Array.isArray(programData) ? programData[0] : programData;
     if (program) {
@@ -212,7 +212,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
       p_text_color: design.text_color,
       p_button_color: design.button_color,
       p_border_radius: design.border_radius,
-      p_design_config: { ...design.design_config, card_mode: cardMode, show_qr: cardMode === 'QR', show_points: false },
+      p_design_config: { ...design.design_config, card_mode: cardMode, show_qr: cardMode === 'QR', show_points: false, business_type: establishment.business_type },
       p_published: publish,
     });
     setSaving(false);
@@ -345,6 +345,51 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                   <label className="text-xs text-ink/50">Description<input value={stampRewardDescription} onChange={e=>setStampRewardDescription(e.target.value)} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5"/></label>
                 </div>
               )}
+
+              <div className="mt-5 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
+                <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Avantages & offres</p>
+                <p className="mt-1 text-[10px] text-ink/45">Ces contenus sont enregistrés dans la configuration de la carte et affichés au client.</p>
+                <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                  {(design.design_config.benefits || []).slice(0,3).map((benefit, index) => (
+                    <div key={index} className="rounded-xl border border-ink/10 bg-white p-3">
+                      <input value={benefit.title} onChange={e => {
+                        const benefits = [...(design.design_config.benefits || [])];
+                        benefits[index] = { ...benefits[index], title: e.target.value };
+                        updateConfig({ benefits });
+                      }} placeholder="Titre avantage" className="w-full rounded-lg border border-ink/10 px-2.5 py-2 text-xs" />
+                      <input value={benefit.description || ''} onChange={e => {
+                        const benefits = [...(design.design_config.benefits || [])];
+                        benefits[index] = { ...benefits[index], description: e.target.value };
+                        updateConfig({ benefits });
+                      }} placeholder="Description" className="mt-2 w-full rounded-lg border border-ink/10 px-2.5 py-2 text-[10px]" />
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3">
+                  {(design.design_config.offers || []).slice(0,2).map((offer, index) => (
+                    <div key={index} className="mb-2 rounded-xl border border-ink/10 bg-white p-3">
+                      <div className="grid gap-2 sm:grid-cols-3">
+                        <input value={offer.eyebrow || ''} onChange={e => {
+                          const offers = [...(design.design_config.offers || [])];
+                          offers[index] = { ...offers[index], eyebrow: e.target.value };
+                          updateConfig({ offers });
+                        }} placeholder="Label" className="rounded-lg border border-ink/10 px-2.5 py-2 text-[10px]" />
+                        <input value={offer.title} onChange={e => {
+                          const offers = [...(design.design_config.offers || [])];
+                          offers[index] = { ...offers[index], title: e.target.value };
+                          updateConfig({ offers });
+                        }} placeholder="Titre offre" className="rounded-lg border border-ink/10 px-2.5 py-2 text-xs" />
+                        <input value={offer.description || ''} onChange={e => {
+                          const offers = [...(design.design_config.offers || [])];
+                          offers[index] = { ...offers[index], description: e.target.value };
+                          updateConfig({ offers });
+                        }} placeholder="Description" className="rounded-lg border border-ink/10 px-2.5 py-2 text-[10px]" />
+                      </div>
+                    </div>
+                  ))}
+                  {!(design.design_config.offers || []).length && <p className="text-[10px] text-ink/35">Aucune offre configurée pour le moment.</p>}
+                </div>
+              </div>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 <label className="text-xs text-ink/50">Coins arrondis <span className="float-right">{design.border_radius}px</span><input type="range" min="12" max="36" value={design.border_radius} onChange={e=>setDesign(d=>({...d,border_radius:Number(e.target.value),published:false}))} className="mt-3 w-full"/></label>
