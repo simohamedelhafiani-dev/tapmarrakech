@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Check, ImagePlus, Loader2, QrCode, Stamp, Upload } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { defaultLoyaltyDesignConfig, LoyaltyCardVisual, type LoyaltyDesignConfig } from './LoyaltyCardVisual';
+import { defaultLoyaltyDesignConfig, type LoyaltyDesignConfig } from './LoyaltyCardVisual';
+import { LoyaltyExperience, type LoyaltyExperienceConfig } from './loyalty/LoyaltyExperience';
 
 type CardMode = 'QR' | 'STAMP';
 
@@ -220,16 +221,38 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     alert(publish ? 'Carte fidélité publiée.' : 'Brouillon enregistré.');
   }
 
-  const visualDesign = { ...design, config: { ...design.design_config, card_mode: cardMode } };
-  const visualCard = {
+  const visualExperience: LoyaltyExperienceConfig = {
+    type: cardMode === 'STAMP' ? 'STAMP' : 'POINTS',
     establishmentName: establishment.name,
     logoUrl: design.design_config.logo_url || establishment.logo_url,
-    points: 0,
+    coverImageUrl: design.design_config.background_image_url,
+    primaryColor: design.primary_color,
+    secondaryColor: design.secondary_color,
+    backgroundColor: design.background_color,
+    textColor: '#17201c',
+    borderRadius: design.border_radius,
     customerName: 'Mohamed Elhafiani',
-    loyaltyNumber: 'TM-000250',
-    cardUrl: window.location.origin + '/loyalty/preview-' + establishmentId,
-    stampsBalance: cardMode === 'STAMP' ? 4 : 0,
-    stampGoal: Number(stampGoal) || 10,
+    pointsBalance: 720,
+    pointsGoal: 1000,
+    visits: cardMode === 'STAMP' ? 6 : 0,
+    visitGoal: Number(stampGoal) || 8,
+    rewardName: cardMode === 'STAMP' ? stampRewardName : '1 récompense offerte',
+    rewardDescription: cardMode === 'STAMP' ? stampRewardDescription || 'À partir de 8 visites' : 'Encore 280 points avant votre prochaine récompense.',
+    intro: design.design_config.front_subtitle,
+    benefits: [
+      { title: 'Offre anniversaire', description: 'Une attention spéciale le jour J.' },
+      { title: 'Invitations privées', description: 'Accès aux nouveautés avant les autres.' },
+      { title: 'Accès prioritaire', description: 'Un traitement privilégié lors de vos visites.' },
+    ],
+    history: [
+      { id: 'demo-1', title: 'Visite', date: '12/08', points: 0 },
+      { id: 'demo-2', title: 'Visite', date: '18/08', points: 0 },
+      { id: 'demo-3', title: 'Visite', date: '24/08', points: 0 },
+      { id: 'demo-4', title: 'Visite', date: '02/09', points: 0 },
+      { id: 'demo-5', title: 'Visite', date: '10/09', points: 0 },
+      { id: 'demo-6', title: 'Visite', date: '17/09', points: 0 },
+    ],
+    qrValue: window.location.origin + '/loyalty/preview-' + establishmentId,
   };
 
   return (
@@ -336,7 +359,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
               <span className="rounded-full bg-white px-3 py-1.5 text-[10px] font-semibold text-forest shadow-sm">Client</span>
             </div>
             <div className="mx-auto mt-5 w-full max-w-[430px]">
-              <LoyaltyCardVisual design={visualDesign} card={{ ...visualCard, stampRewardName }} side="front" programType={cardMode === 'STAMP' ? 'STAMP' : 'POINTS'} />
+              <LoyaltyExperience config={visualExperience} />
             </div>
           </div>
         </div>
