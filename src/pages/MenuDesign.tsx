@@ -113,10 +113,10 @@ export default function MenuDesign() {
       wallpaper_library: next.wallpaper_library ?? [],
     };
 
-    const { error } = await supabase
-      .from('establishments')
-      .update({ menu_ai_design: merged })
-      .eq('id', establishmentId);
+    const { error } = await supabase.rpc('update_establishment_menu_design', {
+      p_establishment_id: establishmentId,
+      p_menu_ai_design: merged,
+    });
 
     if (error) {
       alert(error.message);
