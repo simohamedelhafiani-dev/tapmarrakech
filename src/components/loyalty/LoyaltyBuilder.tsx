@@ -55,8 +55,19 @@ export default function LoyaltyBuilder({ establishmentId }: Props) {
       if (cancelled) return;
       if (place) setEstablishment({ name: place.name || 'Votre établissement', logoUrl: place.logo_url || null });
       const row = Array.isArray(saved) ? saved[0] : saved;
-      if (row?.design_config) {
-        setConfig({ ...DEFAULT_BUILDER_CONFIG, ...row.design_config, published: Boolean(row.published) });
+      if (row) {
+        setConfig({
+          ...DEFAULT_BUILDER_CONFIG,
+          primaryColor: row.primary_color ?? DEFAULT_BUILDER_CONFIG.primaryColor,
+          secondaryColor: row.secondary_color ?? DEFAULT_BUILDER_CONFIG.secondaryColor,
+          backgroundColor: row.background_color ?? DEFAULT_BUILDER_CONFIG.backgroundColor,
+          textColor: row.text_color ?? DEFAULT_BUILDER_CONFIG.textColor,
+          buttonColor: row.button_color ?? DEFAULT_BUILDER_CONFIG.buttonColor,
+          borderRadius: Number(row.border_radius ?? DEFAULT_BUILDER_CONFIG.borderRadius),
+          templateId: row.template_id ?? DEFAULT_BUILDER_CONFIG.templateId,
+          ...(row.design_config ?? {}),
+          published: Boolean(row.published),
+        });
       }
       setLoading(false);
     })();
