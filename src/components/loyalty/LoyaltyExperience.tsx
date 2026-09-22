@@ -466,6 +466,7 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
   const subtitle = config.intro || 'Vos privilèges, toujours avec vous.';
   const benefits = (config.benefits || []).slice(0, 3);
   const offers = (config.offers || []).slice(0, 1);
+  const availableRewards = (config.rewards || []).slice(0, 3);
 
   useEffect(() => {
     if (!config.qrValue) return;
@@ -599,11 +600,27 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
           <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-black/25"><div className="h-full rounded-full" style={{ width: progress + '%', background: config.secondaryColor }} /></div>
         </div>
         {benefits.length > 0 && <div className="mt-5"><div className="flex items-center justify-between"><p className="text-[9px] font-bold uppercase tracking-[.22em] text-white/70">Vos avantages exclusifs</p><span className="text-[8px] text-white/45">Voir tout</span></div><div className="mt-2 grid grid-cols-3 gap-2">{benefits.map((b,i)=><div key={b.title+i} className="rounded-[17px] border border-white/25 bg-white/[0.13] p-3 backdrop-blur-xl"><div className="mb-2 text-[13px]" style={{ color: config.secondaryColor }}>✦</div><p className="text-[10px] font-semibold leading-4">{b.title}</p><p className="mt-1 line-clamp-2 text-[8px] leading-3.5 text-white/55">{b.description}</p></div>)}</div></div>}
-        <LoyaltyReward config={config} />
+        <div className="mt-5 rounded-[22px] border border-white/25 bg-black/15 p-4 backdrop-blur-xl">
+          <div className="flex items-center justify-between gap-3">
+            <div><p className="text-[8px] font-bold uppercase tracking-[.2em] text-white/55">Vos récompenses</p><p className="mt-1 text-[10px] text-white/65">Utilisez vos points pour débloquer un avantage</p></div>
+            <Gift size={18} style={{ color: config.secondaryColor }} />
+          </div>
+          {availableRewards.length > 0 && <div className="mt-3 grid gap-2">
+            {availableRewards.map((r) => {
+              const available = (config.pointsBalance ?? 0) >= r.points_required;
+              return <div key={r.id} className="flex items-center justify-between gap-3 rounded-2xl border border-white/15 bg-white/[0.10] p-3">
+                <div className="min-w-0"><p className="truncate text-[11px] font-semibold text-white">{r.name}</p><p className="mt-1 truncate text-[9px] text-white/50">{r.description || r.points_required + ' points'}</p>{r.reward_type === 'DISCOUNT' && r.discount_percent != null && <p className="mt-1 text-[9px] font-semibold" style={{ color: config.secondaryColor }}>-{r.discount_percent}% de réduction</p>}</div>
+                <span className="shrink-0 rounded-full px-2 py-1 text-[8px] font-bold" style={{ color: available ? config.primaryColor : '#fff', background: available ? config.secondaryColor : 'rgba(255,255,255,.12)' }}>{available ? 'Utiliser' : r.points_required + ' pts'}</span>
+              </div>;
+            })}
+          </div>}
+        </div>
+        <div id="loyalty-reward-list"><LoyaltyReward config={config} /></div>
         {offers.length > 0 && <div className="mt-4 rounded-[19px] border border-white/25 bg-black/20 p-4 backdrop-blur-xl"><div className="flex items-center justify-between"><div><p className="text-[8px] uppercase tracking-[.18em] text-white/45">{offers[0].eyebrow || 'Offre du moment'}</p><p className="mt-1 text-base font-semibold">{offers[0].title}</p>{offers[0].description && <p className="mt-1 text-[9px] text-white/55">{offers[0].description}</p>}</div><span className="text-xl text-white/75">›</span></div></div>}
         <div className="mt-5 flex flex-col items-center pt-2">
-          <div className="h-[112px] w-[112px]">{qrBlock}</div>
-          <p className="mt-2 text-center text-[8px] uppercase tracking-[.16em] text-white/50">Scannez pour identifier votre compte</p>
+          <div className="h-[140px] w-[140px]">{qrBlock}</div>
+          <p className="mt-2 text-center text-[8px] font-semibold uppercase tracking-[.16em] text-white/65">QR fidélité · gagner des points</p>
+          <p className="mt-1 text-center text-[8px] text-white/40">Le responsable scanne ce QR pour ajouter vos points</p>
           <div className="mt-4 flex w-full items-end justify-between border-t border-white/10 pt-3">
             <div><p className="text-[8px] uppercase tracking-[.2em] text-white/45">Membre</p><p className="mt-1 text-sm">{member}</p></div>
             <p className="text-[8px] uppercase tracking-[.14em] text-white/40">Kissko · Gold</p>
