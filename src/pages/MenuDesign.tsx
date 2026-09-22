@@ -413,13 +413,13 @@ export default function MenuDesign() {
                   <div className="rounded-2xl bg-white/15 p-4">
                     Entrées
                   </div>
-                  <div className="rounded-2xl bg-white/15 p-4 backdrop-blur-sm">
+                  <div className="rounded-2xl bg-white/15 p-4">
                     Plats
                   </div>
-                  <div className="rounded-2xl bg-white/15 p-4 backdrop-blur-sm">
+                  <div className="rounded-2xl bg-white/15 p-4">
                     Desserts
                   </div>
-                  <div className="rounded-2xl bg-white/15 p-4 backdrop-blur-sm">
+                  <div className="rounded-2xl bg-white/15 p-4">
                     Boissons
                   </div>
                 </div>
