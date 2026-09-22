@@ -332,7 +332,7 @@ export default function LoyaltyCard() {
     type: mode,
     businessType: raw.business_type,
     establishmentName: card.establishment_name,
-    logoUrl: raw.logo_url || card.establishment_logo_url,
+    logoUrl: card.establishment_logo_url || raw.logo_url,
     coverImageUrl: raw.background_image_url,
     primaryColor: design.primary_color,
     secondaryColor: design.secondary_color,
