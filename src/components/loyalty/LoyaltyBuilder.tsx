@@ -15,6 +15,7 @@ import {
   Trophy,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { LoyaltyCardVisual } from '@/components/LoyaltyCardVisual';
 import { DEFAULT_BUILDER_CONFIG, RESTAURANT_TEMPLATES } from './templates';
 import type { LoyaltyBuilderConfig, LoyaltyTemplate, LoyaltyType } from './types';
 
@@ -228,6 +229,21 @@ function BuilderPanel({
           </div>
 
           <div className="rounded-2xl border border-ink/8 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-ink/40">Identification</p>
+                <p className="mt-1 text-xs text-ink/45">Le QR est indépendant du design de la carte.</p>
+              </div>
+              <button type="button" onClick={() => update({ showQr: !config.showQr })} className={`relative h-6 w-11 rounded-full transition ${config.showQr ? 'bg-forest' : 'bg-ink/15'}`}>
+                <span className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow transition ${config.showQr ? 'left-6' : 'left-1'}`} />
+              </button>
+            </div>
+            <div className="mt-3 flex items-center gap-2 text-[10px] font-semibold text-ink/50">
+              <QrCode size={15} /> {config.showQr ? 'QR code activé' : 'QR code désactivé'}
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-ink/8 p-4">
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-ink/40">Type de fidélité</p>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               {TYPE_OPTIONS.map(option => {
@@ -305,118 +321,56 @@ function BuilderPanel({
 }
 
 function ClientPreview({ config, establishment }: { config: LoyaltyBuilderConfig; establishment: { name: string; logoUrl: string | null } }) {
+  const visualConfig = {
+    primary_color: config.primaryColor,
+    secondary_color: config.secondaryColor,
+    background_color: config.backgroundColor,
+    text_color: config.textColor,
+    border_radius: config.borderRadius,
+    config: {
+      front_title: config.cardTitle,
+      front_subtitle: config.cardSubtitle,
+      show_qr: config.showQr,
+      stamp_style: config.stampStyle,
+      logo_url: config.logoUrl || establishment.logoUrl,
+      background_image_url: config.coverImageUrl,
+      loyaltyType: config.loyaltyType,
+      progressText: config.progressText,
+      rewardTitle: config.rewardTitle,
+      rewardDescription: config.rewardDescription,
+      rewardName: config.rewardName,
+      discountPercent: config.discountPercent,
+      card_mode: config.loyaltyType === 'STAMP' ? 'STAMP' : 'QR',
+    },
+  } as const;
+
   return (
     <div className="min-w-0 rounded-2xl bg-[#f7f7f3] p-4">
       <div className="text-center">
         <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-ink">Aperçu côté client</p>
-        <p className="mt-1 text-xs text-ink/45">Voici exactement ce que vos clients verront.</p>
+        <p className="mt-1 text-xs text-ink/45">Chaque modification est reflétée ici immédiatement.</p>
       </div>
-      <div className="mx-auto mt-4 max-w-[360px] rounded-[2.4rem] border-[7px] border-[#171b1a] bg-[#171b1a] p-2 shadow-2xl">
+      <div className="mx-auto mt-4 max-w-[360px] rounded-[2.2rem] border-[6px] border-[#171b1a] bg-[#171b1a] p-1.5 shadow-2xl">
         <div className="overflow-hidden rounded-[1.8rem] bg-white">
-          <DigitalLoyaltyCard config={config} establishment={establishment} />
+          <LoyaltyCardVisual
+            design={visualConfig}
+            card={{
+              establishmentName: establishment.name,
+              logoUrl: config.logoUrl || establishment.logoUrl,
+              customerName: 'Mohamed',
+              points: 320,
+              stampsBalance: 4,
+              stampGoal: config.stampGoal,
+              stampRewardName: config.rewardName,
+              cardUrl: '',
+            }}
+            compact
+            side="front"
+            programType={config.loyaltyType === 'STAMP' ? 'STAMP' : config.loyaltyType === 'DISCOUNT' ? 'DISCOUNT' : config.loyaltyType === 'REWARD' ? 'REWARD' : config.loyaltyType === 'TIER' ? 'TIER' : 'POINTS'}
+          />
         </div>
       </div>
     </div>
-  );
-}
-
-function DigitalLoyaltyCard({ config, establishment }: { config: LoyaltyBuilderConfig; establishment: { name: string; logoUrl: string | null } }) {
-  const stamps = config.loyaltyType === 'STAMP' ? Math.min(4, config.stampGoal) : 0;
-  const cardBg = config.coverImageUrl
-    ? `linear-gradient(145deg, ${config.primaryColor}${Math.round(255 * 0.78).toString(16)}, ${config.primaryColor}cc), url(${config.coverImageUrl}) center/cover`
-    : config.primaryColor;
-
-  return (
-    <div className="min-h-[690px] text-white" style={{ background: config.backgroundColor }}>
-      <div className="relative overflow-hidden px-5 pb-5 pt-6" style={{ background: cardBg }}>
-        <div className="relative">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex min-w-0 items-center gap-2.5">
-              {config.logoUrl || establishment.logoUrl ? (
-                <img src={config.logoUrl || establishment.logoUrl || ''} alt="" className="h-12 w-12 rounded-full bg-white object-contain p-1.5" />
-              ) : (
-                <div className="grid h-12 w-12 place-items-center rounded-full border border-white/30 text-xs font-bold">{establishment.name.slice(0, 2).toUpperCase()}</div>
-              )}
-              <div className="min-w-0">
-                <p className="truncate text-[10px] font-semibold uppercase tracking-[0.15em]">{establishment.name}</p>
-                <p className="mt-1 text-[8px] uppercase tracking-[0.25em] opacity-60">{config.programName}</p>
-              </div>
-            </div>
-            <span className="text-[8px] uppercase tracking-[0.2em] opacity-60">Carte fidélité</span>
-          </div>
-          <p className="mt-8 max-w-[270px] font-display text-3xl leading-tight">{config.cardTitle}</p>
-          <p className="mt-2 max-w-[280px] text-[10px] leading-4 opacity-70">{config.cardSubtitle}</p>
-        </div>
-      </div>
-
-      <div className="bg-white px-5 pb-5 pt-4 text-ink">
-        <div className="flex items-center justify-between">
-          <div><p className="text-[9px] text-ink/40">Bonjour</p><p className="text-lg font-semibold text-forest">Mohamed</p></div>
-          <span className="rounded-full px-3 py-1.5 text-[9px] font-semibold" style={{ background: `${config.secondaryColor}22`, color: config.primaryColor }}>Client fidèle</span>
-        </div>
-
-        {config.loyaltyType === 'STAMP' && (
-          <div className="mt-5">
-            <div className="flex items-end justify-between"><div><p className="text-[9px] uppercase tracking-[0.15em] text-ink/40">Progression</p><p className="mt-1 text-xs font-semibold">{stamps} / {config.stampGoal} tampons</p></div><span className="text-[9px] text-ink/40">{Math.max(0, config.stampGoal - stamps)} restants</span></div>
-            <div className="mt-3 grid grid-cols-4 gap-2">
-              {Array.from({ length: config.stampGoal }).map((_, i) => <StampIcon key={i} filled={i < stamps} config={config} />)}
-            </div>
-          </div>
-        )}
-
-        {config.loyaltyType === 'POINTS' && (
-          <div className="mt-6 rounded-2xl p-4" style={{ background: `${config.secondaryColor}18` }}>
-            <p className="text-[9px] uppercase tracking-[0.15em] text-ink/40">Vos points</p>
-            <p className="mt-1 text-4xl font-bold" style={{ color: config.primaryColor }}>320</p>
-            <p className="mt-2 text-[10px] text-ink/45">{config.rewardThreshold} points = {config.rewardName}</p>
-          </div>
-        )}
-
-        {config.loyaltyType === 'DISCOUNT' && (
-          <div className="mt-6 rounded-2xl p-5" style={{ background: config.secondaryColor, color: config.primaryColor }}>
-            <Percent className="mb-2" size={20} />
-            <p className="text-3xl font-bold">-{config.discountPercent}%</p>
-            <p className="mt-1 text-[10px] font-medium">{config.progressText}</p>
-          </div>
-        )}
-
-        {config.loyaltyType === 'REWARD' && (
-          <div className="mt-6 rounded-2xl p-5" style={{ background: `${config.secondaryColor}18` }}>
-            <Gift size={22} style={{ color: config.secondaryColor }} />
-            <p className="mt-2 text-xl font-bold text-forest">{config.rewardName}</p>
-            <p className="mt-1 text-[10px] text-ink/45">Après {config.stampGoal} visites</p>
-          </div>
-        )}
-
-        {config.loyaltyType === 'TIER' && (
-          <div className="mt-6 grid grid-cols-3 gap-2">
-            {['Bronze', 'Silver', 'Gold'].map((tier, i) => <div key={tier} className={`rounded-2xl p-3 text-center ${i === 2 ? 'ring-2 ring-gold' : 'bg-[#f7f7f3]'}`}><p className="text-[9px] font-semibold">{tier}</p><p className="mt-1 text-sm font-bold">{i === 0 ? '-5%' : i === 1 ? '-10%' : '-20%'}</p></div>)}
-          </div>
-        )}
-
-        <div className="mt-6 rounded-2xl border border-ink/8 p-4">
-          <p className="text-[9px] uppercase tracking-[0.15em] text-ink/35">Prochaine récompense</p>
-          <p className="mt-1 text-sm font-semibold text-forest">{config.rewardTitle}</p>
-          <p className="mt-1 text-[10px] text-ink/45">{config.rewardDescription}</p>
-        </div>
-
-        <button type="button" className="mt-4 flex w-full items-center justify-between rounded-xl px-4 py-3 text-xs font-semibold text-white" style={{ background: config.buttonColor }}>
-          Voir mes récompenses <ChevronRight size={15} />
-        </button>
-
-        <div className="mt-5 flex items-center justify-center gap-2 text-[8px] uppercase tracking-[0.2em] text-ink/35">
-          <span className="h-px w-8 bg-ink/10" /> by TAP MARRAKECH <span className="h-px w-8 bg-ink/10" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function StampIcon({ filled, config }: { filled: boolean; config: LoyaltyBuilderConfig }) {
-  return (
-    <span className="grid aspect-square place-items-center rounded-full border-2 text-xs" style={{ borderColor: config.secondaryColor, background: filled ? config.secondaryColor : 'transparent', color: filled ? '#fff' : config.secondaryColor }}>
-      {filled ? <Check size={14} /> : null}
-    </span>
   );
 }
 
