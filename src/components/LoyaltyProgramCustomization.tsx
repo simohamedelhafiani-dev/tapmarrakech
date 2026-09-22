@@ -401,12 +401,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                       onClick={() => applyPreset(preset)}
                       className={`overflow-hidden rounded-2xl border text-left transition ${active ? 'border-forest ring-2 ring-forest/10' : 'border-ink/10 hover:border-forest/30'}`}
                     >
-                      <div className="h-20 p-3" style={{ background: `linear-gradient(135deg, ${preset.primary}, ${preset.secondary}55)` }}>
-                        <div className="flex h-full items-end justify-between">
-                          <span className="text-[10px] font-bold uppercase tracking-[.16em]" style={{ color: preset.text }}>{preset.name}</span>
-                          <span className="rounded-full px-2 py-1 text-[8px] font-semibold" style={{ color: preset.primary, background: preset.background }}>{preset.mode}</span>
-                        </div>
-                      </div>
+                      <PresetMiniPreview preset={preset} />
                       <div className="bg-white p-3">
                         <p className="text-xs font-semibold text-forest">{preset.name}</p>
                         <p className="mt-1 text-[9px] leading-4 text-ink/45">{preset.description}</p>
@@ -592,6 +587,99 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
         </div>
       </div>
     </section>
+  );
+}
+
+function PresetMiniPreview({ preset }: { preset: LoyaltyPreset }) {
+  const base = 'relative h-28 overflow-hidden';
+
+  if (preset.id === 'obsidian') {
+    return (
+      <div className={base + ' bg-[#090908] text-white'}>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_15%,rgba(214,177,90,.42),transparent_30%)]" />
+        <div className="absolute left-4 top-4 h-7 w-7 rounded-lg border border-white/20 bg-white/10" />
+        <div className="absolute bottom-4 left-4 right-4">
+          <p className="text-[7px] uppercase tracking-[.28em] text-white/45">BLACK MEMBER</p>
+          <p className="mt-1 text-lg font-semibold tracking-tight">Luxury, simplified.</p>
+          <div className="mt-2 h-px w-20 bg-[#D6B15A]" />
+        </div>
+      </div>
+    );
+  }
+
+  if (preset.id === 'editorial') {
+    return (
+      <div className={base + ' bg-[#F4EDE1] text-[#2B241D]'}>
+        <div className="absolute inset-x-4 top-4 border-t border-[#2B241D]/20" />
+        <div className="absolute left-4 top-7">
+          <p className="text-[7px] uppercase tracking-[.3em] opacity-45">MEMBERSHIP</p>
+          <p className="mt-2 font-serif text-xl leading-none">The art of staying.</p>
+          <p className="mt-2 max-w-[170px] text-[7px] leading-3 opacity-55">Des privilèges pensés pour chaque visite.</p>
+        </div>
+        <span className="absolute bottom-4 right-4 text-[7px] uppercase tracking-[.2em] opacity-40">No. 01</span>
+      </div>
+    );
+  }
+
+  if (preset.id === 'glass') {
+    return (
+      <div className={base + ' bg-[#17372D] text-white'}>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_15%,rgba(255,255,255,.25),transparent_28%),linear-gradient(135deg,rgba(255,255,255,.08),transparent_45%)]" />
+        <div className="absolute inset-3 rounded-2xl border border-white/25 bg-white/10 p-3 backdrop-blur-xl">
+          <div className="flex items-center justify-between">
+            <span className="h-5 w-5 rounded-full border border-white/40 bg-white/20" />
+            <span className="text-[7px] uppercase tracking-[.2em] text-white/55">VIP</span>
+          </div>
+          <p className="mt-4 text-[7px] uppercase tracking-[.2em] text-white/55">YOUR BALANCE</p>
+          <p className="mt-1 text-xl font-light">720 pts</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (preset.id === 'titanium') {
+    return (
+      <div className={base + ' bg-[#0D0D0C] text-white'}>
+        <div className="absolute inset-0 opacity-60" style={{ background: 'linear-gradient(135deg,transparent 0%,rgba(255,255,255,.18) 48%,transparent 50%)' }} />
+        <div className="absolute left-4 right-4 top-4 flex items-center justify-between">
+          <span className="text-[8px] font-semibold tracking-[.2em]">ESTABLISHMENT</span>
+          <span className="text-[7px] tracking-[.18em]" style={{ color: preset.secondary }}>BLACK MEMBER</span>
+        </div>
+        <div className="absolute bottom-4 left-4 right-4">
+          <p className="text-[7px] uppercase tracking-[.3em] text-white/40">SIGNATURE SERIES</p>
+          <div className="mt-2 h-px w-full" style={{ background: preset.secondary }} />
+        </div>
+      </div>
+    );
+  }
+
+  if (preset.id === 'hospitality') {
+    return (
+      <div className={base + ' bg-[#4A2A1B] text-white'}>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_20%,rgba(226,182,109,.45),transparent_32%),linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.45))]" />
+        <div className="absolute left-4 top-4 flex items-center gap-2">
+          <span className="h-7 w-7 rounded-xl bg-white/15" />
+          <div><p className="font-serif text-sm">The Club</p><p className="text-[6px] uppercase tracking-[.25em] text-white/55">HOSPITALITY</p></div>
+        </div>
+        <div className="absolute bottom-4 left-4">
+          <p className="font-serif text-lg">More than a visit.</p>
+        </div>
+        <span className="absolute right-4 bottom-4 rounded-full border border-white/25 px-2 py-1 text-[6px] uppercase tracking-[.18em]">GOLD</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className={base + ' bg-[#F2EEE6] text-[#1B1A18]'}>
+      <div className="absolute inset-x-4 top-4 flex items-center justify-between">
+        <div className="flex items-center gap-2"><span className="h-7 w-7 rounded-lg border border-black/10 bg-white" /><span className="text-[8px] font-semibold">ESTABLISHMENT</span></div>
+        <span className="text-[6px] uppercase tracking-[.2em] opacity-45">PRIVILEGE</span>
+      </div>
+      <div className="absolute bottom-4 left-4 right-4">
+        <p className="text-[7px] uppercase tracking-[.22em] opacity-45">YOUR LOYALTY</p>
+        <div className="mt-2 h-1 overflow-hidden rounded-full bg-black/10"><div className="h-full w-[72%] bg-[#403A32]" /></div>
+      </div>
+    </div>
   );
 }
 
