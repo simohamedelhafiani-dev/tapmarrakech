@@ -153,7 +153,6 @@ export const DEFAULT_BUILDER_CONFIG: LoyaltyBuilderConfig = {
   discountPercent: 10,
   rewardName: '1 plat offert',
   stampStyle: 'circles',
-    showQr: false,
   published: false,
   showQr: false,
 };
