@@ -91,7 +91,7 @@ export default function LoyaltyCard() {
         { data: rewardsData },
       ] = await Promise.all([
         supabase.rpc('get_public_loyalty_card', { p_access_token: token }),
-        supabase.rpc('get_public_loyalty_card_builder_config', { p_access_token: token }),
+        supabase.rpc('get_public_loyalty_card_config', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_program_context', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_history', { p_access_token: token, p_limit: 20 }),
         supabase.rpc('get_public_loyalty_rewards', { p_access_token: token }),
