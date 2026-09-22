@@ -17,6 +17,14 @@ export type LoyaltyDesignConfig = {
   ai_prompt?: string;
   ai_generation_id?: string;
   card_mode?: 'QR' | 'STAMP';
+  loyaltyType?: 'STAMP' | 'POINTS' | 'DISCOUNT' | 'REWARD' | 'TIER' | 'CHALLENGE' | 'CASHBACK';
+  cardTitle?: string;
+  cardSubtitle?: string;
+  progressText?: string;
+  rewardTitle?: string;
+  rewardDescription?: string;
+  rewardName?: string;
+  discountPercent?: number;
 };
 
 export const defaultLoyaltyDesignConfig: LoyaltyDesignConfig = {
@@ -133,7 +141,7 @@ export function LoyaltyCardVisual({
   card: LoyaltyVisualCard;
   side?: 'front' | 'back';
   compact?: boolean;
-  programType?: 'STAMP' | 'DISCOUNT' | 'POINTS';
+  programType?: 'STAMP' | 'DISCOUNT' | 'POINTS' | 'REWARD' | 'TIER';
 }) {
   const config = { ...defaultLoyaltyDesignConfig, ...(design.config ?? {}) };
   const [qr, setQr] = useState('');
@@ -277,18 +285,41 @@ export function LoyaltyCardVisual({
               </div>
             )}
 
-            {config.show_points && cardMode !== 'STAMP' && (
+            {loyaltyType === 'POINTS' && config.show_points && (
               <div className="mt-7">
-                <p className="text-[9px] uppercase tracking-[0.24em] opacity-50">
-                  Vos points
-                </p>
-                <p
-                  className={`mt-1 font-bold leading-none tracking-tight ${
-                    compact ? 'text-5xl' : 'text-6xl sm:text-7xl'
-                  }`}
-                >
+                <p className="text-[9px] uppercase tracking-[0.24em] opacity-50">Vos points</p>
+                <p className={`mt-1 font-bold leading-none tracking-tight ${compact ? 'text-5xl' : 'text-6xl sm:text-7xl'}`}>
                   {card.points ?? 0}
                 </p>
+              </div>
+            )}
+
+            {loyaltyType === 'DISCOUNT' && (
+              <div className="mt-7 rounded-2xl border border-white/15 bg-white/10 p-4">
+                <p className="text-[9px] uppercase tracking-[0.2em] opacity-60">Votre avantage</p>
+                <p className={`mt-1 font-bold ${compact ? 'text-4xl' : 'text-5xl'}`}>
+                  -{config.discountPercent ?? 10}%
+                </p>
+                <p className="mt-1 text-[10px] opacity-70">{config.progressText || 'sur votre prochaine visite'}</p>
+              </div>
+            )}
+
+            {loyaltyType === 'REWARD' && (
+              <div className="mt-7 rounded-2xl border border-white/15 bg-white/10 p-4">
+                <Gift size={18} style={{ color: design.secondary_color }} />
+                <p className="mt-2 text-lg font-semibold">{config.rewardName || config.rewardTitle || 'Votre récompense'}</p>
+                <p className="mt-1 text-[10px] opacity-60">{config.rewardDescription || 'Votre fidélité est récompensée.'}</p>
+              </div>
+            )}
+
+            {loyaltyType === 'TIER' && (
+              <div className="mt-7 grid grid-cols-3 gap-2">
+                {['Bronze', 'Silver', 'Gold'].map((tier, index) => (
+                  <div key={tier} className="rounded-xl bg-white/10 p-2 text-center">
+                    <p className="text-[8px] uppercase tracking-wider opacity-60">{tier}</p>
+                    <p className="mt-1 text-sm font-bold">{index === 0 ? '-5%' : index === 1 ? '-10%' : '-20%'}</p>
+                  </div>
+                ))}
               </div>
             )}
           </div>
