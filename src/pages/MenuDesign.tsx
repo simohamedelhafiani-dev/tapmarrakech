@@ -208,8 +208,7 @@ export default function MenuDesign() {
       await persist({
         ...design,
         wallpaper_library: nextLibrary,
-        background_image_url:
-          design.background_image_url || uploaded[0] || null,
+        background_image_url: uploaded[0] || design.background_image_url || null,
       });
     } catch (error) {
       alert(
