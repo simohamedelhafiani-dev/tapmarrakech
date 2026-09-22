@@ -187,7 +187,32 @@ export default function LoyaltyScanner() {
       const url = new URL(value);
       const parts = url.pathname.split('/').filter(Boolean);
 
-      if (parts[0] === 'loyalty' && parts[1] === 'reward' && parts[2]) {
+      if (parts[0] === 'loyalty' && parts[1] === 'stamp-reward' && parts[2]) {
+        setSearching(true);
+        const { data, error } = await supabase.rpc('get_public_loyalty_stamp_reward_claim', { p_claim_token: parts[2] });
+        setSearching(false);
+        const row = Array.isArray(data) ? data[0] : data;
+        if (error || !row || row.establishment_id !== context?.establishment_id) {
+          setMessage('QR cadeau invalide ou expiré.');
+          return;
+        }
+        setPendingReward({
+          claim_token: row.claim_token,
+          establishment_id: row.establishment_id,
+          customer_id: row.customer_id,
+          reward_name: row.reward_name,
+          reward_type: 'GIFT',
+          points_required: 0,
+          discount_percent: null,
+          discount_max_amount: null,
+          status: row.status,
+          expires_at: row.expires_at,
+        });
+        setRewardInvoiceAmount('');
+        setRewardInvoiceNumber('');
+        setShowScanner(false);
+        return;
+      } else if (parts[0] === 'loyalty' && parts[1] === 'reward' && parts[2]) {
         token = parts[2];
         isRewardClaim = true;
       } else if (parts[0] === 'loyalty' && parts[1]) {
@@ -276,12 +301,18 @@ export default function LoyaltyScanner() {
     setRedeemingReward(true);
     setMessage('');
 
-    const { data, error } = await supabase.rpc('redeem_loyalty_reward_claim', {
-      p_scanner_token: scannerToken,
-      p_claim_token: pendingReward.claim_token,
-      p_invoice_amount: invoiceAmount,
-      p_invoice_number: rewardInvoiceNumber.trim() || null,
-    });
+    const isStampReward = pendingReward.points_required === 0 && pendingReward.reward_type === 'GIFT';
+    const { data, error } = isStampReward
+      ? await supabase.rpc('redeem_public_loyalty_stamp_reward_claim', {
+          p_scanner_token: scannerToken,
+          p_claim_token: pendingReward.claim_token,
+        })
+      : await supabase.rpc('redeem_loyalty_reward_claim', {
+          p_scanner_token: scannerToken,
+          p_claim_token: pendingReward.claim_token,
+          p_invoice_amount: invoiceAmount,
+          p_invoice_number: rewardInvoiceNumber.trim() || null,
+        });
 
     setRedeemingReward(false);
 
@@ -293,13 +324,17 @@ export default function LoyaltyScanner() {
     const result = Array.isArray(data) ? data[0] : data;
     const discountAmount = Number(result?.discount_amount ?? 0);
     const finalAmount = result?.final_amount == null ? null : Number(result.final_amount);
-    const newBalance = Number(result?.new_points_balance ?? 0);
+    const newBalance = isStampReward
+      ? Number(result?.new_stamps_balance ?? 0)
+      : Number(result?.new_points_balance ?? 0);
 
     setPendingReward(null);
     setRewardInvoiceAmount('');
     setRewardInvoiceNumber('');
 
-    if (pendingReward.reward_type === 'DISCOUNT') {
+    if (isStampReward) {
+      alert(`Cadeau validé !\\n\\n${pendingReward.reward_name}\\nNouveau solde : ${newBalance} tampons.`);
+    } else if (pendingReward.reward_type === 'DISCOUNT') {
       alert(
         `Réduction appliquée !\\n\\n${pendingReward.reward_name}\\n-${discountAmount.toFixed(2)} MAD\\nMontant final : ${finalAmount?.toFixed(2) ?? '0.00'} MAD\\n\\nNouveau solde : ${newBalance} points.`
       );
