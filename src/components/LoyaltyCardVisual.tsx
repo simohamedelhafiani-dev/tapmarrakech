@@ -26,6 +26,9 @@ export type LoyaltyDesignConfig = {
   rewardDescription?: string;
   rewardName?: string;
   discountPercent?: number;
+  benefits?: { title: string; description?: string; icon?: string }[];
+  offers?: { title: string; description?: string; eyebrow?: string }[];
+  business_type?: string | null;
 };
 
 export const defaultLoyaltyDesignConfig: LoyaltyDesignConfig = {
