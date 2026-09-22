@@ -53,6 +53,9 @@ type LoyaltyReward = {
   description: string | null;
   points_required: number;
   active: boolean;
+  reward_type?: 'GIFT' | 'DISCOUNT';
+  discount_percent?: number | null;
+  discount_max_amount?: number | null;
 };
 
 type ProgramSettings = {
@@ -1302,8 +1305,8 @@ export default function Employee() {
                 pointsGoal: Math.max(1000, rewards[rewards.length - 1]?.points_required ?? 1000),
                 visits: (showCard as LoyaltyCustomer & { stamps_balance?: number }).stamps_balance ?? showCard.visit_count,
                 visitGoal: loyaltyProgram.stamp_goal,
-                rewardName: loyaltyDesign.design_config.stamp_reward_name || rewards[0]?.name || 'Cadeau fidélité',
-                rewardDescription: loyaltyDesign.design_config.stamp_reward_description || rewards[0]?.description || null,
+                rewardName: loyaltyDesign.design_config.rewardName || rewards[0]?.name || 'Cadeau fidélité',
+                rewardDescription: loyaltyDesign.design_config.rewardDescription || rewards[0]?.description || null,
                 rewards: rewards.map(reward => ({
                   id: reward.id,
                   name: reward.name,
