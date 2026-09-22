@@ -31,6 +31,7 @@ export const RESTAURANT_TEMPLATES: LoyaltyTemplate[] = [
     coverOverlay: 0.66,
     layout: 'photo',
     stampStyle: 'circles',
+    showQr: false,
   },
   {
     id: 'restaurant-modern',
@@ -46,6 +47,7 @@ export const RESTAURANT_TEMPLATES: LoyaltyTemplate[] = [
     coverOverlay: 0.08,
     layout: 'split',
     stampStyle: 'squares',
+    showQr: false,
   },
   {
     id: 'restaurant-minimal',
@@ -61,6 +63,7 @@ export const RESTAURANT_TEMPLATES: LoyaltyTemplate[] = [
     coverOverlay: 0.58,
     layout: 'minimal',
     stampStyle: 'circles',
+    showQr: false,
   },
   {
     id: 'restaurant-premium',
@@ -76,6 +79,7 @@ export const RESTAURANT_TEMPLATES: LoyaltyTemplate[] = [
     coverOverlay: 0.12,
     layout: 'luxury',
     stampStyle: 'stars',
+    showQr: false,
   },
   {
     id: 'restaurant-authentic',
@@ -91,6 +95,7 @@ export const RESTAURANT_TEMPLATES: LoyaltyTemplate[] = [
     coverOverlay: 0.5,
     layout: 'photo',
     stampStyle: 'circles',
+    showQr: false,
   },
   {
     id: 'restaurant-brasserie',
@@ -106,6 +111,7 @@ export const RESTAURANT_TEMPLATES: LoyaltyTemplate[] = [
     coverOverlay: 0.64,
     layout: 'editorial',
     stampStyle: 'squares',
+    showQr: false,
   },
   {
     id: 'restaurant-contemporary',
@@ -121,6 +127,7 @@ export const RESTAURANT_TEMPLATES: LoyaltyTemplate[] = [
     coverOverlay: 0.08,
     layout: 'split',
     stampStyle: 'hearts',
+    showQr: false,
   },
 ];
 
@@ -146,5 +153,7 @@ export const DEFAULT_BUILDER_CONFIG: LoyaltyBuilderConfig = {
   discountPercent: 10,
   rewardName: '1 plat offert',
   stampStyle: 'circles',
+    showQr: false,
   published: false,
+  showQr: false,
 };
