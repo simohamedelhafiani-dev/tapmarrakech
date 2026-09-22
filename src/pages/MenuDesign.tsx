@@ -137,7 +137,7 @@ export default function MenuDesign() {
       for (const file of Array.from(files)) {
         const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
         const path =
-          'menu/' +
+          'loyalty-cards/' +
           establishmentId +
           '/wallpaper-' +
           Date.now() +
