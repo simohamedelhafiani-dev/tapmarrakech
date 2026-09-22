@@ -164,8 +164,9 @@ export function LoyaltyCardVisual({
       .catch(() => setQr(''));
   }, [card.cardUrl, config.show_qr, design.primary_color, side]);
 
+  const loyaltyType = config.loyaltyType ?? programType;
   const cardMode =
-    config.card_mode ?? (programType === 'STAMP' ? 'STAMP' : 'QR');
+    config.card_mode ?? (loyaltyType === 'STAMP' ? 'STAMP' : 'QR');
   const logoUrl = config.logo_url || card.logoUrl;
   const stampGoal = Math.max(1, Math.min(card.stampGoal ?? 10, 12));
   const stampsBalance = Math.max(0, Math.min(card.stampsBalance ?? 0, stampGoal));
