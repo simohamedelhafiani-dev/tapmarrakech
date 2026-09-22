@@ -774,7 +774,7 @@ export default function PublicReview() {
                   <ExternalLink size={15} />
                 </a>
               </section>
-            ) : menuAiDesign ? (
+            ) : menuAiDesign?.sections?.length ? (
               <AIPremiumMenu
                 design={menuAiDesign}
                 place={p}
@@ -1409,6 +1409,10 @@ function AIPremiumMenu({
     photoMode === 'with_photos'
       ? items.find((item) => item.image_url)?.image_url ?? place.logo_url ?? null
       : null;
+  const wallpaper =
+    design?.background_image_url ||
+    (Array.isArray(design?.wallpaper_library) ? design.wallpaper_library[0] : null) ||
+    null;
 
   const palette =
     style === 'dark'
@@ -1459,11 +1463,14 @@ function AIPremiumMenu({
   };
 
   return (
-    <div className={`-mx-5 mt-2 overflow-hidden ${palette.page}`}>
+    <div className={`relative -mx-5 mt-2 overflow-hidden ${wallpaper ? 'bg-black/5' : palette.page}`}>
+      {wallpaper && <div className="pointer-events-none absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url("' + wallpaper + '")' }} />}
+      {wallpaper && <div className="pointer-events-none absolute inset-0 bg-white/35" />}
       <section
         className={`relative overflow-hidden px-5 pb-10 pt-7 ${
           style === 'dark' ? 'bg-[#0d241e]' : 'bg-[#173d32]'
         }`}
+        style={wallpaper ? { backgroundColor: 'rgba(13, 36, 30, 0.58)' } : undefined}
       >
         <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-gold/10 blur-3xl" />
         <div className="absolute -bottom-32 -left-20 h-72 w-72 rounded-full bg-black/20 blur-3xl" />
@@ -1510,7 +1517,7 @@ function AIPremiumMenu({
         </div>
       )}
 
-      <div className={`px-5 pb-14 pt-8 ${palette.body}`}>
+      <div className={`relative px-5 pb-14 pt-8 ${wallpaper ? 'bg-transparent' : palette.body}`}>
         {(design.intro?.title || design.intro?.text) && (
           <section className={`mb-10 rounded-[28px] border p-5 shadow-sm ${palette.card}`}>
             {design.intro.title && (
