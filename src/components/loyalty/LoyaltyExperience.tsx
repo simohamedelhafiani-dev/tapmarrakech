@@ -493,7 +493,7 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
 
   if (template === 'editorial') {
     return (
-      <div className="relative mx-auto aspect-[0.72/1] w-full max-w-[430px] overflow-hidden text-[#17130f] shadow-[0_30px_90px_rgba(0,0,0,.28)]" style={{ borderRadius: config.borderRadius ?? 30 }}>
+      <div className="relative mx-auto w-full max-w-[430px] overflow-hidden text-[#17130f] shadow-[0_30px_90px_rgba(0,0,0,.28)]" style={{ borderRadius: config.borderRadius ?? 30 }}>
         {background}
         <div className="absolute inset-0 bg-gradient-to-b from-[#fff9ed]/20 via-[#f8f0e3]/10 to-[#f7efe2]/88" />
         <div className="relative z-10 flex h-full flex-col p-7 sm:p-8">
@@ -522,7 +522,7 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
 
   if (template === 'glass') {
     return (
-      <div className="relative mx-auto aspect-[0.72/1] w-full max-w-[430px] overflow-hidden text-white shadow-[0_30px_90px_rgba(0,0,0,.35)]" style={{ borderRadius: config.borderRadius ?? 30 }}>
+      <div className="relative mx-auto w-full max-w-[430px] overflow-hidden text-white shadow-[0_30px_90px_rgba(0,0,0,.35)]" style={{ borderRadius: config.borderRadius ?? 30 }}>
         {background}<div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/10 to-black/72" /><div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_15%,rgba(255,255,255,.18),transparent_28%)]" />
         <div className="relative z-10 flex h-full flex-col p-6 sm:p-7">
           <div className="flex items-start justify-between"><div className="flex items-center gap-3">{config.logoUrl ? <img src={config.logoUrl} alt="" className="h-11 w-11 rounded-full border border-white/40 bg-white object-contain p-1.5 shadow" /> : <div className="grid h-11 w-11 place-items-center rounded-full border border-white/35 bg-white/15 text-[10px] font-bold">{establishment.slice(0,2).toUpperCase()}</div>}<div><p className="text-sm font-semibold">{establishment}</p><p className="mt-1 text-[8px] uppercase tracking-[.25em] text-white/60">WELLNESS MEMBERSHIP</p></div></div><span className="text-[9px] uppercase tracking-[.2em] text-white/70">VIP</span></div>
@@ -538,7 +538,7 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
 
   if (template === 'titanium') {
     return (
-      <div className="relative mx-auto aspect-[0.72/1] w-full max-w-[430px] overflow-hidden bg-black text-white shadow-[0_30px_90px_rgba(0,0,0,.45)]" style={{ borderRadius: config.borderRadius ?? 26 }}>
+      <div className="relative mx-auto w-full max-w-[430px] overflow-hidden bg-black text-white shadow-[0_30px_90px_rgba(0,0,0,.45)]" style={{ borderRadius: config.borderRadius ?? 26 }}>
         {background}<div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/20 to-black/90" /><div className="absolute inset-0 opacity-30" style={{ background: 'linear-gradient(135deg,transparent 0%,rgba(255,255,255,.15) 45%,transparent 47%,transparent 100%)' }} />
         <div className="relative z-10 flex h-full flex-col p-6 sm:p-7"><div className="flex items-start justify-between"><div><p className="text-[21px] font-semibold tracking-[.18em]">{establishment.toUpperCase()}</p><p className="mt-1 text-[8px] uppercase tracking-[.4em]" style={{ color: config.secondaryColor }}>BLACK MEMBER</p></div><div className="grid h-10 w-10 place-items-center rounded-xl border border-white/20 bg-black/35 text-[9px]" style={{ color: config.secondaryColor }}>TM</div></div>
           <div className="mt-auto"><p className="text-[9px] uppercase tracking-[.3em] text-white/45">GOOD FOOD. BETTER PEOPLE.</p><p className="mt-2 max-w-[300px] text-[31px] font-semibold leading-[.98] tracking-[-.04em]">{title}</p>
@@ -553,7 +553,7 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
 
   if (template === 'hospitality') {
     return (
-      <div className="relative mx-auto aspect-[0.72/1] w-full max-w-[430px] overflow-hidden text-white shadow-[0_30px_90px_rgba(0,0,0,.3)]" style={{ borderRadius: config.borderRadius ?? 30 }}>
+      <div className="relative mx-auto w-full max-w-[430px] overflow-hidden text-white shadow-[0_30px_90px_rgba(0,0,0,.3)]" style={{ borderRadius: config.borderRadius ?? 30 }}>
         {background}<div className="absolute inset-0 bg-gradient-to-b from-black/15 via-black/10 to-black/78" />
         <div className="relative z-10 flex h-full flex-col p-6 sm:p-7"><div className="flex items-center justify-between"><div className="flex items-center gap-3">{config.logoUrl ? <img src={config.logoUrl} alt="" className="h-11 w-11 rounded-xl bg-white object-contain p-1.5" /> : <div className="grid h-11 w-11 place-items-center rounded-xl bg-white/10 text-xs font-bold">{establishment.slice(0,2).toUpperCase()}</div>}<div><p className="font-serif text-xl">{establishment}</p><p className="mt-1 text-[8px] uppercase tracking-[.32em] text-white/65">HOSPITALITY CLUB</p></div></div><span className="rounded-full border border-white/25 bg-black/15 px-3 py-1.5 text-[8px] uppercase tracking-[.2em] backdrop-blur">Gold</span></div>
           <div className="mt-auto"><p className="text-[9px] uppercase tracking-[.22em] text-white/55">Bonsoir, {member}</p><p className="mt-2 font-serif text-[38px] leading-[.95] tracking-[-.04em]">{title}</p><p className="mt-3 max-w-[280px] text-[10px] leading-5 text-white/70">{subtitle}</p>
@@ -568,7 +568,7 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
 
   if (template === 'apple-wallet') {
     return (
-      <div className="relative mx-auto aspect-[0.72/1] w-full max-w-[430px] overflow-hidden text-[#1b1a18] shadow-[0_30px_90px_rgba(0,0,0,.22)]" style={{ borderRadius: config.borderRadius ?? 28 }}>
+      <div className="relative mx-auto w-full max-w-[430px] overflow-hidden text-[#1b1a18] shadow-[0_30px_90px_rgba(0,0,0,.22)]" style={{ borderRadius: config.borderRadius ?? 28 }}>
         {background}<div className="absolute inset-0 bg-gradient-to-b from-white/35 via-white/50 to-[#f4f0e8]/88" />
         <div className="relative z-10 flex h-full flex-col p-7"><div className="flex items-start justify-between"><div className="flex items-center gap-3">{config.logoUrl ? <img src={config.logoUrl} alt="" className="h-11 w-11 rounded-xl bg-white/80 object-contain p-1.5 shadow" /> : <div className="grid h-11 w-11 place-items-center rounded-xl border border-black/10 bg-white/50 text-[10px] font-bold">{establishment.slice(0,2).toUpperCase()}</div>}<div><p className="text-sm font-semibold">{establishment}</p><p className="mt-1 text-[8px] uppercase tracking-[.24em] opacity-45">PREMIUM MEMBER</p></div></div><p className="text-[9px] uppercase tracking-[.2em] opacity-45">PRIVILEGE</p></div>
           <div className="mt-auto"><p className="text-[9px] uppercase tracking-[.22em] opacity-45">Bonjour, {member}</p><p className="mt-2 font-serif text-[38px] leading-[.95] tracking-[-.045em]">{title}</p><p className="mt-3 max-w-[280px] text-[10px] leading-5 opacity-60">{subtitle}</p>
@@ -582,7 +582,7 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
   }
 
   return (
-    <div className="relative mx-auto aspect-[0.72/1] w-full max-w-[430px] overflow-hidden text-white shadow-[0_30px_90px_rgba(0,0,0,.45)]" style={{ borderRadius: config.borderRadius ?? 30 }}>
+    <div className="relative mx-auto w-full max-w-[430px] overflow-hidden text-white shadow-[0_30px_90px_rgba(0,0,0,.45)]" style={{ borderRadius: config.borderRadius ?? 30 }}>
       {background}
       <div className="absolute inset-0 bg-gradient-to-b from-black/52 via-black/12 to-black/88" />
       <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 78% 12%, ' + config.secondaryColor + '55, transparent 25%)' }} />
