@@ -248,13 +248,15 @@ export default function LoyaltyCard() {
     discountPercent?: number;
   };
 
+  const visualCardMode: 'QR' | 'STAMP' = mode === 'STAMP' ? 'STAMP' : 'QR';
+
   const visualConfig = {
     ...designConfig,
     logo_url: builderConfig.logoUrl || designConfig.logo_url,
     background_image_url: builderConfig.coverImageUrl || designConfig.background_image_url,
     front_title: builderConfig.cardTitle || designConfig.front_title,
     front_subtitle: builderConfig.cardSubtitle || designConfig.front_subtitle,
-    card_mode: mode === 'STAMP' ? 'STAMP' : 'QR',
+    card_mode: visualCardMode,
   };
 
   return (
