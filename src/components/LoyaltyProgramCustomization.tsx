@@ -15,6 +15,7 @@ type LoyaltyRewardAdmin = {
   reward_type: 'GIFT' | 'DISCOUNT';
   discount_percent: number | null;
   discount_max_amount: number | null;
+  valid_days: string[];
 };
 
 type LoyaltyPreset = {
@@ -86,6 +87,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
   const [rewardType, setRewardType] = useState<'GIFT' | 'DISCOUNT'>('GIFT');
   const [discountPercent, setDiscountPercent] = useState('10');
   const [discountMaxAmount, setDiscountMaxAmount] = useState('');
+  const [validDays, setValidDays] = useState<string[]>(['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY']);
   const [rewardSaving, setRewardSaving] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<'logo' | 'photo' | 'wallpapers' | null>(null);
@@ -100,7 +102,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
       supabase.rpc('get_loyalty_card_config', { p_establishment_id: establishmentId }),
       supabase.from('establishments').select('name,logo_url,business_type').eq('id', establishmentId).maybeSingle(),
       supabase.rpc('get_loyalty_program_settings', { p_establishment_id: establishmentId }),
-      supabase.from('loyalty_rewards').select('id,name,description,points_required,active,reward_type,discount_percent,discount_max_amount').eq('establishment_id', establishmentId).order('points_required', { ascending: true }),
+      supabase.from('loyalty_rewards').select('id,name,description,points_required,active,reward_type,discount_percent,discount_max_amount,valid_days').eq('establishment_id', establishmentId).order('points_required', { ascending: true }),
     ]);
 
     const row = Array.isArray(designData) ? designData[0] : designData;
@@ -138,6 +140,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     setRewardName(reward?.name ?? '');
     setRewardDescription(reward?.description ?? '');
     setRewardPoints(String(reward?.points_required ?? 500));
+    setValidDays(reward?.valid_days?.length ? reward.valid_days : ['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY']);
     setRewardType(reward?.reward_type ?? 'GIFT');
     setDiscountPercent(String(reward?.discount_percent ?? 10));
     setDiscountMaxAmount(reward?.discount_max_amount != null ? String(reward.discount_max_amount) : '');
@@ -150,22 +153,42 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     const discount = Number(discountPercent);
     if (rewardType === 'DISCOUNT' && (!Number.isFinite(discount) || discount <= 0 || discount > 20)) return alert('La réduction doit être comprise entre 0 et 20 %.');
     setRewardSaving(true);
-    const { error } = editingReward
-      ? await supabase.rpc('update_loyalty_reward', {
-          p_reward_id: editingReward.id, p_name: rewardName.trim(), p_description: rewardDescription.trim() || null,
-          p_points_required: points, p_reward_type: rewardType,
-          p_discount_percent: rewardType === 'DISCOUNT' ? discount : null,
-          p_discount_max_amount: rewardType === 'DISCOUNT' ? Number(discountMaxAmount) || null : null,
-          p_active: editingReward.active,
-        })
-      : await supabase.rpc('create_loyalty_reward', {
-          p_establishment_id: establishmentId, p_name: rewardName.trim(), p_description: rewardDescription.trim(),
-          p_points_required: points, p_reward_type: rewardType,
-          p_discount_percent: rewardType === 'DISCOUNT' ? discount : null,
-          p_discount_max_amount: rewardType === 'DISCOUNT' ? Number(discountMaxAmount) || null : null,
-        });
+    let error: { message: string } | null = null;
+    let createdRewardId: string | null = null;
+    if (editingReward) {
+      const result = await supabase.rpc('update_loyalty_reward', {
+        p_reward_id: editingReward.id, p_name: rewardName.trim(), p_description: rewardDescription.trim() || null,
+        p_points_required: points, p_reward_type: rewardType,
+        p_discount_percent: rewardType === 'DISCOUNT' ? discount : null,
+        p_discount_max_amount: rewardType === 'DISCOUNT' ? Number(discountMaxAmount) || null : null,
+        p_active: editingReward.active,
+      });
+      error = result.error;
+    } else {
+      const result = await supabase.rpc('create_loyalty_reward', {
+        p_establishment_id: establishmentId, p_name: rewardName.trim(), p_description: rewardDescription.trim(),
+        p_points_required: points, p_reward_type: rewardType,
+        p_discount_percent: rewardType === 'DISCOUNT' ? discount : null,
+        p_discount_max_amount: rewardType === 'DISCOUNT' ? Number(discountMaxAmount) || null : null,
+      });
+      error = result.error;
+      createdRewardId = result.data ?? null;
+    }
+    if (error) {
+      setRewardSaving(false);
+      return alert(error.message);
+    }
+    const rewardId = editingReward?.id ?? createdRewardId;
+    if (!rewardId) {
+      setRewardSaving(false);
+      return alert('Impossible de récupérer la récompense.');
+    }
+    const { error: scheduleError } = await supabase.rpc('update_loyalty_reward_schedule', { p_reward_id: rewardId, p_valid_days: validDays });
+    if (scheduleError) {
+      setRewardSaving(false);
+      return alert(scheduleError.message);
+    }
     setRewardSaving(false);
-    if (error) return alert(error.message);
     setRewardEditorOpen(false);
     await load();
   }
@@ -517,6 +540,21 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                         <label className="text-xs text-ink/50">Type<select value={rewardType} onChange={e=>setRewardType(e.target.value as 'GIFT'|'DISCOUNT')} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5"><option value="GIFT">🎁 Cadeau</option><option value="DISCOUNT">% Réduction</option></select></label>
                       </div>
                       {rewardType === 'DISCOUNT' && <div className="grid gap-3 sm:grid-cols-2"><label className="text-xs text-ink/50">Réduction (%)<input type="number" min="1" max="20" value={discountPercent} onChange={e=>setDiscountPercent(e.target.value)} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5"/></label><label className="text-xs text-ink/50">Plafond (MAD)<input type="number" min="0" value={discountMaxAmount} onChange={e=>setDiscountMaxAmount(e.target.value)} placeholder="Aucun" className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5"/></label></div>}
+                      <div className="mt-3">
+                        <p className="text-xs text-ink/50">Jours de validité</p>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {[['MONDAY','Lun'],['TUESDAY','Mar'],['WEDNESDAY','Mer'],['THURSDAY','Jeu'],['FRIDAY','Ven'],['SATURDAY','Sam'],['SUNDAY','Dim']].map(([day,label]) => {
+                            const active = validDays.includes(day);
+                            return (
+                              <button key={day} type="button" onClick={() => setValidDays(days => active ? days.filter(d => d !== day) : [...days, day])}
+                                className={'rounded-full border px-3 py-1.5 text-[10px] font-semibold ' + (active ? 'border-forest bg-forest text-white' : 'border-ink/10 bg-white text-ink/45')}>
+                                {label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <p className="mt-2 text-[10px] text-ink/40">La récompense ne pourra être réclamée ou utilisée que les jours sélectionnés.</p>
+                      </div>
                     </div>
                     <button type="button" disabled={rewardSaving} onClick={() => void saveReward()} className="mt-5 w-full rounded-xl bg-forest py-3.5 text-sm font-semibold text-white disabled:opacity-50">{rewardSaving ? 'Enregistrement...' : editingReward ? 'Enregistrer les modifications' : 'Créer la récompense'}</button>
                   </div>
