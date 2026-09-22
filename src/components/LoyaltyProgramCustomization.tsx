@@ -5,6 +5,52 @@ import { defaultLoyaltyDesignConfig, LoyaltyCardVisual, type LoyaltyDesignConfig
 
 type CardMode = 'QR' | 'STAMP';
 
+type LoyaltyPreset = {
+  id: string;
+  name: string;
+  description: string;
+  primary: string;
+  secondary: string;
+  background: string;
+  text: string;
+  radius: number;
+  mode: CardMode;
+  title: string;
+  subtitle: string;
+  stampStyle: LoyaltyDesignConfig['stamp_style'];
+};
+
+const LOYALTY_PRESETS: LoyaltyPreset[] = [
+  {
+    id: 'wallet-premium',
+    name: 'Wallet Premium',
+    description: 'Le design Apple Wallet que nous avons validé',
+    primary: '#0B3327',
+    secondary: '#D6B15A',
+    background: '#F7F7F3',
+    text: '#FFFFFF',
+    radius: 24,
+    mode: 'QR',
+    title: 'CARTE FIDÉLITÉ',
+    subtitle: 'Merci de faire partie de notre histoire !',
+    stampStyle: 'circles',
+  },
+  {
+    id: 'passkit-purple',
+    name: 'PassKit Purple',
+    description: 'Style PassKit / U4Coffee avec QR',
+    primary: '#6200EA',
+    secondary: '#FFFFFF',
+    background: '#6200EA',
+    text: '#FFFFFF',
+    radius: 24,
+    mode: 'QR',
+    title: 'PROGRAMME FIDÉLITÉ',
+    subtitle: 'Votre carte digitale',
+    stampStyle: 'circles',
+  },
+];
+
 type Design = {
   template_id: string;
   primary_color: string;
@@ -18,7 +64,7 @@ type Design = {
 };
 
 const baseDesign: Design = {
-  template_id: 'custom',
+  template_id: 'wallet-premium',
   primary_color: '#0B3327',
   secondary_color: '#D6B15A',
   background_color: '#F7F7F3',
@@ -58,7 +104,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     if (row) {
       const nextConfig = { ...defaultLoyaltyDesignConfig, ...(row.design_config ?? {}) };
       setDesign({
-        template_id: 'custom',
+        template_id: row.template_id ?? baseDesign.template_id,
         primary_color: row.primary_color ?? baseDesign.primary_color,
         secondary_color: row.secondary_color ?? baseDesign.secondary_color,
         background_color: row.background_color ?? baseDesign.background_color,
@@ -94,6 +140,29 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
       show_qr: mode === 'QR',
       show_points: false,
     });
+  }
+
+  function applyPreset(preset: LoyaltyPreset) {
+    setDesign(d => ({
+      ...d,
+      template_id: preset.id,
+      primary_color: preset.primary,
+      secondary_color: preset.secondary,
+      background_color: preset.background,
+      text_color: preset.text,
+      border_radius: preset.radius,
+      published: false,
+      design_config: {
+        ...d.design_config,
+        front_title: preset.title,
+        front_subtitle: preset.subtitle,
+        stamp_style: preset.stampStyle,
+        card_mode: preset.mode,
+        show_qr: preset.mode === 'QR',
+        show_points: false,
+      },
+    }));
+    setCardMode(preset.mode);
   }
 
   async function uploadAsset(file: File, kind: 'logo' | 'photo') {
@@ -135,7 +204,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
 
     const { error } = await supabase.rpc('save_loyalty_card_design', {
       p_establishment_id: establishmentId,
-      p_template_id: 'custom',
+      p_template_id: design.template_id,
       p_primary_color: design.primary_color,
       p_secondary_color: design.secondary_color,
       p_background_color: design.background_color,
@@ -147,7 +216,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     });
     setSaving(false);
     if (error) return alert(error.message);
-    setDesign(d => ({ ...d, template_id: 'custom', published: publish }));
+    setDesign(d => ({ ...d, published: publish }));
     alert(publish ? 'Carte fidélité publiée.' : 'Brouillon enregistré.');
   }
 
@@ -184,6 +253,37 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
               {['Design', 'Contenu', 'Récompense', 'Aperçu'].map((tab, index) => (
                 <div key={tab} className={`flex-1 rounded-xl px-3 py-2.5 text-center text-[10px] font-semibold ${index === 0 ? 'bg-white text-forest shadow-sm' : 'text-ink/35'}`}>{tab}</div>
               ))}
+            </div>
+
+            <div className="rounded-2xl border border-ink/10 p-5">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Modèles</p>
+                <p className="mt-1 text-xs text-ink/45">Choisis un modèle de départ, puis personnalise-le avec tes couleurs, ton logo et ta photo.</p>
+              </div>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                {LOYALTY_PRESETS.map(preset => {
+                  const active = design.template_id === preset.id;
+                  return (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      onClick={() => applyPreset(preset)}
+                      className={`overflow-hidden rounded-2xl border text-left transition ${active ? 'border-forest ring-2 ring-forest/10' : 'border-ink/10 hover:border-forest/30'}`}
+                    >
+                      <div className="h-20 p-3" style={{ background: `linear-gradient(135deg, ${preset.primary}, ${preset.secondary}55)` }}>
+                        <div className="flex h-full items-end justify-between">
+                          <span className="text-[10px] font-bold uppercase tracking-[.16em]" style={{ color: preset.text }}>{preset.name}</span>
+                          <span className="rounded-full px-2 py-1 text-[8px] font-semibold" style={{ color: preset.primary, background: preset.background }}>{preset.mode}</span>
+                        </div>
+                      </div>
+                      <div className="bg-white p-3">
+                        <p className="text-xs font-semibold text-forest">{preset.name}</p>
+                        <p className="mt-1 text-[9px] leading-4 text-ink/45">{preset.description}</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <div className="rounded-2xl border border-ink/10 p-5">
