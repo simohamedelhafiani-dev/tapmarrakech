@@ -235,10 +235,8 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
               <div><p className="text-[10px] font-bold uppercase tracking-[.16em] text-gold">Aperçu en temps réel</p><p className="mt-1 text-xs text-ink/45">Voici exactement ce que vos clients verront.</p></div>
               <span className="rounded-full bg-white px-3 py-1.5 text-[10px] font-semibold text-forest shadow-sm">Client</span>
             </div>
-            <div className="mt-5 mx-auto max-w-[390px] rounded-[2.5rem] border-[8px] border-[#20252b] bg-[#20252b] p-2 shadow-2xl">
-              <div className="overflow-hidden rounded-[1.9rem] bg-white p-3">
-                <LoyaltyCardVisual design={visualDesign} card={visualCard} side="front" programType={cardMode === 'STAMP' ? 'STAMP' : 'POINTS'} />
-              </div>
+            <div className="mx-auto mt-5 w-full max-w-[430px]">
+              <LoyaltyCardVisual design={visualDesign} card={{ ...visualCard, stampRewardName }} side="front" programType={cardMode === 'STAMP' ? 'STAMP' : 'POINTS'} />
             </div>
           </div>
         </div>
