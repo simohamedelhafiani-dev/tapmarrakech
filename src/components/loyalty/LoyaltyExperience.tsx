@@ -226,12 +226,12 @@ export function LoyaltyReward({ config }: { config: LoyaltyExperienceConfig }) {
     <>
       {reward || config.rewards?.length ? (
         <Section title={config.rewards?.length ? 'Récompenses disponibles' : 'Votre prochaine récompense'} eyebrow="À débloquer">
-          {reward && <div className="mt-3 flex items-center gap-4 rounded-[22px] border border-white/15 bg-white/10 p-4 text-white shadow-lg backdrop-blur-xl" style={{ background: config.primaryColor }}>
+          {!config.rewards?.length && reward && <div className="mt-3 flex items-center gap-4 rounded-[22px] border border-white/15 bg-white/10 p-4 text-white shadow-lg backdrop-blur-xl" style={{ background: config.primaryColor }}>
             <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl" style={{ background: config.secondaryColor + '35', color: config.secondaryColor }}><Gift size={23}/></div>
             <div className="min-w-0"><p className="text-[9px] uppercase tracking-[0.16em] opacity-55">Prochaine récompense</p><p className="mt-1 text-lg font-semibold">{reward}</p><p className="mt-1 text-[10px] opacity-65">{config.rewardDescription || 'Votre fidélité est récompensée.'}</p></div>
           </div>}
-          {config.rewards?.length ? <div className="mt-3 space-y-2">
-            {config.rewards.map(r => {
+          {config.rewards?.length ? <div className="mt-3 grid gap-2">
+            {config.rewards.slice(0, 3).map(r => {
               const available = (config.pointsBalance ?? 0) >= r.points_required;
               return <button key={r.id} type="button" disabled={!available} onClick={() => void createClaim(r)} className="flex w-full items-center justify-between gap-3 rounded-2xl border border-white/15 bg-white/10 p-4 text-left backdrop-blur-md transition hover:bg-white/15 disabled:opacity-70">
                 <div className="min-w-0"><p className="text-sm font-semibold">{r.name}</p><p className="mt-1 text-[10px] opacity-50">{r.description || r.points_required + ' points'}</p>{r.reward_type === 'DISCOUNT' && r.discount_percent != null && <p className="mt-1 text-[10px] font-semibold" style={{ color: config.secondaryColor }}>-{r.discount_percent}% de réduction</p>}</div>
@@ -600,21 +600,6 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
           <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-black/25"><div className="h-full rounded-full" style={{ width: progress + '%', background: config.secondaryColor }} /></div>
         </div>
         {benefits.length > 0 && <div className="mt-5"><div className="flex items-center justify-between"><p className="text-[9px] font-bold uppercase tracking-[.22em] text-white/70">Vos avantages exclusifs</p><span className="text-[8px] text-white/45">Voir tout</span></div><div className="mt-2 grid grid-cols-3 gap-2">{benefits.map((b,i)=><div key={b.title+i} className="rounded-[17px] border border-white/25 bg-white/[0.13] p-3 backdrop-blur-xl"><div className="mb-2 text-[13px]" style={{ color: config.secondaryColor }}>✦</div><p className="text-[10px] font-semibold leading-4">{b.title}</p><p className="mt-1 line-clamp-2 text-[8px] leading-3.5 text-white/55">{b.description}</p></div>)}</div></div>}
-        <div className="mt-5 rounded-[22px] border border-white/25 bg-black/15 p-4 backdrop-blur-xl">
-          <div className="flex items-center justify-between gap-3">
-            <div><p className="text-[8px] font-bold uppercase tracking-[.2em] text-white/55">Vos récompenses</p><p className="mt-1 text-[10px] text-white/65">Utilisez vos points pour débloquer un avantage</p></div>
-            <Gift size={18} style={{ color: config.secondaryColor }} />
-          </div>
-          {availableRewards.length > 0 && <div className="mt-3 grid gap-2">
-            {availableRewards.map((r) => {
-              const available = (config.pointsBalance ?? 0) >= r.points_required;
-              return <div key={r.id} className="flex items-center justify-between gap-3 rounded-2xl border border-white/15 bg-white/[0.10] p-3">
-                <div className="min-w-0"><p className="truncate text-[11px] font-semibold text-white">{r.name}</p><p className="mt-1 truncate text-[9px] text-white/50">{r.description || r.points_required + ' points'}</p>{r.reward_type === 'DISCOUNT' && r.discount_percent != null && <p className="mt-1 text-[9px] font-semibold" style={{ color: config.secondaryColor }}>-{r.discount_percent}% de réduction</p>}</div>
-                <span className="shrink-0 rounded-full px-2 py-1 text-[8px] font-bold" style={{ color: available ? config.primaryColor : '#fff', background: available ? config.secondaryColor : 'rgba(255,255,255,.12)' }}>{available ? 'Utiliser' : r.points_required + ' pts'}</span>
-              </div>;
-            })}
-          </div>}
-        </div>
         <div id="loyalty-reward-list"><LoyaltyReward config={config} /></div>
         {offers.length > 0 && <div className="mt-4 rounded-[19px] border border-white/25 bg-black/20 p-4 backdrop-blur-xl"><div className="flex items-center justify-between"><div><p className="text-[8px] uppercase tracking-[.18em] text-white/45">{offers[0].eyebrow || 'Offre du moment'}</p><p className="mt-1 text-base font-semibold">{offers[0].title}</p>{offers[0].description && <p className="mt-1 text-[9px] text-white/55">{offers[0].description}</p>}</div><span className="text-xl text-white/75">›</span></div></div>}
         <div className="mt-5 flex flex-col items-center pt-2">
