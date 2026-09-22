@@ -513,6 +513,14 @@ export default function Menu() {
               ))}
             </select>
 
+            <a
+              href="/dashboard/menu/design"
+              className="flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
+            >
+              <ImageIcon size={17} />
+              Personnaliser le menu
+            </a>
+
             <button
               type="button"
               onClick={openNewCategory}
