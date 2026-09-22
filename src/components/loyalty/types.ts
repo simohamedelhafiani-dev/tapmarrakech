@@ -14,6 +14,7 @@ export type LoyaltyTemplate = {
   coverOverlay: number;
   layout: 'editorial' | 'photo' | 'split' | 'minimal' | 'luxury';
   stampStyle: 'circles' | 'squares' | 'stars' | 'hearts';
+  showQr: boolean;
 };
 
 export type LoyaltyBuilderConfig = {
