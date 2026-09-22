@@ -1,4 +1,4 @@
-const CACHE = 'tapmarrakech-shell-v7';
+const CACHE = 'tapmarrakech-shell-v8';
 const APP_SHELL = ['/', '/index.html', '/tapmarrakech-logo.png', '/manifest.webmanifest'];
 
 self.addEventListener('message', (event) => {
@@ -48,8 +48,23 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Never serve JavaScript/CSS from the old PWA cache. Vite assets are hashed,
+  // so fetching them from the network is safe and guarantees new UI code.
+  const isAppAsset = url.pathname.startsWith('/assets/') ||
+    url.pathname.endsWith('.js') ||
+    url.pathname.endsWith('.css');
+
+  if (isAppAsset) {
+    event.respondWith(
+      fetch(event.request, { cache: 'no-store' })
+        .then((response) => response)
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
   event.respondWith(
-    fetch(event.request)
+    fetch(event.request, { cache: 'no-store' })
       .then((response) => {
         const copy = response.clone();
         caches.open(CACHE).then((cache) => cache.put(event.request, copy));
