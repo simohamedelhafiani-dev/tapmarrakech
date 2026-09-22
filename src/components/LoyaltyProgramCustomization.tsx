@@ -257,6 +257,11 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
       { title: 'Invitations privées', description: 'Accès aux nouveautés avant les autres.' },
       { title: 'Accès prioritaire', description: 'Un traitement privilégié lors de vos visites.' },
     ],
+    rewards: [
+      { id: 'preview-dessert', name: 'Dessert offert', description: 'Un dessert au choix offert', points_required: 500, reward_type: 'GIFT', discount_percent: null },
+      { id: 'preview-discount', name: 'Réduction', description: '10% sur votre prochaine visite', points_required: 600, reward_type: 'DISCOUNT', discount_percent: 10 },
+      { id: 'preview-drink', name: 'Boisson offerte', description: 'Une boisson au choix offerte', points_required: 750, reward_type: 'GIFT', discount_percent: null },
+    ],
     history: [
       { id: 'demo-1', title: 'Visite', date: '12/08', points: 0 },
       { id: 'demo-2', title: 'Visite', date: '18/08', points: 0 },
