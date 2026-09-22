@@ -1445,17 +1445,22 @@ function AIPremiumMenu({
 
   const navSections = visibleSections.filter((section: any) => section?.title).slice(0, 12);
 
-  const heroImage =
-    photoMode === 'with_photos'
-      ? items.find((item) => item.image_url)?.image_url ?? place.logo_url ?? null
-      : null;
   const wallpaper =
     design?.background_image_url ||
     (Array.isArray(design?.wallpaper_library) ? design.wallpaper_library[0] : null) ||
     null;
 
-  const palette =
-    style === 'dark'
+  const palette = wallpaper
+    ? {
+        page: 'bg-transparent text-white',
+        body: 'bg-transparent',
+        muted: 'text-white/65',
+        accent: 'text-gold',
+        line: 'border-white/15',
+        card: 'bg-black/35 border-white/15 backdrop-blur-xl',
+        product: 'text-white',
+      }
+    : style === 'dark'
       ? {
           page: 'bg-[#102b24] text-white',
           body: 'bg-[#102b24]',
@@ -1485,25 +1490,15 @@ function AIPremiumMenu({
               card: 'bg-[#fffaf0] border-forest/10',
               product: 'text-forest',
             }
-          : wallpaper
-            ? {
-                page: 'bg-transparent text-white',
-                body: 'bg-transparent',
-                muted: 'text-white/65',
-                accent: 'text-gold',
-                line: 'border-white/15',
-                card: 'bg-black/35 border-white/15 backdrop-blur-md',
-                product: 'text-white',
-              }
-            : {
-                page: 'bg-[#f0ece2] text-forest',
-                body: 'bg-[#f0ece2]',
-                muted: 'text-ink/55',
-                accent: 'text-gold',
-                line: 'border-forest/10',
-                card: 'bg-[#fffdf8] border-ink/10',
-                product: 'text-forest',
-              };
+          : {
+              page: 'bg-[#f0ece2] text-forest',
+              body: 'bg-[#f0ece2]',
+              muted: 'text-ink/55',
+              accent: 'text-gold',
+              line: 'border-forest/10',
+              card: 'bg-[#fffdf8] border-ink/10',
+              product: 'text-forest',
+            };
 
   const scrollToSection = (index: number) => {
     document.getElementById(`ai-menu-section-${index}`)?.scrollIntoView({
@@ -1523,18 +1518,8 @@ function AIPremiumMenu({
         <div className="absolute -bottom-32 -left-20 h-72 w-72 rounded-full bg-black/20 blur-3xl" />
 
         <div className="relative">
-          {heroImage ? (
-            <div className="mb-6 overflow-hidden rounded-[30px] border border-white/10 bg-black/10 shadow-2xl">
-              <img src={heroImage} alt="" className="h-52 w-full object-cover" />
-            </div>
-          ) : (
-            <div className="mb-6 flex h-28 items-center justify-center rounded-[28px] border border-gold/20 bg-white/5">
-              <span className="font-display text-3xl text-gold">{place.name}</span>
-            </div>
-          )}
-
           <p className="text-[9px] font-bold uppercase tracking-[0.34em] text-gold">
-            {design.hero?.eyebrow || 'La carte'}
+            {design.hero?.eyebrow || place.name || 'La carte'}
           </p>
           <h1 className="mt-2 max-w-[430px] font-display text-[42px] leading-[0.94] text-white">
             {design.hero?.title || place.name || 'Notre menu'}
@@ -1557,7 +1542,14 @@ function AIPremiumMenu({
                 key={`nav-${index}`}
                 type="button"
                 onClick={() => scrollToSection(visibleSections.indexOf(section))}
-                className="rounded-full border border-forest/10 bg-white/75 px-4 py-2 text-[10px] font-semibold text-forest shadow-sm"
+                className={
+                  'rounded-full border px-4 py-2 text-[10px] font-semibold shadow-sm backdrop-blur-md ' +
+                  (index === 0
+                    ? 'border-gold/60 bg-gold text-forest'
+                    : wallpaper
+                      ? 'border-white/20 bg-black/25 text-white'
+                      : 'border-forest/10 bg-white/75 text-forest')
+                }
               >
                 {section.title}
               </button>
@@ -1568,7 +1560,7 @@ function AIPremiumMenu({
 
       <div className={`relative px-5 pb-14 pt-8 ${wallpaper ? 'bg-transparent' : palette.body}`}>
         {(design.intro?.title || design.intro?.text) && (
-          <section className={`mb-10 rounded-[28px] border p-5 shadow-sm ${palette.card}`}>
+          <section className={`mb-10 rounded-[28px] border p-5 shadow-xl ${palette.card}`}>
             {design.intro.title && (
               <h2 className={`font-display text-2xl ${palette.product}`}>
                 {design.intro.title}
@@ -1593,8 +1585,9 @@ function AIPremiumMenu({
 
             if (!sectionItems.length) return null;
 
-            const layout =
-              section.type === 'featured'
+            const layout = wallpaper
+              ? 'list'
+              : section.type === 'featured'
                 ? 'feature'
                 : section.layout === 'list'
                   ? 'list'
@@ -1676,6 +1669,47 @@ function AIPremiumMenu({
                             {Number(item.price).toLocaleString('fr-FR')} MAD
                           </p>
                         </div>
+                      </article>
+                    ))}
+                  </div>
+                ) : wallpaper ? (
+                  <div className="space-y-3">
+                    {sectionItems.map((item) => (
+                      <article
+                        key={item.id}
+                        className="flex items-center gap-3 overflow-hidden rounded-[22px] border border-white/15 bg-black/35 p-2.5 shadow-lg backdrop-blur-xl"
+                      >
+                        {photoMode === 'with_photos' && item.image_url ? (
+                          <img
+                            src={item.image_url}
+                            alt=""
+                            className="h-[74px] w-[74px] shrink-0 rounded-[16px] object-cover"
+                          />
+                        ) : (
+                          <div className="h-[74px] w-[74px] shrink-0 rounded-[16px] bg-white/10" />
+                        )}
+                        <div className="min-w-0 flex-1 py-1">
+                          <div className="flex items-start justify-between gap-3">
+                            <h3 className="text-[14px] font-bold leading-5 text-white">
+                              {item.name}
+                            </h3>
+                            <span className="shrink-0 text-[13px] font-bold text-gold">
+                              {Number(item.price).toLocaleString('fr-FR')} MAD
+                            </span>
+                          </div>
+                          {item.description && (
+                            <p className="mt-1 text-[10px] leading-4 text-white/60">
+                              {item.description}
+                            </p>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          aria-label={`Ajouter ${item.name}`}
+                          className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/30 bg-white/10 text-white"
+                        >
+                          <span className="text-xl font-light leading-none">+</span>
+                        </button>
                       </article>
                     ))}
                   </div>
