@@ -107,7 +107,6 @@ export default function LoyaltyCard() {
       setCard(nextCard);
       setHistory((historyData ?? []) as HistoryItem[]);
       setRewards((rewardsData ?? []) as LoyaltyExperienceReward[]);
-      setRewards((rewardsData ?? []) as LoyaltyExperienceReward[]);
 
       const designRow = Array.isArray(designData) ? designData[0] : designData;
       if (designRow) {
@@ -308,7 +307,7 @@ export default function LoyaltyCard() {
     })),
     qrValue: cardUrl,
     intro: raw.intro || designConfig.front_subtitle,
-    templateId: designConfig.card_mode,
+    templateId: design.template_id,
     published: true,
   };
 
