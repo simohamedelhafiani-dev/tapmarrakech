@@ -56,6 +56,7 @@ export type LoyaltyExperienceConfig = {
   intro?: string | null;
   templateId?: string | null;
   published?: boolean;
+  stampStyle?: 'circles' | 'squares' | 'stars' | 'hearts';
 };
 
 function clamp(value: number, min: number, max: number) {
@@ -126,13 +127,20 @@ export function LoyaltyProgress({ config }: { config: LoyaltyExperienceConfig })
     const goal = Math.max(1, config.visitGoal ?? 8);
     const remaining = Math.max(0, goal - current);
     const label = config.type === 'CHALLENGE' ? 'Progression du défi' : config.type === 'COLLECTION' ? 'Collection' : 'Vos visites';
+    const stampStyle = config.stampStyle ?? 'circles';
+    const StampIcon = ({ filled }: { filled: boolean }) => {
+      const common = { color: filled ? config.secondaryColor : config.secondaryColor + '99' };
+      if (stampStyle === 'stars') return <span className="grid h-8 w-8 place-items-center rounded-lg border" style={{ borderColor: common.color }}><Star size={16} fill={filled ? 'currentColor' : 'none'} style={common} /></span>;
+      if (stampStyle === 'hearts') return <span className="grid h-8 w-8 place-items-center rounded-full border text-sm" style={{ borderColor: common.color, color: common.color }}>{filled ? '♥' : '♡'}</span>;
+      return <span className={'grid h-8 w-8 place-items-center border ' + (stampStyle === 'squares' ? 'rounded-lg' : 'rounded-full')} style={{ borderColor: common.color, background: filled ? config.secondaryColor + '22' : 'transparent' }}>{filled && <span className="h-2 w-2 rounded-full" style={{ background: config.secondaryColor }} />}</span>;
+    };
     return (
       <div className="rounded-[24px] border border-black/6 bg-white/10 p-5 shadow-[0_10px_30px_rgba(0,0,0,.10)] backdrop-blur-xl">
         <div className="flex items-end justify-between gap-3">
           <div><p className="text-[9px] font-bold uppercase tracking-[0.2em] opacity-45">{label}</p><p className="mt-1 text-3xl font-bold tracking-tight">{current}<span className="text-base opacity-35"> / {goal}</span></p></div>
           <span className="rounded-full px-3 py-1.5 text-[10px] font-semibold" style={{ color: config.primaryColor, background: config.secondaryColor + '22' }}>{remaining > 0 ? `Encore ${remaining}` : 'Objectif atteint'}</span>
         </div>
-        <div className="mt-4"><ProgressBar value={current} max={goal} color={config.secondaryColor} /></div>
+        <div className="mt-4 grid grid-cols-5 gap-2"><StampIcon key={i} filled={i < goal && i < current} /><StampIcon key={i} filled={i < goal && i < current} /><StampIcon key={i} filled={i < goal && i < current} /><StampIcon key={i} filled={i < goal && i < current} /><StampIcon key={i} filled={i < goal && i < current} /><StampIcon key={i} filled={i < goal && i < current} /><StampIcon key={i} filled={i < goal && i < current} /><StampIcon key={i} filled={i < goal && i < current} /><StampIcon key={i} filled={i < goal && i < current} /><StampIcon key={i} filled={i < goal && i < current} /><StampIcon key={i} filled={i < goal && i < current} /><StampIcon key={i} filled={i < goal && i < current} /></div>
         <p className="mt-3 text-xs opacity-55">{config.progressLabel || (remaining > 0 ? `Encore ${remaining} visites avant votre récompense` : 'Votre récompense est disponible')}</p>
       </div>
     );
