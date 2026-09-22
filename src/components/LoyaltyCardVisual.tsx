@@ -34,7 +34,7 @@ export const defaultLoyaltyDesignConfig: LoyaltyDesignConfig = {
   front_subtitle: 'Savourez, collectionnez, profitez !',
   back_title: 'Merci pour votre fidélité !',
   back_message: 'Chaque visite vous rapproche d’une expérience unique. À très bientôt !',
-  show_qr: true,
+  show_qr: false,
   show_points: true,
   stamp_style: 'circles',
   background_image_url: null,
