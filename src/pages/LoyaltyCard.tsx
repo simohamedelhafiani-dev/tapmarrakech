@@ -275,7 +275,20 @@ export default function LoyaltyCard() {
       )
       .subscribe();
 
+    // Realtime is the primary path. The short polling fallback makes the
+    // customer card update even when a device/browser temporarily misses a
+    // Supabase Realtime event (common with installed PWAs/background tabs).
+    const refreshWhileVisible = () => {
+      if (document.visibilityState === 'visible') void refreshCard();
+    };
+    const refreshInterval = window.setInterval(refreshWhileVisible, 3000);
+    window.addEventListener('focus', refreshWhileVisible);
+    document.addEventListener('visibilitychange', refreshWhileVisible);
+
     return () => {
+      window.clearInterval(refreshInterval);
+      window.removeEventListener('focus', refreshWhileVisible);
+      document.removeEventListener('visibilitychange', refreshWhileVisible);
       void supabase.removeChannel(channel);
     };
   }, [card?.customer_id, token]);
