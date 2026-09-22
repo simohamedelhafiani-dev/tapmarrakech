@@ -89,6 +89,49 @@ export default function LoyaltyCard() {
   }
 
   useEffect(() => {
+    const standalone = window.matchMedia?.('(display-mode: standalone)').matches || (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+    setIsInstalled(Boolean(standalone));
+
+    const media = window.matchMedia?.('(display-mode: standalone)');
+    const onDisplayModeChange = (event: MediaQueryListEvent) => setIsInstalled(event.matches);
+    media?.addEventListener?.('change', onDisplayModeChange);
+
+    const handler = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event as BeforeInstallPromptEvent);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler);
+      media?.removeEventListener?.('change', onDisplayModeChange);
+    };
+  }, []);
+
+  async function saveCardOnPhone() {
+    if (isInstalled) return;
+
+    if (installPrompt) {
+      await installPrompt.prompt();
+      const choice = await installPrompt.userChoice;
+      setInstallPrompt(null);
+      if (choice.outcome === 'accepted') setIsInstalled(true);
+      return;
+    }
+
+    if (navigator.share) {
+      await navigator.share({ title: card?.establishment_name || 'Ma carte fidélité', text: 'Ma carte fidélité', url: cardUrl });
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(cardUrl);
+      alert('Lien de votre carte copié. Ouvrez-le sur votre téléphone pour l’enregistrer.');
+    } catch {
+      alert('Utilisez le menu Partager de votre navigateur puis « Ajouter à l’écran d’accueil ».');
+    }
+  }
+
+  useEffect(() => {
     if (!token) {
       setError('Carte de fidélité introuvable.');
       setLoading(false);
@@ -345,10 +388,10 @@ export default function LoyaltyCard() {
     <main className="min-h-screen bg-[#eef0ed] px-3 py-5 sm:px-6 sm:py-8">
       <div className="mx-auto w-full max-w-[430px]">
         <LoyaltyExperience config={experience} />
-        <button type="button" onClick={() => void saveCardOnPhone()} className="mt-4 flex w-full items-center justify-center gap-3 rounded-2xl bg-[#D6B15A] px-5 py-4 text-sm font-semibold text-[#17130f] shadow-lg transition hover:brightness-105">
+        {!isInstalled && <button type="button" onClick={() => void saveCardOnPhone()} className="mt-4 flex w-full items-center justify-center gap-3 rounded-2xl bg-[#D6B15A] px-5 py-4 text-sm font-semibold text-[#17130f] shadow-lg transition hover:brightness-105">
           <span className="text-lg">▣</span>
           Enregistrer ma carte sur mon téléphone
-        </button>
+        </button>}
         <p className="mt-2 text-center text-[10px] text-ink/40">Ajoutez-la à votre écran d’accueil ou partagez votre carte.</p>
       </div>
     </main>
