@@ -766,20 +766,20 @@ export default function PublicReview() {
                 style={{ backgroundImage: 'url("' + menuAiDesign.wallpaper_library[0] + '")' }}
               />
             )}
-            <div className="pointer-events-none absolute inset-0 bg-black/55" />
+            <div className="pointer-events-none absolute inset-0 bg-black/30" />
 
             <div className="relative z-10">
               <div className="flex items-center justify-between">
                 {p.logo_url ? (
-                  <div className="grid h-14 w-14 place-items-center overflow-hidden rounded-[17px] border border-white/15 bg-white/95 p-1.5 shadow-xl">
+                  <div className="flex h-20 w-[150px] items-center justify-start">
                     <img
                       src={p.logo_url}
                       alt={p.name}
-                      className="h-full w-full object-contain"
+                      className="h-full w-full object-contain object-left drop-shadow-[0_6px_18px_rgba(0,0,0,0.35)]"
                     />
                   </div>
                 ) : (
-                  <div className="grid h-14 w-14 place-items-center rounded-[17px] border border-gold/30 bg-black/20 font-display text-2xl text-gold backdrop-blur-md">
+                  <div className="flex h-20 items-center font-display text-3xl text-gold">
                     {p.name?.[0] || 'E'}
                   </div>
                 )}
@@ -1677,7 +1677,7 @@ function AIPremiumMenu({
                     {sectionItems.map((item) => (
                       <article
                         key={item.id}
-                        className="flex items-center gap-3 overflow-hidden rounded-[22px] border border-white/15 bg-black/35 p-2.5 shadow-lg backdrop-blur-xl"
+                        className="flex items-center gap-3 overflow-hidden rounded-[22px] border border-white/15 bg-black/38 p-2.5 shadow-lg"
                       >
                         {photoMode === 'with_photos' && item.image_url ? (
                           <img
@@ -1703,13 +1703,6 @@ function AIPremiumMenu({
                             </p>
                           )}
                         </div>
-                        <button
-                          type="button"
-                          aria-label={`Ajouter ${item.name}`}
-                          className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/30 bg-white/10 text-white"
-                        >
-                          <span className="text-xl font-light leading-none">+</span>
-                        </button>
                       </article>
                     ))}
                   </div>
