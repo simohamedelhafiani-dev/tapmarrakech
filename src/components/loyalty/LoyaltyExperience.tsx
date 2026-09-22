@@ -558,7 +558,14 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
         </div>
         {benefits.length > 0 && <div className="mt-5"><div className="flex items-center justify-between"><p className="text-[9px] font-bold uppercase tracking-[.22em] text-white/70">Vos avantages exclusifs</p><span className="text-[8px] text-white/45">Voir tout</span></div><div className="mt-2 grid grid-cols-3 gap-2">{benefits.map((b,i)=><div key={b.title+i} className="rounded-[17px] border border-white/25 bg-white/[0.13] p-3 backdrop-blur-xl"><div className="mb-2 text-[13px]" style={{ color: config.secondaryColor }}>✦</div><p className="text-[10px] font-semibold leading-4">{b.title}</p><p className="mt-1 line-clamp-2 text-[8px] leading-3.5 text-white/55">{b.description}</p></div>)}</div></div>}
         {offers.length > 0 && <div className="mt-4 rounded-[19px] border border-white/25 bg-black/20 p-4 backdrop-blur-xl"><div className="flex items-center justify-between"><div><p className="text-[8px] uppercase tracking-[.18em] text-white/45">{offers[0].eyebrow || 'Offre du moment'}</p><p className="mt-1 text-base font-semibold">{offers[0].title}</p>{offers[0].description && <p className="mt-1 text-[9px] text-white/55">{offers[0].description}</p>}</div><span className="text-xl text-white/75">›</span></div></div>}
-        <div className="mt-auto flex items-end justify-between pt-5"><div><p className="text-[8px] uppercase tracking-[.2em] text-white/45">Membre</p><p className="mt-1 text-sm">{member}</p><p className="mt-1 text-[8px] uppercase tracking-[.14em] text-white/40">Scannez pour profiter de vos avantages</p></div><div className="h-[66px] w-[66px]">{qrBlock}</div></div>
+        <div className="mt-5 flex flex-col items-center pt-2">
+          <div className="h-[112px] w-[112px]">{qrBlock}</div>
+          <p className="mt-2 text-center text-[8px] uppercase tracking-[.16em] text-white/50">Scannez pour identifier votre compte</p>
+          <div className="mt-4 flex w-full items-end justify-between border-t border-white/10 pt-3">
+            <div><p className="text-[8px] uppercase tracking-[.2em] text-white/45">Membre</p><p className="mt-1 text-sm">{member}</p></div>
+            <p className="text-[8px] uppercase tracking-[.14em] text-white/40">Kissko · Gold</p>
+          </div>
+        </div>
       </div>
     </div>
   );
