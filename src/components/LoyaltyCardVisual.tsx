@@ -18,7 +18,7 @@ export type LoyaltyDesignConfig = {
   ai_prompt?: string;
   ai_generation_id?: string;
   card_mode?: 'QR' | 'STAMP';
-  loyaltyType?: 'STAMP' | 'POINTS' | 'DISCOUNT' | 'REWARD' | 'TIER' | 'CHALLENGE' | 'CASHBACK';
+  loyaltyType?: 'STAMP' | 'POINTS' | 'DISCOUNT' | 'REWARD' | 'TIER' | 'CHALLENGE' | 'CASHBACK' | 'COLLECTION';
   cardTitle?: string;
   cardSubtitle?: string;
   progressText?: string;
