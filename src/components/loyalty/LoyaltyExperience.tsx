@@ -1,4 +1,6 @@
-import { Gift, History, LockKeyhole, QrCode, Sparkles, Star, Ticket, Trophy, WalletCards } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Gift, History, QrCode, Sparkles, Star, Ticket, Trophy, WalletCards, X } from 'lucide-react';
+import QRCode from 'qrcode';
 import type { ReactNode } from 'react';
 
 export type LoyaltyExperienceType = 'STAMP' | 'POINTS' | 'DISCOUNT' | 'TIER' | 'REWARD' | 'CASHBACK' | 'CHALLENGE' | 'COLLECTION';
@@ -232,7 +234,27 @@ export function LoyaltyHistory({ config }: { config: LoyaltyExperienceConfig }) 
 }
 
 export function LoyaltyFooter({ config }: { config: LoyaltyExperienceConfig }) {
-  return <div className="mt-5 grid grid-cols-2 gap-2"><button type="button" className="flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-[10px] font-semibold shadow-sm"><QrCode size={15}/> Présenter ma carte</button><button type="button" className="flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-[10px] font-semibold text-white shadow-sm" style={{background:config.primaryColor}}><WalletCards size={15}/> Ajouter au téléphone</button></div>;
+  const [open, setOpen] = useState(false);
+  const [qr, setQr] = useState('');
+
+  useEffect(() => {
+    if (!open || !config.qrValue) return;
+    void QRCode.toDataURL(config.qrValue, { width: 360, margin: 1 }).then(setQr).catch(() => setQr(''));
+  }, [open, config.qrValue]);
+
+  return <>
+    <div className="mt-5 grid grid-cols-2 gap-2">
+      <button type="button" onClick={() => setOpen(true)} className="flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-[10px] font-semibold shadow-sm"><QrCode size={15}/> Présenter ma carte</button>
+      <button type="button" onClick={() => window.alert('Utilisez le menu de votre navigateur pour ajouter cette carte à votre écran d’accueil.')} className="flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-[10px] font-semibold text-white shadow-sm" style={{background:config.primaryColor}}><WalletCards size={15}/> Ajouter au téléphone</button>
+    </div>
+    {open && <div className="fixed inset-0 z-50 grid place-items-end bg-black/45 p-3 sm:place-items-center sm:p-6" role="dialog" aria-modal="true">
+      <div className="w-full max-w-sm rounded-[28px] bg-white p-5 shadow-2xl">
+        <div className="flex items-center justify-between"><div><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/40">Présenter ma carte</p><h3 className="mt-1 text-lg font-semibold text-ink">Scannez ce QR code</h3></div><button type="button" onClick={() => setOpen(false)} className="rounded-full bg-ink/5 p-2"><X size={16}/></button></div>
+        <div className="mt-5 grid place-items-center rounded-3xl bg-[#f7f7f3] p-5">{qr ? <img src={qr} alt="QR code de fidélité" className="h-64 w-64 rounded-2xl bg-white p-3" /> : <div className="h-64 w-64 animate-pulse rounded-2xl bg-black/5" />}</div>
+        <p className="mt-4 text-center text-xs text-ink/45">Présentez votre écran au personnel pour enregistrer votre visite ou votre achat.</p>
+      </div>
+    </div>}
+  </>;
 }
 
 export function LoyaltyExperience({ config }: { config: LoyaltyExperienceConfig }) {
