@@ -197,8 +197,30 @@ export function LoyaltyReward({ config }: { config: LoyaltyExperienceConfig }) {
   const reward = config.rewardName;
   const [selectedReward, setSelectedReward] = useState<LoyaltyExperienceReward | null>(null);
   const [claimQr, setClaimQr] = useState('');
+  const [stampClaimQr, setStampClaimQr] = useState('');
   const [claiming, setClaiming] = useState(false);
   const [claimError, setClaimError] = useState('');
+
+  const isStamp = config.type === 'STAMP';
+  const stampBalance = config.visits ?? 0;
+  const stampGoal = config.visitGoal ?? 10;
+  const stampReady = stampBalance >= stampGoal;
+
+  const createStampClaim = async () => {
+    setClaiming(true);
+    setClaimError('');
+    const accessToken = config.qrValue?.split('/loyalty/')[1] || '';
+    const { data, error } = await supabase.rpc('create_public_loyalty_stamp_reward_claim', {
+      p_access_token: accessToken,
+    });
+    setClaiming(false);
+    const row = Array.isArray(data) ? data[0] : data;
+    if (error || !row?.claim_token) {
+      setClaimError(error?.message || 'Impossible de générer le QR cadeau.');
+      return;
+    }
+    setStampClaimQr(window.location.origin + '/loyalty/stamp-reward/' + row.claim_token);
+  };
 
   const createClaim = async (item: LoyaltyExperienceReward) => {
     setSelectedReward(item); setClaimQr(''); setClaimError('');
@@ -219,8 +241,42 @@ export function LoyaltyReward({ config }: { config: LoyaltyExperienceConfig }) {
 
   const closeClaim = () => {
     if (claiming) return;
-    setSelectedReward(null); setClaimQr(''); setClaimError('');
+    setSelectedReward(null); setClaimQr(''); setStampClaimQr(''); setClaimError('');
   };
+
+  if (isStamp) {
+    return (
+      <>
+        <Section title="Votre cadeau" eyebrow="Programme à tampons">
+          <div className="mt-3 rounded-[22px] border border-white/15 bg-white/10 p-4 text-white shadow-lg backdrop-blur-xl" style={{ background: config.primaryColor }}>
+            <div className="flex items-center gap-4">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl" style={{ background: config.secondaryColor + '35', color: config.secondaryColor }}><Gift size={23}/></div>
+              <div className="min-w-0">
+                <p className="text-[9px] uppercase tracking-[.16em] opacity-55">{stampReady ? 'Cadeau débloqué' : `${stampBalance} / ${stampGoal} tampons`}</p>
+                <p className="mt-1 text-lg font-semibold">{reward || 'Cadeau fidélité'}</p>
+                <p className="mt-1 text-[10px] opacity-65">{config.rewardDescription || `Encore ${Math.max(0, stampGoal - stampBalance)} tampon(s) pour débloquer votre cadeau.`}</p>
+              </div>
+            </div>
+            {stampReady && (
+              <button type="button" disabled={claiming} onClick={() => void createStampClaim()} className="mt-4 w-full rounded-xl py-3 text-xs font-bold" style={{ background: config.secondaryColor, color: config.primaryColor }}>
+                {claiming ? 'Génération du QR…' : 'Obtenir mon QR cadeau'}
+              </button>
+            )}
+          </div>
+        </Section>
+
+        {stampClaimQr && <div className="fixed inset-0 z-[100] grid place-items-center bg-black/70 p-4" onClick={closeClaim}>
+          <div className="w-full max-w-sm rounded-[28px] bg-white p-6 text-[#17201c] shadow-2xl" onClick={e => e.stopPropagation()}>
+            <p className="text-[9px] font-bold uppercase tracking-[.2em] text-[#D3A84C]">Cadeau fidélité</p>
+            <h3 className="mt-1 text-xl font-bold">{reward || 'Cadeau fidélité'}</h3>
+            <div className="mt-5 rounded-2xl bg-[#f7f7f3] p-5 text-center"><QRCodeImage value={stampClaimQr}/><p className="mt-3 text-[10px] font-semibold uppercase tracking-[.16em] text-black/45">Présentez ce QR au responsable</p><p className="mt-2 text-[10px] text-black/35">Valable 5 minutes · utilisable une seule fois</p></div>
+            <button type="button" onClick={closeClaim} className="mt-4 w-full rounded-xl bg-[#173D32] py-3.5 text-sm font-semibold text-white">Fermer</button>
+          </div>
+        </div>}
+        {claimError && <p className="mt-2 rounded-xl bg-red-50 p-3 text-xs text-red-700">{claimError}</p>}
+      </>
+    );
+  }
 
   return (
     <>
