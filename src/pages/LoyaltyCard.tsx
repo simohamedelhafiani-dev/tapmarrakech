@@ -57,16 +57,18 @@ export default function LoyaltyCard() {
   const [rewards, setRewards] = useState<LoyaltyExperienceReward[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isInstalled, setIsInstalled] = useState(false);
 
   const cardUrl = window.location.href;
 
   useEffect(() => {
-    const standalone = window.matchMedia?.('(display-mode: standalone)').matches || (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
-    setIsInstalled(Boolean(standalone));
-
     const media = window.matchMedia?.('(display-mode: standalone)');
-    const onDisplayModeChange = (event: MediaQueryListEvent) => setIsInstalled(event.matches);
-    media?.addEventListener?.('change', onDisplayModeChange);
+    const checkInstalled = () => {
+      setIsInstalled(Boolean(media?.matches || (window.navigator as Navigator & { standalone?: boolean }).standalone === true));
+    };
+    checkInstalled();
+    media?.addEventListener?.('change', checkInstalled);
 
     const handler = (event: Event) => {
       event.preventDefault();
@@ -76,7 +78,7 @@ export default function LoyaltyCard() {
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handler);
-      media?.removeEventListener?.('change', onDisplayModeChange);
+      media?.removeEventListener?.('change', checkInstalled);
     };
   }, []);
 
@@ -92,14 +94,23 @@ export default function LoyaltyCard() {
     }
 
     if (navigator.share) {
-      await navigator.share({ title: card?.establishment_name || 'Ma carte fidélité', text: 'Ma carte fidélité', url: cardUrl });
-      return;
+      try {
+        await navigator.share({
+          title: card?.establishment_name || 'Ma carte fidélité',
+          text: 'Ma carte fidélité',
+          url: cardUrl,
+        });
+        return;
+      } catch {
+        // User cancelled sharing; keep the page open.
+      }
     }
+
     try {
       await navigator.clipboard.writeText(cardUrl);
       alert('Lien de votre carte copié. Ouvrez-le sur votre téléphone pour l’enregistrer.');
     } catch {
-      alert('Utilisez le menu Partager de votre navigateur puis « Ajouter à l’écran d’accueil ».');
+      alert('Utilisez le menu Partager puis « Ajouter à l’écran d’accueil ».');
     }
   }
 
