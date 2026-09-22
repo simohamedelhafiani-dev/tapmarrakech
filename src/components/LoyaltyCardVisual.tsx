@@ -32,7 +32,7 @@ export const defaultLoyaltyDesignConfig: LoyaltyDesignConfig = {
   logo_x: 0,
   logo_y: 0,
   front_title: 'CARTE FIDÉLITÉ',
-  front_subtitle: 'Savourez, collectionnez, profitez !',
+  front_subtitle: 'Merci de faire partie de notre histoire !',
   back_title: 'Merci pour votre fidélité !',
   back_message: 'Chaque visite vous rapproche d’une expérience unique. À très bientôt !',
   show_qr: false,
@@ -140,17 +140,26 @@ export function LoyaltyCardVisual({
   const stampGoal = Math.max(1, Math.min(card.stampGoal ?? 10, 12));
   const stampsBalance = Math.max(0, Math.min(card.stampsBalance ?? 0, stampGoal));
 
-  const background = config.background_image_url
-    ? `linear-gradient(135deg, ${design.primary_color}ee 0%, ${design.primary_color}99 55%, ${design.primary_color}55 100%), url(${config.background_image_url}) center/cover no-repeat`
-    : `linear-gradient(145deg, ${design.primary_color} 0%, ${design.primary_color}f2 55%, ${design.primary_color}cc 100%)`;
+  const background = 'linear-gradient(145deg, ' + design.primary_color + ' 0%, ' + design.primary_color + 'f4 58%, ' + design.primary_color + ' 100%)';
 
   return (
     <div
       className={`relative aspect-[0.78/1] w-full overflow-hidden text-white shadow-2xl ${compact ? 'p-5' : 'p-6 sm:p-7'}`}
       style={{ background, borderRadius: design.border_radius }}
     >
-      <div className="pointer-events-none absolute -right-24 -top-28 h-[58%] w-[62%] rounded-full opacity-20" style={{ background: design.secondary_color }} />
-      <div className="pointer-events-none absolute -bottom-28 -left-24 h-[52%] w-[62%] rounded-full opacity-15" style={{ background: design.secondary_color }} />
+      <div
+        className="pointer-events-none absolute right-0 top-0 h-[43%] w-[58%] overflow-hidden"
+        style={{
+          borderBottomLeftRadius: '75% 68%',
+          background: config.background_image_url
+            ? 'linear-gradient(135deg, ' + design.primary_color + '22, ' + design.primary_color + '66), url(' + config.background_image_url + ') center/cover no-repeat'
+            : 'linear-gradient(135deg, ' + design.secondary_color + '55, ' + design.secondary_color + '22)',
+        }}
+      />
+      <div
+        className="pointer-events-none absolute -bottom-20 -left-16 h-44 w-44 rounded-full opacity-10"
+        style={{ background: design.secondary_color }}
+      />
 
       {side === 'front' ? (
         <div className="relative flex h-full flex-col">
@@ -169,28 +178,22 @@ export function LoyaltyCardVisual({
               </div>
             </div>
             <div className="shrink-0 text-right">
-              <p className={`font-medium uppercase tracking-[0.22em] opacity-80 ${compact ? 'text-[8px]' : 'text-[10px]'}`}>Carte fidélité</p>
-              <p className="mt-2 max-w-[145px] text-[8px] uppercase tracking-[0.2em] opacity-45">{cardMode === 'STAMP' ? 'Collectionnez vos visites' : 'Good food · Better moments'}</p>
+              <p className={`font-semibold uppercase tracking-[0.22em] ${compact ? 'text-[8px]' : 'text-[10px]'}`} style={{ color: design.secondary_color }}>Carte fidélité</p>
+              <p className="mt-2 max-w-[125px] text-[8px] uppercase tracking-[0.18em] opacity-55">{cardMode === 'STAMP' ? 'Collectionnez vos visites' : 'Votre carte digitale'}</p>
             </div>
           </div>
 
           <div className="mt-8 min-h-0 flex-1">
-            <p className={`max-w-full break-words font-display leading-[0.94] ${compact ? 'text-[30px]' : 'text-[34px] sm:text-[40px]'}`} style={{ color: design.text_color }}>
-              {config.front_title}
-            </p>
-            <p className={`mt-3 max-w-[330px] leading-5 opacity-70 ${compact ? 'text-[10px]' : 'text-xs sm:text-sm'}`}>{config.front_subtitle}</p>
-
+            <p className="text-[10px] uppercase tracking-[0.28em] opacity-55">Bonjour</p>
             {card.customerName && (
-              <div className="mt-6">
-                <p className="text-[9px] uppercase tracking-[0.24em] opacity-50">Client</p>
-                <p className={`mt-1 font-semibold tracking-tight ${compact ? 'text-lg' : 'text-2xl'}`}>{card.customerName}</p>
-              </div>
+              <p className={`mt-1 font-semibold tracking-tight ${compact ? 'text-xl' : 'text-2xl sm:text-[30px]'}`}>{card.customerName}</p>
             )}
+            <p className={`mt-3 max-w-[270px] leading-5 opacity-70 ${compact ? 'text-[10px]' : 'text-xs sm:text-sm'}`}>{config.front_subtitle}</p>
 
             {loyaltyType === 'POINTS' && config.show_points && (
               <div className="mt-7">
-                <p className="text-[9px] uppercase tracking-[0.24em] opacity-50">Vos points</p>
-                <p className={`mt-1 font-bold leading-none tracking-tight ${compact ? 'text-5xl' : 'text-6xl sm:text-7xl'}`}>{card.points ?? 0}</p>
+                <p className="text-[9px] uppercase tracking-[0.28em] opacity-55">Vos points</p>
+                <p className={`mt-1 font-bold leading-none tracking-tight ${compact ? 'text-5xl' : 'text-6xl sm:text-[68px]'}`}>{card.points ?? 0}</p>
               </div>
             )}
 
