@@ -74,7 +74,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
   async function load() {
     if (!establishmentId) return;
     const [{ data: designData }, { data: place }, { data: programData }] = await Promise.all([
-      supabase.rpc('get_loyalty_card_builder_config', { p_establishment_id: establishmentId }),
+      supabase.rpc('get_loyalty_card_config', { p_establishment_id: establishmentId }),
       supabase.from('establishments').select('name,logo_url,business_type').eq('id', establishmentId).maybeSingle(),
       supabase.rpc('get_loyalty_program_settings', { p_establishment_id: establishmentId }),
     ]);
@@ -181,7 +181,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
       return alert(programError.message);
     }
 
-    const { error } = await supabase.rpc('save_loyalty_card_builder_config', {
+    const { error } = await supabase.rpc('save_loyalty_card_design', {
       p_establishment_id: establishmentId,
       p_design_config: {
         ...design.design_config,
