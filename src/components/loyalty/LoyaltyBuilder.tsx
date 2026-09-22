@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { RefObject } from 'react';
 import {
   Check,
   ChevronRight,
@@ -186,8 +187,8 @@ function BuilderPanel({
   activeTab: Tab;
   setActiveTab: (tab: Tab) => void;
   update: (patch: Partial<LoyaltyBuilderConfig>) => void;
-  logoInput: React.RefObject<HTMLInputElement | null>;
-  coverInput: React.RefObject<HTMLInputElement | null>;
+  logoInput: RefObject<HTMLInputElement | null>;
+  coverInput: RefObject<HTMLInputElement | null>;
   uploading: 'logo' | 'cover' | null;
   onUpload: (file: File, kind: 'logo' | 'cover') => Promise<void>;
 }) {
