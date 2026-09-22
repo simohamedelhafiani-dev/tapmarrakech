@@ -691,6 +691,10 @@ export default function Employee() {
   async function addPoints() {
     if (!employeeSupabase) return;
     if (!showPoints || !establishmentId) return;
+    if (loyaltyProgram.program_type !== 'POINTS') {
+      alert('Cet établissement utilise un programme à tampons. Les points ne peuvent pas être ajoutés.');
+      return;
+    }
 
     const amount = Number(purchaseAmount);
     const code = pointsResponsibleCode.trim();
