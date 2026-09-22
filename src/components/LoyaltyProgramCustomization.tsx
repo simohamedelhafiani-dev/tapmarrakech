@@ -1,10 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
-import { Check, ImagePlus, Loader2, QrCode, Stamp, Upload } from 'lucide-react';
+import { Check, Gift, ImagePlus, Loader2, Pencil, Plus, QrCode, Stamp, Trash2, Upload, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { defaultLoyaltyDesignConfig, type LoyaltyDesignConfig } from './LoyaltyCardVisual';
 import { LoyaltyExperience, type LoyaltyExperienceConfig } from './loyalty/LoyaltyExperience';
 
 type CardMode = 'QR' | 'STAMP';
+
+type LoyaltyRewardAdmin = {
+  id: string;
+  name: string;
+  description: string | null;
+  points_required: number;
+  active: boolean;
+  reward_type: 'GIFT' | 'DISCOUNT';
+  discount_percent: number | null;
+  discount_max_amount: number | null;
+};
 
 type LoyaltyPreset = {
   id: string;
@@ -66,6 +77,16 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
   const [stampGoal, setStampGoal] = useState('10');
   const [stampRewardName, setStampRewardName] = useState('Cadeau fidélité');
   const [stampRewardDescription, setStampRewardDescription] = useState('');
+  const [rewards, setRewards] = useState<LoyaltyRewardAdmin[]>([]);
+  const [rewardEditorOpen, setRewardEditorOpen] = useState(false);
+  const [editingReward, setEditingReward] = useState<LoyaltyRewardAdmin | null>(null);
+  const [rewardName, setRewardName] = useState('');
+  const [rewardDescription, setRewardDescription] = useState('');
+  const [rewardPoints, setRewardPoints] = useState('500');
+  const [rewardType, setRewardType] = useState<'GIFT' | 'DISCOUNT'>('GIFT');
+  const [discountPercent, setDiscountPercent] = useState('10');
+  const [discountMaxAmount, setDiscountMaxAmount] = useState('');
+  const [rewardSaving, setRewardSaving] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<'logo' | 'photo' | 'wallpapers' | null>(null);
   const [activeTab, setActiveTab] = useState<'Design' | 'Contenu' | 'Récompense' | 'Aperçu'>('Design');
@@ -75,10 +96,11 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
 
   async function load() {
     if (!establishmentId) return;
-    const [{ data: designData }, { data: place }, { data: programData }] = await Promise.all([
+    const [{ data: designData }, { data: place }, { data: programData }, { data: rewardData }] = await Promise.all([
       supabase.rpc('get_loyalty_card_config', { p_establishment_id: establishmentId }),
       supabase.from('establishments').select('name,logo_url,business_type').eq('id', establishmentId).maybeSingle(),
       supabase.rpc('get_loyalty_program_settings', { p_establishment_id: establishmentId }),
+      supabase.from('loyalty_rewards').select('id,name,description,points_required,active,reward_type,discount_percent,discount_max_amount').eq('establishment_id', establishmentId).order('points_required', { ascending: true }),
     ]);
 
     const row = Array.isArray(designData) ? designData[0] : designData;
@@ -98,6 +120,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
       setCardMode(nextConfig.card_mode === 'STAMP' ? 'STAMP' : 'QR');
     }
     if (place) setEstablishment({ name: place.name || 'Votre établissement', logo_url: place.logo_url || null, business_type: place.business_type || null });
+    setRewards((rewardData ?? []) as LoyaltyRewardAdmin[]);
 
     const program = Array.isArray(programData) ? programData[0] : programData;
     if (program) {
@@ -109,6 +132,61 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
   }
 
   useEffect(() => { void load(); }, [establishmentId]);
+
+  function openRewardEditor(reward?: LoyaltyRewardAdmin) {
+    setEditingReward(reward ?? null);
+    setRewardName(reward?.name ?? '');
+    setRewardDescription(reward?.description ?? '');
+    setRewardPoints(String(reward?.points_required ?? 500));
+    setRewardType(reward?.reward_type ?? 'GIFT');
+    setDiscountPercent(String(reward?.discount_percent ?? 10));
+    setDiscountMaxAmount(reward?.discount_max_amount != null ? String(reward.discount_max_amount) : '');
+    setRewardEditorOpen(true);
+  }
+
+  async function saveReward() {
+    const points = Number(rewardPoints);
+    if (!rewardName.trim() || !Number.isInteger(points) || points <= 0) return alert('Indique un nom et un nombre de points valide.');
+    const discount = Number(discountPercent);
+    if (rewardType === 'DISCOUNT' && (!Number.isFinite(discount) || discount <= 0 || discount > 20)) return alert('La réduction doit être comprise entre 0 et 20 %.');
+    setRewardSaving(true);
+    const { error } = editingReward
+      ? await supabase.rpc('update_loyalty_reward', {
+          p_reward_id: editingReward.id, p_name: rewardName.trim(), p_description: rewardDescription.trim() || null,
+          p_points_required: points, p_reward_type: rewardType,
+          p_discount_percent: rewardType === 'DISCOUNT' ? discount : null,
+          p_discount_max_amount: rewardType === 'DISCOUNT' ? Number(discountMaxAmount) || null : null,
+          p_active: editingReward.active,
+        })
+      : await supabase.rpc('create_loyalty_reward', {
+          p_establishment_id: establishmentId, p_name: rewardName.trim(), p_description: rewardDescription.trim(),
+          p_points_required: points, p_reward_type: rewardType,
+          p_discount_percent: rewardType === 'DISCOUNT' ? discount : null,
+          p_discount_max_amount: rewardType === 'DISCOUNT' ? Number(discountMaxAmount) || null : null,
+        });
+    setRewardSaving(false);
+    if (error) return alert(error.message);
+    setRewardEditorOpen(false);
+    await load();
+  }
+
+  async function toggleReward(reward: LoyaltyRewardAdmin) {
+    const { error } = await supabase.rpc('update_loyalty_reward', {
+      p_reward_id: reward.id, p_name: reward.name, p_description: reward.description,
+      p_points_required: reward.points_required, p_reward_type: reward.reward_type,
+      p_discount_percent: reward.discount_percent, p_discount_max_amount: reward.discount_max_amount,
+      p_active: !reward.active,
+    });
+    if (error) return alert(error.message);
+    await load();
+  }
+
+  async function removeReward(reward: LoyaltyRewardAdmin) {
+    if (!confirm('Désactiver cette récompense ?')) return;
+    const { error } = await supabase.rpc('delete_loyalty_reward', { p_reward_id: reward.id });
+    if (error) return alert(error.message);
+    await load();
+  }
 
   function updateConfig(patch: Partial<LoyaltyDesignConfig>) {
     setDesign(d => ({ ...d, design_config: { ...d.design_config, ...patch }, published: false }));
@@ -402,11 +480,49 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                 <label className="block text-xs font-medium text-ink/50">Sous-titre<input value={design.design_config.front_subtitle} onChange={e => updateConfig({front_subtitle:e.target.value})} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm"/></label>
               </div>
 
-              {cardMode === 'STAMP' && (
-                <div id="loyalty-rewards" className="mt-4 scroll-mt-6 grid gap-3 rounded-2xl bg-[#fafaf8] p-4 sm:grid-cols-3">
-                  <label className="text-xs text-ink/50">Nombre de tampons<input type="number" min="1" max="12" value={stampGoal} onChange={e=>setStampGoal(e.target.value)} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5"/></label>
-                  <label className="text-xs text-ink/50">Récompense<input value={stampRewardName} onChange={e=>setStampRewardName(e.target.value)} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5"/></label>
-                  <label className="text-xs text-ink/50">Description<input value={stampRewardDescription} onChange={e=>setStampRewardDescription(e.target.value)} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5"/></label>
+              <div id="loyalty-rewards" className="mt-4 scroll-mt-6 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
+                {cardMode === 'STAMP' ? (
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <label className="text-xs text-ink/50">Nombre de tampons<input type="number" min="1" max="12" value={stampGoal} onChange={e=>setStampGoal(e.target.value)} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5"/></label>
+                    <label className="text-xs text-ink/50">Récompense<input value={stampRewardName} onChange={e=>setStampRewardName(e.target.value)} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5"/></label>
+                    <label className="text-xs text-ink/50">Description<input value={stampRewardDescription} onChange={e=>setStampRewardDescription(e.target.value)} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5"/></label>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-between gap-3">
+                      <div><p className="text-sm font-semibold text-forest">Récompenses en points</p><p className="mt-1 text-[10px] text-ink/45">Ajoute des cadeaux ou des réductions que les clients débloquent avec leurs points.</p></div>
+                      <button type="button" onClick={() => openRewardEditor()} className="inline-flex items-center gap-2 rounded-xl bg-forest px-3 py-2.5 text-[10px] font-semibold text-white"><Plus size={14}/> Ajouter</button>
+                    </div>
+                    <div className="mt-4 space-y-2">
+                      {rewards.filter(r => r.active).map(r => (
+                        <div key={r.id} className="flex items-center gap-3 rounded-2xl border border-ink/10 bg-white p-3.5">
+                          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-forest/5 text-forest">{r.reward_type === 'DISCOUNT' ? <span className="text-xs font-bold">%</span> : <Gift size={17}/>}</div>
+                          <div className="min-w-0 flex-1"><p className="text-xs font-semibold text-forest">{r.name}</p><p className="mt-1 text-[10px] text-ink/45">{r.points_required} points · {r.reward_type === 'DISCOUNT' ? '-' + r.discount_percent + '%' : 'Cadeau'}</p>{r.description && <p className="mt-1 truncate text-[10px] text-ink/35">{r.description}</p>}</div>
+                          <button type="button" onClick={() => openRewardEditor(r)} className="rounded-xl p-2 text-ink/40 hover:bg-[#f7f7f3] hover:text-forest"><Pencil size={15}/></button>
+                          <button type="button" onClick={() => void removeReward(r)} className="rounded-xl p-2 text-ink/40 hover:bg-red-50 hover:text-red-600"><Trash2 size={15}/></button>
+                        </div>
+                      ))}
+                      {!rewards.some(r => r.active) && <div className="rounded-xl border border-dashed border-ink/10 px-4 py-6 text-center text-xs text-ink/35">Aucune récompense configurée.</div>}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {rewardEditorOpen && (
+                <div className="fixed inset-0 z-[120] grid place-items-center bg-black/60 p-4" onClick={() => !rewardSaving && setRewardEditorOpen(false)}>
+                  <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+                    <div className="flex items-center justify-between"><div><p className="text-[10px] font-semibold uppercase tracking-[.18em] text-gold">Fidélité points</p><h3 className="mt-1 text-xl font-semibold text-forest">{editingReward ? 'Modifier la récompense' : 'Ajouter une récompense'}</h3></div><button type="button" onClick={() => setRewardEditorOpen(false)} className="rounded-xl p-2 text-ink/40"><X size={18}/></button></div>
+                    <div className="mt-5 space-y-3">
+                      <label className="block text-xs text-ink/50">Nom<input value={rewardName} onChange={e=>setRewardName(e.target.value)} placeholder="Dessert offert" className="mt-1 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"/></label>
+                      <label className="block text-xs text-ink/50">Description<input value={rewardDescription} onChange={e=>setRewardDescription(e.target.value)} placeholder="Un dessert au choix" className="mt-1 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"/></label>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <label className="text-xs text-ink/50">Points nécessaires<input type="number" min="1" value={rewardPoints} onChange={e=>setRewardPoints(e.target.value)} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5"/></label>
+                        <label className="text-xs text-ink/50">Type<select value={rewardType} onChange={e=>setRewardType(e.target.value as 'GIFT'|'DISCOUNT')} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5"><option value="GIFT">🎁 Cadeau</option><option value="DISCOUNT">% Réduction</option></select></label>
+                      </div>
+                      {rewardType === 'DISCOUNT' && <div className="grid gap-3 sm:grid-cols-2"><label className="text-xs text-ink/50">Réduction (%)<input type="number" min="1" max="20" value={discountPercent} onChange={e=>setDiscountPercent(e.target.value)} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5"/></label><label className="text-xs text-ink/50">Plafond (MAD)<input type="number" min="0" value={discountMaxAmount} onChange={e=>setDiscountMaxAmount(e.target.value)} placeholder="Aucun" className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5"/></label></div>}
+                    </div>
+                    <button type="button" disabled={rewardSaving} onClick={() => void saveReward()} className="mt-5 w-full rounded-xl bg-forest py-3.5 text-sm font-semibold text-white disabled:opacity-50">{rewardSaving ? 'Enregistrement...' : editingReward ? 'Enregistrer les modifications' : 'Créer la récompense'}</button>
+                  </div>
                 </div>
               )}
 
