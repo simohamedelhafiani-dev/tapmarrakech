@@ -376,7 +376,9 @@ export default function LoyaltyCard() {
     })),
     qrValue: cardUrl,
     intro: raw.intro || designConfig.front_subtitle,
-    templateId: design.template_id,
+    // The customer card must use the exact premium customer layout shown in the admin preview.
+    // Keep the admin preview untouched; this only aligns the public/customer card renderer.
+    templateId: 'luxury',
     published: true,
   };
 
