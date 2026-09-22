@@ -762,7 +762,7 @@ export default function PublicReview() {
             )}
             {Array.isArray(menuAiDesign?.wallpaper_library) && menuAiDesign.wallpaper_library[0] && !menuAiDesign?.background_image_url && (
               <div
-                className="pointer-events-none absolute inset-0 bg-cover bg-center bg-fixed"
+                className="pointer-events-none absolute inset-0 bg-cover bg-center"
                 style={{ backgroundImage: 'url("' + menuAiDesign.wallpaper_library[0] + '")' }}
               />
             )}
