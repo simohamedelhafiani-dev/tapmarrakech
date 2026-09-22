@@ -290,10 +290,15 @@ function BuilderPanel({
             <div className="grid gap-3 rounded-2xl bg-[#f7f7f3] p-4 sm:grid-cols-2">
               <NumberField label="Nombre de tampons" value={config.stampGoal} min={1} max={12} onChange={v => update({ stampGoal: v })} />
               <Field label="Récompense" value={config.rewardName} onChange={v => update({ rewardName: v })} />
+              <Field label="Description" value={config.rewardDescription} onChange={v => update({ rewardDescription: v })} />
             </div>
           )}
           {config.loyaltyType === 'POINTS' && (
-            <NumberField label="Points nécessaires" value={config.rewardThreshold} min={1} max={100000} onChange={v => update({ rewardThreshold: v })} />
+            <div className="grid gap-3 rounded-2xl bg-[#f7f7f3] p-4">
+              <NumberField label="Points nécessaires" value={config.rewardThreshold} min={1} max={100000} onChange={v => update({ rewardThreshold: v })} />
+              <Field label="Récompense" value={config.rewardName} onChange={v => update({ rewardName: v })} />
+              <Field label="Description" value={config.rewardDescription} onChange={v => update({ rewardDescription: v })} />
+            </div>
           )}
           {config.loyaltyType === 'DISCOUNT' && (
             <div className="grid gap-3 rounded-2xl bg-[#f7f7f3] p-4 sm:grid-cols-2">
