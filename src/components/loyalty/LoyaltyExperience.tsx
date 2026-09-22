@@ -126,7 +126,7 @@ export function LoyaltyProgress({ config }: { config: LoyaltyExperienceConfig })
     const remaining = Math.max(0, goal - current);
     const label = config.type === 'CHALLENGE' ? 'Progression du défi' : config.type === 'COLLECTION' ? 'Collection' : 'Vos visites';
     return (
-      <div className="rounded-[24px] border border-black/6 bg-white/80 p-5 shadow-[0_10px_30px_rgba(0,0,0,.06)] backdrop-blur">
+      <div className="rounded-[24px] border border-black/6 bg-white/10 p-5 shadow-[0_10px_30px_rgba(0,0,0,.10)] backdrop-blur-xl">
         <div className="flex items-end justify-between gap-3">
           <div><p className="text-[9px] font-bold uppercase tracking-[0.2em] opacity-45">{label}</p><p className="mt-1 text-3xl font-bold tracking-tight">{current}<span className="text-base opacity-35"> / {goal}</span></p></div>
           <span className="rounded-full px-3 py-1.5 text-[10px] font-semibold" style={{ color: config.primaryColor, background: config.secondaryColor + '22' }}>{remaining > 0 ? `Encore ${remaining}` : 'Objectif atteint'}</span>
@@ -142,7 +142,7 @@ export function LoyaltyProgress({ config }: { config: LoyaltyExperienceConfig })
     const goal = Math.max(points, config.pointsGoal ?? 1000);
     const remaining = Math.max(0, goal - points);
     return (
-      <div className="rounded-[24px] border border-black/6 bg-white/80 p-5 shadow-[0_10px_30px_rgba(0,0,0,.06)] backdrop-blur">
+      <div className="rounded-[24px] border border-black/6 bg-white/10 p-5 shadow-[0_10px_30px_rgba(0,0,0,.10)] backdrop-blur-xl">
         <div className="flex items-end justify-between">
           <div><p className="text-[9px] font-bold uppercase tracking-[0.2em] opacity-45">Votre solde</p><p className="mt-1 text-4xl font-bold tracking-tight">{points.toLocaleString('fr-FR')} <span className="text-sm font-semibold opacity-45">pts</span></p></div>
           <div className="rounded-2xl p-3" style={{ background: config.secondaryColor + '22', color: config.primaryColor }}><Trophy size={20}/></div>
@@ -176,7 +176,7 @@ export function LoyaltyProgress({ config }: { config: LoyaltyExperienceConfig })
   if (config.type === 'TIER') {
     const tiers = config.tiers ?? [];
     return (
-      <div className="rounded-[24px] border border-black/6 bg-white/80 p-5 shadow-[0_10px_30px_rgba(0,0,0,.06)]">
+      <div className="rounded-[24px] border border-black/6 bg-white/10 p-5 shadow-[0_10px_30px_rgba(0,0,0,.10)] backdrop-blur-xl">
         <div className="flex items-center justify-between"><div><p className="text-[9px] font-bold uppercase tracking-[0.2em] opacity-45">Votre niveau</p><p className="mt-1 text-2xl font-bold">{config.currentTier || 'Membre'}</p></div><Star size={24} fill={config.secondaryColor} style={{ color: config.secondaryColor }}/></div>
         <div className="mt-5 grid grid-cols-3 gap-2">
           {(tiers.length ? tiers : [{name:'Bronze',min:0,benefit:'Avantages essentiels'},{name:'Silver',min:251,benefit:'Avantages renforcés'},{name:'Gold',min:501,benefit:'Avantages premium'}]).map(t => (
@@ -198,7 +198,7 @@ export function LoyaltyReward({ config }: { config: LoyaltyExperienceConfig }) {
   return (
     <Section title={config.rewards?.length ? 'Récompenses disponibles' : 'Votre prochaine récompense'} eyebrow="À débloquer">
       {reward && (
-        <div className="mt-3 flex items-center gap-4 rounded-[22px] p-4 text-white shadow-lg" style={{ background: config.primaryColor }}>
+        <div className="mt-3 flex items-center gap-4 rounded-[22px] border border-white/15 bg-white/10 p-4 text-white shadow-lg backdrop-blur-xl" style={{ background: config.primaryColor }}>
           <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl" style={{ background: config.secondaryColor + '35', color: config.secondaryColor }}><Gift size={23}/></div>
           <div className="min-w-0"><p className="text-[9px] uppercase tracking-[0.16em] opacity-55">Prochaine récompense</p><p className="mt-1 text-lg font-semibold">{reward}</p><p className="mt-1 text-[10px] opacity-65">{config.rewardDescription || 'Votre fidélité est récompensée.'}</p></div>
         </div>
@@ -207,7 +207,7 @@ export function LoyaltyReward({ config }: { config: LoyaltyExperienceConfig }) {
         <div className="mt-3 space-y-2">
           {config.rewards.map(r => {
             const available = (config.pointsBalance ?? 0) >= r.points_required;
-            return <div key={r.id} className="flex items-center justify-between gap-3 rounded-2xl border border-black/6 bg-white p-4">
+            return <div key={r.id} className="flex items-center justify-between gap-3 rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-md">
               <div className="min-w-0"><p className="text-sm font-semibold">{r.name}</p><p className="mt-1 text-[10px] opacity-50">{r.description || `${r.points_required} points`}</p></div>
               <span className="shrink-0 rounded-full px-2.5 py-1 text-[9px] font-bold" style={{ color: available ? config.primaryColor : 'rgba(0,0,0,.45)', background: available ? config.secondaryColor + '30' : 'rgba(0,0,0,.05)' }}>{available ? 'Disponible' : `${r.points_required} pts`}</span>
             </div>;
@@ -220,12 +220,12 @@ export function LoyaltyReward({ config }: { config: LoyaltyExperienceConfig }) {
 
 export function LoyaltyBenefits({ config }: { config: LoyaltyExperienceConfig }) {
   if (!config.benefits?.length) return null;
-  return <Section title="Vos avantages" eyebrow="Exclusif"><div className="mt-3 grid gap-2 sm:grid-cols-3">{config.benefits.map((b,i) => <div key={b.title + i} className="rounded-2xl border border-black/6 bg-white p-4"><Sparkles size={16} style={{color:config.secondaryColor}}/><p className="mt-3 text-xs font-semibold">{b.title}</p><p className="mt-1 text-[10px] leading-4 opacity-50">{b.description}</p></div>)}</div></Section>;
+  return <Section title="Vos avantages" eyebrow="Exclusif"><div className="mt-3 grid gap-2 sm:grid-cols-3">{config.benefits.map((b,i) => <div key={b.title + i} className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-md"><Sparkles size={16} style={{color:config.secondaryColor}}/><p className="mt-3 text-xs font-semibold">{b.title}</p><p className="mt-1 text-[10px] leading-4 opacity-50">{b.description}</p></div>)}</div></Section>;
 }
 
 export function LoyaltyOffers({ config }: { config: LoyaltyExperienceConfig }) {
   if (!config.offers?.length) return null;
-  return <Section title="Offres pour vous" eyebrow="Aujourd’hui"><div className="space-y-2">{config.offers.map((o,i) => <div key={o.title+i} className="rounded-2xl border border-black/6 bg-white p-4"><p className="text-[9px] font-bold uppercase tracking-[0.16em]" style={{color:config.secondaryColor}}>{o.eyebrow || 'Offre exclusive'}</p><p className="mt-1 text-sm font-semibold">{o.title}</p>{o.description && <p className="mt-1 text-[10px] leading-4 opacity-50">{o.description}</p>}</div>)}</div></Section>;
+  return <Section title="Offres pour vous" eyebrow="Aujourd’hui"><div className="space-y-2">{config.offers.map((o,i) => <div key={o.title+i} className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-md"><p className="text-[9px] font-bold uppercase tracking-[0.16em]" style={{color:config.secondaryColor}}>{o.eyebrow || 'Offre exclusive'}</p><p className="mt-1 text-sm font-semibold">{o.title}</p>{o.description && <p className="mt-1 text-[10px] leading-4 opacity-50">{o.description}</p>}</div>)}</div></Section>;
 }
 
 export function LoyaltyHistory({ config }: { config: LoyaltyExperienceConfig }) {
@@ -394,7 +394,7 @@ function SectorProgress({ config, sector }: { config: LoyaltyExperienceConfig; s
 
 function SectorExtras({ config, sector }: { config: LoyaltyExperienceConfig; sector: string }) {
   if (sector === 'restaurant') {
-    return <div className="mt-5 grid grid-cols-2 gap-2">{config.benefits?.slice(0,4).map((b,i) => <div key={b.title+i} className="rounded-2xl border border-black/6 bg-white p-4"><p className="text-[9px] uppercase tracking-[.15em] opacity-35">Privilège {i+1}</p><p className="mt-2 text-xs font-semibold">{b.title}</p><p className="mt-1 text-[10px] leading-4 opacity-45">{b.description}</p></div>)}</div>;
+    return <div className="mt-5 grid grid-cols-2 gap-2">{config.benefits?.slice(0,4).map((b,i) => <div key={b.title+i} className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-md"><p className="text-[9px] uppercase tracking-[.15em] opacity-35">Privilège {i+1}</p><p className="mt-2 text-xs font-semibold">{b.title}</p><p className="mt-1 text-[10px] leading-4 opacity-45">{b.description}</p></div>)}</div>;
   }
   if (sector === 'hotel') return <div className="mt-5 rounded-[22px] p-5 text-white" style={{ background: config.primaryColor }}><p className="text-[9px] uppercase tracking-[.2em] opacity-50">Vos privilèges</p><div className="mt-3 flex flex-wrap gap-2">{(config.benefits || []).slice(0,4).map(b => <span key={b.title} className="rounded-full bg-white/10 px-3 py-2 text-[10px]">{b.title}</span>)}</div></div>;
   if (sector === 'gym') return <div className="mt-5 rounded-[22px] bg-black p-5 text-white"><div className="flex items-center justify-between"><div><p className="text-[9px] uppercase tracking-[.2em] opacity-45">Challenge</p><p className="mt-1 text-xl font-bold">Votre prochaine session</p></div><Trophy size={22} style={{color:config.secondaryColor}} /></div><p className="mt-3 text-xs opacity-55">{config.progressLabel || 'Continuez votre progression pour débloquer votre prochain badge.'}</p></div>;
@@ -436,7 +436,7 @@ export function LoyaltyExperience({ config }: { config: LoyaltyExperienceConfig 
         />
       )}
 
-      <div className="relative z-10" style={{ color: config.textColor }}>
+      <div className="relative z-10 min-h-full" style={{ color: config.textColor }}>
         <SectorHero config={{ ...config, coverImageUrl: null }} sector={sector} />
         <SectorProgress config={config} sector={sector} />
         <div className={`px-4 pb-6 sm:px-5 ${compact ? 'pt-1' : 'pt-5'}`}>
