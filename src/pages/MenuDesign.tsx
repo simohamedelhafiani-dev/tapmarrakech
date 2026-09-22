@@ -14,6 +14,35 @@ const emptyDesign: MenuDesignConfig = {
   wallpaper_library: [],
 };
 
+async function getImageDimensions(file: File) {
+  const objectUrl = URL.createObjectURL(file);
+
+  try {
+    const dimensions = await new Promise<{ width: number; height: number }>(
+      (resolve, reject) => {
+        const image = new Image();
+
+        image.onload = () => {
+          resolve({
+            width: image.naturalWidth,
+            height: image.naturalHeight,
+          });
+        };
+
+        image.onerror = () => {
+          reject(new Error("Impossible de lire les dimensions de l’image."));
+        };
+
+        image.src = objectUrl;
+      }
+    );
+
+    return dimensions;
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
 export default function MenuDesign() {
   const { user } = useAuth();
   const [establishments, setEstablishments] = useState<Establishment[]>([]);
@@ -135,6 +164,18 @@ export default function MenuDesign() {
       const uploaded: string[] = [];
 
       for (const file of Array.from(files)) {
+        const { width, height } = await getImageDimensions(file);
+
+        if (width < 1440 || height < 2560) {
+          throw new Error(
+            'Wallpaper trop petit (' +
+              width +
+              '×' +
+              height +
+              '). Utilise au minimum 1440×2560 px, idéalement 2160×3840 px.'
+          );
+        }
+
         const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
         const path =
           'loyalty-cards/' +
@@ -356,7 +397,7 @@ export default function MenuDesign() {
               }}
             >
               <div className="absolute inset-0 bg-black/35" />
-              <div className="relative rounded-3xl border border-white/15 bg-white/10 p-6 text-white backdrop-blur-[2px]">
+              <div className="relative rounded-3xl border border-white/15 bg-white/10 p-6 text-white">
                 <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold">
                   Menu
                 </p>
@@ -369,7 +410,7 @@ export default function MenuDesign() {
                   univers visuel.
                 </p>
                 <div className="mt-8 grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl bg-white/15 p-4 backdrop-blur-sm">
+                  <div className="rounded-2xl bg-white/15 p-4">
                     Entrées
                   </div>
                   <div className="rounded-2xl bg-white/15 p-4 backdrop-blur-sm">
