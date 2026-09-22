@@ -180,7 +180,7 @@ export default function LoyaltyBuilder({ establishmentId }: Props) {
 }
 
 function BuilderPanel({
-  config, establishment, activeTab, setActiveTab, update, logoInput, coverInput, uploading, onUpload,
+  config, establishment, activeTab, setActiveTab, update, logoInput, coverInput, uploading,
 }: {
   config: LoyaltyBuilderConfig;
   establishment: { name: string; logoUrl: string | null };
