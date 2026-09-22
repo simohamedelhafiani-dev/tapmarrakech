@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Gift, History, QrCode, Sparkles, Star, Ticket, Trophy, WalletCards, X } from 'lucide-react';
 import QRCode from 'qrcode';
 import type { CSSProperties, ReactNode } from 'react';
+import { supabase } from '@/lib/supabase';
 
 export type LoyaltyExperienceType = 'STAMP' | 'POINTS' | 'DISCOUNT' | 'TIER' | 'REWARD' | 'CASHBACK' | 'CHALLENGE' | 'COLLECTION';
 
@@ -194,30 +195,71 @@ export function LoyaltyProgress({ config }: { config: LoyaltyExperienceConfig })
 
 export function LoyaltyReward({ config }: { config: LoyaltyExperienceConfig }) {
   const reward = config.rewardName;
-  if (!reward && !(config.rewards?.length)) return null;
+  const [selectedReward, setSelectedReward] = useState<LoyaltyExperienceReward | null>(null);
+  const [claimQr, setClaimQr] = useState('');
+  const [claiming, setClaiming] = useState(false);
+  const [claimError, setClaimError] = useState('');
+
+  const createClaim = async (item: LoyaltyExperienceReward) => {
+    setSelectedReward(item); setClaimQr(''); setClaimError('');
+    if ((config.pointsBalance ?? 0) < item.points_required) return;
+    setClaiming(true);
+    const accessToken = config.qrValue?.split('/loyalty/')[1] || '';
+    const { data, error } = await supabase.rpc('create_public_loyalty_reward_claim', {
+      p_access_token: accessToken, p_reward_id: item.id,
+    });
+    setClaiming(false);
+    const row = Array.isArray(data) ? data[0] : data;
+    if (error || !row?.claim_token) {
+      setClaimError(error?.message || 'Impossible de générer le QR de récompense.');
+      return;
+    }
+    setClaimQr(window.location.origin + '/loyalty/reward/' + row.claim_token);
+  };
+
+  const closeClaim = () => {
+    if (claiming) return;
+    setSelectedReward(null); setClaimQr(''); setClaimError('');
+  };
+
   return (
-    <Section title={config.rewards?.length ? 'Récompenses disponibles' : 'Votre prochaine récompense'} eyebrow="À débloquer">
-      {reward && (
-        <div className="mt-3 flex items-center gap-4 rounded-[22px] border border-white/15 bg-white/10 p-4 text-white shadow-lg backdrop-blur-xl" style={{ background: config.primaryColor }}>
-          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl" style={{ background: config.secondaryColor + '35', color: config.secondaryColor }}><Gift size={23}/></div>
-          <div className="min-w-0"><p className="text-[9px] uppercase tracking-[0.16em] opacity-55">Prochaine récompense</p><p className="mt-1 text-lg font-semibold">{reward}</p><p className="mt-1 text-[10px] opacity-65">{config.rewardDescription || 'Votre fidélité est récompensée.'}</p></div>
-        </div>
-      )}
-      {config.rewards?.length ? (
-        <div className="mt-3 space-y-2">
-          {config.rewards.map(r => {
-            const available = (config.pointsBalance ?? 0) >= r.points_required;
-            return <div key={r.id} className="flex items-center justify-between gap-3 rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-md">
-              <div className="min-w-0"><p className="text-sm font-semibold">{r.name}</p><p className="mt-1 text-[10px] opacity-50">{r.description || `${r.points_required} points`}</p></div>
-              <span className="shrink-0 rounded-full px-2.5 py-1 text-[9px] font-bold" style={{ color: available ? config.primaryColor : 'rgba(0,0,0,.45)', background: available ? config.secondaryColor + '30' : 'rgba(0,0,0,.05)' }}>{available ? 'Disponible' : `${r.points_required} pts`}</span>
-            </div>;
-          })}
-        </div>
+    <>
+      {reward || config.rewards?.length ? (
+        <Section title={config.rewards?.length ? 'Récompenses disponibles' : 'Votre prochaine récompense'} eyebrow="À débloquer">
+          {reward && <div className="mt-3 flex items-center gap-4 rounded-[22px] border border-white/15 bg-white/10 p-4 text-white shadow-lg backdrop-blur-xl" style={{ background: config.primaryColor }}>
+            <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl" style={{ background: config.secondaryColor + '35', color: config.secondaryColor }}><Gift size={23}/></div>
+            <div className="min-w-0"><p className="text-[9px] uppercase tracking-[0.16em] opacity-55">Prochaine récompense</p><p className="mt-1 text-lg font-semibold">{reward}</p><p className="mt-1 text-[10px] opacity-65">{config.rewardDescription || 'Votre fidélité est récompensée.'}</p></div>
+          </div>}
+          {config.rewards?.length ? <div className="mt-3 space-y-2">
+            {config.rewards.map(r => {
+              const available = (config.pointsBalance ?? 0) >= r.points_required;
+              return <button key={r.id} type="button" disabled={!available} onClick={() => void createClaim(r)} className="flex w-full items-center justify-between gap-3 rounded-2xl border border-white/15 bg-white/10 p-4 text-left backdrop-blur-md transition hover:bg-white/15 disabled:opacity-70">
+                <div className="min-w-0"><p className="text-sm font-semibold">{r.name}</p><p className="mt-1 text-[10px] opacity-50">{r.description || r.points_required + ' points'}</p>{r.reward_type === 'DISCOUNT' && r.discount_percent != null && <p className="mt-1 text-[10px] font-semibold" style={{ color: config.secondaryColor }}>-{r.discount_percent}% de réduction</p>}</div>
+                <span className="shrink-0 rounded-full px-2.5 py-1 text-[9px] font-bold" style={{ color: available ? config.primaryColor : 'rgba(0,0,0,.45)', background: available ? config.secondaryColor + '30' : 'rgba(0,0,0,.05)' }}>{available ? 'Utiliser' : r.points_required + ' pts'}</span>
+              </button>;
+            })}
+          </div> : null}
+        </Section>
       ) : null}
-    </Section>
+
+      {selectedReward && <div className="fixed inset-0 z-[100] grid place-items-center bg-black/70 p-4" onClick={closeClaim}>
+        <div className="w-full max-w-sm rounded-[28px] bg-white p-6 text-[#17201c] shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="flex items-start justify-between gap-3"><div><p className="text-[9px] font-bold uppercase tracking-[.2em] text-[#D3A84C]">Récompense</p><h3 className="mt-1 text-xl font-bold">{selectedReward.name}</h3><p className="mt-1 text-xs text-black/45">{selectedReward.points_required} points seront déduits lors de la validation.</p></div><button type="button" onClick={closeClaim} className="rounded-xl p-2 text-black/35"><X size={18}/></button></div>
+          {claiming ? <div className="grid place-items-center py-12"><div className="h-8 w-8 animate-spin rounded-full border-2 border-[#173D32] border-t-transparent"/><p className="mt-3 text-xs text-black/45">Génération du QR…</p></div>
+          : claimQr ? <div className="mt-5 rounded-2xl bg-[#f7f7f3] p-5 text-center"><QRCodeImage value={claimQr}/><p className="mt-3 text-[10px] font-semibold uppercase tracking-[.16em] text-black/45">Présentez ce QR au responsable</p><p className="mt-2 text-[10px] text-black/35">Valable 2 minutes · utilisable une seule fois</p></div>
+          : claimError ? <div className="mt-5 rounded-2xl bg-red-50 p-4 text-center text-xs text-red-700">{claimError}</div> : null}
+          <button type="button" onClick={closeClaim} disabled={claiming} className="mt-4 w-full rounded-xl bg-[#173D32] py-3.5 text-sm font-semibold text-white disabled:opacity-50">Fermer</button>
+        </div>
+      </div>}
+    </>
   );
 }
 
+function QRCodeImage({ value }: { value: string }) {
+  const [src, setSrc] = useState('');
+  useEffect(() => { void QRCode.toDataURL(value, { width: 360, margin: 2 }).then(setSrc); }, [value]);
+  return src ? <img src={src} alt="QR de validation" className="mx-auto h-56 w-56 rounded-xl bg-white p-3" /> : <div className="mx-auto h-56 w-56 animate-pulse rounded-xl bg-white/70"/>;
+}
 export function LoyaltyBenefits({ config }: { config: LoyaltyExperienceConfig }) {
   if (!config.benefits?.length) return null;
   return <Section title="Vos avantages" eyebrow="Exclusif"><div className="mt-3 grid gap-2 sm:grid-cols-3">{config.benefits.map((b,i) => <div key={b.title + i} className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-md"><Sparkles size={16} style={{color:config.secondaryColor}}/><p className="mt-3 text-xs font-semibold">{b.title}</p><p className="mt-1 text-[10px] leading-4 opacity-50">{b.description}</p></div>)}</div></Section>;
@@ -557,6 +599,7 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
           <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-black/25"><div className="h-full rounded-full" style={{ width: progress + '%', background: config.secondaryColor }} /></div>
         </div>
         {benefits.length > 0 && <div className="mt-5"><div className="flex items-center justify-between"><p className="text-[9px] font-bold uppercase tracking-[.22em] text-white/70">Vos avantages exclusifs</p><span className="text-[8px] text-white/45">Voir tout</span></div><div className="mt-2 grid grid-cols-3 gap-2">{benefits.map((b,i)=><div key={b.title+i} className="rounded-[17px] border border-white/25 bg-white/[0.13] p-3 backdrop-blur-xl"><div className="mb-2 text-[13px]" style={{ color: config.secondaryColor }}>✦</div><p className="text-[10px] font-semibold leading-4">{b.title}</p><p className="mt-1 line-clamp-2 text-[8px] leading-3.5 text-white/55">{b.description}</p></div>)}</div></div>}
+        <LoyaltyReward config={config} />
         {offers.length > 0 && <div className="mt-4 rounded-[19px] border border-white/25 bg-black/20 p-4 backdrop-blur-xl"><div className="flex items-center justify-between"><div><p className="text-[8px] uppercase tracking-[.18em] text-white/45">{offers[0].eyebrow || 'Offre du moment'}</p><p className="mt-1 text-base font-semibold">{offers[0].title}</p>{offers[0].description && <p className="mt-1 text-[9px] text-white/55">{offers[0].description}</p>}</div><span className="text-xl text-white/75">›</span></div></div>}
         <div className="mt-5 flex flex-col items-center pt-2">
           <div className="h-[112px] w-[112px]">{qrBlock}</div>
