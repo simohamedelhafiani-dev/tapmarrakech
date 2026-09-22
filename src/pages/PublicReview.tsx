@@ -756,7 +756,7 @@ export default function PublicReview() {
           <main className="relative -mx-5 min-h-screen overflow-hidden px-5 pb-16 pt-4 text-white">
             {menuAiDesign?.background_image_url && (
               <div
-                className="pointer-events-none absolute inset-0 bg-cover bg-center bg-fixed"
+                className="pointer-events-none absolute inset-0 bg-cover bg-center"
                 style={{ backgroundImage: 'url("' + menuAiDesign.background_image_url + '")' }}
               />
             )}
@@ -766,7 +766,7 @@ export default function PublicReview() {
                 style={{ backgroundImage: 'url("' + menuAiDesign.wallpaper_library[0] + '")' }}
               />
             )}
-            <div className="pointer-events-none absolute inset-0 bg-black/30" />
+            <div className="pointer-events-none absolute inset-0 bg-black/18" />
 
             <div className="relative z-10">
               <div className="flex items-center justify-between">
