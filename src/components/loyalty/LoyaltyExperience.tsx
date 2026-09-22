@@ -257,15 +257,163 @@ export function LoyaltyFooter({ config }: { config: LoyaltyExperienceConfig }) {
   </>;
 }
 
+function normalizeBusinessType(value?: string | null) {
+  const v = (value || '').toLowerCase();
+  if (v.includes('restaurant') || v.includes('restauration')) return 'restaurant';
+  if (v.includes('cafe') || v.includes('café') || v.includes('coffee')) return 'cafe';
+  if (v.includes('spa') || v.includes('bien-être') || v.includes('wellness')) return 'spa';
+  if (v.includes('coiff') || v.includes('hair') || v.includes('barber')) return 'hairdresser';
+  if (v.includes('hotel') || v.includes('hôtel') || v.includes('riad')) return 'hotel';
+  if (v.includes('boutique') || v.includes('retail') || v.includes('shop')) return 'boutique';
+  if (v.includes('gym') || v.includes('fitness') || v.includes('sport')) return 'gym';
+  if (v.includes('boulanger') || v.includes('bakery') || v.includes('patisserie') || v.includes('pâtisserie')) return 'bakery';
+  if (v.includes('voyage') || v.includes('travel') || v.includes('agence')) return 'travel';
+  return 'default';
+}
+
+function SectorHero({ config, sector }: { config: LoyaltyExperienceConfig; sector: string }) {
+  const labels: Record<string, string> = {
+    restaurant: 'Table privilégiée',
+    cafe: 'Club café',
+    spa: 'Wellness member',
+    hairdresser: 'Beauty member',
+    hotel: 'Guest privilege',
+    boutique: 'Private member',
+    gym: 'Performance club',
+    bakery: 'Club gourmand',
+    travel: 'Travel member',
+    default: 'Programme fidélité',
+  };
+  const label = labels[sector] || labels.default;
+
+  if (sector === 'restaurant') {
+    return (
+      <div className="relative min-h-[250px] overflow-hidden text-white">
+        {config.coverImageUrl ? <img src={config.coverImageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" /> : <div className="absolute inset-0" style={{ background: config.primaryColor }} />}
+        <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, ${config.primaryColor}22 0%, ${config.primaryColor}f2 100%)` }} />
+        <div className="relative flex min-h-[250px] flex-col justify-between p-5 sm:p-6">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-3">
+              {config.logoUrl ? <img src={config.logoUrl} alt="" className="h-12 w-12 rounded-2xl bg-white object-contain p-1.5 shadow-xl" /> : <div className="grid h-12 w-12 place-items-center rounded-2xl bg-white/15 text-sm font-bold">{config.establishmentName.slice(0,2).toUpperCase()}</div>}
+              <div><p className="text-sm font-semibold">{config.establishmentName}</p><p className="mt-1 text-[9px] uppercase tracking-[.2em] opacity-65">{label}</p></div>
+            </div>
+            <span className="rounded-full border border-white/20 bg-black/15 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-wider backdrop-blur"><Sparkles size={10} className="mr-1 inline" /> Gold</span>
+          </div>
+          <div>
+            <p className="text-[9px] uppercase tracking-[.25em] opacity-60">Bonsoir, {config.customerName || 'Client'}</p>
+            <h1 className="mt-1 max-w-[310px] text-3xl font-bold tracking-[-.04em]">Encore quelques visites.</h1>
+            <p className="mt-2 max-w-[290px] text-xs leading-5 opacity-70">{config.intro || 'Votre fidélité mérite une vraie expérience.'}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (sector === 'cafe' || sector === 'bakery') {
+    return (
+      <div className="relative overflow-hidden p-5 sm:p-6" style={{ background: config.primaryColor, color: '#fff' }}>
+        <div className="absolute -right-16 -top-20 h-48 w-48 rounded-full opacity-15" style={{ background: config.secondaryColor }} />
+        <div className="relative flex items-center justify-between gap-4">
+          <div className="flex min-w-0 items-center gap-3">
+            {config.logoUrl ? <img src={config.logoUrl} alt="" className="h-11 w-11 rounded-xl bg-white object-contain p-1.5" /> : <div className="grid h-11 w-11 place-items-center rounded-xl bg-white/10 text-xs font-bold">{config.establishmentName.slice(0,2).toUpperCase()}</div>}
+            <div className="min-w-0"><p className="truncate text-sm font-semibold">{config.establishmentName}</p><p className="mt-1 text-[9px] uppercase tracking-[.2em] opacity-55">{sector === 'cafe' ? 'Coffee club' : 'Club gourmand'}</p></div>
+          </div>
+          <span className="rounded-full bg-white/10 px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider">Member</span>
+        </div>
+        <div className="relative mt-8 flex items-end justify-between">
+          <div><p className="text-[9px] uppercase tracking-[.2em] opacity-50">Bonjour</p><p className="mt-1 text-2xl font-bold">{config.customerName || 'Client'}</p></div>
+          <div className="rounded-full px-3 py-1.5 text-[9px] font-bold" style={{ background: config.secondaryColor, color: config.primaryColor }}>Prochain cadeau</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (sector === 'spa' || sector === 'hairdresser') {
+    return (
+      <div className="relative min-h-[215px] overflow-hidden p-5 sm:p-6" style={{ color: '#fff' }}>
+        {config.coverImageUrl ? <img src={config.coverImageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" /> : <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${config.primaryColor}, ${config.secondaryColor})` }} />}
+        <div className="absolute inset-0 bg-black/25" />
+        <div className="relative flex min-h-[180px] flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">{config.logoUrl && <img src={config.logoUrl} alt="" className="h-11 w-11 rounded-full bg-white object-contain p-1.5" />}<div><p className="text-sm font-semibold">{config.establishmentName}</p><p className="text-[9px] uppercase tracking-[.2em] opacity-60">{sector === 'spa' ? 'Wellness' : 'Beauty'}</p></div></div>
+            <Star size={19} fill={config.secondaryColor} style={{ color: config.secondaryColor }} />
+          </div>
+          <div><p className="text-[9px] uppercase tracking-[.22em] opacity-60">Votre statut</p><p className="mt-1 text-3xl font-light tracking-[-.03em]">{config.currentTier || 'Signature'}</p><p className="mt-1 text-xs opacity-70">{config.customerName || 'Client'} · membre privilégié</p></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (sector === 'hotel' || sector === 'travel') {
+    return (
+      <div className="relative overflow-hidden p-5 sm:p-6" style={{ background: config.primaryColor, color: '#fff' }}>
+        {config.coverImageUrl && <img src={config.coverImageUrl} alt="" className="absolute inset-0 h-full w-full object-cover opacity-25" />}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/5 to-black/25" />
+        <div className="relative">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">{config.logoUrl ? <img src={config.logoUrl} alt="" className="h-11 w-11 rounded-xl bg-white object-contain p-1.5" /> : <div className="grid h-11 w-11 place-items-center rounded-xl bg-white/10 text-xs font-bold">{config.establishmentName.slice(0,2).toUpperCase()}</div>}<div><p className="text-sm font-semibold">{config.establishmentName}</p><p className="text-[9px] uppercase tracking-[.2em] opacity-55">{sector === 'hotel' ? 'Guest club' : 'Travel club'}</p></div></div>
+            <span className="text-[9px] font-bold uppercase tracking-[.18em]" style={{ color: config.secondaryColor }}>{config.currentTier || 'Gold'}</span>
+          </div>
+          <div className="mt-12"><p className="text-[9px] uppercase tracking-[.22em] opacity-50">Bienvenue, {config.customerName || 'Client'}</p><p className="mt-1 text-3xl font-semibold tracking-[-.03em]">{config.rewardName || 'Vos privilèges vous attendent'}</p></div>
+        </div>
+      </div>
+    );
+  }
+
+  return <LoyaltyHeader config={config} />;
+}
+
+function SectorProgress({ config, sector }: { config: LoyaltyExperienceConfig; sector: string }) {
+  if (sector === 'cafe' || sector === 'bakery') {
+    const current = config.visits ?? 0;
+    const goal = Math.max(1, config.visitGoal ?? 8);
+    const percent = clamp((current / goal) * 100, 0, 100);
+    return <div className="relative -mt-7 mx-4 rounded-[26px] bg-white p-5 shadow-[0_16px_40px_rgba(0,0,0,.10)]">
+      <div className="flex items-center justify-between"><div><p className="text-[9px] font-bold uppercase tracking-[.2em] text-black/40">Progression</p><p className="mt-1 text-4xl font-bold tracking-tight" style={{ color: config.primaryColor }}>{current}<span className="text-base text-black/25"> / {goal}</span></p></div><div className="grid h-14 w-14 place-items-center rounded-full border-4" style={{ borderColor: config.secondaryColor, background: `conic-gradient(${config.secondaryColor} ${percent}%, #eee ${percent}%)` }}><div className="grid h-9 w-9 place-items-center rounded-full bg-white text-[9px] font-bold">{Math.round(percent)}%</div></div></div>
+      <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-black/7"><div className="h-full rounded-full transition-all duration-700" style={{ width: percent + '%', background: config.secondaryColor }} /></div>
+      <p className="mt-3 text-[10px] text-black/45">{config.progressLabel || `Encore ${Math.max(0, goal-current)} visites avant votre cadeau.`}</p>
+    </div>;
+  }
+
+  if (sector === 'spa' || sector === 'hairdresser') {
+    const points = config.pointsBalance ?? 0;
+    const goal = Math.max(points, config.pointsGoal ?? 1000);
+    const percent = clamp((points / goal) * 100, 0, 100);
+    return <div className="px-5 pt-5">
+      <div className="flex items-center justify-between"><div><p className="text-[9px] uppercase tracking-[.2em] opacity-40">Évolution</p><p className="mt-1 text-3xl font-semibold">{points.toLocaleString('fr-FR')} <span className="text-sm opacity-40">pts</span></p></div><div className="text-right"><p className="text-[9px] uppercase tracking-[.2em] opacity-40">Prochain niveau</p><p className="mt-1 text-sm font-semibold">{Math.max(0, goal-points).toLocaleString('fr-FR')} pts</p></div></div><div className="mt-4 h-1 overflow-hidden rounded-full bg-black/8"><div className="h-full rounded-full transition-all duration-700" style={{ width: percent + '%', background: config.secondaryColor }} /></div>
+    </div>;
+  }
+
+  if (sector === 'hotel' || sector === 'travel') {
+    const points = config.pointsBalance ?? 0;
+    return <div className="mx-4 -mt-6 rounded-[24px] border border-white/10 bg-white p-5 shadow-[0_18px_45px_rgba(0,0,0,.12)]"><div className="grid grid-cols-2 gap-4"><div><p className="text-[9px] uppercase tracking-[.18em] text-black/35">{sector === 'hotel' ? 'Points séjour' : 'Points voyage'}</p><p className="mt-1 text-3xl font-semibold" style={{ color: config.primaryColor }}>{points.toLocaleString('fr-FR')}</p></div><div className="border-l border-black/8 pl-4"><p className="text-[9px] uppercase tracking-[.18em] text-black/35">Statut</p><p className="mt-1 text-xl font-semibold">{config.currentTier || 'Gold'}</p></div></div></div>;
+  }
+
+  return <div className="px-4"><LoyaltyProgress config={config} /></div>;
+}
+
+function SectorExtras({ config, sector }: { config: LoyaltyExperienceConfig; sector: string }) {
+  if (sector === 'restaurant') {
+    return <div className="mt-5 grid grid-cols-2 gap-2">{config.benefits?.slice(0,4).map((b,i) => <div key={b.title+i} className="rounded-2xl border border-black/6 bg-white p-4"><p className="text-[9px] uppercase tracking-[.15em] opacity-35">Privilège {i+1}</p><p className="mt-2 text-xs font-semibold">{b.title}</p><p className="mt-1 text-[10px] leading-4 opacity-45">{b.description}</p></div>)}</div>;
+  }
+  if (sector === 'hotel') return <div className="mt-5 rounded-[22px] p-5 text-white" style={{ background: config.primaryColor }}><p className="text-[9px] uppercase tracking-[.2em] opacity-50">Vos privilèges</p><div className="mt-3 flex flex-wrap gap-2">{(config.benefits || []).slice(0,4).map(b => <span key={b.title} className="rounded-full bg-white/10 px-3 py-2 text-[10px]">{b.title}</span>)}</div></div>;
+  if (sector === 'gym') return <div className="mt-5 rounded-[22px] bg-black p-5 text-white"><div className="flex items-center justify-between"><div><p className="text-[9px] uppercase tracking-[.2em] opacity-45">Challenge</p><p className="mt-1 text-xl font-bold">Votre prochaine session</p></div><Trophy size={22} style={{color:config.secondaryColor}} /></div><p className="mt-3 text-xs opacity-55">{config.progressLabel || 'Continuez votre progression pour débloquer votre prochain badge.'}</p></div>;
+  return null;
+}
+
 export function LoyaltyExperience({ config }: { config: LoyaltyExperienceConfig }) {
   const radius = config.borderRadius ?? 28;
+  const sector = normalizeBusinessType(config.businessType);
+  const compact = sector === 'cafe' || sector === 'bakery';
+
   return (
     <div className="mx-auto w-full max-w-[430px] overflow-hidden bg-white shadow-[0_25px_80px_rgba(0,0,0,.14)]" style={{ borderRadius: radius }}>
       <div style={{ background: config.backgroundColor, color: config.textColor }}>
-        <LoyaltyHeader config={config} />
-        <div className="px-4 pb-6 sm:px-5">
-          <LoyaltyProgress config={config} />
+        <SectorHero config={config} sector={sector} />
+        <SectorProgress config={config} sector={sector} />
+        <div className={`px-4 pb-6 sm:px-5 ${compact ? 'pt-1' : 'pt-5'}`}>
           <LoyaltyReward config={config} />
+          <SectorExtras config={config} sector={sector} />
           <LoyaltyBenefits config={config} />
           <LoyaltyOffers config={config} />
           <LoyaltyHistory config={config} />
