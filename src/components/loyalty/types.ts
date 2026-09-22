@@ -40,4 +40,5 @@ export type LoyaltyBuilderConfig = {
   rewardName: string;
   stampStyle: 'circles' | 'squares' | 'stars' | 'hearts';
   published: boolean;
+  showQr: boolean;
 };
