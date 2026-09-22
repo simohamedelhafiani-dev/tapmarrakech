@@ -178,6 +178,7 @@ export default function LoyaltyCard() {
 
       if (cardData?.[0]) setCard(cardData[0] as Card);
       setHistory((historyData ?? []) as HistoryItem[]);
+      setRewards((rewardsData ?? []) as LoyaltyExperienceReward[]);
       const programRow = Array.isArray(programData) ? programData[0] : programData;
       if (programRow) {
         setProgram({
