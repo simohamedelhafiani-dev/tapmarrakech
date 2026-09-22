@@ -753,23 +753,20 @@ export default function PublicReview() {
             MENU
         ===================================================== */}
         {section === 'menu' && (
-          <main className="relative -mx-5 min-h-screen overflow-hidden px-5 pb-16 pt-4 text-white">
-            {menuAiDesign?.background_image_url && (
-              <img
-                src={menuAiDesign.background_image_url}
-                alt=""
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-              />
-            )}
-            {Array.isArray(menuAiDesign?.wallpaper_library) && menuAiDesign.wallpaper_library[0] && !menuAiDesign?.background_image_url && (
-              <img
-                src={menuAiDesign.wallpaper_library[0]}
-                alt=""
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-              />
-            )}
+          <main
+            className="relative -mx-5 min-h-screen overflow-hidden px-5 pb-16 pt-4 text-white"
+            style={{
+              backgroundImage:
+                menuAiDesign?.background_image_url
+                  ? `url("${menuAiDesign.background_image_url}")`
+                  : Array.isArray(menuAiDesign?.wallpaper_library) && menuAiDesign.wallpaper_library[0]
+                    ? `url("${menuAiDesign.wallpaper_library[0]}")`
+                    : undefined,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center top',
+              backgroundRepeat: 'no-repeat',
+            }}
+          >
             <div className="pointer-events-none absolute inset-0 bg-black/18" />
 
             <div className="relative z-10">
