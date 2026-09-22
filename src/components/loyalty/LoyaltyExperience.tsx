@@ -566,7 +566,9 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
 
 export function LoyaltyExperience({ config }: { config: LoyaltyExperienceConfig }) {
   const premiumIds = new Set(['obsidian', 'editorial', 'glass', 'titanium', 'hospitality', 'apple-wallet', 'luxury', 'minimal', 'elegant', 'modern', 'bold', 'classic', 'wallet-premium']);
-  if (premiumIds.has(config.templateId || '')) return <PremiumWalletTemplate config={config} />;
+  // Any configured loyalty card with a wallpaper must use the premium wallet renderer.
+  // This prevents legacy sector templates from hiding the full-card background or duplicating benefits.
+  if (config.coverImageUrl || premiumIds.has(config.templateId || '')) return <PremiumWalletTemplate config={config} />;
 
   const radius = config.borderRadius ?? 28;
   const sector = normalizeBusinessType(config.businessType);
