@@ -150,15 +150,28 @@ export function LoyaltyCardVisual({
       className={`relative aspect-[0.78/1] w-full overflow-hidden text-white shadow-2xl ${compact ? 'p-5' : 'p-6 sm:p-7'}`}
       style={{ background, borderRadius: design.border_radius }}
     >
-      <div
-        className="pointer-events-none absolute right-0 top-0 h-[43%] w-[58%] overflow-hidden"
-        style={{
-          borderBottomLeftRadius: '75% 68%',
-          background: config.background_image_url
-            ? 'linear-gradient(135deg, ' + design.primary_color + '22, ' + design.primary_color + '66), url(' + config.background_image_url + ') center/cover no-repeat'
-            : 'linear-gradient(135deg, ' + design.secondary_color + '55, ' + design.secondary_color + '22)',
-        }}
-      />
+      {config.background_image_url ? (
+        <>
+          <div
+            className="pointer-events-none absolute inset-0 z-0"
+            style={{
+              backgroundImage: `linear-gradient(145deg, ${design.primary_color}88 0%, ${design.primary_color}55 45%, ${design.primary_color}33 100%), url(${config.background_image_url})`,
+              backgroundPosition: 'center',
+              backgroundSize: 'cover',
+              backgroundRepeat: 'no-repeat',
+            }}
+          />
+          <div
+            className="pointer-events-none absolute inset-0 z-0"
+            style={{ background: `linear-gradient(180deg, ${design.primary_color}66 0%, transparent 42%, ${design.primary_color}88 100%)` }}
+          />
+        </>
+      ) : (
+        <div
+          className="pointer-events-none absolute inset-0 z-0"
+          style={{ background }}
+        />
+      )}
       <div
         className="pointer-events-none absolute -bottom-20 -left-16 h-44 w-44 rounded-full opacity-10"
         style={{ background: design.secondary_color }}
@@ -272,7 +285,7 @@ export function LoyaltyCardVisual({
           </div>
         </div>
       ) : (
-        <div className="relative grid h-full place-items-center text-center">
+        <div className="relative z-10 grid h-full place-items-center text-center">
           <div>
             <p className="text-[10px] uppercase tracking-[0.24em] opacity-60">{config.back_title}</p>
             <p className="mt-3 text-sm opacity-70">{config.back_message}</p>

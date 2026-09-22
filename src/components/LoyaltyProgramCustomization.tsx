@@ -22,34 +22,12 @@ type LoyaltyPreset = {
 };
 
 const LOYALTY_PRESETS: LoyaltyPreset[] = [
-  {
-    id: 'wallet-premium',
-    name: 'Wallet Premium',
-    description: 'Le design Apple Wallet que nous avons validé',
-    primary: '#0B3327',
-    secondary: '#D6B15A',
-    background: '#F7F7F3',
-    text: '#FFFFFF',
-    radius: 24,
-    mode: 'QR',
-    title: 'CARTE FIDÉLITÉ',
-    subtitle: 'Merci de faire partie de notre histoire !',
-    stampStyle: 'circles',
-  },
-  {
-    id: 'passkit-purple',
-    name: 'PassKit Purple',
-    description: 'Style PassKit / U4Coffee avec QR',
-    primary: '#6200EA',
-    secondary: '#FFFFFF',
-    background: '#6200EA',
-    text: '#FFFFFF',
-    radius: 24,
-    mode: 'QR',
-    title: 'PROGRAMME FIDÉLITÉ',
-    subtitle: 'Votre carte digitale',
-    stampStyle: 'circles',
-  },
+  { id: 'luxury', name: 'Luxury', description: 'Vert profond et or — signature premium, élégante et intemporelle.', primary: '#0B3327', secondary: '#D6B15A', background: '#F7F7F3', text: '#FFFFFF', radius: 28, mode: 'QR', title: 'CARTE FIDÉLITÉ', subtitle: 'Vos privilèges, toujours avec vous.', stampStyle: 'circles' },
+  { id: 'minimal', name: 'Minimal', description: 'Design clair et épuré pour une expérience digitale discrète.', primary: '#17201C', secondary: '#C7A96B', background: '#FFFFFF', text: '#FFFFFF', radius: 22, mode: 'QR', title: 'MEMBER CARD', subtitle: 'Simple. Élégante. Personnelle.', stampStyle: 'squares' },
+  { id: 'elegant', name: 'Elegant', description: 'Ivoire, champagne et typographie éditoriale pour un rendu haut de gamme.', primary: '#4A4038', secondary: '#D8B477', background: '#F7F1E8', text: '#FFFFFF', radius: 26, mode: 'QR', title: 'PRIVILEGE CARD', subtitle: 'Une expérience pensée pour vous.', stampStyle: 'circles' },
+  { id: 'modern', name: 'Modern', description: 'Contraste contemporain et lignes nettes pour les marques lifestyle.', primary: '#123B45', secondary: '#7FD1C5', background: '#F2F7F7', text: '#FFFFFF', radius: 20, mode: 'QR', title: 'MEMBERSHIP', subtitle: 'Unlock more. Enjoy more.', stampStyle: 'squares' },
+  { id: 'bold', name: 'Bold', description: 'Une carte forte et immersive pour restaurants, cafés et concepts lifestyle.', primary: '#211B24', secondary: '#E5B86C', background: '#F5F2EE', text: '#FFFFFF', radius: 30, mode: 'STAMP', title: 'CLUB PRIVILÈGE', subtitle: 'Chaque visite compte.', stampStyle: 'stars' },
+  { id: 'classic', name: 'Classic', description: 'Un équilibre premium entre tradition, confiance et simplicité.', primary: '#173D32', secondary: '#D3A84C', background: '#F7F7F3', text: '#FFFFFF', radius: 24, mode: 'STAMP', title: 'CARTE MEMBRE', subtitle: 'Merci pour votre fidélité.', stampStyle: 'circles' },
 ];
 
 type Design = {
@@ -65,7 +43,7 @@ type Design = {
 };
 
 const baseDesign: Design = {
-  template_id: 'wallet-premium',
+  template_id: 'luxury',
   primary_color: '#0B3327',
   secondary_color: '#D6B15A',
   background_color: '#F7F7F3',
@@ -205,6 +183,13 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
 
     const { error } = await supabase.rpc('save_loyalty_card_design', {
       p_establishment_id: establishmentId,
+      p_design_config: {
+        ...design.design_config,
+        card_mode: cardMode,
+        show_qr: cardMode === 'QR',
+        show_points: true,
+        business_type: establishment.business_type,
+      },
       p_template_id: design.template_id,
       p_primary_color: design.primary_color,
       p_secondary_color: design.secondary_color,
@@ -212,7 +197,6 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
       p_text_color: design.text_color,
       p_button_color: design.button_color,
       p_border_radius: design.border_radius,
-      p_design_config: { ...design.design_config, card_mode: cardMode, show_qr: cardMode === 'QR', show_points: false, business_type: establishment.business_type },
       p_published: publish,
     });
     setSaving(false);

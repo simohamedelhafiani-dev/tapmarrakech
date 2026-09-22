@@ -91,7 +91,7 @@ export default function LoyaltyCard() {
         { data: rewardsData },
       ] = await Promise.all([
         supabase.rpc('get_public_loyalty_card', { p_access_token: token }),
-        supabase.rpc('get_public_loyalty_card_builder_config', { p_access_token: token }),
+        supabase.rpc('get_public_loyalty_card_config', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_program_context', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_history', { p_access_token: token, p_limit: 20 }),
         supabase.rpc('get_public_loyalty_rewards', { p_access_token: token }),
@@ -106,7 +106,6 @@ export default function LoyaltyCard() {
       const nextCard = cardData[0] as Card;
       setCard(nextCard);
       setHistory((historyData ?? []) as HistoryItem[]);
-      setRewards((rewardsData ?? []) as LoyaltyExperienceReward[]);
       setRewards((rewardsData ?? []) as LoyaltyExperienceReward[]);
 
       const designRow = Array.isArray(designData) ? designData[0] : designData;
@@ -308,7 +307,7 @@ export default function LoyaltyCard() {
     })),
     qrValue: cardUrl,
     intro: raw.intro || designConfig.front_subtitle,
-    templateId: designConfig.card_mode,
+    templateId: design.template_id,
     published: true,
   };
 
