@@ -554,9 +554,12 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
     </div>
   );
 
-  const actionBlock = config.type === 'STAMP' ? stampBlock : qrBlock;
+  // The customer QR is always required: the employee scans it to identify
+  // the customer before adding a stamp or points. Keep the stamp progress
+  // visible in the card, but never replace the customer QR with the stamp grid.
+  const actionBlock = qrBlock;
   const actionCaption = config.type === 'STAMP'
-    ? `Tampons · ${visits} / ${visitGoal}`
+    ? `Scannez pour ajouter un tampon · ${visits} / ${visitGoal}`
     : 'Scannez pour identifier votre compte';
 
   const background = image ? (
