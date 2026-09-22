@@ -177,7 +177,7 @@ export function LoyaltyCardVisual({
   return (
     <div
       className={`relative w-full overflow-hidden text-white shadow-2xl ${
-        compact ? 'aspect-[0.98/1] p-5' : 'aspect-[0.93/1] p-6 sm:p-7'
+        compact ? 'min-h-[590px] p-5' : 'min-h-[650px] p-6 sm:p-7'
       }`}
       style={{
         background,
@@ -363,7 +363,7 @@ export function LoyaltyCardVisual({
               {qr && (
                 <div
                   className={`rounded-2xl bg-white shadow-xl ${
-                    compact ? 'h-24 w-24 p-2' : 'h-32 w-32 p-2.5 sm:h-36 sm:w-36'
+                    compact ? 'h-20 w-20 p-1.5' : 'h-24 w-24 p-2 sm:h-28 sm:w-28'
                   }`}
                 >
                   <img src={qr} alt="" className="h-full w-full" />
