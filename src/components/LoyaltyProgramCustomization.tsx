@@ -19,8 +19,8 @@ type Design = {
 
 const baseDesign: Design = {
   template_id: 'custom',
-  primary_color: '#173D32',
-  secondary_color: '#D3A84C',
+  primary_color: '#0B3327',
+  secondary_color: '#D6B15A',
   background_color: '#F7F7F3',
   text_color: '#FFFFFF',
   button_color: '#173D32',
@@ -29,7 +29,7 @@ const baseDesign: Design = {
     ...defaultLoyaltyDesignConfig,
     card_mode: 'QR',
     front_title: 'CARTE FIDÉLITÉ',
-    front_subtitle: 'Une expérience qui mérite de revenir.',
+    front_subtitle: 'Merci de faire partie de notre histoire !',
   },
   published: false,
 };
