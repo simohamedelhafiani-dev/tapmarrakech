@@ -70,7 +70,7 @@ function StampMark({
   secondaryColor: string;
   compact: boolean;
 }) {
-  const size = compact ? 'h-8 w-8' : 'h-11 w-11';
+  const size = compact ? 'h-7 w-7' : 'h-9 w-9 sm:h-10 sm:w-10';
 
   if (style === 'stars') {
     return (
@@ -146,14 +146,14 @@ export function LoyaltyCardVisual({
 
   return (
     <div
-      className={`relative w-full overflow-hidden text-white shadow-2xl ${compact ? 'min-h-[590px] p-5' : 'min-h-[650px] p-6 sm:p-7'}`}
+      className={`relative aspect-[0.78/1] w-full overflow-hidden text-white shadow-2xl ${compact ? 'p-5' : 'p-6 sm:p-7'}`}
       style={{ background, borderRadius: design.border_radius }}
     >
       <div className="pointer-events-none absolute -right-24 -top-28 h-[58%] w-[62%] rounded-full opacity-20" style={{ background: design.secondary_color }} />
       <div className="pointer-events-none absolute -bottom-28 -left-24 h-[52%] w-[62%] rounded-full opacity-15" style={{ background: design.secondary_color }} />
 
       {side === 'front' ? (
-        <div className="relative flex h-full min-h-[inherit] flex-col">
+        <div className="relative flex h-full flex-col">
           <div className="flex items-start justify-between gap-4">
             <div className="flex min-w-0 items-center gap-3" style={{ transform: `translate(${config.logo_x}px, ${config.logo_y}px)` }}>
               {logoUrl ? (
@@ -175,7 +175,7 @@ export function LoyaltyCardVisual({
           </div>
 
           <div className="mt-8 min-h-0 flex-1">
-            <p className={`font-display leading-[0.95] ${compact ? 'text-[34px]' : 'text-4xl sm:text-[44px]'}`} style={{ color: design.text_color }}>
+            <p className={`max-w-full break-words font-display leading-[0.94] ${compact ? 'text-[30px]' : 'text-[34px] sm:text-[40px]'}`} style={{ color: design.text_color }}>
               {config.front_title}
             </p>
             <p className={`mt-3 max-w-[330px] leading-5 opacity-70 ${compact ? 'text-[10px]' : 'text-xs sm:text-sm'}`}>{config.front_subtitle}</p>
@@ -234,20 +234,20 @@ export function LoyaltyCardVisual({
                   <span className="max-w-[150px] truncate text-[10px] font-semibold">{card.stampRewardName || 'Récompense'}</span>
                 </div>
               </div>
-              <div className="mt-3 flex flex-wrap justify-center gap-2">
+              <div className="mt-3 grid grid-cols-5 place-items-center gap-2">
                 {Array.from({ length: stampGoal }).map((_, i) => (
                   <StampMark key={i} filled={i < stampsBalance} style={config.stamp_style} secondaryColor={design.secondary_color} compact={compact} />
                 ))}
               </div>
             </div>
           ) : (
-            <div className="mt-6 flex flex-col items-center">
+            <div className="mt-4 flex flex-col items-center">
               {showQr && qr ? (
-                <div className={`rounded-2xl bg-white shadow-xl ${compact ? 'h-[104px] w-[104px] p-2' : 'h-28 w-28 p-2 sm:h-32 sm:w-32'}`}>
+                <div className={`rounded-2xl bg-white shadow-xl ${compact ? 'h-28 w-28 p-2' : 'h-32 w-32 p-2.5 sm:h-36 sm:w-36'}`}>
                   <img src={qr} alt="QR code de la carte fidélité" className="h-full w-full" />
                 </div>
               ) : (
-                <div className={`grid place-items-center rounded-2xl border border-white/15 bg-white/5 text-center ${compact ? 'h-[104px] w-[104px]' : 'h-28 w-28'}`}>
+                <div className={`grid place-items-center rounded-2xl border border-white/15 bg-white/5 text-center ${compact ? 'h-28 w-28' : 'h-32 w-32 sm:h-36 sm:w-36'}`}>
                   <span className="max-w-[80px] text-[8px] uppercase tracking-[0.16em] opacity-45">QR en préparation</span>
                 </div>
               )}
@@ -257,7 +257,7 @@ export function LoyaltyCardVisual({
             </div>
           )}
 
-          <div className="mt-5 flex items-center justify-between gap-3">
+          <div className="mt-4 flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2 text-[8px] uppercase tracking-[0.2em] opacity-55">
               <span className="h-px w-7 shrink-0" style={{ background: design.secondary_color }} />
               <span className="truncate">{cardMode === 'STAMP' ? 'Récompense à la dernière visite' : 'Présentez votre carte'}</span>
