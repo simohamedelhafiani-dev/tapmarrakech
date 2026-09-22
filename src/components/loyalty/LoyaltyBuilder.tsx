@@ -13,6 +13,7 @@ import {
   Stamp,
   Upload,
   Trophy,
+  QrCode,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { LoyaltyCardVisual } from '@/components/LoyaltyCardVisual';
