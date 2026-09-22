@@ -1,4 +1,4 @@
-const CACHE = 'tapmarrakech-shell-v6';
+const CACHE = 'tapmarrakech-shell-v7';
 const APP_SHELL = ['/', '/index.html', '/tapmarrakech-logo.png', '/manifest.webmanifest'];
 
 self.addEventListener('message', (event) => {
@@ -17,8 +17,14 @@ self.addEventListener('activate', (event) => {
         keys.filter((key) => key !== CACHE).map((key) => caches.delete(key))
       )
     )
-  );
-  self.clients.claim();
+  ).then(async () => {
+    await self.clients.claim();
+    // Reload already-open installed PWAs after the new worker takes control.
+    const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    await Promise.all(
+      clients.map((client) => client.navigate(client.url).catch(() => undefined))
+    );
+  });
 });
 
 self.addEventListener('fetch', (event) => {
