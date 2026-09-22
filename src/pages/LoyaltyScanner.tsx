@@ -767,6 +767,7 @@ export default function LoyaltyScanner() {
                 </div>
               )}
 
+              {pendingReward.points_required > 0 && (
               <div className="mt-4">
                 <label className="mb-2 block text-xs font-semibold text-ink/50">
                   Numéro de facture <span className="font-normal">(optionnel)</span>
@@ -778,6 +779,9 @@ export default function LoyaltyScanner() {
                   className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
                 />
               </div>
+
+
+              )}
 
               <button
                 type="button"
