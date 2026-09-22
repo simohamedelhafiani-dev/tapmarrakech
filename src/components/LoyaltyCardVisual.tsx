@@ -11,6 +11,7 @@ export type LoyaltyDesignConfig = {
   back_message: string;
   show_qr: boolean;
   show_points: boolean;
+  showQr?: boolean;
   stamp_style: 'circles' | 'squares' | 'stars' | 'hearts';
   background_image_url: string | null;
   logo_url?: string | null;
@@ -69,55 +70,26 @@ function StampMark({
   secondaryColor: string;
   compact: boolean;
 }) {
-  const size = compact ? 'h-7 w-7' : 'h-10 w-10';
+  const size = compact ? 'h-8 w-8' : 'h-11 w-11';
 
   if (style === 'stars') {
     return (
-      <span
-        className={`grid ${size} place-items-center rounded-xl border-2`}
-        style={{
-          borderColor: secondaryColor,
-          background: filled ? secondaryColor : 'transparent',
-        }}
-      >
-        <Star
-          size={compact ? 12 : 17}
-          fill={filled ? 'currentColor' : 'none'}
-          style={{ color: filled ? '#ffffff' : secondaryColor }}
-        />
+      <span className={`grid ${size} place-items-center rounded-xl border-2`} style={{ borderColor: secondaryColor, background: filled ? secondaryColor : 'transparent' }}>
+        <Star size={compact ? 13 : 18} fill={filled ? 'currentColor' : 'none'} style={{ color: filled ? '#ffffff' : secondaryColor }} />
       </span>
     );
   }
 
   if (style === 'hearts') {
     return (
-      <span
-        className={`grid ${size} place-items-center rounded-full border-2`}
-        style={{
-          borderColor: secondaryColor,
-          background: filled ? secondaryColor : 'transparent',
-        }}
-      >
-        <span
-          className="text-xs"
-          style={{ color: filled ? '#ffffff' : secondaryColor }}
-        >
-          ♥
-        </span>
+      <span className={`grid ${size} place-items-center rounded-full border-2`} style={{ borderColor: secondaryColor, background: filled ? secondaryColor : 'transparent' }}>
+        <span className="text-xs" style={{ color: filled ? '#ffffff' : secondaryColor }}>♥</span>
       </span>
     );
   }
 
   return (
-    <span
-      className={`grid ${size} place-items-center border-2 ${
-        style === 'squares' ? 'rounded-lg' : 'rounded-full'
-      }`}
-      style={{
-        borderColor: secondaryColor,
-        background: filled ? secondaryColor : 'transparent',
-      }}
-    >
+    <span className={`grid ${size} place-items-center border-2 ${style === 'squares' ? 'rounded-lg' : 'rounded-full'}`} style={{ borderColor: secondaryColor, background: filled ? secondaryColor : 'transparent' }}>
       {filled && <span className="h-2 w-2 rounded-full bg-white" />}
     </span>
   );
@@ -144,29 +116,26 @@ export function LoyaltyCardVisual({
   programType?: 'STAMP' | 'DISCOUNT' | 'POINTS' | 'REWARD' | 'TIER';
 }) {
   const config = { ...defaultLoyaltyDesignConfig, ...(design.config ?? {}) };
+  const showQr = Boolean(config.show_qr || config.showQr);
   const [qr, setQr] = useState('');
 
   useEffect(() => {
-    if (!config.show_qr || side !== 'front' || !card.cardUrl) {
+    if (!showQr || side !== 'front' || !card.cardUrl) {
       setQr('');
       return;
     }
 
     void QRCode.toDataURL(card.cardUrl, {
-      width: 280,
+      width: 320,
       margin: 1,
-      color: {
-        dark: design.primary_color,
-        light: '#ffffff',
-      },
+      color: { dark: design.primary_color, light: '#ffffff' },
     })
       .then(setQr)
       .catch(() => setQr(''));
-  }, [card.cardUrl, config.show_qr, design.primary_color, side]);
+  }, [card.cardUrl, showQr, design.primary_color, side]);
 
   const loyaltyType = config.loyaltyType ?? programType;
-  const cardMode =
-    config.card_mode ?? (loyaltyType === 'STAMP' ? 'STAMP' : 'QR');
+  const cardMode = config.card_mode ?? (loyaltyType === 'STAMP' ? 'STAMP' : 'QR');
   const logoUrl = config.logo_url || card.logoUrl;
   const stampGoal = Math.max(1, Math.min(card.stampGoal ?? 10, 12));
   const stampsBalance = Math.max(0, Math.min(card.stampsBalance ?? 0, stampGoal));
@@ -177,130 +146,58 @@ export function LoyaltyCardVisual({
 
   return (
     <div
-      className={`relative w-full overflow-hidden text-white shadow-2xl ${
-        compact ? 'min-h-[590px] p-5' : 'min-h-[650px] p-6 sm:p-7'
-      }`}
-      style={{
-        background,
-        borderRadius: design.border_radius,
-      }}
+      className={`relative w-full overflow-hidden text-white shadow-2xl ${compact ? 'min-h-[590px] p-5' : 'min-h-[650px] p-6 sm:p-7'}`}
+      style={{ background, borderRadius: design.border_radius }}
     >
-      <div
-        className="pointer-events-none absolute -right-24 -top-28 h-[58%] w-[62%] rounded-full opacity-20"
-        style={{ background: design.secondary_color }}
-      />
-      <div
-        className="pointer-events-none absolute -bottom-28 -left-24 h-[52%] w-[62%] rounded-full opacity-15"
-        style={{ background: design.secondary_color }}
-      />
+      <div className="pointer-events-none absolute -right-24 -top-28 h-[58%] w-[62%] rounded-full opacity-20" style={{ background: design.secondary_color }} />
+      <div className="pointer-events-none absolute -bottom-28 -left-24 h-[52%] w-[62%] rounded-full opacity-15" style={{ background: design.secondary_color }} />
 
       {side === 'front' ? (
-        <div className="relative flex h-full flex-col">
+        <div className="relative flex h-full min-h-[inherit] flex-col">
           <div className="flex items-start justify-between gap-4">
-            <div
-              className="flex min-w-0 items-center gap-3"
-              style={{
-                transform: `translate(${config.logo_x}px, ${config.logo_y}px)`,
-              }}
-            >
+            <div className="flex min-w-0 items-center gap-3" style={{ transform: `translate(${config.logo_x}px, ${config.logo_y}px)` }}>
               {logoUrl ? (
-                <img
-                  src={logoUrl}
-                  alt=""
-                  className={`rounded-full bg-white object-contain shadow-lg ${
-                    compact ? 'h-14 w-14 p-1.5' : 'h-[76px] w-[76px] p-2'
-                  }`}
-                />
+                <img src={logoUrl} alt="" className={`shrink-0 rounded-full bg-white object-contain shadow-lg ${compact ? 'h-14 w-14 p-1.5' : 'h-[76px] w-[76px] p-2'}`} />
               ) : (
-                <div
-                  className={`grid place-items-center rounded-full border-2 bg-white/10 font-semibold ${
-                    compact ? 'h-14 w-14 text-xs' : 'h-[76px] w-[76px] text-sm'
-                  }`}
-                  style={{
-                    borderColor: design.secondary_color,
-                    color: design.secondary_color,
-                  }}
-                >
+                <div className={`grid shrink-0 place-items-center rounded-full border-2 bg-white/10 font-semibold ${compact ? 'h-14 w-14 text-xs' : 'h-[76px] w-[76px] text-sm'}`} style={{ borderColor: design.secondary_color, color: design.secondary_color }}>
                   {card.establishmentName.slice(0, 2).toUpperCase()}
                 </div>
               )}
-
               <div className="min-w-0">
-                <p
-                  className={`truncate font-semibold uppercase tracking-[0.14em] ${
-                    compact ? 'text-[10px]' : 'text-sm'
-                  }`}
-                >
-                  {card.establishmentName}
-                </p>
-                <p className="mt-1 text-[9px] uppercase tracking-[0.25em] opacity-60">
-                  Programme fidélité
-                </p>
+                <p className={`max-w-[145px] truncate font-semibold uppercase tracking-[0.14em] ${compact ? 'text-[10px]' : 'text-sm'}`}>{card.establishmentName}</p>
+                <p className="mt-1 text-[9px] uppercase tracking-[0.25em] opacity-60">Programme fidélité</p>
               </div>
             </div>
-
             <div className="shrink-0 text-right">
-              <p
-                className={`font-medium uppercase tracking-[0.22em] opacity-80 ${
-                  compact ? 'text-[8px]' : 'text-[10px]'
-                }`}
-              >
-                Carte fidélité
-              </p>
-              <p className="mt-2 text-[8px] uppercase tracking-[0.2em] opacity-45">
-                {cardMode === 'STAMP' ? 'Collectionnez vos visites' : 'Good food · Better moments'}
-              </p>
+              <p className={`font-medium uppercase tracking-[0.22em] opacity-80 ${compact ? 'text-[8px]' : 'text-[10px]'}`}>Carte fidélité</p>
+              <p className="mt-2 max-w-[145px] text-[8px] uppercase tracking-[0.2em] opacity-45">{cardMode === 'STAMP' ? 'Collectionnez vos visites' : 'Good food · Better moments'}</p>
             </div>
           </div>
 
           <div className="mt-8 min-h-0 flex-1">
-            <p
-              className={`font-display leading-none ${
-                compact ? 'text-3xl' : 'text-4xl sm:text-[44px]'
-              }`}
-              style={{ color: design.text_color }}
-            >
+            <p className={`font-display leading-[0.95] ${compact ? 'text-[34px]' : 'text-4xl sm:text-[44px]'}`} style={{ color: design.text_color }}>
               {config.front_title}
             </p>
-
-            <p
-              className={`mt-3 max-w-[330px] leading-5 opacity-70 ${
-                compact ? 'text-[10px]' : 'text-xs sm:text-sm'
-              }`}
-            >
-              {config.front_subtitle}
-            </p>
+            <p className={`mt-3 max-w-[330px] leading-5 opacity-70 ${compact ? 'text-[10px]' : 'text-xs sm:text-sm'}`}>{config.front_subtitle}</p>
 
             {card.customerName && (
               <div className="mt-6">
-                <p className="text-[9px] uppercase tracking-[0.24em] opacity-50">
-                  Client
-                </p>
-                <p
-                  className={`mt-1 font-semibold tracking-tight ${
-                    compact ? 'text-lg' : 'text-2xl'
-                  }`}
-                >
-                  {card.customerName}
-                </p>
+                <p className="text-[9px] uppercase tracking-[0.24em] opacity-50">Client</p>
+                <p className={`mt-1 font-semibold tracking-tight ${compact ? 'text-lg' : 'text-2xl'}`}>{card.customerName}</p>
               </div>
             )}
 
             {loyaltyType === 'POINTS' && config.show_points && (
               <div className="mt-7">
                 <p className="text-[9px] uppercase tracking-[0.24em] opacity-50">Vos points</p>
-                <p className={`mt-1 font-bold leading-none tracking-tight ${compact ? 'text-5xl' : 'text-6xl sm:text-7xl'}`}>
-                  {card.points ?? 0}
-                </p>
+                <p className={`mt-1 font-bold leading-none tracking-tight ${compact ? 'text-5xl' : 'text-6xl sm:text-7xl'}`}>{card.points ?? 0}</p>
               </div>
             )}
 
             {loyaltyType === 'DISCOUNT' && (
               <div className="mt-7 rounded-2xl border border-white/15 bg-white/10 p-4">
                 <p className="text-[9px] uppercase tracking-[0.2em] opacity-60">Votre avantage</p>
-                <p className={`mt-1 font-bold ${compact ? 'text-4xl' : 'text-5xl'}`}>
-                  -{config.discountPercent ?? 10}%
-                </p>
+                <p className={`mt-1 font-bold ${compact ? 'text-4xl' : 'text-5xl'}`}>-{config.discountPercent ?? 10}%</p>
                 <p className="mt-1 text-[10px] opacity-70">{config.progressText || 'sur votre prochaine visite'}</p>
               </div>
             )}
@@ -326,79 +223,52 @@ export function LoyaltyCardVisual({
           </div>
 
           {cardMode === 'STAMP' ? (
-            <div className={`mt-5 ${compact ? '' : 'sm:mt-6'}`}>
+            <div className="mt-6">
               <div className="flex items-end justify-between gap-3">
                 <div>
-                  <p className="text-[9px] uppercase tracking-[0.22em] opacity-55">
-                    Vos visites
-                  </p>
-                  <p className="mt-1 text-sm font-semibold">
-                    {stampsBalance} / {stampGoal}
-                  </p>
+                  <p className="text-[9px] uppercase tracking-[0.22em] opacity-55">Vos visites</p>
+                  <p className="mt-1 text-sm font-semibold">{stampsBalance} / {stampGoal}</p>
                 </div>
-                <div
-                  className="flex items-center gap-2 rounded-full border px-3 py-1.5"
-                  style={{ borderColor: design.secondary_color }}
-                >
+                <div className="flex items-center gap-2 rounded-full border px-3 py-1.5" style={{ borderColor: design.secondary_color }}>
                   <Gift size={14} style={{ color: design.secondary_color }} />
-                  <span className="max-w-[150px] truncate text-[10px] font-semibold">
-                    {card.stampRewardName || 'Récompense'}
-                  </span>
+                  <span className="max-w-[150px] truncate text-[10px] font-semibold">{card.stampRewardName || 'Récompense'}</span>
                 </div>
               </div>
-
               <div className="mt-3 flex flex-wrap justify-center gap-2">
                 {Array.from({ length: stampGoal }).map((_, i) => (
-                  <StampMark
-                    key={i}
-                    filled={i < stampsBalance}
-                    style={config.stamp_style}
-                    secondaryColor={design.secondary_color}
-                    compact={compact}
-                  />
+                  <StampMark key={i} filled={i < stampsBalance} style={config.stamp_style} secondaryColor={design.secondary_color} compact={compact} />
                 ))}
               </div>
             </div>
           ) : (
-            <div className="mt-4 flex flex-col items-center">
-              {qr && (
-                <div
-                  className={`rounded-2xl bg-white shadow-xl ${
-                    compact ? 'h-20 w-20 p-1.5' : 'h-24 w-24 p-2 sm:h-28 sm:w-28'
-                  }`}
-                >
-                  <img src={qr} alt="" className="h-full w-full" />
+            <div className="mt-6 flex flex-col items-center">
+              {showQr && qr ? (
+                <div className={`rounded-2xl bg-white shadow-xl ${compact ? 'h-[104px] w-[104px] p-2' : 'h-28 w-28 p-2 sm:h-32 sm:w-32'}`}>
+                  <img src={qr} alt="QR code de la carte fidélité" className="h-full w-full" />
+                </div>
+              ) : (
+                <div className={`grid place-items-center rounded-2xl border border-white/15 bg-white/5 text-center ${compact ? 'h-[104px] w-[104px]' : 'h-28 w-28'}`}>
+                  <span className="max-w-[80px] text-[8px] uppercase tracking-[0.16em] opacity-45">QR en préparation</span>
                 </div>
               )}
               <p className="mt-3 text-center text-[9px] uppercase tracking-[0.2em] opacity-55">
-                Présentez ou scannez votre QR code
+                {showQr ? 'Présentez ou scannez votre QR code' : 'Présentez votre carte'}
               </p>
             </div>
           )}
 
           <div className="mt-5 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-[8px] uppercase tracking-[0.2em] opacity-55">
-              <span
-                className="h-px w-7"
-                style={{ background: design.secondary_color }}
-              />
-              <span>
-                {cardMode === 'STAMP'
-                  ? 'Récompense à la dernière visite'
-                  : 'Présentez votre carte'}
-              </span>
+            <div className="flex min-w-0 items-center gap-2 text-[8px] uppercase tracking-[0.2em] opacity-55">
+              <span className="h-px w-7 shrink-0" style={{ background: design.secondary_color }} />
+              <span className="truncate">{cardMode === 'STAMP' ? 'Récompense à la dernière visite' : 'Présentez votre carte'}</span>
             </div>
-            <span className="shrink-0 text-[9px] uppercase tracking-[0.18em] opacity-70">
-              by Tap Marrakech
-            </span>
+            <span className="shrink-0 text-[9px] uppercase tracking-[0.18em] opacity-70">by Tap Marrakech</span>
           </div>
         </div>
       ) : (
         <div className="relative grid h-full place-items-center text-center">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.24em] opacity-60">
-              {config.back_title}
-            </p>
+            <p className="text-[10px] uppercase tracking-[0.24em] opacity-60">{config.back_title}</p>
             <p className="mt-3 text-sm opacity-70">{config.back_message}</p>
           </div>
         </div>
