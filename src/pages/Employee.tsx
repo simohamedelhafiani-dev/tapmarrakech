@@ -1294,7 +1294,10 @@ export default function Employee() {
                 businessType: loyaltyDesign.design_config.business_type || 'restaurant',
                 establishmentName: session.establishment_name,
                 logoUrl: loyaltyDesign.design_config.logo_url || establishmentLogoUrl,
-                coverImageUrl: loyaltyDesign.design_config.background_image_url || null,
+                coverImageUrl:
+                  loyaltyDesign.design_config.background_image_url ||
+                  (loyaltyDesign.design_config as typeof loyaltyDesign.design_config & { wallpaper_library?: string[] }).wallpaper_library?.[0] ||
+                  null,
                 primaryColor: loyaltyDesign.primary_color,
                 secondaryColor: loyaltyDesign.secondary_color,
                 backgroundColor: loyaltyDesign.background_color,
