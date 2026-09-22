@@ -15,6 +15,7 @@ export const RESTAURANT_TEMPLATES: LoyaltyTemplate[] = [
     coverOverlay: 0.72,
     layout: 'editorial',
     stampStyle: 'circles',
+  showQr: false,
   },
   {
     id: 'restaurant-gastronomic',
