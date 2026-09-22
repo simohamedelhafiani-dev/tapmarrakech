@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import { defaultLoyaltyDesignConfig } from '@/components/LoyaltyCardVisual';
 import { LoyaltyExperience, type LoyaltyExperienceConfig, type LoyaltyExperienceReward } from '@/components/loyalty/LoyaltyExperience';
 import { supabase } from '@/lib/supabase';
@@ -184,6 +185,8 @@ export default function LoyaltyCard() {
           stamp_goal: Number(programRow.stamp_goal ?? 10),
           stamps_balance: Number(programRow.stamps_balance ?? 0),
           stamp_reward_name: programRow.stamp_reward_name ?? null,
+          stamp_reward_description: programRow.stamp_reward_description ?? null,
+          discount_percent: programRow.discount_percent != null ? Number(programRow.discount_percent) : null,
         });
       }
     };
@@ -313,3 +316,11 @@ export default function LoyaltyCard() {
     </main>
   );
 
+
+function PageShell({ children }: { children: ReactNode }) {
+  return <main className="min-h-screen bg-[#f7f7f3] px-4 py-6 sm:py-10"><div className="mx-auto w-full max-w-md">{children}</div></main>;
+}
+
+function Loader() {
+  return <div className="grid min-h-screen place-items-center"><div className="h-9 w-9 animate-spin rounded-full border-2 border-forest border-t-transparent" /></div>;
+}
