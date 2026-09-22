@@ -380,6 +380,7 @@ export default function LoyaltyCard() {
     // Keep the admin preview untouched; this only aligns the public/customer card renderer.
     templateId: 'luxury',
     published: true,
+    stampStyle: designConfig.stamp_style,
   };
 
   return (
