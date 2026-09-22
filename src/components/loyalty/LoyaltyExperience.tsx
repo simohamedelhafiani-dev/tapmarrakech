@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Gift, History, QrCode, Sparkles, Star, Ticket, Trophy, WalletCards, X } from 'lucide-react';
 import QRCode from 'qrcode';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 
 export type LoyaltyExperienceType = 'STAMP' | 'POINTS' | 'DISCOUNT' | 'TIER' | 'REWARD' | 'CASHBACK' | 'CHALLENGE' | 'COLLECTION';
 
@@ -434,7 +434,7 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
   const primary = config.primaryColor;
   const gold = config.secondaryColor;
   const hasImage = Boolean(image);
-  const common = { '--primary': primary, '--gold': gold } as React.CSSProperties;
+  const common = { '--primary': primary, '--gold': gold } as CSSProperties;
 
   const backgroundLayer = hasImage ? (
     <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url("' + image + '")', backgroundSize: 'cover', backgroundPosition: 'center' }} />
@@ -470,7 +470,7 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
         <div className="relative z-10 flex h-full flex-col p-6 sm:p-7">
           <div className="flex items-start justify-between"><div className="flex items-center gap-3"><div className="grid h-11 w-11 place-items-center rounded-full border border-white/40 bg-white/15 text-[10px] font-bold backdrop-blur-xl">{config.logoUrl ? <img src={config.logoUrl} alt="" className="h-full w-full rounded-full object-contain p-1" /> : establishment.slice(0,2).toUpperCase()}</div><div><p className="text-sm font-semibold">{establishment}</p><p className="mt-1 text-[8px] uppercase tracking-[.25em] text-white/60">Wellness membership</p></div></div><span className="text-[9px] uppercase tracking-[.2em] text-white/70">VIP</span></div>
           <div className="mt-auto"><p className="max-w-[320px] text-[34px] font-light leading-[1.02] tracking-[-.04em] sm:text-[42px]">{title}</p><p className="mt-3 max-w-[290px] text-[10px] leading-5 text-white/70">{subtitle}</p>
-            <div className="mt-7 rounded-[24px] border border-white/25 bg-white/12 p-5 shadow-2xl backdrop-blur-2xl"><div className="flex items-end justify-between"><div><p className="text-[8px] uppercase tracking-[.2em] text-white/55">Vos points</p><p className="mt-1 text-3xl font-semibold">{points.toLocaleString('fr-FR')}</p></div><div className="text-right"><p className="text-[8px] uppercase tracking-[.2em] text-white/55">Niveau</p><p className="mt-1 text-sm font-semibold">{config.currentTier || 'Silver'}</p></div></div><div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/20"><div className="h-full rounded-full bg-white" style={{ width: progress + '%' }} /></div></div>
+            <div className="mt-7 rounded-[24px] border border-white/25 bg-white/[0.12] p-5 shadow-2xl backdrop-blur-2xl"><div className="flex items-end justify-between"><div><p className="text-[8px] uppercase tracking-[.2em] text-white/55">Vos points</p><p className="mt-1 text-3xl font-semibold">{points.toLocaleString('fr-FR')}</p></div><div className="text-right"><p className="text-[8px] uppercase tracking-[.2em] text-white/55">Niveau</p><p className="mt-1 text-sm font-semibold">{config.currentTier || 'Silver'}</p></div></div><div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/20"><div className="h-full rounded-full bg-white" style={{ width: progress + '%' }} /></div></div>
             <div className="mt-5 flex items-end justify-between"><div className="h-[72px] w-[72px]">{qrBlock}</div><div className="text-right"><p className="text-[8px] uppercase tracking-[.2em] text-white/50">Membre</p><p className="mt-1 text-sm">{member}</p><p className="mt-1 text-[8px] uppercase tracking-[.16em] text-white/45">Présentez votre carte</p></div></div>
           </div>
         </div>
