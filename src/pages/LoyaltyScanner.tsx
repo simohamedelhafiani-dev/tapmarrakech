@@ -17,6 +17,7 @@ type Customer = {
   last_name: string | null;
   phone: string;
   points_balance: number;
+  stamps_balance?: number;
 };
 
 type PendingRewardClaim = {
@@ -36,6 +37,8 @@ type Settings = {
   points_per_currency: number;
   currency: string;
   enabled: boolean;
+  program_type: string;
+  stamp_goal: number;
 };
 
 export default function LoyaltyScanner() {
@@ -49,6 +52,8 @@ export default function LoyaltyScanner() {
     points_per_currency: 1,
     currency: 'MAD',
     enabled: true,
+    program_type: 'POINTS',
+    stamp_goal: 10,
   });
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [manualSearch, setManualSearch] = useState('');
@@ -103,6 +108,8 @@ export default function LoyaltyScanner() {
           points_per_currency: Number(settingsRow.points_per_currency ?? 1),
           currency: settingsRow.currency ?? 'MAD',
           enabled: Boolean(settingsRow.enabled ?? true),
+          program_type: settingsRow.program_type ?? 'POINTS',
+          stamp_goal: Number(settingsRow.stamp_goal ?? 10),
         });
       }
 
@@ -248,6 +255,7 @@ export default function LoyaltyScanner() {
       last_name: row.last_name,
       phone: row.phone ?? '',
       points_balance: Number(row.points_balance ?? 0),
+      stamps_balance: Number(row.stamps_balance ?? 0),
     });
 
     setAmount('');
@@ -328,6 +336,31 @@ export default function LoyaltyScanner() {
     }
 
     setManualMatches((data ?? []) as Customer[]);
+  }
+
+  async function addStamp() {
+    if (!customer || !context) return;
+    if (!settings.enabled || settings.program_type !== 'STAMP') {
+      setMessage('Le programme à tampons n’est pas actif.');
+      return;
+    }
+    setSaving(true);
+    setMessage('');
+    const { data, error } = await supabase.rpc('add_loyalty_stamp_by_scanner', {
+      p_scanner_token: scannerToken,
+      p_customer_id: customer.customer_id,
+    });
+    setSaving(false);
+    if (error) {
+      setMessage(error.message);
+      return;
+    }
+    const row = Array.isArray(data) ? data[0] : data;
+    const balance = Number(row?.stamps_balance ?? (customer.stamps_balance ?? 0) + 1);
+    setCustomer({ ...customer, stamps_balance: balance });
+    alert(row?.reward_ready
+      ? `+1 tampon. Cadeau débloqué : ${row.reward_name || 'votre récompense'} !`
+      : `+1 tampon. Solde : ${balance}/${settings.stamp_goal} tampons.`);
   }
 
   async function addPoints() {
@@ -529,6 +562,20 @@ export default function LoyaltyScanner() {
                 </div>
               </div>
 
+              {settings.program_type === 'STAMP' ? (
+                <div className="mt-5 space-y-4">
+                  <div className="rounded-2xl bg-forest/5 p-5 text-center">
+                    <p className="text-xs text-ink/40">Programme à tampons</p>
+                    <p className="mt-2 text-4xl font-bold text-forest">{customer.stamps_balance ?? 0} / {settings.stamp_goal}</p>
+                    <p className="mt-1 text-xs text-ink/45">Un tampon ajouté à chaque visite</p>
+                  </div>
+                  <button disabled={saving} onClick={() => void addStamp()} className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-4 text-sm font-semibold text-white disabled:opacity-50">
+                    <CheckCircle2 size={18} />
+                    {saving ? 'Enregistrement...' : 'Ajouter 1 tampon'}
+                  </button>
+                  <button disabled={saving} onClick={() => { setCustomer(null); setMessage(''); }} className="w-full py-2 text-xs font-semibold text-ink/40">Changer de client</button>
+                </div>
+              ) : (
               <div className="mt-5 space-y-4">
                 <div>
                   <label className="mb-2 block text-xs font-semibold text-ink/50">
@@ -589,6 +636,7 @@ export default function LoyaltyScanner() {
                   Changer de client
                 </button>
               </div>
+              )}
             </>
           )}
         </section>
@@ -645,7 +693,9 @@ export default function LoyaltyScanner() {
                     : 'Récompense à valider'}
                 </p>
                 <p className="mt-1 text-xs text-ink/45">
-                  {pendingReward.points_required} points seront déduits du compte client.
+                  {pendingReward.points_required > 0
+                    ? `${pendingReward.points_required} points seront déduits du compte client.`
+                    : 'Le cadeau sera validé et les tampons seront remis à zéro.'}
                 </p>
                 {pendingReward.discount_max_amount && (
                   <p className="mt-2 text-xs font-medium text-forest">
@@ -701,7 +751,7 @@ export default function LoyaltyScanner() {
                 className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-4 text-sm font-semibold text-white disabled:opacity-50"
               >
                 <CheckCircle2 size={18} />
-                {redeemingReward ? 'Validation...' : 'Appliquer et déduire les points'}
+                {redeemingReward ? 'Validation...' : pendingReward.points_required > 0 ? 'Appliquer et déduire les points' : 'Valider le cadeau'}
               </button>
             </div>
           </div>
