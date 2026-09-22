@@ -223,6 +223,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
 
   const visualExperience: LoyaltyExperienceConfig = {
     type: cardMode === 'STAMP' ? 'STAMP' : 'POINTS',
+    businessType: design.design_config.business_type || establishment.business_type,
     establishmentName: establishment.name,
     logoUrl: design.design_config.logo_url || establishment.logo_url,
     coverImageUrl: design.design_config.background_image_url,
