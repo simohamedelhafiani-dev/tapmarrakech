@@ -1,13 +1,10 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
-  BarChart3,
-  Building2,
   Gift,
   LayoutDashboard,
   LogOut,
   Menu as MenuIcon,
   MessageSquare,
-  Settings2,
   UtensilsCrossed,
   X,
   QrCode,
@@ -27,22 +24,10 @@ const links = [
     feature: null,
   },
   {
-    to: '/dashboard/establishments',
-    label: 'Établissements',
-    icon: Building2,
-    feature: null,
-  },
-  {
     to: '/dashboard/reviews',
     label: 'Avis reçus',
     icon: MessageSquare,
     feature: 'reviews' as const,
-  },
-  {
-    to: '/dashboard/analytics',
-    label: 'Analytics',
-    icon: BarChart3,
-    feature: 'analytics' as const,
   },
   {
     to: '/dashboard/menu',
@@ -60,12 +45,6 @@ const links = [
     to: '/dashboard/loyalty',
     label: 'Fidélité',
     icon: Gift,
-    feature: 'loyalty' as const,
-  },
-  {
-    to: '/dashboard/loyalty/settings',
-    label: 'Programme fidélité',
-    icon: Settings2,
     feature: 'loyalty' as const,
   },
 ];
