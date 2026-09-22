@@ -68,6 +68,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
   const [stampRewardDescription, setStampRewardDescription] = useState('');
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<'logo' | 'photo' | 'wallpapers' | null>(null);
+  const [activeTab, setActiveTab] = useState<'Design' | 'Contenu' | 'Récompense' | 'Aperçu'>('Design');
   const logoInput = useRef<HTMLInputElement>(null);
   const photoInput = useRef<HTMLInputElement>(null);
   const wallpapersInput = useRef<HTMLInputElement>(null);
@@ -291,12 +292,23 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
         <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_0.9fr]">
           <div className="space-y-5">
             <div className="flex items-center gap-2 rounded-2xl border border-ink/10 bg-[#fafaf8] p-1">
-              {['Design', 'Contenu', 'Récompense', 'Aperçu'].map((tab, index) => (
-                <div key={tab} className={`flex-1 rounded-xl px-3 py-2.5 text-center text-[10px] font-semibold ${index === 0 ? 'bg-white text-forest shadow-sm' : 'text-ink/35'}`}>{tab}</div>
+              {(['Design', 'Contenu', 'Récompense', 'Aperçu'] as const).map(tab => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => {
+                    setActiveTab(tab);
+                    const targetId = tab === 'Design' ? 'loyalty-design' : tab === 'Contenu' ? 'loyalty-content' : tab === 'Récompense' ? 'loyalty-rewards' : 'loyalty-preview';
+                    window.requestAnimationFrame(() => document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+                  }}
+                  className={`flex-1 rounded-xl px-3 py-2.5 text-center text-[10px] font-semibold transition ${activeTab === tab ? 'bg-white text-forest shadow-sm' : 'text-ink/35 hover:text-forest'}`}
+                >
+                  {tab}
+                </button>
               ))}
             </div>
 
-            <div className="rounded-2xl border border-ink/10 p-5">
+            <div id="loyalty-design" className="scroll-mt-6 rounded-2xl border border-ink/10 p-5">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Modèles</p>
                 <p className="mt-1 text-xs text-ink/45">Choisis un modèle de départ, puis personnalise-le avec tes couleurs, ton logo et ta photo.</p>
@@ -391,15 +403,17 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
               </div>
 
               {cardMode === 'STAMP' && (
-                <div className="mt-4 grid gap-3 rounded-2xl bg-[#fafaf8] p-4 sm:grid-cols-3">
+                <div id="loyalty-rewards" className="mt-4 scroll-mt-6 grid gap-3 rounded-2xl bg-[#fafaf8] p-4 sm:grid-cols-3">
                   <label className="text-xs text-ink/50">Nombre de tampons<input type="number" min="1" max="12" value={stampGoal} onChange={e=>setStampGoal(e.target.value)} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5"/></label>
                   <label className="text-xs text-ink/50">Récompense<input value={stampRewardName} onChange={e=>setStampRewardName(e.target.value)} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5"/></label>
                   <label className="text-xs text-ink/50">Description<input value={stampRewardDescription} onChange={e=>setStampRewardDescription(e.target.value)} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5"/></label>
                 </div>
               )}
 
-              <div className="mt-5 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
-                <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Avantages & offres</p>
+              <div id="loyalty-content" className="mt-5 scroll-mt-6 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
+                <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Contenu de la carte</p>
+                <p className="mt-1 text-[10px] text-ink/45">Modifie les avantages et les offres affichés au client.</p>
+                <p className="mt-4 text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Avantages & offres</p>
                 <p className="mt-1 text-[10px] text-ink/45">Ces contenus sont enregistrés dans la configuration de la carte et affichés au client.</p>
                 <div className="mt-3 grid gap-3 sm:grid-cols-3">
                   {(design.design_config.benefits || []).slice(0,3).map((benefit, index) => (
@@ -450,7 +464,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
             </div>
           </div>
 
-          <div className="rounded-2xl border border-ink/10 bg-[#f7f7f3] p-4">
+          <div id="loyalty-preview" className="scroll-mt-6 rounded-2xl border border-ink/10 bg-[#f7f7f3] p-4">
             <div className="flex items-center justify-between">
               <div><p className="text-[10px] font-bold uppercase tracking-[.16em] text-gold">Aperçu en temps réel</p><p className="mt-1 text-xs text-ink/45">Voici exactement ce que vos clients verront.</p></div>
               <span className="rounded-full bg-white px-3 py-1.5 text-[10px] font-semibold text-forest shadow-sm">Client</span>
