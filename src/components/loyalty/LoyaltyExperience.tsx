@@ -518,7 +518,10 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
   const image = config.coverImageUrl;
   const establishment = config.establishmentName;
   const member = config.customerName || 'Membre privilégié';
-  const title = config.rewardName || (config.type === 'STAMP' ? 'Encore quelques visites.' : 'Vos privilèges vous attendent.');
+  // The stamp reward name belongs in the reward section, not in the card headline.
+  const title = config.type === 'STAMP'
+    ? 'Encore quelques visites.'
+    : (config.rewardName || 'Vos privilèges vous attendent.');
   const subtitle = config.intro || 'Vos privilèges, toujours avec vous.';
   const benefits = (config.benefits || []).slice(0, 3);
   const offers = (config.offers || []).slice(0, 1);
