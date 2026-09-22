@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import { LoyaltyCardVisual, defaultLoyaltyDesignConfig } from '@/components/LoyaltyCardVisual';
+import { defaultLoyaltyDesignConfig } from '@/components/LoyaltyCardVisual';
+import { LoyaltyExperience, type LoyaltyExperienceConfig, type LoyaltyExperienceReward } from '@/components/loyalty/LoyaltyExperience';
 import { supabase } from '@/lib/supabase';
 
 type Card = {
@@ -49,6 +50,7 @@ export default function LoyaltyCard() {
     stamp_reward_name: null as string | null,
   });
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [rewards, setRewards] = useState<LoyaltyExperienceReward[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -84,11 +86,13 @@ export default function LoyaltyCard() {
         { data: designData },
         { data: programData },
         { data: historyData },
+        { data: rewardsData },
       ] = await Promise.all([
         supabase.rpc('get_public_loyalty_card', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_card_builder_config', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_program_context', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_history', { p_access_token: token, p_limit: 20 }),
+        supabase.rpc('get_public_loyalty_rewards', { p_access_token: token }),
       ]);
 
       if (cardError || !cardData?.[0]) {
@@ -100,6 +104,8 @@ export default function LoyaltyCard() {
       const nextCard = cardData[0] as Card;
       setCard(nextCard);
       setHistory((historyData ?? []) as HistoryItem[]);
+      setRewards((rewardsData ?? []) as LoyaltyExperienceReward[]);
+      setRewards((rewardsData ?? []) as LoyaltyExperienceReward[]);
 
       const designRow = Array.isArray(designData) ? designData[0] : designData;
       if (designRow) {
@@ -159,10 +165,11 @@ export default function LoyaltyCard() {
     if (!card?.customer_id) return;
 
     const refreshCard = async () => {
-      const [{ data: cardData }, { data: programData }, { data: historyData }] = await Promise.all([
+      const [{ data: cardData }, { data: programData }, { data: historyData }, { data: rewardsData }] = await Promise.all([
         supabase.rpc('get_public_loyalty_card', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_program_context', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_history', { p_access_token: token, p_limit: 20 }),
+        supabase.rpc('get_public_loyalty_rewards', { p_access_token: token }),
       ]);
 
       if (cardData?.[0]) setCard(cardData[0] as Card);
@@ -225,84 +232,83 @@ export default function LoyaltyCard() {
   }
 
   const fullName = `${card.first_name} ${card.last_name ?? ''}`.trim();
+
   const configuredType = (designConfig as typeof designConfig & { loyaltyType?: string }).loyaltyType;
-  const mode = configuredType === 'STAMP' || designConfig.card_mode === 'STAMP' || program.program_type === 'STAMP'
-    ? 'STAMP'
-    : configuredType === 'DISCOUNT'
-      ? 'DISCOUNT'
-      : configuredType === 'REWARD'
-        ? 'REWARD'
+  const mode: LoyaltyExperienceConfig['type'] =
+    configuredType === 'STAMP' || designConfig.card_mode === 'STAMP' || program.program_type === 'STAMP'
+      ? 'STAMP'
+      : configuredType === 'DISCOUNT'
+        ? 'DISCOUNT'
         : configuredType === 'TIER'
           ? 'TIER'
-          : 'POINTS';
+          : configuredType === 'CASHBACK'
+            ? 'CASHBACK'
+            : configuredType === 'CHALLENGE'
+              ? 'CHALLENGE'
+              : configuredType === 'COLLECTION'
+                ? 'COLLECTION'
+                : configuredType === 'REWARD'
+                  ? 'REWARD'
+                  : 'POINTS';
 
-  const builderConfig = designConfig as typeof designConfig & {
-    logoUrl?: string | null;
-    coverImageUrl?: string | null;
-    cardTitle?: string;
-    cardSubtitle?: string;
-    rewardTitle?: string;
-    rewardDescription?: string;
-    rewardName?: string;
-    stampGoal?: number;
+  const raw = designConfig as typeof designConfig & {
+    benefits?: LoyaltyExperienceConfig['benefits'];
+    offers?: LoyaltyExperienceConfig['offers'];
+    tiers?: LoyaltyExperienceConfig['tiers'];
+    pointsGoal?: number;
+    cashbackBalance?: number;
     discountPercent?: number;
+    discountExpiresAt?: string;
+    rewardName?: string;
+    rewardDescription?: string;
+    intro?: string;
   };
 
-  const visualCardMode: 'QR' | 'STAMP' = mode === 'STAMP' ? 'STAMP' : 'QR';
-
-  const visualConfig = {
-    ...designConfig,
-    logo_url: builderConfig.logoUrl || designConfig.logo_url,
-    background_image_url: builderConfig.coverImageUrl || designConfig.background_image_url,
-    front_title: builderConfig.cardTitle || designConfig.front_title,
-    front_subtitle: builderConfig.cardSubtitle || designConfig.front_subtitle,
-    card_mode: visualCardMode,
+  const experience: LoyaltyExperienceConfig = {
+    type: mode,
+    establishmentName: card.establishment_name,
+    logoUrl: raw.logo_url || card.establishment_logo_url,
+    coverImageUrl: raw.background_image_url,
+    primaryColor: design.primary_color,
+    secondaryColor: design.secondary_color,
+    backgroundColor: design.background_color,
+    textColor: design.text_color === '#FFFFFF' ? '#17201c' : design.text_color,
+    borderRadius: design.border_radius,
+    customerName: fullName,
+    pointsBalance: card.points_balance,
+    pointsGoal: raw.pointsGoal ?? Math.max(1000, rewards[rewards.length - 1]?.points_required ?? 1000),
+    visits: program.stamps_balance,
+    visitGoal: program.stamp_goal,
+    rewardName: raw.rewardName || program.stamp_reward_name,
+    rewardDescription: raw.rewardDescription || program.stamp_reward_description,
+    discountPercent: raw.discountPercent ?? program.discount_percent,
+    discountExpiresAt: raw.discountExpiresAt,
+    cashbackBalance: raw.cashbackBalance,
+    currentTier: raw.currentTier,
+    tiers: raw.tiers,
+    benefits: raw.benefits,
+    offers: raw.offers,
+    rewards,
+    history: history.map(item => ({
+      id: item.id,
+      title: item.description || item.type || 'Opération fidélité',
+      date: new Date(item.created_at).toLocaleDateString('fr-FR'),
+      points: item.points,
+      amount: item.amount,
+    })),
+    qrValue: cardUrl,
+    intro: raw.intro || designConfig.front_subtitle,
+    templateId: designConfig.card_mode,
+    published: true,
   };
 
   return (
-    <main className="min-h-screen bg-[#eef0ed] px-3 py-5 sm:grid sm:min-h-screen sm:place-items-center sm:px-6 sm:py-8">
-      <div className="w-full max-w-[430px]">
-        <LoyaltyCardVisual
-          design={{ ...design, config: visualConfig }}
-          card={{
-            establishmentName: card.establishment_name,
-            logoUrl: designConfig.logo_url || card.establishment_logo_url,
-            points: card.points_balance,
-            customerName: fullName,
-            loyaltyNumber: card.loyalty_number,
-            cardUrl,
-            stampsBalance: program.stamps_balance,
-            stampGoal: program.stamp_goal,
-            stampRewardName: program.stamp_reward_name,
-          }}
-          side="front"
-          programType={mode}
-        />
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <div className="rounded-2xl bg-white p-4 shadow-sm">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink/40">Total des points</p>
-            <p className="mt-1 text-2xl font-bold text-forest">{card.points_balance ?? 0}</p>
-          </div>
-          <div className="rounded-2xl bg-white p-4 shadow-sm">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink/40">Visites</p>
-            <p className="mt-1 text-2xl font-bold text-forest">{card.stamps_total ?? 0}</p>
-          </div>
-        </div>
-        <div className="mt-4 rounded-2xl bg-white p-4 shadow-sm">
-          <div className="flex items-center justify-between"><h2 className="text-sm font-semibold text-forest">Historique</h2><span className="text-[10px] text-ink/35">{history.length} opération{history.length > 1 ? 's' : ''}</span></div>
-          <div className="mt-3 space-y-2">
-            {history.length ? history.map(item => (
-              <div key={item.id} className="flex items-center justify-between rounded-xl bg-[#f7f7f3] px-3 py-2.5">
-                <div className="min-w-0"><p className="truncate text-xs font-medium text-ink">{item.description || item.type || 'Opération fidélité'}</p><p className="mt-0.5 text-[10px] text-ink/40">{new Date(item.created_at).toLocaleDateString('fr-FR')}</p></div>
-                <span className={`ml-3 shrink-0 text-xs font-bold ${item.points >= 0 ? 'text-forest' : 'text-red-500'}`}>{item.points > 0 ? '+' : ''}{item.points} pts</span>
-              </div>
-            )) : <p className="py-3 text-center text-xs text-ink/35">Aucune opération pour le moment.</p>}
-          </div>
-        </div>
+    <main className="min-h-screen bg-[#eef0ed] px-3 py-5 sm:px-6 sm:py-8">
+      <div className="mx-auto w-full max-w-[430px]">
+        <LoyaltyExperience config={experience} />
       </div>
     </main>
   );
-}
 
 function PageShell({ children }: { children: ReactNode }) {
   return <main className="min-h-screen bg-[#f7f7f3] px-4 py-6 sm:py-10"><div className="mx-auto w-full max-w-md">{children}</div></main>;
