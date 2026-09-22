@@ -270,10 +270,12 @@ export default function LoyaltyCard() {
     rewardDescription?: string;
     intro?: string;
     currentTier?: string;
+    business_type?: string | null;
   };
 
   const experience: LoyaltyExperienceConfig = {
     type: mode,
+    businessType: raw.business_type,
     establishmentName: card.establishment_name,
     logoUrl: raw.logo_url || card.establishment_logo_url,
     coverImageUrl: raw.background_image_url,
