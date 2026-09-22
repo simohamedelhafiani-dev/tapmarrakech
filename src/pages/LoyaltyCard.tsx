@@ -61,34 +61,6 @@ export default function LoyaltyCard() {
   const cardUrl = window.location.href;
 
   useEffect(() => {
-    const handler = (event: Event) => {
-      event.preventDefault();
-      setInstallPrompt(event as BeforeInstallPromptEvent);
-    };
-    window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []);
-
-  async function saveCardOnPhone() {
-    if (installPrompt) {
-      await installPrompt.prompt();
-      await installPrompt.userChoice;
-      setInstallPrompt(null);
-      return;
-    }
-    if (navigator.share) {
-      await navigator.share({ title: card?.establishment_name || 'Ma carte fidélité', text: 'Ma carte fidélité', url: cardUrl });
-      return;
-    }
-    try {
-      await navigator.clipboard.writeText(cardUrl);
-      alert('Lien de votre carte copié. Ouvrez-le sur votre téléphone pour l’enregistrer.');
-    } catch {
-      alert('Utilisez le menu Partager de votre navigateur puis « Ajouter à l’écran d’accueil ».');
-    }
-  }
-
-  useEffect(() => {
     const standalone = window.matchMedia?.('(display-mode: standalone)').matches || (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
     setIsInstalled(Boolean(standalone));
 
