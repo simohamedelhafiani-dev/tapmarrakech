@@ -67,9 +67,10 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
   const [stampRewardName, setStampRewardName] = useState('Cadeau fidélité');
   const [stampRewardDescription, setStampRewardDescription] = useState('');
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState<'logo' | 'photo' | null>(null);
+  const [uploading, setUploading] = useState<'logo' | 'photo' | 'wallpapers' | null>(null);
   const logoInput = useRef<HTMLInputElement>(null);
   const photoInput = useRef<HTMLInputElement>(null);
+  const wallpapersInput = useRef<HTMLInputElement>(null);
 
   async function load() {
     if (!establishmentId) return;
@@ -157,6 +158,33 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
       updateConfig(kind === 'logo' ? { logo_url: data.publicUrl } : { background_image_url: data.publicUrl, ai_generation_id: undefined });
     } catch (error) {
       alert(error instanceof Error ? error.message : 'Impossible d’envoyer cette image.');
+    } finally {
+      setUploading(null);
+    }
+  }
+
+  async function uploadWallpapers(files: FileList | null) {
+    if (!files?.length) return;
+    const validFiles = Array.from(files).filter(file => file.type.startsWith('image/') && file.size <= 5 * 1024 * 1024);
+    if (!validFiles.length) return alert('Choisis des images PNG, JPG ou WEBP de moins de 5 Mo.');
+
+    setUploading('wallpapers');
+    try {
+      const uploaded: string[] = [];
+      for (const file of validFiles) {
+        const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+        const path = `loyalty-cards/${establishmentId}/wallpaper-${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
+        const { error } = await supabase.storage.from('loyalty-assets').upload(path, file, { upsert: false, contentType: file.type });
+        if (error) throw error;
+        uploaded.push(supabase.storage.from('loyalty-assets').getPublicUrl(path).data.publicUrl);
+      }
+
+      const current = Array.isArray((design.design_config as LoyaltyDesignConfig & { wallpaper_library?: string[] }).wallpaper_library)
+        ? (design.design_config as LoyaltyDesignConfig & { wallpaper_library?: string[] }).wallpaper_library!
+        : [];
+      updateConfig({ wallpaper_library: Array.from(new Set([...current, ...uploaded])) } as Partial<LoyaltyDesignConfig>);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Impossible d’ajouter les wallpapers.');
     } finally {
       setUploading(null);
     }
@@ -301,6 +329,40 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
               </div>
               <input ref={logoInput} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={e => { const file=e.target.files?.[0]; if(file) void uploadAsset(file,'logo'); e.currentTarget.value=''; }} />
               <input ref={photoInput} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={e => { const file=e.target.files?.[0]; if(file) void uploadAsset(file,'photo'); e.currentTarget.value=''; }} />
+              <input ref={wallpapersInput} type="file" accept="image/png,image/jpeg,image/webp" multiple className="hidden" onChange={e => { void uploadWallpapers(e.target.files); e.currentTarget.value=''; }} />
+
+              <div className="mt-5 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Bibliothèque de wallpapers</p>
+                    <p className="mt-1 text-[10px] text-ink/45">Ajoute plusieurs fonds premium et sélectionne celui utilisé par la carte.</p>
+                  </div>
+                  <button type="button" onClick={() => wallpapersInput.current?.click()} disabled={uploading === 'wallpapers'} className="inline-flex items-center gap-2 rounded-xl bg-forest px-3 py-2 text-[10px] font-semibold text-white disabled:opacity-50">
+                    <Upload size={14} /> {uploading === 'wallpapers' ? 'Upload…' : 'Ajouter plusieurs'}
+                  </button>
+                </div>
+                <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-4">
+                  {[
+                    ...new Set([
+                      design.design_config.background_image_url,
+                      ...(((design.design_config as LoyaltyDesignConfig & { wallpaper_library?: string[] }).wallpaper_library) || []),
+                    ].filter(Boolean)),
+                  ].map((url) => (
+                    <button
+                      key={url}
+                      type="button"
+                      onClick={() => updateConfig({ background_image_url: url } as Partial<LoyaltyDesignConfig>)}
+                      className={`relative aspect-[3/4] overflow-hidden rounded-xl border-2 ${design.design_config.background_image_url === url ? 'border-gold ring-2 ring-gold/20' : 'border-transparent'}`}
+                    >
+                      <img src={url} alt="" className="h-full w-full object-cover" />
+                      {design.design_config.background_image_url === url && <span className="absolute right-1.5 top-1.5 grid h-5 w-5 place-items-center rounded-full bg-gold text-white"><Check size={12} /></span>}
+                    </button>
+                  ))}
+                  {!design.design_config.background_image_url && !((design.design_config as LoyaltyDesignConfig & { wallpaper_library?: string[] }).wallpaper_library || []).length && (
+                    <div className="col-span-full rounded-xl border border-dashed border-ink/10 px-4 py-5 text-center text-[10px] text-ink/35">Aucun wallpaper ajouté.</div>
+                  )}
+                </div>
+              </div>
 
               <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {([['Couleur principale','primary_color'],['Couleur secondaire','secondary_color'],['Fond','background_color'],['Texte','text_color']] as const).map(([label,key]) => (
