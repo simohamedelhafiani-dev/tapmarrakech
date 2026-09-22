@@ -216,12 +216,12 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
         front_title: preset.title,
         front_subtitle: preset.subtitle,
         stamp_style: preset.stampStyle,
-        card_mode: preset.mode,
-        show_qr: preset.mode === 'QR',
+        card_mode: cardMode,
+        show_qr: cardMode === 'QR',
         show_points: false,
       },
     }));
-    setCardMode(preset.mode);
+    // Le modèle change le design, pas le type de programme : QR et tampons utilisent le même template.\n    setCardMode(cardMode);
   }
 
   async function uploadAsset(file: File, kind: 'logo' | 'photo') {
