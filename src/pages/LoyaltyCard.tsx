@@ -268,6 +268,7 @@ export default function LoyaltyCard() {
     rewardName?: string;
     rewardDescription?: string;
     intro?: string;
+    currentTier?: string;
   };
 
   const experience: LoyaltyExperienceConfig = {
@@ -315,7 +316,7 @@ export default function LoyaltyCard() {
       </div>
     </main>
   );
-
+}
 
 function PageShell({ children }: { children: ReactNode }) {
   return <main className="min-h-screen bg-[#f7f7f3] px-4 py-6 sm:py-10"><div className="mx-auto w-full max-w-md">{children}</div></main>;
