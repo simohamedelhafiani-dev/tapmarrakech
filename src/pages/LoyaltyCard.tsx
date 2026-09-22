@@ -254,7 +254,7 @@ export default function LoyaltyCard() {
     background_image_url: builderConfig.coverImageUrl || designConfig.background_image_url,
     front_title: builderConfig.cardTitle || designConfig.front_title,
     front_subtitle: builderConfig.cardSubtitle || designConfig.front_subtitle,
-    card_mode: mode,
+    card_mode: mode === 'STAMP' ? 'STAMP' : 'QR',
   };
 
   return (
