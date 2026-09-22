@@ -540,6 +540,24 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
   ) : (
     <div className="grid h-full w-full place-items-center rounded-[16px] border border-white/20 bg-white/10 text-[8px] uppercase tracking-[0.16em] text-white/60">QR</div>
   );
+  
+  const stampBlock = (
+    <div className="grid h-full w-full grid-cols-5 gap-1.5 rounded-[16px] border border-white/20 bg-white/10 p-2">
+      {Array.from({ length: visitGoal }, (_, index) => {
+        const filled = index < visits;
+        return (
+          <span key={index} className="grid place-items-center rounded-full border text-[7px] font-bold" style={{ borderColor: config.secondaryColor + '99', background: filled ? config.secondaryColor : 'transparent', color: filled ? config.primaryColor : config.secondaryColor }}>
+            {filled ? '✓' : index + 1}
+          </span>
+        );
+      })}
+    </div>
+  );
+
+  const actionBlock = config.type === 'STAMP' ? stampBlock : qrBlock;
+  const actionCaption = config.type === 'STAMP'
+    ? `Tampons · ${visits} / ${visitGoal}`
+    : 'Scannez pour identifier votre compte';
 
   const background = image ? (
     <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url("' + image + '")' }} />
@@ -569,7 +587,7 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
               <div className="mt-3 h-1 overflow-hidden rounded-full bg-black/10"><div className="h-full rounded-full" style={{ width: progress + '%', background: config.primaryColor }} /></div>
             </div>
             {benefits.length > 0 && <div className="mt-5"><p className="text-[8px] font-bold uppercase tracking-[.2em] opacity-45">Vos avantages exclusifs</p><div className="mt-2 grid grid-cols-3 gap-2">{benefits.map((b,i) => <div key={b.title+i} className="rounded-[16px] border border-white/45 bg-white/25 p-3 backdrop-blur-xl"><p className="text-[10px] font-semibold">{b.title}</p><p className="mt-1 line-clamp-2 text-[8px] leading-3.5 opacity-55">{b.description}</p></div>)}</div></div>}
-            {offers.length > 0 && <div className="mt-4 rounded-[18px] border border-white/45 bg-white/25 p-4 backdrop-blur-xl"><p className="text-[8px] uppercase tracking-[.18em] opacity-45">{offers[0].eyebrow || 'Offre du moment'}</p><p className="mt-1 text-lg font-semibold">{offers[0].title}</p>{offers[0].description && <p className="mt-1 text-[9px] opacity-55">{offers[0].description}</p>}</div>}
+            {offers.length > 0 && <div className="mt-4 rounded-[18px] border border-white/45 bg-white/25 p-4 backdrop-blur-xl"><p className="text-[8px] uppercase tracking-[.18em] opacity-45">{offers[0].eyebrow || 'Offre du moment'}</p><p className="mt-1 text-lg font-semibold">{offers[0].title}</p>{offers[0].description && <p className="mt-1 text-[9px] opacity-55">{offers[0].description}</p>}</div>}\n            <div className="mt-5 flex flex-col items-center"><div className="h-[92px] w-[92px]">{actionBlock}</div><p className="mt-2 text-center text-[8px] uppercase tracking-[.16em] opacity-50">{actionCaption}</p><p className="mt-2 text-[9px] opacity-55">{member}</p></div>
           </div>
         </div>
       </div>
@@ -585,7 +603,7 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
           <div className="mt-auto"><p className="text-[9px] uppercase tracking-[.24em] text-white/55">Bonjour, {member}</p><p className="mt-2 max-w-[320px] text-[38px] font-light leading-[.98] tracking-[-.045em]">{title}</p><p className="mt-3 max-w-[285px] text-[10px] leading-5 text-white/70">{subtitle}</p>
             <div className="mt-6 rounded-[24px] border border-white/25 bg-white/[0.12] p-5 shadow-2xl backdrop-blur-2xl"><div className="flex items-end justify-between"><div><p className="text-[8px] uppercase tracking-[.2em] text-white/55">Votre solde</p><p className="mt-1 text-3xl font-semibold">{config.type === 'STAMP' ? visits + ' / ' + visitGoal : points.toLocaleString('fr-FR') + ' pts'}</p></div><div className="text-right"><p className="text-[8px] uppercase tracking-[.2em] text-white/55">Niveau</p><p className="mt-1 text-sm font-semibold">{config.currentTier || 'Gold'}</p></div></div><div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/20"><div className="h-full rounded-full bg-white" style={{ width: progress + '%' }} /></div></div>
             {benefits.length > 0 && <div className="mt-5"><p className="text-[8px] font-bold uppercase tracking-[.2em] text-white/55">Vos avantages exclusifs</p><div className="mt-2 grid grid-cols-3 gap-2">{benefits.map((b,i)=><div key={b.title+i} className="rounded-[16px] border border-white/20 bg-white/[0.12] p-3 backdrop-blur-xl"><p className="text-[10px] font-semibold">{b.title}</p><p className="mt-1 line-clamp-2 text-[8px] leading-3.5 text-white/60">{b.description}</p></div>)}</div></div>}
-            <div className="mt-5 flex flex-col items-center"><div className="h-[92px] w-[92px]">{qrBlock}</div><p className="mt-2 text-center text-[8px] uppercase tracking-[.16em] text-white/50">Scannez pour identifier votre compte</p><p className="mt-2 text-[9px] text-white/55">{member}</p></div>
+            <div className="mt-5 flex flex-col items-center"><div className="h-[92px] w-[92px]">{actionBlock}</div><p className="mt-2 text-center text-[8px] uppercase tracking-[.16em] text-white/50">{actionCaption}</p><p className="mt-2 text-[9px] text-white/55">{member}</p></div>
           </div>
         </div>
       </div>
@@ -600,7 +618,7 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
           <div className="mt-auto"><p className="text-[9px] uppercase tracking-[.3em] text-white/45">GOOD FOOD. BETTER PEOPLE.</p><p className="mt-2 max-w-[300px] text-[31px] font-semibold leading-[.98] tracking-[-.04em]">{title}</p>
             <div className="mt-6 rounded-[20px] border border-white/15 bg-black/45 p-4 backdrop-blur-md"><div className="flex justify-between"><div><p className="text-[8px] uppercase tracking-[.2em] text-white/40">Solde</p><p className="mt-1 text-3xl font-semibold">{config.type === 'STAMP' ? visits + '/' + visitGoal : points.toLocaleString('fr-FR')}</p></div><div className="text-right"><p className="text-[8px] uppercase tracking-[.2em] text-white/40">Prochaine récompense</p><p className="mt-1 max-w-[120px] text-[10px]" style={{ color: config.secondaryColor }}>{config.rewardName || 'Votre récompense'}</p></div></div><div className="mt-4 h-px bg-white/15"><div className="h-px" style={{ width: progress + '%', background: config.secondaryColor }} /></div></div>
             {benefits.length > 0 && <div className="mt-5"><p className="text-[8px] uppercase tracking-[.2em] text-white/45">Vos avantages</p><div className="mt-2 grid grid-cols-3 gap-2">{benefits.map((b,i)=><div key={b.title+i} className="rounded-[15px] border border-white/15 bg-black/30 p-3 backdrop-blur-md"><p className="text-[10px] font-semibold">{b.title}</p><p className="mt-1 line-clamp-2 text-[8px] leading-3.5 text-white/50">{b.description}</p></div>)}</div></div>}
-            <div className="mt-5 flex flex-col items-center"><div className="h-[92px] w-[92px]">{qrBlock}</div><p className="mt-2 text-center text-[8px] uppercase tracking-[.16em] text-white/50">Scannez pour identifier votre compte</p><p className="mt-2 text-[9px] text-white/55">{member}</p></div>
+            <div className="mt-5 flex flex-col items-center"><div className="h-[92px] w-[92px]">{actionBlock}</div><p className="mt-2 text-center text-[8px] uppercase tracking-[.16em] text-white/50">{actionCaption}</p><p className="mt-2 text-[9px] text-white/55">{member}</p></div>
           </div>
         </div>
       </div>
@@ -615,7 +633,7 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
           <div className="mt-auto"><p className="text-[9px] uppercase tracking-[.22em] text-white/55">Bonsoir, {member}</p><p className="mt-2 font-serif text-[38px] leading-[.95] tracking-[-.04em]">{title}</p><p className="mt-3 max-w-[280px] text-[10px] leading-5 text-white/70">{subtitle}</p>
             <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-[22px] border border-white/20 bg-white/15"><div className="bg-black/20 p-4 backdrop-blur-md"><p className="text-[8px] uppercase tracking-[.18em] text-white/45">Solde</p><p className="mt-1 text-2xl font-semibold">{config.type === 'STAMP' ? visits + '/' + visitGoal : points.toLocaleString('fr-FR')}</p></div><div className="bg-black/20 p-4 backdrop-blur-md"><p className="text-[8px] uppercase tracking-[.18em] text-white/45">Statut</p><p className="mt-1 text-2xl font-semibold">{config.currentTier || 'Gold'}</p></div></div>
             {benefits.length > 0 && <div className="mt-4 grid grid-cols-3 gap-2">{benefits.map((b,i)=><div key={b.title+i} className="rounded-[15px] border border-white/20 bg-white/[0.12] p-3 backdrop-blur-md"><p className="text-[10px] font-semibold">{b.title}</p><p className="mt-1 line-clamp-2 text-[8px] leading-3.5 text-white/55">{b.description}</p></div>)}</div>}
-            <div className="mt-5 flex flex-col items-center"><div className="h-[92px] w-[92px]">{qrBlock}</div><p className="mt-2 text-center text-[8px] uppercase tracking-[.16em] text-white/50">Scannez pour identifier votre compte</p><p className="mt-2 text-[9px] text-white/55">{member}</p></div>
+            <div className="mt-5 flex flex-col items-center"><div className="h-[92px] w-[92px]">{actionBlock}</div><p className="mt-2 text-center text-[8px] uppercase tracking-[.16em] text-white/50">{actionCaption}</p><p className="mt-2 text-[9px] text-white/55">{member}</p></div>
           </div>
         </div>
       </div>
@@ -630,7 +648,7 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
           <div className="mt-auto"><p className="text-[9px] uppercase tracking-[.22em] opacity-45">Bonjour, {member}</p><p className="mt-2 font-serif text-[38px] leading-[.95] tracking-[-.045em]">{title}</p><p className="mt-3 max-w-[280px] text-[10px] leading-5 opacity-60">{subtitle}</p>
             <div className="mt-6 border-t border-black/10 pt-4"><div className="flex justify-between text-[8px] uppercase tracking-[.18em] opacity-45"><span>Votre fidélité</span><span>{Math.round(progress)}%</span></div><div className="mt-3 h-1 overflow-hidden rounded-full bg-black/10"><div className="h-full rounded-full" style={{ width: progress + '%', background: config.primaryColor }} /></div></div>
             {benefits.length > 0 && <div className="mt-5"><p className="text-[8px] font-bold uppercase tracking-[.2em] opacity-45">Vos avantages exclusifs</p><div className="mt-2 grid grid-cols-3 gap-2">{benefits.map((b,i)=><div key={b.title+i} className="rounded-[15px] border border-black/10 bg-white/35 p-3 backdrop-blur-md"><p className="text-[10px] font-semibold">{b.title}</p><p className="mt-1 line-clamp-2 text-[8px] leading-3.5 opacity-55">{b.description}</p></div>)}</div></div>}
-            <div className="mt-5 flex flex-col items-center"><div className="h-[92px] w-[92px]">{qrBlock}</div><p className="mt-2 text-center text-[8px] uppercase tracking-[.16em] opacity-50">Scannez pour identifier votre compte</p><p className="mt-2 text-[9px] opacity-55">{member}</p></div>
+            <div className="mt-5 flex flex-col items-center"><div className="h-[92px] w-[92px]">{actionBlock}</div><p className="mt-2 text-center text-[8px] uppercase tracking-[.16em] opacity-50">{actionCaption}</p><p className="mt-2 text-[9px] opacity-55">{member}</p></div>
           </div>
         </div>
       </div>
