@@ -314,6 +314,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
 
   const visualExperience: LoyaltyExperienceConfig = {
     type: cardMode === 'STAMP' ? 'STAMP' : 'POINTS',
+    templateId: design.template_id,
     businessType: design.design_config.business_type || establishment.business_type,
     establishmentName: establishment.name,
     logoUrl: design.design_config.logo_url || establishment.logo_url,
@@ -331,6 +332,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     rewardName: cardMode === 'STAMP' ? stampRewardName : '1 récompense offerte',
     rewardDescription: cardMode === 'STAMP' ? stampRewardDescription || 'À partir de 8 visites' : 'Encore 280 points avant votre prochaine récompense.',
     intro: design.design_config.front_subtitle,
+    currentTier: 'Gold',
     benefits: [
       { title: 'Offre anniversaire', description: 'Une attention spéciale le jour J.' },
       { title: 'Invitations privées', description: 'Accès aux nouveautés avant les autres.' },
