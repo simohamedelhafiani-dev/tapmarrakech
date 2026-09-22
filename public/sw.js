@@ -1,4 +1,4 @@
-const CACHE = 'tapmarrakech-shell-v8';
+const CACHE = 'tapmarrakech-shell-v9';
 const APP_SHELL = ['/', '/index.html', '/tapmarrakech-logo.png', '/manifest.webmanifest'];
 
 self.addEventListener('message', (event) => {
