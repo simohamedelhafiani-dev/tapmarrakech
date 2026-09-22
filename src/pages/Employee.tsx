@@ -20,7 +20,8 @@ import {
 } from 'lucide-react';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import QrScanner from '@/components/QrScanner';
-import { LoyaltyCardVisual, defaultLoyaltyDesignConfig } from '@/components/LoyaltyCardVisual';
+import { defaultLoyaltyDesignConfig } from '@/components/LoyaltyCardVisual';
+import { LoyaltyExperience } from '@/components/loyalty/LoyaltyExperience';
 import { supabase } from '@/lib/supabase';
 
 type Establishment = {
@@ -1284,20 +1285,39 @@ export default function Employee() {
       {showCard && (
         <Modal title="Carte de fidélité" onClose={() => setShowCard(null)}>
           <div className="space-y-4">
-            <LoyaltyCardVisual
-              design={{ ...loyaltyDesign, config: loyaltyDesign.design_config }}
-              card={{
+            <LoyaltyExperience
+              config={{
+                type: loyaltyProgram.program_type === 'STAMP' ? 'STAMP' : 'POINTS',
+                businessType: loyaltyDesign.design_config.business_type || 'restaurant',
                 establishmentName: session.establishment_name,
-                logoUrl: establishmentLogoUrl,
-                points: showCard.points_balance,
+                logoUrl: loyaltyDesign.design_config.logo_url || establishmentLogoUrl,
+                coverImageUrl: loyaltyDesign.design_config.background_image_url || null,
+                primaryColor: loyaltyDesign.primary_color,
+                secondaryColor: loyaltyDesign.secondary_color,
+                backgroundColor: loyaltyDesign.background_color,
+                textColor: loyaltyDesign.text_color,
+                borderRadius: loyaltyDesign.border_radius,
                 customerName: `${showCard.first_name} ${showCard.last_name ?? ''}`.trim(),
-                loyaltyNumber: showCard.loyalty_number,
-                cardUrl: showCardLink,
-                stampsBalance: (showCard as LoyaltyCustomer & { stamps_balance?: number }).stamps_balance,
-                stampGoal: loyaltyProgram.stamp_goal,
+                pointsBalance: showCard.points_balance,
+                pointsGoal: Math.max(1000, rewards[rewards.length - 1]?.points_required ?? 1000),
+                visits: (showCard as LoyaltyCustomer & { stamps_balance?: number }).stamps_balance ?? showCard.visit_count,
+                visitGoal: loyaltyProgram.stamp_goal,
+                rewardName: loyaltyDesign.design_config.stamp_reward_name || rewards[0]?.name || 'Cadeau fidélité',
+                rewardDescription: loyaltyDesign.design_config.stamp_reward_description || rewards[0]?.description || null,
+                rewards: rewards.map(reward => ({
+                  id: reward.id,
+                  name: reward.name,
+                  description: reward.description,
+                  points_required: reward.points_required,
+                  reward_type: reward.reward_type,
+                  discount_percent: reward.discount_percent,
+                  discount_max_amount: reward.discount_max_amount,
+                })),
+                intro: loyaltyDesign.design_config.front_subtitle,
+                qrValue: showCardLink,
+                templateId: loyaltyDesign.template_id,
+                published: true,
               }}
-              side="front"
-              programType={loyaltyProgram.program_type}
             />
             {loyaltyProgram.program_type === 'STAMP' && <button disabled={saving} onClick={() => void addStamp(showCard)} className="w-full rounded-xl bg-gold py-3.5 text-xs font-bold text-forest disabled:opacity-50">+ Ajouter 1 tampon</button>}
             {showCardLink && <button onClick={async () => { await navigator.clipboard.writeText(showCardLink); alert('Lien de la carte copié.'); }} className="w-full rounded-xl border border-ink/10 bg-white py-3 text-xs font-semibold text-forest">Copier le lien client</button>}
