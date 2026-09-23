@@ -21,6 +21,13 @@ type Establishment = {
   ai_business_type_id: string | null;
 };
 
+type MenuTemplate = {
+  id: string;
+  name: string;
+  description: string | null;
+  config: Record<string, any>;
+};
+
 type MenuCategory = {
   id: string;
   establishment_id: string;
@@ -80,6 +87,8 @@ export default function Menu() {
 
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
+  const [menuTemplates, setMenuTemplates] = useState<MenuTemplate[]>([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState('');
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -106,6 +115,7 @@ export default function Menu() {
   useEffect(() => {
     if (establishmentId) {
       loadMenu();
+      loadTemplates();
     }
   }, [establishmentId]);
 
@@ -141,6 +151,26 @@ export default function Menu() {
     }
 
     setLoading(false);
+  }
+
+  async function loadTemplates() {
+    const [{ data: templates }, { data: establishment }] = await Promise.all([
+      supabase.from('templates').select('id,name,description,config').eq('kind', 'menu').eq('active', true).order('name'),
+      supabase.from('establishments').select('menu_template_id').eq('id', establishmentId).maybeSingle(),
+    ]);
+    const rows = (templates as MenuTemplate[]) ?? [];
+    setMenuTemplates(rows);
+    const currentId = establishment?.menu_template_id ?? '';
+    const matched = rows.find((template) => template.id === currentId || template.config?.key === currentId);
+    setSelectedTemplateId(matched?.id ?? currentId);
+  }
+
+  async function saveTemplate(templateId: string) {
+    setSelectedTemplateId(templateId);
+    const { error } = await supabase.from('establishments').update({ menu_template_id: templateId }).eq('id', establishmentId);
+    if (error) {
+      alert(error.message);
+    }
   }
 
   async function loadMenu() {
@@ -182,6 +212,8 @@ export default function Menu() {
 
     setLoading(false);
   }
+
+  const selectedTemplate = menuTemplates.find((template) => template.id === selectedTemplateId);
 
   const itemsByCategory = useMemo(() => {
     const map: Record<string, MenuItem[]> = {};
@@ -480,6 +512,32 @@ export default function Menu() {
 
   return (
     <div className="space-y-8">
+      {menuTemplates.length > 0 && (
+        <section className="rounded-2xl border border-ink/10 bg-white p-5 shadow-sm">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">Design du menu</p>
+              <h2 className="mt-1 text-lg font-semibold text-forest">Choisir un template</h2>
+              <p className="mt-1 text-xs text-ink/45">Les templates sont créés et publiés par l’Admin. Ici, tu choisis uniquement celui de ton établissement.</p>
+            </div>
+            <span className="rounded-full bg-forest/5 px-3 py-1.5 text-[10px] font-semibold text-forest">{selectedTemplate?.name ?? 'Automatique'}</span>
+          </div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {menuTemplates.map((template) => (
+              <button key={template.id} type="button" onClick={() => void saveTemplate(template.id)} className={`rounded-2xl border p-4 text-left transition ${selectedTemplateId === template.id ? 'border-gold ring-2 ring-gold/15' : 'border-ink/10 hover:border-gold/40'}`}>
+                <div className="h-20 rounded-xl bg-[#f3eee2] p-3">
+                  <div className="h-2 w-16 rounded-full bg-gold" />
+                  <div className="mt-3 h-2 w-3/4 rounded-full bg-ink/10" />
+                  <div className="mt-2 h-2 w-1/2 rounded-full bg-ink/5" />
+                </div>
+                <p className="mt-3 text-xs font-semibold text-forest">{template.name}</p>
+                <p className="mt-1 text-[10px] leading-4 text-ink/40">{template.description}</p>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="rounded-[28px] bg-forest p-6 text-white shadow-xl md:p-8">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
