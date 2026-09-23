@@ -263,38 +263,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     document.documentElement.lang = language;
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
-
-    const translateDom = () => {
-      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-      const nodes: Text[] = [];
-      let node: Node | null;
-      while ((node = walker.nextNode())) nodes.push(node as Text);
-      nodes.forEach((textNode) => {
-        const current = textNode.nodeValue ?? '';
-        if (!current.trim()) return;
-        const original = originalTextNodes.get(textNode) ?? sourceUiText(current);
-        originalTextNodes.set(textNode, original);
-        const translated = translateUiText(original, language);
-        if (translated !== current) textNode.nodeValue = translated;
-      });
-
-      document.querySelectorAll<HTMLElement>('[placeholder],[title],[aria-label]').forEach((el) => {
-        for (const attr of ['placeholder', 'title', 'aria-label']) {
-          const value = el.getAttribute(attr);
-          if (!value) continue;
-          const key = `tapmarrakech:i18n-original:${attr}`;
-          const original = el.dataset[key.replace(/:/g, '')] ?? value;
-          el.dataset[key.replace(/:/g, '')] = original;
-          const translated = translateUiText(original, language);
-          if (translated !== value) el.setAttribute(attr, translated);
-        }
-      });
-    };
-
-    translateDom();
-    const observer = new MutationObserver(() => translateDom());
-    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
-    return () => observer.disconnect();
   }, [language]);
 
   const value = useMemo(() => ({
