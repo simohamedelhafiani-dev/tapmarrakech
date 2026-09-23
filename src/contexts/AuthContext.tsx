@@ -8,7 +8,7 @@ import {
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 
-type UserRole = 'admin' | 'responsible' | 'employee';
+type UserRole = 'admin' | 'responsible';
 
 type AuthContextValue = {
   session: Session | null;
