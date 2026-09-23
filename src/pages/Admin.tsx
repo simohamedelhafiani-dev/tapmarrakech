@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useLanguage, type Language } from '@/contexts/LanguageContext';
 import {
   BarChart3,
   Building2,
@@ -130,6 +131,7 @@ type AdminSection =
   | 'system';
 
 export default function Admin() {
+  const { language, setLanguage } = useLanguage();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
