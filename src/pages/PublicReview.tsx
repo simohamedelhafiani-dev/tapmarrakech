@@ -66,11 +66,11 @@ type LoyaltyReward = {
 };
 
 export default function PublicReview() {
-  const { slug } = useParams<{ slug: string }>();
+  const { slug, section: routeSection } = useParams<{ slug: string; section?: string }>();
 
   const [place, setPlace] = useState<Establishment | null>(null);
   const [section, setSection] = useState<Section>(() => {
-    const requested = new URLSearchParams(window.location.search).get('section');
+    const requested = routeSection || new URLSearchParams(window.location.search).get('section');
     return requested === 'menu' || requested === 'reviews' || requested === 'loyalty'
       ? requested
       : 'home';
