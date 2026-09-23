@@ -4747,13 +4747,20 @@ function PDFReportsSection({ establishments }: { establishments: Establishment[]
   const [selectedId, setSelectedId] = useState(establishments[0]?.id ?? '');
   const [period, setPeriod] = useState(30);
   const [loading, setLoading] = useState(false);
-  useEffect(() => { if (!selectedId && establishments[0]) setSelectedId(establishments[0].id); }, [establishments, selectedId]);
-  const selected = establishments.find(e => e.id === selectedId);
+
+  useEffect(() => {
+    if (!selectedId && establishments[0]) setSelectedId(establishments[0].id);
+  }, [establishments, selectedId]);
+
+  const selected = establishments.find((e) => e.id === selectedId);
 
   const printReport = async (kind: 'reviews'|'loyalty'|'team'|'analytics'|'complete') => {
     if (!selected) return alert('Sélectionne un établissement.');
     setLoading(true);
-    const since = new Date(); since.setDate(since.getDate() - period);
+
+    const since = new Date();
+    since.setDate(since.getDate() - period);
+
     const [{ data: reviews }, { data: tx }, { data: redemptions }, { data: staffRows }, { count: events }] = await Promise.all([
       supabase.from('reviews').select('rating,type,comment,status,created_at').eq('establishment_id', selected.id).gte('created_at', since.toISOString()).order('created_at', { ascending: false }),
       supabase.from('loyalty_transactions').select('amount,points,created_at').eq('establishment_id', selected.id).eq('type','EARN').gte('created_at', since.toISOString()),
@@ -4761,21 +4768,127 @@ function PDFReportsSection({ establishments }: { establishments: Establishment[]
       supabase.from('establishment_staff').select('role,active,created_at').eq('establishment_id', selected.id),
       supabase.from('analytics_events').select('id',{count:'exact',head:true}).eq('establishment_id', selected.id).gte('created_at', since.toISOString())
     ]);
+
     setLoading(false);
-    const r=reviews??[], t=tx??[], red=redemptions??[], team=staffRows??[];
-    const avg=r.length ? (r.reduce((a:any,x:any)=>a+Number(x.rating||0),0)/r.length).toFixed(1) : '—';
-    const ca=t.reduce((a:any,x:any)=>a+Number(x.amount||0),0);
-    const rewardCost=red.reduce((a:any,x:any)=>a+Number(x.reward_cost_mad||0),0);
-    const title = kind==='complete' ? 'Rapport complet' : kind==='reviews' ? 'Rapport réputation & avis' : kind==='loyalty' ? 'Rapport fidélité' : kind==='team' ? 'Rapport équipe' : 'Rapport analytics';
-    const section = (kind==='reviews'||kind==='complete') ? `<h2>Réputation & avis</h2><p><b>Avis :</b> ${r.length} · <b>Note moyenne :</b> ${avg} / 5 · <b>Positifs :</b> ${r.filter((x:any)=>x.type==='positive').length} · <b>Nouveaux :</b> ${r.filter((x:any)=>x.status==='Nouveau').length}</p>${r.slice(0,80).map((x:any)=>`<div class="item"><b>${x.rating}/5</b> · ${x.type==='positive'?'Positif':'Négatif'} · ${new Date(x.created_at).toLocaleDateString('fr-FR')}<br>${escapeHtml(x.comment||'Aucun commentaire')}</div>`).join('')}` : '';
-    const loyalty = (kind==='loyalty'||kind==='complete') ? `<h2>Fidélité</h2><p><b>CA fidélité :</b> ${formatReportMad(ca)} · <b>Transactions :</b> ${t.length} · <b>Points :</b> ${t.reduce((a:any,x:any)=>a+Number(x.points||0),0).toLocaleString('fr-FR')} · <b>Récompenses :</b> ${red.length} · <b>Coût récompenses :</b> ${formatReportMad(rewardCost)}</p>` : '';
-    const teamHtml = (kind==='team'||kind==='complete') ? `<h2>Équipe</h2><p><b>Membres :</b> ${team.length} · <b>Actifs :</b> ${team.filter((x:any)=>x.active).length} · <b>Responsables :</b> ${team.filter((x:any)=>x.role==='MANAGER').length} · <b>Employés :</b> ${team.filter((x:any)=>x.role==='STAFF').length}</p>` : '';
-    const analytics = (kind==='analytics'||kind==='complete') ? `<h2>Analytics</h2><p><b>Événements :</b> ${events??0} · <b>Période :</b> ${period} jours</p>` : '';
-    const html=`<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(title)} - ${escapeHtml(selected.name)}</title><style>body{font-family:Arial,sans-serif;color:#17241f;padding:32px;max-width:900px;margin:auto}h1{color:#173d32;margin-bottom:4px}h2{margin-top:28px;border-bottom:1px solid #ddd;padding-bottom:8px}.meta{color:#666;font-size:12px}.item{padding:10px 0;border-bottom:1px solid #eee;font-size:13px;line-height:1.5}@media print{body{padding:0}}</style></head><body><h1>${escapeHtml(title)}</h1><div class="meta">${escapeHtml(selected.name)} · ${new Date().toLocaleDateString('fr-FR')} · ${period} derniers jours</div>${section}${loyalty}${teamHtml}${analytics}</body></html>`;
-    const win=window.open('','_blank','width=1000,height=800'); if(!win) return alert('Autorise les fenêtres popup pour générer le PDF.'); win.document.write(html); win.document.close(); win.focus(); setTimeout(()=>win.print(),250);
+
+    const r = reviews ?? [];
+    const t = tx ?? [];
+    const red = redemptions ?? [];
+    const team = staffRows ?? [];
+    const avg = r.length ? (r.reduce((sum:any, x:any) => sum + Number(x.rating || 0), 0) / r.length).toFixed(1) : '—';
+    const revenue = t.reduce((sum:any, x:any) => sum + Number(x.amount || 0), 0);
+    const points = t.reduce((sum:any, x:any) => sum + Number(x.points || 0), 0);
+    const rewardCost = red.reduce((sum:any, x:any) => sum + Number(x.reward_cost_mad || 0), 0);
+    const positive = r.filter((x:any) => Number(x.rating) >= 4).length;
+    const negative = r.filter((x:any) => Number(x.rating) <= 3).length;
+    const title = kind === 'complete' ? 'Rapport de performance' : kind === 'reviews' ? 'Rapport réputation & avis' : kind === 'loyalty' ? 'Rapport fidélité' : kind === 'team' ? 'Rapport équipe' : 'Rapport analytics';
+    const generatedAt = new Date();
+    const periodLabel = `Du ${since.toLocaleDateString('fr-FR')} au ${generatedAt.toLocaleDateString('fr-FR')}`;
+
+    const reportBlock = (heading:string, content:string) => `<section class="report-section"><div class="section-heading"><span></span><h2>${heading}</h2></div>${content}</section>`;
+    const kpi = (label:string, value:string, note:string='') => `<div class="kpi"><div class="kpi-label">${label}</div><div class="kpi-value">${value}</div>${note ? `<div class="kpi-note">${note}</div>` : ''}</div>`;
+
+    const reviewRows = r.slice(0, 80).map((x:any) => `
+      <tr><td><span class="rating">${Number(x.rating).toFixed(0)}/5</span></td><td>${x.type === 'positive' ? '<span class="badge positive">Positif</span>' : '<span class="badge negative">À surveiller</span>'}</td><td>${new Date(x.created_at).toLocaleDateString('fr-FR')}</td><td>${escapeHtml(x.comment || 'Aucun commentaire')}</td></tr>
+    `).join('');
+
+    const reviewContent = `
+      <div class="kpi-grid">
+        ${kpi('Avis reçus', String(r.length), periodLabel)}
+        ${kpi('Note moyenne', avg === '—' ? '—' : avg + ' / 5', 'Sur la période')}
+        ${kpi('Avis positifs', String(positive), r.length ? Math.round(positive / r.length * 100) + '% du volume' : '')}
+        ${kpi('À surveiller', String(negative), '3/5 ou moins')}
+      </div>
+      <div class="insight"><strong>Lecture de la période</strong><p>${r.length ? `L’établissement a reçu ${r.length} avis avec une note moyenne de ${avg}/5. ${positive} avis sont à 4/5 ou plus et ${negative} à 3/5 ou moins.` : 'Aucun avis enregistré sur la période sélectionnée.'}</p></div>
+      ${reviewRows ? `<div class="table-wrap"><table><thead><tr><th>Note</th><th>Sentiment</th><th>Date</th><th>Commentaire</th></tr></thead><tbody>${reviewRows}</tbody></table></div>` : '<div class="empty">Aucun avis à afficher.</div>'}
+    `;
+
+    const loyaltyContent = `
+      <div class="kpi-grid">
+        ${kpi('CA fidélité', formatReportMad(revenue), 'Transactions EARN')}
+        ${kpi('Transactions', String(t.length))}
+        ${kpi('Points générés', points.toLocaleString('fr-FR'))}
+        ${kpi('Récompenses utilisées', String(red.length))}
+        ${kpi('Coût récompenses', formatReportMad(rewardCost))}
+      </div>
+      <div class="insight"><strong>Programme fidélité</strong><p>${t.length ? `Le programme a généré ${points.toLocaleString('fr-FR')} points sur ${t.length} transactions, pour ${formatReportMad(revenue)} de montant associé.` : 'Aucune transaction fidélité enregistrée sur la période sélectionnée.'}</p></div>
+    `;
+
+    const teamContent = `
+      <div class="kpi-grid">
+        ${kpi('Membres', String(team.length))}
+        ${kpi('Actifs', String(team.filter((x:any)=>x.active).length))}
+        ${kpi('Responsables', String(team.filter((x:any)=>x.role === 'MANAGER').length))}
+        ${kpi('Staff', String(team.filter((x:any)=>x.role === 'STAFF').length))}
+      </div>
+    `;
+
+    const analyticsContent = `
+      <div class="kpi-grid">${kpi('Événements', String(events ?? 0), 'Analytics')}${kpi('Période', period + ' jours')}${kpi('Début', since.toLocaleDateString('fr-FR'))}${kpi('Fin', generatedAt.toLocaleDateString('fr-FR'))}</div>
+      <div class="insight"><strong>Activité mesurée</strong><p>${events ?? 0} événements analytics ont été enregistrés sur la période sélectionnée.</p></div>
+    `;
+
+    let body = '';
+    if (kind === 'reviews') body = reportBlock('Réputation & avis', reviewContent);
+    if (kind === 'loyalty') body = reportBlock('Fidélité', loyaltyContent);
+    if (kind === 'team') body = reportBlock('Équipe', teamContent);
+    if (kind === 'analytics') body = reportBlock('Analytics', analyticsContent);
+    if (kind === 'complete') body = reportBlock('Réputation & avis', reviewContent) + reportBlock('Fidélité', loyaltyContent) + reportBlock('Équipe', teamContent) + reportBlock('Analytics', analyticsContent);
+
+    const html = `<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>${escapeHtml(title)} — ${escapeHtml(selected.name)}</title>
+<style>
+@page{size:A4;margin:16mm 15mm 18mm}
+*{box-sizing:border-box}body{margin:0;background:#fff;color:#17241f;font-family:Inter,Arial,Helvetica,sans-serif;font-size:11px;line-height:1.55}
+.page{max-width:800px;margin:auto}.cover{padding:0 0 26px;border-bottom:2px solid #173d32;margin-bottom:24px}
+.brand{display:flex;justify-content:space-between;align-items:center;padding:8px 0 22px;border-bottom:1px solid #e8e5de}
+.logo{font-size:20px;font-weight:800;letter-spacing:-.8px;color:#173d32}.logo b{color:#c9a45c}
+.doc-type{font-size:9px;text-transform:uppercase;letter-spacing:2px;color:#8a8b82;font-weight:700}
+h1{font-size:31px;line-height:1.08;letter-spacing:-1.2px;margin:28px 0 8px;color:#173d32} .subtitle{font-size:13px;color:#69716c;margin:0}
+.meta{display:flex;gap:24px;flex-wrap:wrap;margin-top:20px;color:#59625d;font-size:10px}.meta strong{display:block;color:#173d32;font-size:11px;margin-bottom:2px}
+.report-section{margin-top:28px;break-inside:auto}.section-heading{display:flex;align-items:center;gap:9px;border-bottom:1px solid #deddd7;padding-bottom:9px;margin-bottom:13px}.section-heading span{width:4px;height:20px;border-radius:4px;background:#c9a45c}.section-heading h2{font-size:18px;color:#173d32;margin:0}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:12px 0}.kpi{border:1px solid #e8e5de;border-radius:10px;padding:12px;background:#fafaf8;min-height:76px}.kpi-label{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:#7c837e;font-weight:700}.kpi-value{font-size:19px;font-weight:800;color:#173d32;margin-top:5px}.kpi-note{font-size:8px;color:#969b96;margin-top:2px}
+.insight{border-left:3px solid #c9a45c;background:#f7f3ea;padding:12px 14px;margin:15px 0;border-radius:0 8px 8px 0}.insight strong{color:#173d32}.insight p{margin:3px 0 0;color:#626b65}
+.table-wrap{border:1px solid #e4e2db;border-radius:10px;overflow:hidden;margin-top:15px}table{width:100%;border-collapse:collapse}th{background:#173d32;color:#fff;text-align:left;font-size:8px;text-transform:uppercase;letter-spacing:.7px;padding:8px}td{padding:8px;border-bottom:1px solid #eee;font-size:9px;vertical-align:top}tr:last-child td{border-bottom:0}.rating{font-weight:800;color:#173d32}.badge{display:inline-block;padding:2px 6px;border-radius:99px;font-size:8px;font-weight:700}.positive{background:#e8f2ed;color:#276044}.negative{background:#fbebeb;color:#a13b3b}.empty{text-align:center;border:1px dashed #ddd;padding:20px;color:#999;border-radius:9px}
+.footer{margin-top:35px;padding-top:12px;border-top:1px solid #e5e3dc;display:flex;justify-content:space-between;color:#929790;font-size:8px}.conf{color:#173d32;font-weight:700}
+@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.no-print{display:none!important}.report-section{break-inside:auto}.table-wrap{break-inside:auto}thead{display:table-header-group}}
+</style></head><body><div class="page">
+<div class="cover"><div class="brand"><div class="logo">Tap<b>Marrakech</b></div><div class="doc-type">Rapport de performance</div></div>
+<h1>${escapeHtml(title)}</h1><p class="subtitle">${escapeHtml(selected.name)}</p>
+<div class="meta"><div><strong>Période</strong>${escapeHtml(periodLabel)}</div><div><strong>Généré le</strong>${generatedAt.toLocaleString('fr-FR')}</div><div><strong>Document</strong>Confidentiel</div></div></div>
+${body}
+<div class="footer"><span>TapMarrakech · Expérience client</span><span class="conf">${escapeHtml(selected.name)} · Document confidentiel</span></div>
+</div></body></html>`;
+
+    const win = window.open('', '_blank', 'width=1000,height=900');
+    if (!win) return alert('Autorise les fenêtres popup pour générer le PDF.');
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+    setTimeout(() => win.print(), 350);
   };
-  return <div><div className="mb-8"><p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">Reporting</p><h2 className="font-display text-3xl text-forest md:text-4xl">Rapports PDF</h2><p className="mt-2 max-w-2xl text-sm text-ink/50">Exporte les rapports réputation, fidélité, équipe, analytics ou le rapport complet d’un établissement.</p></div><div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm"><div className="grid gap-4 md:grid-cols-2"><label className="block"><span className="mb-2 block text-xs font-semibold">Établissement</span><select value={selectedId} onChange={e=>setSelectedId(e.target.value)} className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm">{establishments.map(e=><option key={e.id} value={e.id}>{e.name}</option>)}</select></label><label className="block"><span className="mb-2 block text-xs font-semibold">Période</span><select value={period} onChange={e=>setPeriod(Number(e.target.value))} className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm"><option value={7}>7 jours</option><option value={15}>15 jours</option><option value={30}>30 jours</option><option value={90}>90 jours</option><option value={180}>180 jours</option><option value={365}>365 jours</option></select></label></div><div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{[['reviews','Avis & réputation'],['loyalty','Fidélité'],['team','Équipe'],['analytics','Analytics'],['complete','Rapport complet']].map(([id,label])=><button key={id} onClick={()=>printReport(id as any)} disabled={loading} className="inline-flex items-center justify-center gap-2 rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-xs font-semibold text-forest hover:bg-white disabled:opacity-40"><Printer size={15}/>{loading?'Préparation…':label}</button>)}</div><p className="mt-5 text-[11px] text-ink/35">Le bouton ouvre la fenêtre d’impression du navigateur : choisis ensuite « Enregistrer au format PDF ».</p></div></div>;
+
+  return (
+    <div>
+      <div className="mb-8">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">Reporting</p>
+        <h2 className="font-display text-3xl text-forest md:text-4xl">Rapports PDF</h2>
+        <p className="mt-2 max-w-2xl text-sm text-ink/50">Générez des rapports structurés avec en-tête, indicateurs, tableaux et synthèse pour chaque établissement.</p>
+      </div>
+      <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
+        <div className="grid gap-4 md:grid-cols-2">
+          <label className="block"><span className="mb-2 block text-xs font-semibold">Établissement</span><select value={selectedId} onChange={e=>setSelectedId(e.target.value)} className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm">{establishments.map(e=><option key={e.id} value={e.id}>{e.name}</option>)}</select></label>
+          <label className="block"><span className="mb-2 block text-xs font-semibold">Période</span><select value={period} onChange={e=>setPeriod(Number(e.target.value))} className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm"><option value={7}>7 jours</option><option value={15}>15 jours</option><option value={30}>30 jours</option><option value={90}>90 jours</option><option value={180}>180 jours</option><option value={365}>365 jours</option></select></label>
+        </div>
+        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {([['reviews','Avis & réputation'],['loyalty','Fidélité'],['team','Équipe'],['analytics','Analytics'],['complete','Rapport complet']] as const).map(([id,label])=><button key={id} onClick={()=>printReport(id)} disabled={loading} className="inline-flex items-center justify-center gap-2 rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-xs font-semibold text-forest hover:bg-white disabled:opacity-40"><Printer size={15}/>{loading?'Préparation…':label}</button>)}
+        </div>
+        <p className="mt-5 text-[11px] text-ink/35">Le rapport s’ouvre dans une page imprimable A4 : choisissez « Enregistrer au format PDF » dans l’impression du navigateur.</p>
+      </div>
+    </div>
+  );
 }
+
 function escapeHtml(value: string) { return value.replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char] as string)); }
 function formatReportMad(value: number) { return `${value.toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:0})} DH`; }
 
