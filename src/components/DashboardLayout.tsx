@@ -81,12 +81,6 @@ type Establishment = {
 export function DashboardLayout() {
   const [open, setOpen] = useState(false);
   const [profileName, setProfileName] = useState<string | null>(null);
-  const [establishmentName, setEstablishmentName] = useState<string | null>(
-    null
-  );
-  const [establishmentLogoUrl, setEstablishmentLogoUrl] = useState<
-    string | null
-  >(null);
   const [scannerUrl, setScannerUrl] = useState<string | null>(null);
   const [scannerLoading, setScannerLoading] = useState(false);
 
@@ -136,8 +130,6 @@ export function DashboardLayout() {
 
     const loadEstablishment = async () => {
       if (role !== 'responsible' || !user?.id) {
-        setEstablishmentName(null);
-        setEstablishmentLogoUrl(null);
         setScannerUrl(null);
         return;
       }
@@ -151,8 +143,6 @@ export function DashboardLayout() {
         );
 
         if (active) {
-          setEstablishmentName(null);
-          setEstablishmentLogoUrl(null);
           setScannerUrl(null);
         }
 
@@ -163,8 +153,6 @@ export function DashboardLayout() {
       const establishment = establishments[0];
 
       if (active) {
-        setEstablishmentName(establishment?.name ?? null);
-        setEstablishmentLogoUrl(establishment?.logo_url ?? null);
       }
 
       if (!establishment?.id) {
@@ -251,17 +239,6 @@ export function DashboardLayout() {
 
   const avatarLetter =
     displayName?.trim()?.[0]?.toUpperCase() || 'U';
-
-  const formattedDate = new Intl.DateTimeFormat('fr-FR', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  }).format(new Date());
-
-  const capitalizedDate =
-    formattedDate.charAt(0).toUpperCase() +
-    formattedDate.slice(1);
 
   return (
     <div className="min-h-screen bg-[#f7f7f3] text-ink">
