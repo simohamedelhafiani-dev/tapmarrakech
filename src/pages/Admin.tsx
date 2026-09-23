@@ -471,7 +471,7 @@ export default function Admin() {
               </p>
 
               <p className="text-[10px] text-white/45">
-                Administrateur TapMarrakech
+                Administrateur
               </p>
             </div>
           </div>
@@ -1717,14 +1717,14 @@ function EstablishmentWorkspace({
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Mode d'affichage</p>
               <h3 className="mt-1 text-xl font-semibold text-forest">Comment afficher le menu ?</h3>
-              <p className="mt-1 text-xs text-ink/45">Choisis entre un vrai menu numérique construit dans TapMarrakech ou le PDF original du commerce.</p>
+              <p className="mt-1 text-xs text-ink/45">Choisis entre un vrai menu numérique construit dans la plateforme ou le PDF original du commerce.</p>
             </div>
             <span className="rounded-full bg-[#f7f7f3] px-3 py-1.5 text-[11px] font-semibold text-forest">{menuDisplayMode === 'pdf' ? 'PDF original' : 'Menu numérique'}</span>
           </div>
           <div className="mt-5 grid gap-3 md:grid-cols-2">
             <button type="button" onClick={() => void setMenuMode('digital')} className={`rounded-2xl border p-4 text-left ${menuDisplayMode === 'digital' ? 'border-gold ring-2 ring-gold/20' : 'border-ink/10'}`}>
               <div className="font-semibold text-forest">✨ Menu numérique</div>
-              <p className="mt-1 text-xs text-ink/45">Templates, photos, catégories, produits et édition directement dans TapMarrakech.</p>
+              <p className="mt-1 text-xs text-ink/45">Templates, photos, catégories, produits et édition directement dans la plateforme.</p>
             </button>
             <div className={`rounded-2xl border p-4 ${menuDisplayMode === 'pdf' ? 'border-gold ring-2 ring-gold/20' : 'border-ink/10'}`}>
               <div className="font-semibold text-forest">📄 Garder le menu original</div>
@@ -3785,7 +3785,7 @@ function ReviewsSection({
           </h2>
 
           <p className="mt-2 max-w-2xl text-sm text-ink/50">
-            Consultez les avis reçus par tous les établissements TapMarrakech.
+            Consultez les avis reçus par tous les établissements de la plateforme.
           </p>
         </div>
 
@@ -4857,7 +4857,7 @@ h1{font-size:31px;line-height:1.08;letter-spacing:-1.2px;margin:28px 0 8px;color
 <h1>${escapeHtml(title)}</h1><p class="subtitle">${escapeHtml(selected.name)}</p>
 <div class="meta"><div><strong>Période</strong>${escapeHtml(periodLabel)}</div><div><strong>Généré le</strong>${generatedAt.toLocaleString('fr-FR')}</div><div><strong>Document</strong>Confidentiel</div></div></div>
 ${body}
-<div class="footer"><span>TapMarrakech · Expérience client</span><span class="conf">${escapeHtml(selected.name)} · Document confidentiel</span></div>
+<div class="footer"><span><img src="/tapmarrakech-logo.png" alt="TapMarrakech" style="height:18px;width:auto;object-fit:contain;display:block" /></span><span class="conf">${escapeHtml(selected.name)} · Document confidentiel</span></div>
 </div></body></html>`;
 
     const win = window.open('', '_blank', 'width=1000,height=900');
