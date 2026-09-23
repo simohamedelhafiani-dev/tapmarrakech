@@ -273,7 +273,7 @@ export function DashboardLayout() {
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-[270px] flex-col bg-forest px-5 py-6 text-white transition-transform lg:translate-x-0 ${
+        className={`fixed inset-y-0 z-40 flex w-[270px] flex-col bg-forest px-5 py-6 text-white transition-transform lg:translate-x-0 ${language === 'ar' ? 'right-0 left-auto' : 'left-0'} ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -398,7 +398,7 @@ export function DashboardLayout() {
         </div>
       </aside>
 
-      <div className="lg:pl-[270px]">
+      <div className={language === 'ar' ? 'lg:pr-[270px]' : 'lg:pl-[270px]'}>
         <header className="sticky top-0 z-20 flex min-h-[76px] items-center justify-between border-b border-ink/5 bg-[#f7f7f3]/95 px-4 py-3 sm:h-[88px] sm:px-6 md:h-[104px] md:px-10">
           <button
             onClick={() => setOpen(true)}
