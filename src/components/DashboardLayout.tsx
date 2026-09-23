@@ -665,8 +665,12 @@ export function DashboardLayout() {
           <Outlet />
         </main>
 
-        <footer className="px-5 pb-6 text-center text-xs font-medium text-ink/35 md:px-10">
-          {role === 'admin' ? 'TapMarrakech' : 'by Tap Marrakech'}
+        <footer className="px-5 pb-6 text-center md:px-10">
+          <img
+            src="/tapmarrakech-logo.png"
+            alt="TapMarrakech"
+            className="mx-auto h-7 w-auto object-contain opacity-75"
+          />
         </footer>
       </div>
     </div>
