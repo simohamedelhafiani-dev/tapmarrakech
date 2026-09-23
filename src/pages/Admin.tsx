@@ -32,6 +32,7 @@ import {
   Filter,
   CalendarDays,
   ShieldCheck,
+  Star,
   WalletCards,
   Trash2,
   Upload,
