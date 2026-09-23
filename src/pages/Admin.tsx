@@ -5121,12 +5121,21 @@ function BillingSection({
           filtered.map((sub) => {
             const e = establishmentMap.get(sub.establishment_id);
             return (
-              <div key={sub.id} className="grid min-w-[760px] grid-cols-[1.5fr_1fr_.8fr_1fr_1fr] gap-4 border-b border-ink/5 px-5 py-4 text-sm last:border-0">
+              <div key={sub.id} className="grid min-w-[900px] grid-cols-[1.35fr_1fr_.8fr_1fr_1fr_auto] items-center gap-4 border-b border-ink/5 px-5 py-4 text-sm last:border-0">
                 <div><p className="font-semibold">{e?.name ?? 'Établissement supprimé'}</p><p className="text-xs text-ink/35">{e?.city ?? 'Ville non définie'}</p></div>
                 <span>{sub.plan?.name ?? '—'}</span>
-                <span className={`w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold ${sub.status === 'active' ? 'bg-green-100 text-green-700' : sub.status === 'trial' ? 'bg-blue-100 text-blue-700' : sub.status === 'past_due' ? 'bg-amber-100 text-amber-700' : sub.status === 'unpaid' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-600'}`}>{sub.status}</span>
+                <span className={`w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold ${sub.status === 'active' ? 'bg-green-100 text-green-700' : sub.status === 'trial' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>{sub.status}</span>
                 <span className="font-semibold">{Number(sub.plan?.price_mad ?? 0).toLocaleString('fr-FR')} MAD</span>
                 <span className="text-ink/50">{formatDate(sub.current_period_end)}</span>
+                <button type="button" onClick={() => {
+                  setAssignmentEstablishmentId(sub.establishment_id);
+                  setAssignmentPlanId(sub.plan_id);
+                  setAssignmentStatus(sub.status === 'trial' ? 'trial' : 'active');
+                  setAssignmentTrialDays(String(Math.max(1, sub.trial_days || 14)));
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }} className="rounded-lg border border-ink/10 bg-white px-3 py-2 text-[11px] font-semibold text-forest transition hover:border-gold hover:bg-[#fdf9ef]">
+                  Modifier
+                </button>
               </div>
             );
           })
