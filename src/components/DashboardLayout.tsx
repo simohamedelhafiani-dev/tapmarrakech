@@ -22,6 +22,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useLanguage, type Language } from '@/contexts/LanguageContext';
+import { getMySubscriptionAccess, getSubscriptionTheme, type SubscriptionTheme } from '@/lib/subscriptionAccess';
 
 const links = [
   {
@@ -97,12 +98,48 @@ export function DashboardLayout() {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [lastSeenNotificationsAt, setLastSeenNotificationsAt] = useState<string | null>(null);
+  const [subscriptionTheme, setSubscriptionTheme] = useState<SubscriptionTheme>(() => getSubscriptionTheme(null));
 
   const { signOut, user, role } = useAuth();
   const { language, setLanguage } = useLanguage();
   const navigate = useNavigate();
 
   const notificationStorageKey = user?.id ? `tapmarrakech:notifications:last-seen:${user.id}` : null;
+
+  useEffect(() => {
+    let active = true;
+
+    const loadSubscriptionTheme = async () => {
+      if (role !== 'responsible') {
+        if (active) setSubscriptionTheme(getSubscriptionTheme(null));
+        return;
+      }
+
+      const accesses = await getMySubscriptionAccess();
+      const establishmentId = (() => {
+        try {
+          return user?.id ? window.localStorage.getItem(`tapmarrakech:selected-establishment:${user.id}`) : null;
+        } catch {
+          return null;
+        }
+      })();
+      const access = establishmentId
+        ? accesses.find((item) => item.establishment_id === establishmentId)
+        : accesses[0];
+
+      if (active) setSubscriptionTheme(getSubscriptionTheme(access));
+    };
+
+    void loadSubscriptionTheme();
+
+    const handleEstablishmentChanged = () => void loadSubscriptionTheme();
+    window.addEventListener('tapmarrakech:establishment-changed', handleEstablishmentChanged);
+
+    return () => {
+      active = false;
+      window.removeEventListener('tapmarrakech:establishment-changed', handleEstablishmentChanged);
+    };
+  }, [role, user?.id]);
 
   useEffect(() => {
     if (!notificationStorageKey) {
@@ -416,7 +453,7 @@ export function DashboardLayout() {
     displayName?.trim()?.[0]?.toUpperCase() || 'U';
 
   return (
-    <div className="min-h-screen bg-[#f7f7f3] text-ink">
+    <div className="min-h-screen bg-[#f7f7f3] text-ink" style={{ ["--app-primary" as string]: subscriptionTheme.primary, ["--app-primary-hover" as string]: subscriptionTheme.primaryHover, ["--app-accent" as string]: subscriptionTheme.accent }}>
       {open && (
         <button
           aria-label="Fermer le menu"
@@ -426,7 +463,7 @@ export function DashboardLayout() {
       )}
 
       <aside
-        className={`fixed inset-y-0 z-40 flex w-[248px] flex-col bg-forest px-4 py-5 text-white shadow-xl transition-transform lg:translate-x-0 ${language === 'ar' ? 'right-0 left-auto' : 'left-0'} ${
+        style={{ backgroundColor: subscriptionTheme.sidebar }}\n        className={`fixed inset-y-0 z-40 flex w-[248px] flex-col px-4 py-5 text-white shadow-xl transition-transform lg:translate-x-0 ${language === 'ar' ? 'right-0 left-auto' : 'left-0'} ${
           open ? 'translate-x-0' : language === 'ar' ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -526,7 +563,7 @@ export function DashboardLayout() {
 
         <div className="mt-auto border-t border-white/10 pt-5">
           <div className="mb-4 flex items-center gap-3 px-2">
-            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gold font-semibold text-forest">
+            <div style={{ backgroundColor: subscriptionTheme.accent, color: subscriptionTheme.primary }}\n            className="grid h-9 w-9 shrink-0 place-items-center rounded-full font-semibold">
               {avatarLetter}
             </div>
 
@@ -543,7 +580,7 @@ export function DashboardLayout() {
 
           <button
             onClick={logout}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm text-white/60 transition hover:bg-white/10 hover:text-white"
+            style={{ color: subscriptionTheme.accent }}\n            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm transition hover:bg-white/10 hover:text-white"
           >
             <LogOut size={17} />
             Se déconnecter
@@ -653,7 +690,7 @@ export function DashboardLayout() {
             onClick={() =>
               navigate('/dashboard/establishments')
             }
-            className="flex items-center gap-2 rounded-full bg-forest px-3 py-2 text-xs font-semibold text-white transition hover:bg-forest-light sm:px-4"
+            style={{ backgroundColor: subscriptionTheme.primary }}\n            className="flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold text-white transition sm:px-4"
           >
             <Building2 size={15} />
             <span className="hidden sm:inline">Gérer mes établissements</span>
