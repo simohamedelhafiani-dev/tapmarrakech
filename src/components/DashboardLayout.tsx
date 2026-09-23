@@ -463,7 +463,8 @@ export function DashboardLayout() {
       )}
 
       <aside
-        style={{ backgroundColor: subscriptionTheme.sidebar }}\n        className={`fixed inset-y-0 z-40 flex w-[248px] flex-col px-4 py-5 text-white shadow-xl transition-transform lg:translate-x-0 ${language === 'ar' ? 'right-0 left-auto' : 'left-0'} ${
+        style={{ backgroundColor: subscriptionTheme.sidebar }}
+        className={`fixed inset-y-0 z-40 flex w-[248px] flex-col px-4 py-5 text-white shadow-xl transition-transform lg:translate-x-0 ${language === 'ar' ? 'right-0 left-auto' : 'left-0'} ${
           open ? 'translate-x-0' : language === 'ar' ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
