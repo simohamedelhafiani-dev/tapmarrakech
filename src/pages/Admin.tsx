@@ -20,7 +20,6 @@ import {
   Plus,
   Save,
   Pencil,
-  LayoutTemplate,
   TrendingUp,
   DollarSign,
   UsersRound,
@@ -42,7 +41,6 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
-import Templates from '@/pages/Templates';
 import LoyaltyProgramCustomization from '@/components/LoyaltyProgramCustomization';
 
 type Establishment = {
@@ -126,7 +124,6 @@ type AdminSection =
   | 'reviews'
   | 'analysis'
   | 'ai'
-  | 'templates'
   | 'analytics'
   | 'reports'
   | 'billing'
@@ -395,11 +392,6 @@ export default function Admin() {
       icon: Brain,
     },
     {
-      id: 'templates',
-      label: 'Templates',
-      icon: LayoutTemplate,
-    },
-    {
       id: 'reports',
       label: 'Rapports PDF',
       icon: Printer,
@@ -602,8 +594,6 @@ export default function Admin() {
               reload={loadAIBusinessTypes}
             />
           )}
-
-          {section === 'templates' && <Templates />}
 
           {section === 'reports' && (
             <PDFReportsSection establishments={establishments} />
