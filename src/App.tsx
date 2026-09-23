@@ -7,6 +7,7 @@ import { DashboardLayout } from '@/components/DashboardLayout';
 import SubscriptionGuard from '@/components/SubscriptionGuard';
 import type { SubscriptionFeature } from '@/lib/subscriptionAccess';
 import { supabase } from '@/lib/supabase';
+import { LanguageProvider } from '@/contexts/LanguageContext';
 
 import PublicReview from '@/pages/PublicReview';
 import LoyaltyCard from '@/pages/LoyaltyCard';
@@ -150,9 +151,10 @@ function SubscriptionFeatureRoute({
 
 function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <Routes>
+    <LanguageProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <Routes>
           <Route path="/r/:slug" element={<PublicReview />} />
           <Route path="/loyalty" element={<LoyaltyLaunch />} />
           <Route path="/loyalty/:token" element={<LoyaltyCard />} />
@@ -243,9 +245,10 @@ function App() {
           />
 
           <Route path="*" element={<RoleRedirect />} />
-        </Routes>
-      </AuthProvider>
-    </BrowserRouter>
+          </Routes>
+        </AuthProvider>
+      </BrowserRouter>
+    </LanguageProvider>
   );
 }
 
