@@ -2,6 +2,103 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 
 export type Language = 'fr' | 'en' | 'ar';
 
+const uiTranslations: Record<string, { en: string; ar: string }> = {
+  'Vue d’ensemble': { en: 'Overview', ar: 'نظرة عامة' },
+  'Établissements': { en: 'Establishments', ar: 'المؤسسات' },
+  'Avis reçus': { en: 'Reviews', ar: 'التقييمات' },
+  'Avis clients': { en: 'Customer reviews', ar: 'تقييمات العملاء' },
+  'Fidélité': { en: 'Loyalty', ar: 'الولاء' },
+  'Programme fidélité': { en: 'Loyalty program', ar: 'برنامج الولاء' },
+  'Promotions': { en: 'Promotions', ar: 'العروض' },
+  'Analytics': { en: 'Analytics', ar: 'التحليلات' },
+  'Statistiques': { en: 'Statistics', ar: 'الإحصائيات' },
+  'Menu': { en: 'Menu', ar: 'القائمة' },
+  'Paramètres': { en: 'Settings', ar: 'الإعدادات' },
+  'Tableau de bord': { en: 'Dashboard', ar: 'لوحة التحكم' },
+  'Espace de gestion': { en: 'Management workspace', ar: 'مساحة الإدارة' },
+  'Gérer mes établissements': { en: 'Manage my establishments', ar: 'إدارة مؤسساتي' },
+  'Se déconnecter': { en: 'Sign out', ar: 'تسجيل الخروج' },
+  'Scanner fidélité': { en: 'Loyalty scanner', ar: 'ماسح الولاء' },
+  'Ouvrir': { en: 'Open', ar: 'فتح' },
+  'Copier': { en: 'Copy', ar: 'نسخ' },
+  'Annuler': { en: 'Cancel', ar: 'إلغاء' },
+  'Enregistrer': { en: 'Save', ar: 'حفظ' },
+  'Modifier': { en: 'Edit', ar: 'تعديل' },
+  'Supprimer': { en: 'Delete', ar: 'حذف' },
+  'Ajouter': { en: 'Add', ar: 'إضافة' },
+  'Créer': { en: 'Create', ar: 'إنشاء' },
+  'Rechercher': { en: 'Search', ar: 'بحث' },
+  'Filtrer': { en: 'Filter', ar: 'تصفية' },
+  'Exporter': { en: 'Export', ar: 'تصدير' },
+  'Voir tout': { en: 'View all', ar: 'عرض الكل' },
+  'Voir plus': { en: 'View more', ar: 'عرض المزيد' },
+  'Chargement…': { en: 'Loading…', ar: 'جارٍ التحميل…' },
+  'Chargement...': { en: 'Loading...', ar: 'جارٍ التحميل...' },
+  'Aucun résultat': { en: 'No results', ar: 'لا توجد نتائج' },
+  'Aucun établissement sélectionné': { en: 'No establishment selected', ar: 'لم يتم اختيار مؤسسة' },
+  'Mon établissement': { en: 'My establishment', ar: 'مؤسستي' },
+  'Avis & Réputation': { en: 'Reviews & Reputation', ar: 'التقييمات والسمعة' },
+  'Expérience client': { en: 'Customer experience', ar: 'تجربة العميل' },
+  'Performance': { en: 'Performance', ar: 'الأداء' },
+  'Clients fidélisés': { en: 'Loyal customers', ar: 'العملاء المخلصون' },
+  'Nouveaux avis': { en: 'New reviews', ar: 'تقييمات جديدة' },
+  'Note moyenne': { en: 'Average rating', ar: 'متوسط التقييم' },
+  'Derniers avis clients': { en: 'Latest customer reviews', ar: 'أحدث تقييمات العملاء' },
+  'Répondre': { en: 'Reply', ar: 'الرد' },
+  'Réponse': { en: 'Response', ar: 'الرد' },
+  'Récompenses': { en: 'Rewards', ar: 'المكافآت' },
+  'Clients': { en: 'Customers', ar: 'العملاء' },
+  'Membres': { en: 'Members', ar: 'الأعضاء' },
+  'Points': { en: 'Points', ar: 'النقاط' },
+  'Récompense': { en: 'Reward', ar: 'مكافأة' },
+  'Campagnes': { en: 'Campaigns', ar: 'الحملات' },
+  'Aujourd’hui': { en: 'Today', ar: 'اليوم' },
+  'Cette semaine': { en: 'This week', ar: 'هذا الأسبوع' },
+  'Ce mois-ci': { en: 'This month', ar: 'هذا الشهر' },
+  '7 derniers jours': { en: 'Last 7 days', ar: 'آخر 7 أيام' },
+  '30 derniers jours': { en: 'Last 30 days', ar: 'آخر 30 يوماً' },
+  '3 mois': { en: '3 months', ar: '3 أشهر' },
+  '6 mois': { en: '6 months', ar: '6 أشهر' },
+  '12 mois': { en: '12 months', ar: '12 شهراً' },
+  'Total': { en: 'Total', ar: 'الإجمالي' },
+  'Activé': { en: 'Enabled', ar: 'مفعّل' },
+  'Désactivé': { en: 'Disabled', ar: 'معطّل' },
+  'Actif': { en: 'Active', ar: 'نشط' },
+  'Inactif': { en: 'Inactive', ar: 'غير نشط' },
+  'Oui': { en: 'Yes', ar: 'نعم' },
+  'Non': { en: 'No', ar: 'لا' },
+  'Fermer': { en: 'Close', ar: 'إغلاق' },
+  'Continuer': { en: 'Continue', ar: 'متابعة' },
+  'Retour': { en: 'Back', ar: 'رجوع' },
+  'Sélectionner': { en: 'Select', ar: 'اختيار' },
+  'Nom': { en: 'Name', ar: 'الاسم' },
+  'Téléphone': { en: 'Phone', ar: 'الهاتف' },
+  'Email': { en: 'Email', ar: 'البريد الإلكتروني' },
+  'Adresse': { en: 'Address', ar: 'العنوان' },
+  'Statut': { en: 'Status', ar: 'الحالة' },
+  'Date': { en: 'Date', ar: 'التاريخ' },
+  'Actions': { en: 'Actions', ar: 'الإجراءات' },
+  'Utilisateur': { en: 'User', ar: 'المستخدم' },
+  'Responsable': { en: 'Manager', ar: 'المسؤول' },
+  'Administrateur': { en: 'Administrator', ar: 'المشرف' },
+  'Bienvenue': { en: 'Welcome', ar: 'مرحباً' },
+  'Aperçu': { en: 'Overview', ar: 'نظرة عامة' },
+  'Aucun': { en: 'None', ar: 'لا يوجد' },
+  'Enregistrer les modifications': { en: 'Save changes', ar: 'حفظ التغييرات' },
+  'Nouvelle récompense': { en: 'New reward', ar: 'مكافأة جديدة' },
+  'Créer une campagne': { en: 'Create campaign', ar: 'إنشاء حملة' },
+  'Ajouter un client': { en: 'Add customer', ar: 'إضافة عميل' },
+  'Générer un QR code': { en: 'Generate QR code', ar: 'إنشاء رمز QR' },
+};
+
+function translateUiText(value: string, language: Language) {
+  const clean = value.trim();
+  const translation = uiTranslations[clean];
+  if (!translation || language === 'fr') return value;
+  const translated = translation[language];
+  return value.replace(clean, translated);
+}
+
 const translations = {
   fr: {
     language: 'Français',
@@ -155,6 +252,33 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     document.documentElement.lang = language;
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
+
+    const translateDom = () => {
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      const nodes: Text[] = [];
+      let node: Node | null;
+      while ((node = walker.nextNode())) nodes.push(node as Text);
+      nodes.forEach((textNode) => {
+        const value = textNode.nodeValue ?? '';
+        if (!value.trim()) return;
+        const translated = translateUiText(value, language);
+        if (translated !== value) textNode.nodeValue = translated;
+      });
+
+      document.querySelectorAll<HTMLElement>('[placeholder],[title],[aria-label]').forEach((el) => {
+        for (const attr of ['placeholder', 'title', 'aria-label']) {
+          const value = el.getAttribute(attr);
+          if (!value) continue;
+          const translated = translateUiText(value, language);
+          if (translated !== value) el.setAttribute(attr, translated);
+        }
+      });
+    };
+
+    translateDom();
+    const observer = new MutationObserver(() => translateDom());
+    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+    return () => observer.disconnect();
   }, [language]);
 
   const value = useMemo(() => ({
