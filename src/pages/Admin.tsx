@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLanguage, type Language } from '@/contexts/LanguageContext';
 import {
   BarChart3,
+  Bell,
   Building2,
   Gift,
   LogOut,
@@ -633,7 +634,7 @@ function Overview({
   globalStats: GlobalStats;
 }) {
   const [selectedEstablishment, setSelectedEstablishment] = useState('all');
-  const [establishmentDetail, setEstablishmentDetail] = useState({
+  const [detail, setDetail] = useState({
     reviews: 0,
     averageRating: 0,
     loyaltyCustomers: 0,
@@ -644,7 +645,7 @@ function Overview({
 
   useEffect(() => {
     let mounted = true;
-    const loadDetail = async () => {
+    const load = async () => {
       setDetailLoading(true);
       try {
         const reviewQuery = selectedEstablishment === 'all'
@@ -665,7 +666,7 @@ function Overview({
 
         if (!mounted) return;
         const ratings = (reviews ?? []).map((row) => Number(row.rating)).filter(Number.isFinite);
-        setEstablishmentDetail({
+        setDetail({
           reviews: ratings.length,
           averageRating: ratings.length ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length : 0,
           loyaltyCustomers: loyaltyCustomers ?? 0,
@@ -673,211 +674,184 @@ function Overview({
           loyaltyRevenue: (revenueRows ?? []).reduce((sum, row) => sum + Number(row.amount ?? 0), 0),
         });
       } catch (error) {
-        console.error('Erreur vue établissement Admin:', error);
-        if (mounted) {
-          setEstablishmentDetail({
-            reviews: 0,
-            averageRating: 0,
-            loyaltyCustomers: 0,
-            analyticsEvents: 0,
-            loyaltyRevenue: 0,
-          });
-        }
+        console.error('Erreur vue Admin:', error);
       } finally {
         if (mounted) setDetailLoading(false);
       }
     };
-    loadDetail();
+    void load();
     return () => { mounted = false; };
   }, [selectedEstablishment]);
 
-  const responsibles = staff.filter(
-    (member) => member.role === 'MANAGER'
-  );
+  const responsibles = staff.filter((member) => member.role === 'MANAGER');
+  const activeSubscriptions = billing.subscriptions.filter((item) => item.status === 'active').length;
+  const selectedName = selectedEstablishment === 'all'
+    ? 'Tous les établissements'
+    : establishments.find((item) => item.id === selectedEstablishment)?.name ?? 'Établissement';
 
-  const employees = staff.filter(
-    (member) => member.role === 'STAFF'
-  );
+  const quickActions = [
+    { id: 'establishments' as AdminSection, label: 'Ajouter un établissement', icon: Building2 },
+    { id: 'responsibles' as AdminSection, label: 'Gérer les responsables', icon: UserRound },
+    { id: 'reviews' as AdminSection, label: 'Voir les avis', icon: MessageSquare },
+    { id: 'reports' as AdminSection, label: 'Générer un rapport', icon: Printer },
+  ];
+
+  const recent = establishments.slice(0, 5);
 
   return (
-    <div>
-      <div className="mb-8">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
-          Administration
-        </p>
-
-        <h2 className="font-display text-3xl text-forest md:text-4xl">
-          Bienvenue dans votre espace Admin
-        </h2>
-
-        <p className="mt-2 max-w-2xl text-sm text-ink/50">
-          Gérez les établissements, les responsables et les employés
-          de TapMarrakech depuis un seul espace.
-        </p>
-      </div>
-
-      <div className="grid gap-5 md:grid-cols-3">
-        <StatCard
-          icon={Building2}
-          label="Établissements"
-          value={loading ? '—' : establishments.length}
-        />
-
-        <StatCard
-          icon={UserRound}
-          label="Responsables"
-          value={loading ? '—' : responsibles.length}
-        />
-
-        <StatCard
-          icon={Users}
-          label="Employés"
-          value={loading ? '—' : employees.length}
-        />
-      </div>
-
-      <div className="mt-8 rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">Pilotage global</p>
-            <h3 className="mt-1 text-xl font-semibold text-forest">Vue par établissement</h3>
-            <p className="mt-1 text-xs text-ink/40">Sélectionne un établissement pour isoler ses indicateurs, ou conserve la vue globale.</p>
-          </div>
+    <div className="space-y-6">
+      <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
+        <div>
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-forest/45">Vue globale</p>
+          <h2 className="text-3xl font-semibold tracking-tight text-ink md:text-[38px]">
+            Bonjour, Administrateur 👋
+          </h2>
+          <p className="mt-2 text-sm text-ink/50">
+            Voici un aperçu de la performance de votre plateforme aujourd’hui.
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
           <select
             value={selectedEstablishment}
-            onChange={(e) => setSelectedEstablishment(e.target.value)}
-            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm font-medium outline-none focus:border-forest lg:w-80"
+            onChange={(event) => setSelectedEstablishment(event.target.value)}
+            className="rounded-xl border border-ink/10 bg-white px-4 py-3 text-xs font-semibold text-ink shadow-sm outline-none"
           >
             <option value="all">Tous les établissements</option>
-            {establishments.map((establishment) => (
-              <option key={establishment.id} value={establishment.id}>{establishment.name}</option>
-            ))}
+            {establishments.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
           </select>
         </div>
-
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-          <AdminAnalyticsCard icon={MessageSquare} label="Avis" value={detailLoading ? '—' : String(establishmentDetail.reviews)} helper={selectedEstablishment === 'all' ? 'tous établissements' : 'établissement sélectionné'} />
-          <AdminAnalyticsCard icon={BarChart3} label="Note moyenne" value={detailLoading ? '—' : establishmentDetail.averageRating.toFixed(1) + ' ★'} helper="sur 5" />
-          <AdminAnalyticsCard icon={UsersRound} label="Clients fidélité" value={detailLoading ? '—' : establishmentDetail.loyaltyCustomers.toLocaleString('fr-FR')} helper="clients enregistrés" />
-          <AdminAnalyticsCard icon={Activity} label="Événements" value={detailLoading ? '—' : establishmentDetail.analyticsEvents.toLocaleString('fr-FR')} helper="analytics" />
-          <AdminAnalyticsCard icon={DollarSign} label="CA fidélité" value={detailLoading ? '—' : establishmentDetail.loyaltyRevenue.toLocaleString('fr-FR') + ' DH'} helper="transactions EARN" />
-        </div>
-
-        <div className="mt-5 grid gap-4 md:grid-cols-3">
-          <div className="rounded-xl bg-[#f7f7f3] p-4">
-            <p className="text-xs text-ink/40">Abonnements actifs</p>
-            <p className="mt-1 text-xl font-semibold text-forest">{billing.subscriptions.filter((item) => item.status === 'active').length}</p>
-          </div>
-          <div className="rounded-xl bg-[#f7f7f3] p-4">
-            <p className="text-xs text-ink/40">MRR</p>
-            <p className="mt-1 text-xl font-semibold text-forest">{billing.available ? billing.mrr.toLocaleString('fr-FR') + ' DH' : '—'}</p>
-          </div>
-          <div className="rounded-xl bg-[#f7f7f3] p-4">
-            <p className="text-xs text-ink/40">Événements globaux</p>
-            <p className="mt-1 text-xl font-semibold text-forest">{globalStats.analyticsEvents.toLocaleString('fr-FR')}</p>
-          </div>
-        </div>
       </div>
 
-      <div className="mt-8">
-        <div className="mb-4 flex items-end justify-between gap-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">Accès rapide</p>
-            <h3 className="mt-1 text-lg font-semibold text-forest">Raccourcis administrateur</h3>
-          </div>
-          <span className="hidden text-xs text-ink/35 md:block">Accédez directement aux modules</span>
-        </div>
-
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            { id: 'establishments' as AdminSection, label: 'Établissements', description: 'Gérer les établissements', icon: Building2 },
-            { id: 'responsibles' as AdminSection, label: 'Responsables', description: 'Gérer les responsables', icon: UserRound },
-            { id: 'employees' as AdminSection, label: 'Employés', description: 'Gérer les équipes', icon: Users },
-            { id: 'reviews' as AdminSection, label: 'Avis reçus', description: 'Consulter les avis', icon: MessageSquare },
-            { id: 'analysis' as AdminSection, label: 'Analyse des avis', description: 'Analyser la réputation', icon: Brain },
-            { id: 'codes' as AdminSection, label: 'Récompenses', description: 'Gérer les codes', icon: Gift },
-            { id: 'analytics' as AdminSection, label: 'Analytics', description: 'Voir les données', icon: TrendingUp },
-            { id: 'reports' as AdminSection, label: 'Rapports PDF', description: 'Créer les rapports', icon: Printer },
-          ].map(({ id, label, description, icon: Icon }) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => onNavigate(id)}
-              className="group flex items-center gap-4 rounded-2xl border border-ink/5 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-forest/15 hover:shadow-md"
-            >
-              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-forest/10 text-forest transition group-hover:bg-forest group-hover:text-white">
-                <Icon size={19} strokeWidth={1.8} />
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-ink">{label}</p>
-                <p className="mt-1 truncate text-[11px] text-ink/40">{description}</p>
-              </div>
-            </button>
-          ))}
-        </div>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
+        <AdminMetric icon={Building2} label="Établissements" value={loading ? '—' : establishments.length} detail="sur la plateforme" />
+        <AdminMetric icon={UserRound} label="Responsables" value={loading ? '—' : responsibles.length} detail="comptes actifs" />
+        <AdminMetric icon={UsersRound} label="Clients fidélisés" value={detailLoading ? '—' : detail.loyaltyCustomers.toLocaleString('fr-FR')} detail="membres enregistrés" />
+        <AdminMetric icon={Star} label="Note moyenne" value={detailLoading ? '—' : detail.averageRating.toFixed(1)} detail={detail.reviews ? `sur ${detail.reviews.toLocaleString('fr-FR')} avis` : 'sur 0 avis'} />
+        <AdminMetric icon={MessageSquare} label="Avis reçus" value={detailLoading ? '—' : detail.reviews.toLocaleString('fr-FR')} detail={selectedName} />
+        <AdminMetric icon={WalletCards} label="MRR" value={billing.available ? `${billing.mrr.toLocaleString('fr-FR')} DH` : '—'} detail={`${activeSubscriptions} abonnements actifs`} />
       </div>
 
-      <div className="mt-8 rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
-        <h3 className="text-sm font-semibold text-ink">
-          Établissements récents
-        </h3>
+      <div className="grid gap-5 xl:grid-cols-[1.65fr_.85fr]">
+        <div className="rounded-3xl border border-ink/5 bg-white p-6 shadow-soft">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-forest/45">Pilotage</p>
+              <h3 className="mt-1 text-lg font-semibold text-ink">Performance de la plateforme</h3>
+            </div>
+            <span className="rounded-full bg-forest/5 px-3 py-1.5 text-[10px] font-semibold text-forest">Temps réel</span>
+          </div>
 
-        {loading ? (
-          <p className="mt-5 text-sm text-ink/40">
-            Chargement...
-          </p>
-        ) : establishments.length === 0 ? (
-          <p className="mt-5 text-sm text-ink/40">
-            Aucun établissement pour le moment.
-          </p>
-        ) : (
-          <div className="mt-5 space-y-3">
-            {establishments.slice(0, 5).map((establishment) => {
-              const establishmentStaff = staff.filter(
-                (member) =>
-                  member.establishment_id === establishment.id
-              );
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            <div className="rounded-2xl bg-[#f7f7f3] p-5">
+              <p className="text-xs text-ink/45">Avis</p>
+              <p className="mt-2 text-3xl font-semibold text-forest">{detailLoading ? '—' : detail.reviews.toLocaleString('fr-FR')}</p>
+              <p className="mt-1 text-[11px] text-ink/35">note moyenne {detailLoading ? '—' : detail.averageRating.toFixed(1)} / 5</p>
+            </div>
+            <div className="rounded-2xl bg-[#f7f7f3] p-5">
+              <p className="text-xs text-ink/45">Fidélité</p>
+              <p className="mt-2 text-3xl font-semibold text-forest">{detailLoading ? '—' : detail.loyaltyCustomers.toLocaleString('fr-FR')}</p>
+              <p className="mt-1 text-[11px] text-ink/35">clients actifs</p>
+            </div>
+            <div className="rounded-2xl bg-[#f7f7f3] p-5">
+              <p className="text-xs text-ink/45">Activité</p>
+              <p className="mt-2 text-3xl font-semibold text-forest">{detailLoading ? '—' : detail.analyticsEvents.toLocaleString('fr-FR')}</p>
+              <p className="mt-1 text-[11px] text-ink/35">événements analytics</p>
+            </div>
+          </div>
 
-              const manager = establishmentStaff.find(
-                (member) => member.role === 'MANAGER'
-              );
+          <div className="mt-5 rounded-2xl border border-forest/10 bg-forest p-5 text-white">
+            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-gold">Fidélité</p>
+                <h4 className="mt-1 text-lg font-semibold">Une expérience qui fait revenir les clients.</h4>
+                <p className="mt-1 text-xs text-white/55">CA fidélité sélectionné : {detail.loyaltyRevenue.toLocaleString('fr-FR')} DH</p>
+              </div>
+              <button onClick={() => onNavigate('codes')} className="rounded-xl bg-gold px-4 py-2.5 text-xs font-bold text-forest transition hover:bg-gold/90">Gérer la fidélité →</button>
+            </div>
+          </div>
+        </div>
 
-              return (
-                <div
-                  key={establishment.id}
-                  className="flex flex-col gap-4 rounded-xl bg-[#f7f7f3] px-4 py-4 md:flex-row md:items-center md:justify-between"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="grid h-9 w-9 place-items-center rounded-lg bg-forest text-white">
-                      <Building2 size={17} />
-                    </div>
-
-                    <div>
-                      <p className="text-sm font-medium">
-                        {establishment.name}
-                      </p>
-
-                      <p className="text-xs text-ink/40">
-                        /{establishment.slug}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="text-right">
-                    <p className="text-xs text-ink/45">
-                      Responsable
-                    </p>
-
-                    <p className="mt-1 text-xs font-semibold text-forest">
-                      {manager?.name ?? 'Non défini'}
-                    </p>
-                  </div>
+        <div className="rounded-3xl border border-ink/5 bg-white p-6 shadow-soft">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-forest/45">Activité</p>
+              <h3 className="mt-1 text-lg font-semibold">Derniers établissements</h3>
+            </div>
+            <button onClick={() => onNavigate('establishments')} className="text-xs font-semibold text-forest">Voir tout →</button>
+          </div>
+          <div className="mt-5 space-y-2">
+            {recent.length === 0 ? (
+              <p className="py-8 text-center text-sm text-ink/35">Aucun établissement.</p>
+            ) : recent.map((item) => (
+              <button key={item.id} onClick={() => onNavigate('establishments')} className="flex w-full items-center gap-3 rounded-xl p-3 text-left transition hover:bg-[#f7f7f3]">
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-forest/10 text-forest"><Building2 size={17} /></div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold">{item.name}</p>
+                  <p className="mt-0.5 text-[11px] text-ink/35">/{item.slug}</p>
                 </div>
-              );
-            })}
+                <span className="text-[10px] font-semibold text-forest">Ouvrir →</span>
+              </button>
+            ))}
           </div>
-        )}
+        </div>
       </div>
+
+      <div className="grid gap-5 lg:grid-cols-[1.2fr_.8fr]">
+        <div className="rounded-3xl border border-ink/5 bg-white p-6 shadow-soft">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-forest/45">Accès rapide</p>
+              <h3 className="mt-1 text-lg font-semibold">Actions administrateur</h3>
+            </div>
+          </div>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            {quickActions.map(({ id, label, icon: Icon }) => (
+              <button key={id} onClick={() => onNavigate(id)} className="group flex items-center gap-3 rounded-2xl border border-ink/5 bg-[#fbfbf8] p-4 text-left transition hover:-translate-y-0.5 hover:border-forest/15 hover:bg-white hover:shadow-sm">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-forest shadow-sm group-hover:bg-forest group-hover:text-white"><Icon size={17} /></span>
+                <span className="text-xs font-semibold">{label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-3xl border border-ink/5 bg-white p-6 shadow-soft">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-forest/45">Santé plateforme</p>
+              <h3 className="mt-1 text-lg font-semibold">Statistiques rapides</h3>
+            </div>
+            <button onClick={() => onNavigate('system')} className="text-xs font-semibold text-forest">Supervision →</button>
+          </div>
+          <div className="mt-5 space-y-3">
+            <QuickStat label="Événements analytics" value={globalStats.analyticsEvents.toLocaleString('fr-FR')} />
+            <QuickStat label="Abonnements actifs" value={String(activeSubscriptions)} />
+            <QuickStat label="Paiements échoués" value={String(billing.failedPayments)} alert={billing.failedPayments > 0} />
+            <QuickStat label="Renouvellements < 30 j." value={String(billing.upcomingRenewals)} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AdminMetric({ icon: Icon, label, value, detail }: { icon: typeof Star; label: string; value: string | number; detail: string }) {
+  return (
+    <div className="rounded-2xl border border-ink/5 bg-white p-4 shadow-soft">
+      <div className="flex items-start justify-between gap-3">
+        <div className="grid h-10 w-10 place-items-center rounded-xl bg-forest/10 text-forest"><Icon size={18} /></div>
+      </div>
+      <p className="mt-4 text-xs font-medium text-ink/45">{label}</p>
+      <p className="mt-1 text-2xl font-semibold tracking-tight text-ink">{value}</p>
+      <p className="mt-1 text-[10px] text-ink/35">{detail}</p>
+    </div>
+  );
+}
+
+function QuickStat({ label, value, alert = false }: { label: string; value: string; alert?: boolean }) {
+  return (
+    <div className="flex items-center justify-between rounded-xl bg-[#f7f7f3] px-4 py-3">
+      <span className="text-xs text-ink/50">{label}</span>
+      <span className={`text-sm font-semibold ${alert ? 'text-red-600' : 'text-forest'}`}>{value}</span>
     </div>
   );
 }
