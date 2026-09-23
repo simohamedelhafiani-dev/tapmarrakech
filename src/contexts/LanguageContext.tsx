@@ -93,12 +93,21 @@ const uiTranslations: Record<string, { en: string; ar: string }> = {
   'Générer un QR code': { en: 'Generate QR code', ar: 'إنشاء رمز QR' },
 };
 
-function translateUiText(value: string, language: Language) {
+function sourceUiText(value: string) {
   const clean = value.trim();
+  if (uiTranslations[clean]) return clean;
+  for (const [source, translation] of Object.entries(uiTranslations)) {
+    if (translation.en === clean || translation.ar === clean) return source;
+  }
+  return value;
+}
+
+function translateUiText(value: string, language: Language) {
+  const source = sourceUiText(value);
+  const clean = source.trim();
   const translation = uiTranslations[clean];
-  if (!translation || language === 'fr') return value;
-  const translated = translation[language];
-  return value.replace(clean, translated);
+  if (!translation || language === 'fr') return value.replace(value.trim(), clean);
+  return value.replace(value.trim(), translation[language]);
 }
 
 const translations = {
@@ -263,7 +272,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       nodes.forEach((textNode) => {
         const current = textNode.nodeValue ?? '';
         if (!current.trim()) return;
-        const original = originalTextNodes.get(textNode) ?? current;
+        const original = originalTextNodes.get(textNode) ?? sourceUiText(current);
         originalTextNodes.set(textNode, original);
         const translated = translateUiText(original, language);
         if (translated !== current) textNode.nodeValue = translated;
