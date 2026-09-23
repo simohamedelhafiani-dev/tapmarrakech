@@ -1700,6 +1700,8 @@ function EstablishmentWorkspace({
           </div>
         </div>
         <div className="md:col-span-2"><button disabled={saving} onClick={saveProfile} className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white">{saving ? 'Enregistrement...' : 'Enregistrer le profil'}</button></div>
+          </div>
+        </div>
       </div>}
 
       {tab === 'wifi' && <div className="max-w-xl rounded-2xl border border-ink/5 bg-white p-6 shadow-sm"><h3 className="text-lg font-semibold">Wi-Fi client</h3><p className="mt-1 mb-5 text-xs text-ink/45">Ces informations alimenteront le module Wi-Fi de la page publique.</p><div className="space-y-4"><label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">Nom du réseau</span><input value={wifi.ssid} onChange={(e) => setWifi({ ...wifi, ssid: e.target.value })} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></label><label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">Mot de passe</span><input value={wifi.password} onChange={(e) => setWifi({ ...wifi, password: e.target.value })} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></label><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={wifi.active} onChange={(e) => setWifi({ ...wifi, active: e.target.checked })} /> Module actif</label><button disabled={saving} onClick={saveWifi} className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white">Enregistrer le Wi-Fi</button></div></div>}
@@ -5597,61 +5599,3 @@ function SystemSection({
       status: billing.available ? 'ok' : 'error',
       detail: billing.available ? `${billing.subscriptions.length} abonnement${billing.subscriptions.length > 1 ? 's' : ''} chargé${billing.subscriptions.length > 1 ? 's' : ''}` : 'Tables de facturation indisponibles ou non configurées',
     };
-
-    setChecks(next);
-    setLastChecked(new Date().toISOString());
-    setChecking(false);
-  };
-
-  useEffect(() => {
-    void runChecks();
-  }, []);
-
-  const okCount = checks.filter((check) => check.status === 'ok').length;
-  const errorCount = checks.filter((check) => check.status === 'error').length;
-
-  return (
-    <div>
-      <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
-        <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">Plateforme</p>
-          <h2 className="font-display text-3xl text-forest md:text-4xl">Supervision technique</h2>
-          <p className="mt-2 max-w-2xl text-sm text-ink/50">Diagnostic en temps réel des services critiques accessibles depuis l’Admin.</p>
-        </div>
-        <button onClick={() => void runChecks()} disabled={checking} className="inline-flex items-center justify-center gap-2 rounded-xl bg-forest px-4 py-3 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">
-          <RefreshCw size={14} className={checking ? 'animate-spin' : ''} />
-          {checking ? 'Vérification…' : 'Relancer le diagnostic'}
-        </button>
-      </div>
-
-      <div className="mb-6 grid gap-4 sm:grid-cols-3">
-        <SystemMetric label="Contrôles OK" value={okCount} />
-        <SystemMetric label="Erreurs" value={errorCount} />
-        <SystemMetric label="Établissements" value={establishments.length} />
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        {checks.map(({ label, status, detail, icon: Icon }) => (
-          <div key={label} className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
-            <div className="flex items-start justify-between gap-4">
-              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-forest/10 text-forest"><Icon size={20} /></div>
-              <span className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${
-                status === 'ok' ? 'bg-green-100 text-green-700' : status === 'error' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
-              }`}>{status === 'ok' ? 'Opérationnel' : status === 'error' ? 'Erreur' : 'Vérification…'}</span>
-            </div>
-            <h3 className="mt-5 text-base font-semibold">{label}</h3>
-            <p className="mt-2 break-words text-xs leading-5 text-ink/45">{detail}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-6 rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
-        <div className="flex items-center gap-3"><Filter size={17} className="text-forest" /><h3 className="font-semibold">État global</h3></div>
-        <div className="mt-4 rounded-xl bg-[#f7f7f3] p-4 text-sm">
-          {errorCount === 0 && checks.length > 0 ? <span className="font-semibold text-forest">Tous les contrôles exécutés sont opérationnels.</span> : <span className="font-semibold text-[#a15c50]">{errorCount} contrôle{errorCount > 1 ? 's' : ''} nécessite{errorCount > 1 ? 'nt' : ''} une vérification.</span>}
-        </div>
-        <div className="mt-4 grid gap-3 md:grid-cols-3">
-          <SystemMetric label="Avis" value={globalStats.reviews} />
-          <SystemMetric label="Événements" value={globalStats.analyticsEvents} />
-          <SystemMetric label="Abonnements" value={billing.available ? billing.subscriptions.length : 0} />
-        </div>
