@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { LoyaltyCardVisual } from '@/components/LoyaltyCardVisual';
+import { LoyaltyExperience, type LoyaltyExperienceConfig } from '@/components/loyalty/LoyaltyExperience';
 
 type TemplateKind = 'page' | 'menu' | 'loyalty';
 
@@ -149,6 +150,73 @@ function prettyJson(value: Record<string, any>) {
   return JSON.stringify(value, null, 2);
 }
 
+function TemplateVisualPreview({ template, compact = false }: { template: Template; compact?: boolean }) {
+  const c = template.config || {};
+  if (template.kind === 'loyalty') {
+    const config: LoyaltyExperienceConfig = {
+      type: c.mode === 'STAMP' ? 'STAMP' : 'POINTS',
+      stampStyle: c.stampStyle || 'circles',
+      templateId: c.key || template.id,
+      businessType: 'restaurant',
+      establishmentName: 'Votre établissement',
+      logoUrl: null,
+      coverImageUrl: c.background_image_url || null,
+      primaryColor: c.primary || '#173D32',
+      secondaryColor: c.secondary || '#D3A84C',
+      backgroundColor: c.background || '#F7F7F3',
+      textColor: c.text || '#FFFFFF',
+      borderRadius: Number(c.radius || 28),
+      customerName: 'Mohamed Elhafiani',
+      pointsBalance: 720,
+      pointsGoal: 1000,
+      visits: 6,
+      visitGoal: 10,
+      rewardName: 'Manucure offerte',
+      rewardDescription: 'Encore quelques visites avant votre prochaine récompense.',
+      intro: c.subtitle || 'Votre fidélité mérite une expérience à part.',
+      currentTier: 'Gold',
+      benefits: [
+        { title: 'Offre anniversaire', description: 'Une attention spéciale le jour J.' },
+        { title: 'Invitations privées', description: 'Accès aux nouveautés avant les autres.' },
+        { title: 'Accès prioritaire', description: 'Un traitement privilégié lors de vos visites.' },
+      ],
+      rewards: [],
+      offers: [],
+      compact: Boolean(compact),
+    };
+    return <LoyaltyExperience config={config} />;
+  }
+
+  if (template.kind === 'menu') {
+    const theme = c.theme || {};
+    return (
+      <div className={`overflow-hidden rounded-[24px] bg-white shadow-xl ${compact ? 'h-[190px]' : ''}`} style={{ background: theme.background || '#F7F3EA' }}>
+        <div className={`relative p-6 ${compact ? 'h-[105px]' : 'h-44'}`} style={{ background: c.background_image_url ? `linear-gradient(#173F35aa,#173F35aa),url(${c.background_image_url}) center/cover` : theme.primary || '#173F35' }}>
+          <p className="text-[9px] uppercase tracking-[.28em]" style={{ color: theme.accent || '#C9A45C' }}>LA CARTE</p>
+          <h4 className={`mt-2 font-serif text-white ${compact ? 'text-xl' : 'text-3xl'}`}>Maison & saveurs</h4>
+        </div>
+        <div className={`grid gap-2 p-4 ${compact ? 'grid-cols-2' : 'sm:grid-cols-2'}`}>
+          {['Entrées','Plats','Desserts','Boissons'].map(item => <div key={item} className="rounded-xl border border-black/10 bg-white p-3"><p className="text-xs font-semibold" style={{ color: theme.primary || '#173F35' }}>{item}</p><p className="mt-1 text-[9px] text-black/40">Sélection de la maison</p>{!compact && <p className="mt-2 text-xs font-semibold">À partir de 85 MAD</p>}</div>)}
+        </div>
+      </div>
+    );
+  }
+
+  const theme = c.theme || {};
+  return (
+    <div className={`overflow-hidden rounded-[24px] bg-white shadow-xl ${compact ? 'h-[190px]' : ''}`}>
+      <div className={`p-6 ${compact ? 'h-[105px]' : 'h-44'}`} style={{ background: theme.primary || '#173F35' }}>
+        <p className="text-[9px] uppercase tracking-[.28em]" style={{ color: theme.accent || '#C9A45C' }}>EXPÉRIENCE CLIENT</p>
+        <h4 className={`mt-3 font-serif text-white ${compact ? 'text-xl' : 'text-3xl'}`}>Votre établissement</h4>
+      </div>
+      <div className="grid gap-2 p-4 sm:grid-cols-2">
+        {['Avis','WhatsApp','Itinéraire','Appeler'].map(item => <div key={item} className="rounded-xl border border-black/10 p-3 text-xs font-semibold">{item}</div>)}
+      </div>
+    </div>
+  );
+}
+
+
 export default function Templates() {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [establishments, setEstablishments] = useState<Establishment[]>([]);
@@ -159,6 +227,7 @@ export default function Templates() {
   const [previewing, setPreviewing] = useState<Template | null>(null);
   const [editorTab, setEditorTab] = useState<'preview' | 'design'>('preview');
   const [uploadingWallpaper, setUploadingWallpaper] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -207,6 +276,13 @@ export default function Templates() {
   useEffect(() => {
     load();
   }, []);
+
+  useEffect(() => {
+    setSelectedTemplate((current) => {
+      if (current && filteredTemplates.some((template) => template.id === current.id)) return current;
+      return filteredTemplates[0] ?? null;
+    });
+  }, [kind, templates]);
 
   const resetForm = () => {
     setEditing(null);
@@ -697,166 +773,144 @@ export default function Templates() {
       )}
 
       <section>
-        <div className="mb-4 flex items-center justify-between">
-          <div>
-            <h2 className="font-display text-2xl text-forest">
-              {kind === 'page' ? 'Templates de page' : kind === 'menu' ? 'Templates de menu' : 'Templates fidélité'}
-            </h2>
-            <p className="mt-1 text-xs text-ink/40">
-              {filteredTemplates.length} template(s)
-            </p>
-          </div>
+        <div className="mb-4">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">Bibliothèque</p>
+          <h2 className="mt-1 font-display text-2xl text-forest">
+            {kind === 'page' ? 'Templates de page' : kind === 'menu' ? 'Templates de menu' : 'Templates fidélité'}
+          </h2>
+          <p className="mt-1 text-xs text-ink/40">Choisis un modèle pour voir son rendu, le personnaliser et l'utiliser comme base.</p>
         </div>
 
         {loading ? (
-          <div className="rounded-2xl border border-ink/10 bg-white p-8 text-center text-sm text-ink/40">
-            Chargement...
-          </div>
+          <div className="rounded-2xl border border-ink/10 bg-white p-8 text-center text-sm text-ink/40">Chargement...</div>
         ) : filteredTemplates.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-ink/15 bg-white p-10 text-center">
             <p className="text-sm font-semibold text-forest">Aucun template</p>
             <p className="mt-1 text-xs text-ink/40">Crée ton premier template.</p>
           </div>
         ) : (
-          <div className="grid gap-5 xl:grid-cols-2">
-            {filteredTemplates.map((template) => (
-              <article
-                key={template.id}
-                className="overflow-hidden rounded-2xl border border-ink/10 bg-white shadow-sm"
-              >
-                <div className="flex min-h-[150px] items-center justify-center bg-[#f7f7f3] p-6">
-                  {template.thumbnail_url ? (
-                    <img
-                      src={template.thumbnail_url}
-                      alt=""
-                      className="h-28 w-full rounded-xl object-cover"
-                    />
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(430px,.95fr)]">
+            <div className="rounded-[24px] border border-ink/10 bg-white p-5 shadow-sm">
+              <div className="mb-4 flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">Modèles</p>
+                  <p className="mt-1 text-xs text-ink/40">{filteredTemplates.length} modèles disponibles</p>
+                </div>
+                <button onClick={startCreate} className="inline-flex items-center gap-2 rounded-xl bg-forest px-3 py-2 text-xs font-semibold text-white">
+                  <Plus size={14}/> Nouveau
+                </button>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                {filteredTemplates.map((template) => {
+                  const selected = selectedTemplate?.id === template.id;
+                  return (
+                    <button
+                      key={template.id}
+                      type="button"
+                      onClick={() => { setSelectedTemplate(template); setEditorTab('preview'); }}
+                      className={`overflow-hidden rounded-2xl border text-left transition ${selected ? 'border-forest ring-2 ring-forest/10' : 'border-ink/10 hover:border-forest/30'}`}
+                    >
+                      <TemplateVisualPreview template={template} compact />
+                      <div className="border-t border-ink/10 bg-white p-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <p className="text-sm font-semibold text-forest">{template.name}</p>
+                            <p className="mt-1 line-clamp-2 text-[10px] leading-4 text-ink/40">{template.description || 'Aucune description.'}</p>
+                          </div>
+                          {selected && <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-forest text-white"><Check size={13}/></span>}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {selectedTemplate && (
+              <div className="overflow-hidden rounded-[24px] border border-ink/10 bg-white shadow-sm">
+                <div className="flex items-center justify-between border-b border-ink/10 px-5 py-4">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">Aperçu en temps réel</p>
+                    <h3 className="mt-1 font-display text-xl text-forest">{selectedTemplate.name}</h3>
+                    <p className="mt-1 text-xs text-ink/40">Voici le rendu de base du template.</p>
+                  </div>
+                  <span className="rounded-full bg-forest/5 px-3 py-1.5 text-[10px] font-semibold text-forest">
+                    {selectedTemplate.kind === 'loyalty' ? 'Fidélité' : selectedTemplate.kind === 'menu' ? 'Menu' : 'Page'}
+                  </span>
+                </div>
+
+                <div className="min-h-[500px] bg-[#f7f7f3] p-5">
+                  <div className="mx-auto max-w-[470px]">
+                    <TemplateVisualPreview template={selectedTemplate} />
+                  </div>
+                </div>
+
+                <div className="border-t border-ink/10 p-5">
+                  <div className="mb-4 flex rounded-xl bg-[#f7f7f3] p-1">
+                    <button onClick={() => setEditorTab('preview')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab === 'preview' ? 'bg-white text-forest shadow-sm' : 'text-ink/45'}`}>Aperçu</button>
+                    <button onClick={() => setEditorTab('design')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab === 'design' ? 'bg-white text-forest shadow-sm' : 'text-ink/45'}`}>Modifier</button>
+                  </div>
+
+                  {editorTab === 'design' ? (
+                    <div className="space-y-4">
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <label className="text-xs font-semibold text-ink/55">Nom
+                          <input value={selectedTemplate.name} onChange={e => { const next={...selectedTemplate,name:e.target.value}; setSelectedTemplate(next); setName(e.target.value); }} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm"/>
+                        </label>
+                        <label className="text-xs font-semibold text-ink/55">Rayon
+                          <input type="number" min="0" max="40" value={Number(selectedTemplate.config?.radius || 24)} onChange={e => { const config={...selectedTemplate.config,radius:Number(e.target.value)}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm"/>
+                        </label>
+                      </div>
+
+                      {selectedTemplate.kind === 'loyalty' && (
+                        <>
+                          <div className="grid grid-cols-2 gap-3">
+                            {['primary','secondary','background','text'].map(key => (
+                              <label key={key} className="text-xs font-semibold text-ink/55">{key}
+                                <input type="color" value={String(selectedTemplate.config?.[key] || '#173D32')} onChange={e => { const config={...selectedTemplate.config,[key]:e.target.value}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 h-10 w-full cursor-pointer rounded-lg border border-ink/10"/>
+                              </label>
+                            ))}
+                          </div>
+                          <label className="text-xs font-semibold text-ink/55">Titre
+                            <input value={String(selectedTemplate.config?.title || '')} onChange={e => { const config={...selectedTemplate.config,title:e.target.value}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"/>
+                          </label>
+                          <label className="text-xs font-semibold text-ink/55">Sous-titre
+                            <textarea rows={2} value={String(selectedTemplate.config?.subtitle || '')} onChange={e => { const config={...selectedTemplate.config,subtitle:e.target.value}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"/>
+                          </label>
+                        </>
+                      )}
+
+                      {selectedTemplate.kind === 'menu' && (
+                        <div className="grid grid-cols-2 gap-3">
+                          {['primary','accent','background'].map(key => (
+                            <label key={key} className="text-xs font-semibold text-ink/55">{key}
+                              <input type="color" value={String(selectedTemplate.config?.theme?.[key] || (key === 'primary' ? '#173F35' : key === 'accent' ? '#C9A45C' : '#F7F3EA'))} onChange={e => { const config={...selectedTemplate.config,theme:{...(selectedTemplate.config?.theme || {}),[key]:e.target.value}}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 h-10 w-full cursor-pointer rounded-lg border border-ink/10"/>
+                            </label>
+                          ))}
+                        </div>
+                      )}
+
+                      <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-gold/40 bg-gold/5 px-4 py-4 text-xs font-semibold text-forest">
+                        <span>{uploadingWallpaper ? 'Upload...' : 'Ajouter un wallpaper / photo'}</span>
+                        <input type="file" accept="image/*" className="hidden" disabled={uploadingWallpaper} onChange={e => { const file=e.target.files?.[0]; if(file) void uploadTemplateWallpaper(file); e.currentTarget.value=''; }}/>
+                      </label>
+
+                      <div className="flex gap-2">
+                        <button onClick={() => void saveVisualEditor()} className="flex-1 rounded-xl bg-forest px-4 py-3 text-sm font-semibold text-white">Enregistrer les modifications</button>
+                        <button onClick={() => void startEdit(selectedTemplate)} className="rounded-xl border border-ink/10 px-4 py-3 text-sm font-semibold text-ink/55">Ouvrir l'éditeur complet</button>
+                      </div>
+                    </div>
                   ) : (
-                    <div className="grid h-28 w-full place-items-center rounded-xl border border-dashed border-ink/10">
-                      {kind === 'page' ? <LayoutTemplate className="text-gold" size={34} /> : kind === 'menu' ? <Menu className="text-gold" size={34} /> : <Star className="text-gold" size={34} />}
+                    <div className="flex flex-wrap gap-2">
+                      <button onClick={() => setEditorTab('design')} className="rounded-xl bg-forest px-4 py-3 text-xs font-semibold text-white"><Pencil size={14} className="mr-1 inline"/> Modifier le template</button>
+                      <button onClick={() => void startEdit(selectedTemplate)} className="rounded-xl border border-ink/10 px-4 py-3 text-xs font-semibold text-ink/55">Éditeur avancé</button>
+                      <button onClick={() => void duplicate(selectedTemplate)} className="rounded-xl border border-ink/10 px-4 py-3 text-xs font-semibold text-ink/55"><Copy size={14} className="mr-1 inline"/> Dupliquer</button>
                     </div>
                   )}
                 </div>
-
-                <div className="p-5">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-display text-xl text-forest">{template.name}</h3>
-                        {template.is_default && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-gold/15 px-2.5 py-1 text-[10px] font-semibold text-forest">
-                            <Star size={11} />
-                            Défaut
-                          </span>
-                        )}
-                        <span
-                          className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
-                            template.active
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-red-100 text-red-700'
-                          }`}
-                        >
-                          {template.active ? 'Actif' : 'Inactif'}
-                        </span>
-                        {template.source === 'builtin' && <span className="rounded-full bg-forest/5 px-2.5 py-1 text-[10px] font-semibold text-forest">Système</span>}
-                      </div>
-                      <p className="mt-2 text-xs leading-5 text-ink/45">
-                        {template.description || 'Aucune description.'}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    <button
-                      onClick={() => { setPreviewing(template); setEditorTab('preview'); setConfigText(prettyJson(template.config || {})); }}
-                      className="inline-flex items-center gap-2 rounded-lg bg-forest px-3 py-2 text-xs font-semibold text-white"
-                    >
-                      <Eye size={14} />
-                      Voir & personnaliser
-                    </button>
-                    <button
-                      onClick={() => startEdit(template)}
-                      className="inline-flex items-center gap-2 rounded-lg border border-ink/10 px-3 py-2 text-xs font-semibold text-ink/60 hover:bg-[#f7f7f3]"
-                    >
-                      <Pencil size={14} />
-                      Modifier
-                    </button>
-                    <button
-                      onClick={() => duplicate(template)}
-                      className="inline-flex items-center gap-2 rounded-lg border border-ink/10 px-3 py-2 text-xs font-semibold text-ink/60 hover:bg-[#f7f7f3]"
-                    >
-                      <Copy size={14} />
-                      Dupliquer
-                    </button>
-                    <button
-                      onClick={() => toggleActive(template)}
-                      className="inline-flex items-center gap-2 rounded-lg border border-ink/10 px-3 py-2 text-xs font-semibold text-ink/60 hover:bg-[#f7f7f3]"
-                    >
-                      <Power size={14} />
-                      {template.active ? 'Désactiver' : 'Activer'}
-                    </button>
-                    {!template.is_default && (
-                      <button
-                        onClick={() => makeDefault(template)}
-                        className="inline-flex items-center gap-2 rounded-lg border border-gold/30 px-3 py-2 text-xs font-semibold text-forest hover:bg-gold/10"
-                      >
-                        <Check size={14} />
-                        Définir par défaut
-                      </button>
-                    )}
-                    <button
-                      onClick={() => remove(template)}
-                      className="inline-flex items-center gap-2 rounded-lg border border-red-100 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50"
-                    >
-                      <Trash2 size={14} />
-                      Supprimer
-                    </button>
-                  </div>
-
-                  {kind !== 'loyalty' && <div className="mt-5 border-t border-ink/5 pt-4">
-                    <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink/35">
-                      Affectation aux établissements
-                    </p>
-                    <div className="space-y-2">
-                      {establishments.length === 0 ? (
-                        <p className="text-xs text-ink/35">Aucun établissement.</p>
-                      ) : (
-                        establishments.map((establishment) => {
-                          const templateValue = template.source === 'builtin' ? String(template.config?.key || '') : template.id;
-                          const selected = establishment[currentColumn] === templateValue;
-
-                          return (
-                            <div
-                              key={establishment.id}
-                              className="flex items-center justify-between gap-3 rounded-xl bg-[#f7f7f3] px-3 py-2"
-                            >
-                              <span className="truncate text-xs font-medium text-ink">
-                                {establishment.name}
-                              </span>
-                              <button
-                                onClick={() =>
-                                  assign(
-                                    establishment.id,
-                                    selected ? '' : templateValue
-                                  )
-                                }
-                                className={`shrink-0 rounded-lg px-3 py-1.5 text-[10px] font-semibold ${
-                                  selected
-                                    ? 'bg-forest text-white'
-                                    : 'border border-ink/10 bg-white text-ink/55'
-                                }`}
-                              >
-                                {selected ? 'Affecté' : 'Affecter'}
-                              </button>
-                            </div>
-                          );
-                        })
-                      )}
-                    </div>
-                  </div>}
-                </div>
-              </article>
-            ))}
+              </div>
+            )}
           </div>
         )}
       </section>
