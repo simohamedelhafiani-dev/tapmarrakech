@@ -120,7 +120,6 @@ type AdminSection =
   | 'establishments'
   | 'responsibles'
   | 'employees'
-  | 'codes'
   | 'reviews'
   | 'analysis'
   | 'ai'
@@ -377,11 +376,6 @@ export default function Admin() {
       icon: Brain,
     },
     {
-      id: 'codes',
-      label: 'Codes récompenses',
-      icon: Gift,
-    },
-    {
       id: 'analytics',
       label: 'Pilotage Analytics',
       icon: TrendingUp,
@@ -575,13 +569,6 @@ export default function Admin() {
 
           {section === 'analysis' && (
             <ReviewAnalysisSection establishments={establishments} />
-          )}
-
-          {section === 'codes' && (
-            <RewardCodesSection
-              establishments={establishments}
-              responsibleMembers={responsibleMembers}
-            />
           )}
 
           {section === 'analytics' && (
