@@ -127,13 +127,13 @@ export default function Establishments() {
   }, [user, role]);
 
   const publicUrl = (slug: string) =>
-    `${window.location.origin}/r/${slug}`;
+    `${window.location.origin}/p/${slug}`;
 
   const publicLinks = (place: Establishment) => [
     { key: 'home', title: 'Page établissement', description: 'Page publique complète de l’établissement', url: publicUrl(place.slug), icon: Building2 },
-    { key: 'loyalty', title: 'Programme fidélité', description: 'Accès direct à l’inscription et à la fidélité', url: publicUrl(place.slug) + '?section=loyalty', icon: Gift },
-    { key: 'menu', title: 'Menu digital', description: 'Ouvre directement le menu', url: publicUrl(place.slug) + '?section=menu', icon: UtensilsCrossed },
-    { key: 'reviews', title: 'Avis Google', description: 'Ouvre directement le parcours de collecte d’avis', url: publicUrl(place.slug) + '?section=reviews', icon: Star },
+    { key: 'loyalty', title: 'Programme fidélité', description: 'Accès direct à l’inscription et à la fidélité', url: publicUrl(place.slug) + '/loyalty', icon: Gift },
+    { key: 'menu', title: 'Menu digital', description: 'Ouvre directement le menu', url: publicUrl(place.slug) + '/menu', icon: UtensilsCrossed },
+    { key: 'reviews', title: 'Avis Google', description: 'Ouvre directement le parcours de collecte d’avis', url: publicUrl(place.slug) + '/reviews', icon: Star },
   ];
 
   const save = async (e: React.FormEvent) => {
@@ -528,7 +528,7 @@ export default function Establishments() {
 
               <div className="mt-5 flex flex-wrap gap-2 border-t border-ink/5 pt-4">
                 <a
-                  href={`/r/${place.slug}?section=menu`}
+                  href={`/p/${place.slug}/menu`}
                   target="_blank"
                   rel="noreferrer"
                   className="flex items-center gap-1.5 rounded-lg bg-forest px-3 py-2 text-[11px] font-semibold text-white"
@@ -538,7 +538,7 @@ export default function Establishments() {
                 </a>
 
                 <a
-                  href={`/r/${place.slug}`}
+                  href={`/p/${place.slug}`}
                   target="_blank"
                   rel="noreferrer"
                   className="flex items-center gap-1.5 rounded-lg bg-[#f7f7f3] px-3 py-2 text-[11px] font-semibold text-forest"
