@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import QRCode from 'qrcode';
 import { useLanguage, type Language } from '@/contexts/LanguageContext';
 import {
   BarChart3,
@@ -1034,6 +1035,7 @@ function EstablishmentWorkspace({
 
   const publicLink = `${window.location.origin}/p/${establishment.slug}`;
   const [scannerLink, setScannerLink] = useState<string | null>(null);
+  const [scannerQr, setScannerQr] = useState<string | null>(null);
   const businessType = businessTypes.find((x) => x.id === establishment.ai_business_type_id)?.name ?? profile.business_type ?? 'Établissement';
 
   const loadTab = async () => {
@@ -1140,11 +1142,30 @@ function EstablishmentWorkspace({
       if (error) {
         console.error('Erreur chargement lien scanner:', error);
         setScannerLink(null);
+        setScannerQr(null);
         return;
       }
 
       const token = data?.access_token;
-      setScannerLink(token ? window.location.origin + '/employee?scanner=' + encodeURIComponent(token) : null);
+      const link = token ? window.location.origin + '/employee?scanner=' + encodeURIComponent(token) : null;
+      setScannerLink(link);
+
+      if (link) {
+        try {
+          const qr = await QRCode.toDataURL(link, {
+            width: 320,
+            margin: 2,
+            errorCorrectionLevel: 'M',
+            color: { dark: '#173D32', light: '#FFFFFF' },
+          });
+          if (mounted) setScannerQr(qr);
+        } catch (qrError) {
+          console.error('Erreur génération QR scanner:', qrError);
+          if (mounted) setScannerQr(null);
+        }
+      } else {
+        setScannerQr(null);
+      }
     };
 
     void loadScannerLink();
@@ -1599,25 +1620,58 @@ function EstablishmentWorkspace({
 
   return (
     <div>
-      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div><button onClick={onBack} className="mb-3 text-xs font-semibold text-forest">← Retour aux établissements</button><h2 className="font-display text-3xl text-forest">{profile.name ?? establishment.name}</h2><p className="mt-1 text-sm text-ink/45">{businessType} · espace de gestion complet</p></div>
-        <div className="flex flex-wrap gap-2">
-          {scannerLink && <a href={scannerLink} target="_blank" rel="noreferrer" className="rounded-xl border border-gold/30 bg-white px-4 py-3 text-xs font-semibold text-forest">Scanner fidélité ↗</a>}
-          <a href={publicLink} target="_blank" rel="noreferrer" className="rounded-xl bg-forest px-4 py-3 text-center text-xs font-semibold text-white">Ouvrir la page publique ↗</a>
+      <div className="relative mb-6 overflow-hidden rounded-[30px] border border-ink/5 bg-white p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] sm:p-8">
+        <div className="absolute right-0 top-0 h-44 w-44 rounded-full bg-gold/10 blur-3xl" />
+        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <button onClick={onBack} className="mb-5 inline-flex items-center gap-2 text-[11px] font-semibold text-forest/65 transition hover:text-forest">← Retour aux établissements</button>
+            <div className="flex items-center gap-4">
+              <div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-forest text-2xl font-display text-gold shadow-lg shadow-forest/10">
+                {(profile.name ?? establishment.name)?.[0]?.toUpperCase()}
+              </div>
+              <div>
+                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">Espace établissement</p>
+                <h2 className="font-display text-3xl tracking-tight text-forest sm:text-4xl">{profile.name ?? establishment.name}</h2>
+                <p className="mt-1 text-xs text-ink/40">{businessType} · espace de gestion complet</p>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {scannerLink && <a href={scannerLink} target="_blank" rel="noreferrer" className="rounded-xl border border-gold/30 bg-[#fdf9ef] px-4 py-3 text-xs font-semibold text-forest transition hover:border-gold hover:bg-white">Scanner fidélité ↗</a>}
+            <a href={publicLink} target="_blank" rel="noreferrer" className="rounded-xl bg-forest px-4 py-3 text-center text-xs font-semibold text-white shadow-lg shadow-forest/10 transition hover:bg-forest-light">Ouvrir la page publique ↗</a>
+          </div>
         </div>
       </div>
 
-      <div className="mb-6 rounded-2xl border border-gold/20 bg-[#fbf8ee] p-5 shadow-sm">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-forest">Scanner fidélité</p>
-            <p className="mt-1 text-xs text-ink/50">Lien permanent à donner aux employés pour scanner les cartes et ajouter les points.</p>
-            <p className="mt-2 break-all text-[11px] text-ink/35">{scannerLink ?? 'Génération du lien…'}</p>
+      <div className="mb-6 overflow-hidden rounded-[28px] border border-forest/10 bg-forest text-white shadow-[0_18px_55px_rgba(23,61,50,0.14)]">
+        <div className="grid lg:grid-cols-[1fr_210px]">
+          <div className="relative p-6 sm:p-7">
+            <div className="absolute -right-20 -top-20 h-52 w-52 rounded-full bg-gold/10 blur-3xl" />
+            <div className="relative">
+              <div className="flex items-center gap-2">
+                <span className="grid h-9 w-9 place-items-center rounded-xl bg-gold text-forest"><Gift size={16} /></span>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold">Accès équipe</p>
+                  <h3 className="mt-1 text-lg font-semibold">Scanner fidélité</h3>
+                </div>
+              </div>
+              <p className="mt-4 max-w-xl text-xs leading-5 text-white/60">Le responsable peut scanner ce QR code directement avec son téléphone pour ouvrir l’espace de scan et ajouter les points aux cartes clients.</p>
+              <div className="mt-5 flex flex-wrap gap-2">
+                {scannerLink && <button type="button" onClick={() => navigator.clipboard.writeText(scannerLink).then(() => alert('Lien scanner copié.'))} className="rounded-xl bg-white px-4 py-2.5 text-xs font-semibold text-forest transition hover:bg-white/90">Copier le lien</button>}
+                {scannerLink && <a href={scannerLink} target="_blank" rel="noreferrer" className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-white/15">Ouvrir le scanner ↗</a>}
+              </div>
+              <p className="mt-4 break-all text-[10px] text-white/30">{scannerLink ?? 'Génération du lien sécurisé…'}</p>
+            </div>
           </div>
-          {scannerLink && <div className="flex gap-2">
-            <button type="button" onClick={() => navigator.clipboard.writeText(scannerLink).then(() => alert('Lien scanner copié.'))} className="rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Copier le lien</button>
-            <a href={scannerLink} target="_blank" rel="noreferrer" className="rounded-xl border border-ink/10 bg-white px-4 py-2.5 text-xs font-semibold text-forest">Ouvrir</a>
-          </div>}
+          <div className="flex items-center justify-center border-t border-white/10 bg-white/[0.04] p-5 lg:border-l lg:border-t-0">
+            {scannerQr ? (
+              <div className="rounded-[22px] bg-white p-3 shadow-xl shadow-black/10">
+                <img src={scannerQr} alt="QR code du scanner fidélité" className="h-40 w-40 rounded-xl" />
+              </div>
+            ) : (
+              <div className="grid h-40 w-40 place-items-center rounded-[22px] border border-white/10 bg-white/5 text-center text-[10px] text-white/35">QR en cours…</div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -1625,10 +1679,13 @@ function EstablishmentWorkspace({
         {tabs.map((x) => <button key={x.id} onClick={() => setTab(x.id)} className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-xs font-semibold ${tab === x.id ? 'bg-forest text-white' : 'text-ink/55 hover:bg-[#f7f7f3]'}`}>{x.label}</button>)}
       </div>
 
-      {tab === 'profile' && <div className="grid gap-4 md:grid-cols-2">
+      {tab === 'profile' && <div className="space-y-5">
+        <div className="rounded-[26px] border border-ink/5 bg-white p-6 shadow-[0_12px_40px_rgba(15,23,42,0.045)]">
+          <div className="mb-5 flex items-center justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Identité</p><h3 className="mt-1 text-lg font-semibold text-forest">Informations de l’établissement</h3></div><span className="rounded-full bg-forest/5 px-3 py-1.5 text-[10px] font-semibold text-forest">Profil</span></div>
+          <div className="grid gap-4 md:grid-cols-2">
         {field('Nom', 'name')}{field('Slug public', 'slug')}{field('Adresse', 'address')}{field('Ville', 'city')}{field('Téléphone', 'phone')}{field('Email', 'email', 'email')}{field('Site web', 'website_url')}{field('WhatsApp', 'whatsapp_number')}{field('Instagram', 'instagram_url')}{field('Facebook', 'facebook_url')}{field('TikTok', 'tiktok_url')}
-        <label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">Type</span><select value={profile.ai_business_type_id ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, ai_business_type_id: e.target.value || null }))} className="w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm">{businessTypes.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
-        <label className="block md:col-span-2"><span className="mb-1 block text-xs font-medium text-ink/50">Description</span><textarea value={profile.description ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, description: e.target.value }))} rows={4} className="w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm" /></label>
+        <label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">Type</span><select value={profile.ai_business_type_id ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, ai_business_type_id: e.target.value || null }))} className="w-full rounded-xl border border-ink/10 bg-[#fbfbf8] px-3 py-3 text-sm outline-none focus:border-forest/30">{businessTypes.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
+        <label className="block md:col-span-2"><span className="mb-1 block text-xs font-medium text-ink/50">Description</span><textarea value={profile.description ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, description: e.target.value }))} rows={4} className="w-full rounded-xl border border-ink/10 bg-[#fbfbf8] px-3 py-3 text-sm outline-none focus:border-forest/30" /></label>
         <div className="md:col-span-2 rounded-2xl border border-ink/5 bg-[#f7f7f3] p-5">
           <div className="flex flex-col gap-4 md:flex-row md:items-center">
             <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-2xl bg-forest text-2xl font-semibold text-gold">
@@ -5598,8 +5655,3 @@ function SystemSection({
           <SystemMetric label="Événements" value={globalStats.analyticsEvents} />
           <SystemMetric label="Abonnements" value={billing.available ? billing.subscriptions.length : 0} />
         </div>
-        <p className="mt-4 text-xs leading-5 text-ink/40">Dernier diagnostic : {lastChecked ? new Date(lastChecked).toLocaleString('fr-FR') : 'en cours'}. Les métriques d’uptime et de temps de chargement restent distinctes d’un diagnostic fonctionnel.</p>
-      </div>
-    </div>
-  );
-}
