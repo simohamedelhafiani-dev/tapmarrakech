@@ -16,12 +16,14 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { useLanguage, type Language } from '@/contexts/LanguageContext';
 
 type LoginRole = 'admin' | 'responsible' | null;
 
 export default function Login() {
   const navigate = useNavigate();
   const { user, role, loading } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
 
   const [selectedRole, setSelectedRole] = useState<LoginRole>(null);
   const [email, setEmail] = useState('');
@@ -113,26 +115,26 @@ export default function Login() {
                 <p className="mt-2 text-xs text-white/75">L’expérience client, c’est un atout.</p>
               </div>
               <span className="hidden rounded-full border border-[#d3a84c]/45 px-4 py-2 text-[9px] font-bold uppercase tracking-[0.25em] text-[#e0bc68] sm:inline-flex">
-                Plateforme tout-en-un
+                {t.allInOne}
               </span>
             </div>
 
             <div className="mt-12 max-w-2xl lg:mt-16">
-              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#d3a84c]">Des établissements qui grandissent avec leurs clients</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#d3a84c]">{t.language === 'fr' ? 'Des établissements qui grandissent avec leurs clients' : t.language === 'en' ? 'Establishments that grow with their customers' : 'مؤسسات تنمو مع عملائها'}</p>
               <h1 className="mt-5 max-w-2xl font-display text-4xl leading-[1.04] tracking-[-0.035em] sm:text-5xl xl:text-[58px]">
-                Transformez chaque client en <span className="text-[#d3a84c]">client fidèle.</span>
+                {t.hero} <span className="text-[#d3a84c]">{t.heroAccent}</span>
               </h1>
               <p className="mt-6 max-w-xl text-sm leading-7 text-white/65 sm:text-base">
-                TapMarrakech vous aide à gérer vos avis, fidéliser vos clients et offrir une expérience exceptionnelle, simplement.
+                {t.heroDesc}
               </p>
             </div>
 
             <div className="mt-9 grid max-w-2xl grid-cols-1 gap-3 sm:grid-cols-2">
               {[
-                { icon: Star, title: 'Avis & Réputation', text: 'Collectez, analysez et gérez vos avis sur Google et les principales plateformes.' },
-                { icon: Users, title: 'Fidélité', text: 'Récompensez vos clients et donnez-leur envie de revenir.' },
-                { icon: Heart, title: 'Expérience client', text: 'Mesurez la satisfaction et améliorez chaque étape du parcours.' },
-                { icon: BarChart3, title: 'Performance', text: 'Suivez vos données, identifiez vos opportunités et pilotez votre activité.' },
+                { icon: Star, title: t.services.reviews, text: t.services.reviewsDesc },
+                { icon: Users, title: t.services.loyalty, text: t.services.loyaltyDesc },
+                { icon: Heart, title: t.services.experience, text: t.services.experienceDesc },
+                { icon: BarChart3, title: t.services.performance, text: t.services.performanceDesc },
               ].map(({ icon: Icon, title, text }) => (
                 <div key={title} className="rounded-2xl border border-white/10 bg-[#214c40]/45 p-4 transition-colors hover:bg-[#214c40]/65">
                   <div className="flex items-start gap-3">
@@ -150,11 +152,11 @@ export default function Login() {
 
             <div className="mt-auto hidden border-t border-white/10 pt-6 md:block">
               <div className="mb-4 h-px w-12 bg-[#d3a84c]" />
-              <p className="max-w-md text-sm leading-6 text-white/65">Une seule plateforme pour votre réputation, votre fidélité et votre expérience client.</p>
+              <p className="max-w-md text-sm leading-6 text-white/65">{t.heroDesc}</p>
               <div className="mt-6 grid max-w-2xl grid-cols-3 gap-6">
-                <div><p className="text-2xl font-semibold text-[#d3a84c]">+2 000</p><p className="mt-1 text-[11px] text-white/45">établissements</p></div>
-                <div><p className="text-2xl font-semibold text-[#d3a84c]">+50 000</p><p className="mt-1 text-[11px] text-white/45">avis gérés</p></div>
-                <div><p className="text-2xl font-semibold text-[#d3a84c]">+30 %</p><p className="mt-1 text-[11px] text-white/45">clients récurrents</p></div>
+                <div><p className="text-2xl font-semibold text-[#d3a84c]">+2 000</p><p className="mt-1 text-[11px] text-white/45">{t.establishments}</p></div>
+                <div><p className="text-2xl font-semibold text-[#d3a84c]">+50 000</p><p className="mt-1 text-[11px] text-white/45">{t.reviewsManaged}</p></div>
+                <div><p className="text-2xl font-semibold text-[#d3a84c]">+30 %</p><p className="mt-1 text-[11px] text-white/45">{t.recurring}</p></div>
               </div>
             </div>
           </div>
@@ -163,14 +165,24 @@ export default function Login() {
         <section className="flex flex-1 items-center justify-center bg-[#f7f7f3] px-5 py-10 sm:px-10 lg:px-14 xl:px-20">
           <div className="w-full max-w-xl">
             <div className="mb-12 flex justify-end">
-              <button type="button" className="inline-flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-4 py-2.5 text-xs font-medium text-ink/65 shadow-sm">
-                <Globe2 size={16} /> Français <span className="text-ink/30">⌄</span>
-              </button>
+              <label className="inline-flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-xs font-medium text-ink/65 shadow-sm">
+                <Globe2 size={16} />
+                <select
+                  value={language}
+                  onChange={(event) => setLanguage(event.target.value as Language)}
+                  aria-label="Language"
+                  className="cursor-pointer bg-transparent outline-none"
+                >
+                  <option value="fr">Français</option>
+                  <option value="en">English</option>
+                  <option value="ar">العربية</option>
+                </select>
+              </label>
             </div>
 
             <div className="mb-8">
-              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#b58b3e]">Bon retour 👋</p>
-              <h2 className="mt-3 max-w-xl font-display text-4xl leading-[1.05] tracking-[-0.035em] text-[#10201c] sm:text-5xl">Connectez-vous à votre espace</h2>
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#b58b3e]">{t.welcome}</p>
+              <h2 className="mt-3 max-w-xl font-display text-4xl leading-[1.05] tracking-[-0.035em] text-[#10201c] sm:text-5xl">{t.loginTitle}</h2>
               <p className="mt-4 text-sm leading-6 text-ink/50">Choisissez votre profil puis accédez à toutes vos fonctionnalités.</p>
             </div>
 
@@ -183,9 +195,9 @@ export default function Login() {
                 <div className={`mb-3 grid h-10 w-10 place-items-center rounded-xl ${selectedRole === 'admin' ? 'bg-white/10' : 'bg-[#06382e]/10 text-[#06382e]'}`}>
                   <ShieldCheck size={21} />
                 </div>
-                <p className="text-[9px] font-bold uppercase tracking-[0.18em] opacity-55">Accès plateforme</p>
-                <p className="mt-1 font-display text-xl">Administrateur</p>
-                <p className="mt-1 text-[11px] leading-4 opacity-55">Gestion globale</p>
+                <p className="text-[9px] font-bold uppercase tracking-[0.18em] opacity-55">{t.platformAccess}</p>
+                <p className="mt-1 font-display text-xl">{t.admin}</p>
+                <p className="mt-1 text-[11px] leading-4 opacity-55">{t.adminDesc}</p>
               </button>
 
               <button
@@ -196,9 +208,9 @@ export default function Login() {
                 <div className={`mb-3 grid h-10 w-10 place-items-center rounded-xl ${selectedRole === 'responsible' ? 'bg-white/10' : 'bg-[#f4ead3] text-[#06382e]'}`}>
                   <UserRound size={21} />
                 </div>
-                <p className="text-[9px] font-bold uppercase tracking-[0.18em] opacity-55">Espace établissement</p>
-                <p className="mt-1 font-display text-xl">Responsable</p>
-                <p className="mt-1 text-[11px] leading-4 opacity-55">Gestion de l’établissement</p>
+                <p className="text-[9px] font-bold uppercase tracking-[0.18em] opacity-55">{t.establishmentSpace}</p>
+                <p className="mt-1 font-display text-xl">{t.responsible}</p>
+                <p className="mt-1 text-[11px] leading-4 opacity-55">{t.responsibleDesc}</p>
               </button>
             </div>
 
@@ -207,47 +219,47 @@ export default function Login() {
                 {error && <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
                 <div className="space-y-4">
                   <div>
-                    <label className="mb-2 block text-xs font-semibold text-ink/65">Adresse e-mail</label>
+                    <label className="mb-2 block text-xs font-semibold text-ink/65">{t.email}</label>
                     <div className="relative">
                       <UserRound size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-ink/25" />
-                      <input type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }} placeholder="votre@email.com" className="w-full rounded-xl border border-ink/10 bg-white py-4 pl-11 pr-4 text-sm outline-none transition focus:border-[#06382e] focus:ring-4 focus:ring-[#06382e]/5" />
+                      <input type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }} placeholder="{t.emailPlaceholder}" className="w-full rounded-xl border border-ink/10 bg-white py-4 pl-11 pr-4 text-sm outline-none transition focus:border-[#06382e] focus:ring-4 focus:ring-[#06382e]/5" />
                     </div>
                   </div>
                   <div>
                     <div className="mb-2 flex items-center justify-between">
-                      <label className="block text-xs font-semibold text-ink/65">Mot de passe</label>
-                      <Link to="/forgot-password" className="text-xs font-medium text-[#06382e] hover:underline">Mot de passe oublié ?</Link>
+                      <label className="block text-xs font-semibold text-ink/65">{t.password}</label>
+                      <Link to="/forgot-password" className="text-xs font-medium text-[#06382e] hover:underline">{t.forgot}</Link>
                     </div>
                     <div className="relative">
                       <LockKeyhole size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-ink/25" />
-                      <input type={showPassword ? 'text' : 'password'} autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }} placeholder="Votre mot de passe" className="w-full rounded-xl border border-ink/10 bg-white py-4 pl-11 pr-11 text-sm outline-none transition focus:border-[#06382e] focus:ring-4 focus:ring-[#06382e]/5" />
+                      <input type={showPassword ? 'text' : 'password'} autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }} placeholder="{t.passwordPlaceholder}" className="w-full rounded-xl border border-ink/10 bg-white py-4 pl-11 pr-11 text-sm outline-none transition focus:border-[#06382e] focus:ring-4 focus:ring-[#06382e]/5" />
                       <button type="button" onClick={() => setShowPassword(value => !value)} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-ink/30 hover:text-[#06382e]">{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button>
                     </div>
                   </div>
                   <button onClick={handleLogin} disabled={saving} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#06382e] py-4 text-sm font-semibold text-white shadow-lg transition hover:bg-[#0b493c] disabled:opacity-50">
-                    {saving ? 'Connexion...' : 'Se connecter'} {!saving && <ArrowRight size={17} />}
+                    {saving ? '{t.login}...' : '{t.login}'} {!saving && <ArrowRight size={17} />}
                   </button>
                 </div>
                 <button type="button" onClick={() => selectRole(null)} className="mt-5 inline-flex items-center gap-2 text-xs font-medium text-ink/35 hover:text-[#06382e]">
-                  <ArrowLeft size={14} /> Changer d’espace
+                  <ArrowLeft size={14} /> {t.changeSpace}
                 </button>
               </>
             ) : (
               <div className="rounded-2xl border border-black/5 bg-white px-5 py-4 text-center text-xs text-ink/40">
-                Sélectionnez votre espace pour continuer.
+                {t.selectSpace}
               </div>
             )}
 
             <div className="mt-9 flex items-center justify-center gap-4 text-xs text-ink/35">
-              <Link to="/register" className="hover:text-[#06382e]">Créer un compte</Link>
+              <Link to="/register" className="hover:text-[#06382e]">{t.createAccount}</Link>
               <span>•</span>
               <Link to="/forgot-password" className="hover:text-[#06382e]">Mot de passe oublié</Link>
             </div>
 
             <div className="mt-10 flex items-center justify-center gap-8 border-t border-ink/8 pt-6 text-[10px] text-ink/35">
-              <span className="inline-flex items-center gap-2"><ShieldCheck size={15} /> Sécurisé</span>
-              <span className="inline-flex items-center gap-2"><BarChart3 size={15} /> Simple</span>
-              <span className="inline-flex items-center gap-2"><Heart size={15} /> Expérience client</span>
+              <span className="inline-flex items-center gap-2"><ShieldCheck size={15} /> {t.secured}</span>
+              <span className="inline-flex items-center gap-2"><BarChart3 size={15} /> {t.simple}</span>
+              <span className="inline-flex items-center gap-2"><Heart size={15} /> {t.experienceShort}</span>
             </div>
           </div>
         </section>
