@@ -14,6 +14,7 @@ import {
   X,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { LoyaltyCardVisual } from '@/components/LoyaltyCardVisual';
 
 type TemplateKind = 'page' | 'menu' | 'loyalty';
 
@@ -156,6 +157,8 @@ export default function Templates() {
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState<Template | null>(null);
   const [previewing, setPreviewing] = useState<Template | null>(null);
+  const [editorTab, setEditorTab] = useState<'preview' | 'design'>('preview');
+  const [uploadingWallpaper, setUploadingWallpaper] = useState(false);
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -436,6 +439,58 @@ export default function Templates() {
     await load();
   };
 
+  const updateTemplateConfig = (patch: Record<string, any>) => {
+    setConfigText((current) => {
+      try {
+        return prettyJson({ ...JSON.parse(current || '{}'), ...patch });
+      } catch {
+        return prettyJson(patch);
+      }
+    });
+  };
+
+  const uploadTemplateWallpaper = async (file: File) => {
+    if (!previewing || !file.type.startsWith('image/')) return;
+    setUploadingWallpaper(true);
+    try {
+      const path = `template-assets/${previewing.kind}/${previewing.id}-${Date.now()}.jpg`;
+      const { error } = await supabase.storage.from('loyalty-assets').upload(path, file, { upsert: false, contentType: file.type });
+      if (error) throw error;
+      const url = supabase.storage.from('loyalty-assets').getPublicUrl(path).data.publicUrl;
+      const config = { ...(previewing.config || {}), background_image_url: url };
+      setPreviewing({ ...previewing, config });
+      setConfigText(prettyJson(config));
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Impossible d’ajouter le wallpaper.');
+    } finally {
+      setUploadingWallpaper(false);
+    }
+  };
+
+  const saveVisualEditor = async () => {
+    if (!previewing) return;
+    let config: Record<string, any>;
+    try { config = JSON.parse(configText || '{}'); } catch { alert('Configuration invalide.'); return; }
+    if (previewing.source === 'builtin') {
+      const { data, error } = await supabase.from('templates').insert({
+        kind: previewing.kind,
+        name: previewing.name,
+        description: previewing.description,
+        config,
+        active: true,
+        is_default: previewing.is_default,
+      }).select('id,kind,name,description,thumbnail_url,config,active,is_default,created_at,updated_at').single();
+      if (error || !data) { alert(error?.message || 'Impossible d’enregistrer.'); return; }
+      await load();
+      setPreviewing({ ...(data as Template), source: 'database' });
+      return;
+    }
+    const { error } = await supabase.from('templates').update({ config, updated_at: new Date().toISOString() }).eq('id', previewing.id);
+    if (error) { alert(error.message); return; }
+    await load();
+    setPreviewing({ ...previewing, config });
+  };
+
   const assign = async (establishmentId: string, templateId: string) => {
     if (kind === 'loyalty') return;
     const column = kind === 'page' ? 'page_template_id' : 'menu_template_id';
@@ -713,11 +768,11 @@ export default function Templates() {
 
                   <div className="mt-5 flex flex-wrap gap-2">
                     <button
-                      onClick={() => setPreviewing(template)}
-                      className="inline-flex items-center gap-2 rounded-lg border border-ink/10 px-3 py-2 text-xs font-semibold text-ink/60 hover:bg-[#f7f7f3]"
+                      onClick={() => { setPreviewing(template); setEditorTab('preview'); setConfigText(prettyJson(template.config || {})); }}
+                      className="inline-flex items-center gap-2 rounded-lg bg-forest px-3 py-2 text-xs font-semibold text-white"
                     >
                       <Eye size={14} />
-                      Prévisualiser
+                      Voir & personnaliser
                     </button>
                     <button
                       onClick={() => startEdit(template)}
@@ -807,45 +862,93 @@ export default function Templates() {
       </section>
 
       {previewing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 p-5">
-          <div className="max-h-[90vh] w-full max-w-3xl overflow-auto rounded-2xl bg-white shadow-2xl">
-            <div className="sticky top-0 flex items-center justify-between border-b border-ink/10 bg-white px-5 py-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/70 p-4">
+          <div className="max-h-[94vh] w-full max-w-6xl overflow-hidden rounded-[28px] bg-[#f7f7f3] shadow-2xl">
+            <div className="flex items-center justify-between border-b border-ink/10 bg-white px-6 py-4">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-gold">
-                  Prévisualisation
-                </p>
-                <h3 className="font-display text-xl text-forest">{previewing.name}</h3>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">Studio template</p>
+                <h3 className="font-display text-2xl text-forest">{previewing.name}</h3>
               </div>
-              <button
-                onClick={() => setPreviewing(null)}
-                className="rounded-xl border border-ink/10 p-2 text-ink/45 hover:bg-[#f7f7f3]"
-              >
-                <X size={17} />
-              </button>
+              <button onClick={() => setPreviewing(null)} className="rounded-xl border border-ink/10 p-2"><X size={18}/></button>
             </div>
-
-            <div className="p-5">
-              <div className="rounded-2xl border border-ink/10 bg-[#f7f7f3] p-5">
-                <div className="mb-4 flex items-center justify-between">
-                  <span className="text-xs font-semibold text-forest">
-                    {previewing.kind === 'page' ? 'Page publique' : previewing.kind === 'menu' ? 'Menu digital' : 'Carte fidélité'}
-                  </span>
-                  <span className="rounded-full bg-gold/15 px-2.5 py-1 text-[10px] font-semibold text-forest">
-                    Configuration actuelle
-                  </span>
-                </div>
-                <pre className="overflow-auto rounded-xl bg-[#171c19] p-4 text-xs leading-5 text-white">
-                  {prettyJson(previewing.config ?? {})}
-                </pre>
-                <p className="mt-4 text-xs leading-5 text-ink/45">
-                  Cette prévisualisation affiche la configuration enregistrée. Le rendu final
-                  sera branché sur le moteur de rendu public TapMarrakech.
-                </p>
+            <div className="grid max-h-[calc(94vh-80px)] overflow-auto lg:grid-cols-[minmax(0,1fr)_380px]">
+              <div className="flex min-h-[620px] items-center justify-center bg-[#ebe7de] p-6 md:p-10">
+                {previewing.kind === 'loyalty' ? (
+                  <div className="w-full max-w-[360px]">
+                    <LoyaltyCardVisual
+                      design={{
+                        primary_color: String(previewing.config?.primary || '#173D32'),
+                        secondary_color: String(previewing.config?.secondary || '#D3A84C'),
+                        background_color: String(previewing.config?.background || '#F7F7F3'),
+                        text_color: String(previewing.config?.text || '#FFFFFF'),
+                        border_radius: Number(previewing.config?.radius || 28),
+                        config: {
+                          front_title: previewing.config?.title || 'CARTE FIDÉLITÉ',
+                          front_subtitle: previewing.config?.subtitle || 'Votre fidélité mérite une expérience à part.',
+                          background_image_url: previewing.config?.background_image_url || null,
+                          stamp_style: previewing.config?.stampStyle || 'circles',
+                          card_mode: previewing.config?.mode || 'QR',
+                          show_points: true,
+                          show_qr: true,
+                        },
+                      }}
+                      card={{ establishmentName: 'Votre établissement', customerName: 'Client Premium', points: 240, stampsBalance: 6, stampGoal: 10, stampRewardName: 'Récompense' }}
+                      programType={previewing.config?.mode === 'STAMP' ? 'STAMP' : 'POINTS'}
+                    />
+                  </div>
+                ) : (
+                  <div className="w-full max-w-[520px] overflow-hidden rounded-[28px] bg-white shadow-xl">
+                    <div className="h-40 p-7" style={{ background: previewing.config?.background_image_url ? `linear-gradient(#173d32aa,#173d32aa),url(${previewing.config.background_image_url}) center/cover` : String(previewing.config?.theme?.background || '#F3EEE2') }}>
+                      <p className="text-xs uppercase tracking-[.25em]" style={{ color: String(previewing.config?.theme?.accent || '#C9A45C') }}>La carte</p>
+                      <h4 className="mt-3 text-3xl font-semibold" style={{ color: String(previewing.config?.theme?.primary || '#173D35') }}>Maison & saveurs</h4>
+                    </div>
+                    <div className="grid gap-3 p-6 sm:grid-cols-2">
+                      {['Entrées','Plats','Desserts','Boissons'].map((x) => <div key={x} className="rounded-2xl border border-ink/10 p-4"><p className="font-semibold text-forest">{x}</p><p className="mt-2 text-xs text-ink/40">Sélection de la maison</p><p className="mt-3 text-sm font-semibold">À partir de 85 MAD</p></div>)}
+                    </div>
+                  </div>
+                )}
               </div>
+              <aside className="border-l border-ink/10 bg-white p-6">
+                <div className="mb-5 flex rounded-xl bg-[#f7f7f3] p-1">
+                  <button onClick={() => setEditorTab('preview')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab==='preview'?'bg-white text-forest shadow-sm':'text-ink/45'}`}>Aperçu</button>
+                  <button onClick={() => setEditorTab('design')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab==='design'?'bg-white text-forest shadow-sm':'text-ink/45'}`}>Modifier</button>
+                </div>
+                {editorTab === 'design' ? (
+                  <div className="space-y-5">
+                    <div>
+                      <label className="mb-2 block text-xs font-semibold">Titre</label>
+                      <input value={String(previewing.config?.title || '')} onChange={e => { const config={...previewing.config,title:e.target.value}; setPreviewing({...previewing,config}); setConfigText(prettyJson(config)); }} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"/>
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-xs font-semibold">Sous-titre</label>
+                      <textarea value={String(previewing.config?.subtitle || '')} onChange={e => { const config={...previewing.config,subtitle:e.target.value}; setPreviewing({...previewing,config}); setConfigText(prettyJson(config)); }} rows={3} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"/>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      {['primary','secondary','background','text'].map(key => <label key={key} className="text-xs font-semibold">{key}<input type="color" value={String(previewing.config?.[key] || '#173D32')} onChange={e=>{const config={...previewing.config,[key]:e.target.value};setPreviewing({...previewing,config});setConfigText(prettyJson(config));}} className="mt-2 h-10 w-full cursor-pointer rounded-lg border border-ink/10"/></label>)}
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-xs font-semibold">Wallpaper</label>
+                      <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-gold/40 bg-gold/5 px-4 py-4 text-xs font-semibold text-forest">
+                        <ImagePlus size={17}/>{uploadingWallpaper ? 'Upload...' : 'Ajouter un wallpaper'}
+                        <input type="file" accept="image/*" className="hidden" disabled={uploadingWallpaper} onChange={e=>{const f=e.target.files?.[0]; if(f) void uploadTemplateWallpaper(f); e.currentTarget.value='';}}/>
+                      </label>
+                      {previewing.config?.background_image_url && <button onClick={()=>{const config={...previewing.config,background_image_url:null};setPreviewing({...previewing,config});setConfigText(prettyJson(config));}} className="mt-2 text-xs text-red-600">Retirer le wallpaper</button>}
+                    </div>
+                    <button onClick={()=>void saveVisualEditor()} className="w-full rounded-xl bg-forest px-4 py-3 text-sm font-semibold text-white">Enregistrer les modifications</button>
+                  </div>
+                ) : (
+                  <div className="space-y-4 text-sm text-ink/55">
+                    <p>Tu peux sélectionner ce template, voir son rendu réel, modifier ses couleurs, son texte et ajouter un wallpaper.</p>
+                    <div className="rounded-2xl bg-[#f7f7f3] p-4"><p className="text-xs font-semibold text-forest">Template global</p><p className="mt-1 text-xs">Les modifications faites ici deviennent disponibles pour les établissements qui utilisent ce template.</p></div>
+                    <button onClick={()=>setEditorTab('design')} className="w-full rounded-xl bg-forest px-4 py-3 text-sm font-semibold text-white">Modifier le design</button>
+                  </div>
+                )}
+              </aside>
             </div>
           </div>
         </div>
       )}
+}
     </div>
   );
 }
