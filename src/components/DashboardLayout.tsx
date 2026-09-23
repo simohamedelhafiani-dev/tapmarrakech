@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   BarChart3,
+  Bell,
   Building2,
   Gift,
   LayoutDashboard,
@@ -273,16 +274,16 @@ export function DashboardLayout() {
       )}
 
       <aside
-        className={`fixed inset-y-0 z-40 flex w-[270px] flex-col bg-forest px-5 py-6 text-white transition-transform lg:translate-x-0 ${language === 'ar' ? 'right-0 left-auto' : 'left-0'} ${
-          open ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed inset-y-0 z-40 flex w-[248px] flex-col bg-forest px-4 py-5 text-white shadow-xl transition-transform lg:translate-x-0 ${language === 'ar' ? 'right-0 left-auto' : 'left-0'} ${
+          open ? 'translate-x-0' : language === 'ar' ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="mb-12 flex items-center justify-between px-3">
+        <div className="mb-9 flex items-center justify-between px-2">
           <div className="flex min-h-[64px] flex-1 items-center justify-center">
             <img
               src="/tapmarrakech-logo.png"
               alt="TapMarrakech"
-              className="h-16 w-16 object-contain"
+              className="h-[72px] w-[72px] object-contain"
             />
           </div>
 
@@ -295,7 +296,7 @@ export function DashboardLayout() {
           </button>
         </div>
 
-        <p className="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
+        <p className="mb-3 px-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/35">
           Espace de gestion
         </p>
 
@@ -307,7 +308,7 @@ export function DashboardLayout() {
               onClick={() => setOpen(false)}
               to={to}
               className={({ isActive }) =>
-                `flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition ${
+                `flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] transition ${
                   isActive
                     ? 'bg-white text-forest shadow-lg'
                     : 'text-white/65 hover:bg-white/10 hover:text-white'
@@ -399,7 +400,7 @@ export function DashboardLayout() {
       </aside>
 
       <div className={language === 'ar' ? 'lg:pr-[270px]' : 'lg:pl-[270px]'}>
-        <header className="sticky top-0 z-20 flex min-h-[76px] items-center justify-between border-b border-ink/5 bg-[#f7f7f3]/95 px-4 py-3 sm:h-[88px] sm:px-6 md:h-[104px] md:px-10">
+        <header className="sticky top-0 z-20 flex min-h-[72px] items-center gap-4 border-b border-ink/5 bg-[#f7f7f3]/90 px-4 py-3 backdrop-blur-xl sm:px-6 md:px-8">
           <button
             onClick={() => setOpen(true)}
             className="text-ink lg:hidden"
@@ -408,38 +409,29 @@ export function DashboardLayout() {
             <MenuIcon />
           </button>
 
-          <div className="hidden text-sm text-ink/50 lg:block">
-            {capitalizedDate}
-          </div>
-
-          <div className="pointer-events-none absolute left-1/2 top-1/2 z-10 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-3 sm:flex">
-            {establishmentLogoUrl ? (
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-ink/10 bg-white p-1.5 shadow-sm">
-                <img
-                  src={establishmentLogoUrl}
-                  alt={`Logo ${establishmentName || 'établissement'}`}
-                  className="h-full w-full object-contain"
-                />
-              </div>
-            ) : (
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-ink/10 bg-white text-forest shadow-sm">
-                <Building2 size={22} />
-              </div>
-            )}
-
-            <div className="max-w-[260px] text-center">
-              <p className="truncate text-sm font-semibold text-forest md:text-base">
-                {establishmentName || 'Mon établissement'}
-              </p>
-
-              <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-gold">
-                Établissement
-              </p>
+          <div className="hidden min-w-0 flex-1 max-w-[560px] lg:block">
+            <div className="flex h-11 items-center gap-3 rounded-xl border border-ink/5 bg-white px-4 shadow-sm">
+              <span className="text-ink/35">⌕</span>
+              <span className="text-xs text-ink/35">Rechercher un client, un avis, un établissement...</span>
+              <span className="ml-auto rounded-md border border-ink/10 bg-[#f7f7f3] px-2 py-1 text-[9px] text-ink/35">⌘ K</span>
             </div>
           </div>
 
+
+
           <div className="ml-auto flex items-center gap-2">
-            <label className="hidden items-center gap-2 rounded-full border border-ink/10 bg-white px-3 py-2 text-xs font-medium text-ink/60 shadow-sm sm:flex">
+            <button type="button" className="relative grid h-10 w-10 place-items-center rounded-xl border border-ink/10 bg-white text-ink/60 shadow-sm" aria-label="Notifications">
+              <Bell size={17} />
+              <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-red-500" />
+            </button>
+            <div className="hidden h-10 items-center gap-2 rounded-xl border border-ink/10 bg-white px-2.5 shadow-sm sm:flex">
+              <div className="grid h-7 w-7 place-items-center rounded-full bg-forest text-xs font-semibold text-white">{avatarLetter}</div>
+              <div className="max-w-[130px] leading-tight">
+                <p className="truncate text-xs font-semibold text-ink">{displayName}</p>
+                <p className="text-[9px] text-ink/40">{roleLabel}</p>
+              </div>
+            </div>
+            <label className="hidden items-center gap-2 rounded-xl border border-ink/10 bg-white px-3 py-2 text-xs font-medium text-ink/60 shadow-sm md:flex">
               <select
                 value={language}
                 onChange={(event) => setLanguage(event.target.value as Language)}
@@ -463,7 +455,7 @@ export function DashboardLayout() {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-[1440px] p-4 sm:p-5 md:p-10">
+        <main className="mx-auto w-full max-w-[1500px] p-4 sm:p-5 md:p-8 lg:p-10">
           <Outlet />
         </main>
 
