@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 
 export type Language = 'fr' | 'en' | 'ar';
 
+const originalTextNodes = new WeakMap<Text, string>();
+
 const uiTranslations: Record<string, { en: string; ar: string }> = {
   'Vue d’ensemble': { en: 'Overview', ar: 'نظرة عامة' },
   'Établissements': { en: 'Establishments', ar: 'المؤسسات' },
@@ -259,17 +261,22 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       let node: Node | null;
       while ((node = walker.nextNode())) nodes.push(node as Text);
       nodes.forEach((textNode) => {
-        const value = textNode.nodeValue ?? '';
-        if (!value.trim()) return;
-        const translated = translateUiText(value, language);
-        if (translated !== value) textNode.nodeValue = translated;
+        const current = textNode.nodeValue ?? '';
+        if (!current.trim()) return;
+        const original = originalTextNodes.get(textNode) ?? current;
+        originalTextNodes.set(textNode, original);
+        const translated = translateUiText(original, language);
+        if (translated !== current) textNode.nodeValue = translated;
       });
 
       document.querySelectorAll<HTMLElement>('[placeholder],[title],[aria-label]').forEach((el) => {
         for (const attr of ['placeholder', 'title', 'aria-label']) {
           const value = el.getAttribute(attr);
           if (!value) continue;
-          const translated = translateUiText(value, language);
+          const key = `tapmarrakech:i18n-original:${attr}`;
+          const original = el.dataset[key.replace(/:/g, '')] ?? value;
+          el.dataset[key.replace(/:/g, '')] = original;
+          const translated = translateUiText(original, language);
           if (translated !== value) el.setAttribute(attr, translated);
         }
       });
