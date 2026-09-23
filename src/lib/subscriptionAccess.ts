@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 export type SubscriptionAccess = {
   establishment_id: string;
   subscription_status: 'trial' | 'active' | string;
-  plan_id: string;
+  plan_id: string | null;
   plan_name: string;
   features: string[];
 };
@@ -21,6 +21,29 @@ export const FEATURE_LABELS = {
 } as const;
 
 export type SubscriptionFeature = keyof typeof FEATURE_LABELS;
+
+export type SubscriptionTheme = {
+  primary: string;
+  primaryHover: string;
+  accent: string;
+  sidebar: string;
+};
+
+export function getSubscriptionTheme(access: SubscriptionAccess | null | undefined): SubscriptionTheme {
+  // Trial keeps the standard TapMarrakech interface for every establishment.
+  if (!access || access.subscription_status === 'trial') {
+    return { primary: '#17352a', primaryHover: '#214c40', accent: '#c8a96b', sidebar: '#17352a' };
+  }
+
+  const name = access.plan_name.trim().toLowerCase();
+  if (name === 'basic') {
+    return { primary: '#2563eb', primaryHover: '#1d4ed8', accent: '#93c5fd', sidebar: '#1e3a8a' };
+  }
+  if (name === 'enterprise') {
+    return { primary: '#111827', primaryHover: '#1f2937', accent: '#d4af37', sidebar: '#0b1220' };
+  }
+  return { primary: '#17352a', primaryHover: '#214c40', accent: '#c8a96b', sidebar: '#17352a' };
+}
 
 const FEATURE_ALIASES: Record<SubscriptionFeature, string[]> = {
   publicPage: ['Page publique'],
