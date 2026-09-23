@@ -24,9 +24,16 @@ type Establishment = {
 type MenuTemplate = {
   id: string;
   name: string;
-  description: string | null;
-  config: Record<string, any>;
+  description: string;
+  key: string;
 };
+
+const LEGACY_MENU_TEMPLATES: MenuTemplate[] = [
+  { id: 'editorial', key: 'editorial', name: '01 — Editorial', description: 'Mise en page éditoriale premium, typographie élégante et espace négatif.' },
+  { id: 'luxury', key: 'luxury', name: '02 — Luxury', description: 'Présentation luxe avec visuels et cartes produits.' },
+  { id: 'cards', key: 'cards', name: '03 — Cards', description: 'Présentation moderne en cartes, claire et visuelle.' },
+  { id: 'dark', key: 'dark', name: '04 — Noir Signature', description: 'Univers sombre premium avec accents dorés.' },
+];
 
 type MenuCategory = {
   id: string;
@@ -154,21 +161,29 @@ export default function Menu() {
   }
 
   async function loadTemplates() {
-    const [{ data: templates }, { data: establishment }] = await Promise.all([
-      supabase.from('templates').select('id,name,description,config').eq('kind', 'menu').eq('active', true).order('name'),
-      supabase.from('establishments').select('menu_template_id').eq('id', establishmentId).maybeSingle(),
-    ]);
-    const rows = (templates as MenuTemplate[]) ?? [];
-    setMenuTemplates(rows);
-    const currentId = establishment?.menu_template_id ?? '';
-    const matched = rows.find((template) => template.id === currentId || template.config?.key === currentId);
-    setSelectedTemplateId(matched?.id ?? currentId);
+    const { data: establishment, error } = await supabase
+      .from('establishments')
+      .select('menu_template_id')
+      .eq('id', establishmentId)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Erreur chargement template menu:', error);
+    }
+
+    setMenuTemplates(LEGACY_MENU_TEMPLATES);
+    setSelectedTemplateId(establishment?.menu_template_id || 'editorial');
   }
 
   async function saveTemplate(templateId: string) {
     setSelectedTemplateId(templateId);
-    const { error } = await supabase.from('establishments').update({ menu_template_id: templateId }).eq('id', establishmentId);
+    const { error } = await supabase
+      .from('establishments')
+      .update({ menu_template_id: templateId })
+      .eq('id', establishmentId);
+
     if (error) {
+      setSelectedTemplateId((current) => current);
       alert(error.message);
     }
   }
@@ -525,10 +540,10 @@ export default function Menu() {
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {menuTemplates.map((template) => (
               <button key={template.id} type="button" onClick={() => void saveTemplate(template.id)} className={`rounded-2xl border p-4 text-left transition ${selectedTemplateId === template.id ? 'border-gold ring-2 ring-gold/15' : 'border-ink/10 hover:border-gold/40'}`}>
-                <div className="h-20 rounded-xl bg-[#f3eee2] p-3">
-                  <div className="h-2 w-16 rounded-full bg-gold" />
-                  <div className="mt-3 h-2 w-3/4 rounded-full bg-ink/10" />
-                  <div className="mt-2 h-2 w-1/2 rounded-full bg-ink/5" />
+                <div className={`h-20 rounded-xl p-3 ${template.key === 'dark' ? 'bg-[#102B24]' : template.key === 'luxury' ? 'bg-[#F7F3EA]' : template.key === 'cards' ? 'bg-white border border-ink/10' : 'bg-[#F3EEE2]'}`}>
+                  <div className={`h-2 w-16 rounded-full ${template.key === 'dark' ? 'bg-gold' : 'bg-[#C9A45C]'}`} />
+                  <div className={`mt-3 h-2 w-3/4 rounded-full ${template.key === 'dark' ? 'bg-white/20' : 'bg-ink/10'}`} />
+                  <div className={`mt-2 h-2 w-1/2 rounded-full ${template.key === 'dark' ? 'bg-white/10' : 'bg-ink/5'}`} />
                 </div>
                 <p className="mt-3 text-xs font-semibold text-forest">{template.name}</p>
                 <p className="mt-1 text-[10px] leading-4 text-ink/40">{template.description}</p>
