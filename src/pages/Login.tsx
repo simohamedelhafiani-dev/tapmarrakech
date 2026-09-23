@@ -108,10 +108,11 @@ export default function Login() {
           <div className="relative z-10 flex h-full min-h-[620px] flex-col">
             <div className="flex items-start justify-between">
               <div>
-                <div className="leading-none">
-                  <div className="font-display text-4xl tracking-[-0.05em] text-[#d3a84c]">Tap</div>
-                  <div className="-mt-1 font-display text-3xl tracking-[-0.04em] text-[#f7f7f3]">Marrakech</div>
-                </div>
+                <img
+                  src="/tapmarrakech-logo.png"
+                  alt="TapMarrakech"
+                  className="h-16 w-auto max-w-[180px] object-contain object-left"
+                />
                 <p className="mt-2 text-xs text-white/75">L’expérience client, c’est un atout.</p>
               </div>
               <span className="hidden rounded-full border border-[#d3a84c]/45 px-4 py-2 text-[9px] font-bold uppercase tracking-[0.25em] text-[#e0bc68] sm:inline-flex">
