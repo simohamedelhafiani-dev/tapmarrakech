@@ -17,6 +17,7 @@ import {
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { useLanguage, type Language } from '@/contexts/LanguageContext';
 
 const links = [
   {
@@ -89,6 +90,7 @@ export function DashboardLayout() {
   const [scannerLoading, setScannerLoading] = useState(false);
 
   const { signOut, user, role } = useAuth();
+  const { language, setLanguage } = useLanguage();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -209,12 +211,36 @@ export function DashboardLayout() {
 
   const roleLabel =
     role === 'admin'
-      ? 'Administrateur'
+      ? (language === 'en' ? 'Administrator' : language === 'ar' ? 'المشرف' : 'Administrateur')
       : role === 'responsible'
-        ? 'Responsable'
-        : role === 'employee'
-          ? 'Employé'
-          : 'Compte';
+        ? (language === 'en' ? 'Manager' : language === 'ar' ? 'المسؤول' : 'Responsable')
+        : 'Compte';
+
+  const navLabels: Record<string, string> = language === 'en'
+    ? {
+        'Vue d’ensemble': 'Overview',
+        'Établissements': 'Establishments',
+        'Avis reçus': 'Reviews',
+        Analytics: 'Analytics',
+        Menu: 'Menu',
+        Promotions: 'Promotions',
+        Fidélité: 'Loyalty',
+        'Programme fidélité': 'Loyalty program',
+      }
+    : language === 'ar'
+      ? {
+          'Vue d’ensemble': 'نظرة عامة',
+          'Établissements': 'المؤسسات',
+          'Avis reçus': 'التقييمات',
+          Analytics: 'التحليلات',
+          Menu: 'القائمة',
+          Promotions: 'العروض',
+          Fidélité: 'الولاء',
+          'Programme fidélité': 'برنامج الولاء',
+        }
+      : {};
+
+  const localizedLabel = (label: string) => navLabels[label] ?? label;
 
   const displayName =
     profileName ||
@@ -289,7 +315,7 @@ export function DashboardLayout() {
               }
             >
               <Icon size={18} strokeWidth={1.8} />
-              {label}
+              {localizedLabel(label)}
             </NavLink>
           ))}
         </nav>
@@ -412,15 +438,29 @@ export function DashboardLayout() {
             </div>
           </div>
 
-          <button
+          <div className="ml-auto flex items-center gap-2">
+            <label className="hidden items-center gap-2 rounded-full border border-ink/10 bg-white px-3 py-2 text-xs font-medium text-ink/60 shadow-sm sm:flex">
+              <select
+                value={language}
+                onChange={(event) => setLanguage(event.target.value as Language)}
+                aria-label="Language"
+                className="cursor-pointer bg-transparent outline-none"
+              >
+                <option value="fr">Français</option>
+                <option value="en">English</option>
+                <option value="ar">العربية</option>
+              </select>
+            </label>
+            <button
             onClick={() =>
               navigate('/dashboard/establishments')
             }
-            className="ml-auto flex items-center gap-2 rounded-full bg-forest px-3 py-2 text-xs font-semibold text-white transition hover:bg-forest-light sm:px-4"
+            className="flex items-center gap-2 rounded-full bg-forest px-3 py-2 text-xs font-semibold text-white transition hover:bg-forest-light sm:px-4"
           >
             <Building2 size={15} />
             <span className="hidden sm:inline">Gérer mes établissements</span>
-          </button>
+            </button>
+          </div>
         </header>
 
         <main className="mx-auto w-full max-w-[1440px] p-4 sm:p-5 md:p-10">
