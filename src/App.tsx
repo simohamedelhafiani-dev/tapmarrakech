@@ -295,7 +295,6 @@ function RoleRedirect() {
 
   if (role === 'admin') return <Navigate to="/admin" replace />;
   if (role === 'responsible') return <Navigate to="/dashboard" replace />;
-  if (role === 'employee') return <Navigate to="/employee" replace />;
 
   return <Navigate to="/login" replace />;
 }
