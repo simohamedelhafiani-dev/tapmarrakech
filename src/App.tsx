@@ -156,6 +156,8 @@ function App() {
         <AuthProvider>
           <Routes>
           <Route path="/r/:slug" element={<PublicReview />} />
+          <Route path="/p/:slug/:section" element={<PublicReview />} />
+          <Route path="/p/:slug" element={<PublicReview />} />
           <Route path="/loyalty" element={<LoyaltyLaunch />} />
           <Route path="/loyalty/:token" element={<LoyaltyCard />} />
           <Route path="/login" element={<Login />} />
