@@ -179,12 +179,13 @@ export default function PublicReview() {
           .eq('establishment_id', establishment.id)
           .maybeSingle(),
 
-        establishment.menu_template_id && establishment.menu_template_id.length > 20
+        establishment.menu_template_id
           ? supabase
               .from('templates')
               .select('id,kind,config,active')
-              .eq('id', establishment.menu_template_id)
               .eq('kind', 'menu')
+              .eq('active', true)
+              .or(`id.eq.${establishment.menu_template_id},config->>key.eq.${establishment.menu_template_id}`)
               .maybeSingle()
           : Promise.resolve({ data: null }),
       ]);
