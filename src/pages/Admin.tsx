@@ -39,6 +39,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { useLanguage, type Language } from '@/contexts/LanguageContext';
 import Templates from '@/pages/Templates';
 import LoyaltyProgramCustomization from '@/components/LoyaltyProgramCustomization';
 
@@ -524,13 +525,26 @@ export default function Admin() {
             </h1>
           </div>
 
-          <button
+          <div className="ml-auto flex items-center gap-2">
+            <label className="hidden items-center gap-2 rounded-full border border-ink/10 bg-white px-3 py-2 text-xs font-medium text-ink/60 shadow-sm sm:flex">
+              <select
+                value={language}
+                onChange={(event) => setLanguage(event.target.value as Language)}
+                aria-label="Language"
+                className="cursor-pointer bg-transparent outline-none"
+              >
+                <option value="fr">Français</option>
+                <option value="en">English</option>
+                <option value="ar">العربية</option>
+              </select>
+            </label>
+            <button
             onClick={reloadAll}
-            className="flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-3 py-2 text-xs font-medium text-ink transition hover:bg-[#f7f7f3]"
-          >
+            className="flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-3 py-2 text-xs font-medium text-ink transition hover:bg-[#f7f7f3]">
             <RefreshCw size={14} />
             <span className="hidden sm:inline">Actualiser</span>
-          </button>
+            </button>
+          </div>
         </header>
 
         <main className="mx-auto w-full max-w-[1440px] p-4 sm:p-5 md:p-10">
