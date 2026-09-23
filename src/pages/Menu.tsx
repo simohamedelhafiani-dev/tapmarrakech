@@ -73,7 +73,8 @@ const emptyItemForm: ItemForm = {
 };
 
 export default function Menu() {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
+  const canManageMenuStructure = role === 'admin';
 
   const [establishments, setEstablishments] = useState<Establishment[]>([]);
   const [establishmentId, setEstablishmentId] = useState('');
@@ -513,22 +514,26 @@ export default function Menu() {
               ))}
             </select>
 
-            <a
-              href="/dashboard/menu/design"
-              className="flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
-            >
-              <ImageIcon size={17} />
-              Personnaliser le menu
-            </a>
+            {canManageMenuStructure && (
+              <>
+                <a
+                  href="/dashboard/menu/design"
+                  className="flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
+                >
+                  <ImageIcon size={17} />
+                  Personnaliser le menu
+                </a>
 
-            <button
-              type="button"
-              onClick={openNewCategory}
-              className="flex items-center justify-center gap-2 rounded-xl bg-gold px-4 py-3 text-sm font-semibold text-forest transition hover:brightness-105"
-            >
-              <Plus size={17} />
-              Nouvelle catégorie
-            </button>
+                <button
+                  type="button"
+                  onClick={openNewCategory}
+                  className="flex items-center justify-center gap-2 rounded-xl bg-gold px-4 py-3 text-sm font-semibold text-forest transition hover:brightness-105"
+                >
+                  <Plus size={17} />
+                  Nouvelle catégorie
+                </button>
+              </>
+            )}
           </div>
         </div>
       </section>
@@ -547,17 +552,20 @@ export default function Menu() {
               Ton menu est vide
             </h2>
             <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-ink/50">
-              Commence par créer une catégorie comme Entrées, Plats, Burgers,
-              Desserts ou Boissons.
+              {canManageMenuStructure
+                ? 'Commence par créer une catégorie comme Entrées, Plats, Burgers, Desserts ou Boissons.'
+                : 'Le menu est configuré par Tap. Le responsable peut ensuite ajouter ou modifier les produits existants.'}
             </p>
-            <button
-              type="button"
-              onClick={openNewCategory}
-              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white"
-            >
-              <Plus size={17} />
-              Créer ma première catégorie
-            </button>
+            {canManageMenuStructure && (
+              <button
+                type="button"
+                onClick={openNewCategory}
+                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white"
+              >
+                <Plus size={17} />
+                Créer ma première catégorie
+              </button>
+            )}
           </div>
         ) : (
           categories.map((category, index) => {
@@ -606,50 +614,54 @@ export default function Menu() {
                   </button>
 
                   <div className="flex flex-wrap items-center gap-2">
-                    <button
-                      type="button"
-                      title="Monter"
-                      disabled={index === 0}
-                      onClick={() => moveCategory(category, -1)}
-                      className="grid h-9 w-9 place-items-center rounded-xl border border-ink/10 text-ink/50 disabled:cursor-not-allowed disabled:opacity-30"
-                    >
-                      <ChevronUp size={16} />
-                    </button>
+                    {canManageMenuStructure && (
+                      <>
+                        <button
+                          type="button"
+                          title="Monter"
+                          disabled={index === 0}
+                          onClick={() => moveCategory(category, -1)}
+                          className="grid h-9 w-9 place-items-center rounded-xl border border-ink/10 text-ink/50 disabled:cursor-not-allowed disabled:opacity-30"
+                        >
+                          <ChevronUp size={16} />
+                        </button>
 
-                    <button
-                      type="button"
-                      title="Descendre"
-                      disabled={index === categories.length - 1}
-                      onClick={() => moveCategory(category, 1)}
-                      className="grid h-9 w-9 place-items-center rounded-xl border border-ink/10 text-ink/50 disabled:cursor-not-allowed disabled:opacity-30"
-                    >
-                      <ChevronDown size={16} />
-                    </button>
+                        <button
+                          type="button"
+                          title="Descendre"
+                          disabled={index === categories.length - 1}
+                          onClick={() => moveCategory(category, 1)}
+                          className="grid h-9 w-9 place-items-center rounded-xl border border-ink/10 text-ink/50 disabled:cursor-not-allowed disabled:opacity-30"
+                        >
+                          <ChevronDown size={16} />
+                        </button>
 
-                    <button
-                      type="button"
-                      onClick={() => toggleCategoryActive(category)}
-                      className="flex items-center gap-2 rounded-xl border border-ink/10 px-3 py-2 text-xs font-semibold text-ink/60"
-                    >
-                      {category.active ? <EyeOff size={15} /> : <Eye size={15} />}
-                      {category.active ? 'Masquer' : 'Afficher'}
-                    </button>
+                        <button
+                          type="button"
+                          onClick={() => toggleCategoryActive(category)}
+                          className="flex items-center gap-2 rounded-xl border border-ink/10 px-3 py-2 text-xs font-semibold text-ink/60"
+                        >
+                          {category.active ? <EyeOff size={15} /> : <Eye size={15} />}
+                          {category.active ? 'Masquer' : 'Afficher'}
+                        </button>
 
-                    <button
-                      type="button"
-                      onClick={() => openEditCategory(category)}
-                      className="grid h-9 w-9 place-items-center rounded-xl border border-ink/10 text-ink/50"
-                    >
-                      <Edit3 size={15} />
-                    </button>
+                        <button
+                          type="button"
+                          onClick={() => openEditCategory(category)}
+                          className="grid h-9 w-9 place-items-center rounded-xl border border-ink/10 text-ink/50"
+                        >
+                          <Edit3 size={15} />
+                        </button>
 
-                    <button
-                      type="button"
-                      onClick={() => deleteCategory(category)}
-                      className="grid h-9 w-9 place-items-center rounded-xl border border-red-100 text-red-500"
-                    >
-                      <Trash2 size={15} />
-                    </button>
+                        <button
+                          type="button"
+                          onClick={() => deleteCategory(category)}
+                          className="grid h-9 w-9 place-items-center rounded-xl border border-red-100 text-red-500"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </>
+                    )}
 
                     <button
                       type="button"

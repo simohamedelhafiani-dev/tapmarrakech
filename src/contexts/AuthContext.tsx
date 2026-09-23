@@ -8,7 +8,7 @@ import {
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 
-type UserRole = 'admin' | 'responsible' | 'employee';
+type UserRole = 'admin' | 'responsible';
 
 type AuthContextValue = {
   session: Session | null;
@@ -66,17 +66,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, nextSession) => {
+    } = supabase.auth.onAuthStateChange((event, nextSession) => {
       if (!active) return;
 
       setSession(nextSession);
 
-      if (nextSession?.user) {
-        await loadProfile(nextSession.user.id);
-      } else {
+      if (!nextSession?.user) {
         setRole(null);
+        setLoading(false);
+        return;
       }
 
+      if (
+        event === 'INITIAL_SESSION' ||
+        event === 'SIGNED_IN' ||
+        event === 'USER_UPDATED'
+      ) {
+        // Ne jamais attendre un appel Supabase dans onAuthStateChange :
+        // Supabase documente un risque de deadlock avec les appels async
+        // effectués directement dans ce callback.
+        setLoading(true);
+        window.setTimeout(() => {
+          if (!active) return;
+
+          void loadProfile(nextSession.user.id).finally(() => {
+            if (active) setLoading(false);
+          });
+        }, 0);
+        return;
+      }
+
+      // TOKEN_REFRESHED ne change pas le rôle : on conserve le profil déjà chargé.
       setLoading(false);
     });
 

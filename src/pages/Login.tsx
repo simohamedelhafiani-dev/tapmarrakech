@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
-  KeyRound,
   LockKeyhole,
   ShieldCheck,
   UserRound,
@@ -14,8 +13,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 
 type LoginRole = 'admin' | 'responsible' | null;
-
-const EMPLOYEE_SESSION_KEY = 'tapmarrakech_employee_session';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -33,13 +30,7 @@ export default function Login() {
 
     if (role === 'admin') navigate('/admin', { replace: true });
     if (role === 'responsible') navigate('/dashboard', { replace: true });
-    if (role === 'employee') navigate('/employee', { replace: true });
   }, [loading, user, role, navigate]);
-
-  function clearEmployeeSessionArtifacts() {
-    localStorage.removeItem(EMPLOYEE_SESSION_KEY);
-    sessionStorage.removeItem(EMPLOYEE_SESSION_KEY);
-  }
 
   function selectRole(nextRole: LoginRole) {
     setError('');
@@ -47,9 +38,6 @@ export default function Login() {
     setPassword('');
     setSelectedRole(nextRole);
 
-    if (nextRole === 'admin' || nextRole === 'responsible') {
-      clearEmployeeSessionArtifacts();
-    }
   }
 
   async function handleLogin() {
@@ -61,8 +49,6 @@ export default function Login() {
     }
 
     setSaving(true);
-    clearEmployeeSessionArtifacts();
-
     const { data, error: loginError } = await supabase.auth.signInWithPassword({
       email: email.trim().toLowerCase(),
       password,
@@ -230,23 +216,6 @@ export default function Login() {
               <h2 className="mt-2 font-display text-3xl text-forest">Responsable</h2>
               <p className="mt-3 text-sm leading-6 text-ink/45">Pilotage de votre établissement, réputation, fidélité et performances.</p>
               <p className="mt-6 text-xs font-semibold text-forest">Email + mot de passe</p>
-            </button>
-            <button
-              onClick={async () => {
-                clearEmployeeSessionArtifacts();
-                await supabase.auth.signOut();
-                navigate('/employee');
-              }}
-              className="group rounded-[2rem] border border-forest/10 bg-forest p-7 text-left text-white shadow-xl transition duration-200 hover:-translate-y-1 hover:shadow-2xl"
-            >
-              <div className="flex items-start justify-between">
-                <div className="grid h-14 w-14 place-items-center rounded-2xl bg-white/10 text-gold ring-1 ring-white/10"><KeyRound size={27} /></div>
-                <ArrowRight size={19} className="text-white/40 transition group-hover:translate-x-1 group-hover:text-white" />
-              </div>
-              <p className="mt-8 text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">Accès rapide</p>
-              <h2 className="mt-2 font-display text-3xl">Employé</h2>
-              <p className="mt-3 text-sm leading-6 text-white/60">Entrez simplement votre code. TapMarrakech retrouve automatiquement votre établissement.</p>
-              <p className="mt-6 text-xs font-semibold text-gold">Code employé uniquement</p>
             </button>
           </div>
           <div className="mt-8 flex justify-center gap-5 text-xs text-ink/35">

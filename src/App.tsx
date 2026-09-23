@@ -14,13 +14,9 @@ import Login from '@/pages/Login';
 import { ForgotPassword, Register } from '@/pages/AuthPages';
 
 import Dashboard from '@/pages/Dashboard';
-import Establishments from '@/pages/Establishments';
 import Reviews from '@/pages/Reviews';
-import Analytics from '@/pages/Analytics';
 import Loyalty from '@/pages/Loyalty';
-import LoyaltySettings from '@/pages/LoyaltySettings';
 import Menu from '@/pages/Menu';
-import MenuDesign from '@/pages/MenuDesign';
 import Promotions from '@/pages/Promotions';
 import Admin from '@/pages/Admin';
 import Employee from '@/pages/Employee';
@@ -168,30 +164,10 @@ function App() {
             <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route
-                path="/dashboard/establishments"
-                element={<Establishments />}
-              />
-              <Route
                 path="/dashboard/reviews"
                 element={
                   <SubscriptionFeatureRoute feature="reviews">
                     <Reviews />
-                  </SubscriptionFeatureRoute>
-                }
-              />
-              <Route
-                path="/dashboard/analytics"
-                element={
-                  <SubscriptionFeatureRoute feature="analytics">
-                    <Analytics />
-                  </SubscriptionFeatureRoute>
-                }
-              />
-              <Route
-                path="/dashboard/menu/design"
-                element={
-                  <SubscriptionFeatureRoute feature="menu">
-                    <MenuDesign />
                   </SubscriptionFeatureRoute>
                 }
               />
@@ -216,14 +192,6 @@ function App() {
                 element={
                   <SubscriptionFeatureRoute feature="loyalty">
                     <Loyalty />
-                  </SubscriptionFeatureRoute>
-                }
-              />
-              <Route
-                path="/dashboard/loyalty/settings"
-                element={
-                  <SubscriptionFeatureRoute feature="loyalty">
-                    <LoyaltySettings />
                   </SubscriptionFeatureRoute>
                 }
               />

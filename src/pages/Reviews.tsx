@@ -66,7 +66,7 @@ type AIResponse = {
 };
 
 export default function Reviews() {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
 
   const [reviews, setReviews] = useState<Review[]>([]);
   const [search, setSearch] = useState('');
@@ -373,6 +373,7 @@ export default function Reviews() {
             </p>
           </div>
 
+          {role === 'admin' && (
           <button
             onClick={analyzeReviews}
             disabled={
@@ -392,9 +393,12 @@ export default function Reviews() {
               </>
             )}
           </button>
+          )}
         </div>
       </div>
 
+      {role === 'admin' && (
+        <>
       {/* ERREUR IA */}
       {aiError && (
         <div className="mb-5 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
@@ -696,6 +700,8 @@ export default function Reviews() {
             </div>
           </div>
         </div>
+      )}
+        </>
       )}
 
       {/* FILTRES */}
