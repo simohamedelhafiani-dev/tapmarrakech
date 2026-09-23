@@ -10,6 +10,7 @@ import { supabase } from '@/lib/supabase';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
 import PublicReview from '@/pages/PublicReview';
+import PublicEstablishment from '@/pages/PublicEstablishment';
 import LoyaltyCard from '@/pages/LoyaltyCard';
 import Login from '@/pages/Login';
 import { ForgotPassword, Register } from '@/pages/AuthPages';
@@ -156,6 +157,7 @@ function App() {
         <AuthProvider>
           <Routes>
           <Route path="/r/:slug" element={<PublicReview />} />
+          <Route path="/p/:slug" element={<PublicEstablishment />} />
           <Route path="/loyalty" element={<LoyaltyLaunch />} />
           <Route path="/loyalty/:token" element={<LoyaltyCard />} />
           <Route path="/login" element={<Login />} />
