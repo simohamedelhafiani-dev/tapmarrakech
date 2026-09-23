@@ -398,6 +398,7 @@ export default function Reviews() {
       </div>
 
       {role === 'admin' && (
+        <>
       {/* ERREUR IA */}
       {aiError && (
         <div className="mb-5 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
@@ -701,6 +702,8 @@ export default function Reviews() {
         </div>
       )}
 
+      )}
+        </>
       )}
 
       {/* FILTRES */}
