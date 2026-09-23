@@ -2324,6 +2324,44 @@ function ResponsiblesSection({
   const [showForm, setShowForm] = useState(false);
   const [selectedEstablishment, setSelectedEstablishment] = useState('all');
 
+  const assignSubscription = async () => {
+    if (!assignmentEstablishmentId || !assignmentPlanId) {
+      return alert('Sélectionnez un établissement et un pack.');
+    }
+
+    const selectedPlan = billing.plans.find((item) => item.id === assignmentPlanId);
+    if (!selectedPlan) return alert('Pack introuvable.');
+
+    const existing = billing.subscriptions.find((item) => item.establishment_id === assignmentEstablishmentId);
+    const startedAt = new Date();
+    const trialDays = assignmentStatus === 'trial' ? Math.max(1, Number(assignmentTrialDays) || 14) : 0;
+    const periodEnd = new Date(startedAt);
+    if (assignmentStatus === 'trial') periodEnd.setDate(periodEnd.getDate() + trialDays);
+    else if (selectedPlan.interval === 'year') periodEnd.setFullYear(periodEnd.getFullYear() + 1);
+    else periodEnd.setMonth(periodEnd.getMonth() + 1);
+
+    setSavingAssignment(true);
+    const payload = {
+      establishment_id: assignmentEstablishmentId,
+      plan_id: assignmentPlanId,
+      status: assignmentStatus,
+      started_at: startedAt.toISOString(),
+      current_period_end: periodEnd.toISOString(),
+      trial_days: trialDays,
+      canceled_at: null,
+    };
+
+    const result = existing
+      ? await supabase.from('subscriptions').update(payload).eq('id', existing.id)
+      : await supabase.from('subscriptions').insert(payload);
+
+    setSavingAssignment(false);
+    if (result.error) return alert(`Impossible d'attribuer le pack : ${result.error.message}`);
+
+    await reload();
+    alert(`Le pack « ${selectedPlan.name} » a été attribué à l'établissement.`);
+  };
+
   const establishmentMap = useMemo(
     () =>
       new Map(
@@ -4946,6 +4984,11 @@ function BillingSection({
   const [showPlanEditor, setShowPlanEditor] = useState(false);
   const [planForm, setPlanForm] = useState({ name: '', price_mad: '', interval: 'month', features: '' });
   const [savingPlan, setSavingPlan] = useState(false);
+  const [assignmentEstablishmentId, setAssignmentEstablishmentId] = useState('');
+  const [assignmentPlanId, setAssignmentPlanId] = useState('');
+  const [assignmentStatus, setAssignmentStatus] = useState<'active' | 'trial'>('active');
+  const [assignmentTrialDays, setAssignmentTrialDays] = useState('14');
+  const [savingAssignment, setSavingAssignment] = useState(false);
 
   const openPlanEditor = (value?: BillingPlan) => {
     setEditingPlan(value ?? null);
@@ -5050,6 +5093,34 @@ function BillingSection({
             <option value="all">Tous les plans</option>
             {billing.plans.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
+        </div>
+      </div>
+
+      <div className="mt-6 rounded-2xl border border-forest/10 bg-white p-5 shadow-sm">
+        <div className="flex flex-col justify-between gap-3 md:flex-row md:items-end">
+          <div>
+            <h3 className="text-sm font-semibold">Attribuer un pack à un établissement</h3>
+            <p className="mt-1 text-xs text-ink/45">Le pack devient immédiatement le pack actif de l’établissement. En période d’essai, l’interface responsable conserve le thème standard.</p>
+          </div>
+          <span className="rounded-full bg-forest/5 px-3 py-1.5 text-[10px] font-semibold text-forest">Admin uniquement</span>
+        </div>
+        <div className="mt-4 grid gap-3 md:grid-cols-[1.3fr_1fr_.8fr_.7fr_auto]">
+          <select value={assignmentEstablishmentId} onChange={(e) => setAssignmentEstablishmentId(e.target.value)} className="rounded-xl border border-ink/10 bg-[#f7f7f3] px-3 py-2.5 text-sm outline-none focus:border-forest">
+            <option value="">Établissement</option>
+            {establishments.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+          </select>
+          <select value={assignmentPlanId} onChange={(e) => setAssignmentPlanId(e.target.value)} className="rounded-xl border border-ink/10 bg-[#f7f7f3] px-3 py-2.5 text-sm outline-none focus:border-forest">
+            <option value="">Pack</option>
+            {billing.plans.filter((item) => item.active).map((item) => <option key={item.id} value={item.id}>{item.name} · {Number(item.price_mad).toLocaleString('fr-FR')} MAD</option>)}
+          </select>
+          <select value={assignmentStatus} onChange={(e) => setAssignmentStatus(e.target.value as 'active' | 'trial')} className="rounded-xl border border-ink/10 bg-[#f7f7f3] px-3 py-2.5 text-sm outline-none focus:border-forest">
+            <option value="active">Actif</option>
+            <option value="trial">Essai</option>
+          </select>
+          <input type="number" min="1" max="90" value={assignmentTrialDays} onChange={(e) => setAssignmentTrialDays(e.target.value)} disabled={assignmentStatus !== 'trial'} className="rounded-xl border border-ink/10 bg-[#f7f7f3] px-3 py-2.5 text-sm outline-none disabled:opacity-40" placeholder="Jours essai" />
+          <button type="button" onClick={assignSubscription} disabled={savingAssignment} className="inline-flex items-center justify-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-50">
+            <CheckCircle2 size={14} /> {savingAssignment ? 'Attribution…' : 'Attribuer'}
+          </button>
         </div>
       </div>
 
