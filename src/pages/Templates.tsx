@@ -28,6 +28,7 @@ type Template = {
   is_default: boolean;
   created_at: string;
   updated_at: string;
+  source?: 'database' | 'builtin';
 };
 
 type Establishment = {
@@ -130,6 +131,19 @@ const MENU_PRESETS = [
   },
 ];
 
+const BUILTIN_TEMPLATES: Template[] = [
+  { id: 'builtin-menu-editorial', kind: 'menu', name: '01 — Editorial', description: 'Mise en page éditoriale premium, typographie élégante et espace négatif.', thumbnail_url: null, config: { key: 'editorial', layout: 'editorial' }, active: true, is_default: true, created_at: '', updated_at: '', source: 'builtin' },
+  { id: 'builtin-menu-luxury', kind: 'menu', name: '02 — Luxury', description: 'Présentation luxe avec visuels et cartes produits.', thumbnail_url: null, config: { key: 'luxury', layout: 'luxury' }, active: true, is_default: false, created_at: '', updated_at: '', source: 'builtin' },
+  { id: 'builtin-menu-cards', kind: 'menu', name: '03 — Cards', description: 'Présentation moderne en cartes, claire et visuelle.', thumbnail_url: null, config: { key: 'cards', layout: 'cards' }, active: true, is_default: false, created_at: '', updated_at: '', source: 'builtin' },
+  { id: 'builtin-menu-dark', kind: 'menu', name: '04 — Noir Signature', description: 'Univers sombre premium avec accents dorés.', thumbnail_url: null, config: { key: 'dark', layout: 'dark' }, active: true, is_default: false, created_at: '', updated_at: '', source: 'builtin' },
+  { id: 'builtin-loyalty-obsidian', kind: 'loyalty', name: '01 — Obsidian', description: 'Fond photo immersif, contraste cinématique et or discret.', thumbnail_url: null, config: LOYALTY_PRESETS[0].config, active: true, is_default: false, created_at: '', updated_at: '', source: 'builtin' },
+  { id: 'builtin-loyalty-editorial', kind: 'loyalty', name: '02 — Editorial', description: 'Ivoire, typographie magazine, espace négatif et champagne.', thumbnail_url: null, config: LOYALTY_PRESETS[1].config, active: true, is_default: true, created_at: '', updated_at: '', source: 'builtin' },
+  { id: 'builtin-loyalty-glass', kind: 'loyalty', name: '03 — Glass', description: 'Surfaces vitrées, blur et lumière pour une esthétique wellness premium.', thumbnail_url: null, config: LOYALTY_PRESETS[2].config, active: true, is_default: false, created_at: '', updated_at: '', source: 'builtin' },
+  { id: 'builtin-loyalty-titanium', kind: 'loyalty', name: '04 — Titanium', description: 'Noir profond, reflets métalliques et signature gold.', thumbnail_url: null, config: LOYALTY_PRESETS[3].config, active: true, is_default: false, created_at: '', updated_at: '', source: 'builtin' },
+  { id: 'builtin-loyalty-hospitality', kind: 'loyalty', name: '05 — Hospitality', description: 'Univers hôtel, restaurant et travel, chaleureux et premium.', thumbnail_url: null, config: LOYALTY_PRESETS[4].config, active: true, is_default: false, created_at: '', updated_at: '', source: 'builtin' },
+  { id: 'builtin-loyalty-wallet', kind: 'loyalty', name: '06 — Apple Wallet', description: 'Minimalisme premium et lecture instantanée sur mobile.', thumbnail_url: null, config: LOYALTY_PRESETS[5].config, active: true, is_default: false, created_at: '', updated_at: '', source: 'builtin' },
+];
+
 function prettyJson(value: Record<string, any>) {
   return JSON.stringify(value, null, 2);
 }
@@ -181,7 +195,8 @@ export default function Templates() {
       alert(`Impossible de charger les établissements : ${establishmentError.message}`);
     }
 
-    setTemplates((templateRows ?? []) as Template[]);
+    const databaseTemplates = ((templateRows ?? []) as Template[]).map((template) => ({ ...template, source: 'database' as const }));
+    setTemplates([...BUILTIN_TEMPLATES, ...databaseTemplates]);
     setEstablishments((establishmentRows ?? []) as Establishment[]);
     setLoading(false);
   };
@@ -292,6 +307,7 @@ export default function Templates() {
   };
 
   const toggleActive = async (template: Template) => {
+    if (template.source === 'builtin') return;
     const { error } = await supabase
       .from('templates')
       .update({ active: !template.active, updated_at: new Date().toISOString() })
@@ -306,6 +322,7 @@ export default function Templates() {
   };
 
   const makeDefault = async (template: Template) => {
+    if (template.source === 'builtin') return;
     const { error: clearError } = await supabase
       .from('templates')
       .update({ is_default: false })
@@ -330,6 +347,10 @@ export default function Templates() {
   };
 
   const remove = async (template: Template) => {
+    if (template.source === 'builtin') {
+      alert('Ce template fait partie de la bibliothèque native TapMarrakech et ne peut pas être supprimé.');
+      return;
+    }
     const usedBy = establishments.filter(
       (establishment) =>
         establishment.page_template_id === template.id ||
@@ -356,6 +377,7 @@ export default function Templates() {
   };
 
   const assign = async (establishmentId: string, templateId: string) => {
+    if (kind === 'loyalty') return;
     const column = kind === 'page' ? 'page_template_id' : 'menu_template_id';
 
     const { error } = await supabase
@@ -621,6 +643,7 @@ export default function Templates() {
                         >
                           {template.active ? 'Actif' : 'Inactif'}
                         </span>
+                        {template.source === 'builtin' && <span className="rounded-full bg-forest/5 px-2.5 py-1 text-[10px] font-semibold text-forest">Système</span>}
                       </div>
                       <p className="mt-2 text-xs leading-5 text-ink/45">
                         {template.description || 'Aucune description.'}
