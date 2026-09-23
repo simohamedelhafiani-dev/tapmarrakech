@@ -1006,7 +1006,7 @@ function EstablishmentWorkspace({
   const [promotion, setPromotion] = useState({ name: '', description: '', normal_price: '', promo_price: '' });
   const [reward, setReward] = useState({ name: '', description: '', points_required: '' });
 
-  const publicLink = `${window.location.origin}/r/${establishment.slug}`;
+  const publicLink = `${window.location.origin}/p/${establishment.slug}`;
   const [scannerLink, setScannerLink] = useState<string | null>(null);
   const businessType = businessTypes.find((x) => x.id === establishment.ai_business_type_id)?.name ?? profile.business_type ?? 'Établissement';
 
@@ -1564,7 +1564,7 @@ function EstablishmentWorkspace({
 
   const tabs: { id: WorkspaceTab; label: string }[] = [
     { id: 'profile', label: 'Profil' }, { id: 'wifi', label: 'Wi-Fi' }, { id: 'menu', label: 'Menu' }, { id: 'promotions', label: 'Promotions' },
-    { id: 'reviews', label: 'Avis' }, { id: 'loyalty', label: 'Fidélité' }, { id: 'team', label: 'Équipe' }, { id: 'analytics', label: 'Analytics' }, { id: 'public', label: 'Lien public' },
+    { id: 'reviews', label: 'Avis' }, { id: 'loyalty', label: 'Fidélité' }, { id: 'team', label: 'Équipe' }, { id: 'analytics', label: 'Analytics' }, { id: 'public', label: 'Liens publics' },
   ];
 
   const field = (label: string, key: string, type = 'text') => (
@@ -2113,9 +2113,43 @@ function EstablishmentWorkspace({
 
       {tab === 'team' && <div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Équipe de l’établissement</h3><p className="mt-1 text-xs text-ink/45">Les comptes sont gérés depuis les sections Responsables / Employés de l’Admin.</p><div className="mt-5 space-y-2">{team.length === 0 ? <p className="text-sm text-ink/45">Aucun membre affecté.</p> : team.map((m) => <div key={m.id} className="flex justify-between rounded-xl bg-[#f7f7f3] p-3 text-sm"><span>{m.name}</span><span className="text-xs text-ink/45">{m.role} · {m.active ? 'Actif' : 'Inactif'}</span></div>)}</div></div>}
 
-      {tab === 'analytics' && <div className="grid gap-4 md:grid-cols-3"><StatCard label="Événements enregistrés" value={eventsCount} /><StatCard label="Avis" value={reviews.length || '—'} /><StatCard label="Page publique" value="/r/:slug" /></div>}
+      {tab === 'analytics' && <div className="grid gap-4 md:grid-cols-3"><StatCard label="Événements enregistrés" value={eventsCount} /><StatCard label="Avis" value={reviews.length || '—'} /><StatCard label="Page publique" value={`/p/${establishment.slug}`} /></div>}
 
-      {tab === 'public' && <div className="space-y-5"><div className="rounded-2xl border border-ink/5 bg-white p-6"><p className="text-xs font-semibold uppercase tracking-wider text-gold">Lien unique QR / NFC</p><h3 className="mt-2 text-xl font-semibold">{publicLink}</h3><p className="mt-2 text-sm text-ink/50">Ce lien doit devenir la page client complète : Wi-Fi, menu, promotions, fidélité, avis et modules adaptés au type d’établissement.</p><div className="mt-5 flex flex-wrap gap-2"><button onClick={() => navigator.clipboard.writeText(publicLink).then(() => alert('Lien copié.'))} className="rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Copier le lien</button><a href={publicLink} target="_blank" rel="noreferrer" className="rounded-xl border border-ink/10 px-4 py-2.5 text-xs font-semibold">Tester la page</a></div></div><div className="rounded-2xl border border-ink/5 bg-white p-6"><h3 className="font-semibold">Templates</h3><div className="mt-4 grid gap-3 md:grid-cols-2"><label className="text-xs text-ink/50">Template page<select value={profile.page_template_id ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, page_template_id: e.target.value || null }))} className="mt-1 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"><option value="">Automatique / défaut</option>{templates.filter((t) => t.kind === 'page' && t.active).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label><label className="text-xs text-ink/50">Template menu<select value={profile.menu_template_id ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, menu_template_id: e.target.value || null }))} className="mt-1 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"><option value="">Automatique / défaut</option>{templates.filter((t) => t.kind === 'menu' && t.active).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label></div><button onClick={saveProfile} className="mt-4 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Enregistrer les templates</button></div></div>}
+      {tab === 'public' && (
+  <div className="space-y-5">
+    <div className="rounded-2xl border border-gold/20 bg-[#fbf8ee] p-6">
+      <p className="text-xs font-bold uppercase tracking-[0.14em] text-forest">Liens publics de l’établissement</p>
+      <h3 className="mt-2 text-xl font-semibold text-ink">Accès client</h3>
+      <p className="mt-2 text-sm text-ink/50">Tous les liens que l’Admin peut copier et ouvrir pour QR / NFC.</p>
+      <div className="mt-5 grid gap-3 md:grid-cols-2">
+        {[
+          { label: 'Page établissement', description: 'Page publique principale', url: publicLink },
+          { label: 'Programme fidélité', description: 'Accès direct au programme fidélité', url: window.location.origin + '/p/' + establishment.slug + '/loyalty' },
+          { label: 'Menu digital', description: 'Accès direct au menu', url: window.location.origin + '/p/' + establishment.slug + '/menu' },
+          { label: 'Avis Google', description: 'Accès direct à la section avis', url: window.location.origin + '/p/' + establishment.slug + '/reviews' },
+        ].map((link) => (
+          <div key={link.label} className="rounded-2xl border border-ink/5 bg-white p-4">
+            <p className="text-sm font-semibold text-ink">{link.label}</p>
+            <p className="mt-1 text-xs text-ink/45">{link.description}</p>
+            <p className="mt-3 break-all rounded-lg bg-[#f7f7f3] p-2.5 text-[10px] text-ink/45">{link.url}</p>
+            <div className="mt-3 flex gap-2">
+              <button type="button" onClick={() => navigator.clipboard.writeText(link.url).then(() => alert('Lien copié.'))} className="rounded-xl bg-forest px-3 py-2 text-[11px] font-semibold text-white">Copier</button>
+              <a href={link.url} target="_blank" rel="noreferrer" className="rounded-xl border border-ink/10 px-3 py-2 text-[11px] font-semibold text-forest">Ouvrir ↗</a>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+    <div className="rounded-2xl border border-ink/5 bg-white p-6">
+      <h3 className="font-semibold">Templates</h3>
+      <div className="mt-4 grid gap-3 md:grid-cols-2">
+        <label className="text-xs text-ink/50">Template page<select value={profile.page_template_id ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, page_template_id: e.target.value || null }))} className="mt-1 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"><option value="">Automatique / défaut</option>{templates.filter((t) => t.kind === 'page' && t.active).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label>
+        <label className="text-xs text-ink/50">Template menu<select value={profile.menu_template_id ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, menu_template_id: e.target.value || null }))} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm"><option value="">Automatique / défaut</option>{templates.filter((t) => t.kind === 'menu' && t.active).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label>
+      </div>
+      <button onClick={saveProfile} className="mt-4 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Enregistrer les templates</button>
+    </div>
+  </div>
+)} className="rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Copier le lien</button><a href={publicLink} target="_blank" rel="noreferrer" className="rounded-xl border border-ink/10 px-4 py-2.5 text-xs font-semibold">Tester la page</a></div></div><div className="rounded-2xl border border-ink/5 bg-white p-6"><h3 className="font-semibold">Templates</h3><div className="mt-4 grid gap-3 md:grid-cols-2"><label className="text-xs text-ink/50">Template page<select value={profile.page_template_id ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, page_template_id: e.target.value || null }))} className="mt-1 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"><option value="">Automatique / défaut</option>{templates.filter((t) => t.kind === 'page' && t.active).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label><label className="text-xs text-ink/50">Template menu<select value={profile.menu_template_id ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, menu_template_id: e.target.value || null }))} className="mt-1 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"><option value="">Automatique / défaut</option>{templates.filter((t) => t.kind === 'menu' && t.active).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label></div><button onClick={saveProfile} className="mt-4 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Enregistrer les templates</button></div></div>}
     </div>
   );
 }
