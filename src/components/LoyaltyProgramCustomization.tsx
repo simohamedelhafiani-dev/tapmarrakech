@@ -79,6 +79,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
   const [stampRewardName, setStampRewardName] = useState('Cadeau fidélité');
   const [stampRewardDescription, setStampRewardDescription] = useState('');
   const [rewards, setRewards] = useState<LoyaltyRewardAdmin[]>([]);
+  const [availableTemplates, setAvailableTemplates] = useState<LoyaltyPreset[]>(LOYALTY_PRESETS);
   const [rewardEditorOpen, setRewardEditorOpen] = useState(false);
   const [editingReward, setEditingReward] = useState<LoyaltyRewardAdmin | null>(null);
   const [rewardName, setRewardName] = useState('');
@@ -98,11 +99,12 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
 
   async function load() {
     if (!establishmentId) return;
-    const [{ data: designData }, { data: place }, { data: programData }, { data: rewardData }] = await Promise.all([
-      supabase.rpc('get_loyalty_card_config', { p_establishment_id: establishmentId }),
+    const [{ data: designData }, { data: place }, { data: programData }, { data: rewardData }, { data: templateRows }] = await Promise.all([
+      supabase.rpc('get_loyalty_card_builder_config', { p_establishment_id: establishmentId }),
       supabase.from('establishments').select('name,logo_url,business_type').eq('id', establishmentId).maybeSingle(),
       supabase.rpc('get_loyalty_program_settings', { p_establishment_id: establishmentId }),
       supabase.from('loyalty_rewards').select('id,name,description,points_required,active,reward_type,discount_percent,discount_max_amount,valid_days').eq('establishment_id', establishmentId).order('points_required', { ascending: true }),
+      supabase.from('templates').select('id,name,description,config').eq('kind', 'loyalty').eq('active', true).order('name'),
     ]);
 
     const row = Array.isArray(designData) ? designData[0] : designData;
@@ -123,6 +125,28 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     }
     if (place) setEstablishment({ name: place.name || 'Votre établissement', logo_url: place.logo_url || null, business_type: place.business_type || null });
     setRewards((rewardData ?? []) as LoyaltyRewardAdmin[]);
+    if (templateRows?.length) {
+      const mapped = (templateRows as Array<{ id: string; name: string; description: string | null; config: Record<string, any> }>).map((row) => {
+        const c = row.config || {};
+        return {
+          id: c.key || row.id,
+          name: row.name,
+          description: row.description || '',
+          primary: c.primary || '#173D32',
+          secondary: c.secondary || '#D3A84C',
+          background: c.background || '#F7F7F3',
+          text: c.text || '#FFFFFF',
+          radius: Number(c.radius || 28),
+          mode: c.mode === 'STAMP' ? 'STAMP' : 'QR',
+          title: c.title || 'Votre fidélité, autrement.',
+          subtitle: c.subtitle || 'Vos avantages, toujours avec vous.',
+          stampStyle: c.stampStyle || 'circles',
+        } as LoyaltyPreset;
+      });
+      setAvailableTemplates(mapped);
+    } else {
+      setAvailableTemplates(LOYALTY_PRESETS);
+    }
 
     const program = Array.isArray(programData) ? programData[0] : programData;
     if (program) {
@@ -311,7 +335,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
       return alert(programError.message);
     }
 
-    const { error } = await supabase.rpc('save_loyalty_card_design', {
+    const { error } = await supabase.rpc('save_loyalty_card_builder_config', {
       p_establishment_id: establishmentId,
       p_design_config: {
         ...design.design_config,
@@ -418,7 +442,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                 <p className="mt-1 text-xs text-ink/45">Choisis un modèle de départ, puis personnalise-le avec tes couleurs, ton logo et ta photo.</p>
               </div>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                {LOYALTY_PRESETS.map(preset => {
+                {availableTemplates.map(preset => {
                   const active = design.template_id === preset.id;
                   return (
                     <button
