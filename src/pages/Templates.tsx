@@ -224,6 +224,10 @@ export default function Templates() {
   };
 
   const startEdit = (template: Template) => {
+    if (template.source === 'builtin') {
+      alert('Ce template natif est déjà disponible pour tous les établissements. Duplique-le pour créer une variante personnalisée.');
+      return;
+    }
     setEditing(template);
     setKind(template.kind);
     setName(template.name);
@@ -707,7 +711,8 @@ export default function Templates() {
                         <p className="text-xs text-ink/35">Aucun établissement.</p>
                       ) : (
                         establishments.map((establishment) => {
-                          const selected = establishment[currentColumn] === template.id;
+                          const templateValue = template.source === 'builtin' ? String(template.config?.key || '') : template.id;
+                          const selected = establishment[currentColumn] === templateValue;
 
                           return (
                             <div
@@ -721,7 +726,7 @@ export default function Templates() {
                                 onClick={() =>
                                   assign(
                                     establishment.id,
-                                    selected ? '' : template.id
+                                    selected ? '' : templateValue
                                   )
                                 }
                                 className={`shrink-0 rounded-lg px-3 py-1.5 text-[10px] font-semibold ${
