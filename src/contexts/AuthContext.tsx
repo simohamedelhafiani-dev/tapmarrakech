@@ -66,18 +66,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, nextSession) => {
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       if (!active) return;
 
       setSession(nextSession);
 
-      if (nextSession?.user) {
-        await loadProfile(nextSession.user.id);
-      } else {
+      if (!nextSession?.user) {
         setRole(null);
+        setLoading(false);
+        return;
       }
 
-      setLoading(false);
+      // Do not await Supabase profile queries inside onAuthStateChange.
+      // Supabase can hold the auth lock while this callback runs.
+      setLoading(true);
+      setTimeout(() => {
+        if (!active) return;
+        void loadProfile(nextSession.user.id).finally(() => {
+          if (active) setLoading(false);
+        });
+      }, 0);
     });
 
     return () => {
