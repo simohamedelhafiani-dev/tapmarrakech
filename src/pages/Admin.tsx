@@ -303,7 +303,13 @@ export default function Admin() {
         const plan = Array.isArray(relation) ? relation[0] ?? null : relation ?? null;
         return { ...subscription, plan: plan as BillingPlan | null };
       });
-      const mrr = normalizedSubscriptions.filter((subscription) => subscription.status === 'active').reduce((sum, subscription) => sum + Number(subscription.plan?.price_mad ?? 0), 0);
+      const mrr = normalizedSubscriptions
+        .filter((subscription) => subscription.status === 'active')
+        .reduce((sum, subscription) => {
+          const price = Number(subscription.plan?.price_mad ?? 0);
+          const interval = subscription.plan?.interval === 'year' ? 'year' : 'month';
+          return sum + (interval === 'year' ? price / 12 : price);
+        }, 0);
       const now = Date.now();
       const in30Days = now + 30 * 24 * 60 * 60 * 1000;
       const upcomingRenewals = normalizedSubscriptions.filter((subscription) => {
@@ -5256,7 +5262,7 @@ function BillingSection({
       ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard icon={WalletCards} label="MRR" value={billing.available ? `${billing.mrr.toLocaleString('fr-FR')} MAD` : '—'} />
+        <StatCard icon={WalletCards} label="MRR" value={billing.available ? `${billing.mrr.toLocaleString('fr-FR', { maximumFractionDigits: 2 })} MAD` : '—'} />
         <StatCard icon={CreditCard} label="Plans actifs" value={billing.available ? billing.plans.filter((p) => p.active).length : '—'} />
         <StatCard icon={AlertTriangle} label="Paiements échoués" value={billing.available ? billing.failedPayments : '—'} />
         <StatCard icon={CalendarDays} label="Renouvellements < 30 j." value={billing.available ? billing.upcomingRenewals : '—'} />
@@ -5593,7 +5599,16 @@ function SystemSection({
       status: establishments.length > 0 ? 'ok' : 'error',
       detail: establishments.length > 0 ? `${establishments.length} établissement${establishments.length > 1 ? 's' : ''} chargé${establishments.length > 1 ? 's' : ''}` : 'Aucun établissement chargé',
     };
-    next[5] = { ...next[5], status: 'ok', detail: `${globalStats.analyticsEvents.toLocaleString('fr-FR')} événements enregistrés` };
+    try {
+      const { count, error } = await supabase
+        .from('analytics_events')
+        .select('id', { count: 'exact', head: true });
+      next[5] = error
+        ? { ...next[5], status: 'error', detail: error.message }
+        : { ...next[5], status: 'ok', detail: `${(count ?? 0).toLocaleString('fr-FR')} événements analytics accessibles` };
+    } catch (error) {
+      next[5] = { ...next[5], status: 'error', detail: error instanceof Error ? error.message : 'Erreur inconnue' };
+    }
     next[6] = {
       ...next[6],
       status: billing.available ? 'ok' : 'error',
