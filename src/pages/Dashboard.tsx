@@ -34,6 +34,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Establishment, Review } from '@/lib/types';
 import { Stars } from '@/components/Stars';
+import { getMySubscriptionAccess, type SubscriptionAccess } from '@/lib/subscriptionAccess';
 
 type LoyaltyCustomer = {
   id: string;
@@ -164,6 +165,33 @@ export default function Dashboard() {
     null
   );
   const [loading, setLoading] = useState(true);
+  const [subscription, setSubscription] = useState<SubscriptionAccess | null>(null);
+  const [subscriptionLoading, setSubscriptionLoading] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadSubscription = async () => {
+      if (!selectedEstablishmentId) {
+        if (active) setSubscription(null);
+        return;
+      }
+
+      setSubscriptionLoading(true);
+      const accesses = await getMySubscriptionAccess(selectedEstablishmentId);
+
+      if (active) {
+        setSubscription(accesses[0] ?? null);
+        setSubscriptionLoading(false);
+      }
+    };
+
+    void loadSubscription();
+
+    return () => {
+      active = false;
+    };
+  }, [selectedEstablishmentId]);
 
   useEffect(() => {
     if (!user) {
@@ -784,6 +812,45 @@ export default function Dashboard() {
           </Link>
         )}
       </div>
+
+      {isResponsible && (
+        <section className="mb-8 overflow-hidden rounded-2xl border border-ink/5 bg-white shadow-soft">
+          <div className="flex flex-col justify-between gap-5 p-5 md:flex-row md:items-center md:p-7">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">Mon abonnement</p>
+              <div className="mt-2 flex flex-wrap items-center gap-3">
+                <h2 className="font-display text-2xl text-forest">
+                  {subscriptionLoading ? 'Chargement…' : subscription?.plan_name || 'Aucun abonnement'}
+                </h2>
+                {!subscriptionLoading && subscription && (
+                  <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide ${
+                    subscription.subscription_status === 'trial'
+                      ? 'bg-amber-100 text-amber-700'
+                      : 'bg-emerald-100 text-emerald-700'
+                  }`}>
+                    {subscription.subscription_status === 'trial' ? 'Période d’essai' : 'Actif'}
+                  </span>
+                )}
+              </div>
+              <p className="mt-2 text-sm text-ink/45">
+                {subscription
+                  ? subscription.subscription_status === 'trial'
+                    ? `Essai de ${subscription.trial_days} jours · jusqu’au ${subscription.current_period_end ? new Date(subscription.current_period_end).toLocaleDateString('fr-FR') : '—'}`
+                    : `${subscription.plan_price_mad.toLocaleString('fr-FR')} MAD / ${subscription.plan_interval === 'year' ? 'an' : 'mois'} · jusqu’au ${subscription.current_period_end ? new Date(subscription.current_period_end).toLocaleDateString('fr-FR') : '—'}`
+                  : 'Aucun pack n’est actuellement attribué à cet établissement.'}
+              </p>
+            </div>
+
+            <div className="min-w-[180px] rounded-xl bg-[#f7f7f3] px-4 py-3 text-right">
+              <p className="text-[10px] uppercase tracking-[0.12em] text-ink/35">Fonctionnalités</p>
+              <p className="mt-1 text-sm font-semibold text-forest">
+                {subscription ? subscription.features.length : 0} activées
+              </p>
+            </div>
+          </div>
+        </section>
+
+      )}
 
       {/* ACCÈS RAPIDES */}
 
