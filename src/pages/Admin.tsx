@@ -4951,6 +4951,14 @@ function BillingSection({
   const [assignmentStatus, setAssignmentStatus] = useState<'active' | 'trial'>('active');
   const [assignmentTrialDays, setAssignmentTrialDays] = useState('14');
   const [savingAssignment, setSavingAssignment] = useState(false);
+  const [editingSubscription, setEditingSubscription] = useState<BillingSubscription | null>(null);
+  const [subscriptionForm, setSubscriptionForm] = useState({
+    planId: '',
+    status: 'active' as 'active' | 'trial' | 'past_due' | 'unpaid' | 'canceled',
+    trialDays: '14',
+    startedAt: '',
+    periodEnd: '',
+  });
 
   const openPlanEditor = (value?: BillingPlan) => {
     setEditingPlan(value ?? null);
@@ -4997,6 +5005,37 @@ function BillingSection({
     await reload();
   };
 
+  const toLocalDateTimeInput = (value: string | null) => {
+    if (!value) return '';
+    const date = new Date(value);
+    const pad = (part: number) => String(part).padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  };
+
+  const toIsoDate = (value: string) => {
+    if (!value) return null;
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date.toISOString();
+  };
+
+  const openSubscriptionEditor = (subscription: BillingSubscription) => {
+    setEditingSubscription(subscription);
+    setSubscriptionForm({
+      planId: subscription.plan_id,
+      status: ['active', 'trial', 'past_due', 'unpaid', 'canceled'].includes(subscription.status)
+        ? subscription.status as 'active' | 'trial' | 'past_due' | 'unpaid' | 'canceled'
+        : 'active',
+      trialDays: String(Math.max(1, subscription.trial_days || 14)),
+      startedAt: toLocalDateTimeInput(subscription.started_at),
+      periodEnd: toLocalDateTimeInput(subscription.current_period_end),
+    });
+  };
+
+  const closeSubscriptionEditor = () => {
+    if (savingAssignment) return;
+    setEditingSubscription(null);
+  };
+
   const assignSubscription = async () => {
     if (!assignmentEstablishmentId || !assignmentPlanId) {
       return alert('Sélectionnez un établissement et un pack.');
@@ -5020,6 +5059,48 @@ function BillingSection({
 
     await reload();
     alert(`Le pack « ${selectedPlan.name} » a été attribué à l'établissement.`);
+  };
+
+  const saveSubscriptionEdit = async () => {
+    if (!editingSubscription || !subscriptionForm.planId) {
+      return alert('Sélectionnez un pack.');
+    }
+
+    const selectedPlan = billing.plans.find((item) => item.id === subscriptionForm.planId);
+    if (!selectedPlan) return alert('Pack introuvable.');
+
+    const startedAt = toIsoDate(subscriptionForm.startedAt);
+    const periodEnd = toIsoDate(subscriptionForm.periodEnd);
+    if (!startedAt || !periodEnd) {
+      return alert('La date de début et la date de fin sont obligatoires.');
+    }
+
+    if (new Date(periodEnd).getTime() <= new Date(startedAt).getTime()) {
+      return alert('La date de fin doit être postérieure à la date de début.');
+    }
+
+    const trialDays = subscriptionForm.status === 'trial'
+      ? Math.max(1, Number(subscriptionForm.trialDays) || 14)
+      : 0;
+
+    setSavingAssignment(true);
+    const { error } = await supabase.rpc('assign_subscription_to_establishment', {
+      p_establishment_id: editingSubscription.establishment_id,
+      p_plan_id: subscriptionForm.planId,
+      p_status: subscriptionForm.status,
+      p_trial_days: trialDays,
+      p_started_at: startedAt,
+      p_period_end: periodEnd,
+    });
+    setSavingAssignment(false);
+
+    if (error) {
+      return alert(`Impossible de modifier l'abonnement : ${error.message}`);
+    }
+
+    await reload();
+    setEditingSubscription(null);
+    alert(`L'abonnement de « ${establishmentMap.get(editingSubscription.establishment_id)?.name ?? 'cet établissement'} » a été mis à jour.`);
   };
 
   const establishmentMap = useMemo(
@@ -5127,13 +5208,7 @@ function BillingSection({
                 <span className={`w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold ${sub.status === 'active' ? 'bg-green-100 text-green-700' : sub.status === 'trial' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>{sub.status}</span>
                 <span className="font-semibold">{Number(sub.plan?.price_mad ?? 0).toLocaleString('fr-FR')} MAD</span>
                 <span className="text-ink/50">{formatDate(sub.current_period_end)}</span>
-                <button type="button" onClick={() => {
-                  setAssignmentEstablishmentId(sub.establishment_id);
-                  setAssignmentPlanId(sub.plan_id);
-                  setAssignmentStatus(sub.status === 'trial' ? 'trial' : 'active');
-                  setAssignmentTrialDays(String(Math.max(1, sub.trial_days || 14)));
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }} className="rounded-lg border border-ink/10 bg-white px-3 py-2 text-[11px] font-semibold text-forest transition hover:border-gold hover:bg-[#fdf9ef]">
+                <button type="button" onClick={() => openSubscriptionEditor(sub)} className="rounded-lg border border-ink/10 bg-white px-3 py-2 text-[11px] font-semibold text-forest transition hover:border-gold hover:bg-[#fdf9ef]">
                   Modifier
                 </button>
               </div>
@@ -5141,6 +5216,128 @@ function BillingSection({
           })
         )}
       </div>
+
+      {editingSubscription ? (
+        <div className="fixed inset-0 z-[80] overflow-y-auto bg-ink/50 p-4 backdrop-blur-sm sm:p-8">
+          <div className="mx-auto min-h-full max-w-4xl flex items-center">
+            <div className="w-full overflow-hidden rounded-3xl bg-[#f7f7f3] shadow-2xl">
+              <div className="flex items-start justify-between gap-4 border-b border-ink/10 bg-white px-6 py-5 sm:px-8">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-forest/50">Gestion abonnement</p>
+                  <h3 className="mt-1 font-display text-2xl text-forest">Modifier l’abonnement</h3>
+                  <p className="mt-1 text-xs text-ink/45">
+                    {establishmentMap.get(editingSubscription.establishment_id)?.name ?? 'Établissement'}
+                  </p>
+                </div>
+                <button type="button" onClick={closeSubscriptionEditor} className="grid h-10 w-10 place-items-center rounded-xl border border-ink/10 bg-white text-ink/55 hover:bg-[#f7f7f3]" aria-label="Fermer">
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="p-6 sm:p-8">
+                <div className="grid gap-5 md:grid-cols-2">
+                  <label className="text-xs font-semibold">
+                    Pack
+                    <select
+                      value={subscriptionForm.planId}
+                      onChange={(e) => setSubscriptionForm((v) => ({ ...v, planId: e.target.value }))}
+                      className="mt-2 w-full rounded-xl border border-ink/10 bg-white px-3 py-3 text-sm font-normal outline-none focus:border-forest"
+                    >
+                      {billing.plans.filter((item) => item.active || item.id === subscriptionForm.planId).map((item) => (
+                        <option key={item.id} value={item.id}>{item.name} · {Number(item.price_mad).toLocaleString('fr-FR')} MAD/{item.interval === 'year' ? 'an' : 'mois'}</option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="text-xs font-semibold">
+                    Statut
+                    <select
+                      value={subscriptionForm.status}
+                      onChange={(e) => setSubscriptionForm((v) => ({ ...v, status: e.target.value as typeof v.status }))}
+                      className="mt-2 w-full rounded-xl border border-ink/10 bg-white px-3 py-3 text-sm font-normal outline-none focus:border-forest"
+                    >
+                      <option value="active">Actif</option>
+                      <option value="trial">Période d’essai</option>
+                      <option value="past_due">Paiement en retard</option>
+                      <option value="unpaid">Impayé</option>
+                      <option value="canceled">Annulé</option>
+                    </select>
+                  </label>
+
+                  <label className="text-xs font-semibold">
+                    Date de début
+                    <input
+                      type="datetime-local"
+                      value={subscriptionForm.startedAt}
+                      onChange={(e) => setSubscriptionForm((v) => ({ ...v, startedAt: e.target.value }))}
+                      className="mt-2 w-full rounded-xl border border-ink/10 bg-white px-3 py-3 text-sm font-normal outline-none focus:border-forest"
+                    />
+                  </label>
+
+                  <label className="text-xs font-semibold">
+                    Date de fin / échéance
+                    <input
+                      type="datetime-local"
+                      value={subscriptionForm.periodEnd}
+                      onChange={(e) => setSubscriptionForm((v) => ({ ...v, periodEnd: e.target.value }))}
+                      className="mt-2 w-full rounded-xl border border-ink/10 bg-white px-3 py-3 text-sm font-normal outline-none focus:border-forest"
+                    />
+                  </label>
+
+                  <label className="text-xs font-semibold">
+                    Durée de l’essai
+                    <input
+                      type="number"
+                      min="1"
+                      max="365"
+                      value={subscriptionForm.trialDays}
+                      onChange={(e) => setSubscriptionForm((v) => ({ ...v, trialDays: e.target.value }))}
+                      disabled={subscriptionForm.status !== 'trial'}
+                      className="mt-2 w-full rounded-xl border border-ink/10 bg-white px-3 py-3 text-sm font-normal outline-none focus:border-forest disabled:bg-ink/5 disabled:text-ink/30"
+                    />
+                    <span className="mt-1 block text-[10px] font-normal text-ink/40">Utilisé lorsque le statut est « Période d’essai ».</span>
+                  </label>
+
+                  <div className="rounded-xl border border-forest/10 bg-white p-4">
+                    <p className="text-xs font-semibold">Prolonger rapidement l’échéance</p>
+                    <p className="mt-1 text-[10px] text-ink/40">Ajoute des jours à la date de fin actuelle.</p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {[7, 30, 90].map((days) => (
+                        <button
+                          key={days}
+                          type="button"
+                          onClick={() => {
+                            const current = subscriptionForm.periodEnd ? new Date(subscriptionForm.periodEnd) : new Date();
+                            current.setDate(current.getDate() + days);
+                            setSubscriptionForm((v) => ({ ...v, periodEnd: toLocalDateTimeInput(current.toISOString()) }));
+                          }}
+                          className="rounded-lg border border-ink/10 bg-[#f7f7f3] px-3 py-2 text-[11px] font-semibold text-forest hover:border-gold hover:bg-[#fdf9ef]"
+                        >
+                          +{days} jours
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 rounded-2xl border border-gold/20 bg-[#fdf9ef] p-4 text-xs text-ink/60">
+                  <strong className="text-ink">Modification immédiate :</strong> le responsable verra le nouveau pack et les nouvelles dates dès que son abonnement sera rechargé. Les fonctionnalités restent déterminées par le pack sélectionné.
+                </div>
+
+                <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                  <button type="button" onClick={closeSubscriptionEditor} disabled={savingAssignment} className="rounded-xl border border-ink/10 bg-white px-5 py-3 text-xs font-semibold disabled:opacity-50">
+                    Annuler
+                  </button>
+                  <button type="button" onClick={saveSubscriptionEdit} disabled={savingAssignment} className="inline-flex items-center justify-center gap-2 rounded-xl bg-forest px-5 py-3 text-xs font-semibold text-white disabled:opacity-50">
+                    <Save size={14} />
+                    {savingAssignment ? 'Enregistrement…' : 'Enregistrer les modifications'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <div className="mt-8 rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
         <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
