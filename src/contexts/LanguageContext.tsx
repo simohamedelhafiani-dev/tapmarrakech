@@ -239,7 +239,7 @@ const translations = {
   },
 } as const;
 
-type Translation = typeof translations.fr;
+type Translation = typeof translations[Language];
 
 type LanguageContextValue = {
   language: Language;
