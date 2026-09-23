@@ -347,11 +347,6 @@ export default function Admin() {
     [staff]
   );
 
-  const employeeMembers = useMemo(
-    () => staff.filter((member) => member.role === 'STAFF'),
-    [staff]
-  );
-
   const menuItems: {
     id: AdminSection;
     label: string;
@@ -371,11 +366,6 @@ export default function Admin() {
       id: 'responsibles',
       label: 'Responsables',
       icon: UserRound,
-    },
-    {
-      id: 'employees',
-      label: 'Employés',
-      icon: Users,
     },
     {
       id: 'reviews',
@@ -573,15 +563,6 @@ export default function Admin() {
             <ResponsiblesSection
               establishments={establishments}
               staff={responsibleMembers}
-              loading={staffLoading}
-              reload={loadStaff}
-            />
-          )}
-
-          {section === 'employees' && (
-            <EmployeesSection
-              establishments={establishments}
-              staff={employeeMembers}
               loading={staffLoading}
               reload={loadStaff}
             />
