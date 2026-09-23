@@ -2149,8 +2149,6 @@ function EstablishmentWorkspace({
       <button onClick={saveProfile} className="mt-4 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Enregistrer les templates</button>
     </div>
   </div>
-
-    </div>
   );
 }
 
