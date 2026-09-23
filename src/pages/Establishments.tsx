@@ -31,7 +31,7 @@ export default function Establishments() {
   const [editing, setEditing] = useState<string | null>(null);
   const [show, setShow] = useState(false);
   const [message, setMessage] = useState('');
-  const [qr, setQr] = useState<Establishment | null>(null);
+  const [qr, setQr] = useState<{ title: string; url: string; filename: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [scannerLinks, setScannerLinks] = useState<Record<string, string>>({});
 
@@ -126,6 +126,13 @@ export default function Establishments() {
 
   const publicUrl = (slug: string) =>
     `${window.location.origin}/r/${slug}`;
+
+  const publicLinks = (place: Establishment) => [
+    { key: 'home', title: 'Page établissement', description: 'Page publique complète de l’établissement', url: publicUrl(place.slug), icon: Building2 },
+    { key: 'loyalty', title: 'Programme fidélité', description: 'Accès direct à l’inscription et à la fidélité', url: publicUrl(place.slug) + '?section=loyalty', icon: Gift },
+    { key: 'menu', title: 'Menu digital', description: 'Ouvre directement le menu', url: publicUrl(place.slug) + '?section=menu', icon: UtensilsCrossed },
+    { key: 'reviews', title: 'Avis Google', description: 'Ouvre directement le parcours de collecte d’avis', url: publicUrl(place.slug) + '?section=reviews', icon: Star },
+  ];
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -277,9 +284,9 @@ export default function Establishments() {
     setMessage('Lien copié dans le presse-papiers.');
   };
 
-  const download = async (place: Establishment) => {
+  const download = async (link: { title: string; url: string; filename: string }) => {
     const data = await QRCode.toDataURL(
-      publicUrl(place.slug),
+      link.url,
       {
         width: 900,
         margin: 2,
@@ -292,7 +299,7 @@ export default function Establishments() {
 
     const a = document.createElement('a');
     a.href = data;
-    a.download = `${place.slug}-qr.png`;
+    a.download = `${link.filename}-qr.png`;
     a.click();
   };
 
@@ -451,6 +458,27 @@ export default function Establishments() {
                 </button>
               </div>
 
+              <div className="mt-5 rounded-2xl border border-forest/10 bg-white p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div><p className="text-xs font-bold uppercase tracking-[0.14em] text-forest">Liens publics</p><p className="mt-1 text-[11px] text-ink/50">Générez un lien séparé pour chaque fonctionnalité.</p></div>
+                  <Link2 size={20} className="shrink-0 text-gold" />
+                </div>
+                <div className="mt-4 space-y-2">
+                  {publicLinks(place).map((link) => {
+                    const Icon = link.icon;
+                    return (
+                      <div key={link.key} className="rounded-xl border border-ink/5 bg-[#f7f7f3] p-3">
+                        <div className="flex items-start gap-3"><div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white text-forest"><Icon size={16} /></div><div className="min-w-0 flex-1"><p className="text-xs font-semibold text-forest">{link.title}</p><p className="mt-0.5 text-[10px] text-ink/40">{link.description}</p><p className="mt-2 truncate rounded-lg bg-white px-2.5 py-2 text-[10px] text-ink/50">{link.url}</p></div></div>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          <button onClick={() => copy(link.url)} className="flex items-center gap-1.5 rounded-lg bg-forest px-3 py-2 text-[10px] font-semibold text-white"><Copy size={12} />Copier</button>
+                          <a href={link.url} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[10px] font-semibold text-forest"><ExternalLink size={12} />Ouvrir</a>
+                          <button onClick={() => setQr({ title: link.title, url: link.url, filename: place.slug + '-' + link.key })} className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[10px] font-semibold text-forest"><QrCode size={12} />QR</button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
               <div className="mt-5 rounded-2xl border border-gold/20 bg-[#f7f7f3] p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
@@ -661,11 +689,11 @@ export default function Establishments() {
             </h2>
 
             <p className="mt-1 text-xs text-ink/50">
-              {qr.name}
+              {qr.title}
             </p>
 
             <QRCodePreview
-              url={publicUrl(qr.slug)}
+              url={qr.url}
             />
 
             <button
