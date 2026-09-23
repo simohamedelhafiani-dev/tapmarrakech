@@ -223,11 +223,67 @@ export default function Templates() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const startEdit = (template: Template) => {
+  const startEdit = async (template: Template) => {
     if (template.source === 'builtin') {
-      alert('Ce template natif est déjà disponible pour tous les établissements. Duplique-le pour créer une variante personnalisée.');
+      // Les anciens templates natifs deviennent éditables par l'Admin.
+      // On crée leur définition persistante une seule fois, sans toucher au rendu existant.
+      const key = template.config?.key;
+      const { data: existing, error: findError } = await supabase
+        .from('templates')
+        .select('id,kind,name,description,thumbnail_url,config,active,is_default,created_at,updated_at')
+        .eq('kind', template.kind)
+        .eq('config->>key', key)
+        .maybeSingle();
+
+      if (findError) {
+        alert(`Impossible de charger le template : ${findError.message}`);
+        return;
+      }
+
+      if (existing) {
+        setEditing({ ...(existing as Template), source: 'database' });
+        setKind(existing.kind as TemplateKind);
+        setName(existing.name);
+        setDescription(existing.description ?? '');
+        setThumbnailUrl(existing.thumbnail_url ?? '');
+        setConfigText(prettyJson(existing.config ?? {}));
+        setActive(existing.active);
+        setIsDefault(existing.is_default);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+
+      const { data: created, error: createError } = await supabase
+        .from('templates')
+        .insert({
+          kind: template.kind,
+          name: template.name,
+          description: template.description,
+          config: template.config,
+          active: true,
+          is_default: template.is_default,
+        })
+        .select('id,kind,name,description,thumbnail_url,config,active,is_default,created_at,updated_at')
+        .single();
+
+      if (createError || !created) {
+        alert(`Impossible d'enregistrer ce template : ${createError?.message ?? 'erreur inconnue'}`);
+        return;
+      }
+
+      setEditing({ ...(created as Template), source: 'database' });
+      setKind(created.kind as TemplateKind);
+      setName(created.name);
+      setDescription(created.description ?? '');
+      setThumbnailUrl(created.thumbnail_url ?? '');
+      setConfigText(prettyJson(created.config ?? {}));
+      setActive(created.active);
+      setIsDefault(created.is_default);
+      await load();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
+
     setEditing(template);
     setKind(template.kind);
     setName(template.name);
