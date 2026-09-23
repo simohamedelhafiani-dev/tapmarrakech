@@ -564,7 +564,8 @@ export function DashboardLayout() {
 
         <div className="mt-auto border-t border-white/10 pt-5">
           <div className="mb-4 flex items-center gap-3 px-2">
-            <div style={{ backgroundColor: subscriptionTheme.accent, color: subscriptionTheme.primary }}\n            className="grid h-9 w-9 shrink-0 place-items-center rounded-full font-semibold">
+            <div style={{ backgroundColor: subscriptionTheme.accent, color: subscriptionTheme.primary }}
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-full font-semibold">
               {avatarLetter}
             </div>
 
@@ -581,7 +582,8 @@ export function DashboardLayout() {
 
           <button
             onClick={logout}
-            style={{ color: subscriptionTheme.accent }}\n            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm transition hover:bg-white/10 hover:text-white"
+            style={{ color: subscriptionTheme.accent }}
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm transition hover:bg-white/10 hover:text-white"
           >
             <LogOut size={17} />
             Se déconnecter
@@ -691,7 +693,8 @@ export function DashboardLayout() {
             onClick={() =>
               navigate('/dashboard/establishments')
             }
-            style={{ backgroundColor: subscriptionTheme.primary }}\n            className="flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold text-white transition sm:px-4"
+            style={{ backgroundColor: subscriptionTheme.primary }}
+            className="flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold text-white transition sm:px-4"
           >
             <Building2 size={15} />
             <span className="hidden sm:inline">Gérer mes établissements</span>
