@@ -14,6 +14,9 @@ import {
   QrCode,
   Copy,
   ExternalLink,
+  MessageCircle,
+  AlertTriangle,
+  Check,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -78,15 +81,119 @@ type Establishment = {
   logo_url: string | null;
 };
 
+type AppNotification = {
+  id: string;
+  title: string;
+  description: string;
+  createdAt: string;
+  tone: 'review' | 'alert' | 'info';
+};
+
 export function DashboardLayout() {
   const [open, setOpen] = useState(false);
   const [profileName, setProfileName] = useState<string | null>(null);
   const [scannerUrl, setScannerUrl] = useState<string | null>(null);
   const [scannerLoading, setScannerLoading] = useState(false);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [lastSeenNotificationsAt, setLastSeenNotificationsAt] = useState<string | null>(null);
 
   const { signOut, user, role } = useAuth();
   const { language, setLanguage } = useLanguage();
   const navigate = useNavigate();
+
+  const notificationStorageKey = user?.id ? `tapmarrakech:notifications:last-seen:${user.id}` : null;
+
+  useEffect(() => {
+    if (!notificationStorageKey) {
+      setLastSeenNotificationsAt(null);
+      return;
+    }
+    setLastSeenNotificationsAt(localStorage.getItem(notificationStorageKey));
+  }, [notificationStorageKey]);
+
+  useEffect(() => {
+    if (!user?.id || !role) return;
+    let active = true;
+
+    const loadNotifications = async () => {
+      const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      try {
+        let establishmentIds: string[] = [];
+
+        if (role === 'responsible') {
+          const { data } = await supabase.rpc('get_my_establishments');
+          establishmentIds = (data ?? []).map((item: { id?: string }) => item.id).filter(Boolean) as string[];
+        }
+
+        const reviewQuery = supabase
+          .from('reviews')
+          .select('id,rating,created_at,establishment_id')
+          .gte('created_at', since)
+          .order('created_at', { ascending: false })
+          .limit(20);
+
+        const { data: reviewRows, error: reviewError } = establishmentIds.length
+          ? await reviewQuery.in('establishment_id', establishmentIds)
+          : role === 'admin'
+            ? await reviewQuery
+            : { data: [], error: null };
+
+        if (!active) return;
+
+        if (reviewError) {
+          console.error('Erreur notifications avis:', reviewError);
+        }
+
+        const reviewNotifications: AppNotification[] = (reviewRows ?? []).map((review) => ({
+          id: `review-${review.id}`,
+          title: 'Nouvel avis client',
+          description: `Un avis ${Number(review.rating) >= 4 ? 'positif' : 'à surveiller'} vient d’être reçu.`,
+          createdAt: review.created_at,
+          tone: Number(review.rating) <= 3 ? 'alert' : 'review',
+        }));
+
+        let extraNotifications: AppNotification[] = [];
+
+        if (role === 'admin') {
+          const { data: establishmentsRows } = await supabase
+            .from('establishments')
+            .select('id,name,created_at')
+            .gte('created_at', since)
+            .order('created_at', { ascending: false })
+            .limit(10);
+
+          extraNotifications = (establishmentsRows ?? []).map((item) => ({
+            id: `establishment-${item.id}`,
+            title: 'Nouvel établissement',
+            description: `${item.name} a été ajouté à la plateforme.`,
+            createdAt: item.created_at,
+            tone: 'info',
+          }));
+        }
+
+        setNotifications([...reviewNotifications, ...extraNotifications]
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .slice(0, 12));
+      } catch (error) {
+        console.error('Erreur chargement notifications:', error);
+        if (active) setNotifications([]);
+      }
+    };
+
+    void loadNotifications();
+    return () => { active = false; };
+  }, [user?.id, role]);
+
+  const unreadNotifications = notifications.filter((item) =>
+    !lastSeenNotificationsAt || new Date(item.createdAt).getTime() > new Date(lastSeenNotificationsAt).getTime()
+  );
+
+  const markNotificationsRead = () => {
+    const now = new Date().toISOString();
+    if (notificationStorageKey) localStorage.setItem(notificationStorageKey, now);
+    setLastSeenNotificationsAt(now);
+  };
 
   useEffect(() => {
     let active = true;
@@ -397,10 +504,64 @@ export function DashboardLayout() {
 
 
           <div className="ml-auto flex items-center gap-2">
-            <button type="button" className="relative grid h-10 w-10 place-items-center rounded-xl border border-ink/10 bg-white text-ink/60 shadow-sm" aria-label="Notifications">
-              <Bell size={17} />
-              <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-red-500" />
-            </button>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setNotificationsOpen((value) => !value);
+                  if (!notificationsOpen) markNotificationsRead();
+                }}
+                className="relative grid h-10 w-10 place-items-center rounded-xl border border-ink/10 bg-white text-ink/60 shadow-sm"
+                aria-label="Notifications"
+                aria-expanded={notificationsOpen}
+              >
+                <Bell size={17} />
+                {unreadNotifications.length > 0 && (
+                  <span className="absolute -right-1 -top-1 grid min-h-4 min-w-4 place-items-center rounded-full bg-red-500 px-1 text-[8px] font-bold text-white">
+                    {unreadNotifications.length > 9 ? '9+' : unreadNotifications.length}
+                  </span>
+                )}
+              </button>
+
+              {notificationsOpen && (
+                <>
+                  <button className="fixed inset-0 z-40 cursor-default" aria-label="Fermer les notifications" onClick={() => setNotificationsOpen(false)} />
+                  <div className="absolute right-0 top-12 z-50 w-[360px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-ink/10 bg-white shadow-2xl">
+                    <div className="flex items-center justify-between border-b border-ink/5 px-4 py-3">
+                      <div>
+                        <p className="text-sm font-semibold text-ink">Notifications</p>
+                        <p className="text-[10px] text-ink/40">{notifications.length} notification{notifications.length > 1 ? 's' : ''} récentes</p>
+                      </div>
+                      {notifications.length > 0 && (
+                        <button type="button" onClick={markNotificationsRead} className="text-[10px] font-semibold text-forest">
+                          Tout marquer comme lu
+                        </button>
+                      )}
+                    </div>
+                    <div className="max-h-[420px] overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="px-5 py-10 text-center">
+                          <Check size={22} className="mx-auto text-forest/40" />
+                          <p className="mt-2 text-sm font-medium text-ink">Aucune notification</p>
+                          <p className="mt-1 text-[11px] text-ink/35">Tout est à jour.</p>
+                        </div>
+                      ) : notifications.map((notification) => (
+                        <div key={notification.id} className="flex gap-3 border-b border-ink/5 px-4 py-3.5 last:border-0">
+                          <div className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${notification.tone === 'alert' ? 'bg-red-50 text-red-500' : notification.tone === 'review' ? 'bg-gold/10 text-gold' : 'bg-forest/10 text-forest'}`}>
+                            {notification.tone === 'alert' ? <AlertTriangle size={16} /> : notification.tone === 'review' ? <MessageCircle size={16} /> : <Building2 size={16} />}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs font-semibold text-ink">{notification.title}</p>
+                            <p className="mt-1 text-[11px] leading-4 text-ink/50">{notification.description}</p>
+                            <p className="mt-1 text-[9px] text-ink/30">{new Intl.DateTimeFormat(language === 'ar' ? 'ar-MA' : language === 'en' ? 'en-GB' : 'fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(notification.createdAt))}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
             <div className="hidden h-10 items-center gap-2 rounded-xl border border-ink/10 bg-white px-2.5 shadow-sm sm:flex">
               <div className="grid h-7 w-7 place-items-center rounded-full bg-forest text-xs font-semibold text-white">{avatarLetter}</div>
               <div className="max-w-[130px] leading-tight">
