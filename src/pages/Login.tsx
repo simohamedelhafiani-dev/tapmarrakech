@@ -183,7 +183,7 @@ export default function Login() {
             <div className="mb-8">
               <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#b58b3e]">{t.welcome}</p>
               <h2 className="mt-3 max-w-xl font-display text-4xl leading-[1.05] tracking-[-0.035em] text-[#10201c] sm:text-5xl">{t.loginTitle}</h2>
-              <p className="mt-4 text-sm leading-6 text-ink/50">Choisissez votre profil puis accédez à toutes vos fonctionnalités.</p>
+              <p className="mt-4 text-sm leading-6 text-ink/50">{t.selectSpace}</p>
             </div>
 
             <div className="mb-8 grid grid-cols-2 gap-4">
@@ -222,7 +222,7 @@ export default function Login() {
                     <label className="mb-2 block text-xs font-semibold text-ink/65">{t.email}</label>
                     <div className="relative">
                       <UserRound size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-ink/25" />
-                      <input type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }} placeholder="{t.emailPlaceholder}" className="w-full rounded-xl border border-ink/10 bg-white py-4 pl-11 pr-4 text-sm outline-none transition focus:border-[#06382e] focus:ring-4 focus:ring-[#06382e]/5" />
+                      <input type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }} placeholder={t.emailPlaceholder} className="w-full rounded-xl border border-ink/10 bg-white py-4 pl-11 pr-4 text-sm outline-none transition focus:border-[#06382e] focus:ring-4 focus:ring-[#06382e]/5" />
                     </div>
                   </div>
                   <div>
@@ -232,12 +232,12 @@ export default function Login() {
                     </div>
                     <div className="relative">
                       <LockKeyhole size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-ink/25" />
-                      <input type={showPassword ? 'text' : 'password'} autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }} placeholder="{t.passwordPlaceholder}" className="w-full rounded-xl border border-ink/10 bg-white py-4 pl-11 pr-11 text-sm outline-none transition focus:border-[#06382e] focus:ring-4 focus:ring-[#06382e]/5" />
+                      <input type={showPassword ? 'text' : 'password'} autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }} placeholder={t.passwordPlaceholder} className="w-full rounded-xl border border-ink/10 bg-white py-4 pl-11 pr-11 text-sm outline-none transition focus:border-[#06382e] focus:ring-4 focus:ring-[#06382e]/5" />
                       <button type="button" onClick={() => setShowPassword(value => !value)} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-ink/30 hover:text-[#06382e]">{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button>
                     </div>
                   </div>
                   <button onClick={handleLogin} disabled={saving} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#06382e] py-4 text-sm font-semibold text-white shadow-lg transition hover:bg-[#0b493c] disabled:opacity-50">
-                    {saving ? '{t.login}...' : '{t.login}'} {!saving && <ArrowRight size={17} />}
+                    {saving ? `${t.login}...` : t.login} {!saving && <ArrowRight size={17} />}
                   </button>
                 </div>
                 <button type="button" onClick={() => selectRole(null)} className="mt-5 inline-flex items-center gap-2 text-xs font-medium text-ink/35 hover:text-[#06382e]">
@@ -253,7 +253,7 @@ export default function Login() {
             <div className="mt-9 flex items-center justify-center gap-4 text-xs text-ink/35">
               <Link to="/register" className="hover:text-[#06382e]">{t.createAccount}</Link>
               <span>•</span>
-              <Link to="/forgot-password" className="hover:text-[#06382e]">Mot de passe oublié</Link>
+              <Link to="/forgot-password" className="hover:text-[#06382e]">{t.forgot}</Link>
             </div>
 
             <div className="mt-10 flex items-center justify-center gap-8 border-t border-ink/8 pt-6 text-[10px] text-ink/35">
