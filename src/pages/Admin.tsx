@@ -863,8 +863,17 @@ function EstablishmentsSection({
   billing: BillingSnapshot;
 }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
 
   const selected = establishments.find((item) => item.id === selectedId) ?? null;
+  const filtered = establishments.filter((item) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    const type = businessTypes.find((entry) => entry.id === item.ai_business_type_id)?.name ?? item.business_type ?? '';
+    return [item.name, item.slug, item.city ?? '', type].some((value) => value.toLowerCase().includes(q));
+  });
+  const activeCount = establishments.filter((item) => billing.subscriptions.some((sub) => sub.establishment_id === item.id && sub.status === 'active')).length;
+  const trialCount = establishments.filter((item) => billing.subscriptions.some((sub) => sub.establishment_id === item.id && sub.status === 'trial')).length;
 
   if (selected) {
     return (
@@ -878,64 +887,61 @@ function EstablishmentsSection({
   }
 
   return (
-    <div>
-      <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
-        <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">Gestion</p>
-          <h2 className="font-display text-3xl text-forest md:text-4xl">Établissements</h2>
-          <p className="mt-2 text-sm text-ink/50">Cliquez sur un établissement pour ouvrir son espace de gestion complet.</p>
+    <div className="space-y-7">
+      <div className="relative overflow-hidden rounded-[28px] border border-ink/5 bg-forest p-6 text-white shadow-[0_18px_60px_rgba(23,61,50,0.14)] sm:p-8">
+        <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-gold/10 blur-2xl" />
+        <div className="absolute -bottom-24 left-1/3 h-48 w-48 rounded-full bg-white/5 blur-3xl" />
+        <div className="relative flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+          <div>
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/60"><Building2 size={12} /> Portefeuille</div>
+            <h2 className="font-display text-3xl tracking-tight sm:text-4xl">Établissements</h2>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-white/55">Gérez chaque établissement depuis un espace centralisé, avec ses abonnements, sa fidélité, ses avis et son expérience client.</p>
+          </div>
+          <CreateEstablishmentButton reload={reload} businessTypes={businessTypes} />
         </div>
-        <CreateEstablishmentButton reload={reload} businessTypes={businessTypes} />
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-ink/5 bg-white shadow-sm">
-        {loading ? (
-          <div className="p-8 text-sm text-ink/40">Chargement...</div>
-        ) : establishments.length === 0 ? (
-          <div className="p-10 text-center text-sm text-ink/50">Aucun établissement créé.</div>
-        ) : (
-          <div className="divide-y divide-ink/5">
-            {establishments.map((establishment) => {
-              const accessLink = `${window.location.origin}/r/${establishment.slug}`;
-              const type = businessTypes.find((item) => item.id === establishment.ai_business_type_id)?.name;
-              return (
-                <button
-                  key={establishment.id}
-                  onClick={() => setSelectedId(establishment.id)}
-                  className="flex w-full flex-col gap-4 p-5 text-left transition hover:bg-[#fbfbf8] md:flex-row md:items-center md:justify-between"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-forest text-white"><Building2 size={19} /></div>
-                    <div className="min-w-0">
-                      <h3 className="text-sm font-semibold">{establishment.name}</h3>
-                      <p className="mt-1 text-xs text-ink/40">{type ?? 'Type non défini'} · /r/{establishment.slug}</p>
-                      <p className="mt-1 truncate text-[11px] text-ink/30">{accessLink}</p>
-                      {(() => {
-                        const subscription = billing.subscriptions.find(
-                          (item) =>
-                            item.establishment_id === establishment.id &&
-                            ['active', 'trial'].includes(item.status),
-                        );
-                        return subscription ? (
-                          <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-forest/5 px-2.5 py-1 text-[10px] font-semibold text-forest">
-                            <CreditCard size={12} />
-                            {subscription.plan?.name ?? 'Abonnement'} · {subscription.status === 'trial' ? 'Essai' : 'Actif'}
-                          </span>
-                        ) : (
-                          <span className="mt-2 inline-flex items-center rounded-full bg-ink/5 px-2.5 py-1 text-[10px] font-medium text-ink/40">
-                            Aucun abonnement actif
-                          </span>
-                        );
-                      })()}
-                    </div>
-                  </div>
-                  <span className="shrink-0 rounded-lg bg-forest px-4 py-2 text-xs font-semibold text-white">Gérer →</span>
-                </button>
-              );
-            })}
-          </div>
-        )}
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div className="rounded-2xl border border-ink/5 bg-white p-4 shadow-soft"><div className="flex items-center justify-between"><span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink/35">Total</span><Building2 size={16} className="text-forest/50" /></div><p className="mt-2 text-2xl font-semibold text-ink">{establishments.length}</p><p className="mt-1 text-[10px] text-ink/35">établissements gérés</p></div>
+        <div className="rounded-2xl border border-forest/10 bg-forest/[0.035] p-4 shadow-soft"><div className="flex items-center justify-between"><span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-forest/50">Abonnements</span><CreditCard size={16} className="text-forest" /></div><p className="mt-2 text-2xl font-semibold text-forest">{activeCount}</p><p className="mt-1 text-[10px] text-ink/35">actifs · {trialCount} en essai</p></div>
+        <div className="rounded-2xl border border-gold/20 bg-[#fdf9ef] p-4 shadow-soft"><div className="flex items-center justify-between"><span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink/40">Vue</span><Activity size={16} className="text-gold" /></div><p className="mt-2 text-2xl font-semibold text-ink">{filtered.length}</p><p className="mt-1 text-[10px] text-ink/35">résultat{filtered.length > 1 ? 's' : ''} affiché{filtered.length > 1 ? 's' : ''}</p></div>
       </div>
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative w-full sm:max-w-md"><Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink/30" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Rechercher un établissement..." className="h-12 w-full rounded-2xl border border-ink/8 bg-white pl-11 pr-4 text-sm outline-none shadow-sm transition focus:border-forest/25 focus:ring-4 focus:ring-forest/5" /></div>
+        <div className="text-[11px] text-ink/35">{filtered.length} établissement{filtered.length > 1 ? 's' : ''}</div>
+      </div>
+
+      {loading ? (
+        <div className="grid gap-4 lg:grid-cols-2">{[1,2,3,4].map((item) => <div key={item} className="h-44 animate-pulse rounded-3xl border border-ink/5 bg-white" />)}</div>
+      ) : filtered.length === 0 ? (
+        <div className="rounded-3xl border border-dashed border-ink/10 bg-white p-14 text-center shadow-soft"><div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-forest/5 text-forest"><Building2 size={24} /></div><p className="mt-4 text-sm font-semibold text-ink">Aucun établissement trouvé</p><p className="mt-1 text-xs text-ink/40">{search ? 'Essayez une autre recherche.' : 'Créez votre premier établissement pour commencer.'}</p></div>
+      ) : (
+        <div className="grid gap-4 xl:grid-cols-2">
+          {filtered.map((establishment) => {
+            const type = businessTypes.find((item) => item.id === establishment.ai_business_type_id)?.name ?? establishment.business_type ?? 'Établissement';
+            const subscription = billing.subscriptions.find((item) => item.establishment_id === establishment.id && ['active', 'trial'].includes(item.status));
+            const isTrial = subscription?.status === 'trial';
+            return (
+              <button key={establishment.id} onClick={() => setSelectedId(establishment.id)} className="group relative overflow-hidden rounded-[26px] border border-ink/6 bg-white p-5 text-left shadow-[0_8px_30px_rgba(15,23,42,0.045)] transition duration-300 hover:-translate-y-1 hover:border-forest/15 hover:shadow-[0_18px_45px_rgba(23,61,50,0.12)] sm:p-6">
+                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-forest via-forest/70 to-gold opacity-70" />
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex min-w-0 items-center gap-4">
+                    <div className="relative grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-forest text-white shadow-lg shadow-forest/10"><Building2 size={21} strokeWidth={1.8} /><span className="absolute -bottom-1 -right-1 grid h-5 w-5 place-items-center rounded-full border-2 border-white bg-gold"><Sparkles size={9} className="text-forest" /></span></div>
+                    <div className="min-w-0"><h3 className="truncate text-base font-semibold tracking-tight text-ink">{establishment.name}</h3><p className="mt-1 truncate text-[11px] text-ink/40">{type}{establishment.city ? ` · ${establishment.city}` : ''}</p></div>
+                  </div>
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-ink/8 bg-[#fafaf7] text-ink/35 transition group-hover:border-forest/10 group-hover:bg-forest group-hover:text-white">→</span>
+                </div>
+                <div className="mt-5 flex flex-wrap items-center gap-2">
+                  {subscription ? <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold ${isTrial ? 'bg-gold/15 text-[#8b6a20]' : 'bg-forest/7 text-forest'}`}><CreditCard size={11} /> {subscription.plan?.name ?? 'Abonnement'} · {isTrial ? 'Essai' : 'Actif'}</span> : <span className="inline-flex items-center gap-1.5 rounded-full bg-ink/5 px-2.5 py-1 text-[10px] font-medium text-ink/40">Aucun abonnement</span>}
+                  <span className="rounded-full bg-[#f7f7f3] px-2.5 py-1 text-[10px] text-ink/35">/{establishment.slug}</span>
+                </div>
+                <div className="mt-5 border-t border-ink/5 pt-4"><div className="flex items-center justify-between"><div><p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-ink/30">Espace de gestion</p><p className="mt-1 text-xs font-medium text-ink/60">Profil · Menu · Fidélité · Avis · Analytics</p></div><span className="text-[11px] font-semibold text-forest opacity-70 transition group-hover:translate-x-0.5 group-hover:opacity-100">Ouvrir l’espace →</span></div></div>
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
