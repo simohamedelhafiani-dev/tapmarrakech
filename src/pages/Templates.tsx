@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
-type TemplateKind = 'page' | 'menu';
+type TemplateKind = 'page' | 'menu' | 'loyalty';
 
 type Template = {
   id: string;
@@ -60,6 +60,15 @@ const PAGE_PRESETS = [
       theme: { primary: '#173F35', accent: '#C9A45C', background: '#FFFFFF', radius: 'lg' },
     },
   },
+];
+
+const LOYALTY_PRESETS = [
+  { label: 'Obsidian', config: { key: 'obsidian', primary: '#0A0A09', secondary: '#D6B15A', background: '#111111', text: '#FFFFFF', radius: 30, mode: 'QR', title: 'Bon goût. Belles rencontres.', subtitle: 'Votre fidélité mérite une expérience à part.', stampStyle: 'circles' } },
+  { label: 'Editorial', config: { key: 'editorial', primary: '#3B332B', secondary: '#C9A86A', background: '#F4EDE1', text: '#17130F', radius: 30, mode: 'QR', title: 'Des moments qui comptent.', subtitle: 'Une expérience pensée pour vous.', stampStyle: 'circles' } },
+  { label: 'Glass', config: { key: 'glass', primary: '#18372C', secondary: '#D8C28A', background: '#10251E', text: '#FFFFFF', radius: 30, mode: 'QR', title: 'Prendre soin de vous, toujours.', subtitle: 'Vos avantages évoluent avec vous.', stampStyle: 'circles' } },
+  { label: 'Titanium', config: { key: 'titanium', primary: '#11110F', secondary: '#D6B15A', background: '#10100F', text: '#FFFFFF', radius: 26, mode: 'QR', title: 'GOOD FOOD. BETTER PEOPLE.', subtitle: 'Elevate every visit.', stampStyle: 'squares' } },
+  { label: 'Hospitality', config: { key: 'hospitality', primary: '#3A2115', secondary: '#E2B66D', background: '#2B1B13', text: '#FFFFFF', radius: 30, mode: 'QR', title: 'Plus qu’un repas, une expérience.', subtitle: 'Saveurs. Partage. Souvenirs.', stampStyle: 'circles' } },
+  { label: 'Apple Wallet', config: { key: 'apple-wallet', primary: '#403A32', secondary: '#B9975B', background: '#F2EEE6', text: '#1B1A18', radius: 28, mode: 'QR', title: 'Beauty in every detail.', subtitle: 'Vos privilèges, toujours avec vous.', stampStyle: 'circles' } },
 ];
 
 const MENU_PRESETS = [
@@ -193,9 +202,9 @@ export default function Templates() {
 
   const startCreate = () => {
     resetForm();
-    const preset = kind === 'page' ? PAGE_PRESETS[0] : MENU_PRESETS[0];
+    const preset = kind === 'page' ? PAGE_PRESETS[0] : kind === 'menu' ? MENU_PRESETS[0] : LOYALTY_PRESETS[0];
     setConfigText(prettyJson(preset.config));
-    setName(kind === 'page' ? 'Nouveau template de page' : 'Nouveau template de menu');
+    setName(kind === 'page' ? 'Nouveau template de page' : kind === 'menu' ? 'Nouveau template de menu' : 'Nouveau template fidélité');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -405,6 +414,10 @@ export default function Templates() {
           <Menu size={17} />
           Menus
         </button>
+        <button onClick={() => setKind('loyalty')} className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold ${kind === 'loyalty' ? 'bg-forest text-white' : 'text-ink/50 hover:bg-[#f7f7f3]'}`}>
+          <Star size={17} />
+          Fidélité
+        </button>
       </div>
 
       {(editing || name) && (
@@ -444,7 +457,7 @@ export default function Templates() {
                 onChange={(e) => {
                   const nextKind = e.target.value as TemplateKind;
                   setKind(nextKind);
-                  const preset = nextKind === 'page' ? PAGE_PRESETS[0] : MENU_PRESETS[0];
+                  const preset = nextKind === 'page' ? PAGE_PRESETS[0] : nextKind === 'menu' ? MENU_PRESETS[0] : LOYALTY_PRESETS[0];
                   setConfigText(prettyJson(preset.config));
                 }}
                 className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none"
@@ -478,7 +491,7 @@ export default function Templates() {
               <div className="mb-3 flex items-center justify-between">
                 <label className="text-xs font-semibold">Configuration du template</label>
                 <div className="flex flex-wrap gap-2">
-                  {(kind === 'page' ? PAGE_PRESETS : MENU_PRESETS).map((preset) => (
+                  {(kind === 'page' ? PAGE_PRESETS : kind === 'menu' ? MENU_PRESETS : LOYALTY_PRESETS).map((preset) => (
                     <button
                       key={preset.label}
                       onClick={() => setConfigText(prettyJson(preset.config))}
@@ -550,7 +563,7 @@ export default function Templates() {
         <div className="mb-4 flex items-center justify-between">
           <div>
             <h2 className="font-display text-2xl text-forest">
-              {kind === 'page' ? 'Templates de page' : 'Templates de menu'}
+              {kind === 'page' ? 'Templates de page' : kind === 'menu' ? 'Templates de menu' : 'Templates fidélité'}
             </h2>
             <p className="mt-1 text-xs text-ink/40">
               {filteredTemplates.length} template(s)
@@ -583,11 +596,7 @@ export default function Templates() {
                     />
                   ) : (
                     <div className="grid h-28 w-full place-items-center rounded-xl border border-dashed border-ink/10">
-                      {kind === 'page' ? (
-                        <LayoutTemplate className="text-gold" size={34} />
-                      ) : (
-                        <Menu className="text-gold" size={34} />
-                      )}
+                      {kind === 'page' ? <LayoutTemplate className="text-gold" size={34} /> : kind === 'menu' ? <Menu className="text-gold" size={34} /> : <Star className="text-gold" size={34} />}
                     </div>
                   )}
                 </div>
@@ -666,7 +675,7 @@ export default function Templates() {
                     </button>
                   </div>
 
-                  <div className="mt-5 border-t border-ink/5 pt-4">
+                  {kind !== 'loyalty' && <div className="mt-5 border-t border-ink/5 pt-4">
                     <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink/35">
                       Affectation aux établissements
                     </p>
@@ -705,7 +714,7 @@ export default function Templates() {
                         })
                       )}
                     </div>
-                  </div>
+                  </div>}
                 </div>
               </article>
             ))}
@@ -735,7 +744,7 @@ export default function Templates() {
               <div className="rounded-2xl border border-ink/10 bg-[#f7f7f3] p-5">
                 <div className="mb-4 flex items-center justify-between">
                   <span className="text-xs font-semibold text-forest">
-                    {previewing.kind === 'page' ? 'Page publique' : 'Menu digital'}
+                    {previewing.kind === 'page' ? 'Page publique' : previewing.kind === 'menu' ? 'Menu digital' : 'Carte fidélité'}
                   </span>
                   <span className="rounded-full bg-gold/15 px-2.5 py-1 text-[10px] font-semibold text-forest">
                     Configuration actuelle
