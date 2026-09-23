@@ -117,64 +117,132 @@ export function DashboardLayout() {
     let active = true;
 
     const loadNotifications = async () => {
-      const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
       try {
         let establishmentIds: string[] = [];
 
         if (role === 'responsible') {
           const { data } = await supabase.rpc('get_my_establishments');
-          establishmentIds = (data ?? []).map((item: { id?: string }) => item.id).filter(Boolean) as string[];
+          establishmentIds = (data ?? [])
+            .map((item: { id?: string }) => item.id)
+            .filter(Boolean) as string[];
         }
 
-        const reviewQuery = supabase
-          .from('reviews')
-          .select('id,rating,created_at,establishment_id')
-          .gte('created_at', since)
-          .order('created_at', { ascending: false })
-          .limit(20);
+        const scope = <T extends { in: (column: string, values: string[]) => T }>(
+          query: T
+        ) => establishmentIds.length ? query.in('establishment_id', establishmentIds) : query;
 
-        const { data: reviewRows, error: reviewError } = establishmentIds.length
-          ? await reviewQuery.in('establishment_id', establishmentIds)
-          : role === 'admin'
-            ? await reviewQuery
-            : { data: [], error: null };
+        const reviewQuery = scope(
+          supabase.from('reviews')
+            .select('id,rating,content,created_at,establishment_id')
+            .gte('created_at', since)
+            .order('created_at', { ascending: false })
+            .limit(100)
+        );
+
+        const loyaltyCustomerQuery = scope(
+          supabase.from('loyalty_customers')
+            .select('id,first_name,last_name,created_at,establishment_id')
+            .gte('created_at', since)
+            .order('created_at', { ascending: false })
+            .limit(100)
+        );
+
+        const loyaltyTransactionQuery = scope(
+          supabase.from('loyalty_transactions')
+            .select('id,type,points,amount,description,created_at,establishment_id')
+            .gte('created_at', since)
+            .order('created_at', { ascending: false })
+            .limit(100)
+        );
+
+        const loyaltyRedemptionQuery = scope(
+          supabase.from('loyalty_redemptions')
+            .select('id,points_used,discount_amount,amount_paid,created_at,establishment_id')
+            .gte('created_at', since)
+            .order('created_at', { ascending: false })
+            .limit(100)
+        );
+
+        const [
+          { data: reviewRows, error: reviewError },
+          { data: customerRows, error: customerError },
+          { data: transactionRows, error: transactionError },
+          { data: redemptionRows, error: redemptionError },
+        ] = await Promise.all([
+          role === 'admin' || establishmentIds.length ? reviewQuery : Promise.resolve({ data: [], error: null }),
+          role === 'admin' || establishmentIds.length ? loyaltyCustomerQuery : Promise.resolve({ data: [], error: null }),
+          role === 'admin' || establishmentIds.length ? loyaltyTransactionQuery : Promise.resolve({ data: [], error: null }),
+          role === 'admin' || establishmentIds.length ? loyaltyRedemptionQuery : Promise.resolve({ data: [], error: null }),
+        ]);
 
         if (!active) return;
 
-        if (reviewError) {
-          console.error('Erreur notifications avis:', reviewError);
-        }
+        if (reviewError) console.error('Erreur notifications avis:', reviewError);
+        if (customerError) console.error('Erreur notifications fidélité:', customerError);
+        if (transactionError) console.error('Erreur notifications transactions fidélité:', transactionError);
+        if (redemptionError) console.error('Erreur notifications récompenses:', redemptionError);
 
         const reviewNotifications: AppNotification[] = (reviewRows ?? []).map((review) => ({
           id: `review-${review.id}`,
           title: 'Nouvel avis client',
-          description: `Un avis ${Number(review.rating) >= 4 ? 'positif' : 'à surveiller'} vient d’être reçu.`,
+          description: `Note ${review.rating}/5${review.content ? ` — ${String(review.content).slice(0, 90)}` : ''}`,
           createdAt: review.created_at,
           tone: Number(review.rating) <= 3 ? 'alert' : 'review',
+        }));
+
+        const customerNotifications: AppNotification[] = (customerRows ?? []).map((customer) => ({
+          id: `loyalty-customer-${customer.id}`,
+          title: 'Nouveau client fidélité',
+          description: `${[customer.first_name, customer.last_name].filter(Boolean).join(' ') || 'Un client'} a rejoint le programme de fidélité.`,
+          createdAt: customer.created_at,
+          tone: 'info',
+        }));
+
+        const transactionNotifications: AppNotification[] = (transactionRows ?? []).map((transaction) => ({
+          id: `loyalty-transaction-${transaction.id}`,
+          title: transaction.type === 'EARN' ? 'Points fidélité ajoutés' : 'Mouvement fidélité',
+          description: `${transaction.points ?? 0} point${Math.abs(Number(transaction.points ?? 0)) > 1 ? 's' : ''} · ${transaction.description || 'Nouvelle transaction fidélité'}`,
+          createdAt: transaction.created_at,
+          tone: 'info',
+        }));
+
+        const redemptionNotifications: AppNotification[] = (redemptionRows ?? []).map((redemption) => ({
+          id: `loyalty-redemption-${redemption.id}`,
+          title: 'Récompense utilisée',
+          description: `${redemption.points_used ?? 0} points utilisés${redemption.discount_amount ? ` · remise ${redemption.discount_amount} DH` : ''}.`,
+          createdAt: redemption.created_at,
+          tone: 'review',
         }));
 
         let extraNotifications: AppNotification[] = [];
 
         if (role === 'admin') {
-          const { data: establishmentsRows } = await supabase
+          const { data: establishmentsRows, error: establishmentsError } = await supabase
             .from('establishments')
             .select('id,name,created_at')
             .gte('created_at', since)
             .order('created_at', { ascending: false })
-            .limit(10);
+            .limit(100);
+
+          if (establishmentsError) console.error('Erreur notifications établissements:', establishmentsError);
 
           extraNotifications = (establishmentsRows ?? []).map((item) => ({
             id: `establishment-${item.id}`,
             title: 'Nouvel établissement',
             description: `${item.name} a été ajouté à la plateforme.`,
             createdAt: item.created_at,
-            tone: 'info',
+            tone: 'info' as const,
           }));
         }
 
-        setNotifications([...reviewNotifications, ...extraNotifications]
-          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-          .slice(0, 12));
+        setNotifications([
+          ...reviewNotifications,
+          ...customerNotifications,
+          ...transactionNotifications,
+          ...redemptionNotifications,
+          ...extraNotifications,
+        ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 100));
       } catch (error) {
         console.error('Erreur chargement notifications:', error);
         if (active) setNotifications([]);
@@ -530,7 +598,7 @@ export function DashboardLayout() {
                     <div className="flex items-center justify-between border-b border-ink/5 px-4 py-3">
                       <div>
                         <p className="text-sm font-semibold text-ink">Notifications</p>
-                        <p className="text-[10px] text-ink/40">{notifications.length} notification{notifications.length > 1 ? 's' : ''} récentes</p>
+                        <p className="text-[10px] text-ink/40">{notifications.length} activité{notifications.length > 1 ? 's' : ''} récente{notifications.length > 1 ? 's' : ''}</p>
                       </div>
                       {notifications.length > 0 && (
                         <button type="button" onClick={markNotificationsRead} className="text-[10px] font-semibold text-forest">
@@ -538,7 +606,7 @@ export function DashboardLayout() {
                         </button>
                       )}
                     </div>
-                    <div className="max-h-[420px] overflow-y-auto">
+                    <div className="max-h-[520px] overflow-y-auto">
                       {notifications.length === 0 ? (
                         <div className="px-5 py-10 text-center">
                           <Check size={22} className="mx-auto text-forest/40" />
