@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import {
   Building2,
   Copy,
+  Gift,
   ExternalLink,
   Link2,
   Plus,
   QrCode,
   Save,
+  Star,
   UtensilsCrossed,
   X,
 } from 'lucide-react';
@@ -706,7 +708,7 @@ export default function Establishments() {
 
             <button
               onClick={() =>
-                copy(publicUrl(qr.slug))
+                copy(qr.url)
               }
               className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#f7f7f3] py-3 text-xs font-semibold text-forest"
             >
