@@ -182,7 +182,6 @@ function TemplateVisualPreview({ template, compact = false }: { template: Templa
       ],
       rewards: [],
       offers: [],
-      compact: Boolean(compact),
     };
     return <LoyaltyExperience config={config} />;
   }
@@ -559,9 +558,10 @@ export default function Templates() {
       if (error || !data) { alert(error?.message || 'Impossible d’enregistrer.'); return; }
       await load();
       setPreviewing({ ...(data as Template), source: 'database' });
+      setSelectedTemplate({ ...(data as Template), source: 'database' });
       return;
     }
-    const { error } = await supabase.from('templates').update({ config, updated_at: new Date().toISOString() }).eq('id', previewing.id);
+    const { error } = await supabase.from('templates').update({ name: previewing.name, config, updated_at: new Date().toISOString() }).eq('id', previewing.id);
     if (error) { alert(error.message); return; }
     await load();
     setPreviewing({ ...previewing, config });
