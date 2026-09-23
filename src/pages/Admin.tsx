@@ -430,13 +430,14 @@ export default function Admin() {
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-[270px] flex-col bg-forest px-5 py-6 text-white transition-transform lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 flex w-[248px] flex-col bg-forest px-4 py-5 text-white shadow-xl transition-transform lg:translate-x-0 ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="mb-12 flex items-center justify-between px-3">
-          <div className="font-display text-2xl tracking-tight">
+        <div className="mb-9 flex items-center justify-between px-2">
+          <div className="font-display text-2xl tracking-tight leading-none">
             Tap<span className="text-gold">Marrakech</span>
+            <p className="mt-2 font-sans text-[9px] tracking-normal text-white/45">L’expérience client, c’est un atout.</p>
           </div>
 
           <button
@@ -447,7 +448,7 @@ export default function Admin() {
           </button>
         </div>
 
-        <p className="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
+        <p className="mb-3 px-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/35">
           Administration
         </p>
 
@@ -459,7 +460,7 @@ export default function Admin() {
                 setSection(id);
                 setOpen(false);
               }}
-              className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm transition ${
+              className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[13px] transition ${
                 section === id
                   ? 'bg-white text-forest shadow-lg'
                   : 'text-white/65 hover:bg-white/10 hover:text-white'
@@ -498,26 +499,32 @@ export default function Admin() {
         </div>
       </aside>
 
-      <div className="lg:pl-[270px]">
-        <header className="sticky top-0 z-20 flex min-h-[76px] items-center justify-between border-b border-ink/5 bg-[#f7f7f3]/90 px-4 py-3 backdrop-blur sm:px-5 md:px-10">
-          <button
-            onClick={() => setOpen(true)}
-            className="text-ink lg:hidden"
-          >
+      <div className="lg:pl-[248px]">
+        <header className="sticky top-0 z-20 flex min-h-[72px] items-center gap-4 border-b border-ink/5 bg-[#f7f7f3]/90 px-4 py-3 backdrop-blur-xl sm:px-6 md:px-8">
+          <button onClick={() => setOpen(true)} className="text-ink lg:hidden" aria-label="Ouvrir le menu">
             <Menu />
           </button>
 
-          <div>
-            <p className="hidden text-xs text-ink/40 sm:block">
-              Administration TapMarrakech
-            </p>
-
-            <h1 className="text-sm font-semibold text-ink">
-              {currentLabel}
-            </h1>
+          <div className="hidden min-w-0 flex-1 max-w-[560px] lg:block">
+            <div className="flex h-11 items-center gap-3 rounded-xl border border-ink/5 bg-white px-4 shadow-sm">
+              <Search size={16} className="text-ink/30" />
+              <span className="text-xs text-ink/35">Rechercher un client, un avis, un établissement...</span>
+              <span className="ml-auto rounded-md border border-ink/10 bg-[#f7f7f3] px-2 py-1 text-[9px] text-ink/35">⌘ K</span>
+            </div>
           </div>
 
           <div className="ml-auto flex items-center gap-2">
+            <button type="button" className="relative grid h-10 w-10 place-items-center rounded-xl border border-ink/10 bg-white text-ink/60 shadow-sm" aria-label="Notifications">
+              <Bell size={17} />
+              <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-red-500" />
+            </button>
+            <div className="hidden h-10 items-center gap-2 rounded-xl border border-ink/10 bg-white px-2.5 shadow-sm sm:flex">
+              <div className="grid h-7 w-7 place-items-center rounded-full bg-forest text-xs font-semibold text-white">{user?.email?.[0]?.toUpperCase() ?? 'A'}</div>
+              <div className="max-w-[130px] leading-tight">
+                <p className="truncate text-xs font-semibold text-ink">{user?.email ?? 'Administrateur'}</p>
+                <p className="text-[9px] text-ink/40">Administrateur</p>
+              </div>
+            </div>
             <label className="hidden items-center gap-2 rounded-full border border-ink/10 bg-white px-3 py-2 text-xs font-medium text-ink/60 shadow-sm sm:flex">
               <select
                 value={language}
@@ -539,7 +546,7 @@ export default function Admin() {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-[1440px] p-4 sm:p-5 md:p-10">
+        <main className="mx-auto w-full max-w-[1500px] p-4 sm:p-5 md:p-8 lg:p-10">
           {section === 'overview' && (
             <Overview
               establishments={establishments}
