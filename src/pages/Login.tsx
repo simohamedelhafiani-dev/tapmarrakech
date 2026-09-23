@@ -120,7 +120,7 @@ export default function Login() {
             </div>
 
             <div className="mt-12 max-w-2xl lg:mt-16">
-              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#d3a84c]">{t.language === 'fr' ? 'Des établissements qui grandissent avec leurs clients' : t.language === 'en' ? 'Establishments that grow with their customers' : 'مؤسسات تنمو مع عملائها'}</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#d3a84c]">{language === 'fr' ? 'Des établissements qui grandissent avec leurs clients' : language === 'en' ? 'Establishments that grow with their customers' : 'مؤسسات تنمو مع عملائها'}</p>
               <h1 className="mt-5 max-w-2xl font-display text-4xl leading-[1.04] tracking-[-0.035em] sm:text-5xl xl:text-[58px]">
                 {t.hero} <span className="text-[#d3a84c]">{t.heroAccent}</span>
               </h1>
