@@ -6,6 +6,10 @@ export type SubscriptionAccess = {
   plan_id: string | null;
   plan_name: string;
   features: string[];
+  plan_price_mad: number;
+  plan_interval: string;
+  current_period_end: string | null;
+  trial_days: number;
 };
 
 export const FEATURE_LABELS = {
@@ -98,6 +102,10 @@ export async function getMySubscriptionAccess(
     plan_id: item.plan_id ? String(item.plan_id) : null,
     plan_name: String(item.plan_name ?? ''),
     features: Array.isArray(item.features) ? item.features.map(String) : [],
+    plan_price_mad: Number(item.plan_price_mad ?? 0),
+    plan_interval: String(item.plan_interval ?? 'month'),
+    current_period_end: item.current_period_end ? String(item.current_period_end) : null,
+    trial_days: Number(item.trial_days ?? 0),
     };
   });
 
