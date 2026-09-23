@@ -106,17 +106,20 @@ export default function Login() {
           <div className="relative z-10 flex h-full min-h-[620px] flex-col">
             <div className="flex items-start justify-between">
               <div>
-                <img src="/tapmarrakech-logo.png" alt="TapMarrakech" className="h-14 w-auto object-contain object-left brightness-0 invert sm:h-16" />
-                <p className="mt-1 text-xs text-white/75">L’expérience client, c’est un atout.</p>
+                <div className="leading-none">
+                  <div className="font-display text-4xl tracking-[-0.05em] text-[#d3a84c]">Tap</div>
+                  <div className="-mt-1 font-display text-3xl tracking-[-0.04em] text-[#f7f7f3]">Marrakech</div>
+                </div>
+                <p className="mt-2 text-xs text-white/75">L’expérience client, c’est un atout.</p>
               </div>
               <span className="hidden rounded-full border border-[#d3a84c]/45 px-4 py-2 text-[9px] font-bold uppercase tracking-[0.25em] text-[#e0bc68] sm:inline-flex">
                 Plateforme tout-en-un
               </span>
             </div>
 
-            <div className="mt-14 max-w-2xl lg:mt-20">
+            <div className="mt-12 max-w-2xl lg:mt-16">
               <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#d3a84c]">Des établissements qui grandissent avec leurs clients</p>
-              <h1 className="mt-5 font-display text-4xl leading-[1.05] tracking-[-0.025em] sm:text-5xl xl:text-6xl">
+              <h1 className="mt-5 max-w-2xl font-display text-4xl leading-[1.04] tracking-[-0.035em] sm:text-5xl xl:text-[58px]">
                 Transformez chaque client en <span className="text-[#d3a84c]">client fidèle.</span>
               </h1>
               <p className="mt-6 max-w-xl text-sm leading-7 text-white/65 sm:text-base">
@@ -124,14 +127,14 @@ export default function Login() {
               </p>
             </div>
 
-            <div className="mt-10 grid max-w-2xl grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="mt-9 grid max-w-2xl grid-cols-1 gap-3 sm:grid-cols-2">
               {[
                 { icon: Star, title: 'Avis & Réputation', text: 'Collectez, analysez et gérez vos avis sur Google et les principales plateformes.' },
                 { icon: Users, title: 'Fidélité', text: 'Récompensez vos clients et donnez-leur envie de revenir.' },
                 { icon: Heart, title: 'Expérience client', text: 'Mesurez la satisfaction et améliorez chaque étape du parcours.' },
                 { icon: BarChart3, title: 'Performance', text: 'Suivez vos données, identifiez vos opportunités et pilotez votre activité.' },
               ].map(({ icon: Icon, title, text }) => (
-                <div key={title} className="rounded-2xl border border-white/10 bg-white/[0.045] p-4 backdrop-blur-sm">
+                <div key={title} className="rounded-2xl border border-white/10 bg-[#214c40]/45 p-4 transition-colors hover:bg-[#214c40]/65">
                   <div className="flex items-start gap-3">
                     <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#d3a84c]/15 text-[#e1bc68]">
                       <Icon size={22} />
@@ -145,19 +148,21 @@ export default function Login() {
               ))}
             </div>
 
-            <div className="mt-auto hidden border-t border-white/10 pt-7 md:block">
-              <div className="grid max-w-2xl grid-cols-3 gap-6">
-                <div><p className="text-2xl font-semibold text-[#d3a84c]">Avis</p><p className="mt-1 text-[11px] text-white/45">Réputation maîtrisée</p></div>
-                <div><p className="text-2xl font-semibold text-[#d3a84c]">Fidélité</p><p className="mt-1 text-[11px] text-white/45">Clients qui reviennent</p></div>
-                <div><p className="text-2xl font-semibold text-[#d3a84c]">+30%</p><p className="mt-1 text-[11px] text-white/45">Objectif de récurrence</p></div>
+            <div className="mt-auto hidden border-t border-white/10 pt-6 md:block">
+              <div className="mb-4 h-px w-12 bg-[#d3a84c]" />
+              <p className="max-w-md text-sm leading-6 text-white/65">Une seule plateforme pour votre réputation, votre fidélité et votre expérience client.</p>
+              <div className="mt-6 grid max-w-2xl grid-cols-3 gap-6">
+                <div><p className="text-2xl font-semibold text-[#d3a84c]">+2 000</p><p className="mt-1 text-[11px] text-white/45">établissements</p></div>
+                <div><p className="text-2xl font-semibold text-[#d3a84c]">+50 000</p><p className="mt-1 text-[11px] text-white/45">avis gérés</p></div>
+                <div><p className="text-2xl font-semibold text-[#d3a84c]">+30 %</p><p className="mt-1 text-[11px] text-white/45">clients récurrents</p></div>
               </div>
             </div>
           </div>
         </section>
 
-        <section className="flex flex-1 items-center justify-center bg-[#fbfaf7] px-5 py-10 sm:px-10 lg:px-14 xl:px-20">
+        <section className="flex flex-1 items-center justify-center bg-[#f7f7f3] px-5 py-10 sm:px-10 lg:px-14 xl:px-20">
           <div className="w-full max-w-xl">
-            <div className="mb-10 flex justify-end">
+            <div className="mb-12 flex justify-end">
               <button type="button" className="inline-flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-4 py-2.5 text-xs font-medium text-ink/65 shadow-sm">
                 <Globe2 size={16} /> Français <span className="text-ink/30">⌄</span>
               </button>
@@ -165,15 +170,15 @@ export default function Login() {
 
             <div className="mb-8">
               <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#b58b3e]">Bon retour 👋</p>
-              <h2 className="mt-3 font-display text-4xl leading-tight text-[#10201c] sm:text-5xl">Connectez-vous à votre espace</h2>
+              <h2 className="mt-3 max-w-xl font-display text-4xl leading-[1.05] tracking-[-0.035em] text-[#10201c] sm:text-5xl">Connectez-vous à votre espace</h2>
               <p className="mt-4 text-sm leading-6 text-ink/50">Choisissez votre profil puis accédez à toutes vos fonctionnalités.</p>
             </div>
 
-            <div className="mb-7 grid grid-cols-2 gap-3">
+            <div className="mb-8 grid grid-cols-2 gap-4">
               <button
                 type="button"
                 onClick={() => selectRole('admin')}
-                className={`rounded-2xl border p-4 text-left transition ${selectedRole === 'admin' ? 'border-[#06382e] bg-[#06382e] text-white shadow-lg' : 'border-ink/10 bg-white text-ink hover:border-[#06382e]/30'}`}
+                className={`rounded-2xl border p-5 text-left transition-all duration-200 ${selectedRole === 'admin' ? 'border-[#173d32] bg-[#173d32] text-white shadow-lg' : 'border-black/5 bg-white text-ink shadow-sm hover:-translate-y-0.5 hover:border-[#173d32]/25 hover:shadow-md'}`}
               >
                 <div className={`mb-3 grid h-10 w-10 place-items-center rounded-xl ${selectedRole === 'admin' ? 'bg-white/10' : 'bg-[#06382e]/10 text-[#06382e]'}`}>
                   <ShieldCheck size={21} />
@@ -186,7 +191,7 @@ export default function Login() {
               <button
                 type="button"
                 onClick={() => selectRole('responsible')}
-                className={`rounded-2xl border p-4 text-left transition ${selectedRole === 'responsible' ? 'border-[#06382e] bg-[#06382e] text-white shadow-lg' : 'border-ink/10 bg-white text-ink hover:border-[#06382e]/30'}`}
+                className={`rounded-2xl border p-5 text-left transition-all duration-200 ${selectedRole === 'responsible' ? 'border-[#173d32] bg-[#173d32] text-white shadow-lg' : 'border-black/5 bg-white text-ink shadow-sm hover:-translate-y-0.5 hover:border-[#173d32]/25 hover:shadow-md'}`}
               >
                 <div className={`mb-3 grid h-10 w-10 place-items-center rounded-xl ${selectedRole === 'responsible' ? 'bg-white/10' : 'bg-[#f4ead3] text-[#06382e]'}`}>
                   <UserRound size={21} />
@@ -228,7 +233,7 @@ export default function Login() {
                 </button>
               </>
             ) : (
-              <div className="rounded-2xl border border-dashed border-ink/10 bg-white/60 px-5 py-6 text-center text-xs text-ink/40">
+              <div className="rounded-2xl border border-black/5 bg-white px-5 py-4 text-center text-xs text-ink/40">
                 Sélectionnez votre espace pour continuer.
               </div>
             )}
