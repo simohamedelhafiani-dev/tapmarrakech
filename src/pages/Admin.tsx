@@ -422,9 +422,12 @@ export default function Admin() {
         }`}
       >
         <div className="mb-9 flex items-center justify-between px-2">
-          <div className="font-display text-2xl tracking-tight leading-none">
-            Tap<span className="text-gold">Marrakech</span>
-            <p className="mt-2 font-sans text-[9px] tracking-normal text-white/45">L’expérience client, c’est un atout.</p>
+          <div className="flex min-h-[64px] flex-1 items-center justify-center">
+            <img
+              src="/tapmarrakech-logo.png"
+              alt="TapMarrakech"
+              className="h-[72px] w-auto max-w-[180px] object-contain"
+            />
           </div>
 
           <button
