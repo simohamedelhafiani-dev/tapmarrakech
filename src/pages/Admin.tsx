@@ -2324,44 +2324,6 @@ function ResponsiblesSection({
   const [showForm, setShowForm] = useState(false);
   const [selectedEstablishment, setSelectedEstablishment] = useState('all');
 
-  const assignSubscription = async () => {
-    if (!assignmentEstablishmentId || !assignmentPlanId) {
-      return alert('Sélectionnez un établissement et un pack.');
-    }
-
-    const selectedPlan = billing.plans.find((item) => item.id === assignmentPlanId);
-    if (!selectedPlan) return alert('Pack introuvable.');
-
-    const existing = billing.subscriptions.find((item) => item.establishment_id === assignmentEstablishmentId);
-    const startedAt = new Date();
-    const trialDays = assignmentStatus === 'trial' ? Math.max(1, Number(assignmentTrialDays) || 14) : 0;
-    const periodEnd = new Date(startedAt);
-    if (assignmentStatus === 'trial') periodEnd.setDate(periodEnd.getDate() + trialDays);
-    else if (selectedPlan.interval === 'year') periodEnd.setFullYear(periodEnd.getFullYear() + 1);
-    else periodEnd.setMonth(periodEnd.getMonth() + 1);
-
-    setSavingAssignment(true);
-    const payload = {
-      establishment_id: assignmentEstablishmentId,
-      plan_id: assignmentPlanId,
-      status: assignmentStatus,
-      started_at: startedAt.toISOString(),
-      current_period_end: periodEnd.toISOString(),
-      trial_days: trialDays,
-      canceled_at: null,
-    };
-
-    const result = existing
-      ? await supabase.from('subscriptions').update(payload).eq('id', existing.id)
-      : await supabase.from('subscriptions').insert(payload);
-
-    setSavingAssignment(false);
-    if (result.error) return alert(`Impossible d'attribuer le pack : ${result.error.message}`);
-
-    await reload();
-    alert(`Le pack « ${selectedPlan.name} » a été attribué à l'établissement.`);
-  };
-
   const establishmentMap = useMemo(
     () =>
       new Map(
@@ -5033,6 +4995,44 @@ function BillingSection({
     const { error } = await supabase.from('subscription_plans').delete().eq('id', value.id);
     if (error) return alert(`Impossible de supprimer le plan : ${error.message}`);
     await reload();
+  };
+
+  const assignSubscription = async () => {
+    if (!assignmentEstablishmentId || !assignmentPlanId) {
+      return alert('Sélectionnez un établissement et un pack.');
+    }
+
+    const selectedPlan = billing.plans.find((item) => item.id === assignmentPlanId);
+    if (!selectedPlan) return alert('Pack introuvable.');
+
+    const existing = billing.subscriptions.find((item) => item.establishment_id === assignmentEstablishmentId);
+    const startedAt = new Date();
+    const trialDays = assignmentStatus === 'trial' ? Math.max(1, Number(assignmentTrialDays) || 14) : 0;
+    const periodEnd = new Date(startedAt);
+    if (assignmentStatus === 'trial') periodEnd.setDate(periodEnd.getDate() + trialDays);
+    else if (selectedPlan.interval === 'year') periodEnd.setFullYear(periodEnd.getFullYear() + 1);
+    else periodEnd.setMonth(periodEnd.getMonth() + 1);
+
+    setSavingAssignment(true);
+    const payload = {
+      establishment_id: assignmentEstablishmentId,
+      plan_id: assignmentPlanId,
+      status: assignmentStatus,
+      started_at: startedAt.toISOString(),
+      current_period_end: periodEnd.toISOString(),
+      trial_days: trialDays,
+      canceled_at: null,
+    };
+
+    const result = existing
+      ? await supabase.from('subscriptions').update(payload).eq('id', existing.id)
+      : await supabase.from('subscriptions').insert(payload);
+
+    setSavingAssignment(false);
+    if (result.error) return alert(`Impossible d'attribuer le pack : ${result.error.message}`);
+
+    await reload();
+    alert(`Le pack « ${selectedPlan.name} » a été attribué à l'établissement.`);
   };
 
   const establishmentMap = useMemo(
