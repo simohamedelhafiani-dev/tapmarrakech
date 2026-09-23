@@ -39,7 +39,6 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
-import { useLanguage, type Language } from '@/contexts/LanguageContext';
 import Templates from '@/pages/Templates';
 import LoyaltyProgramCustomization from '@/components/LoyaltyProgramCustomization';
 
