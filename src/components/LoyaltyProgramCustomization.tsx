@@ -462,7 +462,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                     ...new Set([
                       design.design_config.background_image_url,
                       ...(((design.design_config as LoyaltyDesignConfig & { wallpaper_library?: string[] }).wallpaper_library) || []),
-                    ].filter(Boolean)),
+                    ].filter((url): url is string => Boolean(url))),
                   ].map((url) => (
                     <button
                       key={url}
