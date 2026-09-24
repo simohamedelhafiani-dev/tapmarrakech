@@ -95,17 +95,33 @@ export async function getMySubscriptionAccess(
 
   const accesses = (data ?? []).map((row: unknown) => {
     const item = row as Record<string, unknown>;
+    const rawFeatures = item.features ?? item.plan_features ?? [];
+    let features: string[] = [];
+
+    if (Array.isArray(rawFeatures)) {
+      features = rawFeatures.map(String);
+    } else if (typeof rawFeatures === 'string') {
+      try {
+        const parsed = JSON.parse(rawFeatures);
+        if (Array.isArray(parsed)) features = parsed.map(String);
+      } catch {
+        features = rawFeatures
+          .split(',')
+          .map((value) => value.trim())
+          .filter(Boolean);
+      }
+    }
 
     return {
-    establishment_id: String(item.establishment_id ?? ''),
-    subscription_status: String(item.subscription_status ?? ''),
-    plan_id: item.plan_id ? String(item.plan_id) : null,
-    plan_name: String(item.plan_name ?? ''),
-    features: Array.isArray(item.features) ? item.features.map(String) : [],
-    plan_price_mad: Number(item.plan_price_mad ?? 0),
-    plan_interval: String(item.plan_interval ?? 'month'),
-    current_period_end: item.current_period_end ? String(item.current_period_end) : null,
-    trial_days: Number(item.trial_days ?? 0),
+      establishment_id: String(item.establishment_id ?? ''),
+      subscription_status: String(item.subscription_status ?? ''),
+      plan_id: item.plan_id ? String(item.plan_id) : null,
+      plan_name: String(item.plan_name ?? item.name ?? ''),
+      features,
+      plan_price_mad: Number(item.plan_price_mad ?? item.price_mad ?? 0),
+      plan_interval: String(item.plan_interval ?? item.interval ?? 'month'),
+      current_period_end: item.current_period_end ? String(item.current_period_end) : null,
+      trial_days: Number(item.trial_days ?? 0),
     };
   });
 
