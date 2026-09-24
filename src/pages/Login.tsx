@@ -120,27 +120,61 @@ export default function Login() {
               </span>
             </div>
 
-            <div className="mt-12 max-w-2xl lg:mt-16">
-              <p className="text-[10px] font-bold text-[#C9A15A]">
-                {language === 'fr' ? 'Des établissements qui grandissent avec leurs clients' : language === 'en' ? 'Establishments that grow with their customers' : 'مؤسسات تنمو مع عملائها'}
+            <div className="mt-14 max-w-2xl lg:mt-20">
+              <p className="text-[10px] font-semibold tracking-[0.08em] text-[#C9A15A]">
+                {language === 'fr'
+                  ? 'UNE SEULE PLATEFORME POUR L’EXPÉRIENCE CLIENT'
+                  : language === 'en'
+                    ? 'ONE PLATFORM FOR CUSTOMER EXPERIENCE'
+                    : 'منصة واحدة لتجربة العميل'}
               </p>
-              <h1 className="mt-5 max-w-2xl font-display text-4xl leading-[1.04] sm:text-5xl xl:text-[58px]">
-                {t.hero} <span className="text-[#C9A15A]">{t.heroAccent}</span>
+
+              <h1 className="mt-5 max-w-2xl font-display text-[42px] leading-[0.98] sm:text-5xl xl:text-[60px]">
+                {language === 'fr'
+                  ? 'Chaque interaction peut donner envie de revenir.'
+                  : language === 'en'
+                    ? 'Every interaction can give customers a reason to return.'
+                    : 'كل تفاعل يمكن أن يمنح العميل سبباً للعودة.'}
               </h1>
-              <p className="mt-6 max-w-xl text-sm leading-7 text-[#EFE9DC]/56 sm:text-base">
-                {t.heroDesc}
+
+              <p className="mt-6 max-w-xl text-[15px] leading-7 text-[#EFE9DC]/56 sm:text-base">
+                {language === 'fr'
+                  ? 'Avis, fidélité et expérience client réunis dans un espace simple pour piloter ce qui compte vraiment.'
+                  : language === 'en'
+                    ? 'Reviews, loyalty and customer experience brought together in one simple space to manage what really matters.'
+                    : 'التقييمات والولاء وتجربة العميل في مساحة واحدة بسيطة لإدارة ما يهم فعلاً.'}
               </p>
             </div>
 
-            <div className="mt-10 max-w-2xl">
+            <div className="mt-12 max-w-2xl">
               {[
-                { title: t.services.reviews, text: t.services.reviewsDesc },
-                { title: t.services.loyalty, text: t.services.loyaltyDesc },
-                { title: t.services.experience, text: t.services.experienceDesc },
-                { title: t.services.performance, text: t.services.performanceDesc },
-              ].map(({ title, text }, index) => (
-                <div key={title} className={`flex flex-col gap-2 border-t border-[rgba(239,233,220,0.12)] py-4 sm:flex-row sm:items-baseline sm:gap-8 ${index === 3 ? 'border-b' : ''}`}>
-                  <p className="w-full shrink-0 text-sm font-medium text-[#EFE9DC] sm:w-44">{title}</p>
+                {
+                  number: '01',
+                  title: t.services.reviews,
+                  text: t.services.reviewsDesc,
+                },
+                {
+                  number: '02',
+                  title: t.services.loyalty,
+                  text: t.services.loyaltyDesc,
+                },
+                {
+                  number: '03',
+                  title: t.services.experience,
+                  text: t.services.experienceDesc,
+                },
+                {
+                  number: '04',
+                  title: t.services.performance,
+                  text: t.services.performanceDesc,
+                },
+              ].map(({ number, title, text }) => (
+                <div
+                  key={number}
+                  className="grid grid-cols-[42px_150px_1fr] items-baseline gap-4 border-t border-[rgba(239,233,220,0.12)] py-4 last:border-b sm:grid-cols-[48px_170px_1fr] sm:gap-5"
+                >
+                  <span className="font-display text-sm text-[#C9A15A]">{number}</span>
+                  <p className="text-sm font-medium text-[#EFE9DC]">{title}</p>
                   <p className="text-xs leading-5 text-[#EFE9DC]/56 sm:text-sm">{text}</p>
                 </div>
               ))}
