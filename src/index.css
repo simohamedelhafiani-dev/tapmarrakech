@@ -582,3 +582,82 @@ h6,
 .tm-auth [class*="border-black"] {
   border-color: var(--line) !important;
 }
+
+/* === TapMarrakech final application skin ===
+   Structural UI only. Product previews/custom customer designs remain untouched.
+*/
+.tm-theme :is(.bg-white,.bg-gray-50,.bg-slate-50,.bg-zinc-50),
+.tm-theme [class*="bg-[#f7f7f3"],
+.tm-theme [class*="bg-[#F7F7F3"],
+.tm-theme [class*="bg-[#fbfbf8"],
+.tm-theme [class*="bg-[#FBFBF8"],
+.tm-theme [class*="bg-[#fafaf7"],
+.tm-theme [class*="bg-[#FAFAF7"],
+.tm-theme [class*="bg-[#fdfdfb"],
+.tm-theme [class*="bg-[#FDFDFB"],
+.tm-theme [class*="bg-[#fbfaf7"],
+.tm-theme [class*="bg-[#FBFAF7"] {
+  background: linear-gradient(180deg, rgba(239,233,220,.055), rgba(239,233,220,.028)) !important;
+  color: var(--paper) !important;
+}
+.tm-theme [class*="bg-[#f3eee2"],
+.tm-theme [class*="bg-[#F3EEE2"],
+.tm-theme [class*="bg-[#f0ece2"],
+.tm-theme [class*="bg-[#F0ECE2"],
+.tm-theme [class*="bg-[#ebe5d8"],
+.tm-theme [class*="bg-[#EBE5D8"],
+.tm-theme [class*="bg-gray-100"],
+.tm-theme [class*="bg-slate-100"],
+.tm-theme [class*="bg-zinc-100"] {
+  background: var(--ink-2) !important;
+  color: var(--paper) !important;
+}
+.tm-theme [class*="bg-forest"],
+.tm-theme [class*="bg-[#06382e"],
+.tm-theme [class*="bg-[#06382E"],
+.tm-theme [class*="bg-[#0b493c"],
+.tm-theme [class*="bg-[#0B493C"],
+.tm-theme [class*="bg-[#173d32"],
+.tm-theme [class*="bg-[#173D32"],
+.tm-theme [class*="bg-[#214c40"],
+.tm-theme [class*="bg-[#214C40"] {
+  background: var(--ink-2) !important;
+  color: var(--paper) !important;
+}
+.tm-theme [class*="text-forest"],
+.tm-theme [class*="text-[#06382e"],
+.tm-theme [class*="text-[#06382E"],
+.tm-theme [class*="text-[#10201c"],
+.tm-theme [class*="text-[#173d32"],
+.tm-theme [class*="text-[#173D32"] {
+  color: var(--paper) !important;
+}
+.tm-theme [class*="text-gray-900"],
+.tm-theme [class*="text-gray-800"],
+.tm-theme [class*="text-slate-900"],
+.tm-theme [class*="text-slate-800"],
+.tm-theme [class*="text-zinc-900"],
+.tm-theme [class*="text-zinc-800"] {
+  color: var(--paper) !important;
+}
+
+/* Login is a separate shell but uses the same palette. */
+.tm-auth section.bg-\[\#06382e\],
+.tm-auth [class*="bg-[#06382e"],
+.tm-auth [class*="bg-[#0b493c"],
+.tm-auth [class*="bg-[#214c40"] {
+  background: var(--ink) !important;
+}
+.tm-auth [class*="bg-[#214c40"] {
+  background: rgba(239,233,220,.055) !important;
+}
+.tm-auth [class*="bg-white"],
+.tm-auth [class*="bg-[#f7f7f3"] {
+  background: linear-gradient(180deg, rgba(239,233,220,.055), rgba(239,233,220,.028)) !important;
+  color: var(--paper) !important;
+}
+.tm-auth [class*="text-[#10201c"],
+.tm-auth [class*="text-[#06382e"],
+.tm-auth [class*="text-forest"] {
+  color: var(--paper) !important;
+}
