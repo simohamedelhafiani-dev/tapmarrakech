@@ -414,7 +414,7 @@ export default function Admin() {
     'Vue d’ensemble';
 
   return (
-    <div className="min-h-screen bg-[#f7f7f3] text-ink">
+    <div className="app-shell min-h-screen bg-[#f7f7f3] text-ink">
       {open && (
         <button
           aria-label="Fermer le menu"
