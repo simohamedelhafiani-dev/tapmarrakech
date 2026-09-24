@@ -1,2 +1,25 @@
 /** @type {import('tailwindcss').Config} */
-export default { content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'], theme: { extend: { colors: { ink: '#17221d', forest: '#17352a', gold: '#c8a96b', cream: '#f7f7f3' }, fontFamily: { display: ['Playfair Display', 'serif'], sans: ['DM Sans', 'sans-serif'] }, boxShadow: { soft: '0 14px 40px rgba(23,53,42,0.08)' } } }, plugins: [] };
+export default {
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  theme: {
+    extend: {
+      colors: {
+        ink: 'var(--ink)',
+        'ink-2': 'var(--ink-2)',
+        forest: 'var(--ink)',
+        gold: 'var(--gold)',
+        'gold-dim': 'var(--gold-dim)',
+        cream: 'var(--ink)',
+        paper: 'var(--paper)',
+      },
+      fontFamily: {
+        display: ['Fraunces', 'serif'],
+        sans: ['Inter', 'sans-serif'],
+      },
+      boxShadow: {
+        soft: '0 10px 28px rgba(0,0,0,0.16)',
+      },
+    },
+  },
+  plugins: [],
+};
