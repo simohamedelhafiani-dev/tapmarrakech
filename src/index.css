@@ -488,3 +488,39 @@ h6,
 .tm-auth-main .rounded-2xl {
   border-radius: 2px !important;
 }
+
+/* Normalize legacy light surfaces across the existing application. */
+.tm-theme [class*="bg-[#fff"],
+.tm-theme [class*="bg-[#FFF"],
+.tm-theme [class*="bg-[#ffffff"],
+.tm-theme [class*="bg-[#FFFFFF"],
+.tm-theme [class*="bg-[#f7f7f3"],
+.tm-theme [class*="bg-[#F7F7F3"],
+.tm-theme [class*="bg-[#f7f3ea"],
+.tm-theme [class*="bg-[#F7F3EA"],
+.tm-theme [class*="bg-[#f3eee2"],
+.tm-theme [class*="bg-[#F3EEE2"],
+.tm-theme [class*="bg-[#fafafa"],
+.tm-theme [class*="bg-[#FAFAFA"],
+.tm-theme [class*="bg-gray-50"],
+.tm-theme [class*="bg-slate-50"],
+.tm-theme [class*="bg-zinc-50"] {
+  background: linear-gradient(180deg, rgba(239,233,220,0.055), rgba(239,233,220,0.035)) !important;
+  color: var(--paper) !important;
+}
+.tm-theme [class*="bg-gray-100"],
+.tm-theme [class*="bg-slate-100"],
+.tm-theme [class*="bg-zinc-100"],
+.tm-theme [class*="bg-[#f5f5f5"],
+.tm-theme [class*="bg-[#F5F5F5"] {
+  background: var(--ink-2) !important;
+  color: var(--paper) !important;
+}
+.tm-theme [class*="text-gray-900"],
+.tm-theme [class*="text-slate-900"],
+.tm-theme [class*="text-zinc-900"],
+.tm-theme [class*="text-gray-800"],
+.tm-theme [class*="text-slate-800"],
+.tm-theme [class*="text-zinc-800"] {
+  color: var(--paper) !important;
+}
