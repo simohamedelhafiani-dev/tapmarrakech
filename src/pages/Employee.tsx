@@ -987,7 +987,7 @@ export default function Employee() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f7f3] p-4 md:p-8">
+    <div className="tm-employee min-h-screen bg-[var(--ink)] p-4 md:p-8">
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 flex justify-center">
           <div className="flex items-center gap-3 rounded-2xl border border-ink/5 bg-white px-5 py-3 shadow-sm">
