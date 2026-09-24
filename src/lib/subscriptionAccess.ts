@@ -116,7 +116,7 @@ export async function getMySubscriptionAccess(
       establishment_id: String(item.establishment_id ?? ''),
       subscription_status: String(item.subscription_status ?? ''),
       plan_id: item.plan_id ? String(item.plan_id) : null,
-      plan_name: String(item.plan_name ?? item.name ?? ''),
+      plan_name: String(item.plan_name || item.name || ''),
       features,
       plan_price_mad: Number(item.plan_price_mad ?? item.price_mad ?? 0),
       plan_interval: String(item.plan_interval ?? item.interval ?? 'month'),
