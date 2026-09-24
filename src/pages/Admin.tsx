@@ -414,7 +414,7 @@ export default function Admin() {
     'Vue d’ensemble';
 
   return (
-    <div className="app-shell min-h-screen bg-[#f7f7f3] text-ink">
+    <div className="app-shell min-h-screen bg-[var(--ink)] text-[var(--paper)]">
       {open && (
         <button
           aria-label="Fermer le menu"
@@ -496,8 +496,8 @@ export default function Admin() {
         </div>
       </aside>
 
-      <div className="lg:pl-[248px]">
-        <header className="sticky top-0 z-20 flex min-h-[72px] items-center gap-4 border-b border-ink/5 bg-[#f7f7f3]/90 px-4 py-3 backdrop-blur-xl sm:px-6 md:px-8">
+      <div className="min-h-screen lg:ml-[248px]">
+        <header className="sticky top-0 z-50 flex min-h-[72px] shrink-0 items-center gap-4 border-b border-[var(--line)] bg-[var(--ink)] px-4 py-3 sm:px-6 md:px-8">
           <button onClick={() => setOpen(true)} className="text-ink lg:hidden" aria-label="Ouvrir le menu">
             <Menu />
           </button>
@@ -543,7 +543,7 @@ export default function Admin() {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-[1500px] p-4 sm:p-5 md:p-8 lg:p-10">
+        <main className="mx-auto w-full max-w-[1500px] flex-1 bg-[var(--ink)] p-4 text-[var(--paper)] sm:p-5 md:p-8 lg:p-10">
           {section === 'overview' && (
             <Overview
               establishments={establishments}
