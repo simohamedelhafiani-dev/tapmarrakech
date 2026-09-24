@@ -293,6 +293,66 @@ label,
   letter-spacing: 0.02em;
 }
 
+.auth-surface {
+  background: var(--ink) !important;
+  color: var(--paper);
+}
+
+.auth-surface [class*="bg-[#f7f7f3]"] {
+  background: var(--ink) !important;
+}
+
+.auth-surface [class*="bg-[#06382e]"],
+.auth-surface .bg-forest {
+  background: var(--ink) !important;
+}
+
+.auth-surface [class*="text-forest"],
+.auth-surface [class*="text-ink"] {
+  color: var(--paper) !important;
+}
+
+.auth-surface [class*="text-ink/"] {
+  color: var(--muted) !important;
+}
+
+.auth-surface input,
+.auth-surface textarea,
+.auth-surface select {
+  color: var(--paper);
+  background: transparent !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--line) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.auth-surface input:focus,
+.auth-surface textarea:focus,
+.auth-surface select:focus {
+  border-bottom-color: var(--gold) !important;
+  outline: none;
+}
+
+.auth-surface .rounded-xl,
+.auth-surface .rounded-2xl,
+.auth-surface .rounded-lg {
+  border-radius: 2px !important;
+}
+
+.auth-surface button.bg-forest {
+  color: #1A1409 !important;
+  background: linear-gradient(180deg, #D9B673 0%, #B08A45 100%) !important;
+  box-shadow: 0 8px 20px rgba(201,161,90,0.18) !important;
+  border-radius: 2px !important;
+}
+
+.auth-surface [class*="uppercase"] {
+  text-transform: none !important;
+  font-variant-caps: small-caps;
+  letter-spacing: 0.02em;
+}
+
 @keyframes tapmarrakech-entry {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
