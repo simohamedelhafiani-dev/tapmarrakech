@@ -444,3 +444,21 @@ label,
 .app-shell [class*="bg-white"] {
   background: linear-gradient(180deg, rgba(239,233,220,0.05), rgba(239,233,220,0.035)) !important;
 }
+
+/* Admin content flow: no reserved space above the topbar. */
+.app-shell > .min-h-screen {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+.app-shell > .min-h-screen > header {
+  margin-top: 0 !important;
+  top: 0 !important;
+}
+
+@media (min-width: 1024px) {
+  .app-shell > .min-h-screen {
+    margin-left: 248px !important;
+    padding-top: 0 !important;
+  }
+}
