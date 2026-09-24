@@ -125,6 +125,44 @@ export async function getMySubscriptionAccess(
     };
   });
 
+  const planIds = Array.from(
+    new Set(
+      accesses
+        .map((access) => access.plan_id)
+        .filter((id): id is string => Boolean(id))
+    )
+  );
+
+  if (planIds.length > 0) {
+    const { data: plans, error: plansError } = await supabase
+      .from('subscription_plans')
+      .select('id, name, features, price_mad, interval')
+      .in('id', planIds);
+
+    if (plansError) {
+      console.error('Erreur chargement des plans abonnement:', plansError);
+    } else {
+      const plansById = new Map(
+        (plans ?? []).map((plan) => [String(plan.id), plan])
+      );
+
+      accesses.forEach((access) => {
+        if (!access.plan_id) return;
+
+        const plan = plansById.get(access.plan_id);
+        if (!plan) return;
+
+        access.plan_name = String(plan.name ?? access.plan_name ?? '');
+        access.plan_price_mad = Number(plan.price_mad ?? access.plan_price_mad ?? 0);
+        access.plan_interval = String(plan.interval ?? access.plan_interval ?? 'month');
+
+        if (Array.isArray(plan.features) && plan.features.length > 0) {
+          access.features = plan.features.map(String);
+        }
+      });
+    }
+  }
+
   return establishmentId
     ? accesses.filter(
         (access: SubscriptionAccess) => access.establishment_id === establishmentId
