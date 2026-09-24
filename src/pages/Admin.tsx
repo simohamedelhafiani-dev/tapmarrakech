@@ -166,83 +166,43 @@ export default function Admin() {
 
   const loadEstablishments = async () => {
     setLoading(true);
-
-    const { data, error } = await supabase
-      .from('establishments')
-      .select('id, name, slug, ai_business_type_id, created_at')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Erreur établissements:', error);
-      setEstablishments([]);
-    } else {
-      setEstablishments(data ?? []);
+    try {
+      const { data, error } = await supabase.rpc('get_my_establishments');
+      if (error) {
+        console.error('Erreur établissements:', error);
+        setEstablishments([]);
+        return;
+      }
+      setEstablishments((data ?? []) as Establishment[]);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const loadStaff = async () => {
     setStaffLoading(true);
+    try {
+      const { data, error } = await supabase.rpc('get_admin_staff');
+      if (error) {
+        console.error('Erreur équipe:', error);
+        setStaff([]);
+        return;
+      }
 
-    const { data: staffRows, error: staffError } = await supabase
-      .from('establishment_staff')
-      .select('id, establishment_id, user_id, role, active, created_at')
-      .order('created_at', { ascending: false });
-
-    if (staffError) {
-      console.error('Erreur équipe:', staffError);
-      setStaff([]);
-      setStaffLoading(false);
-      return;
-    }
-
-    const rows = staffRows ?? [];
-    const userIds = rows.map((row) => row.user_id);
-
-    if (userIds.length === 0) {
-      setStaff([]);
-      setStaffLoading(false);
-      return;
-    }
-
-    const { data: profiles, error: profilesError } = await supabase
-      .from('profiles')
-      .select('id, email, name, role')
-      .in('id', userIds);
-
-    if (profilesError) {
-      console.error('Erreur profils:', profilesError);
-      setStaff([]);
-      setStaffLoading(false);
-      return;
-    }
-
-    const profileMap = new Map(
-      (profiles ?? []).map((profile) => [
-        profile.id,
-        profile,
-      ])
-    );
-
-    const result: StaffMember[] = rows.map((row) => {
-      const profile = profileMap.get(row.user_id);
-
-      return {
+      setStaff((data ?? []).map((row) => ({
         id: row.id,
         establishment_id: row.establishment_id,
         user_id: row.user_id,
-        role: row.role,
-        active: row.active,
+        role: row.role as StaffMember['role'],
+        active: Boolean(row.active),
         created_at: row.created_at,
-        email: profile?.email ?? '—',
-        name: profile?.name ?? 'Utilisateur',
-        profileRole: profile?.role ?? null,
-      };
-    });
-
-    setStaff(result);
-    setStaffLoading(false);
+        email: row.email ?? '—',
+        name: row.name ?? 'Utilisateur',
+        profileRole: (row.profile_role ?? null) as StaffMember['profileRole'],
+      })));
+    } finally {
+      setStaffLoading(false);
+    }
   };
 
   const loadAIBusinessTypes = async () => {
