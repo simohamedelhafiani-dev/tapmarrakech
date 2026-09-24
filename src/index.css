@@ -462,3 +462,25 @@ label,
     padding-top: 0 !important;
   }
 }
+
+/* Admin: explicit vertical flow prevents the topbar from being pushed below the viewport. */
+.app-shell > .min-h-screen {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  align-items: stretch !important;
+  min-height: 100vh !important;
+}
+
+.app-shell > .min-h-screen > header {
+  position: sticky !important;
+  inset-block-start: 0 !important;
+  flex: 0 0 auto !important;
+  align-self: stretch !important;
+  min-height: 72px !important;
+}
+
+.app-shell > .min-h-screen > main {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+}
