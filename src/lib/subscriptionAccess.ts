@@ -81,20 +81,17 @@ export function planHasFeature(
 export async function getMySubscriptionAccess(
   establishmentId?: string
 ): Promise<SubscriptionAccess[]> {
-  const rpcName = establishmentId
-    ? 'get_my_subscription_for_establishment'
-    : 'get_my_subscription_features';
-
-  const { data, error } = establishmentId
-    ? await supabase.rpc(rpcName, { p_establishment_id: establishmentId })
-    : await supabase.rpc(rpcName);
+  // Use the established subscription RPC that is already part of the app's
+  // normal responsible-session path, then select the active establishment
+  // locally. This avoids depending on a newly added PostgREST function cache.
+  const { data, error } = await supabase.rpc('get_my_subscription_features');
 
   if (error) {
     console.error('Erreur chargement des droits abonnement:', error);
     return [];
   }
 
-  return (data ?? []).map((row: unknown) => {
+  const rows = (data ?? []).map((row: unknown) => {
     const item = row as Record<string, unknown>;
     const rawFeatures = item.features;
     const features = Array.isArray(rawFeatures)
@@ -122,4 +119,8 @@ export async function getMySubscriptionAccess(
       trial_days: Number(item.trial_days ?? 0),
     };
   });
+
+  return establishmentId
+    ? rows.filter((item) => item.establishment_id === establishmentId)
+    : rows;
 }
