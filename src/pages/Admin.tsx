@@ -496,7 +496,7 @@ export default function Admin() {
         </div>
       </aside>
 
-      <div className="min-h-screen lg:ml-[248px]">
+      <div className="flex min-h-screen flex-col lg:ml-[248px]">
         <header className="sticky top-0 z-50 flex min-h-[72px] shrink-0 items-center gap-4 border-b border-[var(--line)] bg-[var(--ink)] px-4 py-3 sm:px-6 md:px-8">
           <button onClick={() => setOpen(true)} className="text-ink lg:hidden" aria-label="Ouvrir le menu">
             <Menu />
