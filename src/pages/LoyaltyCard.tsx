@@ -384,7 +384,7 @@ export default function LoyaltyCard() {
   };
 
   return (
-    <main className="min-h-screen bg-[#eef0ed] px-3 py-5 sm:px-6 sm:py-8">
+    <main className="tm-loyalty-public min-h-screen bg-[var(--ink)] px-3 py-5 sm:px-6 sm:py-8">
       <div className="mx-auto w-full max-w-[430px]">
         <LoyaltyExperience config={experience} />
         {!isInstalled && <button type="button" onClick={() => void saveCardOnPhone()} className="mt-4 flex w-full items-center justify-center gap-3 rounded-2xl bg-[#D6B15A] px-5 py-4 text-sm font-semibold text-[#17130f] shadow-lg transition hover:brightness-105">
