@@ -524,3 +524,61 @@ h6,
 .tm-theme [class*="text-zinc-800"] {
   color: var(--paper) !important;
 }
+
+/* Final theme normalization: eliminate the legacy green/white palette inside the existing screens. */
+.tm-theme [class*="bg-white"],
+.tm-theme [class*="bg-[#fff"],
+.tm-theme [class*="bg-[#FFF"],
+.tm-theme [class*="bg-[#ffffff"],
+.tm-theme [class*="bg-[#FFFFFF"] {
+  background: linear-gradient(180deg, rgba(239,233,220,0.055), rgba(239,233,220,0.035)) !important;
+  color: var(--paper) !important;
+}
+.tm-theme [class*="bg-[#06382e"],
+.tm-theme [class*="bg-[#06382E"],
+.tm-theme [class*="bg-[#0b493c"],
+.tm-theme [class*="bg-[#0B493C"],
+.tm-theme [class*="bg-[#173d32"],
+.tm-theme [class*="bg-[#173D32"],
+.tm-theme [class*="bg-[#214c40"],
+.tm-theme [class*="bg-[#214C40"],
+.tm-theme [class*="bg-forest"] {
+  background: var(--ink-2) !important;
+  color: var(--paper) !important;
+}
+.tm-theme [class*="text-[#06382e"],
+.tm-theme [class*="text-[#173d32"],
+.tm-theme [class*="text-[#214c40"],
+.tm-theme [class*="text-forest"] {
+  color: var(--paper) !important;
+}
+
+/* Login is outside DashboardLayout, so give it the same final palette explicitly. */
+.tm-auth [class*="bg-[#06382e"],
+.tm-auth [class*="bg-[#06382E"],
+.tm-auth [class*="bg-[#0b493c"],
+.tm-auth [class*="bg-[#0B493C"],
+.tm-auth [class*="bg-[#173d32"],
+.tm-auth [class*="bg-[#173D32"],
+.tm-auth [class*="bg-[#214c40"],
+.tm-auth [class*="bg-[#214C40"],
+.tm-auth .bg-forest {
+  background: var(--ink) !important;
+  color: var(--paper) !important;
+}
+.tm-auth [class*="bg-[#214c40"] {
+  background: rgba(239,233,220,0.055) !important;
+}
+.tm-auth [class*="text-[#10201c"],
+.tm-auth [class*="text-[#06382e"],
+.tm-auth [class*="text-forest"] {
+  color: var(--paper) !important;
+}
+.tm-auth .bg-white,
+.tm-auth [class*="bg-white"] {
+  background: rgba(239,233,220,0.045) !important;
+  color: var(--paper) !important;
+}
+.tm-auth [class*="border-black"] {
+  border-color: var(--line) !important;
+}
