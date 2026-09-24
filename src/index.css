@@ -661,3 +661,109 @@ h6,
 .tm-auth [class*="text-forest"] {
   color: var(--paper) !important;
 }
+
+
+/* FINAL STRUCTURAL THEME OVERRIDE
+   This layer intentionally targets legacy structural color utilities.
+   It does not target configurable menu/loyalty preview palettes.
+*/
+.tm-theme {
+  --tm-surface: #141A15;
+  --tm-surface-2: #181F19;
+  --tm-surface-3: #1D251F;
+}
+
+/* Legacy light structural surfaces */
+.tm-theme :is(
+  [class*="bg-white"],
+  [class*="bg-[#f7f7f3"], [class*="bg-[#F7F7F3"],
+  [class*="bg-[#fbfbf8"], [class*="bg-[#FBFBF8"],
+  [class*="bg-[#fafaf7"], [class*="bg-[#FAFAF7"],
+  [class*="bg-[#fdfdfb"], [class*="bg-[#FDFDFB"],
+  [class*="bg-[#fbfaf7"], [class*="bg-[#FBFAF7"],
+  [class*="bg-[#fdf9ef"], [class*="bg-[#FDF9EF"],
+  [class*="bg-[#f4ead3"], [class*="bg-[#F4EAD3"],
+  [class*="bg-[#f4e4e1"], [class*="bg-[#F4E4E1"],
+  [class*="bg-[#f3eee2"], [class*="bg-[#F3EEE2"],
+  [class*="bg-[#f0ece2"], [class*="bg-[#F0ECE2"],
+  [class*="bg-[#ebe5d8"], [class*="bg-[#EBE5D8"],
+  [class*="bg-[#e5eee9"], [class*="bg-[#E5EEE9"],
+  [class*="bg-[#f7f3ea"], [class*="bg-[#F7F3EA"],
+  [class*="bg-[#eee9df"], [class*="bg-[#EEE9DF"],
+  [class*="bg-[#fffdf9"], [class*="bg-[#FFFDF9"],
+  [class*="bg-[#fffdf7"], [class*="bg-[#FFFDF7"],
+  [class*="bg-[#fffaf0"], [class*="bg-[#FFFAF0"],
+  [class*="bg-[#fffdf8"], [class*="bg-[#FFFDF8"],
+  [class*="bg-[#f5f0e7"], [class*="bg-[#F5F0E7"],
+  [class*="bg-[#f0ece2"], [class*="bg-[#F0ECE2"],
+  [class*="bg-gray-50"], [class*="bg-gray-100"],
+  [class*="bg-slate-50"], [class*="bg-slate-100"],
+  [class*="bg-zinc-50"], [class*="bg-zinc-100"]
+) {
+  background: var(--tm-surface) !important;
+  background-color: var(--tm-surface) !important;
+  color: var(--paper) !important;
+  box-shadow: none !important;
+}
+
+/* Legacy green structural surfaces */
+.tm-theme :is(
+  [class*="bg-forest"],
+  [class*="bg-[#06382e"], [class*="bg-[#06382E"],
+  [class*="bg-[#0b493c"], [class*="bg-[#0B493C"],
+  [class*="bg-[#173d32"], [class*="bg-[#173D32"],
+  [class*="bg-[#214c40"], [class*="bg-[#214C40"],
+  [class*="bg-[#102b24"], [class*="bg-[#102B24"]
+) {
+  background: var(--tm-surface-2) !important;
+  background-color: var(--tm-surface-2) !important;
+  color: var(--paper) !important;
+}
+
+/* Legacy dark-green text */
+.tm-theme :is(
+  [class*="text-forest"],
+  [class*="text-[#06382e"], [class*="text-[#06382E"],
+  [class*="text-[#10201c"], [class*="text-[#10201C"],
+  [class*="text-[#173d32"], [class*="text-[#173D32"],
+  [class*="text-[#214c40"], [class*="text-[#214C40"]
+) {
+  color: var(--paper) !important;
+}
+
+/* Legacy dark borders */
+.tm-theme :is(
+  [class*="border-forest"],
+  [class*="border-ink"],
+  [class*="border-black"],
+  [class*="border-gray"],
+  [class*="border-slate"],
+  [class*="border-zinc"]
+) {
+  border-color: var(--line) !important;
+}
+
+/* Structural cards should never revert to the old cream/white shadows. */
+.tm-theme :is(
+  [class*="bg-white"], [class*="bg-gray-50"], [class*="bg-gray-100"],
+  [class*="bg-slate-50"], [class*="bg-slate-100"],
+  [class*="bg-zinc-50"], [class*="bg-zinc-100"]
+) :is(h1,h2,h3,h4,h5,h6,p,span,label) {
+  color: inherit !important;
+}
+
+/* Login left shell: remove every legacy green surface. */
+.tm-auth :is(
+  [class*="bg-[#06382e"], [class*="bg-[#06382E"],
+  [class*="bg-[#0b493c"], [class*="bg-[#0B493C"],
+  [class*="bg-[#214c40"], [class*="bg-[#214C40"],
+  [class*="bg-[#173d32"], [class*="bg-[#173D32"]
+) {
+  background: var(--ink) !important;
+  background-color: var(--ink) !important;
+}
+.tm-auth :is([class*="bg-white"], [class*="bg-[#f7f7f3"], [class*="bg-[#F7F7F3"]) {
+  background: var(--ink-2) !important;
+  background-color: var(--ink-2) !important;
+  color: var(--paper) !important;
+}
