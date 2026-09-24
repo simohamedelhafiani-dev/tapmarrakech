@@ -87,10 +87,20 @@ export async function getMySubscriptionAccess(
 
   // Return one explicit JSON object from Postgres. This avoids any ambiguity
   // in PostgREST table-return column mapping for the responsible dashboard.
+  console.info('[SUBSCRIPTION_DIAG] start', { establishmentId });
+
   const { data, error } = await supabase.rpc(
     'get_responsible_subscription_card',
     { p_establishment_id: establishmentId }
   );
+
+  console.info('[SUBSCRIPTION_DIAG] RPC response', {
+    establishmentId,
+    data,
+    error,
+    dataType: typeof data,
+    isArray: Array.isArray(data),
+  });
 
   if (error) {
     console.error('Erreur chargement abonnement établissement:', error);
