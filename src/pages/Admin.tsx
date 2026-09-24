@@ -718,13 +718,13 @@ function Overview({
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
-        <AdminMetric icon={Building2} label="Établissements" value={loading ? '—' : establishments.length} detail="sur la plateforme" />
-        <AdminMetric icon={UserRound} label="Responsables" value={loading ? '—' : responsibles.length} detail="comptes actifs" />
-        <AdminMetric icon={UsersRound} label="Clients fidélisés" value={detailLoading ? '—' : detail.loyaltyCustomers.toLocaleString('fr-FR')} detail="membres enregistrés" />
-        <AdminMetric icon={Star} label="Note moyenne" value={detailLoading ? '—' : detail.averageRating.toFixed(1)} detail={detail.reviews ? `sur ${detail.reviews.toLocaleString('fr-FR')} avis` : 'sur 0 avis'} />
-        <AdminMetric icon={MessageSquare} label="Avis reçus" value={detailLoading ? '—' : detail.reviews.toLocaleString('fr-FR')} detail={selectedName} />
-        <AdminMetric icon={WalletCards} label="MRR" value={billing.available ? `${billing.mrr.toLocaleString('fr-FR')} DH` : '—'} detail={`${activeSubscriptions} abonnements actifs`} />
+      <div className="grid grid-cols-2 gap-y-5 border-y border-[var(--line)] py-5 sm:grid-cols-3 xl:grid-cols-6 xl:gap-y-0">
+        <AdminMetric label="Établissements" value={loading ? '—' : establishments.length} detail="sur la plateforme" />
+        <AdminMetric label="Responsables" value={loading ? '—' : responsibles.length} detail="comptes actifs" />
+        <AdminMetric label="Clients fidélisés" value={detailLoading ? '—' : detail.loyaltyCustomers.toLocaleString('fr-FR')} detail="membres enregistrés" />
+        <AdminMetric label="Note moyenne" value={detailLoading ? '—' : detail.averageRating.toFixed(1)} detail={detail.reviews ? `sur ${detail.reviews.toLocaleString('fr-FR')} avis` : 'sur 0 avis'} />
+        <AdminMetric label="Avis reçus" value={detailLoading ? '—' : detail.reviews.toLocaleString('fr-FR')} detail={selectedName} />
+        <AdminMetric label="MRR" value={billing.available ? `${billing.mrr.toLocaleString('fr-FR')} DH` : '—'} detail={`${activeSubscriptions} abonnements actifs`} />
       </div>
 
       <div className="grid gap-5 xl:grid-cols-[1.65fr_.85fr]">
@@ -830,15 +830,12 @@ function Overview({
   );
 }
 
-function AdminMetric({ icon: Icon, label, value, detail }: { icon: typeof Star; label: string; value: string | number; detail: string }) {
+function AdminMetric({ label, value, detail }: { icon?: typeof Star; label: string; value: string | number; detail: string }) {
   return (
-    <div className="rounded-2xl border border-ink/5 bg-white p-4 shadow-soft">
-      <div className="flex items-start justify-between gap-3">
-        <div className="grid h-10 w-10 place-items-center rounded-xl bg-forest/10 text-forest"><Icon size={18} /></div>
-      </div>
-      <p className="mt-4 text-xs font-medium text-ink/45">{label}</p>
-      <p className="mt-1 text-2xl font-semibold tracking-tight text-ink">{value}</p>
-      <p className="mt-1 text-[10px] text-ink/35">{detail}</p>
+    <div className="border-r border-[var(--line)] px-4 py-1 last:border-r-0 sm:px-5">
+      <p className="text-xs font-medium text-ink/50">{label}</p>
+      <p className="mt-2 font-display text-3xl text-gold">{value}</p>
+      <p className="mt-1 text-[11px] text-ink/45">{detail}</p>
     </div>
   );
 }
