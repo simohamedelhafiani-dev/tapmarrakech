@@ -322,47 +322,39 @@ export default function Analytics() {
 }
 
 function Metric({
-  icon: Icon,
   label,
   value,
   detail,
 }: {
-  icon: typeof Star;
+  icon?: typeof Star;
   label: string;
   value: string | number;
   detail: string;
 }) {
   return (
-    <div className="rounded-2xl border border-ink/5 bg-white p-5 shadow-soft">
-      <Icon size={18} className="text-gold" />
-      <p className="mt-5 text-xs text-ink/45">{label}</p>
-      <p className="mt-1 font-display text-3xl text-forest">{value}</p>
-      <p className="mt-1 text-[11px] text-ink/40">{detail}</p>
+    <div className="border-r border-[var(--line)] px-4 py-1 last:border-r-0 sm:px-5">
+      <p className="text-xs font-medium text-ink/50">{label}</p>
+      <p className="mt-2 font-display text-3xl text-gold">{value}</p>
+      <p className="mt-1 text-[11px] text-ink/45">{detail}</p>
     </div>
   );
 }
 
 function InfoCard({
-  icon: Icon,
   title,
   value,
   detail,
 }: {
-  icon: typeof Star;
+  icon?: typeof Star;
   title: string;
   value: string | number;
   detail: string;
 }) {
   return (
-    <div className="flex items-center gap-4 rounded-2xl border border-ink/5 bg-white p-5 shadow-soft">
-      <div className="grid h-11 w-11 place-items-center rounded-xl bg-[#e5eee9] text-forest">
-        <Icon size={19} />
-      </div>
-      <div>
-        <p className="text-xs text-ink/45">{title}</p>
-        <p className="mt-1 font-display text-2xl text-forest">{value}</p>
-        <p className="text-[11px] text-ink/40">{detail}</p>
-      </div>
+    <div className="border-r border-[var(--line)] px-4 py-1 last:border-r-0 sm:px-5">
+      <p className="text-xs font-medium text-ink/50">{title}</p>
+      <p className="mt-2 font-display text-2xl text-gold">{value}</p>
+      <p className="mt-1 text-[11px] text-ink/45">{detail}</p>
     </div>
   );
 }
