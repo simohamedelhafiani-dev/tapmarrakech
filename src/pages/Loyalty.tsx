@@ -1132,29 +1132,15 @@ export default function Loyalty() {
 function Stat({
   label,
   value,
-  icon: Icon,
 }: {
   label: string;
   value: string | number;
-  icon: typeof Users;
+  icon?: typeof Users;
 }) {
   return (
-    <div className="rounded-2xl border border-ink/5 bg-white p-5 shadow-soft">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs font-medium text-ink/50">
-            {label}
-          </p>
-
-          <p className="mt-3 font-display text-3xl text-forest">
-            {value}
-          </p>
-        </div>
-
-        <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#e5eee9] text-forest">
-          <Icon size={18} />
-        </div>
-      </div>
+    <div className="border-r border-[var(--line)] px-4 py-1 last:border-r-0 sm:px-5">
+      <p className="text-xs font-medium text-ink/50">{label}</p>
+      <p className="mt-2 font-display text-3xl text-gold">{value}</p>
     </div>
   );
 }
