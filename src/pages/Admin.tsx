@@ -166,43 +166,83 @@ export default function Admin() {
 
   const loadEstablishments = async () => {
     setLoading(true);
-    try {
-      const { data, error } = await supabase.rpc('get_my_establishments');
-      if (error) {
-        console.error('Erreur établissements:', error);
-        setEstablishments([]);
-        return;
-      }
-      setEstablishments((data ?? []) as Establishment[]);
-    } finally {
-      setLoading(false);
+
+    const { data, error } = await supabase
+      .from('establishments')
+      .select('id, name, slug, ai_business_type_id, created_at')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Erreur établissements:', error);
+      setEstablishments([]);
+    } else {
+      setEstablishments(data ?? []);
     }
+
+    setLoading(false);
   };
 
   const loadStaff = async () => {
     setStaffLoading(true);
-    try {
-      const { data, error } = await supabase.rpc('get_admin_staff');
-      if (error) {
-        console.error('Erreur équipe:', error);
-        setStaff([]);
-        return;
-      }
 
-      setStaff((data ?? []).map((row) => ({
+    const { data: staffRows, error: staffError } = await supabase
+      .from('establishment_staff')
+      .select('id, establishment_id, user_id, role, active, created_at')
+      .order('created_at', { ascending: false });
+
+    if (staffError) {
+      console.error('Erreur équipe:', staffError);
+      setStaff([]);
+      setStaffLoading(false);
+      return;
+    }
+
+    const rows = staffRows ?? [];
+    const userIds = rows.map((row) => row.user_id);
+
+    if (userIds.length === 0) {
+      setStaff([]);
+      setStaffLoading(false);
+      return;
+    }
+
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id, email, name, role')
+      .in('id', userIds);
+
+    if (profilesError) {
+      console.error('Erreur profils:', profilesError);
+      setStaff([]);
+      setStaffLoading(false);
+      return;
+    }
+
+    const profileMap = new Map(
+      (profiles ?? []).map((profile) => [
+        profile.id,
+        profile,
+      ])
+    );
+
+    const result: StaffMember[] = rows.map((row) => {
+      const profile = profileMap.get(row.user_id);
+
+      return {
         id: row.id,
         establishment_id: row.establishment_id,
         user_id: row.user_id,
-        role: row.role as StaffMember['role'],
-        active: Boolean(row.active),
+        role: row.role,
+        active: row.active,
         created_at: row.created_at,
-        email: row.email ?? '—',
-        name: row.name ?? 'Utilisateur',
-        profileRole: (row.profile_role ?? null) as StaffMember['profileRole'],
-      })));
-    } finally {
-      setStaffLoading(false);
-    }
+        email: profile?.email ?? '—',
+        name: profile?.name ?? 'Utilisateur',
+        profileRole: profile?.role ?? null,
+      };
+    });
+
+    setStaff(result);
+    setStaffLoading(false);
   };
 
   const loadAIBusinessTypes = async () => {
@@ -221,24 +261,19 @@ export default function Admin() {
   };
 
   const loadGlobalStats = async () => {
-    const { data, error } = await supabase.rpc('get_admin_dashboard_stats');
-    if (error) {
+    try {
+      const [{ data: reviewRows }, { count: loyaltyCustomers }, { count: analyticsEvents }] = await Promise.all([
+        supabase.from('reviews').select('rating'),
+        supabase.from('loyalty_customers').select('id', { count: 'exact', head: true }),
+        supabase.from('analytics_events').select('id', { count: 'exact', head: true }),
+      ]);
+      const ratings = (reviewRows ?? []).map((row) => Number(row.rating)).filter((rating) => Number.isFinite(rating));
+      const averageRating = ratings.length ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length : 0;
+      setGlobalStats({ reviews: ratings.length, averageRating, positiveReviews: ratings.filter((rating) => rating >= 4).length, negativeReviews: ratings.filter((rating) => rating <= 3).length, loyaltyCustomers: loyaltyCustomers ?? 0, analyticsEvents: analyticsEvents ?? 0 });
+    } catch (error) {
       console.error('Erreur statistiques globales:', error);
       setGlobalStats({ reviews: 0, averageRating: 0, positiveReviews: 0, negativeReviews: 0, loyaltyCustomers: 0, analyticsEvents: 0 });
-      return;
     }
-
-    const stats = (data ?? {}) as Record<string, unknown>;
-    const reviews = Number(stats.reviews ?? 0);
-    const averageRating = Number(stats.averageRating ?? 0);
-    setGlobalStats({
-      reviews,
-      averageRating,
-      positiveReviews: 0,
-      negativeReviews: 0,
-      loyaltyCustomers: Number(stats.loyaltyCustomers ?? 0),
-      analyticsEvents: Number(stats.analyticsEvents ?? 0),
-    });
   };
 
   const loadBilling = async () => {
@@ -596,10 +631,10 @@ function Overview({
 }) {
   const [selectedEstablishment, setSelectedEstablishment] = useState('all');
   const [detail, setDetail] = useState({
-    reviews: globalStats.reviews,
-    averageRating: globalStats.averageRating,
-    loyaltyCustomers: globalStats.loyaltyCustomers,
-    analyticsEvents: globalStats.analyticsEvents,
+    reviews: 0,
+    averageRating: 0,
+    loyaltyCustomers: 0,
+    analyticsEvents: 0,
     loyaltyRevenue: 0,
   });
   const [detailLoading, setDetailLoading] = useState(false);
@@ -621,30 +656,30 @@ function Overview({
     const load = async () => {
       setDetailLoading(true);
       try {
-        const { data, error } = await supabase.rpc('get_admin_dashboard_stats', {
-          p_establishment_id: selectedEstablishment === 'all' ? null : selectedEstablishment,
-        });
+        const reviewQuery = selectedEstablishment === 'all'
+          ? supabase.from('reviews').select('rating')
+          : supabase.from('reviews').select('rating').eq('establishment_id', selectedEstablishment);
+        const customerQuery = selectedEstablishment === 'all'
+          ? supabase.from('loyalty_customers').select('id', { count: 'exact', head: true })
+          : supabase.from('loyalty_customers').select('id', { count: 'exact', head: true }).eq('establishment_id', selectedEstablishment);
+        const eventsQuery = selectedEstablishment === 'all'
+          ? supabase.from('analytics_events').select('id', { count: 'exact', head: true })
+          : supabase.from('analytics_events').select('id', { count: 'exact', head: true }).eq('establishment_id', selectedEstablishment);
+        const revenueQuery = selectedEstablishment === 'all'
+          ? supabase.from('loyalty_transactions').select('amount').eq('type', 'EARN')
+          : supabase.from('loyalty_transactions').select('amount').eq('type', 'EARN').eq('establishment_id', selectedEstablishment);
+
+        const [{ data: reviews }, { count: loyaltyCustomers }, { count: analyticsEvents }, { data: revenueRows }] =
+          await Promise.all([reviewQuery, customerQuery, eventsQuery, revenueQuery]);
 
         if (!mounted) return;
-        if (error) {
-          console.error('Erreur vue Admin:', error);
-          setDetail({
-            reviews: 0,
-            averageRating: 0,
-            loyaltyCustomers: 0,
-            analyticsEvents: 0,
-            loyaltyRevenue: 0,
-          });
-          return;
-        }
-
-        const stats = (data ?? {}) as Record<string, unknown>;
+        const ratings = (reviews ?? []).map((row) => Number(row.rating)).filter(Number.isFinite);
         setDetail({
-          reviews: Number(stats.reviews ?? 0),
-          averageRating: Number(stats.averageRating ?? 0),
-          loyaltyCustomers: Number(stats.loyaltyCustomers ?? 0),
-          analyticsEvents: Number(stats.analyticsEvents ?? 0),
-          loyaltyRevenue: Number(stats.loyaltyRevenue ?? 0),
+          reviews: ratings.length,
+          averageRating: ratings.length ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length : 0,
+          loyaltyCustomers: loyaltyCustomers ?? 0,
+          analyticsEvents: analyticsEvents ?? 0,
+          loyaltyRevenue: (revenueRows ?? []).reduce((sum, row) => sum + Number(row.amount ?? 0), 0),
         });
       } catch (error) {
         console.error('Erreur vue Admin:', error);
