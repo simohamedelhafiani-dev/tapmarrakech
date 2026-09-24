@@ -767,3 +767,20 @@ h6,
   background-color: var(--ink-2) !important;
   color: var(--paper) !important;
 }
+
+/* Dashboard statistics: explicit theme-safe values, without changing data logic. */
+.tm-theme .tm-stat {
+  background: var(--ink-2) !important;
+  color: var(--paper) !important;
+  border-color: var(--line) !important;
+}
+.tm-theme .tm-stat-value {
+  color: var(--paper) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+.tm-theme .tm-stat-detail {
+  color: var(--muted) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
