@@ -25,7 +25,7 @@ export default function Login() {
   const { user, role, loading } = useAuth();
   const { language, setLanguage, t } = useLanguage();
 
-  const [selectedRole, setSelectedRole] = useState<LoginRole>(null);
+  const [selectedRole, setSelectedRole] = useState<LoginRole>('admin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -147,8 +147,7 @@ export default function Login() {
             </div>
 
             <div className="mt-auto hidden border-t border-[rgba(239,233,220,0.12)] pt-6 md:block">
-              <p className="max-w-md text-sm leading-6 text-[#EFE9DC]/56">{t.heroDesc}</p>
-              <div className="mt-6 flex items-stretch">
+              <div className="flex items-stretch">
                 <div className="pr-8">
                   <p className="font-display text-2xl text-[#C9A15A]">+2 000</p>
                   <p className="mt-1 text-[11px] text-[#EFE9DC]/56">{t.establishments}</p>
