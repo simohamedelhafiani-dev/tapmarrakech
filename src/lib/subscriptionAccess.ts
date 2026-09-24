@@ -97,11 +97,36 @@ export async function getMySubscriptionAccess(
     return [];
   }
 
-  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+  let item: Record<string, unknown>;
+
+  if (typeof data === 'string') {
+    try {
+      const parsed = JSON.parse(data);
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        return [];
+      }
+      item = parsed as Record<string, unknown>;
+    } catch {
+      return [];
+    }
+  } else if (data && typeof data === 'object' && !Array.isArray(data)) {
+    item = data as Record<string, unknown>;
+  } else {
     return [];
   }
 
-  const item = data as Record<string, unknown>;
+  // Defensive fallback if the JSONB response is incomplete.
+  if (!item.plan_name || !item.plan_id) {
+    const { data: fallbackData, error: fallbackError } = await supabase.rpc(
+      'get_my_subscription_for_establishment',
+      { p_establishment_id: establishmentId }
+    );
+
+    if (!fallbackError && Array.isArray(fallbackData) && fallbackData[0]) {
+      item = fallbackData[0] as Record<string, unknown>;
+    }
+  }
+
   const rawFeatures = item.features;
   const features = Array.isArray(rawFeatures)
     ? rawFeatures.map(String)
