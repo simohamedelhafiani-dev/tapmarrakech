@@ -384,7 +384,7 @@ export default function LoyaltyCard() {
   };
 
   return (
-    <main className="min-h-screen bg-[#eef0ed] px-3 py-5 sm:px-6 sm:py-8">
+    <main className="public-surface min-h-screen bg-[#eef0ed] px-3 py-5 sm:px-6 sm:py-8">
       <div className="mx-auto w-full max-w-[430px]">
         <LoyaltyExperience config={experience} />
         {!isInstalled && <button type="button" onClick={() => void saveCardOnPhone()} className="mt-4 flex w-full items-center justify-center gap-3 rounded-2xl bg-[#D6B15A] px-5 py-4 text-sm font-semibold text-[#17130f] shadow-lg transition hover:brightness-105">
@@ -398,7 +398,7 @@ export default function LoyaltyCard() {
 }
 
 function PageShell({ children }: { children: ReactNode }) {
-  return <main className="min-h-screen bg-[#f7f7f3] px-4 py-6 sm:py-10"><div className="mx-auto w-full max-w-md">{children}</div></main>;
+  return <main className="public-surface min-h-screen bg-[#f7f7f3] px-4 py-6 sm:py-10"><div className="mx-auto w-full max-w-md">{children}</div></main>;
 }
 
 function Loader() {
