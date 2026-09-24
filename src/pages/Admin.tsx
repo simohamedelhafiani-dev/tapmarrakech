@@ -261,19 +261,24 @@ export default function Admin() {
   };
 
   const loadGlobalStats = async () => {
-    try {
-      const [{ data: reviewRows }, { count: loyaltyCustomers }, { count: analyticsEvents }] = await Promise.all([
-        supabase.from('reviews').select('rating'),
-        supabase.from('loyalty_customers').select('id', { count: 'exact', head: true }),
-        supabase.from('analytics_events').select('id', { count: 'exact', head: true }),
-      ]);
-      const ratings = (reviewRows ?? []).map((row) => Number(row.rating)).filter((rating) => Number.isFinite(rating));
-      const averageRating = ratings.length ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length : 0;
-      setGlobalStats({ reviews: ratings.length, averageRating, positiveReviews: ratings.filter((rating) => rating >= 4).length, negativeReviews: ratings.filter((rating) => rating <= 3).length, loyaltyCustomers: loyaltyCustomers ?? 0, analyticsEvents: analyticsEvents ?? 0 });
-    } catch (error) {
+    const { data, error } = await supabase.rpc('get_admin_dashboard_stats');
+    if (error) {
       console.error('Erreur statistiques globales:', error);
       setGlobalStats({ reviews: 0, averageRating: 0, positiveReviews: 0, negativeReviews: 0, loyaltyCustomers: 0, analyticsEvents: 0 });
+      return;
     }
+
+    const stats = (data ?? {}) as Record<string, unknown>;
+    const reviews = Number(stats.reviews ?? 0);
+    const averageRating = Number(stats.averageRating ?? 0);
+    setGlobalStats({
+      reviews,
+      averageRating,
+      positiveReviews: 0,
+      negativeReviews: 0,
+      loyaltyCustomers: Number(stats.loyaltyCustomers ?? 0),
+      analyticsEvents: Number(stats.analyticsEvents ?? 0),
+    });
   };
 
   const loadBilling = async () => {
@@ -644,30 +649,30 @@ function Overview({
     const load = async () => {
       setDetailLoading(true);
       try {
-        const reviewQuery = selectedEstablishment === 'all'
-          ? supabase.from('reviews').select('rating')
-          : supabase.from('reviews').select('rating').eq('establishment_id', selectedEstablishment);
-        const customerQuery = selectedEstablishment === 'all'
-          ? supabase.from('loyalty_customers').select('id', { count: 'exact', head: true })
-          : supabase.from('loyalty_customers').select('id', { count: 'exact', head: true }).eq('establishment_id', selectedEstablishment);
-        const eventsQuery = selectedEstablishment === 'all'
-          ? supabase.from('analytics_events').select('id', { count: 'exact', head: true })
-          : supabase.from('analytics_events').select('id', { count: 'exact', head: true }).eq('establishment_id', selectedEstablishment);
-        const revenueQuery = selectedEstablishment === 'all'
-          ? supabase.from('loyalty_transactions').select('amount').eq('type', 'EARN')
-          : supabase.from('loyalty_transactions').select('amount').eq('type', 'EARN').eq('establishment_id', selectedEstablishment);
-
-        const [{ data: reviews }, { count: loyaltyCustomers }, { count: analyticsEvents }, { data: revenueRows }] =
-          await Promise.all([reviewQuery, customerQuery, eventsQuery, revenueQuery]);
+        const { data, error } = await supabase.rpc('get_admin_dashboard_stats', {
+          p_establishment_id: selectedEstablishment === 'all' ? null : selectedEstablishment,
+        });
 
         if (!mounted) return;
-        const ratings = (reviews ?? []).map((row) => Number(row.rating)).filter(Number.isFinite);
+        if (error) {
+          console.error('Erreur vue Admin:', error);
+          setDetail({
+            reviews: 0,
+            averageRating: 0,
+            loyaltyCustomers: 0,
+            analyticsEvents: 0,
+            loyaltyRevenue: 0,
+          });
+          return;
+        }
+
+        const stats = (data ?? {}) as Record<string, unknown>;
         setDetail({
-          reviews: ratings.length,
-          averageRating: ratings.length ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length : 0,
-          loyaltyCustomers: loyaltyCustomers ?? 0,
-          analyticsEvents: analyticsEvents ?? 0,
-          loyaltyRevenue: (revenueRows ?? []).reduce((sum, row) => sum + Number(row.amount ?? 0), 0),
+          reviews: Number(stats.reviews ?? 0),
+          averageRating: Number(stats.averageRating ?? 0),
+          loyaltyCustomers: Number(stats.loyaltyCustomers ?? 0),
+          analyticsEvents: Number(stats.analyticsEvents ?? 0),
+          loyaltyRevenue: Number(stats.loyaltyRevenue ?? 0),
         });
       } catch (error) {
         console.error('Erreur vue Admin:', error);
@@ -3830,12 +3835,7 @@ function ReviewsSection({
   const loadReviews = async () => {
     setLoading(true);
 
-    const { data, error } = await supabase
-      .from('reviews')
-      .select(
-        'id, establishment_id, rating, type, comment, name, phone, email, status, created_at'
-      )
-      .order('created_at', { ascending: false });
+    const { data, error } = await supabase.rpc('get_admin_reviews');
 
     if (error) {
       console.error('Erreur avis:', error);
