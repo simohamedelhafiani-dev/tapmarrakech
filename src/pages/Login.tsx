@@ -98,7 +98,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f7f3]">
+    <div className="tm-auth min-h-screen bg-[var(--ink)]">
       <div className="mx-auto flex min-h-screen max-w-[1600px] flex-col lg:flex-row">
         <section className="relative overflow-hidden bg-[#06382e] px-7 py-8 text-white sm:px-10 lg:min-h-screen lg:w-[48%] lg:px-14 lg:py-10 xl:px-20">
           <div className="absolute -left-28 -top-28 h-72 w-72 rounded-full border border-white/10" />
