@@ -596,13 +596,25 @@ function Overview({
 }) {
   const [selectedEstablishment, setSelectedEstablishment] = useState('all');
   const [detail, setDetail] = useState({
-    reviews: 0,
-    averageRating: 0,
-    loyaltyCustomers: 0,
-    analyticsEvents: 0,
+    reviews: globalStats.reviews,
+    averageRating: globalStats.averageRating,
+    loyaltyCustomers: globalStats.loyaltyCustomers,
+    analyticsEvents: globalStats.analyticsEvents,
     loyaltyRevenue: 0,
   });
   const [detailLoading, setDetailLoading] = useState(false);
+
+  useEffect(() => {
+    if (selectedEstablishment === 'all') {
+      setDetail((current) => ({
+        ...current,
+        reviews: globalStats.reviews,
+        averageRating: globalStats.averageRating,
+        loyaltyCustomers: globalStats.loyaltyCustomers,
+        analyticsEvents: globalStats.analyticsEvents,
+      }));
+    }
+  }, [selectedEstablishment, globalStats]);
 
   useEffect(() => {
     let mounted = true;
@@ -686,9 +698,9 @@ function Overview({
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
         <AdminMetric icon={Building2} label="Établissements" value={loading ? '—' : establishments.length} detail="sur la plateforme" />
         <AdminMetric icon={UserRound} label="Responsables" value={loading ? '—' : responsibles.length} detail="comptes actifs" />
-        <AdminMetric icon={UsersRound} label="Clients fidélisés" value={detailLoading ? '—' : detail.loyaltyCustomers.toLocaleString('fr-FR')} detail="membres enregistrés" />
-        <AdminMetric icon={Star} label="Note moyenne" value={detailLoading ? '—' : detail.averageRating.toFixed(1)} detail={detail.reviews ? `sur ${detail.reviews.toLocaleString('fr-FR')} avis` : 'sur 0 avis'} />
-        <AdminMetric icon={MessageSquare} label="Avis reçus" value={detailLoading ? '—' : detail.reviews.toLocaleString('fr-FR')} detail={selectedName} />
+        <AdminMetric icon={UsersRound} label="Clients fidélisés" value={selectedEstablishment === 'all' ? globalStats.loyaltyCustomers.toLocaleString('fr-FR') : (detailLoading ? '—' : detail.loyaltyCustomers.toLocaleString('fr-FR'))} detail="membres enregistrés" />
+        <AdminMetric icon={Star} label="Note moyenne" value={selectedEstablishment === 'all' ? globalStats.averageRating.toFixed(1) : (detailLoading ? '—' : detail.averageRating.toFixed(1))} detail={selectedEstablishment === 'all' ? (globalStats.reviews ? `sur ${globalStats.reviews.toLocaleString('fr-FR')} avis` : 'sur 0 avis') : (detail.reviews ? `sur ${detail.reviews.toLocaleString('fr-FR')} avis` : 'sur 0 avis')} />
+        <AdminMetric icon={MessageSquare} label="Avis reçus" value={selectedEstablishment === 'all' ? globalStats.reviews.toLocaleString('fr-FR') : (detailLoading ? '—' : detail.reviews.toLocaleString('fr-FR'))} detail={selectedName} />
         <AdminMetric icon={WalletCards} label="MRR" value={billing.available ? `${billing.mrr.toLocaleString('fr-FR')} DH` : '—'} detail={`${activeSubscriptions} abonnements actifs`} />
       </div>
 
@@ -706,16 +718,16 @@ function Overview({
             <div className="rounded-2xl bg-[#f7f7f3] p-5">
               <p className="text-xs text-ink/45">Avis</p>
               <p className="mt-2 text-3xl font-semibold text-forest">{detailLoading ? '—' : detail.reviews.toLocaleString('fr-FR')}</p>
-              <p className="mt-1 text-[11px] text-ink/35">note moyenne {detailLoading ? '—' : detail.averageRating.toFixed(1)} / 5</p>
+              <p className="mt-1 text-[11px] text-ink/35">note moyenne {selectedEstablishment === 'all' ? globalStats.averageRating.toFixed(1) : (detailLoading ? '—' : detail.averageRating.toFixed(1))} / 5</p>
             </div>
             <div className="rounded-2xl bg-[#f7f7f3] p-5">
               <p className="text-xs text-ink/45">Fidélité</p>
-              <p className="mt-2 text-3xl font-semibold text-forest">{detailLoading ? '—' : detail.loyaltyCustomers.toLocaleString('fr-FR')}</p>
+              <p className="mt-2 text-3xl font-semibold text-forest">{selectedEstablishment === 'all' ? globalStats.loyaltyCustomers.toLocaleString('fr-FR') : (detailLoading ? '—' : detail.loyaltyCustomers.toLocaleString('fr-FR'))}</p>
               <p className="mt-1 text-[11px] text-ink/35">clients actifs</p>
             </div>
             <div className="rounded-2xl bg-[#f7f7f3] p-5">
               <p className="text-xs text-ink/45">Activité</p>
-              <p className="mt-2 text-3xl font-semibold text-forest">{detailLoading ? '—' : detail.analyticsEvents.toLocaleString('fr-FR')}</p>
+              <p className="mt-2 text-3xl font-semibold text-forest">{selectedEstablishment === 'all' ? globalStats.analyticsEvents.toLocaleString('fr-FR') : (detailLoading ? '—' : detail.analyticsEvents.toLocaleString('fr-FR'))}</p>
               <p className="mt-1 text-[11px] text-ink/35">événements analytics</p>
             </div>
           </div>
