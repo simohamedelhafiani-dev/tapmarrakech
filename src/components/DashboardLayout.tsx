@@ -471,7 +471,7 @@ export function DashboardLayout() {
         <div className="mb-9 flex items-center justify-between px-2">
           <div className="flex min-h-[64px] flex-1 items-center justify-center">
             <img
-              src="/tapmarrakech-logo.png"
+              src="/tapmarrakech-logo.svg"
               alt="TapMarrakech"
               className="h-[72px] w-[72px] object-contain"
             />
@@ -708,7 +708,7 @@ export function DashboardLayout() {
 
         <footer className="px-5 pb-6 text-center md:px-10">
           <img
-            src="/tapmarrakech-logo.png"
+            src="/tapmarrakech-logo.svg"
             alt="TapMarrakech"
             className="mx-auto h-7 w-auto object-contain opacity-75"
           />

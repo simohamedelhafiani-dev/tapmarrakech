@@ -431,7 +431,7 @@ export default function Admin() {
         <div className="mb-9 flex items-center justify-between px-2">
           <div className="flex min-h-[64px] flex-1 items-center justify-center">
             <img
-              src="/tapmarrakech-logo.png"
+              src="/tapmarrakech-logo.svg"
               alt="TapMarrakech"
               className="h-[72px] w-auto max-w-[180px] object-contain"
             />
@@ -4981,11 +4981,11 @@ h1{font-size:31px;line-height:1.08;letter-spacing:-1.2px;margin:28px 0 8px;color
 .footer{margin-top:35px;padding-top:12px;border-top:1px solid #e5e3dc;display:flex;justify-content:space-between;color:#929790;font-size:8px}.conf{color:#173d32;font-weight:700}
 @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.no-print{display:none!important}.report-section{break-inside:auto}.table-wrap{break-inside:auto}thead{display:table-header-group}}
 </style></head><body><div class="page">
-<div class="cover"><div class="brand"><div class="brand-logo"><img src="/tapmarrakech-logo.png" alt="TapMarrakech"></div><div class="doc-type">Rapport de performance</div></div>
+<div class="cover"><div class="brand"><div class="brand-logo"><img src="/tapmarrakech-logo.svg" alt="TapMarrakech"></div><div class="doc-type">Rapport de performance</div></div>
 <h1>${escapeHtml(title)}</h1><p class="subtitle">${escapeHtml(selected.name)}</p>
 <div class="meta"><div><strong>Période</strong>${escapeHtml(periodLabel)}</div><div><strong>Généré le</strong>${generatedAt.toLocaleString('fr-FR')}</div><div><strong>Document</strong>Confidentiel</div></div></div>
 ${body}
-<div class="footer"><span><img src="/tapmarrakech-logo.png" alt="TapMarrakech" style="height:18px;width:auto;object-fit:contain;display:block" /></span><span class="conf">${escapeHtml(selected.name)} · Document confidentiel</span></div>
+<div class="footer"><span><img src="/tapmarrakech-logo.svg" alt="TapMarrakech" style="height:18px;width:auto;object-fit:contain;display:block" /></span><span class="conf">${escapeHtml(selected.name)} · Document confidentiel</span></div>
 </div></body></html>`;
 
     const win = window.open('', '_blank', 'width=1000,height=900');

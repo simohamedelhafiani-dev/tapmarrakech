@@ -1,5 +1,5 @@
 const CACHE = 'tapmarrakech-shell-v10';
-const APP_SHELL = ['/', '/index.html', '/tapmarrakech-logo.png', '/manifest.webmanifest'];
+const APP_SHELL = ['/', '/index.html', '/tapmarrakech-logo.svg', '/manifest.webmanifest'];
 
 self.addEventListener('message', (event) => {
   if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();

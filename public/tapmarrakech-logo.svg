@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 625 625" role="img" aria-labelledby="title desc">
+<title id="title">TapMarrakech</title>
+<desc id="desc">TapMarrakech gold and cream mark on a dark rounded square.</desc>
+<rect x="10" y="10" width="605" height="605" rx="104" fill="#0D110E" stroke="#C9A15A" stroke-width="5"/>
+<rect x="140" y="194" width="315" height="68" rx="34" fill="#EFE9DC"/>
+<rect x="244" y="250" width="68" height="185" rx="34" fill="#EFE9DC"/>
+<circle cx="438" cy="181" r="47" fill="#C9A15A"/>
+<path d="M280 261C365 295 413 354 410 414C407 467 368 512 333 540C370 483 379 444 364 405C349 365 317 337 280 315L252 298Z" fill="#C9A15A"/>
+</svg>

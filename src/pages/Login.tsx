@@ -109,7 +109,7 @@ export default function Login() {
             <div className="flex items-start justify-between">
               <div>
                 <img
-                  src="/tapmarrakech-logo.png"
+                  src="/tapmarrakech-logo.svg"
                   alt="TapMarrakech"
                   className="h-16 w-auto max-w-[180px] object-contain object-left"
                 />
@@ -163,7 +163,7 @@ export default function Login() {
           </div>
         </section>
 
-        <section className="flex flex-1 items-center justify-center bg-[#f7f7f3] px-5 py-10 sm:px-10 lg:px-14 xl:px-20">
+        <section className="tm-auth-main flex flex-1 items-center justify-center bg-[#f7f7f3] px-5 py-10 sm:px-10 lg:px-14 xl:px-20">
           <div className="w-full max-w-xl">
             <div className="mb-12 flex justify-end">
               <label className="inline-flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-xs font-medium text-ink/65 shadow-sm">
@@ -187,11 +187,11 @@ export default function Login() {
               <p className="mt-4 text-sm leading-6 text-ink/50">{t.selectSpace}</p>
             </div>
 
-            <div className="mb-8 grid grid-cols-2 gap-4">
+            <div className="tm-role-switch mb-8 grid grid-cols-2 gap-1 rounded-[4px] border border-white/10 bg-white/[0.03] p-1">
               <button
                 type="button"
                 onClick={() => selectRole('admin')}
-                className={`rounded-2xl border p-5 text-left transition-all duration-200 ${selectedRole === 'admin' ? 'border-[#173d32] bg-[#173d32] text-white shadow-lg' : 'border-black/5 bg-white text-ink shadow-sm hover:-translate-y-0.5 hover:border-[#173d32]/25 hover:shadow-md'}`}
+                className={`tm-role-option rounded-2xl border p-5 text-left transition-all duration-200 ${selectedRole === 'admin' ? 'border-[#173d32] bg-[#173d32] text-white shadow-lg' : 'border-black/5 bg-white text-ink shadow-sm hover:-translate-y-0.5 hover:border-[#173d32]/25 hover:shadow-md'}`}
               >
                 <div className={`mb-3 grid h-10 w-10 place-items-center rounded-xl ${selectedRole === 'admin' ? 'bg-white/10' : 'bg-[#06382e]/10 text-[#06382e]'}`}>
                   <ShieldCheck size={21} />
@@ -204,7 +204,7 @@ export default function Login() {
               <button
                 type="button"
                 onClick={() => selectRole('responsible')}
-                className={`rounded-2xl border p-5 text-left transition-all duration-200 ${selectedRole === 'responsible' ? 'border-[#173d32] bg-[#173d32] text-white shadow-lg' : 'border-black/5 bg-white text-ink shadow-sm hover:-translate-y-0.5 hover:border-[#173d32]/25 hover:shadow-md'}`}
+                className={`tm-role-option rounded-2xl border p-5 text-left transition-all duration-200 ${selectedRole === 'responsible' ? 'border-[#173d32] bg-[#173d32] text-white shadow-lg' : 'border-black/5 bg-white text-ink shadow-sm hover:-translate-y-0.5 hover:border-[#173d32]/25 hover:shadow-md'}`}
               >
                 <div className={`mb-3 grid h-10 w-10 place-items-center rounded-xl ${selectedRole === 'responsible' ? 'bg-white/10' : 'bg-[#f4ead3] text-[#06382e]'}`}>
                   <UserRound size={21} />
@@ -237,7 +237,7 @@ export default function Login() {
                       <button type="button" onClick={() => setShowPassword(value => !value)} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-ink/30 hover:text-[#06382e]">{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button>
                     </div>
                   </div>
-                  <button onClick={handleLogin} disabled={saving} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#06382e] py-4 text-sm font-semibold text-white shadow-lg transition hover:bg-[#0b493c] disabled:opacity-50">
+                  <button onClick={handleLogin} disabled={saving} className="tm-login-submit flex w-full items-center justify-center gap-2 rounded-xl bg-gold py-4 text-sm font-semibold shadow-lg transition disabled:opacity-50">
                     {saving ? `${t.login}...` : t.login} {!saving && <ArrowRight size={17} />}
                   </button>
                 </div>

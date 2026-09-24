@@ -423,3 +423,68 @@ h6,
     animation-iteration-count: 1 !important;
   }
 }
+
+
+/* Login visual correction: keep the existing auth behavior, fix contrast and role selection styling. */
+.tm-auth-main {
+  background: var(--ink-2) !important;
+  color: var(--paper) !important;
+}
+.tm-auth-main h2,
+.tm-auth-main p,
+.tm-auth-main label,
+.tm-auth-main a {
+  color: inherit;
+}
+.tm-auth-main h2 {
+  color: var(--paper) !important;
+}
+.tm-auth-main [class*="text-ink/"],
+.tm-auth-main [class*="text-forest/"] {
+  color: var(--muted) !important;
+}
+.tm-auth-main select {
+  color: var(--paper) !important;
+  background: var(--ink-2) !important;
+}
+.tm-auth-main option {
+  background: var(--ink-2);
+  color: var(--paper);
+}
+.tm-role-switch {
+  background: rgba(239,233,220,0.035) !important;
+}
+.tm-role-option {
+  border-radius: 2px !important;
+  border-color: transparent !important;
+  background: transparent !important;
+  color: var(--paper) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+.tm-role-option:hover {
+  background: rgba(239,233,220,0.055) !important;
+}
+.tm-role-option[class*="bg-[#173d32]"] {
+  background: linear-gradient(180deg, #D9B673 0%, #B08A45 100%) !important;
+  color: #1A1409 !important;
+  border-color: rgba(201,161,90,0.7) !important;
+}
+.tm-role-option[class*="bg-[#173d32]"] [class*="text-white"] {
+  color: #1A1409 !important;
+}
+.tm-role-option[class*="bg-[#173d32]"] [class*="bg-white/10"] {
+  background: rgba(26,20,9,0.10) !important;
+}
+.tm-login-submit {
+  background: linear-gradient(180deg, #D9B673 0%, #B08A45 100%) !important;
+  color: #1A1409 !important;
+  box-shadow: 0 8px 20px rgba(201,161,90,0.18) !important;
+}
+.tm-login-submit:hover {
+  filter: brightness(1.04);
+}
+.tm-auth-main .rounded-xl,
+.tm-auth-main .rounded-2xl {
+  border-radius: 2px !important;
+}
