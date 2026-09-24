@@ -917,7 +917,7 @@ export default function Employee() {
 
   if (!session) {
     return (
-      <div className="min-h-screen bg-[#f7f7f3] px-4 py-8">
+      <div className="app-shell min-h-screen bg-[#f7f7f3] px-4 py-8">
         <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md items-center justify-center">
           <div className="w-full rounded-[2rem] border border-ink/5 bg-white p-7 shadow-2xl md:p-9">
             <div className="mb-8 text-center">
