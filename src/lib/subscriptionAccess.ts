@@ -85,10 +85,10 @@ export async function getMySubscriptionAccess(
     return [];
   }
 
-  // The responsible dashboard asks for the exact establishment. This RPC
-  // returns the joined plan data in one server-side, authorized query.
+  // Return one explicit JSON object from Postgres. This avoids any ambiguity
+  // in PostgREST table-return column mapping for the responsible dashboard.
   const { data, error } = await supabase.rpc(
-    'get_my_subscription_for_establishment',
+    'get_responsible_subscription_card',
     { p_establishment_id: establishmentId }
   );
 
@@ -97,32 +97,34 @@ export async function getMySubscriptionAccess(
     return [];
   }
 
-  return (data ?? []).map((row: unknown) => {
-    const item = row as Record<string, unknown>;
-    const rawFeatures = item.features;
-    const features = Array.isArray(rawFeatures)
-      ? rawFeatures.map(String)
-      : typeof rawFeatures === 'string'
-        ? (() => {
-            try {
-              const parsed = JSON.parse(rawFeatures);
-              return Array.isArray(parsed) ? parsed.map(String) : [];
-            } catch {
-              return rawFeatures.split(',').map((value) => value.trim()).filter(Boolean);
-            }
-          })()
-        : [];
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    return [];
+  }
 
-    return {
-      establishment_id: String(item.establishment_id ?? establishmentId),
-      subscription_status: String(item.subscription_status ?? ''),
-      plan_id: item.plan_id ? String(item.plan_id) : null,
-      plan_name: String(item.plan_name ?? ''),
-      features,
-      plan_price_mad: Number(item.plan_price_mad ?? 0),
-      plan_interval: String(item.plan_interval ?? 'month'),
-      current_period_end: item.current_period_end ? String(item.current_period_end) : null,
-      trial_days: Number(item.trial_days ?? 0),
-    };
-  });
+  const item = data as Record<string, unknown>;
+  const rawFeatures = item.features;
+  const features = Array.isArray(rawFeatures)
+    ? rawFeatures.map(String)
+    : typeof rawFeatures === 'string'
+      ? (() => {
+          try {
+            const parsed = JSON.parse(rawFeatures);
+            return Array.isArray(parsed) ? parsed.map(String) : [];
+          } catch {
+            return rawFeatures.split(',').map((value) => value.trim()).filter(Boolean);
+          }
+        })()
+      : [];
+
+  return [{
+    establishment_id: String(item.establishment_id ?? establishmentId),
+    subscription_status: String(item.subscription_status ?? ''),
+    plan_id: item.plan_id ? String(item.plan_id) : null,
+    plan_name: String(item.plan_name ?? ''),
+    features,
+    plan_price_mad: Number(item.plan_price_mad ?? 0),
+    plan_interval: String(item.plan_interval ?? 'month'),
+    current_period_end: item.current_period_end ? String(item.current_period_end) : null,
+    trial_days: Number(item.trial_days ?? 0),
+  }];
 }
