@@ -453,7 +453,7 @@ export function DashboardLayout() {
     displayName?.trim()?.[0]?.toUpperCase() || 'U';
 
   return (
-    <div className="min-h-screen bg-[#f7f7f3] text-ink" style={{ ["--app-primary" as string]: subscriptionTheme.primary, ["--app-primary-hover" as string]: subscriptionTheme.primaryHover, ["--app-accent" as string]: subscriptionTheme.accent }}>
+    <div className="app-shell min-h-screen bg-[#f7f7f3] text-ink" style={{ ["--app-primary" as string]: subscriptionTheme.primary, ["--app-primary-hover" as string]: subscriptionTheme.primaryHover, ["--app-accent" as string]: subscriptionTheme.accent }}>
       {open && (
         <button
           aria-label="Fermer le menu"
