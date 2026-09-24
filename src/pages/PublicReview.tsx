@@ -513,7 +513,7 @@ export default function PublicReview() {
       : '';
 
   return (
-    <div className="min-h-screen bg-[#f5f0e7] text-ink">
+    <div className="public-surface min-h-screen bg-[#f5f0e7] text-ink">
       <div className="mx-auto min-h-screen w-full max-w-[520px] overflow-hidden bg-[#f5f0e7] pb-24 shadow-2xl">
 
         {/* =====================================================
