@@ -399,3 +399,46 @@ label,
   color: currentColor;
 }
 
+
+/* Admin dashboard layout correction */
+.app-shell {
+  min-height: 100vh !important;
+  background: var(--ink) !important;
+  color: var(--paper) !important;
+}
+
+.app-shell > .min-h-screen {
+  min-height: 100vh !important;
+  background: var(--ink) !important;
+}
+
+.app-shell > .min-h-screen > div {
+  background: var(--ink) !important;
+}
+
+.app-shell header {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 50 !important;
+  background: var(--ink) !important;
+  color: var(--paper) !important;
+}
+
+.app-shell main {
+  background: var(--ink) !important;
+  color: var(--paper) !important;
+}
+
+.app-shell main > * {
+  color: inherit;
+}
+
+.app-shell [class*="text-black"],
+.app-shell [class*="text-gray-"],
+.app-shell [class*="text-slate-"] {
+  color: var(--paper) !important;
+}
+
+.app-shell [class*="bg-white"] {
+  background: linear-gradient(180deg, rgba(239,233,220,0.05), rgba(239,233,220,0.035)) !important;
+}
