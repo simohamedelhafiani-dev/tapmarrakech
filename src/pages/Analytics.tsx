@@ -3,7 +3,7 @@ import { BarChart3, ExternalLink, MessageSquare, Percent, Star, Users } from 'lu
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
-import type { AnalyticsEvent, Review } from '@/lib/types';
+import type { Review } from '@/lib/types';
 
 type Establishment = {
   id: string;
@@ -16,7 +16,26 @@ export default function Analytics() {
   const [establishments, setEstablishments] = useState<Establishment[]>([]);
   const [establishmentId, setEstablishmentId] = useState('');
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [events, setEvents] = useState<AnalyticsEvent[]>([]);
+  const [events, setEvents] = useState<Array<{ id: string; establishment_id: string; event_type: string; rating: number | null; created_at: string }>>([]);
+  const [dashboardStats, setDashboardStats] = useState<{
+    reviewsCount: number;
+    averageRating: number;
+    satisfactionPercent: number;
+    redirectsCount: number;
+    pageViewsCount: number;
+    feedbacksCount: number;
+    weekly: Array<{ name: string; total: number }>;
+    distribution: Array<{ name: string; value: number }>;
+  }>({
+    reviewsCount: 0,
+    averageRating: 0,
+    satisfactionPercent: 0,
+    redirectsCount: 0,
+    pageViewsCount: 0,
+    feedbacksCount: 0,
+    weekly: [],
+    distribution: [],
+  });
 
   useEffect(() => {
     loadEstablishments();
@@ -28,6 +47,7 @@ export default function Analytics() {
     } else {
       setReviews([]);
       setEvents([]);
+      setDashboardStats({ reviewsCount: 0, averageRating: 0, satisfactionPercent: 0, redirectsCount: 0, pageViewsCount: 0, feedbacksCount: 0, weekly: [], distribution: [] });
     }
   }, [establishmentId]);
 
@@ -64,67 +84,35 @@ export default function Analytics() {
   async function loadAnalytics() {
     if (!establishmentId) return;
 
-    const [r, e] = await Promise.all([
-      supabase
-        .from('reviews')
-        .select('*')
-        .eq('establishment_id', establishmentId),
-      supabase
-        .from('analytics_events')
-        .select('*')
-        .eq('establishment_id', establishmentId),
-    ]);
+    const { data, error } = await supabase.rpc('get_analytics_dashboard_stats', {
+      p_establishment_id: establishmentId,
+    });
 
-    if (r.error) {
-      console.error('Erreur chargement avis:', r.error);
+    if (error) {
+      console.error('Erreur chargement analytics:', error);
+      setReviews([]);
+      setEvents([]);
+      setDashboardStats({ reviewsCount: 0, averageRating: 0, satisfactionPercent: 0, redirectsCount: 0, pageViewsCount: 0, feedbacksCount: 0, weekly: [], distribution: [] });
+      return;
     }
 
-    if (e.error) {
-      console.error('Erreur chargement analytics:', e.error);
-    }
+    const row = Array.isArray(data) ? data[0] : data;
+    const weeklyData = Array.isArray(row?.weekly) ? row.weekly : [];
+    const distributionData = Array.isArray(row?.distribution) ? row.distribution : [];
 
-    setReviews((r.data as Review[]) ?? []);
-    setEvents((e.data as AnalyticsEvent[]) ?? []);
+    setDashboardStats({
+      reviewsCount: Number(row?.reviews_count ?? 0),
+      averageRating: Number(row?.average_rating ?? 0),
+      satisfactionPercent: Number(row?.satisfaction_percent ?? 0),
+      redirectsCount: Number(row?.redirects_count ?? 0),
+      pageViewsCount: Number(row?.page_views_count ?? 0),
+      feedbacksCount: Number(row?.feedbacks_count ?? 0),
+      weekly: weeklyData.map((item: { name?: string; total?: number }) => ({ name: String(item.name ?? ''), total: Number(item.total ?? 0) })),
+      distribution: distributionData.map((item: { name?: string; value?: number }) => ({ name: String(item.name ?? ''), value: Number(item.value ?? 0) })),
+    });
   }
 
-  const positive = reviews.filter(r => r.rating >= 4).length;
-  const satisfaction = reviews.length
-    ? Math.round((positive / reviews.length) * 100)
-    : 0;
-
-  const distribution = [5, 4, 3, 2, 1].map(n => ({
-    name: `⭐ ${n}`,
-    value: reviews.filter(r => r.rating === n).length,
-  }));
-
-  const weekly = useMemo(
-    () =>
-      Array.from({ length: 8 }, (_, i) => {
-        const end = new Date();
-        end.setDate(end.getDate() - (7 - i) * 7);
-
-        const start = new Date(end);
-        start.setDate(end.getDate() - 7);
-
-        const rows = reviews.filter(r => {
-          const d = new Date(r.created_at);
-          return d >= start && d <= end;
-        });
-
-        return { name: `S${i + 1}`, total: rows.length };
-      }),
-    [reviews]
-  );
-
-  const redirects = events.filter(
-    e => e.event_type === 'google_redirect'
-  ).length;
-
-  const pageViews = events.filter(
-    e => e.event_type === 'page_view'
-  ).length;
-
-  const feedbacks = reviews.filter(r => r.rating <= 3).length;
+  const { averageRating, satisfactionPercent, redirectsCount, pageViewsCount, feedbacksCount, weekly, distribution } = dashboardStats;
 
   return (
     <div>
@@ -162,32 +150,28 @@ export default function Analytics() {
         <Metric
           icon={BarChart3}
           label="Volume total"
-          value={reviews.length}
+          value={dashboardStats.reviewsCount}
           detail="notes collectées"
         />
         <Metric
           icon={Star}
           label="Note moyenne"
           value={
-            reviews.length
-              ? (
-                  reviews.reduce((a, r) => a + r.rating, 0) / reviews.length
-                ).toFixed(1)
-              : '—'
+            dashboardStats.reviewsCount ? averageRating.toFixed(1) : '—'
           }
           detail="sur 5 étoiles"
         />
         <Metric
           icon={Percent}
           label="Satisfaction"
-          value={`${satisfaction}%`}
+          value={`${satisfactionPercent}%`}
           detail="clients satisfaits"
         />
         <Metric
           icon={ExternalLink}
           label="Redirections Google"
-          value={redirects}
-          detail={`${pageViews ? Math.round((redirects / pageViews) * 100) : 0}% des scans`}
+          value={redirectsCount}
+          detail={`${pageViewsCount ? Math.round((redirectsCount / pageViewsCount) * 100) : 0}% des scans`}
         />
       </div>
 
@@ -297,23 +281,23 @@ export default function Analytics() {
         <InfoCard
           icon={MessageSquare}
           title="Retours privés"
-          value={feedbacks}
+          value={feedbacksCount}
           detail={
-            reviews.length
-              ? `${Math.round((feedbacks / reviews.length) * 100)}% du total des notes`
+            dashboardStats.reviewsCount
+              ? `${Math.round((feedbacksCount / dashboardStats.reviewsCount) * 100)}% du total des notes`
               : 'En attente de données'
           }
         />
         <InfoCard
           icon={Users}
           title="Scans NFC / QR"
-          value={pageViews}
+          value={pageViewsCount}
           detail="pages publiques consultées"
         />
         <InfoCard
           icon={ExternalLink}
           title="Taux de redirection"
-          value={`${pageViews ? Math.round((redirects / pageViews) * 100) : 0}%`}
+          value={`${pageViewsCount ? Math.round((redirectsCount / pageViewsCount) * 100) : 0}%`}
           detail="visiteurs orientés vers Google"
         />
       </div>
