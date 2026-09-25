@@ -1,5 +1,31 @@
-const CACHE = 'tapmarrakech-shell-v11';
+const CACHE = 'tapmarrakech-shell-v12';
 const APP_SHELL = ['/', '/index.html', '/tapmarrakech-logo.svg', '/manifest.webmanifest'];
+
+self.addEventListener('push', (event) => {
+  event.waitUntil((async () => {
+    let payload = {};
+    try { payload = event.data ? event.data.json() : {}; } catch { payload = { body: event.data?.text?.() || '' }; }
+    await self.registration.showNotification(payload.title || 'Tap Marrakech', {
+      body: payload.body || 'Une nouvelle offre est disponible.',
+      icon: payload.icon || '/tapmarrakech-logo.svg',
+      badge: payload.badge || '/tapmarrakech-logo.svg',
+      tag: payload.tag || 'tapmarrakech-notification',
+      data: payload.data || {},
+      renotify: true,
+    });
+  })());
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const targetUrl = event.notification.data?.url || '/';
+  event.waitUntil((async () => {
+    const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    const existing = windows.find((client) => 'focus' in client);
+    if (existing) { await existing.navigate(targetUrl); await existing.focus(); return; }
+    await self.clients.openWindow(targetUrl);
+  })());
+});
 
 self.addEventListener('message', (event) => {
   if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
