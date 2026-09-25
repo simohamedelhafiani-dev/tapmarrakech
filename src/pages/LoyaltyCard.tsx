@@ -5,6 +5,7 @@ type BeforeInstallPromptEvent = Event & { prompt: () => Promise<void>; userChoic
 import { defaultLoyaltyDesignConfig } from '@/components/LoyaltyCardVisual';
 import { LoyaltyExperience, type LoyaltyExperienceConfig, type LoyaltyExperienceReward } from '@/components/loyalty/LoyaltyExperience';
 import { supabase } from '@/lib/supabase';
+import { registerLoyaltyPush, isLoyaltyPushEnabled } from '@/lib/pushNotifications';
 
 type Card = {
   customer_id: string;
@@ -21,6 +22,16 @@ type Card = {
 };
 
 type HistoryItem = { id: string; points: number; type: string; description: string | null; amount: number | null; created_at: string; };
+
+type Promotion = {
+  id: string;
+  name: string;
+  description: string | null;
+  promo_price: number | null;
+  start_at: string | null;
+  end_at: string | null;
+  active: boolean;
+};
 
 type Design = {
   template_id: string;
@@ -54,11 +65,15 @@ export default function LoyaltyCard() {
     discount_percent: null as number | null,
   });
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [rewards, setRewards] = useState<LoyaltyExperienceReward[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [pushEnabled, setPushEnabled] = useState(false);
+  const [pushMessage, setPushMessage] = useState('');
+  const [pushLoading, setPushLoading] = useState(false);
 
   const cardUrl = window.location.href;
 
@@ -68,6 +83,7 @@ export default function LoyaltyCard() {
       setIsInstalled(Boolean(media?.matches || (window.navigator as Navigator & { standalone?: boolean }).standalone === true));
     };
     checkInstalled();
+    setPushEnabled(isLoyaltyPushEnabled());
     media?.addEventListener?.('change', checkInstalled);
 
     const handler = (event: Event) => {
@@ -81,6 +97,22 @@ export default function LoyaltyCard() {
       media?.removeEventListener?.('change', checkInstalled);
     };
   }, []);
+
+  async function enablePushNotifications() {
+    if (!token) return;
+    setPushLoading(true);
+    setPushMessage('');
+
+    const result = await registerLoyaltyPush(token, cardUrl);
+    if (result.ok) {
+      setPushEnabled(true);
+      setPushMessage('Notifications activées. Vous recevrez les nouvelles offres de l’établissement.');
+    } else {
+      setPushMessage(result.message);
+    }
+
+    setPushLoading(false);
+  }
 
   async function saveCardOnPhone() {
     if (isInstalled) return;
@@ -163,6 +195,18 @@ export default function LoyaltyCard() {
       setCard(nextCard);
       setHistory((historyData ?? []) as HistoryItem[]);
       setRewards((rewardsData ?? []) as LoyaltyExperienceReward[]);
+      const { data: promotionData } = await supabase
+        .from('promotions')
+        .select('id,name,description,promo_price,start_at,end_at,active')
+        .eq('establishment_id', nextCard.establishment_id)
+        .eq('active', true)
+        .order('display_order');
+      setPromotions(((promotionData ?? []) as Promotion[]).filter((promotion) => {
+        const now = Date.now();
+        const start = promotion.start_at ? new Date(promotion.start_at).getTime() : -Infinity;
+        const end = promotion.end_at ? new Date(promotion.end_at).getTime() : Infinity;
+        return start <= now && end >= now;
+      }));
 
       const designRow = Array.isArray(designData) ? designData[0] : designData;
       if (designRow) {
@@ -234,6 +278,20 @@ export default function LoyaltyCard() {
       if (cardData?.[0]) setCard(cardData[0] as Card);
       setHistory((historyData ?? []) as HistoryItem[]);
       setRewards((rewardsData ?? []) as LoyaltyExperienceReward[]);
+      if (cardData?.[0]?.establishment_id) {
+        const { data: promotionData } = await supabase
+          .from('promotions')
+          .select('id,name,description,promo_price,start_at,end_at,active')
+          .eq('establishment_id', cardData[0].establishment_id)
+          .eq('active', true)
+          .order('display_order');
+        setPromotions(((promotionData ?? []) as Promotion[]).filter((promotion) => {
+          const now = Date.now();
+          const start = promotion.start_at ? new Date(promotion.start_at).getTime() : -Infinity;
+          const end = promotion.end_at ? new Date(promotion.end_at).getTime() : Infinity;
+          return start <= now && end >= now;
+        }));
+      }
       const programRow = Array.isArray(programData) ? programData[0] : programData;
       if (programRow) {
         setProgram({
@@ -365,7 +423,13 @@ export default function LoyaltyCard() {
     currentTier: raw.currentTier,
     tiers: raw.tiers,
     benefits: raw.benefits,
-    offers: raw.offers,
+    offers: promotions.length
+      ? promotions.map((promotion) => ({
+          eyebrow: 'Offre membre',
+          title: promotion.promo_price != null ? `${promotion.name} — ${promotion.promo_price} MAD` : promotion.name,
+          description: promotion.description || 'Offre exclusive réservée aux membres fidélité.',
+        }))
+      : raw.offers,
     rewards,
     history: history.map(item => ({
       id: item.id,
@@ -391,7 +455,28 @@ export default function LoyaltyCard() {
           <span className="text-lg">▣</span>
           Enregistrer ma carte sur mon téléphone
         </button>}
-        <p className="mt-2 text-center text-[10px] text-ink/40">Ajoutez-la à votre écran d’accueil ou partagez votre carte.</p>
+
+        {!pushEnabled && (
+          <button
+            type="button"
+            onClick={() => void enablePushNotifications()}
+            disabled={pushLoading}
+            className="mt-3 flex w-full items-center justify-center gap-3 rounded-2xl border border-white/15 bg-white/10 px-5 py-4 text-sm font-semibold text-white shadow-lg transition hover:bg-white/15 disabled:opacity-60"
+          >
+            <span className="text-lg">🔔</span>
+            {pushLoading ? 'Activation…' : 'Recevoir les offres et promotions'}
+          </button>
+        )}
+
+        {pushMessage && (
+          <p className="mt-3 rounded-2xl bg-white/10 px-4 py-3 text-center text-xs leading-5 text-white/75">
+            {pushMessage}
+          </p>
+        )}
+
+        <p className="mt-2 text-center text-[10px] text-white/35">
+          Activez les notifications pour recevoir directement les nouvelles offres de l’établissement.
+        </p>
       </div>
     </main>
   );
