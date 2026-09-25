@@ -83,7 +83,7 @@ export default function LoyaltyCard() {
       setIsInstalled(Boolean(media?.matches || (window.navigator as Navigator & { standalone?: boolean }).standalone === true));
     };
     checkInstalled();
-    setPushEnabled(isLoyaltyPushEnabled());
+    void isLoyaltyPushEnabled().then(setPushEnabled);
     media?.addEventListener?.('change', checkInstalled);
 
     const handler = (event: Event) => {
