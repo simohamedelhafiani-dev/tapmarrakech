@@ -410,10 +410,6 @@ export default function Admin() {
     },
   ];
 
-  const currentLabel =
-    menuItems.find((item) => item.id === section)?.label ??
-    'Vue d’ensemble';
-
   return (
     <div className="tm-theme min-h-screen bg-[var(--ink)] text-[var(--paper)]">
       {open && (
@@ -2579,6 +2575,7 @@ function ResponsiblesSection({
    EMPLOYEES
 ========================================================= */
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function EmployeesSection({
   establishments,
   staff,
@@ -3186,6 +3183,7 @@ function EditStaffModal({ member, establishments, close, reload }: { member: Sta
    REWARD CODES
 ========================================================= */
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function RewardCodesSection({
   establishments,
   responsibleMembers,
