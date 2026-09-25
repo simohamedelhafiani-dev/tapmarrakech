@@ -216,7 +216,7 @@ function TemplateVisualPreview({ template, compact = false }: { template: Templa
 
 export default function Templates() {
   const [templates, setTemplates] = useState<Template[]>([]);
-  const [establishments, setEstablishments] = useState<Establishment[]>([]);
+  const [, setEstablishments] = useState<Establishment[]>([]);
   const [kind, setKind] = useState<TemplateKind>('page');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
