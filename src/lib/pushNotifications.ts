@@ -60,14 +60,34 @@ export async function registerLoyaltyPush(accessToken: string, cardUrl: string):
       };
     }
 
-    const registration = await navigator.serviceWorker.ready;
+    let registration: ServiceWorkerRegistration;
+    try {
+      registration = await navigator.serviceWorker.ready;
+    } catch (error) {
+      console.error('Push diagnostic - service worker:', error);
+      return {
+        ok: false,
+        reason: 'failed',
+        message: `DIAGNOSTIC SW: ${error instanceof Error ? error.message : String(error)}`,
+      };
+    }
+
     let subscription = await registration.pushManager.getSubscription();
 
     if (!subscription) {
-      subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-      });
+      try {
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+        });
+      } catch (error) {
+        console.error('Push diagnostic - subscribe:', error);
+        return {
+          ok: false,
+          reason: 'failed',
+          message: `DIAGNOSTIC SUBSCRIBE: ${error instanceof Error ? error.message : String(error)}`,
+        };
+      }
     }
 
     const { error } = await supabase.rpc('register_loyalty_push_subscription', {
@@ -77,11 +97,11 @@ export async function registerLoyaltyPush(accessToken: string, cardUrl: string):
     });
 
     if (error) {
-      console.error('Impossible d’enregistrer l’abonnement push:', error);
+      console.error('Push diagnostic - Supabase:', error);
       return {
         ok: false,
         reason: 'failed',
-        message: 'Impossible d’activer les notifications pour le moment.',
+        message: `DIAGNOSTIC SUPABASE: ${error.message}`,
       };
     }
 
