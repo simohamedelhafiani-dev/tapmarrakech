@@ -49,7 +49,7 @@ type LoyaltyCardDesign = {
   text_color: string;
   button_color: string;
   border_radius: number;
-  design_config: typeof defaultLoyaltyDesignConfig;
+  design_config: typeof defaultLoyaltyDesignConfig & { wallpaper_library?: string[] };
   published: boolean;
 };
 
