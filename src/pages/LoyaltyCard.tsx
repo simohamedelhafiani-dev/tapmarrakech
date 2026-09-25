@@ -177,14 +177,12 @@ export default function LoyaltyCard() {
         { data: programData },
         { data: historyData },
         { data: rewardsData },
-        { data: promotionData },
       ] = await Promise.all([
         supabase.rpc('get_public_loyalty_card', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_card_config', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_program_context', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_history', { p_access_token: token, p_limit: 20 }),
         supabase.rpc('get_public_loyalty_rewards', { p_access_token: token }),
-        supabase.from('promotions').select('id,name,description,promo_price,start_at,end_at,active').eq('establishment_id', cardData?.[0]?.establishment_id ?? '').eq('active', true).order('display_order'),
       ]);
 
       if (cardError || !cardData?.[0]) {
@@ -197,6 +195,12 @@ export default function LoyaltyCard() {
       setCard(nextCard);
       setHistory((historyData ?? []) as HistoryItem[]);
       setRewards((rewardsData ?? []) as LoyaltyExperienceReward[]);
+      const { data: promotionData } = await supabase
+        .from('promotions')
+        .select('id,name,description,promo_price,start_at,end_at,active')
+        .eq('establishment_id', nextCard.establishment_id)
+        .eq('active', true)
+        .order('display_order');
       setPromotions(((promotionData ?? []) as Promotion[]).filter((promotion) => {
         const now = Date.now();
         const start = promotion.start_at ? new Date(promotion.start_at).getTime() : -Infinity;
