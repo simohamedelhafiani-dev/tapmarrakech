@@ -210,6 +210,23 @@ export default function LoyaltyScanner() {
           setMessage('QR promotion invalide ou expiré.');
           return;
         }
+
+        if (row.status !== 'PENDING') {
+          setMessage(
+            row.status === 'REDEEMED'
+              ? 'Cette offre a déjà été utilisée.'
+              : row.status === 'EXPIRED'
+                ? 'Cette offre a expiré.'
+                : 'Cette offre n’est plus disponible.'
+          );
+          return;
+        }
+
+        if (row.expires_at && new Date(row.expires_at).getTime() <= Date.now()) {
+          setMessage('Cette offre a expiré.');
+          return;
+        }
+
         setPendingPromotion(row as PendingPromotionClaim);
         setShowScanner(false);
         return;
