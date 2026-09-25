@@ -500,29 +500,6 @@ export default function Dashboard() {
     };
   }, [selectedEstablishmentId]);
 
-  const positive = reviews.filter(
-    (review) => review.rating >= 4
-  ).length;
-
-  const negative = reviews.filter(
-    (review) => review.rating <= 3
-  ).length;
-
-  const pending = reviews.filter(
-    (review) =>
-      review.status === 'Nouveau' &&
-      review.rating <= 3
-  ).length;
-
-  const average = reviews.length
-    ? (
-        reviews.reduce(
-          (total, review) => total + review.rating,
-          0
-        ) / reviews.length
-      ).toFixed(1)
-    : '—';
-
   const selected =
     ranges.find((range) => range.key === period) ??
     ranges[0];
