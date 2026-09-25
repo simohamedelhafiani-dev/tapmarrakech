@@ -358,6 +358,7 @@ export function DashboardLayout() {
       const establishment = establishments[0];
 
       if (active) {
+        setScannerUrl(null);
       }
 
       if (!establishment?.id) {
