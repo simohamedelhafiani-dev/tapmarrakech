@@ -167,7 +167,6 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<SubscriptionAccess | null>(null);
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
-  const [serverAnalytics, setServerAnalytics] = useState<Record<string, number> | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -500,6 +499,29 @@ export default function Dashboard() {
     };
   }, [selectedEstablishmentId]);
 
+  const positive = reviews.filter(
+    (review) => review.rating >= 4
+  ).length;
+
+  const negative = reviews.filter(
+    (review) => review.rating <= 3
+  ).length;
+
+  const pending = reviews.filter(
+    (review) =>
+      review.status === 'Nouveau' &&
+      review.rating <= 3
+  ).length;
+
+  const average = reviews.length
+    ? (
+        reviews.reduce(
+          (total, review) => total + review.rating,
+          0
+        ) / reviews.length
+      ).toFixed(1)
+    : '—';
+
   const selected =
     ranges.find((range) => range.key === period) ??
     ranges[0];
@@ -680,82 +702,7 @@ export default function Dashboard() {
     };
   }, [reviews, loyaltyCustomers, loyaltyTransactions, loyaltyRedemptions, pointsPerCurrency, selected.days]);
 
-  useEffect(() => {
-    let active = true;
-
-    const loadServerStats = async () => {
-      if (!selectedEstablishmentId) {
-        setServerAnalytics(null);
-        return;
-      }
-
-      const days = ranges.find((range) => range.key === period)?.days ?? 30;
-      const { data, error } = await supabase.rpc('get_dashboard_program_stats', {
-        p_establishment_id: selectedEstablishmentId,
-        p_days: days,
-      });
-
-      if (!active) return;
-
-      if (error) {
-        console.error('Erreur statistiques dashboard:', error);
-        setServerAnalytics(null);
-        return;
-      }
-
-      const row = Array.isArray(data) ? data[0] : data;
-      setServerAnalytics({
-        totalReviews: Number(row?.reviews_count ?? 0),
-        averageRating: Number(row?.average_rating ?? 0),
-        positive: Number(row?.positive_reviews ?? 0),
-        negative: Number(row?.negative_reviews ?? 0),
-        pending: Number(row?.pending_negative_reviews ?? 0),
-        currentReviews: Number(row?.current_reviews ?? 0),
-        reviewGrowth: Number(row?.review_growth ?? 0),
-        currentRegistrations: Number(row?.current_registrations ?? 0),
-        registrationGrowth: Number(row?.registration_growth ?? 0),
-        returningRate: Number(row?.returning_rate ?? 0),
-        returningCustomers: Number(row?.returning_customers ?? 0),
-        activeRate: Number(row?.active_rate ?? 0),
-        activeCustomers: Number(row?.active_customers ?? 0),
-        redemptionRate: Number(row?.redemption_rate ?? 0),
-        pointsEarned: Number(row?.points_earned ?? 0),
-        pointsRedeemed: Number(row?.points_redeemed ?? 0),
-        visits: Number(row?.visits ?? 0),
-        currentRevenue: Number(row?.current_revenue ?? 0),
-        previousRevenue: Number(row?.previous_revenue ?? 0),
-        revenueGrowth: Number(row?.revenue_growth ?? 0),
-        totalRevenue: Number(row?.total_revenue ?? 0),
-        currentTransactions: Number(row?.current_transactions ?? 0),
-        averageBasket: Number(row?.average_basket ?? 0),
-        currentRedemptions: Number(row?.current_redemptions ?? 0),
-        previousRedemptions: Number(row?.previous_redemptions ?? 0),
-        redemptionGrowth: Number(row?.redemption_growth ?? 0),
-        pointsRedeemedOnPeriod: Number(row?.points_redeemed_on_period ?? 0),
-        rewardValueOnPeriod: Number(row?.reward_value_on_period ?? 0),
-        previousRewardValue: Number(row?.previous_reward_value ?? 0),
-        redemptionRevenue: Number(row?.redemption_revenue ?? 0),
-        rewardEfficiency: Number(row?.reward_efficiency ?? 0),
-        rewardCostOnPeriod: Number(row?.reward_cost_on_period ?? 0),
-        netContribution: Number(row?.net_contribution ?? 0),
-        realROI: row?.real_roi == null ? 0 : Number(row.real_roi),
-      });
-    };
-
-    void loadServerStats();
-
-    return () => {
-      active = false;
-    };
-  }, [selectedEstablishmentId, period]);
-
   const isResponsible = role === 'responsible';
-
-  const displayAnalytics = {
-    ...analytics,
-    ...(serverAnalytics ?? {}),
-  };
-
 
   const selectedEstablishment =
     places.find(
@@ -974,7 +921,7 @@ export default function Dashboard() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <Stat
           label="Avis reçus"
-          value={displayAnalytics.totalReviews}
+          value={reviews.length}
           detail="Depuis le début"
           icon={MessageCircle}
           accent="bg-[#f4ead3] text-gold"
@@ -982,7 +929,7 @@ export default function Dashboard() {
 
         <Stat
           label="Note moyenne"
-          value={displayAnalytics.totalReviews ? displayAnalytics.averageRating.toFixed(1) : '—'}
+          value={average}
           detail="Sur 5 étoiles"
           icon={Star}
           accent="bg-[#e5eee9] text-forest"
@@ -1004,7 +951,7 @@ export default function Dashboard() {
 
         <Stat
           label="Retours négatifs"
-          value={displayAnalytics.negative}
+          value={negative}
           detail="Notes de 1 à 3 étoiles"
           icon={TrendingDown}
           accent="bg-[#f4ead3] text-gold"
@@ -1012,7 +959,7 @@ export default function Dashboard() {
 
         <Stat
           label="À traiter"
-          value={displayAnalytics.pending}
+          value={pending}
           detail="Retours en attente"
           icon={CheckCircle2}
           accent="bg-[#f4e4e1] text-[#a15c50]"
@@ -1060,11 +1007,11 @@ export default function Dashboard() {
               <p className="text-xs font-medium text-ink/50">Nouveaux clients</p>
               <Users size={17} className="text-forest" />
             </div>
-            <p className="mt-3 font-display text-3xl text-forest">{loyaltyLoading ? '—' : displayAnalytics.currentRegistrations}</p>
+            <p className="mt-3 font-display text-3xl text-forest">{loyaltyLoading ? '—' : analytics.currentRegistrations}</p>
             <p className="mt-2 text-xs text-ink/40">inscriptions sur la période sélectionnée</p>
             <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-forest">
               <TrendingUp size={14} />
-              {loyaltyLoading ? '—' : `${displayAnalytics.registrationGrowth >= 0 ? '+' : ''}${displayAnalytics.registrationGrowth.toFixed(1)} %`}
+              {loyaltyLoading ? '—' : `${analytics.registrationGrowth >= 0 ? '+' : ''}${analytics.registrationGrowth.toFixed(1)} %`}
               <span className="font-normal text-ink/35">vs période précédente</span>
             </div>
           </div>
@@ -1074,9 +1021,9 @@ export default function Dashboard() {
               <p className="text-xs font-medium text-ink/50">Taux de retour</p>
               <TrendingUp size={17} className="text-forest" />
             </div>
-            <p className="mt-3 font-display text-3xl text-forest">{loyaltyLoading ? '—' : `${displayAnalytics.returningRate.toFixed(1)} %`}</p>
+            <p className="mt-3 font-display text-3xl text-forest">{loyaltyLoading ? '—' : `${analytics.returningRate.toFixed(1)} %`}</p>
             <p className="mt-2 text-xs text-ink/40">clients ayant effectué au moins 2 visites</p>
-            <p className="mt-4 text-xs font-semibold text-ink/55">{loyaltyLoading ? '—' : `${displayAnalytics.returningCustomers} clients concernés`}</p>
+            <p className="mt-4 text-xs font-semibold text-ink/55">{loyaltyLoading ? '—' : `${analytics.returningCustomers} clients concernés`}</p>
           </div>
 
           <div className="rounded-2xl border border-ink/5 bg-[#f7f7f3] p-5">
@@ -1084,9 +1031,9 @@ export default function Dashboard() {
               <p className="text-xs font-medium text-ink/50">Clients actifs</p>
               <CheckCircle2 size={17} className="text-forest" />
             </div>
-            <p className="mt-3 font-display text-3xl text-forest">{loyaltyLoading ? '—' : `${displayAnalytics.activeRate.toFixed(1)} %`}</p>
+            <p className="mt-3 font-display text-3xl text-forest">{loyaltyLoading ? '—' : `${analytics.activeRate.toFixed(1)} %`}</p>
             <p className="mt-2 text-xs text-ink/40">ayant visité l’établissement pendant la période sélectionnée</p>
-            <p className="mt-4 text-xs font-semibold text-ink/55">{loyaltyLoading ? '—' : `${displayAnalytics.activeCustomers} clients actifs`}</p>
+            <p className="mt-4 text-xs font-semibold text-ink/55">{loyaltyLoading ? '—' : `${analytics.activeCustomers} clients actifs`}</p>
           </div>
 
           <div className="rounded-2xl border border-ink/5 bg-[#f7f7f3] p-5">
@@ -1094,27 +1041,27 @@ export default function Dashboard() {
               <p className="text-xs font-medium text-ink/50">Utilisation des points</p>
               <Coins size={17} className="text-gold" />
             </div>
-            <p className="mt-3 font-display text-3xl text-forest">{loyaltyLoading ? '—' : `${displayAnalytics.redemptionRate.toFixed(1)} %`}</p>
+            <p className="mt-3 font-display text-3xl text-forest">{loyaltyLoading ? '—' : `${analytics.redemptionRate.toFixed(1)} %`}</p>
             <p className="mt-2 text-xs text-ink/40">part des points gagnés déjà utilisés</p>
-            <p className="mt-4 text-xs font-semibold text-ink/55">{loyaltyLoading ? '—' : `${displayAnalytics.pointsRedeemed.toLocaleString('fr-FR')} / ${displayAnalytics.pointsEarned.toLocaleString('fr-FR')} pts`}</p>
+            <p className="mt-4 text-xs font-semibold text-ink/55">{loyaltyLoading ? '—' : `${analytics.pointsRedeemed.toLocaleString('fr-FR')} / ${analytics.pointsEarned.toLocaleString('fr-FR')} pts`}</p>
           </div>
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           <div className="rounded-2xl bg-forest p-5 text-white">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold">Visites cumulées</p>
-            <p className="mt-2 font-display text-3xl">{loyaltyLoading ? '—' : displayAnalytics.visits.toLocaleString('fr-FR')}</p>
+            <p className="mt-2 font-display text-3xl">{loyaltyLoading ? '—' : analytics.visits.toLocaleString('fr-FR')}</p>
             <p className="mt-1 text-xs text-white/45">visites enregistrées dans le programme</p>
           </div>
           <div className="rounded-2xl border border-ink/5 p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold">CA fidélité cumulé</p>
-            <p className="mt-2 font-display text-3xl text-forest">{transactionsLoading ? '—' : `${displayAnalytics.totalRevenue.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}</p>
+            <p className="mt-2 font-display text-3xl text-forest">{transactionsLoading ? '—' : `${analytics.totalRevenue.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}</p>
             <p className="mt-1 text-xs text-ink/40">depuis le début des transactions enregistrées</p>
           </div>
           <div className="rounded-2xl border border-ink/5 p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold">Avis sur la période</p>
-            <p className="mt-2 font-display text-3xl text-forest">{displayAnalytics.currentReviews}</p>
-            <p className="mt-1 text-xs text-ink/40">{displayAnalytics.reviewGrowth >= 0 ? '+' : ''}{displayAnalytics.reviewGrowth.toFixed(1)} % vs la période précédente</p>
+            <p className="mt-2 font-display text-3xl text-forest">{analytics.currentReviews}</p>
+            <p className="mt-1 text-xs text-ink/40">{analytics.reviewGrowth >= 0 ? '+' : ''}{analytics.reviewGrowth.toFixed(1)} % vs la période précédente</p>
           </div>
           <div className="rounded-2xl border border-gold/20 bg-[#fdf9ef] p-5">
             <div className="flex items-center justify-between gap-3">
@@ -1122,23 +1069,23 @@ export default function Dashboard() {
               <TrendingUp size={17} className="text-gold" />
             </div>
             <p className="mt-2 font-display text-3xl text-forest">
-              {transactionsLoading ? '—' : `${displayAnalytics.currentRevenue.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}
+              {transactionsLoading ? '—' : `${analytics.currentRevenue.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}
             </p>
             <p className="mt-1 text-xs text-ink/45">CA généré par les achats fidélité sur la période sélectionnée</p>
             <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
               <span className="font-semibold text-forest">
-                {transactionsLoading ? '—' : `${displayAnalytics.revenueGrowth >= 0 ? '+' : ''}${displayAnalytics.revenueGrowth.toFixed(1)} %`}
+                {transactionsLoading ? '—' : `${analytics.revenueGrowth >= 0 ? '+' : ''}${analytics.revenueGrowth.toFixed(1)} %`}
               </span>
               <span className="text-ink/35">vs la période précédente</span>
             </div>
             <div className="mt-3 grid grid-cols-2 gap-3 border-t border-gold/10 pt-3">
               <div>
                 <p className="text-[10px] text-ink/35">Transactions</p>
-                <p className="mt-1 text-sm font-semibold text-forest">{transactionsLoading ? '—' : displayAnalytics.currentTransactions}</p>
+                <p className="mt-1 text-sm font-semibold text-forest">{transactionsLoading ? '—' : analytics.currentTransactions}</p>
               </div>
               <div>
                 <p className="text-[10px] text-ink/35">Panier moyen</p>
-                <p className="mt-1 text-sm font-semibold text-forest">{transactionsLoading ? '—' : `${displayAnalytics.averageBasket.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}</p>
+                <p className="mt-1 text-sm font-semibold text-forest">{transactionsLoading ? '—' : `${analytics.averageBasket.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}</p>
               </div>
             </div>
           </div>
@@ -1165,9 +1112,9 @@ export default function Dashboard() {
             <p className="mt-1 font-display text-2xl text-forest">
               {redemptionsLoading
                 ? '—'
-                : displayAnalytics.realROI === null
+                : analytics.realROI === null
                   ? '—'
-                  : `${displayAnalytics.realROI.toFixed(0)} %`}
+                  : `${analytics.realROI.toFixed(0)} %`}
             </p>
           </div>
         </div>
@@ -1176,19 +1123,19 @@ export default function Dashboard() {
           <div className="rounded-2xl bg-white p-5">
             <p className="text-xs font-medium text-ink/50">Récompenses utilisées</p>
             <p className="mt-3 font-display text-3xl text-forest">
-              {redemptionsLoading ? '—' : displayAnalytics.currentRedemptions}
+              {redemptionsLoading ? '—' : analytics.currentRedemptions}
             </p>
             <p className="mt-2 text-xs text-ink/40">
               {redemptionsLoading
                 ? '—'
-                : `${displayAnalytics.redemptionGrowth >= 0 ? '+' : ''}${displayAnalytics.redemptionGrowth.toFixed(1)} % vs période précédente`}
+                : `${analytics.redemptionGrowth >= 0 ? '+' : ''}${analytics.redemptionGrowth.toFixed(1)} % vs période précédente`}
             </p>
           </div>
 
           <div className="rounded-2xl bg-white p-5">
             <p className="text-xs font-medium text-ink/50">Points consommés</p>
             <p className="mt-3 font-display text-3xl text-forest">
-              {redemptionsLoading ? '—' : displayAnalytics.pointsRedeemedOnPeriod.toLocaleString('fr-FR')}
+              {redemptionsLoading ? '—' : analytics.pointsRedeemedOnPeriod.toLocaleString('fr-FR')}
             </p>
             <p className="mt-2 text-xs text-ink/40">sur la période sélectionnée</p>
           </div>
@@ -1198,7 +1145,7 @@ export default function Dashboard() {
             <p className="mt-3 font-display text-3xl text-forest">
               {redemptionsLoading
                 ? '—'
-                : `${displayAnalytics.rewardValueOnPeriod.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}
+                : `${analytics.rewardValueOnPeriod.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}
             </p>
             <p className="mt-2 text-xs text-ink/40">
               équivalent monétaire selon le barème de points
@@ -1210,7 +1157,7 @@ export default function Dashboard() {
             <p className="mt-3 font-display text-3xl">
               {redemptionsLoading
                 ? '—'
-                : `${displayAnalytics.redemptionRevenue.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}
+                : `${analytics.redemptionRevenue.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}
             </p>
             <p className="mt-2 text-xs text-white/45">
               montant payé lors des utilisations
@@ -1222,7 +1169,7 @@ export default function Dashboard() {
             <p className="mt-3 font-display text-3xl text-forest">
               {redemptionsLoading
                 ? '—'
-                : `${displayAnalytics.rewardCostOnPeriod.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}
+                : `${analytics.rewardCostOnPeriod.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}
             </p>
             <p className="mt-2 text-xs text-ink/40">coût enregistré au moment de chaque utilisation</p>
           </div>
@@ -1232,7 +1179,7 @@ export default function Dashboard() {
             <p className="mt-3 font-display text-3xl text-forest">
               {redemptionsLoading
                 ? '—'
-                : `${displayAnalytics.netContribution.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}
+                : `${analytics.netContribution.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}
             </p>
             <p className="mt-2 text-xs text-ink/40">CA récompenses − coût réel des récompenses</p>
           </div>
