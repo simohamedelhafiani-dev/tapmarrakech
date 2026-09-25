@@ -775,7 +775,7 @@ function Overview({
                 <h4 className="mt-1 text-lg font-semibold">Une expérience qui fait revenir les clients.</h4>
                 <p className="mt-1 text-xs text-white/55">CA fidélité sélectionné : {detail.loyaltyRevenue.toLocaleString('fr-FR')} DH</p>
               </div>
-              <button onClick={() => onNavigate('codes')} className="rounded-xl bg-gold px-4 py-2.5 text-xs font-bold text-forest transition hover:bg-gold/90">Gérer la fidélité →</button>
+              <button onClick={() => window.location.assign('/dashboard/loyalty')} className="rounded-xl bg-gold px-4 py-2.5 text-xs font-bold text-forest transition hover:bg-gold/90">Gérer la fidélité →</button>
             </div>
           </div>
         </div>
