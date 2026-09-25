@@ -149,7 +149,19 @@ export default function Loyalty() {
       setEstablishments(establishmentsData);
 
       if (establishmentsData.length > 0) {
-        setEstablishmentId(establishmentsData[0].id);
+        const selectedKey = user?.id
+          ? `tapmarrakech:selected-establishment:${user.id}`
+          : null;
+        const selectedId = selectedKey
+          ? window.localStorage.getItem(selectedKey)
+          : null;
+        const selectedEstablishment = selectedId
+          ? establishmentsData.find((item) => item.id === selectedId)
+          : null;
+
+        setEstablishmentId(
+          selectedEstablishment?.id ?? establishmentsData[0].id
+        );
       }
     } else {
       console.error('Erreur chargement établissements:', error);
