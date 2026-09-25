@@ -13,6 +13,12 @@ export type PushRegistrationResult =
   | { ok: true; alreadyEnabled: boolean }
   | { ok: false; reason: 'unsupported' | 'not-standalone' | 'denied' | 'failed'; message: string };
 
+function formatPushError(error: unknown, fallback: string) {
+  if (error instanceof Error && error.message) return error.message;
+  if (typeof error === 'string' && error) return error;
+  return fallback;
+}
+
 export async function registerLoyaltyPush(accessToken: string, cardUrl: string): Promise<PushRegistrationResult> {
   if (
     !('serviceWorker' in navigator) ||
@@ -62,17 +68,36 @@ export async function registerLoyaltyPush(accessToken: string, cardUrl: string):
 
     const registration = await navigator.serviceWorker.ready;
     let subscription = await registration.pushManager.getSubscription();
+    const alreadySubscribed = Boolean(subscription);
 
     if (!subscription) {
-      subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-      });
+      try {
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+        });
+      } catch (error) {
+        console.error('Push subscription creation failed:', error);
+        return {
+          ok: false,
+          reason: 'failed',
+          message: `Impossible de créer l’abonnement aux notifications : ${formatPushError(error, 'erreur inconnue')}.`,
+        };
+      }
+    }
+
+    const subscriptionJson = subscription.toJSON();
+    if (!subscriptionJson.endpoint || !subscriptionJson.keys?.p256dh || !subscriptionJson.keys?.auth) {
+      return {
+        ok: false,
+        reason: 'failed',
+        message: 'L’abonnement aux notifications est incomplet. Réessayez depuis la carte ajoutée à l’écran d’accueil.',
+      };
     }
 
     const { error } = await supabase.rpc('register_loyalty_push_subscription', {
       p_access_token: accessToken,
-      p_subscription: subscription.toJSON(),
+      p_subscription: subscriptionJson,
       p_card_url: cardUrl,
     });
 
@@ -81,7 +106,7 @@ export async function registerLoyaltyPush(accessToken: string, cardUrl: string):
       return {
         ok: false,
         reason: 'failed',
-        message: 'Impossible d’activer les notifications pour le moment.',
+        message: `L’abonnement a été créé sur l’iPhone, mais son enregistrement a échoué : ${formatPushError(error, 'erreur Supabase')}.`,
       };
     }
 
@@ -91,17 +116,31 @@ export async function registerLoyaltyPush(accessToken: string, cardUrl: string):
       // Storage is optional.
     }
 
-    return { ok: true, alreadyEnabled: Boolean(subscription) };
+    return { ok: true, alreadyEnabled: alreadySubscribed };
   } catch (error) {
     console.error('Web Push registration failed:', error);
     return {
       ok: false,
       reason: 'failed',
-      message: 'Impossible d’activer les notifications pour le moment.',
+      message: `Impossible d’activer les notifications : ${formatPushError(error, 'erreur inconnue')}.`,
     };
   }
 }
 
-export function isLoyaltyPushEnabled() {
-  return typeof Notification !== 'undefined' && Notification.permission === 'granted';
+export async function isLoyaltyPushEnabled() {
+  if (
+    typeof Notification === 'undefined' ||
+    !('serviceWorker' in navigator) ||
+    !('PushManager' in window) ||
+    Notification.permission !== 'granted'
+  ) {
+    return false;
+  }
+
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    return Boolean(await registration.pushManager.getSubscription());
+  } catch {
+    return false;
+  }
 }
