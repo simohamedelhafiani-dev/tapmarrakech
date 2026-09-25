@@ -1,6 +1,7 @@
 type VercelRequest = {
   method?: string;
   query: Record<string, string | string[] | undefined>;
+  headers?: Record<string, string | string[] | undefined>;
 };
 
 type VercelResponse = {
@@ -75,7 +76,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       'Carte fidélité';
 
     const logo = safeUrl(String(card.establishment_logo_url || ''));
-    const origin = `https://${req.headers?.host || 'tapmarrakech.vercel.app'}`;
+    const origin = `https://${first(req.headers?.host) || 'tapmarrakech.vercel.app'}`;
     const cardUrl = `${origin}/loyalty/${encodeURIComponent(token)}`;
 
     const title = `${establishmentName} — Carte fidélité`;

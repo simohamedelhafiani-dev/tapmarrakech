@@ -16,6 +16,15 @@ export type LoyaltyExperienceReward = {
   discount_max_amount?: number | null;
 };
 
+export type LoyaltyExperiencePromotion = {
+  id: string;
+  name: string;
+  description?: string | null;
+  promo_price?: number | null;
+  start_at?: string | null;
+  end_at?: string | null;
+};
+
 export type LoyaltyExperienceHistory = {
   id: string;
   title: string;
@@ -50,6 +59,8 @@ export type LoyaltyExperienceConfig = {
   progressLabel?: string | null;
   benefits?: { title: string; description?: string; icon?: string }[];
   offers?: { title: string; description?: string; eyebrow?: string }[];
+  promotions?: LoyaltyExperiencePromotion[];
+  highlightedPromotionId?: string | null;
   rewards?: LoyaltyExperienceReward[];
   history?: LoyaltyExperienceHistory[];
   qrValue?: string | null;
@@ -199,6 +210,133 @@ export function LoyaltyProgress({ config }: { config: LoyaltyExperienceConfig })
   }
 
   return null;
+}
+
+export function LoyaltyPromotions({ config }: { config: LoyaltyExperienceConfig }) {
+  const promotions = config.promotions ?? [];
+  const [selectedPromotion, setSelectedPromotion] = useState<LoyaltyExperiencePromotion | null>(null);
+  const [claimQr, setClaimQr] = useState('');
+  const [claiming, setClaiming] = useState(false);
+  const [claimError, setClaimError] = useState('');
+
+  useEffect(() => {
+    if (!config.highlightedPromotionId) return;
+    const target = document.getElementById('loyalty-promotion-' + config.highlightedPromotionId);
+    if (target) {
+      window.setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
+    }
+  }, [config.highlightedPromotionId, promotions.length]);
+
+  if (!promotions.length) return null;
+
+  const createClaim = async (promotion: LoyaltyExperiencePromotion) => {
+    setSelectedPromotion(promotion);
+    setClaimQr('');
+    setClaimError('');
+    setClaiming(true);
+
+    let accessToken = '';
+    try {
+      accessToken = new URL(config.qrValue || '').pathname.split('/').filter(Boolean).pop() || '';
+    } catch {
+      accessToken = config.qrValue?.split('/loyalty/')[1]?.split(/[?#]/)[0] || '';
+    }
+
+    const { data, error } = await supabase.rpc('create_public_loyalty_promotion_claim', {
+      p_access_token: accessToken,
+      p_promotion_id: promotion.id,
+    });
+
+    setClaiming(false);
+    const row = Array.isArray(data) ? data[0] : data;
+
+    if (error || !row?.claim_token) {
+      setClaimError(error?.message || 'Impossible de générer le QR de l’offre.');
+      return;
+    }
+
+    setClaimQr(window.location.origin + '/loyalty/promotion/' + row.claim_token);
+  };
+
+  const closeClaim = () => {
+    if (claiming) return;
+    setSelectedPromotion(null);
+    setClaimQr('');
+    setClaimError('');
+  };
+
+  return (
+    <>
+      <Section title="Offres membres" eyebrow="Disponibles maintenant">
+        <div className="mt-3 grid gap-3">
+          {promotions.map((promotion) => {
+            const highlighted = promotion.id === config.highlightedPromotionId;
+            return (
+              <div
+                key={promotion.id}
+                id={'loyalty-promotion-' + promotion.id}
+                className={'rounded-[22px] border p-4 shadow-lg backdrop-blur-xl transition ' + (highlighted ? 'ring-2 ring-[#D3A84C]' : '')}
+                style={{ background: config.primaryColor, borderColor: highlighted ? config.secondaryColor : 'rgba(255,255,255,.15)' }}
+              >
+                <div className="flex items-start justify-between gap-3 text-white">
+                  <div className="min-w-0">
+                    <p className="text-[9px] font-bold uppercase tracking-[.18em] text-[#D3A84C]">Offre membre</p>
+                    <h3 className="mt-1 text-base font-semibold">{promotion.name}</h3>
+                    {promotion.description && <p className="mt-1 text-[10px] leading-4 text-white/65">{promotion.description}</p>}
+                    {promotion.promo_price != null && (
+                      <p className="mt-2 text-lg font-bold text-[#D3A84C]">{promotion.promo_price} MAD</p>
+                    )}
+                    {promotion.end_at && (
+                      <p className="mt-1 text-[9px] text-white/45">
+                        Valable jusqu’au {new Date(promotion.end_at).toLocaleDateString('fr-FR')}
+                      </p>
+                    )}
+                  </div>
+                  <Ticket size={20} className="shrink-0 text-[#D3A84C]" />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void createClaim(promotion)}
+                  className="mt-4 w-full rounded-xl bg-[#D3A84C] py-3 text-xs font-bold text-[#173D32] transition hover:brightness-105"
+                >
+                  Utiliser cette offre
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </Section>
+
+      {selectedPromotion && (
+        <div className="fixed inset-0 z-[100] grid place-items-center bg-black/70 p-4" onClick={closeClaim}>
+          <div className="w-full max-w-sm rounded-[28px] bg-white p-6 text-[#17201c] shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[9px] font-bold uppercase tracking-[.2em] text-[#D3A84C]">Offre membre</p>
+                <h3 className="mt-1 text-xl font-bold">{selectedPromotion.name}</h3>
+              </div>
+              <button type="button" onClick={closeClaim} className="rounded-xl p-2 text-black/35"><X size={18} /></button>
+            </div>
+            {claiming ? (
+              <div className="grid place-items-center py-12">
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#173D32] border-t-transparent" />
+                <p className="mt-3 text-xs text-black/45">Génération du QR…</p>
+              </div>
+            ) : claimQr ? (
+              <div className="mt-5 rounded-2xl bg-[#f7f7f3] p-5 text-center">
+                <QRCodeImage value={claimQr} />
+                <p className="mt-3 text-[10px] font-semibold uppercase tracking-[.16em] text-black/45">Présentez ce QR au responsable</p>
+                <p className="mt-2 text-[10px] text-black/35">Valable 5 minutes · utilisable une seule fois</p>
+              </div>
+            ) : (
+              <div className="mt-5 rounded-2xl bg-red-50 p-4 text-center text-xs text-red-700">{claimError || 'Impossible de générer le QR.'}</div>
+            )}
+            <button type="button" onClick={closeClaim} disabled={claiming} className="mt-4 w-full rounded-xl bg-[#173D32] py-3.5 text-sm font-semibold text-white disabled:opacity-50">Fermer</button>
+          </div>
+        </div>
+      )}
+    </>
+  );
 }
 
 export function LoyaltyReward({ config }: { config: LoyaltyExperienceConfig }) {
@@ -692,7 +830,7 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
         </div>
         {benefits.length > 0 && <div className="mt-5"><div className="flex items-center justify-between"><p className="text-[9px] font-bold uppercase tracking-[.22em] text-white/70">Vos avantages exclusifs</p><span className="text-[8px] text-white/45">Voir tout</span></div><div className="mt-2 grid grid-cols-3 gap-2">{benefits.map((b,i)=><div key={b.title+i} className="rounded-[17px] border border-white/25 bg-white/[0.13] p-3 backdrop-blur-xl"><div className="mb-2 text-[13px]" style={{ color: config.secondaryColor }}>✦</div><p className="text-[10px] font-semibold leading-4">{b.title}</p><p className="mt-1 line-clamp-2 text-[8px] leading-3.5 text-white/55">{b.description}</p></div>)}</div></div>}
         <div id="loyalty-reward-list"><LoyaltyReward config={config} /></div>
-        {offers.length > 0 && <div className="mt-4 rounded-[19px] border border-white/25 bg-black/20 p-4 backdrop-blur-xl"><div className="flex items-center justify-between"><div><p className="text-[8px] uppercase tracking-[.18em] text-white/45">{offers[0].eyebrow || 'Offre du moment'}</p><p className="mt-1 text-base font-semibold">{offers[0].title}</p>{offers[0].description && <p className="mt-1 text-[9px] text-white/55">{offers[0].description}</p>}</div><span className="text-xl text-white/75">›</span></div></div>}
+        <LoyaltyPromotions config={config} />
         <div className="mt-5 flex flex-col items-center pt-2">
           <div className="h-[140px] w-[140px]">{qrBlock}</div>
           <p className="mt-2 text-center text-[8px] font-semibold uppercase tracking-[.16em] text-white/65">QR fidélité · gagner des points</p>

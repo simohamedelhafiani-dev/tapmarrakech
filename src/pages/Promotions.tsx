@@ -158,9 +158,16 @@ export default function Promotions() {
       );
 
       if (pushError || !pushData?.success) {
-        setNoticeMessage('Promotion publiée, mais les notifications n’ont pas pu être envoyées.');
+        console.error('Erreur envoi notifications promotion:', pushError ?? pushData);
+        setNoticeMessage(
+          `Promotion publiée, mais l’envoi des notifications a échoué : ${pushData?.error || pushError?.message || 'erreur inconnue'}`
+        );
       } else if (Number(pushData.sent ?? 0) > 0) {
         setNoticeMessage(`Promotion publiée et envoyée à ${pushData.sent} client${Number(pushData.sent) > 1 ? 's' : ''}.`);
+      } else if (Number(pushData.total ?? 0) > 0) {
+        setNoticeMessage(
+          `Promotion publiée. ${pushData.total} abonnement${Number(pushData.total) > 1 ? 's' : ''} trouvé${Number(pushData.total) > 1 ? 's' : ''}, mais aucune notification n’a été envoyée.`
+        );
       } else {
         setNoticeMessage('Promotion publiée. Aucun client n’a encore activé les notifications.');
       }

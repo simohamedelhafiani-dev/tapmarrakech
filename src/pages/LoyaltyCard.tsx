@@ -74,6 +74,7 @@ export default function LoyaltyCard() {
   const [pushEnabled, setPushEnabled] = useState(false);
   const [pushMessage, setPushMessage] = useState('');
   const [pushLoading, setPushLoading] = useState(false);
+  const highlightedPromotionId = new URLSearchParams(window.location.search).get('promotion');
 
   const cardUrl = window.location.href;
 
@@ -83,7 +84,7 @@ export default function LoyaltyCard() {
       setIsInstalled(Boolean(media?.matches || (window.navigator as Navigator & { standalone?: boolean }).standalone === true));
     };
     checkInstalled();
-    setPushEnabled(isLoyaltyPushEnabled());
+    void isLoyaltyPushEnabled().then(setPushEnabled);
     media?.addEventListener?.('change', checkInstalled);
 
     const handler = (event: Event) => {
@@ -423,13 +424,9 @@ export default function LoyaltyCard() {
     currentTier: raw.currentTier,
     tiers: raw.tiers,
     benefits: raw.benefits,
-    offers: promotions.length
-      ? promotions.map((promotion) => ({
-          eyebrow: 'Offre membre',
-          title: promotion.promo_price != null ? `${promotion.name} — ${promotion.promo_price} MAD` : promotion.name,
-          description: promotion.description || 'Offre exclusive réservée aux membres fidélité.',
-        }))
-      : raw.offers,
+    offers: raw.offers,
+    promotions,
+    highlightedPromotionId,
     rewards,
     history: history.map(item => ({
       id: item.id,

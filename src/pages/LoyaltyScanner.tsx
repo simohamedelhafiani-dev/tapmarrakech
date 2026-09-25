@@ -20,6 +20,18 @@ type Customer = {
   stamps_balance?: number;
 };
 
+type PendingPromotionClaim = {
+  claim_token: string;
+  establishment_id: string;
+  customer_id: string;
+  promotion_id: string;
+  promotion_name: string;
+  description: string | null;
+  promo_price: number | null;
+  status: 'PENDING' | 'REDEEMED' | 'EXPIRED' | 'CANCELLED';
+  expires_at: string;
+};
+
 type PendingRewardClaim = {
   claim_token: string;
   establishment_id: string;
@@ -70,6 +82,8 @@ export default function LoyaltyScanner() {
   const [rewardInvoiceAmount, setRewardInvoiceAmount] = useState('');
   const [rewardInvoiceNumber, setRewardInvoiceNumber] = useState('');
   const [redeemingReward, setRedeemingReward] = useState(false);
+  const [pendingPromotion, setPendingPromotion] = useState<PendingPromotionClaim | null>(null);
+  const [redeemingPromotion, setRedeemingPromotion] = useState(false);
 
   useEffect(() => {
     if (!scannerToken) {
@@ -187,7 +201,19 @@ export default function LoyaltyScanner() {
       const url = new URL(value);
       const parts = url.pathname.split('/').filter(Boolean);
 
-      if (parts[0] === 'loyalty' && parts[1] === 'stamp-reward' && parts[2]) {
+      if (parts[0] === 'loyalty' && parts[1] === 'promotion' && parts[2]) {
+        setSearching(true);
+        const { data, error } = await supabase.rpc('get_public_loyalty_promotion_claim', { p_claim_token: parts[2] });
+        setSearching(false);
+        const row = Array.isArray(data) ? data[0] : data;
+        if (error || !row || row.establishment_id !== context?.establishment_id) {
+          setMessage('QR promotion invalide ou expiré.');
+          return;
+        }
+        setPendingPromotion(row as PendingPromotionClaim);
+        setShowScanner(false);
+        return;
+      } else if (parts[0] === 'loyalty' && parts[1] === 'stamp-reward' && parts[2]) {
         setSearching(true);
         const { data, error } = await supabase.rpc('get_public_loyalty_stamp_reward_claim', { p_claim_token: parts[2] });
         setSearching(false);
@@ -345,6 +371,29 @@ export default function LoyaltyScanner() {
     }
   }
 
+
+  async function redeemPendingPromotion() {
+    if (!pendingPromotion) return;
+
+    setRedeemingPromotion(true);
+    setMessage('');
+
+    const { data, error } = await supabase.rpc('redeem_public_loyalty_promotion_claim', {
+      p_scanner_token: scannerToken,
+      p_claim_token: pendingPromotion.claim_token,
+    });
+
+    setRedeemingPromotion(false);
+
+    if (error) {
+      setMessage(error.message);
+      return;
+    }
+
+    const result = Array.isArray(data) ? data[0] : data;
+    setPendingPromotion(null);
+    alert(`Offre validée !\n\n${result?.promotion_name || pendingPromotion.promotion_name}\nL’offre a été utilisée avec succès.`);
+  }
 
   async function searchCustomer(query = manualSearch) {
     const value = query.trim();
@@ -699,6 +748,29 @@ export default function LoyaltyScanner() {
                   </p>
                 )}
               </div>
+            </div>
+          </div>
+        )}
+
+        {pendingPromotion && (
+          <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4">
+            <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">Offre membre</p>
+                  <h2 className="mt-1 font-display text-2xl text-forest">{pendingPromotion.promotion_name}</h2>
+                </div>
+                <button type="button" onClick={() => setPendingPromotion(null)} disabled={redeemingPromotion} className="rounded-xl p-2 text-ink/40"><X size={18} /></button>
+              </div>
+              <div className="mt-5 rounded-2xl bg-[#f7f7f3] p-4">
+                {pendingPromotion.description && <p className="text-sm text-ink/60">{pendingPromotion.description}</p>}
+                {pendingPromotion.promo_price != null && <p className="mt-3 text-2xl font-bold text-forest">{pendingPromotion.promo_price} MAD</p>}
+                <p className="mt-3 text-xs text-ink/45">Cette offre est valide pour ce client et ne peut être utilisée qu’une seule fois.</p>
+              </div>
+              <button type="button" disabled={redeemingPromotion} onClick={() => void redeemPendingPromotion()} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-4 text-sm font-semibold text-white disabled:opacity-50">
+                <CheckCircle2 size={18} />
+                {redeemingPromotion ? 'Validation...' : 'Valider cette offre'}
+              </button>
             </div>
           </div>
         )}
