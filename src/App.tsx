@@ -165,7 +165,9 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
 
           <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+            <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
             <Route path="/admin" element={<Admin />} />
+          </Route>
           </Route>
 
           <Route element={<ProtectedRoute allowedRoles={['responsible']} />}>
