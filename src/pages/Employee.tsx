@@ -135,6 +135,7 @@ export default function Employee() {
     button_color: '#173D32',
     border_radius: 24,
     design_config: defaultLoyaltyDesignConfig,
+    published: false,
   });
   const [customers, setCustomers] = useState<LoyaltyCustomer[]>([]);
   const [rewards, setRewards] = useState<LoyaltyReward[]>([]);
