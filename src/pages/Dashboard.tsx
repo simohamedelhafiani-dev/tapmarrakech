@@ -780,8 +780,6 @@ export default function Dashboard() {
       (place) => place.id === selectedEstablishmentId
     ) ?? null;
 
-  const displayAnalytics = { ...analytics, ...(serverStats ?? {}) };
-
   const establishmentName = selectedEstablishment?.name ?? null;
 
   const changeEstablishment = (establishmentId: string) => {
