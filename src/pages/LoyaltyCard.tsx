@@ -5,6 +5,7 @@ type BeforeInstallPromptEvent = Event & { prompt: () => Promise<void>; userChoic
 import { defaultLoyaltyDesignConfig } from '@/components/LoyaltyCardVisual';
 import { LoyaltyExperience, type LoyaltyExperienceConfig, type LoyaltyExperienceReward } from '@/components/loyalty/LoyaltyExperience';
 import { supabase } from '@/lib/supabase';
+import { registerLoyaltyPush, isLoyaltyPushEnabled } from '@/lib/pushNotifications';
 
 type Card = {
   customer_id: string;
@@ -59,6 +60,9 @@ export default function LoyaltyCard() {
   const [error, setError] = useState('');
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [pushEnabled, setPushEnabled] = useState(false);
+  const [pushMessage, setPushMessage] = useState('');
+  const [pushLoading, setPushLoading] = useState(false);
 
   const cardUrl = window.location.href;
 
@@ -68,6 +72,7 @@ export default function LoyaltyCard() {
       setIsInstalled(Boolean(media?.matches || (window.navigator as Navigator & { standalone?: boolean }).standalone === true));
     };
     checkInstalled();
+    setPushEnabled(isLoyaltyPushEnabled());
     media?.addEventListener?.('change', checkInstalled);
 
     const handler = (event: Event) => {
@@ -81,6 +86,22 @@ export default function LoyaltyCard() {
       media?.removeEventListener?.('change', checkInstalled);
     };
   }, []);
+
+  async function enablePushNotifications() {
+    if (!token) return;
+    setPushLoading(true);
+    setPushMessage('');
+
+    const result = await registerLoyaltyPush(token, cardUrl);
+    if (result.ok) {
+      setPushEnabled(true);
+      setPushMessage('Notifications activées. Vous recevrez les nouvelles offres de l’établissement.');
+    } else {
+      setPushMessage(result.message);
+    }
+
+    setPushLoading(false);
+  }
 
   async function saveCardOnPhone() {
     if (isInstalled) return;
@@ -391,7 +412,28 @@ export default function LoyaltyCard() {
           <span className="text-lg">▣</span>
           Enregistrer ma carte sur mon téléphone
         </button>}
-        <p className="mt-2 text-center text-[10px] text-ink/40">Ajoutez-la à votre écran d’accueil ou partagez votre carte.</p>
+
+        {!pushEnabled && (
+          <button
+            type="button"
+            onClick={() => void enablePushNotifications()}
+            disabled={pushLoading}
+            className="mt-3 flex w-full items-center justify-center gap-3 rounded-2xl border border-white/15 bg-white/10 px-5 py-4 text-sm font-semibold text-white shadow-lg transition hover:bg-white/15 disabled:opacity-60"
+          >
+            <span className="text-lg">🔔</span>
+            {pushLoading ? 'Activation…' : 'Recevoir les offres et promotions'}
+          </button>
+        )}
+
+        {pushMessage && (
+          <p className="mt-3 rounded-2xl bg-white/10 px-4 py-3 text-center text-xs leading-5 text-white/75">
+            {pushMessage}
+          </p>
+        )}
+
+        <p className="mt-2 text-center text-[10px] text-white/35">
+          Activez les notifications pour recevoir directement les nouvelles offres de l’établissement.
+        </p>
       </div>
     </main>
   );
