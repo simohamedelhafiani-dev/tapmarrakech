@@ -4155,19 +4155,99 @@ function AdminAnalyticsSection({
   const [period, setPeriod] = useState<7 | 30 | 90 | 180 | 365>(30);
   const [selectedEstablishment, setSelectedEstablishment] = useState('all');
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    reviewsCount: 0,
-    averageRating: 0,
-    positiveReviews: 0,
-    negativeReviews: 0,
-    revenue: 0,
-    transactionCount: 0,
-    averageTicket: 0,
-    pointsEarned: 0,
-    eventsCount: 0,
-    redemptionCount: 0,
-    rewardCost: 0,
-    byEstablishment: [] as Array<{
+  const [transactions, setTransactions] = useState<Array<{ establishment_id: string; amount: number | null; points: number; created_at: string }>>([]);
+  const [redemptions, setRedemptions] = useState<Array<{ establishment_id: string; points_used: number; reward_cost_mad: number | null; created_at: string }>>([]);
+  const [reviews, setReviews] = useState<Array<{ establishment_id: string; rating: number; type: string | null; created_at: string }>>([]);
+  const [events, setEvents] = useState<Array<{ establishment_id: string; created_at: string }>>([]);
+
+  const loadAnalytics = async () => {
+    setLoading(true);
+    try {
+      const since = new Date();
+      since.setDate(since.getDate() - period);
+      const establishmentFilter = selectedEstablishment === 'all' ? null : selectedEstablishment;
+
+      let txQuery = supabase.from('loyalty_transactions').select('establishment_id, amount, points, created_at').gte('created_at', since.toISOString()).eq('type', 'EARN');
+      let redemptionQuery = supabase.from('loyalty_redemptions').select('establishment_id, points_used, reward_cost_mad, created_at').gte('created_at', since.toISOString());
+      let reviewQuery = supabase.from('reviews').select('establishment_id, rating, type, created_at').gte('created_at', since.toISOString());
+      let eventQuery = supabase.from('analytics_events').select('establishment_id, created_at').gte('created_at', since.toISOString());
+
+      if (establishmentFilter) {
+        txQuery = txQuery.eq('establishment_id', establishmentFilter);
+        redemptionQuery = redemptionQuery.eq('establishment_id', establishmentFilter);
+        reviewQuery = reviewQuery.eq('establishment_id', establishmentFilter);
+        eventQuery = eventQuery.eq('establishment_id', establishmentFilter);
+      }
+
+      const [txResult, redemptionResult, reviewResult, eventResult] = await Promise.all([
+        txQuery,
+        redemptionQuery,
+        reviewQuery,
+        eventQuery,
+      ]);
+
+      if (txResult.error) throw txResult.error;
+      if (redemptionResult.error) throw redemptionResult.error;
+      if (reviewResult.error) throw reviewResult.error;
+      if (eventResult.error) throw eventResult.error;
+
+      setTransactions(txResult.data ?? []);
+      setRedemptions(redemptionResult.data ?? []);
+      setReviews(reviewResult.data ?? []);
+      setEvents(eventResult.data ?? []);
+    } catch (error) {
+      console.error('Erreur analytics globales:', error);
+      setTransactions([]);
+      setRedemptions([]);
+      setReviews([]);
+      setEvents([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadAnalytics();
+  }, [period, selectedEstablishment]);
+
+  const establishmentMap = useMemo(
+    () => new Map(establishments.map((item) => [item.id, item.name])),
+    [establishments]
+  );
+
+  const visibleTransactions = useMemo(
+    () => transactions.filter((row) => establishmentMap.has(row.establishment_id)),
+    [transactions, establishmentMap]
+  );
+  const visibleRedemptions = useMemo(
+    () => redemptions.filter((row) => establishmentMap.has(row.establishment_id)),
+    [redemptions, establishmentMap]
+  );
+  const visibleReviews = useMemo(
+    () => reviews.filter((row) => establishmentMap.has(row.establishment_id)),
+    [reviews, establishmentMap]
+  );
+  const visibleEvents = useMemo(
+    () => events.filter((row) => establishmentMap.has(row.establishment_id)),
+    [events, establishmentMap]
+  );
+
+  const revenue = visibleTransactions.reduce((sum, row) => sum + Number(row.amount ?? 0), 0);
+  const transactionCount = visibleTransactions.length;
+  const averageTicket = transactionCount > 0 ? revenue / transactionCount : 0;
+  const pointsEarned = visibleTransactions.reduce((sum, row) => sum + Number(row.points ?? 0), 0);
+  const redemptionCount = visibleRedemptions.length;
+  const rewardCost = visibleRedemptions.reduce((sum, row) => sum + Number(row.reward_cost_mad ?? 0), 0);
+  const netContribution = revenue - rewardCost;
+  const rewardCostRate = revenue > 0 ? (rewardCost / revenue) * 100 : 0;
+  const averageRating = visibleReviews.length
+    ? visibleReviews.reduce((sum, row) => sum + Number(row.rating ?? 0), 0) / visibleReviews.length
+    : 0;
+  const positiveReviews = visibleReviews.filter((row) => row.type === 'positive' || Number(row.rating) >= 4).length;
+  const negativeReviews = visibleReviews.filter((row) => row.type === 'negative' || Number(row.rating) <= 3).length;
+
+  const byEstablishment = useMemo(() => {
+    const map = new Map<string, {
       id: string;
       name: string;
       revenue: number;
@@ -4178,86 +4258,57 @@ function AdminAnalyticsSection({
       ratingTotal: number;
       events: number;
       points: number;
-    }>,
-  });
+    }>();
 
-  useEffect(() => {
-    let mounted = true;
-
-    const loadAnalytics = async () => {
-      setLoading(true);
-
-      const { data, error } = await supabase.rpc('get_admin_analytics_dashboard_stats', {
-        p_establishment_id: selectedEstablishment === 'all' ? null : selectedEstablishment,
-        p_days: period,
+    for (const establishment of establishments) {
+      map.set(establishment.id, {
+        id: establishment.id,
+        name: establishment.name,
+        revenue: 0,
+        transactions: 0,
+        rewards: 0,
+        rewardCost: 0,
+        reviews: 0,
+        ratingTotal: 0,
+        events: 0,
+        points: 0,
       });
+    }
 
-      if (!mounted) return;
+    for (const row of transactions) {
+      const item = map.get(row.establishment_id);
+      if (!item) continue;
+      item.revenue += Number(row.amount ?? 0);
+      item.transactions += 1;
+      item.points += Number(row.points ?? 0);
+    }
+    for (const row of redemptions) {
+      const item = map.get(row.establishment_id);
+      if (!item) continue;
+      item.rewards += 1;
+      item.rewardCost += Number(row.reward_cost_mad ?? 0);
+    }
+    for (const row of reviews) {
+      const item = map.get(row.establishment_id);
+      if (!item) continue;
+      item.reviews += 1;
+      item.ratingTotal += Number(row.rating ?? 0);
+    }
+    for (const row of events) {
+      const item = map.get(row.establishment_id);
+      if (!item) continue;
+      item.events += 1;
+    }
 
-      if (error) {
-        console.error('Erreur analytics globales:', error);
-        setStats((current) => ({
-          ...current,
-          reviewsCount: 0,
-          averageRating: 0,
-          positiveReviews: 0,
-          negativeReviews: 0,
-          revenue: 0,
-          transactionCount: 0,
-          averageTicket: 0,
-          pointsEarned: 0,
-          eventsCount: 0,
-          redemptionCount: 0,
-          rewardCost: 0,
-          byEstablishment: [],
-        }));
-        setLoading(false);
-        return;
-      }
-
-      const row = Array.isArray(data) ? data[0] : data;
-      const rows = Array.isArray(row?.by_establishment) ? row.by_establishment : [];
-
-      setStats({
-        reviewsCount: Number(row?.reviews_count ?? 0),
-        averageRating: Number(row?.average_rating ?? 0),
-        positiveReviews: Number(row?.positive_reviews ?? 0),
-        negativeReviews: Number(row?.negative_reviews ?? 0),
-        revenue: Number(row?.revenue ?? 0),
-        transactionCount: Number(row?.transaction_count ?? 0),
-        averageTicket: Number(row?.average_ticket ?? 0),
-        pointsEarned: Number(row?.points_earned ?? 0),
-        eventsCount: Number(row?.events_count ?? 0),
-        redemptionCount: Number(row?.redemption_count ?? 0),
-        rewardCost: Number(row?.reward_cost ?? 0),
-        byEstablishment: rows.map((item: Record<string, unknown>) => ({
-          id: String(item.id ?? ''),
-          name: String(item.name ?? 'Établissement'),
-          revenue: Number(item.revenue ?? 0),
-          transactions: Number(item.transactions ?? 0),
-          rewards: Number(item.rewards ?? 0),
-          rewardCost: Number(item.rewardCost ?? 0),
-          reviews: Number(item.reviews ?? 0),
-          ratingTotal: Number(item.ratingTotal ?? 0),
-          events: Number(item.events ?? 0),
-          points: Number(item.points ?? 0),
-        })),
-      });
-      setLoading(false);
-    };
-
-    void loadAnalytics();
-
-    return () => {
-      mounted = false;
-    };
-  }, [period, selectedEstablishment]);
+    return Array.from(map.values()).filter((item) =>
+      selectedEstablishment === 'all'
+        ? item.revenue > 0 || item.rewards > 0 || item.reviews > 0 || item.events > 0
+        : item.id === selectedEstablishment
+    );
+  }, [establishments, transactions, redemptions, reviews, events, selectedEstablishment]);
 
   const formatMad = (value: number) =>
     `${value.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} DH`;
-
-  const netContribution = stats.revenue - stats.rewardCost;
-  const rewardCostRate = stats.revenue > 0 ? (stats.rewardCost / stats.revenue) * 100 : 0;
 
   return (
     <div>
@@ -4285,12 +4336,12 @@ function AdminAnalyticsSection({
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        <AdminAnalyticsCard icon={MessageSquare} label="Avis" value={loading ? '—' : String(stats.reviewsCount)} helper={`${stats.positiveReviews} positifs · ${stats.negativeReviews} négatifs`} />
-        <AdminAnalyticsCard icon={BarChart3} label="Note moyenne" value={loading ? '—' : `${stats.averageRating.toFixed(1)} ★`} helper="sur 5" />
-        <AdminAnalyticsCard icon={DollarSign} label="CA fidélité" value={loading ? '—' : formatMad(stats.revenue)} helper={`${stats.transactionCount} transactions`} />
-        <AdminAnalyticsCard icon={TrendingUp} label="Panier moyen" value={loading ? '—' : formatMad(stats.averageTicket)} helper="par transaction" />
-        <AdminAnalyticsCard icon={UsersRound} label="Points distribués" value={loading ? '—' : stats.pointsEarned.toLocaleString('fr-FR')} helper="sur la période" />
-        <AdminAnalyticsCard icon={Activity} label="Événements" value={loading ? '—' : stats.eventsCount.toLocaleString('fr-FR')} helper="analytics" />
+        <AdminAnalyticsCard icon={MessageSquare} label="Avis" value={loading ? '—' : String(visibleReviews.length)} helper={`${positiveReviews} positifs · ${negativeReviews} négatifs`} />
+        <AdminAnalyticsCard icon={BarChart3} label="Note moyenne" value={loading ? '—' : `${averageRating.toFixed(1)} ★`} helper="sur 5" />
+        <AdminAnalyticsCard icon={DollarSign} label="CA fidélité" value={loading ? '—' : formatMad(revenue)} helper={`${transactionCount} transactions`} />
+        <AdminAnalyticsCard icon={TrendingUp} label="Panier moyen" value={loading ? '—' : formatMad(averageTicket)} helper="par transaction" />
+        <AdminAnalyticsCard icon={UsersRound} label="Points distribués" value={loading ? '—' : pointsEarned.toLocaleString('fr-FR')} helper="sur la période" />
+        <AdminAnalyticsCard icon={Activity} label="Événements" value={loading ? '—' : visibleEvents.length.toLocaleString('fr-FR')} helper="analytics" />
       </div>
 
       <div className="mt-5 grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
@@ -4301,11 +4352,11 @@ function AdminAnalyticsSection({
           </div>
           {loading ? (
             <div className="py-12 text-center text-sm text-ink/40">Chargement…</div>
-          ) : stats.byEstablishment.length === 0 ? (
+          ) : byEstablishment.length === 0 ? (
             <div className="rounded-xl bg-[#f7f7f3] p-8 text-center text-sm text-ink/40">Aucune donnée sur cette période.</div>
           ) : (
             <div className="space-y-3">
-              {stats.byEstablishment.map((item) => (
+              {byEstablishment.map((item) => (
                 <div key={item.id} className="rounded-xl border border-ink/5 bg-[#fbfbf8] p-4">
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div className="min-w-0">
@@ -4336,11 +4387,11 @@ function AdminAnalyticsSection({
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/50">Synthèse période</p>
           <h3 className="mt-2 text-xl font-semibold">Vue financière & réputation</h3>
           <div className="mt-6 space-y-4">
-            <div><p className="text-xs text-white/50">CA fidélité</p><p className="mt-1 text-2xl font-semibold">{loading ? '—' : formatMad(stats.revenue)}</p></div>
-            <div><p className="text-xs text-white/50">Coût récompenses</p><p className="mt-1 text-2xl font-semibold">{loading ? '—' : formatMad(stats.rewardCost)}</p></div>
+            <div><p className="text-xs text-white/50">CA fidélité</p><p className="mt-1 text-2xl font-semibold">{loading ? '—' : formatMad(revenue)}</p></div>
+            <div><p className="text-xs text-white/50">Coût récompenses</p><p className="mt-1 text-2xl font-semibold">{loading ? '—' : formatMad(rewardCost)}</p></div>
             <div><p className="text-xs text-white/50">CA après coût récompenses</p><p className="mt-1 text-3xl font-semibold text-gold">{loading ? '—' : formatMad(netContribution)}</p></div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-xl bg-white/10 px-4 py-3"><p className="text-[11px] text-white/50">Récompenses</p><p className="mt-1 text-lg font-semibold">{stats.redemptionCount}</p></div>
+              <div className="rounded-xl bg-white/10 px-4 py-3"><p className="text-[11px] text-white/50">Récompenses</p><p className="mt-1 text-lg font-semibold">{redemptionCount}</p></div>
               <div className="rounded-xl bg-white/10 px-4 py-3"><p className="text-[11px] text-white/50">Part coût</p><p className="mt-1 text-lg font-semibold">{loading ? '—' : `${rewardCostRate.toFixed(1)} %`}</p></div>
             </div>
           </div>
