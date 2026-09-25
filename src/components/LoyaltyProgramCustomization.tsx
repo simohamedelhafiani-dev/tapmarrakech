@@ -223,16 +223,6 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     await load();
   }
 
-  async function toggleReward(reward: LoyaltyRewardAdmin) {
-    const { error } = await supabase.rpc('update_loyalty_reward', {
-      p_reward_id: reward.id, p_name: reward.name, p_description: reward.description,
-      p_points_required: reward.points_required, p_reward_type: reward.reward_type,
-      p_discount_percent: reward.discount_percent, p_discount_max_amount: reward.discount_max_amount,
-      p_active: !reward.active,
-    });
-    if (error) return alert(error.message);
-    await load();
-  }
 
   async function removeReward(reward: LoyaltyRewardAdmin) {
     if (!confirm('Désactiver cette récompense ?')) return;
