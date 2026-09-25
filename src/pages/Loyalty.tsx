@@ -72,6 +72,12 @@ export default function Loyalty() {
 
   const [customers, setCustomers] = useState<LoyaltyCustomer[]>([]);
   const [rewards, setRewards] = useState<LoyaltyReward[]>([]);
+  const [loyaltyStats, setLoyaltyStats] = useState({
+    customersCount: 0,
+    pointsInCirculation: 0,
+    activeCustomersCount: 0,
+    rewardsCount: 0,
+  });
   const [showPublishedCard, setShowPublishedCard] = useState(false);
   const [loyaltyDesign, setLoyaltyDesign] = useState<LoyaltyCardDesign>({
     template_id: 'luxury',
@@ -126,6 +132,7 @@ export default function Loyalty() {
       loadCustomers();
       loadProgramSettings();
       loadRewards();
+      loadLoyaltyStats();
       loadPublishedCard();
     }
   }, [establishmentId]);
@@ -184,6 +191,33 @@ export default function Loyalty() {
     } else {
       console.error('Erreur chargement clients:', error);
     }
+  }
+
+  async function loadLoyaltyStats() {
+    if (!establishmentId) return;
+
+    const { data, error } = await supabase.rpc('get_loyalty_dashboard_stats', {
+      p_establishment_id: establishmentId,
+    });
+
+    if (error) {
+      console.error('Erreur chargement statistiques fidélité:', error);
+      setLoyaltyStats({
+        customersCount: 0,
+        pointsInCirculation: 0,
+        activeCustomersCount: 0,
+        rewardsCount: 0,
+      });
+      return;
+    }
+
+    const row = Array.isArray(data) ? data[0] : data;
+    setLoyaltyStats({
+      customersCount: Number(row?.customers_count ?? 0),
+      pointsInCirculation: Number(row?.points_in_circulation ?? 0),
+      activeCustomersCount: Number(row?.active_customers_count ?? 0),
+      rewardsCount: Number(row?.rewards_count ?? 0),
+    });
   }
 
   async function loadProgramSettings() {
@@ -270,11 +304,6 @@ export default function Loyalty() {
         customer.phone.toLowerCase().includes(value)
     );
   }, [customers, search]);
-
-  const totalPoints = customers.reduce(
-    (sum, customer) => sum + customer.points_balance,
-    0
-  );
 
   async function createCustomer() {
     if (!establishmentId || !phone.trim()) return;
@@ -696,29 +725,25 @@ export default function Loyalty() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Stat
           label="Clients fidélité"
-          value={customers.length}
+          value={loyaltyStats.customersCount}
           icon={Users}
         />
 
         <Stat
           label="Points en circulation"
-          value={totalPoints}
+          value={loyaltyStats.pointsInCirculation}
           icon={Coins}
         />
 
         <Stat
           label="Clients actifs"
-          value={
-            customers.filter(
-              customer => customer.visit_count > 0
-            ).length
-          }
+          value={loyaltyStats.activeCustomersCount}
           icon={Star}
         />
 
         <Stat
           label="Récompenses disponibles"
-          value={rewards.length}
+          value={loyaltyStats.rewardsCount}
           icon={Gift}
         />
       </div>
