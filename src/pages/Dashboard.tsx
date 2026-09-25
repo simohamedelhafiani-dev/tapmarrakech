@@ -771,6 +771,8 @@ export default function Dashboard() {
     };
   }, [reviews, loyaltyCustomers, loyaltyTransactions, loyaltyRedemptions, pointsPerCurrency, selected.days]);
 
+  const displayAnalytics = { ...analytics, ...(serverStats ?? {}) };
+
   const isResponsible = role === 'responsible';
 
   const selectedEstablishment =
@@ -1000,7 +1002,7 @@ export default function Dashboard() {
 
         <Stat
           label="Note moyenne"
-          value={average}
+          value={serverStats ? serverStats.averageRating.toFixed(1) : average}
           detail="Sur 5 étoiles"
           icon={Star}
           accent="bg-[#e5eee9] text-forest"
@@ -1020,7 +1022,7 @@ export default function Dashboard() {
 
         <Stat
           label="Retours négatifs"
-          value={negative}
+          value={serverStats ? serverStats.negative : negative}
           detail="Notes de 1 à 3 étoiles"
           icon={TrendingDown}
           accent="bg-[#f4ead3] text-gold"
@@ -1028,7 +1030,7 @@ export default function Dashboard() {
 
         <Stat
           label="À traiter"
-          value={pending}
+          value={serverStats ? serverStats.pending : pending}
           detail="Retours en attente"
           icon={CheckCircle2}
           accent="bg-[#f4e4e1] text-[#a15c50]"
