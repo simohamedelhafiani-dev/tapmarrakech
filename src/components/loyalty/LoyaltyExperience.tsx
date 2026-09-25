@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Gift, History, QrCode, Sparkles, Star, Ticket, Trophy, WalletCards, X } from 'lucide-react';
 import QRCode from 'qrcode';
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
 
 export type LoyaltyExperienceType = 'STAMP' | 'POINTS' | 'DISCOUNT' | 'TIER' | 'REWARD' | 'CASHBACK' | 'CHALLENGE' | 'COLLECTION';
@@ -671,7 +671,6 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
   const subtitle = config.intro || 'Vos privilèges, toujours avec vous.';
   const benefits = (config.benefits || []).slice(0, 3);
   const offers = (config.offers || []).slice(0, 1);
-  const availableRewards = (config.rewards || []).slice(0, 3);
 
   useEffect(() => {
     if (!config.qrValue) return;
