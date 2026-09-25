@@ -135,6 +135,7 @@ export default function Employee() {
     button_color: '#173D32',
     border_radius: 24,
     design_config: defaultLoyaltyDesignConfig,
+    published: false,
   });
   const [customers, setCustomers] = useState<LoyaltyCustomer[]>([]);
   const [rewards, setRewards] = useState<LoyaltyReward[]>([]);
@@ -152,6 +153,7 @@ export default function Employee() {
   const [showPoints, setShowPoints] = useState<LoyaltyCustomer | null>(null);
   const [showRewards, setShowRewards] = useState<LoyaltyCustomer | null>(null);
   const [showCard, setShowCard] = useState<LoyaltyCustomer | null>(null);
+  const [showPublishedCardPreview, setShowPublishedCardPreview] = useState(false);
   const [showCardLink, setShowCardLink] = useState('');
   const [editCustomer, setEditCustomer] = useState<LoyaltyCustomer | null>(null);
   const [selectedReward, setSelectedReward] = useState<LoyaltyReward | null>(null);
@@ -1107,6 +1109,76 @@ export default function Employee() {
           </div>
         </div>
 
+        <div className="mb-6 rounded-2xl border border-ink/5 bg-white p-5 shadow-sm">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">Carte fidélité</p>
+              <h2 className="mt-1 text-lg font-semibold text-forest">Carte fidélité de votre établissement</h2>
+              <p className="mt-1 max-w-2xl text-xs leading-5 text-ink/45">
+                Aperçu en lecture seule de la carte actuellement publiée par l’administrateur.
+                Les modifications de design se font uniquement depuis la session Admin.
+              </p>
+            </div>
+            <button
+              type="button"
+              disabled={!loyaltyDesign.published}
+              onClick={() => setShowPublishedCardPreview(true)}
+              className="shrink-0 rounded-xl bg-forest px-4 py-3 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:bg-ink/15"
+            >
+              Voir la carte
+            </button>
+          </div>
+
+          <div className="mt-4 rounded-2xl border border-ink/5 bg-[#f7f7f3] p-3">
+            {loyaltyDesign.published ? (
+              <div className="mx-auto w-full max-w-[360px] pointer-events-none">
+                <LoyaltyExperience
+                  config={{
+                    type: loyaltyProgram.program_type === 'STAMP' ? 'STAMP' : 'POINTS',
+                    businessType: loyaltyDesign.design_config.business_type || 'restaurant',
+                    establishmentName: session.establishment_name,
+                    logoUrl: loyaltyDesign.design_config.logo_url || establishmentLogoUrl,
+                    coverImageUrl:
+                      loyaltyDesign.design_config.background_image_url ||
+                      (loyaltyDesign.design_config as typeof loyaltyDesign.design_config & { wallpaper_library?: string[] }).wallpaper_library?.[0] ||
+                      null,
+                    primaryColor: loyaltyDesign.primary_color,
+                    secondaryColor: loyaltyDesign.secondary_color,
+                    backgroundColor: loyaltyDesign.background_color,
+                    textColor: loyaltyDesign.text_color,
+                    borderRadius: loyaltyDesign.border_radius,
+                    customerName: 'Aperçu client',
+                    pointsBalance: 720,
+                    pointsGoal: Math.max(1000, rewards[rewards.length - 1]?.points_required ?? 1000),
+                    visits: 6,
+                    visitGoal: loyaltyProgram.stamp_goal,
+                    rewardName: loyaltyDesign.design_config.rewardName || rewards[0]?.name || 'Cadeau fidélité',
+                    rewardDescription: loyaltyDesign.design_config.rewardDescription || rewards[0]?.description || null,
+                    rewards: rewards.map(reward => ({
+                      id: reward.id,
+                      name: reward.name,
+                      description: reward.description,
+                      points_required: reward.points_required,
+                      reward_type: reward.reward_type,
+                      discount_percent: reward.discount_percent,
+                      discount_max_amount: reward.discount_max_amount,
+                    })),
+                    intro: loyaltyDesign.design_config.front_subtitle,
+                    qrValue: '',
+                    templateId: loyaltyDesign.template_id,
+                    published: true,
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="py-8 text-center">
+                <p className="text-sm font-semibold text-forest">Aucune carte publiée</p>
+                <p className="mt-1 text-xs text-ink/40">L’administrateur doit publier une carte avant qu’elle soit visible ici.</p>
+              </div>
+            )}
+          </div>
+        </div>
+
         <div className="overflow-hidden rounded-2xl border border-ink/5 bg-white shadow-sm">
           {filteredCustomers.length === 0 ? (
             <div className="p-12 text-center">
@@ -1207,6 +1279,50 @@ export default function Employee() {
               <p><strong className="text-forest">Android :</strong> Chrome → menu ⋮ → « Ajouter à l’écran d’accueil » ou « Installer l’application ».</p>
             </div>
             <button onClick={() => setShowInstallHelp(false)} className="w-full rounded-xl bg-forest py-3.5 text-sm font-semibold text-white">Compris</button>
+          </div>
+        </Modal>
+      )}
+
+      {showPublishedCardPreview && loyaltyDesign.published && (
+        <Modal title="Carte fidélité publiée" onClose={() => setShowPublishedCardPreview(false)}>
+          <div className="mx-auto w-full max-w-[430px]">
+            <LoyaltyExperience
+              config={{
+                type: loyaltyProgram.program_type === 'STAMP' ? 'STAMP' : 'POINTS',
+                businessType: loyaltyDesign.design_config.business_type || 'restaurant',
+                establishmentName: session.establishment_name,
+                logoUrl: loyaltyDesign.design_config.logo_url || establishmentLogoUrl,
+                coverImageUrl:
+                  loyaltyDesign.design_config.background_image_url ||
+                  (loyaltyDesign.design_config as typeof loyaltyDesign.design_config & { wallpaper_library?: string[] }).wallpaper_library?.[0] ||
+                  null,
+                primaryColor: loyaltyDesign.primary_color,
+                secondaryColor: loyaltyDesign.secondary_color,
+                backgroundColor: loyaltyDesign.background_color,
+                textColor: loyaltyDesign.text_color,
+                borderRadius: loyaltyDesign.border_radius,
+                customerName: 'Aperçu client',
+                pointsBalance: 720,
+                pointsGoal: Math.max(1000, rewards[rewards.length - 1]?.points_required ?? 1000),
+                visits: 6,
+                visitGoal: loyaltyProgram.stamp_goal,
+                rewardName: loyaltyDesign.design_config.rewardName || rewards[0]?.name || 'Cadeau fidélité',
+                rewardDescription: loyaltyDesign.design_config.rewardDescription || rewards[0]?.description || null,
+                rewards: rewards.map(reward => ({
+                  id: reward.id,
+                  name: reward.name,
+                  description: reward.description,
+                  points_required: reward.points_required,
+                  reward_type: reward.reward_type,
+                  discount_percent: reward.discount_percent,
+                  discount_max_amount: reward.discount_max_amount,
+                })),
+                intro: loyaltyDesign.design_config.front_subtitle,
+                qrValue: '',
+                templateId: loyaltyDesign.template_id,
+                published: true,
+              }}
+            />
           </div>
         </Modal>
       )}

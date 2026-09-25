@@ -78,6 +78,9 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
   const [stampGoal, setStampGoal] = useState('10');
   const [stampRewardName, setStampRewardName] = useState('Cadeau fidélité');
   const [stampRewardDescription, setStampRewardDescription] = useState('');
+  const [pointsPerCurrency, setPointsPerCurrency] = useState('1');
+  const [currency, setCurrency] = useState('MAD');
+  const [programEnabled, setProgramEnabled] = useState(true);
   const [rewards, setRewards] = useState<LoyaltyRewardAdmin[]>([]);
   const [availableTemplates, setAvailableTemplates] = useState<LoyaltyPreset[]>(LOYALTY_PRESETS);
   const [rewardEditorOpen, setRewardEditorOpen] = useState(false);
@@ -153,6 +156,9 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
       setStampGoal(String(program.stamp_goal ?? 10));
       setStampRewardName(program.stamp_reward_name ?? 'Cadeau fidélité');
       setStampRewardDescription(program.stamp_reward_description ?? '');
+      setPointsPerCurrency(String(program.points_per_currency ?? 1));
+      setCurrency(program.currency ?? 'MAD');
+      setProgramEnabled(program.enabled ?? true);
       if (!row?.design_config?.card_mode) setCardMode(program.program_type === 'STAMP' ? 'STAMP' : 'QR');
     }
   }
@@ -217,16 +223,6 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     await load();
   }
 
-  async function toggleReward(reward: LoyaltyRewardAdmin) {
-    const { error } = await supabase.rpc('update_loyalty_reward', {
-      p_reward_id: reward.id, p_name: reward.name, p_description: reward.description,
-      p_points_required: reward.points_required, p_reward_type: reward.reward_type,
-      p_discount_percent: reward.discount_percent, p_discount_max_amount: reward.discount_max_amount,
-      p_active: !reward.active,
-    });
-    if (error) return alert(error.message);
-    await load();
-  }
 
   async function removeReward(reward: LoyaltyRewardAdmin) {
     if (!confirm('Désactiver cette récompense ?')) return;
@@ -326,9 +322,9 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
       p_stamp_reward_description: cardMode === 'STAMP' ? stampRewardDescription.trim() || null : null,
       p_discount_percent: null,
       p_discount_valid_days: 7,
-      p_points_per_currency: 1,
-      p_currency: 'MAD',
-      p_enabled: true,
+      p_points_per_currency: Number(pointsPerCurrency) > 0 ? Number(pointsPerCurrency) : 1,
+      p_currency: currency.trim() || 'MAD',
+      p_enabled: programEnabled,
     });
     if (programError) {
       setSaving(false);

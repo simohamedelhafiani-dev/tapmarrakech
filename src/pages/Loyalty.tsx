@@ -12,8 +12,9 @@ import {
   LockKeyhole,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { defaultLoyaltyDesignConfig } from '@/components/LoyaltyCardVisual';
+import { LoyaltyExperience } from '@/components/loyalty/LoyaltyExperience';
 import { useAuth } from '@/contexts/AuthContext';
-import LoyaltyProgramCustomization from '@/components/LoyaltyProgramCustomization';
 import LoyaltyCardRecoveryQr from '@/components/LoyaltyCardRecoveryQr';
 
 type Establishment = {
@@ -40,6 +41,18 @@ type LoyaltyProgramSettings = {
   enabled: boolean;
 };
 
+type LoyaltyCardDesign = {
+  template_id: string;
+  primary_color: string;
+  secondary_color: string;
+  background_color: string;
+  text_color: string;
+  button_color: string;
+  border_radius: number;
+  design_config: typeof defaultLoyaltyDesignConfig & { wallpaper_library?: string[] };
+  published: boolean;
+};
+
 type LoyaltyReward = {
   id: string;
   establishment_id: string;
@@ -59,6 +72,18 @@ export default function Loyalty() {
 
   const [customers, setCustomers] = useState<LoyaltyCustomer[]>([]);
   const [rewards, setRewards] = useState<LoyaltyReward[]>([]);
+  const [showPublishedCard, setShowPublishedCard] = useState(false);
+  const [loyaltyDesign, setLoyaltyDesign] = useState<LoyaltyCardDesign>({
+    template_id: 'luxury',
+    primary_color: '#173D32',
+    secondary_color: '#D3A84C',
+    background_color: '#F7F7F3',
+    text_color: '#173D32',
+    button_color: '#173D32',
+    border_radius: 24,
+    design_config: defaultLoyaltyDesignConfig,
+    published: false,
+  });
 
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -101,6 +126,7 @@ export default function Loyalty() {
       loadCustomers();
       loadProgramSettings();
       loadRewards();
+      loadPublishedCard();
     }
   }, [establishmentId]);
 
@@ -170,6 +196,37 @@ export default function Loyalty() {
         enabled: true,
       });
     }
+  }
+
+  async function loadPublishedCard() {
+    if (!establishmentId) return;
+
+    const { data, error } = await supabase.rpc('get_responsible_loyalty_card_config', {
+      p_establishment_id: establishmentId,
+    });
+
+    if (error) {
+      console.error('Erreur chargement carte fidélité publiée:', error);
+      return;
+    }
+
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row) return;
+
+    setLoyaltyDesign({
+      template_id: row.template_id ?? 'luxury',
+      primary_color: row.primary_color ?? '#173D32',
+      secondary_color: row.secondary_color ?? '#D3A84C',
+      background_color: row.background_color ?? '#F7F7F3',
+      text_color: row.text_color ?? '#173D32',
+      button_color: row.button_color ?? '#173D32',
+      border_radius: Number(row.border_radius ?? 24),
+      design_config: {
+        ...defaultLoyaltyDesignConfig,
+        ...(row.design_config ?? {}),
+      },
+      published: Boolean(row.published),
+    });
   }
 
   async function loadRewards() {
@@ -466,6 +523,16 @@ export default function Loyalty() {
               establishmentName={establishments.find((item) => item.id === establishmentId)?.name ?? 'Établissement'}
             />
           )}
+          {establishmentId && (
+            <button
+              type="button"
+              onClick={() => setShowPublishedCard(true)}
+              className="flex w-fit items-center gap-2 rounded-xl border border-gold/30 bg-white px-4 py-2.5 text-xs font-semibold text-forest transition hover:bg-[#fdf9ef]"
+            >
+              <Gift size={16} />
+              Voir la carte publiée
+            </button>
+          )}
           <button
             onClick={() => setShowNewCustomer(true)}
             disabled={!establishmentId || !programSettings.enabled}
@@ -516,7 +583,6 @@ export default function Loyalty() {
         </div>
       </div>
 
-      <LoyaltyProgramCustomization establishmentId={establishmentId} />
 
       {/* ESTABLISHMENT */}
       {establishments.length > 1 && (
@@ -539,6 +605,78 @@ export default function Loyalty() {
               </option>
             ))}
           </select>
+        </div>
+      )}
+
+      {/* PUBLISHED CARD PREVIEW */}
+      {showPublishedCard && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-5">
+          <div className="max-h-[92vh] w-full max-w-[520px] overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl">
+            <div className="mb-5 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold">
+                  Carte fidélité
+                </p>
+                <h2 className="mt-1 font-display text-2xl text-forest">
+                  Version publiée
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPublishedCard(false)}
+                className="grid h-9 w-9 place-items-center rounded-full bg-[#f7f7f3] text-ink/50"
+              >
+                <X size={17} />
+              </button>
+            </div>
+
+            {!loyaltyDesign.published ? (
+              <div className="rounded-2xl border border-dashed border-ink/10 bg-[#f7f7f3] p-8 text-center">
+                <p className="font-semibold text-forest">Aucune carte publiée</p>
+                <p className="mt-2 text-sm text-ink/45">
+                  L’administrateur doit publier une version de la carte pour qu’elle apparaisse ici.
+                </p>
+              </div>
+            ) : (
+              <LoyaltyExperience
+                config={{
+                  type: loyaltyDesign.design_config.card_mode === 'STAMP' ? 'STAMP' : 'POINTS',
+                  businessType: loyaltyDesign.design_config.business_type || 'restaurant',
+                  establishmentName: establishments.find(item => item.id === establishmentId)?.name || 'Établissement',
+                  logoUrl: loyaltyDesign.design_config.logo_url || null,
+                  coverImageUrl:
+                    loyaltyDesign.design_config.background_image_url ||
+                    loyaltyDesign.design_config.wallpaper_library?.[0] ||
+                    null,
+                  primaryColor: loyaltyDesign.primary_color,
+                  secondaryColor: loyaltyDesign.secondary_color,
+                  backgroundColor: loyaltyDesign.background_color,
+                  textColor: loyaltyDesign.text_color,
+                  borderRadius: loyaltyDesign.border_radius,
+                  customerName: 'Aperçu client',
+                  pointsBalance: 720,
+                  pointsGoal: Math.max(1000, rewards[rewards.length - 1]?.points_required ?? 1000),
+                  visits: 6,
+                  visitGoal: 10,
+                  rewardName: loyaltyDesign.design_config.rewardName || rewards[0]?.name || 'Cadeau fidélité',
+                  rewardDescription: loyaltyDesign.design_config.rewardDescription || rewards[0]?.description || null,
+                  rewards: rewards.map(reward => ({
+                    id: reward.id,
+                    name: reward.name,
+                    description: reward.description,
+                    points_required: reward.points_required,
+                    reward_type: 'GIFT',
+                    discount_percent: null,
+                    discount_max_amount: null,
+                  })),
+                  intro: loyaltyDesign.design_config.front_subtitle,
+                  qrValue: '',
+                  templateId: loyaltyDesign.template_id,
+                  published: true,
+                }}
+              />
+            )}
+          </div>
         </div>
       )}
 

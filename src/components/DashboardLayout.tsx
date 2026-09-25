@@ -8,7 +8,6 @@ import {
   LogOut,
   Menu as MenuIcon,
   MessageSquare,
-  Settings2,
   UtensilsCrossed,
   X,
   QrCode,
@@ -66,12 +65,6 @@ const links = [
     to: '/dashboard/loyalty',
     label: 'Fidélité',
     icon: Gift,
-    feature: 'loyalty' as const,
-  },
-  {
-    to: '/dashboard/loyalty/settings',
-    label: 'Programme fidélité',
-    icon: Settings2,
     feature: 'loyalty' as const,
   },
 ];
@@ -365,6 +358,7 @@ export function DashboardLayout() {
       const establishment = establishments[0];
 
       if (active) {
+        setScannerUrl(null);
       }
 
       if (!establishment?.id) {

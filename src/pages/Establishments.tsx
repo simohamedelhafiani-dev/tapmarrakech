@@ -556,7 +556,7 @@ export default function Establishments() {
                 </button>
 
                 <button
-                  onClick={() => setQr(place)}
+                  onClick={() => setQr({ title: place.name, url: publicUrl(place.slug), filename: place.slug })}
                   className="flex items-center gap-1.5 rounded-lg bg-[#f7f7f3] px-3 py-2 text-[11px] font-semibold text-forest"
                 >
                   <QrCode size={13} />
