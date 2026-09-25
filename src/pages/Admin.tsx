@@ -1086,7 +1086,7 @@ function EstablishmentWorkspace({
         const [
           { data: rewardsData, error: rewardsError },
           { data: settingsData, error: settingsError },
-          { count, error: customersError },
+          { data: statsData, error: statsError },
         ] = await Promise.all([
           supabase
             .from('loyalty_rewards')
@@ -1098,15 +1098,16 @@ function EstablishmentWorkspace({
             .select('points_per_currency, currency, enabled')
             .eq('establishment_id', establishment.id)
             .maybeSingle(),
-          supabase
-            .from('loyalty_customers')
-            .select('id', { count: 'exact', head: true })
-            .eq('establishment_id', establishment.id),
+          supabase.rpc('get_loyalty_dashboard_stats', {
+            p_establishment_id: establishment.id,
+          }),
         ]);
 
         if (rewardsError) throw rewardsError;
         if (settingsError) throw settingsError;
-        if (customersError) throw customersError;
+        if (statsError) throw statsError;
+
+        const statsRow = Array.isArray(statsData) ? statsData[0] : statsData;
 
         setRewards(rewardsData ?? []);
         setLoyalty(
@@ -1116,7 +1117,7 @@ function EstablishmentWorkspace({
             enabled: true,
           },
         );
-        setCustomersCount(count ?? 0);
+        setCustomersCount(Number(statsRow?.customers_count ?? 0));
       } catch (error) {
         console.error('Erreur chargement fidélité:', error);
         setRewards([]);
