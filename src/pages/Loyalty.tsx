@@ -14,6 +14,7 @@ import {
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import LoyaltyProgramCustomization from '@/components/LoyaltyProgramCustomization';
+import LoyaltyCardRecoveryQr from '@/components/LoyaltyCardRecoveryQr';
 
 type Establishment = {
   id: string;
@@ -458,14 +459,22 @@ export default function Loyalty() {
           </p>
         </div>
 
-        <button
-          onClick={() => setShowNewCustomer(true)}
-          disabled={!establishmentId || !programSettings.enabled}
-          className="flex w-fit items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-forest-light disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          <Plus size={16} />
-          Nouveau client
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          {establishmentId && (
+            <LoyaltyCardRecoveryQr
+              establishmentId={establishmentId}
+              establishmentName={establishments.find((item) => item.id === establishmentId)?.name ?? 'Établissement'}
+            />
+          )}
+          <button
+            onClick={() => setShowNewCustomer(true)}
+            disabled={!establishmentId || !programSettings.enabled}
+            className="flex w-fit items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-forest-light disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <Plus size={16} />
+            Nouveau client
+          </button>
+        </div>
       </div>
 
       {/* PROGRAM STATUS */}
