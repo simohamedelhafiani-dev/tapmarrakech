@@ -3,6 +3,7 @@ import {
   Eye,
   EyeOff,
   Gift,
+  Bell,
   Image as ImageIcon,
   Loader2,
   Plus,
@@ -49,6 +50,8 @@ export default function Promotions() {
   const [saving, setSaving] = useState(false);
   const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const [noticeMessage, setNoticeMessage] = useState('');
+  const [notifyMembers, setNotifyMembers] = useState(false);
 
   useEffect(() => {
     if (user?.id) void loadEstablishments();
@@ -120,6 +123,7 @@ export default function Promotions() {
 
     setSaving(true);
     setErrorMessage('');
+    setNoticeMessage('');
 
     const { data, error } = await supabase.functions.invoke(
       'generate-promotion-image',
@@ -145,6 +149,26 @@ export default function Promotions() {
       return;
     }
 
+    const promotionId = data?.promotion?.id;
+
+    if (notifyMembers && promotionId) {
+      const { data: pushData, error: pushError } = await supabase.functions.invoke(
+        'send-promotion-push',
+        { body: { promotion_id: promotionId, establishment_id: establishmentId } },
+      );
+
+      if (pushError || !pushData?.success) {
+        setNoticeMessage('Promotion publiée, mais les notifications n’ont pas pu être envoyées.');
+      } else if (Number(pushData.sent ?? 0) > 0) {
+        setNoticeMessage(\`Promotion publiée et envoyée à \${pushData.sent} client\${Number(pushData.sent) > 1 ? 's' : ''}.\`);
+      } else {
+        setNoticeMessage('Promotion publiée. Aucun client n’a encore activé les notifications.');
+      }
+    } else {
+      setNoticeMessage('Promotion publiée sur la page de l’établissement.');
+    }
+
+    setNotifyMembers(false);
     setForm(emptyForm);
     await loadPromotions();
     setSaving(false);
@@ -269,6 +293,12 @@ export default function Promotions() {
         </div>
       )}
 
+      {noticeMessage && (
+        <div className="rounded-2xl border border-green-200 bg-green-50 px-5 py-4 text-sm text-green-800">
+          {noticeMessage}
+        </div>
+      )}
+
       <section className="rounded-3xl border border-ink/10 bg-white p-6 shadow-sm md:p-8">
         <div className="flex items-start gap-4">
           <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gold/10 text-gold">
@@ -327,6 +357,24 @@ export default function Promotions() {
             />
           </label>
         </div>
+
+        <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-2xl border border-ink/10 bg-[#f7f7f3] px-4 py-4">
+          <input
+            type="checkbox"
+            checked={notifyMembers}
+            onChange={(event) => setNotifyMembers(event.target.checked)}
+            className="mt-1 h-4 w-4 accent-[#173D32]"
+          />
+          <span>
+            <span className="flex items-center gap-2 text-sm font-semibold text-forest">
+              <Bell size={16} />
+              Envoyer la promotion aux clients fidélité
+            </span>
+            <span className="mt-1 block text-xs leading-5 text-ink/45">
+              Les clients qui ont activé les notifications recevront la promotion directement sur leur téléphone.
+            </span>
+          </span>
+        </label>
 
         <div className="mt-5 flex justify-end">
           <button
