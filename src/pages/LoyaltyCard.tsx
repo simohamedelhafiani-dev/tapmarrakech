@@ -196,18 +196,10 @@ export default function LoyaltyCard() {
       setCard(nextCard);
       setHistory((historyData ?? []) as HistoryItem[]);
       setRewards((rewardsData ?? []) as LoyaltyExperienceReward[]);
-      const { data: promotionData } = await supabase
-        .from('promotions')
-        .select('id,name,description,promo_price,start_at,end_at,active')
-        .eq('establishment_id', nextCard.establishment_id)
-        .eq('active', true)
-        .order('display_order');
-      setPromotions(((promotionData ?? []) as Promotion[]).filter((promotion) => {
-        const now = Date.now();
-        const start = promotion.start_at ? new Date(promotion.start_at).getTime() : -Infinity;
-        const end = promotion.end_at ? new Date(promotion.end_at).getTime() : Infinity;
-        return start <= now && end >= now;
-      }));
+      const { data: promotionData } = await supabase.rpc('get_public_loyalty_available_promotions', {
+        p_access_token: token,
+      });
+      setPromotions((promotionData ?? []) as Promotion[]);
 
       const designRow = Array.isArray(designData) ? designData[0] : designData;
       if (designRow) {
@@ -280,18 +272,10 @@ export default function LoyaltyCard() {
       setHistory((historyData ?? []) as HistoryItem[]);
       setRewards((rewardsData ?? []) as LoyaltyExperienceReward[]);
       if (cardData?.[0]?.establishment_id) {
-        const { data: promotionData } = await supabase
-          .from('promotions')
-          .select('id,name,description,promo_price,start_at,end_at,active')
-          .eq('establishment_id', cardData[0].establishment_id)
-          .eq('active', true)
-          .order('display_order');
-        setPromotions(((promotionData ?? []) as Promotion[]).filter((promotion) => {
-          const now = Date.now();
-          const start = promotion.start_at ? new Date(promotion.start_at).getTime() : -Infinity;
-          const end = promotion.end_at ? new Date(promotion.end_at).getTime() : Infinity;
-          return start <= now && end >= now;
-        }));
+        const { data: promotionData } = await supabase.rpc('get_public_loyalty_available_promotions', {
+          p_access_token: token,
+        });
+        setPromotions((promotionData ?? []) as Promotion[]);
       }
       const programRow = Array.isArray(programData) ? programData[0] : programData;
       if (programRow) {
