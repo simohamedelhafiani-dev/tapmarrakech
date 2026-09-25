@@ -160,7 +160,7 @@ export default function Promotions() {
       if (pushError || !pushData?.success) {
         setNoticeMessage('Promotion publiée, mais les notifications n’ont pas pu être envoyées.');
       } else if (Number(pushData.sent ?? 0) > 0) {
-        setNoticeMessage(\`Promotion publiée et envoyée à \${pushData.sent} client\${Number(pushData.sent) > 1 ? 's' : ''}.\`);
+        setNoticeMessage(`Promotion publiée et envoyée à ${pushData.sent} client${Number(pushData.sent) > 1 ? 's' : ''}.`);
       } else {
         setNoticeMessage('Promotion publiée. Aucun client n’a encore activé les notifications.');
       }
