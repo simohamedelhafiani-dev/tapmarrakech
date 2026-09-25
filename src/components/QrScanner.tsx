@@ -10,6 +10,7 @@ export default function QrScanner({ onScan, onClose }: QrScannerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const scannerRef = useRef<QrScannerLib | null>(null);
   const onScanRef = useRef(onScan);
+  const scanLockedRef = useRef(false);
   const [error, setError] = useState('');
   const [torch, setTorch] = useState(false);
 
@@ -40,8 +41,13 @@ export default function QrScanner({ onScan, onClose }: QrScannerProps) {
           videoRef.current,
           result => {
             if (!active) return;
+            if (scanLockedRef.current) return;
             const value = typeof result === 'string' ? result : result.data;
-            if (value?.trim()) onScanRef.current(value.trim());
+            const trimmedValue = value?.trim();
+            if (!trimmedValue) return;
+            scanLockedRef.current = true;
+            scanner.stop();
+            onScanRef.current(trimmedValue);
           },
           {
             preferredCamera: 'environment',
