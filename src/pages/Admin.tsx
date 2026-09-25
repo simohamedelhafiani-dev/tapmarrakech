@@ -43,6 +43,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import LoyaltyProgramCustomization from '@/components/LoyaltyProgramCustomization';
+import LoyaltyCardRecoveryQr from '@/components/LoyaltyCardRecoveryQr';
 
 type Establishment = {
   id: string;
@@ -2056,6 +2057,21 @@ function EstablishmentWorkspace({
 
       {tab === 'loyalty' && (
         <div className="space-y-5">
+          <div className="rounded-2xl border border-gold/20 bg-[#fbf8ee] p-5">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Carte fidélité</p>
+                <h3 className="mt-1 text-lg font-semibold text-forest">Récupération client</h3>
+                <p className="mt-1 max-w-2xl text-xs leading-5 text-ink/45">
+                  Affichez ce QR code pour qu’un client puisse retrouver sa carte après avoir supprimé son raccourci ou changé de téléphone.
+                </p>
+              </div>
+              <LoyaltyCardRecoveryQr
+                establishmentId={establishment.id}
+                establishmentName={establishment.name}
+              />
+            </div>
+          </div>
           <LoyaltyProgramCustomization establishmentId={establishment.id} />
           <div className="grid gap-3 md:grid-cols-3">
             <StatCard label="Clients fidélité" value={customersCount} />
