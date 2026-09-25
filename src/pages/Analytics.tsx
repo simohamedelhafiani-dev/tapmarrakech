@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BarChart3, ExternalLink, MessageSquare, Percent, Star, Users } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
-import type { Review } from '@/lib/types';
 
 type Establishment = {
   id: string;
@@ -15,8 +14,6 @@ export default function Analytics() {
 
   const [establishments, setEstablishments] = useState<Establishment[]>([]);
   const [establishmentId, setEstablishmentId] = useState('');
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [events, setEvents] = useState<Array<{ id: string; establishment_id: string; event_type: string; rating: number | null; created_at: string }>>([]);
   const [dashboardStats, setDashboardStats] = useState<{
     reviewsCount: number;
     averageRating: number;
@@ -45,8 +42,6 @@ export default function Analytics() {
     if (establishmentId) {
       loadAnalytics();
     } else {
-      setReviews([]);
-      setEvents([]);
       setDashboardStats({ reviewsCount: 0, averageRating: 0, satisfactionPercent: 0, redirectsCount: 0, pageViewsCount: 0, feedbacksCount: 0, weekly: [], distribution: [] });
     }
   }, [establishmentId]);
@@ -90,8 +85,6 @@ export default function Analytics() {
 
     if (error) {
       console.error('Erreur chargement analytics:', error);
-      setReviews([]);
-      setEvents([]);
       setDashboardStats({ reviewsCount: 0, averageRating: 0, satisfactionPercent: 0, redirectsCount: 0, pageViewsCount: 0, feedbacksCount: 0, weekly: [], distribution: [] });
       return;
     }
