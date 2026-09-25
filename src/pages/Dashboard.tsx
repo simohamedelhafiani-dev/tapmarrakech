@@ -992,7 +992,7 @@ export default function Dashboard() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <Stat
           label="Avis reçus"
-          value={reviews.length}
+          value={serverStats ? serverStats.totalReviews : reviews.length}
           detail="Depuis le début"
           icon={MessageCircle}
           accent="bg-[#f4ead3] text-gold"
@@ -1010,10 +1010,8 @@ export default function Dashboard() {
           label="Avis positifs"
           value={positive}
           detail={
-            reviews.length
-              ? `${Math.round(
-                  (positive / reviews.length) * 100
-                )}% du total`
+            (serverStats ? serverStats.totalReviews : reviews.length)
+              ? `${Math.round((positive / (serverStats?.totalReviews ?? reviews.length)) * 100)}% du total`
               : 'Pas encore de données'
           }
           icon={TrendingUp}
