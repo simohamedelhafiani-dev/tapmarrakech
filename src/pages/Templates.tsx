@@ -2,16 +2,13 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   Check,
   Copy,
-  Eye,
   ImagePlus,
   LayoutTemplate,
   Menu,
   Pencil,
   Plus,
-  Power,
   Save,
   Star,
-  Trash2,
   X,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
@@ -445,85 +442,9 @@ export default function Templates() {
     await load();
   };
 
-  const toggleActive = async (template: Template) => {
-    if (template.source === 'builtin') return;
-    const { error } = await supabase
-      .from('templates')
-      .update({ active: !template.active, updated_at: new Date().toISOString() })
-      .eq('id', template.id);
 
-    if (error) {
-      alert(`Impossible de modifier le statut : ${error.message}`);
-      return;
-    }
 
-    await load();
-  };
 
-  const makeDefault = async (template: Template) => {
-    if (template.source === 'builtin') return;
-    const { error: clearError } = await supabase
-      .from('templates')
-      .update({ is_default: false })
-      .eq('kind', template.kind);
-
-    if (clearError) {
-      alert(`Impossible de définir le défaut : ${clearError.message}`);
-      return;
-    }
-
-    const { error } = await supabase
-      .from('templates')
-      .update({ is_default: true, active: true, updated_at: new Date().toISOString() })
-      .eq('id', template.id);
-
-    if (error) {
-      alert(`Impossible de définir le défaut : ${error.message}`);
-      return;
-    }
-
-    await load();
-  };
-
-  const remove = async (template: Template) => {
-    if (template.source === 'builtin') {
-      alert('Ce template fait partie de la bibliothèque native TapMarrakech et ne peut pas être supprimé.');
-      return;
-    }
-    const usedBy = establishments.filter(
-      (establishment) =>
-        establishment.page_template_id === template.id ||
-        establishment.menu_template_id === template.id
-    );
-
-    if (usedBy.length > 0) {
-      alert(
-        `Ce template est utilisé par ${usedBy.length} établissement(s). Désaffecte-le d'abord avant de le supprimer.`
-      );
-      return;
-    }
-
-    if (!window.confirm(`Supprimer « ${template.name} » ?`)) return;
-
-    const { error } = await supabase.from('templates').delete().eq('id', template.id);
-
-    if (error) {
-      alert(`Impossible de supprimer : ${error.message}`);
-      return;
-    }
-
-    await load();
-  };
-
-  const updateTemplateConfig = (patch: Record<string, any>) => {
-    setConfigText((current) => {
-      try {
-        return prettyJson({ ...JSON.parse(current || '{}'), ...patch });
-      } catch {
-        return prettyJson(patch);
-      }
-    });
-  };
 
   const uploadTemplateWallpaper = async (file: File) => {
     if (!previewing || !file.type.startsWith('image/')) return;
@@ -568,24 +489,7 @@ export default function Templates() {
     setPreviewing({ ...previewing, config });
   };
 
-  const assign = async (establishmentId: string, templateId: string) => {
-    if (kind === 'loyalty') return;
-    const column = kind === 'page' ? 'page_template_id' : 'menu_template_id';
 
-    const { error } = await supabase
-      .from('establishments')
-      .update({ [column]: templateId || null })
-      .eq('id', establishmentId);
-
-    if (error) {
-      alert(`Impossible d'affecter le template : ${error.message}`);
-      return;
-    }
-
-    await load();
-  };
-
-  const currentColumn = kind === 'page' ? 'page_template_id' : 'menu_template_id';
 
   return (
     <div className="space-y-8">
