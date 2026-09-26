@@ -330,7 +330,7 @@ export default function Dashboard() {
         error,
       } = await supabase
         .from('reviews')
-        .select('id, establishment_id, rating, type, comment, name, phone, email, status, created_at')
+        .select('id, establishment_id, rating, type, name, phone, email, status, created_at')
         .eq('establishment_id', selectedEstablishmentId)
         .order('created_at', {
           ascending: false,
