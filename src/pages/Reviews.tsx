@@ -67,7 +67,7 @@ type AIResponse = {
 };
 
 export default function Reviews() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
   const [reviews, setReviews] = useState<Review[]>([]);
   const [search, setSearch] = useState('');
@@ -75,6 +75,7 @@ export default function Reviews() {
   const [rating, setRating] = useState('Tous');
 
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
 
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState('');
@@ -91,6 +92,7 @@ export default function Reviews() {
       }
 
       setLoading(true);
+      setLoadError('');
 
       try {
         /*
@@ -110,6 +112,7 @@ export default function Reviews() {
           );
 
           setReviews([]);
+          setLoadError('Impossible de charger les établissements.');
           return;
         }
 
@@ -119,6 +122,7 @@ export default function Reviews() {
 
         if (!ids.length) {
           setReviews([]);
+          setLoadError('Impossible de charger les avis.');
           return;
         }
 
@@ -143,13 +147,15 @@ export default function Reviews() {
         }
 
         setReviews((data as Review[]) ?? []);
+        setLoadError('');
       } finally {
         setLoading(false);
       }
     };
 
-    load();
-  }, [user]);
+    if (authLoading) return;
+    void load();
+  }, [user, authLoading]);
 
   const filtered = useMemo(() => {
     return reviews.filter((review) => {
@@ -346,7 +352,7 @@ export default function Reviews() {
     }
   };
 
-  if (loading) {
+  if (loading && !loadError) {
     return (
       <div className="grid min-h-[400px] place-items-center">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
@@ -356,6 +362,7 @@ export default function Reviews() {
 
   return (
     <div>
+      {loadError && <DataLoadError message={loadError} onRetry={() => window.location.reload()} />}
       {/* HEADER */}
       <div className="mb-8">
         <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
