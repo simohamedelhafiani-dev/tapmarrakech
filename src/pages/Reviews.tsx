@@ -143,6 +143,7 @@ export default function Reviews() {
           );
 
           setReviews([]);
+          setLoadError('Impossible de charger les avis.');
           return;
         }
 
@@ -362,7 +363,12 @@ export default function Reviews() {
 
   return (
     <div>
-      {loadError && <DataLoadError message={loadError} onRetry={() => window.location.reload()} />}
+      {loadError && (
+        <DataLoadError
+          message={loadError}
+          onRetry={() => window.location.reload()}
+        />
+      )}
       {/* HEADER */}
       <div className="mb-8">
         <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
