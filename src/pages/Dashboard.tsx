@@ -167,6 +167,13 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<SubscriptionAccess | null>(null);
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
+  const [dashboardReviewStats, setDashboardReviewStats] = useState<{
+    reviews: number;
+    averageRating: number;
+    positiveReviews: number;
+    negativeReviews: number;
+    pendingNegativeReviews: number;
+  } | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -496,6 +503,52 @@ export default function Dashboard() {
       active = false;
     };
   }, [selectedEstablishmentId]);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadDashboardReviewStats = async () => {
+      if (authLoading || !user || !selectedEstablishmentId) {
+        if (!selectedEstablishmentId && active) {
+          setDashboardReviewStats(null);
+        }
+        return;
+      }
+
+      const { data, error } = await supabase.rpc('get_dashboard_program_stats', {
+        p_establishment_id: selectedEstablishmentId,
+        p_days: selected.days,
+      });
+
+      if (!active) return;
+
+      if (error) {
+        console.error('Erreur statistiques dashboard:', error);
+        setDashboardReviewStats(null);
+        return;
+      }
+
+      const row = Array.isArray(data) ? data[0] : data;
+      if (!row) {
+        setDashboardReviewStats(null);
+        return;
+      }
+
+      setDashboardReviewStats({
+        reviews: Number(row.reviews_count ?? 0),
+        averageRating: Number(row.average_rating ?? 0),
+        positiveReviews: Number(row.positive_reviews ?? 0),
+        negativeReviews: Number(row.negative_reviews ?? 0),
+        pendingNegativeReviews: Number(row.pending_negative_reviews ?? 0),
+      });
+    };
+
+    void loadDashboardReviewStats();
+
+    return () => {
+      active = false;
+    };
+  }, [authLoading, user, selectedEstablishmentId, selected.days]);
 
   const positive = reviews.filter(
     (review) => review.rating >= 4
@@ -861,7 +914,7 @@ export default function Dashboard() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <Stat
           label="Avis reçus"
-          value={reviews.length}
+          value={dashboardReviewStats?.reviews ?? reviews.length}
           detail="Depuis le début"
           icon={MessageCircle}
           accent="bg-[#f4ead3] text-gold"
@@ -869,7 +922,7 @@ export default function Dashboard() {
 
         <Stat
           label="Note moyenne"
-          value={average}
+          value={dashboardReviewStats ? dashboardReviewStats.averageRating.toFixed(1) : average}
           detail="Sur 5 étoiles"
           icon={Star}
           accent="bg-[#e5eee9] text-forest"
@@ -877,10 +930,10 @@ export default function Dashboard() {
 
         <Stat
           label="Avis positifs"
-          value={positive}
+          value={dashboardReviewStats?.positiveReviews ?? positive}
           detail={
-            reviews.length
-              ? `${Math.round((positive / reviews.length) * 100)}% du total`
+            (dashboardReviewStats?.reviews ?? reviews.length)
+              ? `${Math.round(((dashboardReviewStats?.positiveReviews ?? positive) / (dashboardReviewStats?.reviews ?? reviews.length)) * 100)}% du total`
               : 'Pas encore de données'
           }
           icon={TrendingUp}
@@ -889,7 +942,7 @@ export default function Dashboard() {
 
         <Stat
           label="Retours négatifs"
-          value={negative}
+          value={dashboardReviewStats?.negativeReviews ?? negative}
           detail="Notes de 1 à 3 étoiles"
           icon={TrendingDown}
           accent="bg-[#f4ead3] text-gold"
@@ -897,7 +950,7 @@ export default function Dashboard() {
 
         <Stat
           label="À traiter"
-          value={pending}
+          value={dashboardReviewStats?.pendingNegativeReviews ?? pending}
           detail="Retours en attente"
           icon={CheckCircle2}
           accent="bg-[#f4e4e1] text-[#a15c50]"
