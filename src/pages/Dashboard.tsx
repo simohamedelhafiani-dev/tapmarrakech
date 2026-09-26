@@ -704,6 +704,8 @@ export default function Dashboard() {
 
 
 
+  const displayAnalytics = analytics;
+
   const isResponsible = role === 'responsible';
 
   const selectedEstablishment =
@@ -879,9 +881,7 @@ export default function Dashboard() {
           detail={
             reviews.length
               ? `${Math.round((positive / reviews.length) * 100)}% du total`
-              : serverStatsLoading
-                ? 'Chargement des statistiques…'
-                : 'Pas encore de données'
+              : 'Pas encore de données'
           }
           icon={TrendingUp}
           accent="bg-[#e5eee9] text-forest"
