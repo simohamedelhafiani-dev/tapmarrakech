@@ -44,6 +44,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import LoyaltyProgramCustomization from '@/components/LoyaltyProgramCustomization';
 import LoyaltyCardRecoveryQr from '@/components/LoyaltyCardRecoveryQr';
+import { DataLoadError } from '@/components/DataLoadError';
 
 type Establishment = {
   id: string;
@@ -164,9 +165,11 @@ export default function Admin() {
 
   const [loading, setLoading] = useState(true);
   const [staffLoading, setStaffLoading] = useState(true);
+  const [dataLoadError, setDataLoadError] = useState('');
 
   const loadEstablishments = async () => {
     setLoading(true);
+    setDataLoadError('');
 
     const { data, error } = await supabase
       .from('establishments')
@@ -176,6 +179,7 @@ export default function Admin() {
     if (error) {
       console.error('Erreur établissements:', error);
       setEstablishments([]);
+      setDataLoadError('Impossible de charger les établissements.');
     } else {
       setEstablishments(data ?? []);
     }
@@ -193,6 +197,7 @@ export default function Admin() {
 
     if (staffError) {
       console.error('Erreur équipe:', staffError);
+      setDataLoadError('Impossible de charger l’équipe.');
       setStaff([]);
       setStaffLoading(false);
       return;
@@ -214,6 +219,7 @@ export default function Admin() {
 
     if (profilesError) {
       console.error('Erreur profils:', profilesError);
+      setDataLoadError('Impossible de charger les profils de l’équipe.');
       setStaff([]);
       setStaffLoading(false);
       return;
@@ -254,6 +260,7 @@ export default function Admin() {
 
     if (error) {
       console.error('Erreur types IA:', error);
+      setDataLoadError('Impossible de charger la configuration IA.');
       setAIBusinessTypes([]);
       return;
     }
@@ -278,6 +285,7 @@ export default function Admin() {
       });
     } catch (error) {
       console.error('Erreur statistiques globales:', error);
+      setDataLoadError('Impossible de charger les statistiques.');
       setGlobalStats({ reviews: 0, averageRating: 0, positiveReviews: 0, negativeReviews: 0, loyaltyCustomers: 0, analyticsEvents: 0 });
     }
   };
@@ -326,6 +334,7 @@ export default function Admin() {
       setBilling({ available: true, plans: (plans ?? []) as BillingPlan[], subscriptions: normalizedSubscriptions, paymentsThisMonth: paymentsThisMonth ?? 0, failedPayments: failedPayments ?? 0, overdueInvoices: overdueInvoices ?? 0, upcomingRenewals, mrr });
     } catch (error) {
       console.error('Erreur facturation:', error);
+      setDataLoadError('Impossible de charger les données de facturation.');
       setBilling(empty);
     }
   };
@@ -345,6 +354,7 @@ export default function Admin() {
   }, [authLoading, user]);
 
   const reloadAll = async () => {
+    setDataLoadError('');
     await Promise.all([
       loadEstablishments(),
       loadStaff(),
@@ -423,6 +433,7 @@ export default function Admin() {
 
   return (
     <div className="tm-theme min-h-screen bg-[var(--ink)] text-[var(--paper)]">
+      {dataLoadError && <div className="mx-auto max-w-[1600px] px-4 pt-4 lg:px-8"><DataLoadError message={dataLoadError} onRetry={() => void reloadAll()} /></div>}
       {open && (
         <button
           aria-label="Fermer le menu"
