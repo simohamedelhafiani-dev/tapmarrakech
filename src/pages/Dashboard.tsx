@@ -35,6 +35,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import type { Establishment, Review } from '@/lib/types';
 import { Stars } from '@/components/Stars';
 import { getMySubscriptionAccess, type SubscriptionAccess } from '@/lib/subscriptionAccess';
+import { DataLoadError } from '@/components/DataLoadError';
 
 type LoyaltyCustomer = {
   id: string;
@@ -167,6 +168,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<SubscriptionAccess | null>(null);
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
+  const [dataLoadError, setDataLoadError] = useState('');
   const [dashboardReviewStats, setDashboardReviewStats] = useState<{
     reviews: number;
     averageRating: number;
@@ -201,6 +203,7 @@ export default function Dashboard() {
   }, [selectedEstablishmentId]);
 
   useEffect(() => {
+    if (authLoading) return;
     if (!user) {
       setPlaces([]);
       setReviews([]);
@@ -257,6 +260,7 @@ export default function Dashboard() {
             'Erreur chargement établissements:',
             establishmentsError
           );
+          setDataLoadError('Impossible de charger les établissements.');
 
           setPlaces([]);
           setReviews([]);
@@ -303,6 +307,7 @@ export default function Dashboard() {
           'Erreur inattendue dashboard:',
           error
         );
+        setDataLoadError('Impossible de charger le tableau de bord.');
 
         setPlaces([]);
         setReviews([]);
@@ -347,6 +352,7 @@ export default function Dashboard() {
           'Erreur chargement avis:',
           error
         );
+        setDataLoadError('Impossible de charger les avis.');
 
         if (active) {
           setReviews([]);
@@ -390,6 +396,7 @@ export default function Dashboard() {
 
       if (error) {
         console.error('Erreur chargement fidélité:', error);
+        setDataLoadError('Impossible de charger les données fidélité.');
         if (active) setLoyaltyCustomers([]);
       } else if (active) {
         setLoyaltyCustomers((data as LoyaltyCustomer[]) ?? []);
@@ -422,6 +429,7 @@ export default function Dashboard() {
 
       if (error) {
         console.error('Erreur chargement paramètres fidélité:', error);
+        setDataLoadError('Impossible de charger les paramètres fidélité.');
         if (active) setPointsPerCurrency(1);
       } else if (active) {
         setPointsPerCurrency(Number(data?.points_per_currency || 1));
@@ -805,6 +813,7 @@ export default function Dashboard() {
 
   return (
     <div>
+      {dataLoadError && <DataLoadError message={dataLoadError} onRetry={() => window.location.reload()} />}
       {/* HEADER */}
 
       <div className="mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-end">
