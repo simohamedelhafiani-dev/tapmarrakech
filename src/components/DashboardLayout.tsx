@@ -94,7 +94,7 @@ export function DashboardLayout() {
   const [lastSeenNotificationsAt, setLastSeenNotificationsAt] = useState<string | null>(null);
   const [subscriptionTheme, setSubscriptionTheme] = useState<SubscriptionTheme>(() => getSubscriptionTheme(null));
 
-  const { signOut, user, role } = useAuth();
+  const { signOut, user, role, loading: authLoading } = useAuth();
   const { language, setLanguage } = useLanguage();
   const navigate = useNavigate();
 
@@ -104,6 +104,7 @@ export function DashboardLayout() {
     let active = true;
 
     const loadSubscriptionTheme = async () => {
+      if (authLoading) return;
       if (role !== 'responsible') {
         if (active) setSubscriptionTheme(getSubscriptionTheme(null));
         return;
@@ -133,7 +134,7 @@ export function DashboardLayout() {
       active = false;
       window.removeEventListener('tapmarrakech:establishment-changed', handleEstablishmentChanged);
     };
-  }, [role, user?.id]);
+  }, [authLoading, role, user?.id]);
 
   useEffect(() => {
     if (!notificationStorageKey) {
@@ -144,7 +145,7 @@ export function DashboardLayout() {
   }, [notificationStorageKey]);
 
   useEffect(() => {
-    if (!user?.id || !role) return;
+    if (authLoading || !user?.id || !role) return;
     let active = true;
 
     const loadNotifications = async () => {
@@ -282,7 +283,7 @@ export function DashboardLayout() {
 
     void loadNotifications();
     return () => { active = false; };
-  }, [user?.id, role]);
+  }, [authLoading, user?.id, role]);
 
   const unreadNotifications = notifications.filter((item) =>
     !lastSeenNotificationsAt || new Date(item.createdAt).getTime() > new Date(lastSeenNotificationsAt).getTime()
@@ -298,6 +299,7 @@ export function DashboardLayout() {
     let active = true;
 
     const loadProfile = async () => {
+      if (authLoading) return;
       if (!user?.id) {
         setProfileName(null);
         return;
@@ -335,7 +337,7 @@ export function DashboardLayout() {
     let active = true;
 
     const loadEstablishment = async () => {
-      if (role !== 'responsible' || !user?.id) {
+      if (authLoading || role !== 'responsible' || !user?.id) {
         setScannerUrl(null);
         return;
       }
