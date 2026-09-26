@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { BarChart3, ExternalLink, MessageSquare, Percent, Star, Users } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useAuth } from '@/contexts/AuthContext';
+import { DataLoadError } from '@/components/DataLoadError';
 import { supabase } from '@/lib/supabase';
 import type { AnalyticsEvent, Review } from '@/lib/types';
 
