@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { DataLoadError } from '@/components/DataLoadError';
 
 type Establishment = {
   id: string;
@@ -296,8 +297,7 @@ export default function Promotions() {
       </section>
 
       {errorMessage && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
-          {errorMessage}
+        <DataLoadError message={errorMessage} onRetry={() => { void loadEstablishments(); if (establishmentId) void loadPromotions(); }} />
         </div>
       )}
 
