@@ -557,6 +557,27 @@ export default function Dashboard() {
         setServerStatsLoading(false);
         return;
       }
+
+      // Never let an all-zero RPC payload hide data that the dashboard
+      // has already loaded successfully for the selected establishment.
+      const rpcHasData =
+        Number(row?.reviews_count ?? 0) > 0 ||
+        Number(row?.current_registrations ?? 0) > 0 ||
+        Number(row?.current_transactions ?? 0) > 0 ||
+        Number(row?.total_revenue ?? 0) > 0 ||
+        Number(row?.current_redemptions ?? 0) > 0;
+
+      if (
+        !rpcHasData &&
+        (reviews.length > 0 ||
+          loyaltyCustomers.length > 0 ||
+          loyaltyTransactions.length > 0)
+      ) {
+        setServerStats(null);
+        setServerStatsLoading(false);
+        return;
+      }
+
       setServerStats({
         totalReviews: Number(row?.reviews_count ?? 0),
         averageRating: Number(row?.average_rating ?? 0),
