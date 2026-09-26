@@ -171,6 +171,7 @@ export default function Menu() {
 
     if (error) {
       console.error('Erreur chargement template menu:', error);
+      setErrorMessage(error.message);
     }
 
     setMenuTemplates(LEGACY_MENU_TEMPLATES);
