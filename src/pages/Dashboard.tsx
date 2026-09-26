@@ -148,7 +148,7 @@ function Stat({
 }
 
 export default function Dashboard() {
-  const { user, role } = useAuth();
+  const { user, role, loading: authLoading } = useAuth();
 
   const [places, setPlaces] = useState<Establishment[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -306,7 +306,7 @@ export default function Dashboard() {
     };
 
     load();
-  }, [user, role]);
+  }, [user, role, authLoading]);
 
   /*
    * Charger uniquement les avis de l'établissement sélectionné.
