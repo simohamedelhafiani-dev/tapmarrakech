@@ -330,9 +330,7 @@ export default function Dashboard() {
         error,
       } = await supabase
         .from('reviews')
-        .select(
-          '*, establishment:establishments(name)'
-        )
+        .select('id, establishment_id, rating, type, comment, name, phone, email, status, created_at')
         .eq('establishment_id', selectedEstablishmentId)
         .order('created_at', {
           ascending: false,
@@ -538,16 +536,7 @@ export default function Dashboard() {
       const { data, error } = await supabase.rpc('get_dashboard_program_stats', {
         p_establishment_id: selectedEstablishmentId,
         p_days: selected.days,
-      });
-
-      console.info('[DASHBOARD_STATS_DIAG]', {
-        establishmentId: selectedEstablishmentId,
-        days: selected.days,
-        data,
-        error,
-        dataType: typeof data,
-        isArray: Array.isArray(data),
-      });
+      }).maybeSingle();
 
       if (!active) return;
 
