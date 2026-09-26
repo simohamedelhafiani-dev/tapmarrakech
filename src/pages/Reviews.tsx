@@ -14,6 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import type { Review } from '@/lib/types';
 import { Stars } from '@/components/Stars';
+import { DataLoadError } from '@/components/DataLoadError';
 
 type AIRecurringIssue = {
   topic: string;
