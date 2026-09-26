@@ -195,6 +195,7 @@ export default function Loyalty() {
       setCustomers((data as LoyaltyCustomer[]) ?? []);
     } else {
       console.error('Erreur chargement clients:', error);
+      setLoadError('Impossible de charger les clients fidélité.');
     }
   }
 
@@ -207,6 +208,7 @@ export default function Loyalty() {
 
     if (error) {
       console.error('Erreur chargement statistiques fidélité:', error);
+      setLoadError('Impossible de charger les statistiques fidélité.');
       setLoyaltyStats({
         customersCount: 0,
         pointsInCirculation: 0,
@@ -241,6 +243,7 @@ export default function Loyalty() {
         enabled: data.enabled ?? true,
       });
     } else {
+      if (error) setLoadError('Impossible de charger les paramètres fidélité.');
       setProgramSettings({
         points_per_currency: 1,
         currency: 'MAD',
@@ -258,6 +261,7 @@ export default function Loyalty() {
 
     if (error) {
       console.error('Erreur chargement carte fidélité publiée:', error);
+      setLoadError('Impossible de charger la carte fidélité publiée.');
       return;
     }
 
@@ -294,6 +298,7 @@ export default function Loyalty() {
       setRewards((data as LoyaltyReward[]) ?? []);
     } else {
       console.error('Erreur chargement récompenses:', error);
+      setLoadError('Impossible de charger les récompenses fidélité.');
       setRewards([]);
     }
   }
