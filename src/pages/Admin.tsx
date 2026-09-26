@@ -132,7 +132,7 @@ type AdminSection =
 
 export default function Admin() {
   const { language, setLanguage } = useLanguage();
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   const [section, setSection] = useState<AdminSection>('overview');
@@ -331,12 +331,18 @@ export default function Admin() {
   };
 
   useEffect(() => {
-    loadEstablishments();
-    loadStaff();
-    loadAIBusinessTypes();
-    loadGlobalStats();
-    loadBilling();
-  }, []);
+    if (authLoading || !user) {
+      return;
+    }
+
+    void Promise.all([
+      loadEstablishments(),
+      loadStaff(),
+      loadAIBusinessTypes(),
+      loadGlobalStats(),
+      loadBilling(),
+    ]);
+  }, [authLoading, user]);
 
   const reloadAll = async () => {
     await Promise.all([
