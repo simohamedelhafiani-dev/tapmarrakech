@@ -706,6 +706,19 @@ function Overview({
   const [detailLoading, setDetailLoading] = useState(false);
 
   useEffect(() => {
+    console.info('[ADMIN_DIAG] Overview render values', {
+      establishmentsLength: establishments.length,
+      staffLength: staff.length,
+      responsibleManagers: staff.filter((member) => member.role === 'MANAGER').length,
+      loading,
+      billingAvailable: billing.available,
+      billingMrr: billing.mrr,
+      billingSubscriptions: billing.subscriptions.length,
+      globalStats,
+    });
+  }, [establishments, staff, loading, billing, globalStats]);
+
+  useEffect(() => {
     if (selectedEstablishment === 'all') {
       setDetail((current) => ({
         ...current,
