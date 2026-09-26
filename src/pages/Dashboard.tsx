@@ -536,7 +536,7 @@ export default function Dashboard() {
       const { data, error } = await supabase.rpc('get_dashboard_program_stats', {
         p_establishment_id: selectedEstablishmentId,
         p_days: selected.days,
-      }).maybeSingle();
+      });
 
       if (!active) return;
 
@@ -547,6 +547,10 @@ export default function Dashboard() {
       }
 
       const row = Array.isArray(data) ? data[0] : data;
+      if (!row) {
+        setServerStats(null);
+        return;
+      }
       setServerStats({
         totalReviews: Number(row?.reviews_count ?? 0),
         averageRating: Number(row?.average_rating ?? 0),
