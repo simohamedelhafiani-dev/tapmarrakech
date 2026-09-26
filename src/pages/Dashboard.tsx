@@ -517,7 +517,7 @@ export default function Dashboard() {
 
       const { data, error } = await supabase.rpc('get_dashboard_program_stats', {
         p_establishment_id: selectedEstablishmentId,
-        p_days: selected.days,
+        p_days: (ranges.find((range) => range.key === period) ?? ranges[0]).days,
       });
 
       if (!active) return;
@@ -548,7 +548,7 @@ export default function Dashboard() {
     return () => {
       active = false;
     };
-  }, [authLoading, user, selectedEstablishmentId, selected.days]);
+  }, [authLoading, user, selectedEstablishmentId, period]);
 
   const positive = reviews.filter(
     (review) => review.rating >= 4
