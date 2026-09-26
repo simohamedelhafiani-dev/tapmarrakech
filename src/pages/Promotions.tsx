@@ -297,8 +297,13 @@ export default function Promotions() {
       </section>
 
       {errorMessage && (
-        <DataLoadError message={errorMessage} onRetry={() => { void loadEstablishments(); if (establishmentId) void loadPromotions(); }} />
-        </div>
+        <DataLoadError
+          message={errorMessage}
+          onRetry={() => {
+            void loadEstablishments();
+            if (establishmentId) void loadPromotions();
+          }}
+        />
       )}
 
       {noticeMessage && (
