@@ -529,77 +529,6 @@ export default function Dashboard() {
   useEffect(() => {
     let active = true;
 
-    const loadReviewStats = async () => {
-      if (!selectedEstablishmentId) return;
-
-      const { data, error } = await supabase.rpc('get_dashboard_review_stats', {
-        p_establishment_id: selectedEstablishmentId,
-      });
-
-      if (!active) return;
-
-      if (error) {
-        console.error('Erreur statistiques avis:', error);
-        return;
-      }
-
-      const row = Array.isArray(data) ? data[0] : data;
-      if (!row) return;
-
-      setServerStats((current) => ({
-        ...(current ?? {
-          totalReviews: 0,
-          averageRating: 0,
-          positive: 0,
-          negative: 0,
-          pending: 0,
-          currentReviews: 0,
-          reviewGrowth: 0,
-          currentRegistrations: 0,
-          registrationGrowth: 0,
-          returningRate: 0,
-          returningCustomers: 0,
-          activeRate: 0,
-          activeCustomers: 0,
-          redemptionRate: 0,
-          pointsEarned: 0,
-          pointsRedeemed: 0,
-          visits: 0,
-          currentRevenue: 0,
-          previousRevenue: 0,
-          revenueGrowth: 0,
-          totalRevenue: 0,
-          currentTransactions: 0,
-          averageBasket: 0,
-          currentRedemptions: 0,
-          previousRedemptions: 0,
-          redemptionGrowth: 0,
-          pointsRedeemedOnPeriod: 0,
-          rewardValueOnPeriod: 0,
-          previousRewardValue: 0,
-          redemptionRevenue: 0,
-          rewardEfficiency: 0,
-          rewardCostOnPeriod: 0,
-          netContribution: 0,
-          realROI: 0,
-        }),
-        totalReviews: Number(row.reviews_count ?? 0),
-        averageRating: Number(row.average_rating ?? 0),
-        positive: Number(row.positive_reviews ?? 0),
-        negative: Number(row.negative_reviews ?? 0),
-        pending: Number(row.pending_negative_reviews ?? 0),
-      }));
-    };
-
-    void loadReviewStats();
-
-    return () => {
-      active = false;
-    };
-  }, [selectedEstablishmentId]);
-  useEffect(() => {
-    let active = true;
-
     const loadServerStats = async () => {
       if (!selectedEstablishmentId) {
         setServerStats(null);
@@ -877,12 +806,15 @@ export default function Dashboard() {
 
   // Les statistiques serveur complètent les données déjà chargées localement.
   // En cas de problème réseau/RPC, le Dashboard conserve donc son comportement existant.
+  // The reviews query is the dashboard's local source of truth for these cards.
+  // Server stats remain a fallback when the local review list is unavailable.
+  const hasLocalReviewStats = reviews.length > 0;
   const dashboardStats = {
-    totalReviews: serverStats?.totalReviews ?? reviews.length,
-    averageRating: serverStats?.averageRating ?? Number(average === '—' ? 0 : average),
-    positive: serverStats?.positive ?? positive,
-    negative: serverStats?.negative ?? negative,
-    pending: serverStats?.pending ?? pending,
+    totalReviews: hasLocalReviewStats ? reviews.length : (serverStats?.totalReviews ?? 0),
+    averageRating: hasLocalReviewStats ? Number(average) : (serverStats?.averageRating ?? 0),
+    positive: hasLocalReviewStats ? positive : (serverStats?.positive ?? 0),
+    negative: hasLocalReviewStats ? negative : (serverStats?.negative ?? 0),
+    pending: hasLocalReviewStats ? pending : (serverStats?.pending ?? 0),
   };
 
   const isResponsible = role === 'responsible';
