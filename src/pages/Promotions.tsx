@@ -41,7 +41,7 @@ const emptyForm = {
 };
 
 export default function Promotions() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [establishments, setEstablishments] = useState<Establishment[]>([]);
   const [establishmentId, setEstablishmentId] = useState('');
   const [promotions, setPromotions] = useState<Promotion[]>([]);
@@ -54,8 +54,9 @@ export default function Promotions() {
   const [notifyMembers, setNotifyMembers] = useState(false);
 
   useEffect(() => {
-    if (user?.id) void loadEstablishments();
-  }, [user?.id]);
+    if (authLoading || !user?.id) return;
+    void loadEstablishments();
+  }, [authLoading, user?.id]);
 
   useEffect(() => {
     if (establishmentId) void loadPromotions();
