@@ -45,24 +45,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let active = true;
 
     const loadSession = async () => {
-      const { data } = await supabase.auth.getSession();
+      try {
+        const { data } = await supabase.auth.getSession();
 
-      if (!active) return;
+        if (!active) return;
 
-      setSession(data.session);
+        setSession(data.session);
 
-      if (data.session?.user) {
-        await loadProfile(data.session.user.id);
-      } else {
-        setRole(null);
-      }
+        if (data.session?.user) {
+          await loadProfile(data.session.user.id);
+        } else {
+          setRole(null);
+        }
+      } catch (error) {
+        console.error('Erreur chargement de la session:', error);
 
-      if (active) {
-        setLoading(false);
+        if (active) {
+          setSession(null);
+          setRole(null);
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
       }
     };
 
-    loadSession();
+    void loadSession();
 
     const {
       data: { subscription },
@@ -82,9 +91,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       setTimeout(() => {
         if (!active) return;
-        void loadProfile(nextSession.user.id).finally(() => {
-          if (active) setLoading(false);
-        });
+
+        void (async () => {
+          try {
+            await loadProfile(nextSession.user.id);
+          } catch (error) {
+            console.error('Erreur chargement du profil après changement de session:', error);
+          } finally {
+            if (active) {
+              setLoading(false);
+            }
+          }
+        })();
       }, 0);
     });
 
