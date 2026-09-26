@@ -540,6 +540,15 @@ export default function Dashboard() {
         p_days: selected.days,
       });
 
+      console.info('[DASHBOARD_STATS_DIAG]', {
+        establishmentId: selectedEstablishmentId,
+        days: selected.days,
+        data,
+        error,
+        dataType: typeof data,
+        isArray: Array.isArray(data),
+      });
+
       if (!active) return;
 
       if (error) {
@@ -1008,10 +1017,10 @@ export default function Dashboard() {
 
         <Stat
           label="Avis positifs"
-          value={positive}
+          value={serverStats ? serverStats.positive : positive}
           detail={
             (serverStats ? serverStats.totalReviews : reviews.length)
-              ? `${Math.round((positive / (serverStats?.totalReviews ?? reviews.length)) * 100)}% du total`
+              ? `${Math.round(((serverStats ? serverStats.positive : positive) / (serverStats?.totalReviews ?? reviews.length)) * 100)}% du total`
               : 'Pas encore de données'
           }
           icon={TrendingUp}
