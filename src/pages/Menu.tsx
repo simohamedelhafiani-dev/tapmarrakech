@@ -498,8 +498,6 @@ export default function Menu() {
 
   if (loading && establishments.length === 0) {
     return (
-    <>
-      {errorMessage && <DataLoadError message={errorMessage} onRetry={() => { if (establishmentId) void loadMenu(); else void loadEstablishments(); }} />}
       <div className="flex min-h-[400px] items-center justify-center">
         <div className="text-sm text-ink/50">Chargement du menu…</div>
       </div>
@@ -508,10 +506,7 @@ export default function Menu() {
 
   if (errorMessage && establishments.length === 0) {
     return (
-      <div className="rounded-3xl border border-red-200 bg-red-50 p-8 text-red-700">
-        <p className="font-semibold">Impossible de charger le menu.</p>
-        <p className="mt-2 text-sm">{errorMessage}</p>
-      </div>
+      <DataLoadError message={errorMessage} onRetry={() => void loadEstablishments()} />
     );
   }
 
@@ -531,6 +526,7 @@ export default function Menu() {
 
   return (
     <div className="space-y-8">
+      {errorMessage && <DataLoadError message={errorMessage} onRetry={() => void loadMenu()} />}
       {menuTemplates.length > 0 && (
         <section className="rounded-2xl border border-ink/10 bg-white p-5 shadow-sm">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
