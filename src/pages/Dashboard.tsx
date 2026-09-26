@@ -167,8 +167,6 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<SubscriptionAccess | null>(null);
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
-  const [serverStats, setServerStats] = useState<Record<string, number> | null>(null);
-  const [serverStatsLoading, setServerStatsLoading] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -331,7 +329,7 @@ export default function Dashboard() {
         error,
       } = await supabase
         .from('reviews')
-        .select('id, establishment_id, rating, type, name, phone, email, status, created_at')
+        .select('*, establishment:establishments(name)')
         .eq('establishment_id', selectedEstablishmentId)
         .order('created_at', {
           ascending: false,
@@ -526,104 +524,6 @@ export default function Dashboard() {
     ranges.find((range) => range.key === period) ??
     ranges[0];
 
-  useEffect(() => {
-    let active = true;
-
-    const loadServerStats = async () => {
-      if (!selectedEstablishmentId) {
-        setServerStats(null);
-        setServerStatsLoading(false);
-        return;
-      }
-
-      setServerStatsLoading(true);
-
-      const { data, error } = await supabase.rpc('get_dashboard_program_stats', {
-        p_establishment_id: selectedEstablishmentId,
-        p_days: selected.days,
-      });
-
-      if (!active) return;
-
-      if (error) {
-        console.error('Erreur statistiques serveur:', error);
-        setServerStats(null);
-        setServerStatsLoading(false);
-        return;
-      }
-
-      const row = Array.isArray(data) ? data[0] : data;
-      if (!row) {
-        setServerStats(null);
-        setServerStatsLoading(false);
-        return;
-      }
-
-      // Never let an all-zero RPC payload hide data that the dashboard
-      // has already loaded successfully for the selected establishment.
-      const rpcHasData =
-        Number(row?.reviews_count ?? 0) > 0 ||
-        Number(row?.current_registrations ?? 0) > 0 ||
-        Number(row?.current_transactions ?? 0) > 0 ||
-        Number(row?.total_revenue ?? 0) > 0 ||
-        Number(row?.current_redemptions ?? 0) > 0;
-
-      if (
-        !rpcHasData &&
-        (reviews.length > 0 ||
-          loyaltyCustomers.length > 0 ||
-          loyaltyTransactions.length > 0)
-      ) {
-        setServerStats(null);
-        setServerStatsLoading(false);
-        return;
-      }
-
-      setServerStats({
-        totalReviews: Number(row?.reviews_count ?? 0),
-        averageRating: Number(row?.average_rating ?? 0),
-        positive: Number(row?.positive_reviews ?? 0),
-        negative: Number(row?.negative_reviews ?? 0),
-        pending: Number(row?.pending_negative_reviews ?? 0),
-        currentReviews: Number(row?.current_reviews ?? 0),
-        reviewGrowth: Number(row?.review_growth ?? 0),
-        currentRegistrations: Number(row?.current_registrations ?? 0),
-        registrationGrowth: Number(row?.registration_growth ?? 0),
-        returningRate: Number(row?.returning_rate ?? 0),
-        returningCustomers: Number(row?.returning_customers ?? 0),
-        activeRate: Number(row?.active_rate ?? 0),
-        activeCustomers: Number(row?.active_customers ?? 0),
-        redemptionRate: Number(row?.redemption_rate ?? 0),
-        pointsEarned: Number(row?.points_earned ?? 0),
-        pointsRedeemed: Number(row?.points_redeemed ?? 0),
-        visits: Number(row?.visits ?? 0),
-        currentRevenue: Number(row?.current_revenue ?? 0),
-        previousRevenue: Number(row?.previous_revenue ?? 0),
-        revenueGrowth: Number(row?.revenue_growth ?? 0),
-        totalRevenue: Number(row?.total_revenue ?? 0),
-        currentTransactions: Number(row?.current_transactions ?? 0),
-        averageBasket: Number(row?.average_basket ?? 0),
-        currentRedemptions: Number(row?.current_redemptions ?? 0),
-        previousRedemptions: Number(row?.previous_redemptions ?? 0),
-        redemptionGrowth: Number(row?.redemption_growth ?? 0),
-        pointsRedeemedOnPeriod: Number(row?.points_redeemed_on_period ?? 0),
-        rewardValueOnPeriod: Number(row?.reward_value_on_period ?? 0),
-        previousRewardValue: Number(row?.previous_reward_value ?? 0),
-        redemptionRevenue: Number(row?.redemption_revenue ?? 0),
-        rewardEfficiency: Number(row?.reward_efficiency ?? 0),
-        rewardCostOnPeriod: Number(row?.reward_cost_on_period ?? 0),
-        netContribution: Number(row?.net_contribution ?? 0),
-        realROI: row?.real_roi == null ? 0 : Number(row.real_roi),
-      });
-      setServerStatsLoading(false);
-    };
-
-    void loadServerStats();
-
-    return () => {
-      active = false;
-    };
-  }, [selectedEstablishmentId, selected.days, reviews.length, loyaltyCustomers.length, loyaltyTransactions.length]);
 
 
   const chart = useMemo(() => {
@@ -802,20 +702,7 @@ export default function Dashboard() {
     };
   }, [reviews, loyaltyCustomers, loyaltyTransactions, loyaltyRedemptions, pointsPerCurrency, selected.days]);
 
-  const displayAnalytics = { ...analytics, ...(serverStats ?? {}) };
 
-  // Les statistiques serveur complètent les données déjà chargées localement.
-  // En cas de problème réseau/RPC, le Dashboard conserve donc son comportement existant.
-  // The reviews query is the dashboard's local source of truth for these cards.
-  // Server stats remain a fallback when the local review list is unavailable.
-  const hasLocalReviewStats = reviews.length > 0;
-  const dashboardStats = {
-    totalReviews: hasLocalReviewStats ? reviews.length : (serverStats?.totalReviews ?? 0),
-    averageRating: hasLocalReviewStats ? Number(average) : (serverStats?.averageRating ?? 0),
-    positive: hasLocalReviewStats ? positive : (serverStats?.positive ?? 0),
-    negative: hasLocalReviewStats ? negative : (serverStats?.negative ?? 0),
-    pending: hasLocalReviewStats ? pending : (serverStats?.pending ?? 0),
-  };
 
   const isResponsible = role === 'responsible';
 
@@ -972,7 +859,7 @@ export default function Dashboard() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <Stat
           label="Avis reçus"
-          value={serverStatsLoading && reviews.length === 0 ? '…' : dashboardStats.totalReviews}
+          value={reviews.length}
           detail="Depuis le début"
           icon={MessageCircle}
           accent="bg-[#f4ead3] text-gold"
@@ -980,7 +867,7 @@ export default function Dashboard() {
 
         <Stat
           label="Note moyenne"
-          value={serverStatsLoading && reviews.length === 0 ? '…' : dashboardStats.averageRating.toFixed(1)}
+          value={average}
           detail="Sur 5 étoiles"
           icon={Star}
           accent="bg-[#e5eee9] text-forest"
@@ -988,10 +875,10 @@ export default function Dashboard() {
 
         <Stat
           label="Avis positifs"
-          value={serverStatsLoading && reviews.length === 0 ? '…' : dashboardStats.positive}
+          value={positive}
           detail={
-            dashboardStats.totalReviews
-              ? `${Math.round((dashboardStats.positive / dashboardStats.totalReviews) * 100)}% du total`
+            reviews.length
+              ? `${Math.round((positive / reviews.length) * 100)}% du total`
               : serverStatsLoading
                 ? 'Chargement des statistiques…'
                 : 'Pas encore de données'
@@ -1002,7 +889,7 @@ export default function Dashboard() {
 
         <Stat
           label="Retours négatifs"
-          value={serverStatsLoading && reviews.length === 0 ? '…' : dashboardStats.negative}
+          value={negative}
           detail="Notes de 1 à 3 étoiles"
           icon={TrendingDown}
           accent="bg-[#f4ead3] text-gold"
@@ -1010,7 +897,7 @@ export default function Dashboard() {
 
         <Stat
           label="À traiter"
-          value={serverStatsLoading && reviews.length === 0 ? '…' : dashboardStats.pending}
+          value={pending}
           detail="Retours en attente"
           icon={CheckCircle2}
           accent="bg-[#f4e4e1] text-[#a15c50]"
