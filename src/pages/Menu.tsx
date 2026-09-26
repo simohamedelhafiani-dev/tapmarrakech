@@ -87,7 +87,7 @@ const emptyItemForm: ItemForm = {
 };
 
 export default function Menu() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
   const [establishments, setEstablishments] = useState<Establishment[]>([]);
   const [establishmentId, setEstablishmentId] = useState('');
@@ -114,10 +114,11 @@ export default function Menu() {
   const [expandedCategoryIds, setExpandedCategoryIds] = useState<string[]>([]);
 
   useEffect(() => {
+    if (authLoading) return;
     if (user?.id) {
       loadEstablishments();
     }
-  }, [user?.id]);
+  }, [authLoading, user?.id]);
 
   useEffect(() => {
     if (establishmentId) {
