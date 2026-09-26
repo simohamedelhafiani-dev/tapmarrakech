@@ -525,6 +525,78 @@ export default function Dashboard() {
   const selected =
     ranges.find((range) => range.key === period) ??
     ranges[0];
+
+  useEffect(() => {
+    let active = true;
+
+    const loadReviewStats = async () => {
+      if (!selectedEstablishmentId) return;
+
+      const { data, error } = await supabase.rpc('get_dashboard_review_stats', {
+        p_establishment_id: selectedEstablishmentId,
+      });
+
+      if (!active) return;
+
+      if (error) {
+        console.error('Erreur statistiques avis:', error);
+        return;
+      }
+
+      const row = Array.isArray(data) ? data[0] : data;
+      if (!row) return;
+
+      setServerStats((current) => ({
+        ...(current ?? {
+          totalReviews: 0,
+          averageRating: 0,
+          positive: 0,
+          negative: 0,
+          pending: 0,
+          currentReviews: 0,
+          reviewGrowth: 0,
+          currentRegistrations: 0,
+          registrationGrowth: 0,
+          returningRate: 0,
+          returningCustomers: 0,
+          activeRate: 0,
+          activeCustomers: 0,
+          redemptionRate: 0,
+          pointsEarned: 0,
+          pointsRedeemed: 0,
+          visits: 0,
+          currentRevenue: 0,
+          previousRevenue: 0,
+          revenueGrowth: 0,
+          totalRevenue: 0,
+          currentTransactions: 0,
+          averageBasket: 0,
+          currentRedemptions: 0,
+          previousRedemptions: 0,
+          redemptionGrowth: 0,
+          pointsRedeemedOnPeriod: 0,
+          rewardValueOnPeriod: 0,
+          previousRewardValue: 0,
+          redemptionRevenue: 0,
+          rewardEfficiency: 0,
+          rewardCostOnPeriod: 0,
+          netContribution: 0,
+          realROI: 0,
+        }),
+        totalReviews: Number(row.reviews_count ?? 0),
+        averageRating: Number(row.average_rating ?? 0),
+        positive: Number(row.positive_reviews ?? 0),
+        negative: Number(row.negative_reviews ?? 0),
+        pending: Number(row.pending_negative_reviews ?? 0),
+      }));
+    };
+
+    void loadReviewStats();
+
+    return () => {
+      active = false;
+    };
+  }, [selectedEstablishmentId]);
   useEffect(() => {
     let active = true;
 
