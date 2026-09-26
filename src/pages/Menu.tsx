@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { DataLoadError } from '@/components/DataLoadError';
 
 type Establishment = {
   id: string;
@@ -497,6 +498,8 @@ export default function Menu() {
 
   if (loading && establishments.length === 0) {
     return (
+    <>
+      {errorMessage && <DataLoadError message={errorMessage} onRetry={() => { if (establishmentId) void loadMenu(); else void loadEstablishments(); }} />}
       <div className="flex min-h-[400px] items-center justify-center">
         <div className="text-sm text-ink/50">Chargement du menu…</div>
       </div>
