@@ -165,7 +165,7 @@ export function DashboardLayout() {
 
         const reviewQuery = scope(
           supabase.from('reviews')
-            .select('id,rating,content,created_at,establishment_id')
+            .select('id,rating,comment,created_at,establishment_id')
             .gte('created_at', since)
             .order('created_at', { ascending: false })
             .limit(100)
