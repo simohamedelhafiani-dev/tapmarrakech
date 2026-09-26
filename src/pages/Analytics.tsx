@@ -69,6 +69,8 @@ export default function Analytics() {
   async function loadAnalytics() {
     if (!establishmentId) return;
 
+    setLoadError('');
+
     const [r, e] = await Promise.all([
       supabase
         .from('reviews')
@@ -82,6 +84,7 @@ export default function Analytics() {
 
     if (r.error) {
       console.error('Erreur chargement avis:', r.error);
+      setLoadError('Impossible de charger les avis.');
     }
 
     if (e.error) {
@@ -135,7 +138,12 @@ export default function Analytics() {
 
   return (
     <div>
-      {loadError && <DataLoadError message={loadError} onRetry={() => void loadEstablishments()} />}
+      {loadError && (
+        <DataLoadError
+          message={loadError}
+          onRetry={() => (establishmentId ? void loadAnalytics() : void loadEstablishments())}
+        />
+      )}
       <div className="mb-8">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">
           Comprendre votre audience
