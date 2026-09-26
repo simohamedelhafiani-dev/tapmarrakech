@@ -66,7 +66,7 @@ type LoyaltyReward = {
 };
 
 export default function Loyalty() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
   const [establishments, setEstablishments] = useState<Establishment[]>([]);
   const [establishmentId, setEstablishmentId] = useState('');
@@ -94,6 +94,7 @@ export default function Loyalty() {
 
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [saving, setSaving] = useState(false);
   const [redeeming, setRedeeming] = useState(false);
 
@@ -125,8 +126,9 @@ export default function Loyalty() {
   const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'CARD' | 'OTHER'>('CASH');
 
   useEffect(() => {
-    loadEstablishments();
-  }, [user]);
+    if (authLoading || !user) return;
+    void loadEstablishments();
+  }, [authLoading, user]);
 
   useEffect(() => {
     if (establishmentId) {
@@ -142,6 +144,7 @@ export default function Loyalty() {
     if (!user) return;
 
     setLoading(true);
+    setLoadError('');
 
     const { data, error } = await supabase
       .rpc('get_my_establishments');
@@ -173,6 +176,7 @@ export default function Loyalty() {
       }
     } else {
       console.error('Erreur chargement établissements:', error);
+      setLoadError('Impossible de charger les établissements.');
     }
 
     setLoading(false);
@@ -542,6 +546,7 @@ export default function Loyalty() {
 
   return (
     <div>
+      {loadError && <DataLoadError message={loadError} onRetry={() => void loadEstablishments()} />}
       {/* HEADER */}
       <div className="mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-end">
         <div>
