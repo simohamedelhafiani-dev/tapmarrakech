@@ -27,7 +27,7 @@ const empty = {
 };
 
 export default function Establishments() {
-  const { user, role } = useAuth();
+  const { user, role, loading: authLoading } = useAuth();
 
   const [places, setPlaces] = useState<Establishment[]>([]);
   const [form, setForm] = useState(empty);
@@ -39,6 +39,7 @@ export default function Establishments() {
   const [scannerLinks, setScannerLinks] = useState<Record<string, string>>({});
 
   useEffect(() => {
+    if (authLoading) return;
     if (!user) {
       setPlaces([]);
       setLoading(false);
@@ -125,7 +126,7 @@ export default function Establishments() {
     };
 
     loadEstablishments();
-  }, [user, role]);
+  }, [authLoading, user, role]);
 
   const publicUrl = (slug: string) =>
     `${window.location.origin}/p/${slug}`;
@@ -331,6 +332,8 @@ export default function Establishments() {
   return (
     <div>
       {/* HEADER */}
+
+      {message && message.toLowerCase().includes('impossible') && <DataLoadError message={message} onRetry={() => window.location.reload()} />}
 
       <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
