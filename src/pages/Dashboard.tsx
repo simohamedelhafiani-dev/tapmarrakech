@@ -168,6 +168,7 @@ export default function Dashboard() {
   const [subscription, setSubscription] = useState<SubscriptionAccess | null>(null);
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
   const [serverStats, setServerStats] = useState<Record<string, number> | null>(null);
+  const [serverStatsLoading, setServerStatsLoading] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -530,8 +531,11 @@ export default function Dashboard() {
     const loadServerStats = async () => {
       if (!selectedEstablishmentId) {
         setServerStats(null);
+        setServerStatsLoading(false);
         return;
       }
+
+      setServerStatsLoading(true);
 
       const { data, error } = await supabase.rpc('get_dashboard_program_stats', {
         p_establishment_id: selectedEstablishmentId,
@@ -543,12 +547,14 @@ export default function Dashboard() {
       if (error) {
         console.error('Erreur statistiques serveur:', error);
         setServerStats(null);
+        setServerStatsLoading(false);
         return;
       }
 
       const row = Array.isArray(data) ? data[0] : data;
       if (!row) {
         setServerStats(null);
+        setServerStatsLoading(false);
         return;
       }
       setServerStats({
@@ -587,6 +593,7 @@ export default function Dashboard() {
         netContribution: Number(row?.net_contribution ?? 0),
         realROI: row?.real_roi == null ? 0 : Number(row.real_roi),
       });
+      setServerStatsLoading(false);
     };
 
     void loadServerStats();
@@ -774,6 +781,16 @@ export default function Dashboard() {
   }, [reviews, loyaltyCustomers, loyaltyTransactions, loyaltyRedemptions, pointsPerCurrency, selected.days]);
 
   const displayAnalytics = { ...analytics, ...(serverStats ?? {}) };
+
+  // Les statistiques serveur complètent les données déjà chargées localement.
+  // En cas de problème réseau/RPC, le Dashboard conserve donc son comportement existant.
+  const dashboardStats = {
+    totalReviews: serverStats?.totalReviews ?? reviews.length,
+    averageRating: serverStats?.averageRating ?? Number(average === '—' ? 0 : average),
+    positive: serverStats?.positive ?? positive,
+    negative: serverStats?.negative ?? negative,
+    pending: serverStats?.pending ?? pending,
+  };
 
   const isResponsible = role === 'responsible';
 
@@ -994,7 +1011,7 @@ export default function Dashboard() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <Stat
           label="Avis reçus"
-          value={serverStats ? serverStats.totalReviews : reviews.length}
+          value={serverStatsLoading && reviews.length === 0 ? '…' : dashboardStats.totalReviews}
           detail="Depuis le début"
           icon={MessageCircle}
           accent="bg-[#f4ead3] text-gold"
@@ -1002,7 +1019,7 @@ export default function Dashboard() {
 
         <Stat
           label="Note moyenne"
-          value={serverStats ? serverStats.averageRating.toFixed(1) : average}
+          value={serverStatsLoading && reviews.length === 0 ? '…' : dashboardStats.averageRating.toFixed(1)}
           detail="Sur 5 étoiles"
           icon={Star}
           accent="bg-[#e5eee9] text-forest"
@@ -1010,11 +1027,13 @@ export default function Dashboard() {
 
         <Stat
           label="Avis positifs"
-          value={serverStats ? serverStats.positive : positive}
+          value={serverStatsLoading && reviews.length === 0 ? '…' : dashboardStats.positive}
           detail={
-            (serverStats ? serverStats.totalReviews : reviews.length)
-              ? `${Math.round(((serverStats ? serverStats.positive : positive) / (serverStats?.totalReviews ?? reviews.length)) * 100)}% du total`
-              : 'Pas encore de données'
+            dashboardStats.totalReviews
+              ? `${Math.round((dashboardStats.positive / dashboardStats.totalReviews) * 100)}% du total`
+              : serverStatsLoading
+                ? 'Chargement des statistiques…'
+                : 'Pas encore de données'
           }
           icon={TrendingUp}
           accent="bg-[#e5eee9] text-forest"
@@ -1022,7 +1041,7 @@ export default function Dashboard() {
 
         <Stat
           label="Retours négatifs"
-          value={serverStats ? serverStats.negative : negative}
+          value={serverStatsLoading && reviews.length === 0 ? '…' : dashboardStats.negative}
           detail="Notes de 1 à 3 étoiles"
           icon={TrendingDown}
           accent="bg-[#f4ead3] text-gold"
@@ -1030,7 +1049,7 @@ export default function Dashboard() {
 
         <Stat
           label="À traiter"
-          value={serverStats ? serverStats.pending : pending}
+          value={serverStatsLoading && reviews.length === 0 ? '…' : dashboardStats.pending}
           detail="Retours en attente"
           icon={CheckCircle2}
           accent="bg-[#f4e4e1] text-[#a15c50]"
