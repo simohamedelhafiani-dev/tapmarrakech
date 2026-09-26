@@ -622,7 +622,7 @@ export default function Dashboard() {
     return () => {
       active = false;
     };
-  }, [selectedEstablishmentId, selected.days]);
+  }, [selectedEstablishmentId, selected.days, reviews.length, loyaltyCustomers.length, loyaltyTransactions.length]);
 
 
   const chart = useMemo(() => {
