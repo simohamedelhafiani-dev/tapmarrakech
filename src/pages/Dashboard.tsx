@@ -942,6 +942,58 @@ export default function Dashboard() {
 
       )}
 
+      {/* STATISTIQUES */}
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <Stat
+          label="Avis reçus"
+          value={serverStatsLoading && reviews.length === 0 ? '…' : dashboardStats.totalReviews}
+          detail="Depuis le début"
+          icon={MessageCircle}
+          accent="bg-[#f4ead3] text-gold"
+        />
+
+        <Stat
+          label="Note moyenne"
+          value={serverStatsLoading && reviews.length === 0 ? '…' : dashboardStats.averageRating.toFixed(1)}
+          detail="Sur 5 étoiles"
+          icon={Star}
+          accent="bg-[#e5eee9] text-forest"
+        />
+
+        <Stat
+          label="Avis positifs"
+          value={serverStatsLoading && reviews.length === 0 ? '…' : dashboardStats.positive}
+          detail={
+            dashboardStats.totalReviews
+              ? `${Math.round((dashboardStats.positive / dashboardStats.totalReviews) * 100)}% du total`
+              : serverStatsLoading
+                ? 'Chargement des statistiques…'
+                : 'Pas encore de données'
+          }
+          icon={TrendingUp}
+          accent="bg-[#e5eee9] text-forest"
+        />
+
+        <Stat
+          label="Retours négatifs"
+          value={serverStatsLoading && reviews.length === 0 ? '…' : dashboardStats.negative}
+          detail="Notes de 1 à 3 étoiles"
+          icon={TrendingDown}
+          accent="bg-[#f4ead3] text-gold"
+        />
+
+        <Stat
+          label="À traiter"
+          value={serverStatsLoading && reviews.length === 0 ? '…' : dashboardStats.pending}
+          detail="Retours en attente"
+          icon={CheckCircle2}
+          accent="bg-[#f4e4e1] text-[#a15c50]"
+        />
+      </div>
+
+
+
       {/* ACCÈS RAPIDES */}
 
       <section className="mb-8 rounded-2xl border border-ink/5 bg-white p-5 shadow-soft md:p-7">
@@ -1005,56 +1057,6 @@ export default function Dashboard() {
           })}
         </div>
       </section>
-
-      {/* STATISTIQUES */}
-
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <Stat
-          label="Avis reçus"
-          value={serverStatsLoading && reviews.length === 0 ? '…' : dashboardStats.totalReviews}
-          detail="Depuis le début"
-          icon={MessageCircle}
-          accent="bg-[#f4ead3] text-gold"
-        />
-
-        <Stat
-          label="Note moyenne"
-          value={serverStatsLoading && reviews.length === 0 ? '…' : dashboardStats.averageRating.toFixed(1)}
-          detail="Sur 5 étoiles"
-          icon={Star}
-          accent="bg-[#e5eee9] text-forest"
-        />
-
-        <Stat
-          label="Avis positifs"
-          value={serverStatsLoading && reviews.length === 0 ? '…' : dashboardStats.positive}
-          detail={
-            dashboardStats.totalReviews
-              ? `${Math.round((dashboardStats.positive / dashboardStats.totalReviews) * 100)}% du total`
-              : serverStatsLoading
-                ? 'Chargement des statistiques…'
-                : 'Pas encore de données'
-          }
-          icon={TrendingUp}
-          accent="bg-[#e5eee9] text-forest"
-        />
-
-        <Stat
-          label="Retours négatifs"
-          value={serverStatsLoading && reviews.length === 0 ? '…' : dashboardStats.negative}
-          detail="Notes de 1 à 3 étoiles"
-          icon={TrendingDown}
-          accent="bg-[#f4ead3] text-gold"
-        />
-
-        <Stat
-          label="À traiter"
-          value={serverStatsLoading && reviews.length === 0 ? '…' : dashboardStats.pending}
-          detail="Retours en attente"
-          icon={CheckCircle2}
-          accent="bg-[#f4e4e1] text-[#a15c50]"
-        />
-      </div>
 
       {/* PILOTAGE DU PROGRAMME */}
 
