@@ -16,6 +16,7 @@ import { defaultLoyaltyDesignConfig } from '@/components/LoyaltyCardVisual';
 import { LoyaltyExperience } from '@/components/loyalty/LoyaltyExperience';
 import { useAuth } from '@/contexts/AuthContext';
 import LoyaltyCardRecoveryQr from '@/components/LoyaltyCardRecoveryQr';
+import { DataLoadError } from '@/components/DataLoadError';
 
 type Establishment = {
   id: string;
