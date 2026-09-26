@@ -12,16 +12,18 @@ type Establishment = {
 };
 
 export default function Analytics() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
   const [establishments, setEstablishments] = useState<Establishment[]>([]);
   const [establishmentId, setEstablishmentId] = useState('');
   const [reviews, setReviews] = useState<Review[]>([]);
   const [events, setEvents] = useState<AnalyticsEvent[]>([]);
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
-    loadEstablishments();
-  }, [user]);
+    if (authLoading || !user) return;
+    void loadEstablishments();
+  }, [authLoading, user]);
 
   useEffect(() => {
     if (establishmentId) {
@@ -39,6 +41,7 @@ export default function Analytics() {
 
     if (error) {
       console.error('Erreur chargement établissements:', error);
+      setLoadError('Impossible de charger les établissements.');
       setEstablishments([]);
       setEstablishmentId('');
       return;
@@ -51,6 +54,7 @@ export default function Analytics() {
       })
     );
 
+    setLoadError('');
     setEstablishments(places);
 
     if (places.length > 0) {
@@ -82,7 +86,9 @@ export default function Analytics() {
 
     if (e.error) {
       console.error('Erreur chargement analytics:', e.error);
+      setLoadError('Impossible de charger les analytics.');
     }
+    if (!r.error && !e.error) setLoadError('');
 
     setReviews((r.data as Review[]) ?? []);
     setEvents((e.data as AnalyticsEvent[]) ?? []);
@@ -129,6 +135,7 @@ export default function Analytics() {
 
   return (
     <div>
+      {loadError && <DataLoadError message={loadError} onRetry={() => void loadEstablishments()} />}
       <div className="mb-8">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">
           Comprendre votre audience
