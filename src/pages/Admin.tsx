@@ -171,10 +171,19 @@ export default function Admin() {
     setLoading(true);
     setDataLoadError('');
 
+    console.info('[ADMIN_DIAG] loadEstablishments start');
+
     const { data, error } = await supabase
       .from('establishments')
       .select('id, name, slug, ai_business_type_id, created_at')
       .order('created_at', { ascending: false });
+
+    console.info('[ADMIN_DIAG] loadEstablishments response', {
+      data,
+      error,
+      dataType: typeof data,
+      isArray: Array.isArray(data),
+    });
 
     if (error) {
       console.error('Erreur établissements:', error);
@@ -270,9 +279,22 @@ export default function Admin() {
 
   const loadGlobalStats = async () => {
     try {
+      console.info('[ADMIN_DIAG] loadGlobalStats start', {
+        rpc: 'get_admin_dashboard_stats',
+        p_establishment_id: null,
+      });
+
       const { data, error } = await supabase.rpc('get_admin_dashboard_stats', {
         p_establishment_id: null,
       });
+
+      console.info('[ADMIN_DIAG] loadGlobalStats RPC response', {
+        data,
+        error,
+        dataType: typeof data,
+        isArray: Array.isArray(data),
+      });
+
       if (error) throw error;
       const row = Array.isArray(data) ? data[0] : data;
       setGlobalStats({
@@ -293,6 +315,16 @@ export default function Admin() {
   const loadBilling = async () => {
     const empty: BillingSnapshot = { available: false, plans: [], subscriptions: [], paymentsThisMonth: 0, failedPayments: 0, overdueInvoices: 0, upcomingRenewals: 0, mrr: 0 };
     try {
+      console.info('[ADMIN_DIAG] loadBilling start', {
+        calls: [
+          'subscription_plans',
+          'subscriptions',
+          'payments_this_month',
+          'failed_payments',
+          'overdue_invoices',
+        ],
+      });
+
       const [
         { data: plans, error: plansError },
         { data: subscriptions, error: subscriptionsError },
@@ -306,6 +338,21 @@ export default function Admin() {
         supabase.from('payments').select('id', { count: 'exact', head: true }).eq('status', 'failed'),
         supabase.from('invoices').select('id', { count: 'exact', head: true }).eq('status', 'overdue'),
       ]);
+
+      console.info('[ADMIN_DIAG] loadBilling response', {
+        plans,
+        subscriptions,
+        plansError,
+        subscriptionsError,
+        paymentsThisMonth,
+        failedPayments,
+        overdueInvoices,
+        plansDataType: typeof plans,
+        subscriptionsDataType: typeof subscriptions,
+        plansIsArray: Array.isArray(plans),
+        subscriptionsIsArray: Array.isArray(subscriptions),
+      });
+
       if (plansError || subscriptionsError) {
         if (plansError) console.error('Erreur plans:', plansError);
         if (subscriptionsError) console.error('Erreur abonnements:', subscriptionsError);
