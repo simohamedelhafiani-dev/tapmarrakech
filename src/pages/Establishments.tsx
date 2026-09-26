@@ -16,6 +16,7 @@ import QRCode from 'qrcode';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import type { Establishment } from '@/lib/types';
+import { DataLoadError } from '@/components/DataLoadError';
 
 const empty = {
   name: '',
