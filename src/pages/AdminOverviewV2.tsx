@@ -1,4 +1,4 @@
-import { useAdminOverviewStatsV2 } from '@/hooks/useAdminOverviewStatsV2';
+import { useAdminOverviewStatsV2 } from '@/hooks/useAdminOverviewV2Stats';
 
 export default function AdminOverviewV2() {
   const state = useAdminOverviewStatsV2();
