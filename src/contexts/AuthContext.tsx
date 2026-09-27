@@ -26,6 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const loadProfile = async (userId: string) => {
+    console.log('[Auth] LOAD PROFILE START', { userId });
     const { data, error } = await supabase
       .from('profiles')
       .select('role')
@@ -38,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    console.log('[Auth] LOAD PROFILE COMPLETE', { role: data?.role ?? null });
     setRole((data?.role as UserRole) ?? null);
   };
 
@@ -45,7 +47,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let active = true;
 
     const loadSession = async () => {
+      console.log('[Auth] GET SESSION START');
       const { data } = await supabase.auth.getSession();
+      console.log('[Auth] GET SESSION RESULT', { hasSession: Boolean(data.session) });
 
       if (!active) return;
 
@@ -58,6 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (active) {
+        console.log('[Auth] SET LOADING FALSE (SESSION)');
         setLoading(false);
       }
     };
@@ -73,17 +78,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (!nextSession?.user) {
         setRole(null);
+        console.log('[Auth] SET LOADING FALSE (SIGNED OUT)');
         setLoading(false);
         return;
       }
 
       // Do not await Supabase profile queries inside onAuthStateChange.
       // Supabase can hold the auth lock while this callback runs.
+      console.log('[Auth] SET LOADING TRUE (AUTH EVENT)');
       setLoading(true);
       setTimeout(() => {
         if (!active) return;
         void loadProfile(nextSession.user.id).finally(() => {
-          if (active) setLoading(false);
+          if (active) {
+            console.log('[Auth] SET LOADING FALSE (PROFILE EVENT)');
+            setLoading(false);
+          }
         });
       }, 0);
     });
