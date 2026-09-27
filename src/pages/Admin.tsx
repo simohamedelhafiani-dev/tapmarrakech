@@ -262,9 +262,8 @@ export default function Admin() {
 
   const loadGlobalStats = async () => {
     try {
-      const { data, error } = await supabase.rpc('get_dashboard_stats', {
+      const { data, error } = await supabase.rpc('get_admin_dashboard_stats', {
         p_establishment_id: null,
-        p_days: 30,
       });
       if (error) throw error;
       const row = Array.isArray(data) ? data[0] : data;
@@ -554,7 +553,7 @@ export default function Admin() {
             <Overview
               establishments={establishments}
               staff={staff}
-              loading={loading || staffLoading}
+              loading={loading}
               onNavigate={setSection}
               billing={billing}
               globalStats={globalStats}
@@ -647,25 +646,41 @@ function Overview({
 
   useEffect(() => {
     let mounted = true;
+
     const load = async () => {
       setDetailLoading(true);
+
+      if (selectedEstablishment === 'all') {
+        if (mounted) {
+          setDetail({
+            reviews: globalStats.reviews,
+            averageRating: globalStats.averageRating,
+            loyaltyCustomers: globalStats.loyaltyCustomers,
+            analyticsEvents: globalStats.analyticsEvents,
+            loyaltyRevenue: 0,
+          });
+          setDetailLoading(false);
+        }
+        return;
+      }
+
       try {
-        const { data, error } = await supabase.rpc('get_dashboard_stats', {
-          p_establishment_id: selectedEstablishment === 'all' ? null : selectedEstablishment,
-          p_days: 30,
+        const { data, error } = await supabase.rpc('get_admin_dashboard_stats', {
+          p_establishment_id: selectedEstablishment,
         });
         if (error) throw error;
         if (!mounted) return;
+
         const row = Array.isArray(data) ? data[0] : data;
         setDetail({
           reviews: Number(row?.reviews_count ?? 0),
           averageRating: Number(row?.average_rating ?? 0),
           loyaltyCustomers: Number(row?.loyalty_customers_count ?? 0),
           analyticsEvents: Number(row?.analytics_events_count ?? 0),
-          loyaltyRevenue: Number(row?.total_revenue ?? 0),
+          loyaltyRevenue: 0,
         });
       } catch (error) {
-        console.error('Erreur statistiques Admin:', error);
+        console.error('Erreur statistiques établissement Admin:', error);
         if (mounted) {
           setDetail({ reviews: 0, averageRating: 0, loyaltyCustomers: 0, analyticsEvents: 0, loyaltyRevenue: 0 });
         }
@@ -673,9 +688,10 @@ function Overview({
         if (mounted) setDetailLoading(false);
       }
     };
+
     void load();
     return () => { mounted = false; };
-  }, [selectedEstablishment]);
+  }, [selectedEstablishment, globalStats]);
 
   const responsibles = staff.filter((member) => member.role === 'MANAGER');
   const activeSubscriptions = billing.subscriptions.filter((item) => item.status === 'active').length;
