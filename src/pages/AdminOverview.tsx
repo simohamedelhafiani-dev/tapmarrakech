@@ -18,6 +18,12 @@ const formatPercent = (value: number) =>
 export default function AdminOverview() {
   const { stats, loading, error } = useAdminOverviewStats();
 
+  console.log('[AdminOverview COMPONENT]', {
+    loading,
+    reviews: stats.reviewsCount,
+    rating: stats.averageRating,
+  });
+
   const rating = stats.averageRating.toLocaleString('fr-FR', {
     minimumFractionDigits: 1,
     maximumFractionDigits: 1,
