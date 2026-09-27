@@ -230,6 +230,7 @@ export function useAdminOverviewStats(periodDays = 30) {
         row as DashboardStatsRpcRow,
       );
 
+      console.log('[AdminOverview] SET STATS', nextStats);
       setStats(nextStats);
     } catch (loadError) {
       console.error(
@@ -237,10 +238,13 @@ export function useAdminOverviewStats(periodDays = 30) {
         loadError,
       );
 
-      setStats({
+      const emptyStats = {
         ...EMPTY_ADMIN_OVERVIEW_STATS,
         periodDays,
-      });
+      };
+
+      console.log('[AdminOverview] SET STATS AFTER ERROR', emptyStats);
+      setStats(emptyStats);
 
       setError(
         loadError instanceof Error
@@ -248,6 +252,7 @@ export function useAdminOverviewStats(periodDays = 30) {
           : 'Impossible de charger les statistiques.',
       );
     } finally {
+      console.log('[AdminOverview] LOADING COMPLETE');
       setLoading(false);
     }
   }, [periodDays]);
