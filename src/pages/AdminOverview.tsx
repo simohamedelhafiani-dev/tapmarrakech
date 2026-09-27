@@ -17,6 +17,13 @@ const formatPercent = (value: number) =>
   })} %`;
 
 export default function AdminOverview() {
+  console.log('[AdminOverview] ENVIRONMENT', {
+    mode: import.meta.env.MODE,
+    dev: import.meta.env.DEV,
+    prod: import.meta.env.PROD,
+    url: window.location.href,
+  });
+
   const { stats, loading, error } = useAdminOverviewStats();
 
   console.log('[AdminOverview COMPONENT]', {
