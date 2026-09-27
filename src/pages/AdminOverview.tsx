@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useAdminOverviewStats } from '../hooks/useAdminOverviewStats';
 
 const formatNumber = (value: number) =>
@@ -32,6 +33,15 @@ export default function AdminOverview() {
   const reviewPositiveRate = stats.reviewsCount
     ? (stats.positiveReviewsCount / stats.reviewsCount) * 100
     : 0;
+
+  useEffect(() => {
+    console.log('[AdminOverview DOM]', {
+      loading,
+      hasReviews11: document.body.innerText.includes('11'),
+      hasRating41: document.body.innerText.includes('4,1'),
+      bodyPreview: document.body.innerText.slice(0, 1200),
+    });
+  }, [loading, stats.reviewsCount, stats.averageRating]);
 
   return (
     <section className="min-h-full bg-[#F6F7F5] px-4 py-6 sm:px-6 lg:px-8">
