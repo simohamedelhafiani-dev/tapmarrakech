@@ -1,76 +1,119 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
-export type AdminOverviewV2Stats = {
+export type AdminOverviewStats = {
   reviews: number;
-  rating: number;
+  averageRating: number;
   loyaltyCustomers: number;
   analyticsEvents: number;
 };
 
-const INITIAL_STATS: AdminOverviewV2Stats | null = null;
+type StatsState = {
+  status: 'loading' | 'success' | 'error';
+  data: AdminOverviewStats | null;
+  error: string | null;
+};
 
-function toNumber(value: unknown): number {
-  return typeof value === 'number' ? value : Number(value ?? 0);
+const INITIAL_STATE: StatsState = {
+  status: 'loading',
+  data: null,
+  error: null,
+};
+
+function numberValue(value: unknown): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
-export function useAdminOverviewV2Stats() {
-  const [stats, setStats] = useState<AdminOverviewV2Stats | null>(INITIAL_STATS);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export function useAdminOverviewStatsV2() {
+  const [state, setState] = useState<StatsState>(INITIAL_STATE);
 
   useEffect(() => {
-    let active = true;
+    let mounted = true;
 
-    const load = async () => {
-      setLoading(true);
-      setError(null);
+    console.log('[AdminOverviewV2] MOUNT');
+
+    const loadStats = async () => {
+      console.log('[AdminOverviewV2] NETWORK START');
 
       try {
-        const { data, error: rpcError } = await supabase.rpc('get_dashboard_stats', {
-          p_establishment_id: null,
-          p_days: 30,
+        const { data, error } = await supabase.rpc(
+          'get_dashboard_stats',
+          {
+            p_establishment_id: null,
+            p_days: 30,
+          },
+        );
+
+        console.log('[AdminOverviewV2] NETWORK RESPONSE', {
+          hasData: Boolean(data),
+          error,
         });
 
-        if (rpcError) throw rpcError;
+        if (error) throw error;
 
         const row = Array.isArray(data) ? data[0] : data;
-        if (!row) throw new Error('Aucune statistique retournée.');
 
-        const nextStats: AdminOverviewV2Stats = {
-          reviews: toNumber(row.reviews_count),
-          rating: toNumber(row.average_rating),
-          loyaltyCustomers: toNumber(row.loyalty_customers_count),
-          analyticsEvents: toNumber(row.analytics_events_count),
+        if (!row) {
+          throw new Error('Aucune statistique retournée.');
+        }
+
+        const nextData: AdminOverviewStats = {
+          reviews: numberValue(row.reviews_count),
+          averageRating: numberValue(row.average_rating),
+          loyaltyCustomers: numberValue(row.loyalty_customers_count),
+          analyticsEvents: numberValue(row.analytics_events_count),
         };
 
-        if (!active) return;
+        console.log('[AdminOverviewV2] DATA RECEIVED', nextData);
 
-        setStats(nextStats);
-        console.log('[AdminOverviewV2] STATS WRITTEN', nextStats);
+        if (!mounted) {
+          console.log('[AdminOverviewV2] COMPONENT NO LONGER MOUNTED');
+          return;
+        }
+
+        const nextState: StatsState = {
+          status: 'success',
+          data: nextData,
+          error: null,
+        };
+
+        console.log('[AdminOverviewV2] STATE WRITE', nextState);
+
+        setState(nextState);
+
+        console.log('[AdminOverviewV2] STATE WRITE COMPLETE');
       } catch (loadError) {
-        if (!active) return;
+        if (!mounted) {
+          return;
+        }
 
         const message =
           loadError instanceof Error
             ? loadError.message
             : 'Impossible de charger les statistiques.';
 
-        setError(message);
-        console.error('[AdminOverviewV2] LOAD ERROR', loadError);
-      } finally {
-        if (active) {
-          setLoading(false);
-        }
+        const nextState: StatsState = {
+          status: 'error',
+          data: null,
+          error: message,
+        };
+
+        console.log('[AdminOverviewV2] STATE ERROR WRITE', nextState);
+
+        setState(nextState);
       }
     };
 
-    void load();
+    void loadStats();
 
     return () => {
-      active = false;
+      console.log('[AdminOverviewV2] UNMOUNT');
+      mounted = false;
     };
   }, []);
 
-  return { stats, loading, error };
+  console.log('[AdminOverviewV2] RENDER STATE', state);
+
+  return state;
 }
