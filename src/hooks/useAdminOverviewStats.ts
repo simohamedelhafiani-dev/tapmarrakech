@@ -258,8 +258,14 @@ export function useAdminOverviewStats(periodDays = 30) {
   }, [periodDays]);
 
   useEffect(() => {
+    console.log('[AdminOverview] HOOK MOUNT', { periodDays });
+
     void loadStats();
-  }, [loadStats]);
+
+    return () => {
+      console.log('[AdminOverview] HOOK UNMOUNT', { periodDays });
+    };
+  }, [loadStats, periodDays]);
 
   console.log('[AdminOverview] RENDER', {
     loading,
