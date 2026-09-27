@@ -109,7 +109,7 @@ export default function AdminOverview() {
           <MetricCard
             testId="admin-overview-reviews"
             label="Avis reçus"
-            value="TEST-11"
+            value={String(stats.reviewsCount)}
             detail={
               loading
                 ? 'Chargement…'
