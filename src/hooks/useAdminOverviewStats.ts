@@ -261,6 +261,11 @@ export function useAdminOverviewStats(periodDays = 30) {
     void loadStats();
   }, [loadStats]);
 
+  console.log('[AdminOverview] RENDER', {
+    loading,
+    stats,
+  });
+
   return {
     stats,
     loading,
