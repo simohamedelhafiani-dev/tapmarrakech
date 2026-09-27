@@ -262,22 +262,46 @@ export default function Admin() {
 
   const loadGlobalStats = async () => {
     try {
-      const { data, error } = await supabase.rpc('get_admin_dashboard_stats', {
-        p_establishment_id: null,
-      });
-      if (error) throw error;
-      const row = Array.isArray(data) ? data[0] : data;
+      const [
+        { data: reviewRows, error: reviewsError },
+        { count: loyaltyCustomers, error: loyaltyError },
+        { count: analyticsEvents, error: analyticsError },
+      ] = await Promise.all([
+        supabase.from('reviews').select('rating'),
+        supabase.from('loyalty_customers').select('id', { count: 'exact', head: true }),
+        supabase.from('analytics_events').select('id', { count: 'exact', head: true }),
+      ]);
+
+      if (reviewsError || loyaltyError || analyticsError) {
+        throw reviewsError ?? loyaltyError ?? analyticsError;
+      }
+
+      const ratings = (reviewRows ?? [])
+        .map((row) => Number(row.rating))
+        .filter((rating) => Number.isFinite(rating));
+
+      const averageRating = ratings.length
+        ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length
+        : 0;
+
       setGlobalStats({
-        reviews: Number(row?.reviews_count ?? 0),
-        averageRating: Number(row?.average_rating ?? 0),
-        positiveReviews: Number(row?.positive_reviews_count ?? 0),
-        negativeReviews: Number(row?.negative_reviews_count ?? 0),
-        loyaltyCustomers: Number(row?.loyalty_customers_count ?? 0),
-        analyticsEvents: Number(row?.analytics_events_count ?? 0),
+        reviews: ratings.length,
+        averageRating,
+        positiveReviews: ratings.filter((rating) => rating >= 4).length,
+        negativeReviews: ratings.filter((rating) => rating <= 3).length,
+        loyaltyCustomers: loyaltyCustomers ?? 0,
+        analyticsEvents: analyticsEvents ?? 0,
       });
     } catch (error) {
       console.error('Erreur statistiques globales:', error);
-      setGlobalStats({ reviews: 0, averageRating: 0, positiveReviews: 0, negativeReviews: 0, loyaltyCustomers: 0, analyticsEvents: 0 });
+      setGlobalStats({
+        reviews: 0,
+        averageRating: 0,
+        positiveReviews: 0,
+        negativeReviews: 0,
+        loyaltyCustomers: 0,
+        analyticsEvents: 0,
+      });
     }
   };
 
@@ -665,24 +689,43 @@ function Overview({
       }
 
       try {
-        const { data, error } = await supabase.rpc('get_admin_dashboard_stats', {
-          p_establishment_id: selectedEstablishment,
-        });
-        if (error) throw error;
+        const [
+          { data: reviewRows, error: reviewsError },
+          { count: loyaltyCustomers, error: loyaltyError },
+          { count: analyticsEvents, error: analyticsError },
+        ] = await Promise.all([
+          supabase.from('reviews').select('rating').eq('establishment_id', selectedEstablishment),
+          supabase.from('loyalty_customers').select('id', { count: 'exact', head: true }).eq('establishment_id', selectedEstablishment),
+          supabase.from('analytics_events').select('id', { count: 'exact', head: true }).eq('establishment_id', selectedEstablishment),
+        ]);
+
+        if (reviewsError || loyaltyError || analyticsError) {
+          throw reviewsError ?? loyaltyError ?? analyticsError;
+        }
+
         if (!mounted) return;
 
-        const row = Array.isArray(data) ? data[0] : data;
+        const ratings = (reviewRows ?? [])
+          .map((row) => Number(row.rating))
+          .filter((rating) => Number.isFinite(rating));
+
         setDetail({
-          reviews: Number(row?.reviews_count ?? 0),
-          averageRating: Number(row?.average_rating ?? 0),
-          loyaltyCustomers: Number(row?.loyalty_customers_count ?? 0),
-          analyticsEvents: Number(row?.analytics_events_count ?? 0),
+          reviews: ratings.length,
+          averageRating: ratings.length ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length : 0,
+          loyaltyCustomers: loyaltyCustomers ?? 0,
+          analyticsEvents: analyticsEvents ?? 0,
           loyaltyRevenue: 0,
         });
       } catch (error) {
         console.error('Erreur statistiques établissement Admin:', error);
         if (mounted) {
-          setDetail({ reviews: 0, averageRating: 0, loyaltyCustomers: 0, analyticsEvents: 0, loyaltyRevenue: 0 });
+          setDetail({
+            reviews: 0,
+            averageRating: 0,
+            loyaltyCustomers: 0,
+            analyticsEvents: 0,
+            loyaltyRevenue: 0,
+          });
         }
       } finally {
         if (mounted) setDetailLoading(false);
@@ -733,8 +776,8 @@ function Overview({
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
-        <AdminMetric icon={Building2} label="Établissements" value={loading ? '—' : establishments.length} detail="sur la plateforme" />
-        <AdminMetric icon={UserRound} label="Responsables" value={loading ? '—' : responsibles.length} detail="comptes actifs" />
+        <AdminMetric icon={Building2} label="Établissements" value={establishments.length} detail="sur la plateforme" />
+        <AdminMetric icon={UserRound} label="Responsables" value={responsibles.length} detail="comptes actifs" />
         <AdminMetric icon={UsersRound} label="Clients fidélisés" value={detailLoading ? '—' : detail.loyaltyCustomers.toLocaleString('fr-FR')} detail="membres enregistrés" />
         <AdminMetric icon={Star} label="Note moyenne" value={detailLoading ? '—' : detail.averageRating.toFixed(1)} detail={detail.reviews ? `sur ${detail.reviews.toLocaleString('fr-FR')} avis` : 'sur 0 avis'} />
         <AdminMetric icon={MessageSquare} label="Avis reçus" value={detailLoading ? '—' : detail.reviews.toLocaleString('fr-FR')} detail={selectedName} />
