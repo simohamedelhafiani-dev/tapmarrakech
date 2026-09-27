@@ -26,6 +26,10 @@ export default function AdminOverview() {
 
   const { stats, loading, error } = useAdminOverviewStats();
 
+  console.log('[AdminOverview] HOOK INPUTS', {
+    periodDays: 30,
+  });
+
   console.log('[AdminOverview COMPONENT]', {
     loading,
     reviews: stats.reviewsCount,
