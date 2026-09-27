@@ -171,7 +171,7 @@ export function DashboardLayout() {
 
         const reviewQuery = scope(
           supabase.from('reviews')
-            .select('id,rating,content,created_at,establishment_id')
+            .select('id,rating,comment,created_at,establishment_id')
             .gte('created_at', since)
             .order('created_at', { ascending: false })
             .limit(100)
@@ -223,7 +223,7 @@ export function DashboardLayout() {
         const reviewNotifications: AppNotification[] = (reviewRows ?? []).map((review) => ({
           id: `review-${review.id}`,
           title: 'Nouvel avis client',
-          description: `Note ${review.rating}/5${review.content ? ` — ${String(review.content).slice(0, 90)}` : ''}`,
+          description: `Note ${review.rating}/5${review.comment ? ` — ${String(review.comment).slice(0, 90)}` : ''}`,
           createdAt: review.created_at,
           tone: Number(review.rating) <= 3 ? 'alert' : 'review',
         }));
