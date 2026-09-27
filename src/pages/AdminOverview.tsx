@@ -17,6 +17,11 @@ const formatPercent = (value: number) =>
   })} %`;
 
 export default function AdminOverview() {
+  useEffect(() => {
+    console.log('[AdminOverview COMPONENT] MOUNT');
+    return () => console.log('[AdminOverview COMPONENT] UNMOUNT');
+  }, []);
+
   console.log('[AdminOverview] ENVIRONMENT', {
     mode: import.meta.env.MODE,
     dev: import.meta.env.DEV,
