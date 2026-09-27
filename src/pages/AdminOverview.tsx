@@ -35,11 +35,15 @@ export default function AdminOverview() {
     : 0;
 
   useEffect(() => {
-    console.log('[AdminOverview DOM]', {
+    const card = document.querySelector(
+      '[data-testid="admin-overview-reviews"]',
+    );
+
+    console.log('[AdminOverview DOM TARGET]', {
       loading,
-      hasReviews11: document.body.innerText.includes('11'),
-      hasRating41: document.body.innerText.includes('4,1'),
-      bodyPreview: document.body.innerText.slice(0, 1200),
+      cardFound: Boolean(card),
+      cardText: card?.textContent ?? null,
+      cardHtml: card?.outerHTML.slice(0, 1000) ?? null,
     });
   }, [loading, stats.reviewsCount, stats.averageRating]);
 
@@ -87,6 +91,7 @@ export default function AdminOverview() {
 
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <MetricCard
+            testId="admin-overview-reviews"
             label="Avis reçus"
             value={loading ? '—' : formatNumber(stats.reviewsCount)}
             detail={
@@ -315,12 +320,14 @@ function MetricCard({
   detail,
   accent,
   icon,
+  testId,
 }: {
   label: string;
   value: string;
   detail: string;
   accent: 'forest' | 'gold' | 'violet' | 'indigo';
   icon: string;
+  testId?: string;
 }) {
   const accentClasses = {
     forest: 'bg-[#173D32]/[0.07] text-[#173D32]',
@@ -330,7 +337,7 @@ function MetricCard({
   };
 
   return (
-    <article className="group rounded-[24px] border border-white/80 bg-white/85 p-5 shadow-[0_14px_40px_rgba(17,24,39,0.05)] backdrop-blur-xl transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_45px_rgba(17,24,39,0.08)]">
+    <article data-testid={testId} className="group rounded-[24px] border border-white/80 bg-white/85 p-5 shadow-[0_14px_40px_rgba(17,24,39,0.05)] backdrop-blur-xl transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_45px_rgba(17,24,39,0.08)]">
       <div className="flex items-start justify-between gap-3">
         <p className="text-xs font-semibold text-[#111827]/45">{label}</p>
         <span
