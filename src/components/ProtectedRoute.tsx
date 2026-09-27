@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -8,6 +9,13 @@ type ProtectedRouteProps = {
 };
 
 export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
+  console.log('[ProtectedRoute] RENDER', { allowedRoles });
+
+  useEffect(() => {
+    console.log('[ProtectedRoute] MOUNT');
+    return () => console.log('[ProtectedRoute] UNMOUNT');
+  }, []);
+
   const { user, role, loading } = useAuth();
 
   if (loading) {
