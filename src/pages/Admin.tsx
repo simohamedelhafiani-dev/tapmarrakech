@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import QRCode from 'qrcode';
 import { useLanguage, type Language } from '@/contexts/LanguageContext';
 import {
@@ -667,8 +667,14 @@ function Overview({
     loyaltyRevenue: 0,
   });
   const [detailLoading, setDetailLoading] = useState(false);
+  const requestCounter = useRef(0);
+
+  console.log('[RENDER]', selectedEstablishment, globalStats);
 
   useEffect(() => {
+    const reqId = ++requestCounter.current;
+    console.log('[EFFECT START]', reqId, selectedEstablishment);
+
     let mounted = true;
 
     const load = async () => {
@@ -676,6 +682,11 @@ function Overview({
 
       if (selectedEstablishment === 'all') {
         if (mounted) {
+          console.log('[SET DETAIL]', reqId, {
+            reviews: globalStats.reviews,
+            loyaltyCustomers: globalStats.loyaltyCustomers,
+            analyticsEvents: globalStats.analyticsEvents,
+          });
           setDetail({
             reviews: globalStats.reviews,
             averageRating: globalStats.averageRating,
@@ -709,6 +720,11 @@ function Overview({
           .map((row) => Number(row.rating))
           .filter((rating) => Number.isFinite(rating));
 
+        console.log('[SET DETAIL]', reqId, {
+          reviews: ratings.length,
+          loyaltyCustomers: loyaltyCustomers ?? 0,
+          analyticsEvents: analyticsEvents ?? 0,
+        });
         setDetail({
           reviews: ratings.length,
           averageRating: ratings.length ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length : 0,
@@ -733,7 +749,10 @@ function Overview({
     };
 
     void load();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+      console.log('[CLEANUP]', reqId);
+    };
   }, [selectedEstablishment, globalStats]);
 
   const responsibles = staff.filter((member) => member.role === 'MANAGER');
