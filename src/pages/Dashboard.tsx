@@ -79,6 +79,49 @@ type LoyaltyRedemption = {
   created_at: string;
 };
 
+type DashboardStats = {
+  period_days: number;
+  reviews_count: number;
+  average_rating: number;
+  positive_reviews_count: number;
+  negative_reviews_count: number;
+  pending_reviews_count: number;
+  loyalty_customers_count: number;
+  returning_customers_count: number;
+  active_customers_count: number;
+  visits_total: number;
+  points_balance_total: number;
+  points_earned_total: number;
+  points_redeemed_total: number;
+  analytics_events_count: number;
+  current_analytics_events_count: number;
+  current_reviews_count: number;
+  previous_reviews_count: number;
+  review_growth: number;
+  current_registrations_count: number;
+  previous_registrations_count: number;
+  registration_growth: number;
+  returning_rate: number;
+  active_rate: number;
+  redemption_rate: number;
+  current_revenue: number;
+  previous_revenue: number;
+  total_revenue: number;
+  current_transactions_count: number;
+  average_basket: number;
+  current_redemptions_count: number;
+  previous_redemptions_count: number;
+  redemption_growth: number;
+  points_redeemed_on_period: number;
+  reward_value_on_period: number;
+  redemption_revenue: number;
+  reward_cost_on_period: number;
+  net_contribution: number;
+  real_roi: number | null;
+  reward_efficiency: number;
+  points_per_currency: number;
+};
+
 const ranges = [
   {
     key: '7d',
@@ -167,6 +210,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<SubscriptionAccess | null>(null);
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
+  const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
+  const [dashboardStatsLoading, setDashboardStatsLoading] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -315,6 +360,80 @@ export default function Dashboard() {
    * le graphique et les derniers retours correspondent toujours
    * à l'établissement actuellement choisi.
    */
+  useEffect(() => {
+    let active = true;
+
+    const loadDashboardStats = async () => {
+      if (!selectedEstablishmentId) {
+        if (active) setDashboardStats(null);
+        return;
+      }
+
+      setDashboardStatsLoading(true);
+      const { data, error } = await supabase.rpc('get_dashboard_stats', {
+        p_establishment_id: selectedEstablishmentId,
+        p_days: ranges.find((range) => range.key === period)?.days ?? 30,
+      });
+
+      if (!active) return;
+
+      if (error) {
+        console.error('Erreur statistiques dashboard:', error);
+        setDashboardStats(null);
+      } else {
+        const row = Array.isArray(data) ? data[0] : data;
+        setDashboardStats(row ? {
+          period_days: Number(row.period_days ?? (ranges.find((range) => range.key === period)?.days ?? 30)),
+          reviews_count: Number(row.reviews_count ?? 0),
+          average_rating: Number(row.average_rating ?? 0),
+          positive_reviews_count: Number(row.positive_reviews_count ?? 0),
+          negative_reviews_count: Number(row.negative_reviews_count ?? 0),
+          pending_reviews_count: Number(row.pending_reviews_count ?? 0),
+          loyalty_customers_count: Number(row.loyalty_customers_count ?? 0),
+          returning_customers_count: Number(row.returning_customers_count ?? 0),
+          active_customers_count: Number(row.active_customers_count ?? 0),
+          visits_total: Number(row.visits_total ?? 0),
+          points_balance_total: Number(row.points_balance_total ?? 0),
+          points_earned_total: Number(row.points_earned_total ?? 0),
+          points_redeemed_total: Number(row.points_redeemed_total ?? 0),
+          analytics_events_count: Number(row.analytics_events_count ?? 0),
+          current_analytics_events_count: Number(row.current_analytics_events_count ?? 0),
+          current_reviews_count: Number(row.current_reviews_count ?? 0),
+          previous_reviews_count: Number(row.previous_reviews_count ?? 0),
+          review_growth: Number(row.review_growth ?? 0),
+          current_registrations_count: Number(row.current_registrations_count ?? 0),
+          previous_registrations_count: Number(row.previous_registrations_count ?? 0),
+          registration_growth: Number(row.registration_growth ?? 0),
+          returning_rate: Number(row.returning_rate ?? 0),
+          active_rate: Number(row.active_rate ?? 0),
+          redemption_rate: Number(row.redemption_rate ?? 0),
+          current_revenue: Number(row.current_revenue ?? 0),
+          previous_revenue: Number(row.previous_revenue ?? 0),
+          total_revenue: Number(row.total_revenue ?? 0),
+          current_transactions_count: Number(row.current_transactions_count ?? 0),
+          average_basket: Number(row.average_basket ?? 0),
+          current_redemptions_count: Number(row.current_redemptions_count ?? 0),
+          previous_redemptions_count: Number(row.previous_redemptions_count ?? 0),
+          redemption_growth: Number(row.redemption_growth ?? 0),
+          points_redeemed_on_period: Number(row.points_redeemed_on_period ?? 0),
+          reward_value_on_period: Number(row.reward_value_on_period ?? 0),
+          redemption_revenue: Number(row.redemption_revenue ?? 0),
+          reward_cost_on_period: Number(row.reward_cost_on_period ?? 0),
+          net_contribution: Number(row.net_contribution ?? 0),
+          real_roi: row.real_roi === null || row.real_roi === undefined ? null : Number(row.real_roi),
+          reward_efficiency: Number(row.reward_efficiency ?? 0),
+          points_per_currency: Number(row.points_per_currency ?? 1),
+        } : null);
+      }
+
+      setDashboardStatsLoading(false);
+    };
+
+    void loadDashboardStats();
+
+    return () => { active = false; };
+  }, [selectedEstablishmentId, period]);
+
   useEffect(() => {
     let active = true;
 
@@ -667,39 +786,41 @@ export default function Dashboard() {
       return ((current - previous) / previous) * 100;
     };
 
+    const source = dashboardStats;
+
     return {
-      currentReviews: currentReviews.length,
-      reviewGrowth: growth(currentReviews.length, previousReviews.length),
-      currentRegistrations: currentRegistrations.length,
-      registrationGrowth: growth(currentRegistrations.length, previousRegistrations.length),
-      returningRate: totalCustomers ? (returningCustomers / totalCustomers) * 100 : 0,
-      activeRate: totalCustomers ? (activeCustomers / totalCustomers) * 100 : 0,
-      redemptionRate: pointsEarned ? (pointsRedeemed / pointsEarned) * 100 : 0,
-      visits,
-      returningCustomers,
-      activeCustomers,
-      pointsEarned,
-      pointsRedeemed,
-      currentRevenue,
-      previousRevenue,
-      revenueGrowth: growth(currentRevenue, previousRevenue),
-      totalRevenue,
-      currentTransactions: currentTransactions.length,
-      averageBasket,
-      currentRedemptions: currentRedemptions.length,
-      previousRedemptions: previousRedemptions.length,
-      redemptionGrowth: growth(currentRedemptions.length, previousRedemptions.length),
-      pointsRedeemedOnPeriod,
-      rewardValueOnPeriod,
+      currentReviews: source ? source.current_reviews_count : currentReviews.length,
+      reviewGrowth: source ? source.review_growth : growth(currentReviews.length, previousReviews.length),
+      currentRegistrations: source ? source.current_registrations_count : currentRegistrations.length,
+      registrationGrowth: source ? source.registration_growth : growth(currentRegistrations.length, previousRegistrations.length),
+      returningRate: source ? source.returning_rate : (totalCustomers ? (returningCustomers / totalCustomers) * 100 : 0),
+      activeRate: source ? source.active_rate : (totalCustomers ? (activeCustomers / totalCustomers) * 100 : 0),
+      redemptionRate: source ? source.redemption_rate : (pointsEarned ? (pointsRedeemed / pointsEarned) * 100 : 0),
+      visits: source ? source.visits_total : visits,
+      returningCustomers: source ? source.returning_customers_count : returningCustomers,
+      activeCustomers: source ? source.active_customers_count : activeCustomers,
+      pointsEarned: source ? source.points_earned_total : pointsEarned,
+      pointsRedeemed: source ? source.points_redeemed_total : pointsRedeemed,
+      currentRevenue: source ? source.current_revenue : currentRevenue,
+      previousRevenue: source ? source.previous_revenue : previousRevenue,
+      revenueGrowth: source ? (source.previous_revenue === 0 ? (source.current_revenue > 0 ? 100 : 0) : ((source.current_revenue - source.previous_revenue) / source.previous_revenue) * 100) : growth(currentRevenue, previousRevenue),
+      totalRevenue: source ? source.total_revenue : totalRevenue,
+      currentTransactions: source ? source.current_transactions_count : currentTransactions.length,
+      averageBasket: source ? source.average_basket : averageBasket,
+      currentRedemptions: source ? source.current_redemptions_count : currentRedemptions.length,
+      previousRedemptions: source ? source.previous_redemptions_count : previousRedemptions.length,
+      redemptionGrowth: source ? source.redemption_growth : growth(currentRedemptions.length, previousRedemptions.length),
+      pointsRedeemedOnPeriod: source ? source.points_redeemed_on_period : pointsRedeemedOnPeriod,
+      rewardValueOnPeriod: source ? source.reward_value_on_period : rewardValueOnPeriod,
       previousRewardValue,
-      redemptionRevenue,
-      rewardEfficiency,
-      rewardCostOnPeriod,
-      netContribution,
-      realROI,
+      redemptionRevenue: source ? source.redemption_revenue : redemptionRevenue,
+      rewardEfficiency: source ? source.reward_efficiency : rewardEfficiency,
+      rewardCostOnPeriod: source ? source.reward_cost_on_period : rewardCostOnPeriod,
+      netContribution: source ? source.net_contribution : netContribution,
+      realROI: source ? source.real_roi : realROI,
       topClients,
       periodDays: selected.days,
-    };
+    }
   }, [reviews, loyaltyCustomers, loyaltyTransactions, loyaltyRedemptions, pointsPerCurrency, selected.days]);
 
   const isResponsible = role === 'responsible';
@@ -919,51 +1040,11 @@ export default function Dashboard() {
       {/* STATISTIQUES */}
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <Stat
-          label="Avis reçus"
-          value={reviews.length}
-          detail="Depuis le début"
-          icon={MessageCircle}
-          accent="bg-[#f4ead3] text-gold"
-        />
-
-        <Stat
-          label="Note moyenne"
-          value={average}
-          detail="Sur 5 étoiles"
-          icon={Star}
-          accent="bg-[#e5eee9] text-forest"
-        />
-
-        <Stat
-          label="Avis positifs"
-          value={positive}
-          detail={
-            reviews.length
-              ? `${Math.round(
-                  (positive / reviews.length) * 100
-                )}% du total`
-              : 'Pas encore de données'
-          }
-          icon={TrendingUp}
-          accent="bg-[#e5eee9] text-forest"
-        />
-
-        <Stat
-          label="Retours négatifs"
-          value={negative}
-          detail="Notes de 1 à 3 étoiles"
-          icon={TrendingDown}
-          accent="bg-[#f4ead3] text-gold"
-        />
-
-        <Stat
-          label="À traiter"
-          value={pending}
-          detail="Retours en attente"
-          icon={CheckCircle2}
-          accent="bg-[#f4e4e1] text-[#a15c50]"
-        />
+        <Stat label="Avis reçus" value={dashboardStatsLoading ? '—' : (dashboardStats?.reviews_count ?? 0)} detail="Depuis le début" icon={MessageCircle} accent="bg-[#f4ead3] text-gold" />
+        <Stat label="Note moyenne" value={dashboardStatsLoading ? '—' : (dashboardStats?.average_rating ?? 0).toFixed(1)} detail="Sur 5 étoiles" icon={Star} accent="bg-[#e5eee9] text-forest" />
+        <Stat label="Avis positifs" value={dashboardStatsLoading ? '—' : (dashboardStats?.positive_reviews_count ?? 0)} detail={dashboardStats?.reviews_count ? `${Math.round(((dashboardStats?.positive_reviews_count ?? 0) / dashboardStats.reviews_count) * 100)}% du total` : 'Pas encore de données'} icon={TrendingUp} accent="bg-[#e5eee9] text-forest" />
+        <Stat label="Retours négatifs" value={dashboardStatsLoading ? '—' : (dashboardStats?.negative_reviews_count ?? 0)} detail="Notes de 1 à 3 étoiles" icon={TrendingDown} accent="bg-[#f4ead3] text-gold" />
+        <Stat label="À traiter" value={dashboardStatsLoading ? '—' : (dashboardStats?.pending_reviews_count ?? 0)} detail="Retours en attente" icon={CheckCircle2} accent="bg-[#f4e4e1] text-[#a15c50]" />
       </div>
 
       {/* PILOTAGE DU PROGRAMME */}
@@ -1007,11 +1088,11 @@ export default function Dashboard() {
               <p className="text-xs font-medium text-ink/50">Nouveaux clients</p>
               <Users size={17} className="text-forest" />
             </div>
-            <p className="mt-3 font-display text-3xl text-forest">{loyaltyLoading ? '—' : analytics.currentRegistrations}</p>
+            <p className="mt-3 font-display text-3xl text-forest">{(loyaltyLoading || dashboardStatsLoading) ? '—' : analytics.currentRegistrations}</p>
             <p className="mt-2 text-xs text-ink/40">inscriptions sur la période sélectionnée</p>
             <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-forest">
               <TrendingUp size={14} />
-              {loyaltyLoading ? '—' : `${analytics.registrationGrowth >= 0 ? '+' : ''}${analytics.registrationGrowth.toFixed(1)} %`}
+              {(loyaltyLoading || dashboardStatsLoading) ? '—' : `${analytics.registrationGrowth >= 0 ? '+' : ''}${analytics.registrationGrowth.toFixed(1)} %`}
               <span className="font-normal text-ink/35">vs période précédente</span>
             </div>
           </div>
@@ -1021,9 +1102,9 @@ export default function Dashboard() {
               <p className="text-xs font-medium text-ink/50">Taux de retour</p>
               <TrendingUp size={17} className="text-forest" />
             </div>
-            <p className="mt-3 font-display text-3xl text-forest">{loyaltyLoading ? '—' : `${analytics.returningRate.toFixed(1)} %`}</p>
+            <p className="mt-3 font-display text-3xl text-forest">{(loyaltyLoading || dashboardStatsLoading) ? '—' : `${analytics.returningRate.toFixed(1)} %`}</p>
             <p className="mt-2 text-xs text-ink/40">clients ayant effectué au moins 2 visites</p>
-            <p className="mt-4 text-xs font-semibold text-ink/55">{loyaltyLoading ? '—' : `${analytics.returningCustomers} clients concernés`}</p>
+            <p className="mt-4 text-xs font-semibold text-ink/55">{(loyaltyLoading || dashboardStatsLoading) ? '—' : `${analytics.returningCustomers} clients concernés`}</p>
           </div>
 
           <div className="rounded-2xl border border-ink/5 bg-[#f7f7f3] p-5">
@@ -1031,9 +1112,9 @@ export default function Dashboard() {
               <p className="text-xs font-medium text-ink/50">Clients actifs</p>
               <CheckCircle2 size={17} className="text-forest" />
             </div>
-            <p className="mt-3 font-display text-3xl text-forest">{loyaltyLoading ? '—' : `${analytics.activeRate.toFixed(1)} %`}</p>
+            <p className="mt-3 font-display text-3xl text-forest">{(loyaltyLoading || dashboardStatsLoading) ? '—' : `${analytics.activeRate.toFixed(1)} %`}</p>
             <p className="mt-2 text-xs text-ink/40">ayant visité l’établissement pendant la période sélectionnée</p>
-            <p className="mt-4 text-xs font-semibold text-ink/55">{loyaltyLoading ? '—' : `${analytics.activeCustomers} clients actifs`}</p>
+            <p className="mt-4 text-xs font-semibold text-ink/55">{(loyaltyLoading || dashboardStatsLoading) ? '—' : `${analytics.activeCustomers} clients actifs`}</p>
           </div>
 
           <div className="rounded-2xl border border-ink/5 bg-[#f7f7f3] p-5">
@@ -1041,21 +1122,21 @@ export default function Dashboard() {
               <p className="text-xs font-medium text-ink/50">Utilisation des points</p>
               <Coins size={17} className="text-gold" />
             </div>
-            <p className="mt-3 font-display text-3xl text-forest">{loyaltyLoading ? '—' : `${analytics.redemptionRate.toFixed(1)} %`}</p>
+            <p className="mt-3 font-display text-3xl text-forest">{(loyaltyLoading || dashboardStatsLoading) ? '—' : `${analytics.redemptionRate.toFixed(1)} %`}</p>
             <p className="mt-2 text-xs text-ink/40">part des points gagnés déjà utilisés</p>
-            <p className="mt-4 text-xs font-semibold text-ink/55">{loyaltyLoading ? '—' : `${analytics.pointsRedeemed.toLocaleString('fr-FR')} / ${analytics.pointsEarned.toLocaleString('fr-FR')} pts`}</p>
+            <p className="mt-4 text-xs font-semibold text-ink/55">{(loyaltyLoading || dashboardStatsLoading) ? '—' : `${analytics.pointsRedeemed.toLocaleString('fr-FR')} / ${analytics.pointsEarned.toLocaleString('fr-FR')} pts`}</p>
           </div>
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           <div className="rounded-2xl bg-forest p-5 text-white">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold">Visites cumulées</p>
-            <p className="mt-2 font-display text-3xl">{loyaltyLoading ? '—' : analytics.visits.toLocaleString('fr-FR')}</p>
+            <p className="mt-2 font-display text-3xl">{(loyaltyLoading || dashboardStatsLoading) ? '—' : analytics.visits.toLocaleString('fr-FR')}</p>
             <p className="mt-1 text-xs text-white/45">visites enregistrées dans le programme</p>
           </div>
           <div className="rounded-2xl border border-ink/5 p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold">CA fidélité cumulé</p>
-            <p className="mt-2 font-display text-3xl text-forest">{transactionsLoading ? '—' : `${analytics.totalRevenue.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}</p>
+            <p className="mt-2 font-display text-3xl text-forest">{(transactionsLoading || dashboardStatsLoading) ? '—' : `${analytics.totalRevenue.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}</p>
             <p className="mt-1 text-xs text-ink/40">depuis le début des transactions enregistrées</p>
           </div>
           <div className="rounded-2xl border border-ink/5 p-5">
@@ -1069,23 +1150,23 @@ export default function Dashboard() {
               <TrendingUp size={17} className="text-gold" />
             </div>
             <p className="mt-2 font-display text-3xl text-forest">
-              {transactionsLoading ? '—' : `${analytics.currentRevenue.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}
+              {(transactionsLoading || dashboardStatsLoading) ? '—' : `${analytics.currentRevenue.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}
             </p>
             <p className="mt-1 text-xs text-ink/45">CA généré par les achats fidélité sur la période sélectionnée</p>
             <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
               <span className="font-semibold text-forest">
-                {transactionsLoading ? '—' : `${analytics.revenueGrowth >= 0 ? '+' : ''}${analytics.revenueGrowth.toFixed(1)} %`}
+                {(transactionsLoading || dashboardStatsLoading) ? '—' : `${analytics.revenueGrowth >= 0 ? '+' : ''}${analytics.revenueGrowth.toFixed(1)} %`}
               </span>
               <span className="text-ink/35">vs la période précédente</span>
             </div>
             <div className="mt-3 grid grid-cols-2 gap-3 border-t border-gold/10 pt-3">
               <div>
                 <p className="text-[10px] text-ink/35">Transactions</p>
-                <p className="mt-1 text-sm font-semibold text-forest">{transactionsLoading ? '—' : analytics.currentTransactions}</p>
+                <p className="mt-1 text-sm font-semibold text-forest">{(transactionsLoading || dashboardStatsLoading) ? '—' : analytics.currentTransactions}</p>
               </div>
               <div>
                 <p className="text-[10px] text-ink/35">Panier moyen</p>
-                <p className="mt-1 text-sm font-semibold text-forest">{transactionsLoading ? '—' : `${analytics.averageBasket.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}</p>
+                <p className="mt-1 text-sm font-semibold text-forest">{(transactionsLoading || dashboardStatsLoading) ? '—' : `${analytics.averageBasket.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`}</p>
               </div>
             </div>
           </div>
@@ -1123,7 +1204,7 @@ export default function Dashboard() {
           <div className="rounded-2xl bg-white p-5">
             <p className="text-xs font-medium text-ink/50">Récompenses utilisées</p>
             <p className="mt-3 font-display text-3xl text-forest">
-              {redemptionsLoading ? '—' : analytics.currentRedemptions}
+              {(redemptionsLoading || dashboardStatsLoading) ? '—' : analytics.currentRedemptions}
             </p>
             <p className="mt-2 text-xs text-ink/40">
               {redemptionsLoading
@@ -1135,7 +1216,7 @@ export default function Dashboard() {
           <div className="rounded-2xl bg-white p-5">
             <p className="text-xs font-medium text-ink/50">Points consommés</p>
             <p className="mt-3 font-display text-3xl text-forest">
-              {redemptionsLoading ? '—' : analytics.pointsRedeemedOnPeriod.toLocaleString('fr-FR')}
+              {(redemptionsLoading || dashboardStatsLoading) ? '—' : analytics.pointsRedeemedOnPeriod.toLocaleString('fr-FR')}
             </p>
             <p className="mt-2 text-xs text-ink/40">sur la période sélectionnée</p>
           </div>
@@ -1220,7 +1301,7 @@ export default function Dashboard() {
         <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <Stat
             label="Clients fidélité"
-            value={loyaltyLoading ? '—' : loyaltyCustomers.length}
+            value={(loyaltyLoading || dashboardStatsLoading) ? '—' : loyaltyCustomers.length}
             detail="Clients inscrits"
             icon={Users}
             accent="bg-[#e5eee9] text-forest"
@@ -1324,7 +1405,7 @@ export default function Dashboard() {
             </div>
 
             <div className="mt-5 space-y-3">
-              {loyaltyLoading ? (
+              {(loyaltyLoading || dashboardStatsLoading) ? (
                 <p className="py-5 text-center text-sm text-ink/35">Chargement...</p>
               ) : loyaltyCustomers.length ? (
                 loyaltyCustomers.slice(0, 5).map((customer) => (

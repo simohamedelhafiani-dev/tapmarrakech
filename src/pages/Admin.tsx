@@ -262,8 +262,9 @@ export default function Admin() {
 
   const loadGlobalStats = async () => {
     try {
-      const { data, error } = await supabase.rpc('get_admin_dashboard_stats', {
+      const { data, error } = await supabase.rpc('get_dashboard_stats', {
         p_establishment_id: null,
+        p_days: 30,
       });
       if (error) throw error;
       const row = Array.isArray(data) ? data[0] : data;
@@ -649,33 +650,25 @@ function Overview({
     const load = async () => {
       setDetailLoading(true);
       try {
-        const reviewQuery = selectedEstablishment === 'all'
-          ? supabase.from('reviews').select('rating')
-          : supabase.from('reviews').select('rating').eq('establishment_id', selectedEstablishment);
-        const customerQuery = selectedEstablishment === 'all'
-          ? supabase.from('loyalty_customers').select('id', { count: 'exact', head: true })
-          : supabase.from('loyalty_customers').select('id', { count: 'exact', head: true }).eq('establishment_id', selectedEstablishment);
-        const eventsQuery = selectedEstablishment === 'all'
-          ? supabase.from('analytics_events').select('id', { count: 'exact', head: true })
-          : supabase.from('analytics_events').select('id', { count: 'exact', head: true }).eq('establishment_id', selectedEstablishment);
-        const revenueQuery = selectedEstablishment === 'all'
-          ? supabase.from('loyalty_transactions').select('amount').eq('type', 'EARN')
-          : supabase.from('loyalty_transactions').select('amount').eq('type', 'EARN').eq('establishment_id', selectedEstablishment);
-
-        const [{ data: reviews }, { count: loyaltyCustomers }, { count: analyticsEvents }, { data: revenueRows }] =
-          await Promise.all([reviewQuery, customerQuery, eventsQuery, revenueQuery]);
-
+        const { data, error } = await supabase.rpc('get_dashboard_stats', {
+          p_establishment_id: selectedEstablishment === 'all' ? null : selectedEstablishment,
+          p_days: 30,
+        });
+        if (error) throw error;
         if (!mounted) return;
-        const ratings = (reviews ?? []).map((row) => Number(row.rating)).filter(Number.isFinite);
+        const row = Array.isArray(data) ? data[0] : data;
         setDetail({
-          reviews: ratings.length,
-          averageRating: ratings.length ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length : 0,
-          loyaltyCustomers: loyaltyCustomers ?? 0,
-          analyticsEvents: analyticsEvents ?? 0,
-          loyaltyRevenue: (revenueRows ?? []).reduce((sum, row) => sum + Number(row.amount ?? 0), 0),
+          reviews: Number(row?.reviews_count ?? 0),
+          averageRating: Number(row?.average_rating ?? 0),
+          loyaltyCustomers: Number(row?.loyalty_customers_count ?? 0),
+          analyticsEvents: Number(row?.analytics_events_count ?? 0),
+          loyaltyRevenue: Number(row?.total_revenue ?? 0),
         });
       } catch (error) {
-        console.error('Erreur vue Admin:', error);
+        console.error('Erreur statistiques Admin:', error);
+        if (mounted) {
+          setDetail({ reviews: 0, averageRating: 0, loyaltyCustomers: 0, analyticsEvents: 0, loyaltyRevenue: 0 });
+        }
       } finally {
         if (mounted) setDetailLoading(false);
       }
