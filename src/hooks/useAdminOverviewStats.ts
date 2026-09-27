@@ -267,6 +267,11 @@ export function useAdminOverviewStats(periodDays = 30) {
     };
   }, [loadStats, periodDays]);
 
+  console.log('[AdminOverview] HOOK EFFECT INPUTS', {
+    periodDays,
+    loadStats,
+  });
+
   console.log('[AdminOverview] RENDER', {
     loading,
     stats,
