@@ -43,6 +43,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import LoyaltyProgramCustomization from '@/components/LoyaltyProgramCustomization';
+import RecentActivity from '@/components/admin/RecentActivity';
 import { useRecentActivity } from '@/hooks/useRecentActivity';
 
 type Establishment = {
@@ -669,7 +670,12 @@ function Overview({
   });
   const [detailLoading, setDetailLoading] = useState(false);
   const requestCounter = useRef(0);
-  const { activities, loading: activityLoading, error: activityError } = useRecentActivity();
+  const {
+    activities,
+    loading: activityLoading,
+    error: activityError,
+    reload: reloadRecentActivity,
+  } = useRecentActivity();
 
   console.log('[RENDER]', selectedEstablishment, globalStats);
   console.log('[RecentActivity] Overview received:', { activities, activityLoading, activityError });
@@ -805,6 +811,13 @@ function Overview({
         <AdminMetric icon={MessageSquare} label="Avis reçus" value={detailLoading ? '—' : detail.reviews.toLocaleString('fr-FR')} detail={selectedName} />
         <AdminMetric icon={WalletCards} label="MRR" value={billing.available ? `${billing.mrr.toLocaleString('fr-FR')} DH` : '—'} detail={`${activeSubscriptions} abonnements actifs`} />
       </div>
+
+      <RecentActivity
+        events={activities}
+        loading={activityLoading}
+        error={activityError}
+        onRetry={reloadRecentActivity}
+      />
 
       <div className="grid gap-5 xl:grid-cols-[1.65fr_.85fr]">
         <div className="rounded-3xl border border-ink/5 bg-white p-6 shadow-soft">
