@@ -44,6 +44,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import LoyaltyProgramCustomization from '@/components/LoyaltyProgramCustomization';
 import RecentActivity from '@/components/admin/RecentActivity';
+import EvolutionCharts from '@/components/admin/EvolutionCharts';
 import { useRecentActivity } from '@/hooks/useRecentActivity';
 import { useAdminOverviewStats } from '@/hooks/useAdminOverviewStats';
 
@@ -875,6 +876,12 @@ function Overview({
         loading={activityLoading}
         error={activityError}
         onRetry={reloadRecentActivity}
+      />
+
+      <EvolutionCharts
+        reviewsData={overviewStats?.reviewsEvolution ?? []}
+        scansData={overviewStats?.scansEvolution ?? []}
+        loading={overviewStatsStatus === 'loading'}
       />
 
       <div className="grid gap-5 xl:grid-cols-[1.65fr_.85fr]">
