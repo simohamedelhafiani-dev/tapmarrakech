@@ -49,6 +49,7 @@ import RecentLoyaltyCustomers from '@/components/admin/RecentLoyaltyCustomers';
 import { useRecentActivity } from '@/hooks/useRecentActivity';
 import { useRecentLoyaltyCustomers } from '@/hooks/useRecentLoyaltyCustomers';
 import { useAdminOverviewStats } from '@/hooks/useAdminOverviewStats';
+import { useEstablishmentPerformance } from '@/hooks/useEstablishmentPerformance';
 
 type Establishment = {
   id: string;
@@ -741,6 +742,31 @@ function Overview({
       ),
     });
   }, [overviewStatsStatus, overviewStats]);
+
+  const {
+    performances: establishmentPerformances,
+    loading: establishmentPerformanceLoading,
+    error: establishmentPerformanceError,
+  } = useEstablishmentPerformance();
+
+  useEffect(() => {
+    console.log(
+      '[EstablishmentPerformance] Admin bridge:',
+      {
+        status: establishmentPerformanceLoading
+          ? 'loading'
+          : establishmentPerformanceError
+            ? 'error'
+            : 'success',
+        performances: establishmentPerformances,
+        count: establishmentPerformances.length,
+      },
+    );
+  }, [
+    establishmentPerformances,
+    establishmentPerformanceLoading,
+    establishmentPerformanceError,
+  ]);
 
   console.log(
     '[KPI PROOF] Overview render:',
