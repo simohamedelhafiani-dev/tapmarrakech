@@ -55,7 +55,7 @@ function EvolutionCard({
 
       <div className="mt-5 h-[250px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
+          <AreaChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
             <defs>
               <linearGradient id={`${dataKey}-gradient`} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor={stroke} stopOpacity={0.22} />
@@ -93,13 +93,13 @@ function EvolutionCard({
             />
 
             <Area
-              type="monotone"
+              type="linear"
               dataKey="count"
               stroke={stroke}
               strokeWidth={2.5}
               fill={`url(#${dataKey}-gradient)`}
-              dot={false}
-              activeDot={{ r: 4 }}
+              dot={{ r: 2.5 }}
+              activeDot={{ r: 5 }}
             />
           </AreaChart>
         </ResponsiveContainer>
