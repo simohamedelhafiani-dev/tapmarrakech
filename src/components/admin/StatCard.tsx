@@ -100,6 +100,7 @@ export default function StatCard({ label, value, icon: Icon, iconTone = 'indigo'
           <p className="text-sm font-medium tracking-[-0.01em] text-[#6B7280]">{label}</p>
           <p
             data-stat-card-value
+            data-no-translate
             className="mt-3 text-[30px] font-semibold leading-none tracking-[-0.035em] text-[#111827]"
           >
             {value}
