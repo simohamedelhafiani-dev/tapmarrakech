@@ -12,6 +12,25 @@ type StatCardProps = {
   hint?: string;
 };
 
+let nextDomNodeId = 1;
+
+const domNodeIds = new WeakMap<Element, number>();
+
+function getDomNodeId(element: Element | null) {
+  if (!element) return null;
+
+  const existingId = domNodeIds.get(element);
+
+  if (existingId) {
+    return existingId;
+  }
+
+  const newId = nextDomNodeId++;
+  domNodeIds.set(element, newId);
+
+  return newId;
+}
+
 const iconToneClasses: Record<NonNullable<StatCardProps['iconTone']>, string> = {
   indigo: 'bg-[#6366F1]/10 text-[#4F46E5]',
   emerald: 'bg-[#10B981]/10 text-[#059669]',
@@ -32,6 +51,7 @@ function TrendIndicator({ value, label }: { value: number; label?: string }) {
 
 export default function StatCard({ label, value, icon: Icon, iconTone = 'indigo', trend, trendLabel, hint }: StatCardProps) {
   const cardRef = useRef<HTMLElement | null>(null);
+  const valueNodeRef = useRef<HTMLElement | null>(null);
 
   console.log('[StatCard] PROPS:', {
     label,
@@ -41,22 +61,31 @@ export default function StatCard({ label, value, icon: Icon, iconTone = 'indigo'
   });
 
   useLayoutEffect(() => {
-    const domValue = cardRef.current?.querySelector('[data-stat-card-value]')?.textContent;
+    const valueNode = cardRef.current?.querySelector<HTMLElement>(
+      '[data-stat-card-value]'
+    );
 
-    console.log('[StatCard] COMMIT:', {
+    valueNodeRef.current = valueNode;
+
+    console.log('[StatCard] NODE COMMIT', {
       label,
+      nodeId: getDomNodeId(valueNode),
       propValue: value,
-      domValue,
+      domValue: valueNode?.textContent,
     });
   }, [label, value]);
 
   useEffect(() => {
-    const domValue = cardRef.current?.querySelector('[data-stat-card-value]')?.textContent;
+    const valueNode = cardRef.current?.querySelector<HTMLElement>(
+      '[data-stat-card-value]'
+    );
 
-    console.log('[StatCard] EFFECT:', {
+    console.log('[StatCard] NODE EFFECT', {
       label,
+      nodeId: getDomNodeId(valueNode),
+      sameNode: valueNode === valueNodeRef.current,
       propValue: value,
-      domValue,
+      domValue: valueNode?.textContent,
     });
   }, [label, value]);
 
