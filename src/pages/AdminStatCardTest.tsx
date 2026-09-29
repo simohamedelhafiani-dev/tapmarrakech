@@ -1,68 +1,9 @@
-import { useEffect } from 'react';
 import { MessageSquare, Star, UsersRound } from 'lucide-react';
 import StatCard from '@/components/admin/StatCard';
 import { useAdminOverviewStats } from '@/hooks/useAdminOverviewStats';
 
 export default function AdminStatCardTest() {
   const { status, data, error } = useAdminOverviewStats(30);
-
-  useEffect(() => {
-    console.log('[StatCard TEST] MOUNT');
-
-    return () => {
-      console.log('[StatCard TEST] UNMOUNT');
-    };
-  }, []);
-
-  useEffect(() => {
-    const root = document.querySelector('main');
-
-    if (!root) {
-      console.log('[DOM WATCH] main introuvable');
-      return;
-    }
-
-    console.log('[DOM WATCH] OBSERVER ACTIF');
-
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        console.log('[DOM WATCH] MUTATION DETAIL', {
-          type: mutation.type,
-          oldValue: mutation.oldValue,
-          newValue: mutation.target.textContent,
-          target: mutation.target,
-          parent: mutation.target.parentElement?.outerHTML,
-        });
-      });
-    });
-
-    observer.observe(root, {
-      subtree: true,
-      childList: true,
-      characterData: true,
-      characterDataOldValue: true,
-    });
-
-    return () => {
-      observer.disconnect();
-      console.log('[DOM WATCH] OBSERVER STOP');
-    };
-  }, []);
-
-  console.log('[StatCard TEST] RENDER:', {
-    data,
-    reviewsCount: data?.reviewsCount,
-    averageRating: data?.averageRating,
-    loyaltyCustomersCount: data?.loyaltyCustomersCount,
-  });
-
-  console.log('[StatCard TEST] VALUES:', {
-    reviewsCount: data?.reviewsCount,
-    averageRating: data?.averageRating,
-    loyaltyCustomersCount: data?.loyaltyCustomersCount,
-    reviewGrowth: data?.reviewGrowth,
-    registrationGrowth: data?.registrationGrowth,
-  });
 
   return (
     <main className="min-h-screen bg-[#F6F7F5] px-6 py-10 text-[#111827]">
