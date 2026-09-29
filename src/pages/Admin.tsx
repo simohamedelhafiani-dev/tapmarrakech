@@ -174,6 +174,14 @@ export default function Admin() {
       .select('id, name, slug, ai_business_type_id, created_at')
       .order('created_at', { ascending: false });
 
+    console.log('[KPI PROOF] loadEstablishments result:', {
+      error: error
+        ? { message: error.message, code: error.code, details: error.details, hint: error.hint }
+        : null,
+      rowCount: data?.length ?? 0,
+      rows: data,
+    });
+
     if (error) {
       console.error('Erreur établissements:', error);
       setEstablishments([]);
@@ -273,6 +281,27 @@ export default function Admin() {
         supabase.from('loyalty_customers').select('id', { count: 'exact', head: true }),
         supabase.from('analytics_events').select('id', { count: 'exact', head: true }),
       ]);
+
+      console.log('[KPI PROOF] loadGlobalStats results:', {
+        reviews: {
+          count: reviewRows?.length ?? 0,
+          error: reviewsError
+            ? { message: reviewsError.message, code: reviewsError.code, details: reviewsError.details, hint: reviewsError.hint }
+            : null,
+        },
+        loyaltyCustomers: {
+          count: loyaltyCustomers ?? 0,
+          error: loyaltyError
+            ? { message: loyaltyError.message, code: loyaltyError.code, details: loyaltyError.details, hint: loyaltyError.hint }
+            : null,
+        },
+        analyticsEvents: {
+          count: analyticsEvents ?? 0,
+          error: analyticsError
+            ? { message: analyticsError.message, code: analyticsError.code, details: analyticsError.details, hint: analyticsError.hint }
+            : null,
+        },
+      });
 
       if (reviewsError || loyaltyError || analyticsError) {
         throw reviewsError ?? loyaltyError ?? analyticsError;
@@ -677,7 +706,13 @@ function Overview({
     reload: reloadRecentActivity,
   } = useRecentActivity();
 
-  console.log('[RENDER]', selectedEstablishment, globalStats);
+  console.log('[KPI PROOF] Overview render:', {
+    selectedEstablishment,
+    establishmentsCount: establishments.length,
+    globalStats,
+    detail,
+    detailLoading,
+  });
   console.log('[RecentActivity] Overview received:', { activities, activityLoading, activityError });
 
   useEffect(() => {
