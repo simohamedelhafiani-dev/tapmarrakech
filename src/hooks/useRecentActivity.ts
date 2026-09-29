@@ -136,6 +136,16 @@ function mapEstablishment(row: EstablishmentActivityRow): ActivityEvent {
   };
 }
 
+function getCreatedAtTimestamp(value: string): number {
+  const timestamp = Date.parse(value);
+
+  if (Number.isNaN(timestamp)) {
+    throw new Error(`Date created_at invalide: ${value}`);
+  }
+
+  return timestamp;
+}
+
 export function useRecentActivity() {
   const [activities, setActivities] = useState<ActivityEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -186,10 +196,33 @@ export function useRecentActivity() {
       ]
         .sort(
           (a, b) =>
-            new Date(b.created_at).getTime() -
-            new Date(a.created_at).getTime()
+            getCreatedAtTimestamp(b.created_at) -
+            getCreatedAtTimestamp(a.created_at)
         )
         .slice(0, 10);
+
+      const chronologicalDesc = merged.every((event, index, array) => {
+        if (index === 0) return true;
+
+        return (
+          getCreatedAtTimestamp(array[index - 1].created_at) >=
+          getCreatedAtTimestamp(event.created_at)
+        );
+      });
+
+      console.log('[RecentActivity] Sort proof:', {
+        chronologicalDesc,
+        timestamps: merged.map((event) => ({
+          id: event.id,
+          type: event.type,
+          created_at: event.created_at,
+          timestamp: getCreatedAtTimestamp(event.created_at),
+        })),
+      });
+
+      if (!chronologicalDesc) {
+        throw new Error('Recent Activity: ordre chronologique invalide.');
+      }
 
       console.log('[RecentActivity] ActivityEvent[] final:', merged);
 
