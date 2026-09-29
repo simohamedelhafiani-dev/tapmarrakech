@@ -748,6 +748,7 @@ function Overview({
     performances: establishmentPerformances,
     loading: establishmentPerformanceLoading,
     error: establishmentPerformanceError,
+    reload: reloadEstablishmentPerformance,
   } = useEstablishmentPerformance();
 
   useEffect(() => {
@@ -944,10 +945,7 @@ function Overview({
         performanceData={establishmentPerformances}
         loading={establishmentPerformanceLoading}
         error={establishmentPerformanceError}
-        onRetry={async () => {
-          // reload is added below without changing the existing data flow.
-          window.location.reload();
-        }}
+        onRetry={reloadEstablishmentPerformance}
       />
 
       <div className="grid gap-5 xl:grid-cols-[1.65fr_.85fr]">
