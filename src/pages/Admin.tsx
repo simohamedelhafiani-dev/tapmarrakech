@@ -418,6 +418,7 @@ export default function Admin() {
   const reloadAll = async () => {
     await Promise.all([
       loadEstablishments(),
+      reloadEstablishmentList(),
       loadStaff(),
       loadAIBusinessTypes(),
       loadGlobalStats(),
