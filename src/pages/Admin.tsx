@@ -45,6 +45,7 @@ import { supabase } from '@/lib/supabase';
 import LoyaltyProgramCustomization from '@/components/LoyaltyProgramCustomization';
 import RecentActivity from '@/components/admin/RecentActivity';
 import { useRecentActivity } from '@/hooks/useRecentActivity';
+import { useAdminOverviewStats } from '@/hooks/useAdminOverviewStats';
 
 type Establishment = {
   id: string;
@@ -700,6 +701,23 @@ function Overview({
     error: activityError,
     reload: reloadRecentActivity,
   } = useRecentActivity();
+
+  const {
+    data: overviewStats,
+    status: overviewStatsStatus,
+  } = useAdminOverviewStats(30);
+
+  useEffect(() => {
+    console.log('[OverviewEvolution] HOOK DATA:', {
+      status: overviewStatsStatus,
+      reviewsPoints: overviewStats?.reviewsEvolution?.length,
+      scansPoints: overviewStats?.scansEvolution?.length,
+      scansTotal: overviewStats?.scansEvolution?.reduce(
+        (sum, point) => sum + point.count,
+        0,
+      ),
+    });
+  }, [overviewStatsStatus, overviewStats]);
 
   console.log(
     '[KPI PROOF] Overview render:',
