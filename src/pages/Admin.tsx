@@ -46,6 +46,7 @@ import LoyaltyProgramCustomization from '@/components/LoyaltyProgramCustomizatio
 import RecentActivity from '@/components/admin/RecentActivity';
 import EvolutionCharts from '@/components/admin/EvolutionCharts';
 import RecentLoyaltyCustomers from '@/components/admin/RecentLoyaltyCustomers';
+import EstablishmentPerformanceTable from '@/components/admin/EstablishmentPerformanceTable';
 import { useRecentActivity } from '@/hooks/useRecentActivity';
 import { useRecentLoyaltyCustomers } from '@/hooks/useRecentLoyaltyCustomers';
 import { useAdminOverviewStats } from '@/hooks/useAdminOverviewStats';
@@ -937,6 +938,16 @@ function Overview({
         loading={loyaltyCustomersLoading}
         error={loyaltyCustomersError}
         onRetry={reloadRecentLoyaltyCustomers}
+      />
+
+      <EstablishmentPerformanceTable
+        performanceData={establishmentPerformances}
+        loading={establishmentPerformanceLoading}
+        error={establishmentPerformanceError}
+        onRetry={async () => {
+          // reload is added below without changing the existing data flow.
+          window.location.reload();
+        }}
       />
 
       <div className="grid gap-5 xl:grid-cols-[1.65fr_.85fr]">
