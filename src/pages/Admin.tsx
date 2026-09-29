@@ -963,6 +963,12 @@ function Overview({
 }
 
 function AdminMetric({ icon: Icon, label, value, detail }: { icon: typeof Star; label: string; value: string | number; detail: string }) {
+  console.log('[KPI PROOF] AdminMetric render:', {
+    label,
+    value,
+    detail,
+  });
+
   return (
     <div className="rounded-2xl border border-ink/5 bg-white p-4 shadow-soft">
       <div className="flex items-start justify-between gap-3">
