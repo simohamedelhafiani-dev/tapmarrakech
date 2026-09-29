@@ -14,6 +14,42 @@ export default function AdminStatCardTest() {
     };
   }, []);
 
+  useEffect(() => {
+    const root = document.querySelector('main');
+
+    if (!root) {
+      console.log('[DOM WATCH] main introuvable');
+      return;
+    }
+
+    console.log('[DOM WATCH] OBSERVER ACTIF');
+
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        console.log('[DOM WATCH] MUTATION', {
+          type: mutation.type,
+          target: mutation.target,
+          oldValue: mutation.oldValue,
+          addedNodes: mutation.addedNodes.length,
+          removedNodes: mutation.removedNodes.length,
+          currentText: root.innerText,
+        });
+      });
+    });
+
+    observer.observe(root, {
+      subtree: true,
+      childList: true,
+      characterData: true,
+      characterDataOldValue: true,
+    });
+
+    return () => {
+      observer.disconnect();
+      console.log('[DOM WATCH] OBSERVER STOP');
+    };
+  }, []);
+
   console.log('[StatCard TEST] RENDER:', {
     data,
     reviewsCount: data?.reviewsCount,
