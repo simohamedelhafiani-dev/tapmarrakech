@@ -2,6 +2,7 @@ import {
   createContext,
   useContext,
   useEffect,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -24,6 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<UserRole | null>(null);
   const [loading, setLoading] = useState(true);
+  const hasSessionRef = useRef(false);
 
   const loadProfile = async (userId: string) => {
     console.log('[Auth] LOAD PROFILE START', { userId });
@@ -54,6 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!active) return;
 
       setSession(data.session);
+      hasSessionRef.current = Boolean(data.session);
 
       if (data.session?.user) {
         await loadProfile(data.session.user.id);
@@ -81,17 +84,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(nextSession);
 
       if (event === 'SIGNED_OUT' || !nextSession?.user) {
+        hasSessionRef.current = false;
         setRole(null);
         setLoading(false);
         return;
       }
 
       if (event === 'SIGNED_IN') {
-        setLoading(true);
+        const wasAlreadyAuthenticated = hasSessionRef.current;
+
+        hasSessionRef.current = true;
+
+        if (!wasAlreadyAuthenticated) {
+          setLoading(true);
+        }
+
         setTimeout(() => {
           if (!active) return;
           void loadProfile(nextSession.user.id).finally(() => {
-            if (active) {
+            if (active && !wasAlreadyAuthenticated) {
               setLoading(false);
             }
           });
