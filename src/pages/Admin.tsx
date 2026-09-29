@@ -46,6 +46,7 @@ import LoyaltyProgramCustomization from '@/components/LoyaltyProgramCustomizatio
 import RecentActivity from '@/components/admin/RecentActivity';
 import EvolutionCharts from '@/components/admin/EvolutionCharts';
 import { useRecentActivity } from '@/hooks/useRecentActivity';
+import { useRecentLoyaltyCustomers } from '@/hooks/useRecentLoyaltyCustomers';
 import { useAdminOverviewStats } from '@/hooks/useAdminOverviewStats';
 
 type Establishment = {
@@ -702,6 +703,25 @@ function Overview({
     error: activityError,
     reload: reloadRecentActivity,
   } = useRecentActivity();
+
+  const {
+    customers: recentLoyaltyCustomers,
+    loading: loyaltyCustomersLoading,
+    error: loyaltyCustomersError,
+  } = useRecentLoyaltyCustomers(10);
+
+  useEffect(() => {
+    console.log('[RecentLoyaltyCustomers] Admin bridge:', {
+      customers: recentLoyaltyCustomers,
+      loading: loyaltyCustomersLoading,
+      error: loyaltyCustomersError,
+      count: recentLoyaltyCustomers.length,
+    });
+  }, [
+    recentLoyaltyCustomers,
+    loyaltyCustomersLoading,
+    loyaltyCustomersError,
+  ]);
 
   const {
     data: overviewStats,
