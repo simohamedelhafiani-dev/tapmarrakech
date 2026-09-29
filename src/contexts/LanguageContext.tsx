@@ -654,6 +654,12 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     const translatableAttributes = ['placeholder', 'title', 'aria-label', 'alt'];
 
     const translateNode = (node: Text) => {
+      if (
+        node.parentElement?.closest('[data-no-translate], [data-i18n-ignore]')
+      ) {
+        return;
+      }
+
       const current = node.nodeValue ?? '';
       if (!current.trim()) return;
       if (!originalTextNodes.has(node)) originalTextNodes.set(node, current);
