@@ -662,8 +662,15 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
       const current = node.nodeValue ?? '';
       if (!current.trim()) return;
-      if (!originalTextNodes.has(node)) originalTextNodes.set(node, current);
-      const source = originalTextNodes.get(node) ?? current;
+
+      // Only touch text nodes that are actually known to the app translation dictionary.
+      // Dynamic values such as KPI counters ("0" -> "2" / "13") must remain owned by React.
+      const sourceCandidate = sourceUiText(current);
+      const sourceKey = sourceCandidate.trim();
+      if (!uiTranslations[sourceKey]) return;
+
+      if (!originalTextNodes.has(node)) originalTextNodes.set(node, sourceCandidate);
+      const source = originalTextNodes.get(node) ?? sourceCandidate;
       const translated = translateUiText(source, language);
       if (node.nodeValue !== translated) node.nodeValue = translated;
     };
