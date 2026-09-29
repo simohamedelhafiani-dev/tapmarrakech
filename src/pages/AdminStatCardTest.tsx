@@ -5,6 +5,8 @@ import { useAdminOverviewStats } from '@/hooks/useAdminOverviewStats';
 export default function AdminStatCardTest() {
   const { status, data, error } = useAdminOverviewStats(30);
 
+  console.log('[StatCard TEST] reviewGrowth:', data?.reviewGrowth, 'registrationGrowth:', data?.registrationGrowth);
+
   return (
     <main className="min-h-screen bg-[#F6F7F5] px-6 py-10 text-[#111827]">
       <div className="mx-auto max-w-6xl">
