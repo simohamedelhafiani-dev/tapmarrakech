@@ -5,6 +5,13 @@ import { useAdminOverviewStats } from '@/hooks/useAdminOverviewStats';
 export default function AdminStatCardTest() {
   const { status, data, error } = useAdminOverviewStats(30);
 
+  console.log('[StatCard TEST] RENDER:', {
+    data,
+    reviewsCount: data?.reviewsCount,
+    averageRating: data?.averageRating,
+    loyaltyCustomersCount: data?.loyaltyCustomersCount,
+  });
+
   console.log('[StatCard TEST] VALUES:', {
     reviewsCount: data?.reviewsCount,
     averageRating: data?.averageRating,
