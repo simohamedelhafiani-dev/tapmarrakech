@@ -43,6 +43,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import LoyaltyProgramCustomization from '@/components/LoyaltyProgramCustomization';
+import { useRecentActivity } from '@/hooks/useRecentActivity';
 
 type Establishment = {
   id: string;
@@ -668,8 +669,10 @@ function Overview({
   });
   const [detailLoading, setDetailLoading] = useState(false);
   const requestCounter = useRef(0);
+  const { activities, loading: activityLoading, error: activityError } = useRecentActivity();
 
   console.log('[RENDER]', selectedEstablishment, globalStats);
+  console.log('[RecentActivity] Overview received:', { activities, activityLoading, activityError });
 
   useEffect(() => {
     const reqId = ++requestCounter.current;
