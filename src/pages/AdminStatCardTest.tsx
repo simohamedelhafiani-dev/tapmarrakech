@@ -26,13 +26,12 @@ export default function AdminStatCardTest() {
 
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
-        console.log('[DOM WATCH] MUTATION', {
+        console.log('[DOM WATCH] MUTATION DETAIL', {
           type: mutation.type,
-          target: mutation.target,
           oldValue: mutation.oldValue,
-          addedNodes: mutation.addedNodes.length,
-          removedNodes: mutation.removedNodes.length,
-          currentText: root.innerText,
+          newValue: mutation.target.textContent,
+          target: mutation.target,
+          parent: mutation.target.parentElement?.outerHTML,
         });
       });
     });
