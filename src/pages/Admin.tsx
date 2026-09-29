@@ -970,7 +970,11 @@ function AdminMetric({ icon: Icon, label, value, detail }: { icon: typeof Star; 
   });
 
   return (
-    <div className="rounded-2xl border border-ink/5 bg-white p-4 shadow-soft">
+    <div
+      data-kpi-label={label}
+      data-kpi-value={String(value)}
+      className="rounded-2xl border border-ink/5 bg-white p-4 shadow-soft"
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="grid h-10 w-10 place-items-center rounded-xl bg-forest/10 text-forest"><Icon size={18} /></div>
       </div>
