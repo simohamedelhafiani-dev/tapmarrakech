@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { TrendingDown, TrendingUp } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -44,6 +44,16 @@ export default function StatCard({ label, value, icon: Icon, iconTone = 'indigo'
     const domValue = cardRef.current?.querySelector('[data-stat-card-value]')?.textContent;
 
     console.log('[StatCard] COMMIT:', {
+      label,
+      propValue: value,
+      domValue,
+    });
+  }, [label, value]);
+
+  useEffect(() => {
+    const domValue = cardRef.current?.querySelector('[data-stat-card-value]')?.textContent;
+
+    console.log('[StatCard] EFFECT:', {
       label,
       propValue: value,
       domValue,
