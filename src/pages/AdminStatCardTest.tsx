@@ -1,9 +1,18 @@
+import { useEffect } from 'react';
 import { MessageSquare, Star, UsersRound } from 'lucide-react';
 import StatCard from '@/components/admin/StatCard';
 import { useAdminOverviewStats } from '@/hooks/useAdminOverviewStats';
 
 export default function AdminStatCardTest() {
   const { status, data, error } = useAdminOverviewStats(30);
+
+  useEffect(() => {
+    console.log('[StatCard TEST] MOUNT');
+
+    return () => {
+      console.log('[StatCard TEST] UNMOUNT');
+    };
+  }, []);
 
   console.log('[StatCard TEST] RENDER:', {
     data,
