@@ -213,6 +213,18 @@ export function useAdminOverviewStats(periodDays = 30) {
           hasEvolutionData: Boolean(evolutionResult.data),
         });
 
+        console.log('[OverviewEvolution] RPC result:', {
+          reviewsEvolution: evolutionResult.data?.reviewsEvolution,
+          scansEvolution: evolutionResult.data?.scansEvolution,
+          reviewsPoints: evolutionResult.data?.reviewsEvolution?.length,
+          scansPoints: evolutionResult.data?.scansEvolution?.length,
+          scansTotal: evolutionResult.data?.scansEvolution?.reduce(
+            (sum: number, point: { count?: number }) =>
+              sum + Number(point.count || 0),
+            0,
+          ),
+        });
+
         if (kpiResult.error) {
           throw kpiResult.error;
         }
