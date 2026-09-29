@@ -51,6 +51,7 @@ import { useRecentActivity } from '@/hooks/useRecentActivity';
 import { useRecentLoyaltyCustomers } from '@/hooks/useRecentLoyaltyCustomers';
 import { useAdminOverviewStats } from '@/hooks/useAdminOverviewStats';
 import { useEstablishmentPerformance } from '@/hooks/useEstablishmentPerformance';
+import { useEstablishments } from '@/hooks/useEstablishments';
 
 type Establishment = {
   id: string;
@@ -170,6 +171,22 @@ export default function Admin() {
 
 
   const [loading, setLoading] = useState(true);
+
+  const {
+    establishments: establishmentList,
+    loading: establishmentListLoading,
+    error: establishmentListError,
+  } = useEstablishments();
+
+  useEffect(() => {
+    console.log('[Establishments] HOOK DATA:', {
+      status: establishmentListLoading ? 'loading' : 'success',
+      count: establishmentList.length,
+      establishments: establishmentList,
+      error: establishmentListError?.message ?? null,
+    });
+  }, [establishmentListLoading, establishmentList, establishmentListError]);
+
   const [staffLoading, setStaffLoading] = useState(true);
 
   const loadEstablishments = async () => {
