@@ -5,7 +5,13 @@ import { useAdminOverviewStats } from '@/hooks/useAdminOverviewStats';
 export default function AdminStatCardTest() {
   const { status, data, error } = useAdminOverviewStats(30);
 
-  console.log('[StatCard TEST] reviewGrowth:', data?.reviewGrowth, 'registrationGrowth:', data?.registrationGrowth);
+  console.log('[StatCard TEST] VALUES:', {
+    reviewsCount: data?.reviewsCount,
+    averageRating: data?.averageRating,
+    loyaltyCustomersCount: data?.loyaltyCustomersCount,
+    reviewGrowth: data?.reviewGrowth,
+    registrationGrowth: data?.registrationGrowth,
+  });
 
   return (
     <main className="min-h-screen bg-[#F6F7F5] px-6 py-10 text-[#111827]">
