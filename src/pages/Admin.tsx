@@ -45,6 +45,7 @@ import { supabase } from '@/lib/supabase';
 import LoyaltyProgramCustomization from '@/components/LoyaltyProgramCustomization';
 import RecentActivity from '@/components/admin/RecentActivity';
 import EvolutionCharts from '@/components/admin/EvolutionCharts';
+import RecentLoyaltyCustomers from '@/components/admin/RecentLoyaltyCustomers';
 import { useRecentActivity } from '@/hooks/useRecentActivity';
 import { useRecentLoyaltyCustomers } from '@/hooks/useRecentLoyaltyCustomers';
 import { useAdminOverviewStats } from '@/hooks/useAdminOverviewStats';
@@ -708,6 +709,7 @@ function Overview({
     customers: recentLoyaltyCustomers,
     loading: loyaltyCustomersLoading,
     error: loyaltyCustomersError,
+    reload: reloadRecentLoyaltyCustomers,
   } = useRecentLoyaltyCustomers(10);
 
   useEffect(() => {
@@ -902,6 +904,13 @@ function Overview({
         reviewsData={overviewStats?.reviewsEvolution ?? []}
         scansData={overviewStats?.scansEvolution ?? []}
         loading={overviewStatsStatus === 'loading'}
+      />
+
+      <RecentLoyaltyCustomers
+        customers={recentLoyaltyCustomers}
+        loading={loyaltyCustomersLoading}
+        error={loyaltyCustomersError}
+        onRetry={reloadRecentLoyaltyCustomers}
       />
 
       <div className="grid gap-5 xl:grid-cols-[1.65fr_.85fr]">
