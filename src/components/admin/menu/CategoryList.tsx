@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, Pencil, Plus, RefreshCw, Trash2, X } from 'lucide-react';
+import { Check, ChevronDown, Pencil, Plus, RefreshCw, Trash2, X } from 'lucide-react';
 import type { MenuCategory, MenuItem } from '@/hooks/useMenuManager';
 
 type CategoryListProps = {
@@ -9,7 +9,7 @@ type CategoryListProps = {
   onAdd: (input: { name: string; description?: string | null; active?: boolean }) => Promise<MenuCategory>;
   onUpdate: (categoryId: string, input: { name?: string; description?: string | null; active?: boolean }) => Promise<MenuCategory>;
   onToggleActive: (categoryId: string) => Promise<MenuCategory>;
-  onDelete: (categoryId: string) => Promise<boolean>;
+  onDelete: (categoryId: string, action?: 'move' | 'delete', destinationCategoryId?: string) => Promise<boolean>;
   onReindex: () => Promise<void>;
 };
 
@@ -26,7 +26,7 @@ export default function CategoryList({
   const [newName, setNewName] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
-  const [actionError, setActionError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);\n  const [expandedId, setExpandedId] = useState<string | null>(null);\n  const [deleteTarget, setDeleteTarget] = useState<MenuCategory | null>(null);\n  const [deleteMode, setDeleteMode] = useState<'move' | 'delete'>('move');\n  const [destinationId, setDestinationId] = useState('');
 
   const submitNewCategory = async () => {
     console.log('[UI] Click: ADD_CATEGORY', { newName, saving });
@@ -73,15 +73,18 @@ export default function CategoryList({
     }
   };
 
-  const remove = async (category: MenuCategory) => {
-    console.log('[UI] Click: DELETE_CATEGORY', { categoryId: category.id, name: category.name, itemCount: itemsByCategory[category.id]?.length ?? 0, saving });
-    setActionError(null);
+  const openDelete = (category: MenuCategory) => {
+    setActionError(null); setDeleteTarget(category); setDeleteMode('move');
+    setDestinationId(categories.find(c => c.id !== category.id && c.active)?.id ?? '');
+  };
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
     try {
-      console.log('[UI] DELETE_CATEGORY -> calling onDelete', { categoryId: category.id });
-      const deleted = await onDelete(category.id);
-      console.log('[UI] DELETE_CATEGORY -> SUCCESS', { categoryId: category.id, deleted });
+      setActionError(null);
+      if (deleteMode === 'move' && !destinationId) throw new Error('Choisis une catégorie destination.');
+      await onDelete(deleteTarget.id, deleteMode, deleteMode === 'move' ? destinationId : undefined);
+      setDeleteTarget(null);
     } catch (error) {
-      console.error('[UI] DELETE_CATEGORY -> ERROR', error);
       setActionError(error instanceof Error ? error.message : 'Impossible de supprimer la catégorie.');
     }
   };
@@ -230,24 +233,54 @@ export default function CategoryList({
                         >
                           {category.active ? 'Actif' : 'Inactif'}
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => void remove(category)}
-                          disabled={saving || itemCount > 0}
-                          title={itemCount > 0 ? 'Supprime d’abord les articles de cette catégorie.' : 'Supprimer'}
-                          className="grid h-8 w-8 place-items-center rounded-lg bg-white text-ink/35 transition hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-30"
-                        >
+                        <button type="button" onClick={() => setExpandedId(expandedId === category.id ? null : category.id)} disabled={saving} className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[11px] font-semibold text-forest disabled:opacity-40">
+                          <ChevronDown size={13} className={expandedId === category.id ? 'rotate-180 transition-transform' : 'transition-transform'} /> Articles
+                        </button>
+                        <button type="button" onClick={() => openDelete(category)} disabled={saving} title="Supprimer" className="grid h-8 w-8 place-items-center rounded-lg bg-white text-ink/35 transition hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-30">
                           <Trash2 size={14} />
                         </button>
                       </>
                     )}
                   </div>
                 </div>
-              );
+                {expandedId === category.id && (
+                  <div className="rounded-2xl border border-ink/5 bg-white p-4">
+                    {itemCount === 0 ? <p className="text-xs text-ink/40">Aucun article dans cette catégorie.</p> : (
+                      <div className="space-y-2">
+                        {itemsByCategory[category.id].map((item, itemIndex) => (
+                          <div key={item.id} className="flex items-center justify-between rounded-xl bg-[#f7f7f3] px-3 py-2.5">
+                            <div className="min-w-0"><p className="truncate text-xs font-semibold text-forest">{itemIndex + 1}. {item.name}</p><p className="mt-0.5 text-[10px] text-ink/40">{item.price} DH · {item.active ? 'Actif' : 'Inactif'}</p></div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
             })
           )}
         </div>
       </div>
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/30 p-4">
+          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Suppression</p>
+            <h4 className="mt-2 text-lg font-semibold text-forest">Supprimer « {deleteTarget.name} » ?</h4>
+            <p className="mt-2 text-xs text-ink/50">{itemsByCategory[deleteTarget.id]?.length ?? 0} article(s) concerné(s).</p>
+            {(itemsByCategory[deleteTarget.id]?.length ?? 0) > 0 && <>
+              <div className="mt-4 space-y-2">
+                <label className="flex gap-3 rounded-xl border p-3"><input type="radio" checked={deleteMode === 'move'} onChange={() => setDeleteMode('move')} /><span className="text-xs"><b>Déplacer les articles</b><span className="block text-ink/40">Ils restent dans le menu.</span></span></label>
+                <label className="flex gap-3 rounded-xl border border-red-100 p-3"><input type="radio" checked={deleteMode === 'delete'} onChange={() => setDeleteMode('delete')} /><span className="text-xs"><b className="text-red-700">Tout supprimer</b><span className="block text-ink/40">Les articles seront supprimés.</span></span></label>
+              </div>
+              {deleteMode === 'move' && <select value={destinationId} onChange={e => setDestinationId(e.target.value)} className="mt-3 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-xs"><option value="">Choisir une destination…</option>{categories.filter(c => c.id !== deleteTarget.id && c.active).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select>}
+              {deleteMode === 'delete' && <p className="mt-3 rounded-xl bg-red-50 px-3 py-2.5 text-[10px] text-red-700">Suppression définitive des articles concernés.</p>}
+            </>}
+            {actionError && <div className="mt-3 rounded-xl bg-red-50 px-3 py-2.5 text-xs text-red-700">{actionError}</div>}
+            <div className="mt-5 flex justify-end gap-2"><button type="button" onClick={() => setDeleteTarget(null)} className="rounded-xl bg-[#f7f7f3] px-4 py-2.5 text-xs font-semibold">Annuler</button><button type="button" onClick={() => void confirmDelete()} disabled={saving || ((itemsByCategory[deleteTarget.id]?.length ?? 0) > 0 && deleteMode === 'move' && !destinationId)} className="rounded-xl bg-red-600 px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-40">Confirmer</button></div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
