@@ -210,8 +210,13 @@ export default function CategoryList({
                           <button type="button" onClick={() => startEditing(category)} disabled={saving} className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[11px] font-semibold text-forest disabled:opacity-40">
                             <Pencil size={13} /> Modifier
                           </button>
-                          <button type="button" onClick={() => void toggle(category.id)} disabled={saving} className={category.active ? 'rounded-full bg-green-100 px-3 py-1.5 text-[10px] font-semibold text-green-700' : 'rounded-full bg-ink/10 px-3 py-1.5 text-[10px] font-semibold text-ink/45'}>
-                            {category.active ? 'Actif' : 'Inactif'}
+                          <button
+                            type="button"
+                            onClick={() => void toggle(category.id)}
+                            disabled={saving}
+                            className={category.active ? 'rounded-lg bg-red-50 px-3 py-2 text-[11px] font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-40' : 'rounded-lg bg-forest px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-forest/90 disabled:cursor-not-allowed disabled:opacity-40'}
+                          >
+                            {category.active ? 'Désactiver' : 'Activer'}
                           </button>
                           <button type="button" onClick={() => setExpandedId(expandedId === category.id ? null : category.id)} disabled={saving} className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[11px] font-semibold text-forest disabled:opacity-40">
                             <ChevronDown size={13} className={expandedId === category.id ? 'rotate-180 transition-transform' : 'transition-transform'} /> Articles
