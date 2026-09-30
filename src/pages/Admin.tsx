@@ -1379,6 +1379,20 @@ function EstablishmentWorkspace({
     setSaving(false); if (error) return alert(error.message); alert('Wi-Fi enregistré.');
   };
 
+  const saveTemplates = async () => {
+    setSaving(true);
+    const { error } = await supabase
+      .from('establishments')
+      .update({
+        page_template_id: profile.page_template_id || null,
+        menu_template_id: profile.menu_template_id || null,
+      })
+      .eq('id', establishment.id);
+    setSaving(false);
+    if (error) return alert(error.message);
+    alert('Templates enregistrés.');
+  };
+
   const setMenuMode = async (mode: 'digital' | 'pdf') => {
     setMenuDisplayMode(mode);
     const { error } = await supabase.from('establishments').update({ menu_display_mode: mode }).eq('id', establishment.id);
@@ -2392,7 +2406,7 @@ function EstablishmentWorkspace({
         <label className="text-xs text-ink/50">Template page<select value={profile.page_template_id ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, page_template_id: e.target.value || null }))} className="mt-1 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"><option value="">Automatique / défaut</option>{templates.filter((t) => t.kind === 'page' && t.active).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label>
         <label className="text-xs text-ink/50">Template menu<select value={profile.menu_template_id ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, menu_template_id: e.target.value || null }))} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm"><option value="">Automatique / défaut</option>{templates.filter((t) => t.kind === 'menu' && t.active).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label>
       </div>
-      <button onClick={saveProfile} className="mt-4 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Enregistrer les templates</button>
+      <button onClick={saveTemplates} disabled={saving} className="mt-4 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-40">Enregistrer les templates</button>
     </div>
   </div>
       )}
