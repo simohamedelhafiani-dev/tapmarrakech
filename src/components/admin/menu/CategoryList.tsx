@@ -29,11 +29,15 @@ export default function CategoryList({
   const [actionError, setActionError] = useState<string | null>(null);
 
   const submitNewCategory = async () => {
+    console.log('[UI] Click: ADD_CATEGORY', { newName, saving });
     setActionError(null);
     try {
-      await onAdd({ name: newName });
+      console.log('[UI] ADD_CATEGORY -> calling onAdd');
+      const created = await onAdd({ name: newName });
+      console.log('[UI] ADD_CATEGORY -> SUCCESS', { id: created.id, name: created.name, display_order: created.display_order });
       setNewName('');
     } catch (error) {
+      console.error('[UI] ADD_CATEGORY -> ERROR', error);
       setActionError(error instanceof Error ? error.message : 'Impossible de créer la catégorie.');
     }
   };
@@ -70,11 +74,28 @@ export default function CategoryList({
   };
 
   const remove = async (category: MenuCategory) => {
+    console.log('[UI] Click: DELETE_CATEGORY', { categoryId: category.id, name: category.name, itemCount: itemsByCategory[category.id]?.length ?? 0, saving });
     setActionError(null);
     try {
-      await onDelete(category.id);
+      console.log('[UI] DELETE_CATEGORY -> calling onDelete', { categoryId: category.id });
+      const deleted = await onDelete(category.id);
+      console.log('[UI] DELETE_CATEGORY -> SUCCESS', { categoryId: category.id, deleted });
     } catch (error) {
+      console.error('[UI] DELETE_CATEGORY -> ERROR', error);
       setActionError(error instanceof Error ? error.message : 'Impossible de supprimer la catégorie.');
+    }
+  };
+
+  const reindex = async () => {
+    console.log('[UI] Click: REINDEX', { categoryCount: categories.length, saving });
+    setActionError(null);
+    try {
+      console.log('[UI] REINDEX -> calling onReindex');
+      await onReindex();
+      console.log('[UI] REINDEX -> RESOLVED');
+    } catch (error) {
+      console.error('[UI] REINDEX -> ERROR', error);
+      setActionError(error instanceof Error ? error.message : 'Impossible de réindexer le menu.');
     }
   };
 
@@ -89,8 +110,9 @@ export default function CategoryList({
 
         <button
           type="button"
-          onClick={() => void onReindex()}
+          onClick={() => void reindex()}
           disabled={saving || categories.length === 0}
+          title={categories.length === 0 ? 'Aucune catégorie à réindexer.' : saving ? 'Une opération est en cours.' : 'Réindexer les catégories et articles'}
           className="inline-flex items-center justify-center gap-2 rounded-xl border border-forest/10 bg-[#f7f7f3] px-4 py-2.5 text-xs font-semibold text-forest disabled:cursor-not-allowed disabled:opacity-40"
         >
           <RefreshCw size={14} />
