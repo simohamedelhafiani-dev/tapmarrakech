@@ -78,9 +78,16 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
         />
 
         <ItemEditor
+          establishmentId={establishmentId}
+          categories={menu.categories}
           category={selectedCategory}
           items={selectedItems}
           saving={menu.saving}
+          onAdd={menu.addItem}
+          onUpdate={menu.updateItem}
+          onMove={menu.moveItem}
+          onToggleActive={menu.toggleItemActive}
+          onDelete={menu.deleteItem}
         />
 
         <MenuPreview
