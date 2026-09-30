@@ -1,10 +1,12 @@
 import { useRef, useState } from 'react';
-import { Check, ImagePlus, Loader2, Sparkles, Upload, X } from 'lucide-react';
+import { Check, ChevronDown, ImagePlus, Loader2, Sparkles, Upload, X } from 'lucide-react';
 
 export type MenuTemplate = 'editorial' | 'luxury' | 'cards' | 'dark';
+export type MenuNavigationMode = 'scroll' | 'book' | 'app';
 
 export type MenuDesignDraft = {
   template: MenuTemplate;
+  navigation: MenuNavigationMode;
   wallpaperUrl: string | null;
   wallpaperFile: File | null;
   wallpaperObjectUrl: string | null;
@@ -22,6 +24,12 @@ type MenuConfiguratorProps = {
   onPublish: () => void;
   onGenerateAi: () => void;
 };
+
+const navigationModes: Array<{ id: MenuNavigationMode; label: string; description: string }> = [
+  { id: 'scroll', label: 'Page unique', description: 'Défilement classique' },
+  { id: 'book', label: 'Mode livre', description: 'Pagination par catégorie' },
+  { id: 'app', label: 'Mode app', description: 'Navigation interactive' },
+];
 
 const templates: Array<{ id: MenuTemplate; label: string; description: string }> = [
   { id: 'editorial', label: 'Editorial', description: 'Élégant, lumineux, typographique' },
@@ -120,6 +128,57 @@ export default function MenuConfigurator({
             );
           })}
         </div>
+      </div>
+
+      <div className="rounded-2xl border border-gold/15 bg-gold/5 p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-gold">Expérience</p>
+            <h4 className="mt-1 text-sm font-semibold text-forest">Mode de navigation</h4>
+            <p className="mt-1 text-[10px] leading-4 text-ink/40">
+              Choisis comment le visiteur parcourt ton menu.
+            </p>
+          </div>
+          <ChevronDown size={16} className="mt-0.5 text-gold" />
+        </div>
+
+        <div className="mt-3 grid gap-2 sm:grid-cols-3">
+          {navigationModes.map((mode) => {
+            const active = draft.navigation === mode.id;
+
+            return (
+              <button
+                key={mode.id}
+                type="button"
+                disabled={publishing}
+                onClick={() => onChange({ navigation: mode.id })}
+                className={[
+                  'rounded-xl border px-3 py-3 text-left transition-all duration-200',
+                  active
+                    ? 'border-forest/20 bg-white shadow-sm ring-1 ring-gold/20'
+                    : 'border-ink/5 bg-white/60 hover:border-forest/15 hover:bg-white',
+                ].join(' ')}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-semibold text-forest">{mode.label}</span>
+                  <span
+                    className={[
+                      'grid h-5 w-5 place-items-center rounded-full border',
+                      active ? 'border-gold bg-gold text-white' : 'border-ink/10 bg-white',
+                    ].join(' ')}
+                  >
+                    {active && <Check size={11} />}
+                  </span>
+                </div>
+                <span className="mt-1 block text-[9px] leading-4 text-ink/35">{mode.description}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <p className="mt-3 text-[9px] leading-4 text-ink/35">
+          Le mode est synchronisé avec le Draft et l’aperçu. Sa persistance publique sera ajoutée avec la future configuration de navigation.
+        </p>
       </div>
 
       <div>
