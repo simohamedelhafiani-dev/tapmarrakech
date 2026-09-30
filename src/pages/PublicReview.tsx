@@ -4,6 +4,8 @@ import {
   ArrowRight,
   Check,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   ExternalLink,
   Gift,
   Heart,
@@ -497,13 +499,22 @@ export default function PublicReview() {
   const googleReviewCount =
     p.google_review_count ?? p.review_count ?? null;
   const menuTemplate =
-    menuTemplateConfig?.layout ||
-    (p.menu_template_id === 'dark' || p.menu_template_id === 'cards' || p.menu_template_id === 'luxury'
+    p.menu_template_id === 'dark' || p.menu_template_id === 'cards' || p.menu_template_id === 'luxury'
       ? p.menu_template_id
-      : 'editorial');
+      : menuTemplateConfig?.layout === 'dark' || menuTemplateConfig?.layout === 'cards' || menuTemplateConfig?.layout === 'luxury'
+        ? menuTemplateConfig.layout
+        : 'editorial';
   const menuDisplayMode = p.menu_display_mode || 'digital';
   const menuPdfUrl = p.menu_pdf_url || '';
   const menuAiDesign = p.menu_ai_design || null;
+  const menuNavigation =
+    menuAiDesign?.navigation_mode === 'book' || menuAiDesign?.navigation_mode === 'app'
+      ? menuAiDesign.navigation_mode
+      : 'scroll';
+  const menuOverlayOpacity =
+    typeof menuAiDesign?.overlay_opacity === 'number'
+      ? Math.min(0.7, Math.max(0, menuAiDesign.overlay_opacity))
+      : 0.18;
 
   const directionsUrl =
     address || city
@@ -769,7 +780,10 @@ export default function PublicReview() {
               backgroundAttachment: 'fixed',
             }}
           >
-            <div className="pointer-events-none absolute inset-0 bg-black/18" />
+            <div
+              className="pointer-events-none absolute inset-0 bg-black"
+              style={{ opacity: menuOverlayOpacity }}
+            />
 
             <div className="relative z-10">
               <div className="flex items-center justify-between">
@@ -823,6 +837,7 @@ export default function PublicReview() {
                   categories={categories}
                   items={items}
                   itemsByCategory={itemsByCategory}
+                  navigation={menuNavigation}
                   photoMode={(p as any).menu_ai_photo_mode === 'without_photos' ? 'without_photos' : 'with_photos'}
                 />
               ) : (
@@ -831,6 +846,7 @@ export default function PublicReview() {
                   place={p}
                   categories={categories}
                   itemsByCategory={itemsByCategory}
+                  navigation={menuNavigation}
                 />
               )}
             </div>
@@ -1421,6 +1437,7 @@ function AIPremiumMenu({
   categories,
   items,
   itemsByCategory,
+  navigation = 'scroll',
   photoMode,
 }: {
   design: any;
@@ -1428,6 +1445,7 @@ function AIPremiumMenu({
   categories: MenuCategory[];
   items: MenuItem[];
   itemsByCategory: Record<string, MenuItem[]>;
+  navigation?: 'scroll' | 'book' | 'app';
   photoMode: 'with_photos' | 'without_photos';
 }) {
   const style = design?.style ?? 'editorial';
@@ -1762,11 +1780,13 @@ function MenuTemplate({
   place,
   categories,
   itemsByCategory,
+  navigation = 'scroll',
 }: {
   template: string;
   place: any;
   categories: MenuCategory[];
   itemsByCategory: Record<string, MenuItem[]>;
+  navigation?: 'scroll' | 'book' | 'app';
 }) {
   const visible = categories.filter((category) => (itemsByCategory[category.id] ?? []).length > 0);
 
