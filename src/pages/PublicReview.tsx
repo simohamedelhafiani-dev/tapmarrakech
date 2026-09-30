@@ -1535,9 +1535,20 @@ function AIPremiumMenu({
       </section>
 
       {navSections.length > 1 && (
-        <div className={`sticky top-0 z-20 overflow-x-auto border-b px-5 py-3 scrollbar-hide ${
-          'border-ink/10 bg-[#f0ece2]/95'
-        }`}>
+        <div
+          className="sticky top-0 z-20 overflow-x-auto border-b border-white/10 px-5 py-3 scrollbar-hide"
+          style={
+            wallpaper
+              ? {
+                  backgroundImage: `linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("${wallpaper}")`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }
+              : {
+                  backgroundColor: '#173d32',
+                }
+          }
+        >
           <div className="flex min-w-max gap-2">
             {navSections.map((section: any, index: number) => (
               <button
