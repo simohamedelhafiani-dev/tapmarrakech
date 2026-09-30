@@ -168,98 +168,82 @@ export default function CategoryList({
 
               return (
                 <div key={category.id} className="space-y-2">
-                  className="flex flex-col gap-3 rounded-2xl border border-ink/5 bg-[#f7f7f3] p-4 sm:flex-row sm:items-center"
-                >
-                  <div className="flex min-w-0 flex-1 items-center gap-3">
-                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-xs font-bold text-forest shadow-sm">
-                      {index + 1}
+                  <div className="flex flex-col gap-3 rounded-2xl border border-ink/5 bg-[#f7f7f3] p-4 sm:flex-row sm:items-center">
+                    <div className="flex min-w-0 flex-1 items-center gap-3">
+                      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-xs font-bold text-forest shadow-sm">
+                        {index + 1}
+                      </div>
+
+                      {isEditing ? (
+                        <input
+                          autoFocus
+                          value={editingName}
+                          onChange={(event) => setEditingName(event.target.value)}
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter' && editingName.trim()) void saveEditing();
+                            if (event.key === 'Escape') cancelEditing();
+                          }}
+                          className="min-w-0 flex-1 rounded-lg border border-forest/20 bg-white px-3 py-2 text-sm outline-none ring-2 ring-forest/5"
+                        />
+                      ) : (
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-forest">{category.name}</p>
+                          <p className="mt-0.5 text-[11px] text-ink/40">
+                            {itemCount} article{itemCount > 1 ? 's' : ''}
+                          </p>
+                        </div>
+                      )}
                     </div>
 
-                    {isEditing ? (
-                      <input
-                        autoFocus
-                        value={editingName}
-                        onChange={(event) => setEditingName(event.target.value)}
-                        onKeyDown={(event) => {
-                          if (event.key === 'Enter' && editingName.trim()) void saveEditing();
-                          if (event.key === 'Escape') cancelEditing();
-                        }}
-                        className="min-w-0 flex-1 rounded-lg border border-forest/20 bg-white px-3 py-2 text-sm outline-none ring-2 ring-forest/5"
-                      />
-                    ) : (
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-forest">{category.name}</p>
-                        <p className="mt-0.5 text-[11px] text-ink/40">
-                          {itemCount} article{itemCount > 1 ? 's' : ''}
-                        </p>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2 sm:shrink-0">
+                      {isEditing ? (
+                        <>
+                          <button type="button" onClick={() => void saveEditing()} disabled={saving || !editingName.trim()} className="inline-flex items-center gap-1.5 rounded-lg bg-forest px-3 py-2 text-[11px] font-semibold text-white disabled:opacity-40">
+                            <Check size={13} /> Enregistrer
+                          </button>
+                          <button type="button" onClick={cancelEditing} className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[11px] font-semibold text-ink/55">
+                            <X size={13} /> Annuler
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button type="button" onClick={() => startEditing(category)} disabled={saving} className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[11px] font-semibold text-forest disabled:opacity-40">
+                            <Pencil size={13} /> Modifier
+                          </button>
+                          <button type="button" onClick={() => void toggle(category.id)} disabled={saving} className={category.active ? 'rounded-full bg-green-100 px-3 py-1.5 text-[10px] font-semibold text-green-700' : 'rounded-full bg-ink/10 px-3 py-1.5 text-[10px] font-semibold text-ink/45'}>
+                            {category.active ? 'Actif' : 'Inactif'}
+                          </button>
+                          <button type="button" onClick={() => setExpandedId(expandedId === category.id ? null : category.id)} disabled={saving} className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[11px] font-semibold text-forest disabled:opacity-40">
+                            <ChevronDown size={13} className={expandedId === category.id ? 'rotate-180 transition-transform' : 'transition-transform'} /> Articles
+                          </button>
+                          <button type="button" onClick={() => openDelete(category)} disabled={saving} title="Supprimer" className="grid h-8 w-8 place-items-center rounded-lg bg-white text-ink/35 transition hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-30">
+                            <Trash2 size={14} />
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-2 sm:shrink-0">
-                    {isEditing ? (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => void saveEditing()}
-                          disabled={saving || !editingName.trim()}
-                          className="inline-flex items-center gap-1.5 rounded-lg bg-forest px-3 py-2 text-[11px] font-semibold text-white disabled:opacity-40"
-                        >
-                          <Check size={13} />
-                          Enregistrer
-                        </button>
-                        <button
-                          type="button"
-                          onClick={cancelEditing}
-                          className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[11px] font-semibold text-ink/55"
-                        >
-                          <X size={13} />
-                          Annuler
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => startEditing(category)}
-                          disabled={saving}
-                          className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[11px] font-semibold text-forest disabled:opacity-40"
-                        >
-                          <Pencil size={13} />
-                          Modifier
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => void toggle(category.id)}
-                          disabled={saving}
-                          className={category.active ? 'rounded-full bg-green-100 px-3 py-1.5 text-[10px] font-semibold text-green-700' : 'rounded-full bg-ink/10 px-3 py-1.5 text-[10px] font-semibold text-ink/45'}
-                        >
-                          {category.active ? 'Actif' : 'Inactif'}
-                        </button>
-                        <button type="button" onClick={() => setExpandedId(expandedId === category.id ? null : category.id)} disabled={saving} className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[11px] font-semibold text-forest disabled:opacity-40">
-                          <ChevronDown size={13} className={expandedId === category.id ? 'rotate-180 transition-transform' : 'transition-transform'} /> Articles
-                        </button>
-                        <button type="button" onClick={() => openDelete(category)} disabled={saving} title="Supprimer" className="grid h-8 w-8 place-items-center rounded-lg bg-white text-ink/35 transition hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-30">
-                          <Trash2 size={14} />
-                        </button>
-                      </>
-                    )}
-                  </div>
-                {expandedId === category.id && (
-                  <div className="rounded-2xl border border-ink/5 bg-white p-4">
-                    {itemCount === 0 ? <p className="text-xs text-ink/40">Aucun article dans cette catégorie.</p> : (
-                      <div className="space-y-2">
-                        {itemsByCategory[category.id].map((item, itemIndex) => (
-                          <div key={item.id} className="flex items-center justify-between rounded-xl bg-[#f7f7f3] px-3 py-2.5">
-                            <div className="min-w-0"><p className="truncate text-xs font-semibold text-forest">{itemIndex + 1}. {item.name}</p><p className="mt-0.5 text-[10px] text-ink/40">{item.price} DH · {item.active ? 'Actif' : 'Inactif'}</p></div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
+                  {expandedId === category.id && (
+                    <div className="rounded-2xl border border-ink/5 bg-white p-4">
+                      {itemCount === 0 ? (
+                        <p className="text-xs text-ink/40">Aucun article dans cette catégorie.</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {itemsByCategory[category.id].map((item, itemIndex) => (
+                            <div key={item.id} className="flex items-center justify-between rounded-xl bg-[#f7f7f3] px-3 py-2.5">
+                              <div className="min-w-0">
+                                <p className="truncate text-xs font-semibold text-forest">{itemIndex + 1}. {item.name}</p>
+                                <p className="mt-0.5 text-[10px] text-ink/40">{item.price} DH · {item.active ? 'Actif' : 'Inactif'}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
             })
           )}
         </div>
