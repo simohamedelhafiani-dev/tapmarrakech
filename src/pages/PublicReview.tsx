@@ -1548,9 +1548,7 @@ function AIPremiumMenu({
                   'rounded-full border px-4 py-2 text-[10px] font-semibold shadow-sm ' +
                   (index === 0
                     ? 'border-gold/60 bg-gold text-forest'
-                    : wallpaper
-                      ? 'border-white/20 bg-black/25 text-white'
-                      : 'border-forest/10 bg-white/75 text-forest')
+                    : 'border-white/20 bg-black/25 text-white')
                 }
               >
                 {section.title}
