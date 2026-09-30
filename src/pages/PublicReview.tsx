@@ -1789,6 +1789,27 @@ function MenuTemplate({
   navigation?: 'scroll' | 'book' | 'app';
 }) {
   const visible = categories.filter((category) => (itemsByCategory[category.id] ?? []).length > 0);
+  const [bookPage, setBookPage] = useState(0);
+  const [appCategoryId, setAppCategoryId] = useState(visible[0]?.id ?? '');
+
+  useEffect(() => {
+    if (!visible.length) {
+      setBookPage(0);
+      setAppCategoryId('');
+      return;
+    }
+    setBookPage(current => Math.min(current, visible.length - 1));
+    setAppCategoryId(current =>
+      visible.some(category => category.id === current) ? current : visible[0].id
+    );
+  }, [visible]);
+
+  const displayCategories =
+    navigation === 'book'
+      ? visible.slice(bookPage, bookPage + 1)
+      : navigation === 'app'
+        ? visible.filter(category => category.id === appCategoryId)
+        : visible;
 
   if (!visible.length) {
     return (
@@ -1800,14 +1821,62 @@ function MenuTemplate({
     );
   }
 
+  const navigationControls = navigation !== 'scroll' ? (
+    <div className="mt-5 mb-7">
+      {navigation === 'app' ? (
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {visible.map(category => (
+            <button
+              key={category.id}
+              type="button"
+              onClick={() => setAppCategoryId(category.id)}
+              className={[
+                'shrink-0 rounded-full border px-3.5 py-2 text-[10px] font-semibold transition',
+                category.id === appCategoryId
+                  ? 'border-gold bg-gold text-forest'
+                  : 'border-ink/10 bg-white text-ink/55',
+              ].join(' ')}
+            >
+              {category.name}
+            </button>
+          ))}
+        </div>
+      ) : (
+        <div className="flex items-center justify-between gap-3 rounded-2xl border border-ink/10 bg-white px-3 py-2.5">
+          <button
+            type="button"
+            disabled={bookPage === 0}
+            onClick={() => setBookPage(page => Math.max(0, page - 1))}
+            className="inline-flex items-center gap-1 rounded-full border border-ink/10 px-3 py-2 text-[10px] font-semibold text-forest disabled:opacity-30"
+          >
+            <ChevronLeft size={13} /> Précédent
+          </button>
+          <span className="text-[10px] font-bold text-gold">
+            Page {bookPage + 1}/{visible.length}
+          </span>
+          <button
+            type="button"
+            disabled={bookPage >= visible.length - 1}
+            onClick={() => setBookPage(page => Math.min(visible.length - 1, page + 1))}
+            className="inline-flex items-center gap-1 rounded-full border border-ink/10 px-3 py-2 text-[10px] font-semibold text-forest disabled:opacity-30"
+          >
+            Suivant <ChevronRight size={13} />
+          </button>
+        </div>
+      )}
+    </div>
+  ) : null;
+
   if (template === 'dark') {
     return (
       <div className="mt-6 -mx-5 overflow-hidden bg-[#102b24] px-5 pb-10 pt-7 text-white">
         <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold">Menu</p>
         <h1 className="mt-2 font-display text-5xl leading-none">{place.name || 'Notre carte'}</h1>
         <p className="mt-3 text-sm text-white/45">Une carte pensée pour être consultée simplement.</p>
-        <div className="mt-8 space-y-8">
-          {visible.map((category) => (
+        {navigationControls}
+        {navigationControls}
+      <div className="mt-8 space-y-8">
+          {displayCategories.map((category) => (
             <section key={category.id}>
               <div className="mb-4 flex items-end justify-between gap-4">
                 <h2 className="font-display text-2xl text-gold">{category.name}</h2>
@@ -1837,8 +1906,9 @@ function MenuTemplate({
         <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold">Découvrez</p>
         <h1 className="mt-1 font-display text-4xl text-forest">Notre carte</h1>
         <p className="mt-2 text-sm text-ink/45">Choisissez votre envie.</p>
+        {navigationControls}
         <div className="mt-7 space-y-8">
-          {visible.map((category) => (
+          {displayCategories.map((category) => (
             <section key={category.id}>
               <div className="mb-4 flex items-end justify-between">
                 <h2 className="font-display text-2xl text-forest">{category.name}</h2>
@@ -1873,8 +1943,9 @@ function MenuTemplate({
           <h1 className="mt-2 font-display text-5xl text-forest">{place.name || 'Menu'}</h1>
           <p className="mx-auto mt-3 max-w-xs text-xs leading-5 text-ink/45">Une sélection préparée avec soin.</p>
         </div>
+        {navigationControls}
         <div className="mt-8 space-y-10">
-          {visible.map((category) => (
+          {displayCategories.map((category) => (
             <section key={category.id}>
               <div className="mb-5 text-center">
                 <span className="text-[8px] font-bold uppercase tracking-[0.35em] text-gold">Sélection</span>
@@ -1906,7 +1977,7 @@ function MenuTemplate({
       <h1 className="mt-1 font-display text-4xl text-forest">Notre menu</h1>
       <p className="mt-2 text-sm text-ink/45">Une sélection préparée pour vous.</p>
       <div className="mt-8 space-y-8">
-        {visible.map((category) => (
+        {displayCategories.map((category) => (
           <section key={category.id}>
             <h2 className="mb-4 font-display text-2xl text-forest">{category.name}</h2>
             <div className="space-y-3">
