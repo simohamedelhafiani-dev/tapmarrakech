@@ -423,6 +423,9 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
                 onPublish={() => void publish()}
                 onGenerateAi={() => void generateAiDesign()}
                 aiCandidates={aiCandidates}
+                categories={menu.categories}
+                itemsByCategory={menu.itemsByCategory}
+                establishmentName={establishmentName}
                 onApplyAiCandidate={applyAiCandidate}
               />
             </div>
