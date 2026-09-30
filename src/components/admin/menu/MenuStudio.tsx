@@ -1,5 +1,6 @@
 import { useMenuManager } from '@/hooks/useMenuManager';
 import CategoryList from '@/components/admin/menu/CategoryList';
+import ItemManager from '@/components/admin/menu/ItemManager';
 
 type MenuStudioProps = {
   establishmentId: string;
@@ -58,6 +59,18 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
         onToggleActive={menu.toggleCategoryActive}
         onDelete={tracedDeleteCategory}
         onReindex={tracedReindex}
+      />
+
+      <ItemManager
+        establishmentId={establishmentId}
+        categories={menu.categories}
+        itemsByCategory={menu.itemsByCategory}
+        saving={menu.saving}
+        onAdd={menu.addItem}
+        onUpdate={menu.updateItem}
+        onMove={menu.moveItem}
+        onToggleActive={menu.toggleItemActive}
+        onDelete={menu.deleteItem}
       />
 
       <section className="rounded-3xl border border-dashed border-forest/15 bg-white/70 p-8 text-center">
