@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, BookOpen, LayoutGrid, ScrollText } from 'lucide-react';
 import type { MenuCategory, MenuItem } from '@/hooks/useMenuManager';
 import type { MenuDesignDraft } from '@/components/admin/menu/MenuConfigurator';
 
@@ -13,31 +13,43 @@ type MenuPreviewProps = {
 const theme = {
   editorial: {
     shell: 'bg-[#f4f0e6] text-[#26362b]',
-    card: 'bg-white/85 border-black/5',
+    header: 'bg-[#f4f0e6]',
+    card: 'border-b border-[#26362b]/10 bg-transparent rounded-none px-1 py-3',
     accent: 'text-[#9c7a32]',
     muted: 'text-[#26362b]/55',
     heading: 'font-display',
+    category: 'border-b border-[#9c7a32]/30 pb-2',
+    icon: ScrollText,
   },
   luxury: {
-    shell: 'bg-[#121712] text-white',
-    card: 'bg-black/25 border-white/10',
-    accent: 'text-gold',
+    shell: 'bg-[#111611] text-[#f7f0df]',
+    header: 'bg-[#111611]',
+    card: 'border border-[#c8a75d]/25 bg-[#1b211b] rounded-xl px-4 py-3',
+    accent: 'text-[#d2b46a]',
     muted: 'text-white/55',
     heading: 'font-display',
+    category: 'border-b border-[#c8a75d]/30 pb-2',
+    icon: BookOpen,
   },
   cards: {
-    shell: 'bg-[#f7f7f3] text-forest',
-    card: 'bg-white border-black/5 shadow-sm',
-    accent: 'text-gold',
-    muted: 'text-ink/45',
+    shell: 'bg-[#f7f7f3] text-[#24352a]',
+    header: 'bg-white',
+    card: 'border border-black/5 bg-white rounded-2xl p-3 shadow-sm',
+    accent: 'text-[#a17d31]',
+    muted: 'text-[#24352a]/50',
     heading: '',
+    category: 'border-b border-black/5 pb-2',
+    icon: LayoutGrid,
   },
   dark: {
-    shell: 'bg-[#101610] text-white',
-    card: 'bg-white/8 border-white/10',
-    accent: 'text-gold',
+    shell: 'bg-[#080c09] text-white',
+    header: 'bg-[#080c09]',
+    card: 'border border-white/10 bg-white/[0.06] rounded-2xl px-4 py-3 backdrop-blur-sm',
+    accent: 'text-[#d6b86b]',
     muted: 'text-white/55',
     heading: 'font-display',
+    category: 'border-b border-white/10 pb-2',
+    icon: BookOpen,
   },
 } as const;
 
@@ -59,12 +71,14 @@ export default function MenuPreview({
   };
 
   const colors = theme[activeDraft.template];
+
   const activeCategories = useMemo(
     () => categories.filter(category => category.active),
     [categories],
   );
+
   const [bookPage, setBookPage] = useState(0);
-  const [appCategoryId, setAppCategoryId] = useState(activeCategories[0]?.id ?? '');
+  const [appCategoryId, setAppCategoryId] = useState('');
 
   useEffect(() => {
     if (!activeCategories.length) {
@@ -75,10 +89,16 @@ export default function MenuPreview({
 
     setBookPage(current => Math.min(current, activeCategories.length - 1));
 
-    if (!activeCategories.some(category => category.id === appCategoryId)) {
-      setAppCategoryId(activeCategories[0].id);
-    }
-  }, [activeCategories, appCategoryId]);
+    setAppCategoryId(current =>
+      activeCategories.some(category => category.id === current)
+        ? current
+        : activeCategories[0].id,
+    );
+  }, [activeCategories]);
+
+  useEffect(() => {
+    setBookPage(0);
+  }, [activeDraft.navigation, activeDraft.template]);
 
   const visibleCategories =
     activeDraft.navigation === 'book'
@@ -88,13 +108,83 @@ export default function MenuPreview({
         : activeCategories;
 
   const currentBookPage = activeCategories.length ? bookPage + 1 : 0;
+  const TemplateIcon = colors.icon;
+
+  const renderItems = (category: MenuCategory) => {
+    const items = (itemsByCategory[category.id] ?? []).filter(item => item.active);
+
+    if (!items.length) {
+      return <p className={`text-[10px] ${colors.muted}`}>Aucun article actif.</p>;
+    }
+
+    if (activeDraft.template === 'cards') {
+      return (
+        <div className="grid gap-3">
+          {items.map(item => (
+            <article key={item.id} className={colors.card}>
+              {item.image_url && (
+                <img
+                  src={item.image_url}
+                  alt=""
+                  className="mb-3 h-32 w-full rounded-xl object-cover"
+                />
+              )}
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-xs font-bold">{item.name}</p>
+                  {item.description && (
+                    <p className={`mt-1 text-[10px] leading-4 ${colors.muted}`}>{item.description}</p>
+                  )}
+                </div>
+                <span className={`shrink-0 text-[11px] font-bold ${colors.accent}`}>
+                  {item.price} DH
+                </span>
+              </div>
+            </article>
+          ))}
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-1">
+        {items.map(item => (
+          <article key={item.id} className={colors.card}>
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold">{item.name}</p>
+                {item.description && (
+                  <p className={`mt-1 text-[10px] leading-4 ${colors.muted}`}>{item.description}</p>
+                )}
+              </div>
+              <span className={`shrink-0 text-[11px] font-bold ${colors.accent}`}>
+                {item.price} DH
+              </span>
+            </div>
+
+            {activeDraft.template === 'luxury' && item.image_url && (
+              <img
+                src={item.image_url}
+                alt=""
+                className="mt-3 h-24 w-full rounded-lg object-cover opacity-90"
+              />
+            )}
+          </article>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <aside className="min-w-0 overflow-hidden rounded-3xl border border-ink/5 bg-white shadow-sm lg:sticky lg:top-4 lg:self-start">
       <div className="border-b border-ink/5 bg-white p-5">
         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Aperçu en direct</p>
-        <h3 className="mt-1 text-base font-semibold text-forest">{establishmentName || 'Menu public'}</h3>
-        <p className="mt-1 text-[11px] text-ink/35">Miroir du Draft · aucune sauvegarde automatique</p>
+        <h3 className="mt-1 text-base font-semibold text-forest">
+          {establishmentName || 'Menu public'}
+        </h3>
+        <p className="mt-1 text-[11px] text-ink/35">
+          Miroir du Draft · aucune sauvegarde automatique
+        </p>
       </div>
 
       <div className="p-3">
@@ -113,30 +203,42 @@ export default function MenuPreview({
           )}
 
           <div className="relative">
-            <header className="p-5 pb-4 text-center sm:p-6 sm:pb-4">
-              <p className={`text-[9px] font-bold uppercase tracking-[0.32em] ${colors.accent}`}>Menu</p>
+            <header className={`p-6 text-center ${colors.header} `}>
+              <div className={`mx-auto mb-3 grid h-9 w-9 place-items-center rounded-full border border-current/10 ${colors.accent}`}>
+                <TemplateIcon size={15} />
+              </div>
+              <p className={`text-[9px] font-bold uppercase tracking-[0.32em] ${colors.accent}`}>
+                Menu
+              </p>
               <h4 className={`mt-2 text-3xl leading-tight ${colors.heading}`}>
                 {establishmentName || 'Votre établissement'}
               </h4>
               <p className={`mt-2 text-[10px] leading-4 ${colors.muted}`}>
                 Une carte pensée pour votre expérience client.
               </p>
+
+              <div className="mt-4 flex justify-center">
+                <span className={`rounded-full border border-current/10 px-2.5 py-1 text-[8px] font-semibold uppercase tracking-[0.12em] ${colors.muted}`}>
+                  {activeDraft.template}
+                </span>
+              </div>
             </header>
 
             {activeDraft.navigation === 'app' && activeCategories.length > 0 && (
-              <nav className="sticky top-0 z-10 border-y border-current/10 bg-black/10 px-3 py-2 backdrop-blur-md">
+              <nav className="sticky top-0 z-20 border-y border-current/10 bg-black/10 px-3 py-2 backdrop-blur-md">
                 <div className="flex gap-1.5 overflow-x-auto">
                   {activeCategories.map(category => {
                     const active = category.id === appCategoryId;
+
                     return (
                       <button
                         key={category.id}
                         type="button"
                         onClick={() => setAppCategoryId(category.id)}
                         className={[
-                          'shrink-0 rounded-full border px-3 py-1.5 text-[9px] font-semibold transition',
+                          'shrink-0 rounded-full border px-3 py-1.5 text-[9px] font-semibold transition-all',
                           active
-                            ? 'border-gold bg-gold text-white'
+                            ? 'border-gold bg-gold text-white shadow-sm'
                             : 'border-current/10 bg-black/5 text-current/60 hover:border-gold/40',
                         ].join(' ')}
                       >
@@ -149,43 +251,43 @@ export default function MenuPreview({
             )}
 
             <div className="p-5 sm:p-6">
-            <div className="mt-5 space-y-6">
-              {visibleCategories.map((category) => {
-                const items = (itemsByCategory[category.id] ?? []).filter(item => item.active);
-                return (
+              {activeDraft.navigation === 'book' && (
+                <div className="mb-5 flex items-center justify-between rounded-xl border border-current/10 bg-black/5 px-3 py-2">
+                  <span className={`text-[9px] font-semibold ${colors.muted}`}>Mode livre</span>
+                  <span className={`text-[10px] font-bold ${colors.accent}`}>
+                    Page {currentBookPage}/{activeCategories.length || 1}
+                  </span>
+                </div>
+              )}
+
+              <div className="space-y-7">
+                {visibleCategories.map(category => (
                   <section key={category.id}>
-                    <div className="mb-3 flex items-end justify-between gap-3">
-                      <h5 className={`text-lg font-semibold ${colors.heading}`}>{category.name}</h5>
-                      <span className={`text-[8px] uppercase tracking-[0.18em] ${colors.accent}`}>Carte</span>
+                    <div className={`mb-3 ${colors.category}`}>
+                      <h5 className={`text-lg font-semibold ${colors.heading}`}>
+                        {category.name}
+                      </h5>
+                      {category.description && (
+                        <p className={`mt-1 text-[9px] leading-4 ${colors.muted}`}>
+                          {category.description}
+                        </p>
+                      )}
                     </div>
 
-                    <div className={activeDraft.template === 'cards' ? 'grid gap-2' : 'space-y-2'}>
-                      {items.map((item) => (
-                        <article key={item.id} className={`rounded-2xl border p-3 ${colors.card}`}>
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                              <p className="text-xs font-semibold">{item.name}</p>
-                              {item.description && (
-                                <p className={`mt-1 text-[10px] leading-4 ${colors.muted}`}>{item.description}</p>
-                              )}
-                            </div>
-                            <span className={`shrink-0 text-[11px] font-bold ${colors.accent}`}>{item.price} DH</span>
-                          </div>
-                          {item.image_url && activeDraft.template === 'cards' && (
-                            <img src={item.image_url} alt="" className="mt-3 h-28 w-full rounded-xl object-cover" />
-                          )}
-                        </article>
-                      ))}
-                      {!items.length && <p className={`text-[10px] ${colors.muted}`}>Aucun article actif.</p>}
-                    </div>
+                    {renderItems(category)}
                   </section>
-                );
-              })}
+                ))}
+
+                {!visibleCategories.length && (
+                  <div className={`rounded-2xl border border-current/10 p-5 text-center text-[10px] ${colors.muted}`}>
+                    Aucune catégorie active.
+                  </div>
+                )}
               </div>
 
-              {activeDraft.navigation === 'book' && (
+              {activeDraft.navigation === 'book' && activeCategories.length > 0 && (
                 <div className="mt-7 border-t border-current/10 pt-4">
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center justify-between gap-2">
                     <button
                       type="button"
                       disabled={bookPage === 0}
@@ -197,7 +299,7 @@ export default function MenuPreview({
                     </button>
 
                     <span className={`text-[9px] font-semibold ${colors.muted}`}>
-                      Page {currentBookPage}/{activeCategories.length || 1}
+                      {bookPage + 1} / {activeCategories.length}
                     </span>
 
                     <button
@@ -212,6 +314,12 @@ export default function MenuPreview({
                       <ChevronRight size={12} />
                     </button>
                   </div>
+                </div>
+              )}
+
+              {activeDraft.navigation === 'app' && activeCategories.length > 0 && (
+                <div className={`mt-6 text-center text-[9px] ${colors.muted}`}>
+                  Catégorie {Math.max(1, activeCategories.findIndex(c => c.id === appCategoryId) + 1)} / {activeCategories.length}
                 </div>
               )}
             </div>
