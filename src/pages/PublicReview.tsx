@@ -1453,7 +1453,7 @@ function AIPremiumMenu({
 }) {
   const style =
     template === 'dark'
-      ? 'immersive'
+      ? 'dark'
       : template === 'cards'
         ? 'minimal'
         : template === 'luxury'
@@ -1927,8 +1927,7 @@ function MenuTemplate({
         <h1 className="mt-2 font-display text-5xl leading-none">{place.name || 'Notre carte'}</h1>
         <p className="mt-3 text-sm text-white/45">Une carte pensée pour être consultée simplement.</p>
         {navigationControls}
-        {navigationControls}
-      <div className="mt-8 space-y-8">
+        <div className="mt-8 space-y-8">
           {displayCategories.map((category) => (
             <section key={category.id}>
               <div className="mb-4 flex items-end justify-between gap-4">
@@ -2029,6 +2028,7 @@ function MenuTemplate({
       <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold">Découvrez</p>
       <h1 className="mt-1 font-display text-4xl text-forest">Notre menu</h1>
       <p className="mt-2 text-sm text-ink/45">Une sélection préparée pour vous.</p>
+      {navigationControls}
       <div className="mt-8 space-y-8">
         {displayCategories.map((category) => (
           <section key={category.id}>
