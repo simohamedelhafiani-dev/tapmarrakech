@@ -104,6 +104,12 @@ export default function MenuTestHarness({ establishmentId }: Props) {
             price: 12,
           });
           setContext((current) => ({ ...current, item2: item.id }));
+          console.log('[MenuHarness] SEQUENCE A5 -> CREATE ITEM 2: SUCCESS', item);
+          setPhase(5);
+          return;
+        }
+
+        if (phase === 5 && context.categoryA) {
           const group = manager.itemsByCategory[context.categoryA] ?? [];
           assert(
             group.map((entry) => entry.display_order).join(',') === '0,1,2',
@@ -111,12 +117,18 @@ export default function MenuTestHarness({ establishmentId }: Props) {
             group.map((entry) => ({ id: entry.id, display_order: entry.display_order }))
           );
           console.log('[MenuHarness] SEQUENCE A -> SUCCESS');
-          setPhase(5);
+          setPhase(6);
           return;
         }
 
-        if (phase === 5 && context.item0 && context.categoryB && context.categoryA) {
+        if (phase === 6 && context.item0 && context.categoryB) {
           await manager.moveItem(context.item0, context.categoryB);
+          console.log('[MenuHarness] SEQUENCE B1 -> MOVE ITEM 0: SUCCESS');
+          setPhase(7);
+          return;
+        }
+
+        if (phase === 7 && context.categoryA && context.categoryB) {
           const source = manager.itemsByCategory[context.categoryA] ?? [];
           const destination = manager.itemsByCategory[context.categoryB] ?? [];
           assert(
@@ -130,12 +142,18 @@ export default function MenuTestHarness({ establishmentId }: Props) {
             destination.map((entry) => ({ id: entry.id, display_order: entry.display_order }))
           );
           console.log('[MenuHarness] SEQUENCE B -> SUCCESS');
-          setPhase(6);
+          setPhase(8);
           return;
         }
 
-        if (phase === 6 && context.item1 && context.categoryA) {
+        if (phase === 8 && context.item1) {
           await manager.deleteItem(context.item1);
+          console.log('[MenuHarness] SEQUENCE C1 -> DELETE ITEM 1: SUCCESS');
+          setPhase(9);
+          return;
+        }
+
+        if (phase === 9 && context.categoryA) {
           const source = manager.itemsByCategory[context.categoryA] ?? [];
           assert(
             source.length === 1 && source[0].display_order === 0,
@@ -143,12 +161,18 @@ export default function MenuTestHarness({ establishmentId }: Props) {
             source.map((entry) => ({ id: entry.id, display_order: entry.display_order }))
           );
           console.log('[MenuHarness] SEQUENCE C -> SUCCESS');
-          setPhase(7);
+          setPhase(10);
           return;
         }
 
-        if (phase === 7 && context.categoryA) {
+        if (phase === 10) {
           await manager.reindexAll();
+          console.log('[MenuHarness] SEQUENCE D1 -> REINDEX: SUCCESS');
+          setPhase(11);
+          return;
+        }
+
+        if (phase === 11 && context.categoryA) {
           const source = manager.itemsByCategory[context.categoryA] ?? [];
           assert(
             source.map((entry) => entry.display_order).join(',') === '0',
@@ -156,11 +180,11 @@ export default function MenuTestHarness({ establishmentId }: Props) {
             source.map((entry) => ({ id: entry.id, display_order: entry.display_order }))
           );
           console.log('[MenuHarness] SEQUENCE D -> SUCCESS (all positions aligned)');
-          setPhase(8);
+          setPhase(12);
           return;
         }
 
-        if (phase === 8 && !cleanupStarted.current) {
+        if (phase === 12 && !cleanupStarted.current) {
           cleanupStarted.current = true;
           console.log('[MenuHarness] CLEANUP -> removing temporary data');
 
@@ -170,7 +194,7 @@ export default function MenuTestHarness({ establishmentId }: Props) {
           if (context.categoryB) await manager.deleteCategory(context.categoryB);
 
           console.log('[MenuHarness] CERTIFICATION RUN COMPLETE -> ALL ASSERTIONS PASSED + CLEANUP COMPLETE');
-          setPhase(9);
+          setPhase(13);
         }
       } catch (error) {
         setFailed(true);
@@ -181,7 +205,7 @@ export default function MenuTestHarness({ establishmentId }: Props) {
     void run();
   }, [context, establishmentId, failed, manager, phase]);
 
-  if (phase === 9) return null;
+  if (phase === 13) return null;
 
   return null;
 }
