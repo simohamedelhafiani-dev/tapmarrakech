@@ -75,6 +75,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
           saving={menu.saving}
           onSelect={setSelectedCategoryId}
           onAdd={menu.addCategory}
+          onToggleActive={menu.toggleCategoryActive}
         />
 
         <ItemEditor
