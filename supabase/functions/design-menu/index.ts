@@ -172,6 +172,7 @@ Deno.serve(async (request) => {
       `Le mode photo sélectionné est : ${body?.photo_mode === 'without_photos' ? 'sans photos' : 'avec photos'}.`,
       'Utilise uniquement les catégories et produits fournis.',
       'Choisis une direction visuelle adaptée au contexte disponible.',
+      body?.variant ? `VARIANTE DEMANDÉE : ${String(body.variant)}. Produis une direction distincte des autres variantes : ne change pas les produits ni les catégories, mais varie clairement le ton éditorial, la hiérarchie, les textes de hero et les choix de layout. Chaque variante doit être exploitable comme une proposition indépendante.` : '',
       'RÈGLE ABSOLUE SUR LES CATÉGORIES : tu dois respecter exactement les catégories fournies par l’établissement.',
       'Ne fusionne jamais deux catégories. Ne divise jamais une catégorie en sous-catégories. Ne renomme pas les catégories source.',
       'Crée exactement UNE section de type category pour CHAQUE catégorie source, dans le MÊME ORDRE que le menu fourni.',
