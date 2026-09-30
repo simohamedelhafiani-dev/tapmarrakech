@@ -523,7 +523,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                 ))}
               </div>
 
-              <div className="mt-5">
+              <div className="hidden">
                 <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-ink/40">Type de fidélité</p>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   <ModeButton active={cardMode === 'QR'} icon={<QrCode size={23}/>} title="QR Code" description="Une carte avec un QR unique pour le client." onClick={() => chooseMode('QR')} />
@@ -566,6 +566,13 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                 <div className="mt-3 rounded-xl border border-forest/10 bg-white p-3 text-[10px] text-ink/45">
                   Exemple : 250 MAD = {Math.floor(Math.max(0, Number(pointsPerCurrency) || 0) * 250)} points.
                 </div>
+                <div className="mt-5">
+                <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-ink/40">Type de fidélité</p>
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  <ModeButton active={cardMode === 'QR'} icon={<QrCode size={23}/>} title="QR Code" description="Une carte avec un QR unique pour le client." onClick={() => chooseMode('QR')} />
+                  <ModeButton active={cardMode === 'STAMP'} icon={<Stamp size={23}/>} title="Tampons" description="Une carte de visites avec des tampons." onClick={() => chooseMode('STAMP')} />
+                </div>
+              </div>
               </div>
 
                 </div>
