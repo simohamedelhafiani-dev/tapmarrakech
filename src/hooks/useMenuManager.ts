@@ -19,6 +19,7 @@ const normalizeCategoryOrder = (rows: MenuCategory[]) =>
   [...rows].sort((a,b) => a.display_order - b.display_order || a.created_at.localeCompare(b.created_at));
 const normalizeItemOrder = (rows: MenuItem[]) =>
   [...rows].sort((a,b) => a.display_order - b.display_order || a.created_at.localeCompare(b.created_at));
+const normalizeCategoryName = (name: string) => name.trim().replace(/\s+/g, ' ').toLocaleLowerCase();
 
 export function useMenuManager(establishmentId: string | null) {
   const mutationVersionRef = useRef(0); // stale-load guard
@@ -101,6 +102,10 @@ export function useMenuManager(establishmentId: string | null) {
     console.log('[HOOK] Executing addCategory()', { establishmentId, input });
     if(!establishmentId)throw new Error('Établissement requis.');
     const name=input.name.trim(); if(!name)throw new Error('Le nom de la catégorie est requis.');
+    const normalizedName=normalizeCategoryName(name);
+    if(categories.some(category=>normalizeCategoryName(category.name)===normalizedName)) {
+      throw new Error(`La catégorie « ${name} » existe déjà.`);
+    }
     mutationVersionRef.current += 1;
     setSaving(true);setError(null);
     try {
@@ -122,6 +127,10 @@ export function useMenuManager(establishmentId: string | null) {
     if(!establishmentId)throw new Error('Établissement requis.');
     const current=categories.find(c=>c.id===categoryId);if(!current)throw new Error('Catégorie introuvable.');
     const name=input.name===undefined?current.name:input.name.trim();if(!name)throw new Error('Le nom de la catégorie est requis.');
+    const normalizedName=normalizeCategoryName(name);
+    if(categories.some(category=>category.id!==categoryId&&normalizeCategoryName(category.name)===normalizedName)) {
+      throw new Error(`La catégorie « ${name} » existe déjà.`);
+    }
     mutationVersionRef.current += 1;
     setSaving(true);setError(null);
     try{
