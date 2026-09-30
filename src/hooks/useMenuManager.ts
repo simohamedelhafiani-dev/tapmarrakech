@@ -2,242 +2,222 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
 export type MenuCategory = {
-  id: string;
-  establishment_id: string;
-  name: string;
-  description: string | null;
-  display_order: number;
-  active: boolean;
-  created_at: string;
-  updated_at: string;
+  id: string; establishment_id: string; name: string; description: string | null;
+  display_order: number; active: boolean; created_at: string; updated_at: string;
 };
-
 export type MenuItem = {
-  id: string;
-  establishment_id: string;
-  category_id: string;
-  name: string;
-  description: string | null;
-  price: number;
-  image_url: string | null;
-  display_order: number;
-  active: boolean;
-  created_at: string;
-  updated_at: string;
+  id: string; establishment_id: string; category_id: string; name: string;
+  description: string | null; price: number; image_url: string | null;
+  display_order: number; active: boolean; created_at: string; updated_at: string;
 };
-
-type NewCategory = {
-  name: string;
-  description?: string | null;
-  active?: boolean;
-};
-
-type NewItem = {
-  category_id: string;
-  name: string;
-  description?: string | null;
-  price: number;
-  image_url?: string | null;
-  active?: boolean;
-};
+type NewCategory = { name: string; description?: string | null; active?: boolean };
+type NewItem = { category_id: string; name: string; description?: string | null; price: number; image_url?: string | null; active?: boolean };
+type UpdateCategory = Partial<NewCategory>;
+type UpdateItem = Partial<Omit<NewItem, 'category_id'>>;
 
 const normalizeCategoryOrder = (rows: MenuCategory[]) =>
-  [...rows].sort((a, b) => a.display_order - b.display_order || a.created_at.localeCompare(b.created_at));
-
+  [...rows].sort((a,b) => a.display_order - b.display_order || a.created_at.localeCompare(b.created_at));
 const normalizeItemOrder = (rows: MenuItem[]) =>
-  [...rows].sort((a, b) => a.display_order - b.display_order || a.created_at.localeCompare(b.created_at));
+  [...rows].sort((a,b) => a.display_order - b.display_order || a.created_at.localeCompare(b.created_at));
 
 export function useMenuManager(establishmentId: string | null) {
-  const [categories, setCategories] = useState<MenuCategory[]>([]);
-  const [items, setItems] = useState<MenuItem[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [categories,setCategories] = useState<MenuCategory[]>([]);
+  const [items,setItems] = useState<MenuItem[]>([]);
+  const [loading,setLoading] = useState(false);
+  const [saving,setSaving] = useState(false);
+  const [error,setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    if (!establishmentId) {
-      setCategories([]);
-      setItems([]);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
+    if (!establishmentId) { setCategories([]); setItems([]); return; }
+    setLoading(true); setError(null);
     try {
-      const [{ data: categoryRows, error: categoryError }, { data: itemRows, error: itemError }] =
-        await Promise.all([
-          supabase.from('menu_categories').select('*').eq('establishment_id', establishmentId).order('display_order'),
-          supabase.from('menu_items').select('*').eq('establishment_id', establishmentId).order('display_order'),
-        ]);
-
+      const [{data: categoryRows,error: categoryError},{data:itemRows,error:itemError}] = await Promise.all([
+        supabase.from('menu_categories').select('*').eq('establishment_id',establishmentId).order('display_order'),
+        supabase.from('menu_items').select('*').eq('establishment_id',establishmentId).order('display_order'),
+      ]);
       if (categoryError) throw categoryError;
       if (itemError) throw itemError;
+      const nextCategories=normalizeCategoryOrder((categoryRows??[]) as MenuCategory[]);
+      const nextItems=normalizeItemOrder((itemRows??[]) as MenuItem[]);
+      setCategories(nextCategories); setItems(nextItems);
+      console.log('[MenuManager] LOAD SUCCESS:',{establishmentId,categories:nextCategories.length,items:nextItems.length});
+    } catch(cause) {
+      const message=cause instanceof Error?cause.message:'Impossible de charger le menu.';
+      setError(message); console.error('[MenuManager] LOAD ERROR:',cause);
+    } finally { setLoading(false); }
+  },[establishmentId]);
 
-      const nextCategories = normalizeCategoryOrder((categoryRows ?? []) as MenuCategory[]);
-      const nextItems = normalizeItemOrder((itemRows ?? []) as MenuItem[]);
+  useEffect(()=>{ void load(); },[load]);
 
-      setCategories(nextCategories);
-      setItems(nextItems);
-
-      console.log('[MenuManager] LOAD SUCCESS:', {
-        establishmentId,
-        categories: nextCategories.length,
-        items: nextItems.length,
-      });
-    } catch (cause) {
-      const message = cause instanceof Error ? cause.message : 'Impossible de charger le menu.';
-      console.error('[MenuManager] LOAD ERROR:', cause);
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  }, [establishmentId]);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
-
-  const itemsByCategory = useMemo(() => {
-    const grouped: Record<string, MenuItem[]> = {};
-    for (const category of categories) grouped[category.id] = [];
-    for (const item of items) {
-      if (grouped[item.category_id]) grouped[item.category_id].push(item);
-    }
-    for (const categoryId of Object.keys(grouped)) {
-      grouped[categoryId] = normalizeItemOrder(grouped[categoryId]);
-    }
+  const itemsByCategory=useMemo(()=>{
+    const grouped:Record<string,MenuItem[]>={};
+    for(const category of categories) grouped[category.id]=[];
+    for(const item of items) if(grouped[item.category_id]) grouped[item.category_id].push(item);
+    for(const id of Object.keys(grouped)) grouped[id]=normalizeItemOrder(grouped[id]);
     return grouped;
-  }, [categories, items]);
+  },[categories,items]);
 
-  const reindexAll = useCallback(async () => {
-    if (!establishmentId) return;
-    setSaving(true);
-    setError(null);
+  const reindexCategory=useCallback(async(categoryId:string,sourceItems:MenuItem[])=>{
+    const group=normalizeItemOrder(sourceItems.filter(item=>item.category_id===categoryId));
+    for(let index=0;index<group.length;index++) {
+      const {error:updateError}=await supabase.from('menu_items').update({display_order:index})
+        .eq('id',group[index].id).eq('establishment_id',establishmentId);
+      if(updateError) throw updateError;
+    }
+  },[establishmentId]);
 
+  const reindexAll=useCallback(async()=>{
+    if(!establishmentId)return;
+    setSaving(true);setError(null);
     try {
-      const orderedCategories = normalizeCategoryOrder(categories);
-      for (let index = 0; index < orderedCategories.length; index += 1) {
-        const category = orderedCategories[index];
-        const { error: updateError } = await supabase
-          .from('menu_categories')
-          .update({ display_order: index })
-          .eq('id', category.id)
-          .eq('establishment_id', establishmentId);
-        if (updateError) throw updateError;
+      const orderedCategories=normalizeCategoryOrder(categories);
+      for(let index=0;index<orderedCategories.length;index++){
+        const {error:e}=await supabase.from('menu_categories').update({display_order:index})
+          .eq('id',orderedCategories[index].id).eq('establishment_id',establishmentId);
+        if(e)throw e;
       }
-
-      const orderedItems = normalizeItemOrder(items);
-      const grouped = new Map<string, MenuItem[]>();
-      for (const item of orderedItems) {
-        const group = grouped.get(item.category_id) ?? [];
-        group.push(item);
-        grouped.set(item.category_id, group);
+      const orderedItems=normalizeItemOrder(items);
+      const groups=new Map<string,MenuItem[]>();
+      for(const item of orderedItems) groups.set(item.category_id,[...(groups.get(item.category_id)??[]),item]);
+      for(const group of groups.values()) for(let index=0;index<group.length;index++){
+        const {error:e}=await supabase.from('menu_items').update({display_order:index})
+          .eq('id',group[index].id).eq('establishment_id',establishmentId);
+        if(e)throw e;
       }
-
-      for (const group of grouped.values()) {
-        for (let index = 0; index < group.length; index += 1) {
-          const item = group[index];
-          const { error: updateError } = await supabase
-            .from('menu_items')
-            .update({ display_order: index })
-            .eq('id', item.id)
-            .eq('establishment_id', establishmentId);
-          if (updateError) throw updateError;
-        }
-      }
-
       await load();
-      console.log('[MenuManager] REINDEX SUCCESS:', { establishmentId });
-    } catch (cause) {
-      const message = cause instanceof Error ? cause.message : 'Impossible de réindexer le menu.';
-      console.error('[MenuManager] REINDEX ERROR:', cause);
-      setError(message);
-    } finally {
-      setSaving(false);
-    }
-  }, [categories, establishmentId, items, load]);
+      console.log('[MenuManager] ACTION: REINDEX -> RESULT: SUCCESS (All aligned)');
+    } catch(cause) {
+      setError(cause instanceof Error?cause.message:'Impossible de réindexer le menu.');
+      console.error('[MenuManager] ACTION: REINDEX -> RESULT: ERROR',cause);
+    } finally { setSaving(false); }
+  },[categories,establishmentId,items,load]);
 
-  const addCategory = useCallback(async (input: NewCategory) => {
-    if (!establishmentId) throw new Error('Établissement requis.');
-    const name = input.name.trim();
-    if (!name) throw new Error('Le nom de la catégorie est requis.');
-
-    setSaving(true);
-    setError(null);
+  const addCategory=useCallback(async(input:NewCategory)=>{
+    if(!establishmentId)throw new Error('Établissement requis.');
+    const name=input.name.trim(); if(!name)throw new Error('Le nom de la catégorie est requis.');
+    setSaving(true);setError(null);
     try {
-      const maxOrder = categories.reduce((max, category) => Math.max(max, category.display_order), -1);
-      const { data, error: insertError } = await supabase
-        .from('menu_categories')
-        .insert({
-          establishment_id: establishmentId,
-          name,
-          description: input.description?.trim() || null,
-          display_order: maxOrder + 1,
-          active: input.active ?? true,
-        })
-        .select('*')
-        .single();
-
-      if (insertError) throw insertError;
-      setCategories((current) => normalizeCategoryOrder([...current, data as MenuCategory]));
-      console.log('[MenuManager] CATEGORY CREATE SUCCESS:', data);
+      const maxOrder=categories.reduce((max,c)=>Math.max(max,c.display_order),-1);
+      const {data,error:e}=await supabase.from('menu_categories').insert({
+        establishment_id:establishmentId,name,description:input.description?.trim()||null,
+        display_order:maxOrder+1,active:input.active??true
+      }).select('*').single();
+      if(e)throw e;
+      setCategories(rows=>normalizeCategoryOrder([...rows,data as MenuCategory]));
+      console.log('[MenuManager] ACTION: CREATE_CATEGORY -> RESULT: SUCCESS (Pos:',(data as MenuCategory).display_order,')');
       return data as MenuCategory;
-    } finally {
-      setSaving(false);
-    }
-  }, [categories, establishmentId]);
+    } catch(cause){setError(cause instanceof Error?cause.message:'Impossible de créer la catégorie.');console.error('[MenuManager] CATEGORY CREATE ERROR:',cause);throw cause;}
+    finally{setSaving(false);}
+  },[categories,establishmentId]);
 
-  const addItem = useCallback(async (input: NewItem) => {
-    if (!establishmentId) throw new Error('Établissement requis.');
-    if (!input.category_id) throw new Error('Une catégorie est requise.');
+  const updateCategory=useCallback(async(categoryId:string,input:UpdateCategory)=>{
+    if(!establishmentId)throw new Error('Établissement requis.');
+    const current=categories.find(c=>c.id===categoryId);if(!current)throw new Error('Catégorie introuvable.');
+    const name=input.name===undefined?current.name:input.name.trim();if(!name)throw new Error('Le nom de la catégorie est requis.');
+    setSaving(true);setError(null);
+    try{
+      const {data,error:e}=await supabase.from('menu_categories').update({
+        name,description:input.description===undefined?current.description:input.description?.trim()||null,
+        active:input.active===undefined?current.active:input.active
+      }).eq('id',categoryId).eq('establishment_id',establishmentId).select('*').single();
+      if(e)throw e;setCategories(rows=>normalizeCategoryOrder(rows.map(r=>r.id===categoryId?data as MenuCategory:r)));
+      console.log('[MenuManager] ACTION: UPDATE_CATEGORY -> RESULT: SUCCESS',{categoryId});return data as MenuCategory;
+    }catch(cause){setError(cause instanceof Error?cause.message:'Impossible de modifier la catégorie.');console.error('[MenuManager] CATEGORY UPDATE ERROR:',cause);throw cause;}
+    finally{setSaving(false);}
+  },[categories,establishmentId]);
 
-    const category = categories.find((entry) => entry.id === input.category_id);
-    if (!category || !category.active) throw new Error('La catégorie sélectionnée doit être active.');
+  const toggleCategoryActive=useCallback(async(categoryId:string)=>{
+    const category=categories.find(c=>c.id===categoryId);if(!category)throw new Error('Catégorie introuvable.');
+    return updateCategory(categoryId,{active:!category.active});
+  },[categories,updateCategory]);
 
-    const name = input.name.trim();
-    if (!name) throw new Error('Le nom du produit est requis.');
+  const deleteCategory=useCallback(async(categoryId:string)=>{
+    if(!establishmentId)throw new Error('Établissement requis.');
+    if(!categories.some(c=>c.id===categoryId))throw new Error('Catégorie introuvable.');
+    if(items.some(i=>i.category_id===categoryId))throw new Error('Impossible de supprimer une catégorie qui contient des articles.');
+    setSaving(true);setError(null);
+    try{
+      const {error:e}=await supabase.from('menu_categories').delete().eq('id',categoryId).eq('establishment_id',establishmentId);
+      if(e)throw e;setCategories(rows=>rows.filter(r=>r.id!==categoryId));
+      console.log('[MenuManager] ACTION: DELETE_CATEGORY -> RESULT: SUCCESS',{categoryId});return true;
+    }catch(cause){setError(cause instanceof Error?cause.message:'Impossible de supprimer la catégorie.');console.error('[MenuManager] CATEGORY DELETE ERROR:',cause);throw cause;}
+    finally{setSaving(false);}
+  },[categories,establishmentId,items]);
 
-    setSaving(true);
-    setError(null);
-    try {
-      const siblings = items.filter((item) => item.category_id === input.category_id);
-      const maxOrder = siblings.reduce((max, item) => Math.max(max, item.display_order), -1);
+  const addItem=useCallback(async(input:NewItem)=>{
+    if(!establishmentId)throw new Error('Établissement requis.');
+    const category=categories.find(c=>c.id===input.category_id);if(!category||!category.active)throw new Error('La catégorie sélectionnée doit être active.');
+    const name=input.name.trim();const price=Number(input.price);
+    if(!name)throw new Error('Le nom du produit est requis.');
+    if(!Number.isFinite(price)||price<0)throw new Error('Le prix doit être un nombre positif ou nul.');
+    setSaving(true);setError(null);
+    try{
+      const maxOrder=items.filter(i=>i.category_id===input.category_id).reduce((max,i)=>Math.max(max,i.display_order),-1);
+      const {data,error:e}=await supabase.from('menu_items').insert({
+        establishment_id:establishmentId,category_id:input.category_id,name,description:input.description?.trim()||null,
+        price,image_url:input.image_url??null,display_order:maxOrder+1,active:input.active??true
+      }).select('*').single();
+      if(e)throw e;setItems(rows=>normalizeItemOrder([...rows,data as MenuItem]));
+      console.log('[MenuManager] ACTION: CREATE_ITEM -> RESULT: SUCCESS (Pos:',(data as MenuItem).display_order,')');return data as MenuItem;
+    }catch(cause){setError(cause instanceof Error?cause.message:'Impossible de créer l’article.');console.error('[MenuManager] ITEM CREATE ERROR:',cause);throw cause;}
+    finally{setSaving(false);}
+  },[categories,establishmentId,items]);
 
-      const { data, error: insertError } = await supabase
-        .from('menu_items')
-        .insert({
-          establishment_id: establishmentId,
-          category_id: input.category_id,
-          name,
-          description: input.description?.trim() || null,
-          price: Number(input.price),
-          image_url: input.image_url ?? null,
-          display_order: maxOrder + 1,
-          active: input.active ?? true,
-        })
-        .select('*')
-        .single();
+  const updateItem=useCallback(async(itemId:string,input:UpdateItem)=>{
+    if(!establishmentId)throw new Error('Établissement requis.');
+    const current=items.find(i=>i.id===itemId);if(!current)throw new Error('Article introuvable.');
+    if(input.category_id!==undefined)throw new Error('Utilisez moveItem pour changer la catégorie d’un article.');
+    const category=categories.find(c=>c.id===current.category_id);if(!category||!category.active)throw new Error('La catégorie de l’article doit être active.');
+    const name=input.name===undefined?current.name:input.name.trim();const price=input.price===undefined?current.price:Number(input.price);
+    if(!name)throw new Error('Le nom du produit est requis.');if(!Number.isFinite(price)||price<0)throw new Error('Le prix doit être un nombre positif ou nul.');
+    setSaving(true);setError(null);
+    try{
+      const {data,error:e}=await supabase.from('menu_items').update({
+        name,description:input.description===undefined?current.description:input.description?.trim()||null,
+        price,image_url:input.image_url===undefined?current.image_url:input.image_url,
+        active:input.active===undefined?current.active:input.active
+      }).eq('id',itemId).eq('establishment_id',establishmentId).select('*').single();
+      if(e)throw e;setItems(rows=>normalizeItemOrder(rows.map(r=>r.id===itemId?data as MenuItem:r)));
+      console.log('[MenuManager] ACTION: UPDATE_ITEM -> RESULT: SUCCESS',{itemId});return data as MenuItem;
+    }catch(cause){setError(cause instanceof Error?cause.message:'Impossible de modifier l’article.');console.error('[MenuManager] ITEM UPDATE ERROR:',cause);throw cause;}
+    finally{setSaving(false);}
+  },[categories,establishmentId,items]);
 
-      if (insertError) throw insertError;
-      setItems((current) => normalizeItemOrder([...current, data as MenuItem]));
-      console.log('[MenuManager] ITEM CREATE SUCCESS:', data);
-      return data as MenuItem;
-    } finally {
-      setSaving(false);
-    }
-  }, [categories, establishmentId, items]);
+  const moveItem=useCallback(async(itemId:string,destinationCategoryId:string)=>{
+    if(!establishmentId)throw new Error('Établissement requis.');
+    const item=items.find(i=>i.id===itemId);const source=item&&categories.find(c=>c.id===item.category_id);const destination=categories.find(c=>c.id===destinationCategoryId);
+    if(!item||!source||!destination)throw new Error('Article ou catégorie introuvable.');
+    if(!destination.active)throw new Error('La catégorie destination doit être active.');
+    if(item.category_id===destinationCategoryId)return item;
+    setSaving(true);setError(null);
+    try{
+      const maxOrder=items.filter(i=>i.category_id===destinationCategoryId).reduce((max,i)=>Math.max(max,i.display_order),-1);
+      const {data,error:e}=await supabase.from('menu_items').update({category_id:destinationCategoryId,display_order:maxOrder+1})
+        .eq('id',itemId).eq('establishment_id',establishmentId).select('*').single();
+      if(e)throw e;
+      const nextItems=items.map(i=>i.id===itemId?data as MenuItem:i);
+      await reindexCategory(source.id,nextItems);await reindexCategory(destination.id,nextItems);await load();
+      console.log('[MenuManager] ACTION: MOVE_ITEM -> RESULT: SUCCESS (Pos:',(data as MenuItem).display_order,')');return data as MenuItem;
+    }catch(cause){setError(cause instanceof Error?cause.message:'Impossible de déplacer l’article.');console.error('[MenuManager] MOVE ITEM ERROR:',cause);await load();throw cause;}
+    finally{setSaving(false);}
+  },[categories,establishmentId,items,load,reindexCategory]);
 
-  return {
-    categories,
-    items,
-    itemsByCategory,
-    loading,
-    saving,
-    error,
-    reload: load,
-    reindexAll,
-    addCategory,
-    addItem,
-  };
+  const toggleItemActive=useCallback(async(itemId:string)=>{
+    const item=items.find(i=>i.id===itemId);if(!item)throw new Error('Article introuvable.');
+    return updateItem(itemId,{active:!item.active});
+  },[items,updateItem]);
+
+  const deleteItem=useCallback(async(itemId:string)=>{
+    if(!establishmentId)throw new Error('Établissement requis.');
+    const item=items.find(i=>i.id===itemId);if(!item)throw new Error('Article introuvable.');
+    setSaving(true);setError(null);
+    try{
+      const {error:e}=await supabase.from('menu_items').delete().eq('id',itemId).eq('establishment_id',establishmentId);if(e)throw e;
+      await reindexCategory(item.category_id,items.filter(i=>i.id!==itemId));await load();
+      console.log('[MenuManager] ACTION: DELETE_ITEM -> RESULT: SUCCESS',{itemId});return true;
+    }catch(cause){setError(cause instanceof Error?cause.message:'Impossible de supprimer l’article.');console.error('[MenuManager] DELETE ITEM ERROR:',cause);await load();throw cause;}
+    finally{setSaving(false);}
+  },[establishmentId,items,load,reindexCategory]);
+
+  return {categories,items,itemsByCategory,loading,saving,error,reload:load,reindexAll,addCategory,updateCategory,deleteCategory,toggleCategoryActive,addItem,updateItem,moveItem,deleteItem,toggleItemActive};
 }
