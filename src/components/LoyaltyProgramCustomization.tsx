@@ -78,7 +78,11 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
   const [stampGoal, setStampGoal] = useState('10');
   const [stampRewardName, setStampRewardName] = useState('Cadeau fidélité');
   const [stampRewardDescription, setStampRewardDescription] = useState('');
+  const [pointsPerCurrency, setPointsPerCurrency] = useState('1');
+  const [programEnabled, setProgramEnabled] = useState(true);
   const [rewards, setRewards] = useState<LoyaltyRewardAdmin[]>([]);
+  const [previewCustomer, setPreviewCustomer] = useState<{ first_name: string | null; points_balance: number; visit_count: number } | null>(null);
+  const [previewTransactions, setPreviewTransactions] = useState<Array<{ id: string; description: string | null; created_at: string; points: number }>>([]);
   const [availableTemplates, setAvailableTemplates] = useState<LoyaltyPreset[]>(LOYALTY_PRESETS);
   const [rewardEditorOpen, setRewardEditorOpen] = useState(false);
   const [editingReward, setEditingReward] = useState<LoyaltyRewardAdmin | null>(null);
@@ -92,19 +96,21 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
   const [rewardSaving, setRewardSaving] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<'logo' | 'photo' | 'wallpapers' | null>(null);
-  const [activeTab, setActiveTab] = useState<'Design' | 'Contenu' | 'Récompense' | 'Aperçu'>('Design');
+  const [activeTab, setActiveTab] = useState<'Structure' | 'Design'>('Structure');
   const logoInput = useRef<HTMLInputElement>(null);
   const photoInput = useRef<HTMLInputElement>(null);
   const wallpapersInput = useRef<HTMLInputElement>(null);
 
   async function load() {
     if (!establishmentId) return;
-    const [{ data: designData }, { data: place }, { data: programData }, { data: rewardData }, { data: templateRows }] = await Promise.all([
+    const [{ data: designData }, { data: place }, { data: programData }, { data: rewardData }, { data: templateRows }, { data: customerRows }, { data: transactionRows }] = await Promise.all([
       supabase.rpc('get_loyalty_card_builder_config', { p_establishment_id: establishmentId }),
       supabase.from('establishments').select('name,logo_url,business_type').eq('id', establishmentId).maybeSingle(),
       supabase.rpc('get_loyalty_program_settings', { p_establishment_id: establishmentId }),
       supabase.from('loyalty_rewards').select('id,name,description,points_required,active,reward_type,discount_percent,discount_max_amount,valid_days').eq('establishment_id', establishmentId).order('points_required', { ascending: true }),
       supabase.from('templates').select('id,name,description,config').eq('kind', 'loyalty').eq('active', true).order('name'),
+      supabase.from('loyalty_customers').select('first_name,points_balance,visit_count').eq('establishment_id', establishmentId).order('created_at', { ascending: false }).limit(1),
+      supabase.from('loyalty_transactions').select('id,description,created_at,points').eq('establishment_id', establishmentId).order('created_at', { ascending: false }).limit(6),
     ]);
 
     const row = Array.isArray(designData) ? designData[0] : designData;
@@ -125,6 +131,8 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     }
     if (place) setEstablishment({ name: place.name || 'Votre établissement', logo_url: place.logo_url || null, business_type: place.business_type || null });
     setRewards((rewardData ?? []) as LoyaltyRewardAdmin[]);
+    setPreviewCustomer((customerRows?.[0] as { first_name: string | null; points_balance: number; visit_count: number } | undefined) ?? null);
+    setPreviewTransactions((transactionRows ?? []) as Array<{ id: string; description: string | null; created_at: string; points: number }>);
     if (templateRows?.length) {
       const mapped = (templateRows as Array<{ id: string; name: string; description: string | null; config: Record<string, any> }>).map((row) => {
         const c = row.config || {};
@@ -153,6 +161,8 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
       setStampGoal(String(program.stamp_goal ?? 10));
       setStampRewardName(program.stamp_reward_name ?? 'Cadeau fidélité');
       setStampRewardDescription(program.stamp_reward_description ?? '');
+      setPointsPerCurrency(String(program.points_per_currency ?? 1));
+      setProgramEnabled(Boolean(program.enabled ?? true));
       if (!row?.design_config?.card_mode) setCardMode(program.program_type === 'STAMP' ? 'STAMP' : 'QR');
     }
   }
@@ -326,9 +336,9 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
       p_stamp_reward_description: cardMode === 'STAMP' ? stampRewardDescription.trim() || null : null,
       p_discount_percent: null,
       p_discount_valid_days: 7,
-      p_points_per_currency: 1,
+      p_points_per_currency: Number(pointsPerCurrency) > 0 ? Number(pointsPerCurrency) : 1,
       p_currency: 'MAD',
-      p_enabled: true,
+      p_enabled: programEnabled,
     });
     if (programError) {
       setSaving(false);
@@ -370,36 +380,35 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     primaryColor: design.primary_color,
     secondaryColor: design.secondary_color,
     backgroundColor: design.background_color,
-    textColor: '#17201c',
+    textColor: design.text_color || '#17201c',
     borderRadius: design.border_radius,
-    customerName: 'Mohamed Elhafiani',
-    pointsBalance: 720,
-    pointsGoal: 1000,
-    visits: cardMode === 'STAMP' ? 6 : 0,
-    visitGoal: Number(stampGoal) || 8,
-    rewardName: cardMode === 'STAMP' ? stampRewardName : '1 récompense offerte',
-    rewardDescription: cardMode === 'STAMP' ? stampRewardDescription || 'À partir de 8 visites' : 'Encore 280 points avant votre prochaine récompense.',
+    customerName: previewCustomer?.first_name || 'Client',
+    pointsBalance: Number(previewCustomer?.points_balance ?? 0),
+    pointsGoal: Number(rewards[0]?.points_required ?? 0),
+    visits: Number(previewCustomer?.visit_count ?? 0),
+    visitGoal: Number(stampGoal) || 10,
+    rewardName: cardMode === 'STAMP' ? stampRewardName : (rewards[0]?.name ?? 'Aucune récompense'),
+    rewardDescription: cardMode === 'STAMP' ? (stampRewardDescription || null) : (rewards[0]?.description ?? null),
     intro: design.design_config.front_subtitle,
-    currentTier: 'Gold',
-    benefits: [
-      { title: 'Offre anniversaire', description: 'Une attention spéciale le jour J.' },
-      { title: 'Invitations privées', description: 'Accès aux nouveautés avant les autres.' },
-      { title: 'Accès prioritaire', description: 'Un traitement privilégié lors de vos visites.' },
-    ],
-    rewards: [
-      { id: 'preview-dessert', name: 'Dessert offert', description: 'Un dessert au choix offert', points_required: 500, reward_type: 'GIFT', discount_percent: null },
-      { id: 'preview-discount', name: 'Réduction', description: '10% sur votre prochaine visite', points_required: 600, reward_type: 'DISCOUNT', discount_percent: 10 },
-      { id: 'preview-drink', name: 'Boisson offerte', description: 'Une boisson au choix offerte', points_required: 750, reward_type: 'GIFT', discount_percent: null },
-    ],
-    history: [
-      { id: 'demo-1', title: 'Visite', date: '12/08', points: 0 },
-      { id: 'demo-2', title: 'Visite', date: '18/08', points: 0 },
-      { id: 'demo-3', title: 'Visite', date: '24/08', points: 0 },
-      { id: 'demo-4', title: 'Visite', date: '02/09', points: 0 },
-      { id: 'demo-5', title: 'Visite', date: '10/09', points: 0 },
-      { id: 'demo-6', title: 'Visite', date: '17/09', points: 0 },
-    ],
+    benefits: design.design_config.benefits || [],
+    offers: design.design_config.offers || [],
+    rewards: rewards.map(reward => ({
+      id: reward.id,
+      name: reward.name,
+      description: reward.description,
+      points_required: reward.points_required,
+      reward_type: reward.reward_type,
+      discount_percent: reward.discount_percent,
+      discount_max_amount: reward.discount_max_amount,
+    })),
+    history: previewTransactions.map(transaction => ({
+      id: transaction.id,
+      title: transaction.description || 'Transaction',
+      date: new Date(transaction.created_at).toLocaleDateString('fr-FR'),
+      points: Number(transaction.points || 0),
+    })),
     qrValue: window.location.origin + '/loyalty/preview-' + establishmentId,
+    published: design.published,
   };
 
   return (
@@ -408,8 +417,8 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">Fidélité</p>
-            <h2 className="mt-1 font-display text-3xl text-forest">Personnaliser la carte fidélité</h2>
-            <p className="mt-1 text-sm text-ink/45">Une seule carte. Votre logo, votre photo, vos couleurs. Le client ne voit que sa carte.</p>
+            <h2 className="mt-1 font-display text-3xl text-forest">Loyalty Studio</h2>
+            <p className="mt-1 text-sm text-ink/45">Structure, Design et Miroir de la carte fidélité existante de l’établissement.</p>
           </div>
           <div className="flex gap-2">
             <button type="button" onClick={() => void save(false)} disabled={saving} className="rounded-xl border border-forest/20 bg-white px-4 py-3 text-xs font-semibold text-forest">Enregistrer</button>
@@ -420,13 +429,13 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
         <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_0.9fr]">
           <div className="space-y-5">
             <div className="flex items-center gap-2 rounded-2xl border border-ink/10 bg-[#fafaf8] p-1">
-              {(['Design', 'Contenu', 'Récompense', 'Aperçu'] as const).map(tab => (
+              {(['Structure', 'Design'] as const).map(tab => (
                 <button
                   key={tab}
                   type="button"
                   onClick={() => {
                     setActiveTab(tab);
-                    const targetId = tab === 'Design' ? 'loyalty-design' : tab === 'Contenu' ? 'loyalty-content' : tab === 'Récompense' ? 'loyalty-rewards' : 'loyalty-preview';
+                    const targetId = tab === 'Structure' ? 'loyalty-structure' : 'loyalty-design';
                     window.requestAnimationFrame(() => document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
                   }}
                   className={`flex-1 rounded-xl px-3 py-2.5 text-center text-[10px] font-semibold transition ${activeTab === tab ? 'bg-white text-forest shadow-sm' : 'text-ink/35 hover:text-forest'}`}
@@ -523,6 +532,36 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 <label className="block text-xs font-medium text-ink/50">Titre<input value={design.design_config.front_title} onChange={e => updateConfig({front_title:e.target.value})} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm"/></label>
                 <label className="block text-xs font-medium text-ink/50">Sous-titre<input value={design.design_config.front_subtitle} onChange={e => updateConfig({front_subtitle:e.target.value})} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm"/></label>
+              </div>
+
+              <div id="loyalty-structure" className="scroll-mt-6 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
+                <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Structure</p>
+                <p className="mt-1 text-xs text-ink/45">Les réglages ci-dessous pilotent le programme de fidélité déjà utilisé par cet établissement.</p>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <label className="text-xs font-medium text-ink/50">
+                    Points par MAD
+                    <input
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      value={pointsPerCurrency}
+                      onChange={e => setPointsPerCurrency(e.target.value)}
+                      className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm text-ink outline-none"
+                    />
+                  </label>
+                  <label className="flex items-end gap-3 rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-xs text-ink/60">
+                    <input
+                      type="checkbox"
+                      checked={programEnabled}
+                      onChange={e => setProgramEnabled(e.target.checked)}
+                      className="h-4 w-4 rounded"
+                    />
+                    Programme actif
+                  </label>
+                </div>
+                <div className="mt-3 rounded-xl border border-forest/10 bg-white p-3 text-[10px] text-ink/45">
+                  Exemple : 250 MAD = {Math.floor(Math.max(0, Number(pointsPerCurrency) || 0) * 250)} points.
+                </div>
               </div>
 
               <div id="loyalty-rewards" className="mt-4 scroll-mt-6 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
