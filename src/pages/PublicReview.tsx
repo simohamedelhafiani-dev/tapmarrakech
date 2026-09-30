@@ -1560,7 +1560,23 @@ function AIPremiumMenu({
         </div>
       )}
 
-      <div className={`relative px-5 pb-14 pt-8 ${palette.body}`}>
+      <div
+        className="relative px-5 pb-14 pt-8"
+        style={
+          wallpaper
+            ? {
+                backgroundImage: `url("${wallpaper}")`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundAttachment: 'fixed',
+              }
+            : undefined
+        }
+      >
+        {wallpaper && (
+          <div className="pointer-events-none absolute inset-0 bg-black/25" aria-hidden="true" />
+        )}
+        <div className={`relative ${wallpaper ? 'z-10' : ''}`}>
         {(design.intro?.title || design.intro?.text) && (
           <section className={`mb-10 rounded-[28px] border p-5 shadow-xl ${palette.card}`}>
             {design.intro.title && (
@@ -1749,6 +1765,7 @@ function AIPremiumMenu({
               </section>
             );
           })}
+        </div>
         </div>
       </div>
     </div>
