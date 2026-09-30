@@ -197,7 +197,9 @@ export function useMenuManager(establishmentId: string | null) {
       if(e)throw e;
       const nextItems=items.map(i=>i.id===itemId?data as MenuItem:i);
       await reindexCategory(source.id,nextItems);await reindexCategory(destination.id,nextItems);await load();
-      console.log('[MenuManager] ACTION: MOVE_ITEM -> RESULT: SUCCESS (Pos:',(data as MenuItem).display_order,')');return data as MenuItem;
+      const finalPosition=nextItems.filter(i=>i.category_id===destinationCategoryId).length-1;
+      const finalItem={...(data as MenuItem),display_order:finalPosition};
+      console.log('[MenuManager] ACTION: MOVE_ITEM -> RESULT: SUCCESS (Pos:',finalPosition,')');return finalItem;
     }catch(cause){setError(cause instanceof Error?cause.message:'Impossible de déplacer l’article.');console.error('[MenuManager] MOVE ITEM ERROR:',cause);await load();throw cause;}
     finally{setSaving(false);}
   },[categories,establishmentId,items,load,reindexCategory]);
