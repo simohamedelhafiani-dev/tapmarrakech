@@ -35,7 +35,7 @@ type MenuConfiguratorProps = {
 const navigationModes: Array<{ id: MenuNavigationMode; label: string; description: string }> = [
   { id: 'scroll', label: 'Page unique', description: 'Défilement classique' },
   { id: 'book', label: 'Mode livre', description: 'Pagination par catégorie' },
-  { id: 'app', label: 'Mode app', description: 'Navigation interactive' },
+  { id: 'app', label: 'Catégories en haut', description: 'Cliquez sur une catégorie pour afficher ses plats' },
 ];
 
 const templates: Array<{ id: MenuTemplate; label: string; description: string }> = [
@@ -215,7 +215,7 @@ export default function MenuConfigurator({
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-gold">Expérience</p>
-            <h4 className="mt-1 text-sm font-semibold text-forest">Mode de navigation</h4>
+            <h4 className="mt-1 text-sm font-semibold text-forest">Navigation du menu</h4>
             <p className="mt-1 text-[10px] leading-4 text-ink/40">
               Choisis comment le visiteur parcourt ton menu.
             </p>
@@ -258,7 +258,7 @@ export default function MenuConfigurator({
         </div>
 
         <p className="mt-3 text-[9px] leading-4 text-ink/35">
-          Le mode est synchronisé avec le Draft et l’aperçu. Sa persistance publique sera ajoutée avec la future configuration de navigation.
+          Le choix est synchronisé avec le Draft, l’aperçu et la page publique.
         </p>
       </div>
 
