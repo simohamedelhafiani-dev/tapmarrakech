@@ -48,7 +48,8 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
   const [loadingDesign, setLoadingDesign] = useState(true);
   const [publishing, setPublishing] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
-  const [aiCandidates, setAiCandidates] = useState<Array<{ id: string; design: Record<string, unknown>; template: MenuTemplate }>>([]);
+  const [aiPhotoMode, setAiPhotoMode] = useState<'with_photos' | 'without_photos'>('without_photos');
+  const [aiCandidates, setAiCandidates] = useState<Array<{ id: string; design: Record<string, unknown>; template: MenuTemplate; photoMode: 'with_photos' | 'without_photos' }>>([]);
   const [designError, setDesignError] = useState<string | null>(null);
   const [publishedSnapshot, setPublishedSnapshot] = useState<{
     template: MenuTemplate;
@@ -203,6 +204,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
               establishment_id: establishmentId,
               menu: buildMenuForAi(),
               variant: variant.label,
+              photo_mode: aiPhotoMode,
             },
           });
 
@@ -215,8 +217,9 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
 
           return {
             id: variant.id,
-            design: ai,
+            design: { ...ai, photo_mode: aiPhotoMode },
             template: mappedTemplate,
+            photoMode: aiPhotoMode,
           };
         }),
       );
@@ -233,10 +236,10 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
     }
   };
 
-  const applyAiCandidate = (candidate: { design: Record<string, unknown>; template: MenuTemplate }) => {
+  const applyAiCandidate = (candidate: { design: Record<string, unknown>; template: MenuTemplate; photoMode: 'with_photos' | 'without_photos' }) => {
     setDraft(current => ({
       ...current,
-      aiDesign: candidate.design,
+      aiDesign: { ...candidate.design, photo_mode: candidate.photoMode },
       template: candidate.template,
     }));
     setAiCandidates([]);
@@ -419,6 +422,8 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
                 hasChanges={hasChanges}
                 publishing={publishing}
                 aiLoading={aiLoading}
+                aiPhotoMode={aiPhotoMode}
+                onAiPhotoModeChange={setAiPhotoMode}
                 onChange={changeDraft}
                 onPublish={() => void publish()}
                 onGenerateAi={() => void generateAiDesign()}
