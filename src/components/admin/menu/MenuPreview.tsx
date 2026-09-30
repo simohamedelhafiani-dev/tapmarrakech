@@ -149,16 +149,6 @@ export default function MenuPreview({
             )}
 
             <div className="p-5 sm:p-6">
-            <header className="border-b border-current/10 pb-5 text-center">
-              <p className={`text-[9px] font-bold uppercase tracking-[0.32em] ${colors.accent}`}>Menu</p>
-              <h4 className={`mt-2 text-3xl leading-tight ${colors.heading}`}>
-                {establishmentName || 'Votre établissement'}
-              </h4>
-              <p className={`mt-2 text-[10px] leading-4 ${colors.muted}`}>
-                Une carte pensée pour votre expérience client.
-              </p>
-            </header>
-
             <div className="mt-5 space-y-6">
               {visibleCategories.map((category) => {
                 const items = (itemsByCategory[category.id] ?? []).filter(item => item.active);
