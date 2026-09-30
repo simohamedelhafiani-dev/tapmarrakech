@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { CheckCircle2, CircleOff, Plus } from 'lucide-react';
 import type { MenuCategory } from '@/hooks/useMenuManager';
 
@@ -18,10 +19,26 @@ export default function CategorySidebar({
   onAdd,
   onToggleActive,
 }: CategorySidebarProps) {
+  const [actionError, setActionError] = useState<string | null>(null);
+
   const addCategory = async () => {
     const name = window.prompt('Nom de la catégorie');
     if (!name?.trim()) return;
-    await onAdd({ name: name.trim() });
+    setActionError(null);
+    try {
+      await onAdd({ name: name.trim() });
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : 'Impossible de créer la catégorie.');
+    }
+  };
+
+  const toggleCategory = async (categoryId: string) => {
+    setActionError(null);
+    try {
+      await onToggleActive(categoryId);
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : 'Impossible de modifier le statut.');
+    }
   };
 
   return (
@@ -41,6 +58,12 @@ export default function CategorySidebar({
           </button>
         </div>
       </div>
+
+      {actionError && (
+        <div className="mx-3 mt-3 rounded-xl bg-red-50 px-3 py-2.5 text-xs text-red-700">
+          {actionError}
+        </div>
+      )}
 
       <div className="max-h-[60vh] space-y-1 overflow-y-auto p-2 lg:max-h-[calc(100vh-260px)]">
         {categories.length === 0 ? (
@@ -83,7 +106,7 @@ export default function CategorySidebar({
 
                 <button
                   type="button"
-                  onClick={() => void onToggleActive(category.id)}
+                  onClick={() => void toggleCategory(category.id)}
                   disabled={saving}
                   title={category.active ? 'Désactiver la catégorie' : 'Activer la catégorie'}
                   aria-label={category.active ? 'Désactiver la catégorie' : 'Activer la catégorie'}
