@@ -77,6 +77,7 @@ export function useMenuManager(establishmentId: string | null) {
   },[establishmentId]);
 
   const reindexAll=useCallback(async()=>{
+    console.log('[HOOK] Executing reindexAll()', { establishmentId, categories: categories.length, items: items.length });
     if(!establishmentId)return;
     mutationVersionRef.current += 1;
     setSaving(true);setError(null);
@@ -96,14 +97,17 @@ export function useMenuManager(establishmentId: string | null) {
         if(e)throw e;
       }
       await load();
+      console.log('[HOOK] Result: REINDEX -> SUCCESS');
       console.log('[MenuManager] ACTION: REINDEX -> RESULT: SUCCESS (All aligned)');
     } catch(cause) {
       setError(cause instanceof Error?cause.message:'Impossible de réindexer le menu.');
+      console.error('[HOOK] Result: REINDEX -> ERROR', cause);
       console.error('[MenuManager] ACTION: REINDEX -> RESULT: ERROR',cause);
     } finally { setSaving(false); }
   },[categories,establishmentId,items,load]);
 
   const addCategory=useCallback(async(input:NewCategory)=>{
+    console.log('[HOOK] Executing addCategory()', { establishmentId, input });
     if(!establishmentId)throw new Error('Établissement requis.');
     const name=input.name.trim(); if(!name)throw new Error('Le nom de la catégorie est requis.');
     mutationVersionRef.current += 1;
@@ -116,6 +120,7 @@ export function useMenuManager(establishmentId: string | null) {
       }).select('*').single();
       if(e)throw e;
       setCategories(rows=>normalizeCategoryOrder([...rows,data as MenuCategory]));
+      console.log('[HOOK] Result: ADD_CATEGORY -> SUCCESS', { id: (data as MenuCategory).id, display_order: (data as MenuCategory).display_order });
       console.log('[MenuManager] ACTION: CREATE_CATEGORY -> RESULT: SUCCESS (Pos:',(data as MenuCategory).display_order,')');
       return data as MenuCategory;
     } catch(cause){setError(cause instanceof Error?cause.message:'Impossible de créer la catégorie.');console.error('[MenuManager] CATEGORY CREATE ERROR:',cause);throw cause;}
@@ -145,6 +150,7 @@ export function useMenuManager(establishmentId: string | null) {
   },[categories,updateCategory]);
 
   const deleteCategory=useCallback(async(categoryId:string)=>{
+    console.log('[HOOK] Executing deleteCategory()', { establishmentId, categoryId });
     if(!establishmentId)throw new Error('Établissement requis.');
     if(!categories.some(c=>c.id===categoryId))throw new Error('Catégorie introuvable.');
     if(items.some(i=>i.category_id===categoryId))throw new Error('Impossible de supprimer une catégorie qui contient des articles.');
@@ -153,6 +159,7 @@ export function useMenuManager(establishmentId: string | null) {
     try{
       const {error:e}=await supabase.from('menu_categories').delete().eq('id',categoryId).eq('establishment_id',establishmentId);
       if(e)throw e;setCategories(rows=>rows.filter(r=>r.id!==categoryId));
+      console.log('[HOOK] Result: DELETE_CATEGORY -> SUCCESS', { categoryId });
       console.log('[MenuManager] ACTION: DELETE_CATEGORY -> RESULT: SUCCESS',{categoryId});return true;
     }catch(cause){setError(cause instanceof Error?cause.message:'Impossible de supprimer la catégorie.');console.error('[MenuManager] CATEGORY DELETE ERROR:',cause);throw cause;}
     finally{setSaving(false);}
