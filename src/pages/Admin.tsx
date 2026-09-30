@@ -52,7 +52,7 @@ import EstablishmentsSection from '@/components/admin/EstablishmentsSection';
 import ProfileForm from '@/components/admin/ProfileForm';
 import WifiForm from '@/components/admin/WifiForm';
 import MenuStudio from '@/components/admin/menu/MenuStudio';
-import LoyaltyStudio from '@/components/loyalty/LoyaltyStudio';
+import LoyaltyProgramCustomization from '@/components/LoyaltyProgramCustomization';
 import { useRecentActivity } from '@/hooks/useRecentActivity';
 import { useRecentLoyaltyCustomers } from '@/hooks/useRecentLoyaltyCustomers';
 import { useAdminOverviewStats } from '@/hooks/useAdminOverviewStats';
@@ -746,7 +746,7 @@ export default function Admin() {
                       </label>
                     </div>
                   )}
-                  <LoyaltyStudio establishmentId={selectedEstablishmentId ?? establishments[0].id} />
+                  <LoyaltyProgramCustomization establishmentId={selectedEstablishmentId ?? establishments[0].id} />
                 </>
               ) : (
                 <div className="rounded-2xl border border-ink/5 bg-white p-10 text-center shadow-sm">
