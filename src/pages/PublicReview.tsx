@@ -766,6 +766,7 @@ export default function PublicReview() {
               backgroundSize: 'cover',
               backgroundPosition: 'center top',
               backgroundRepeat: 'no-repeat',
+              backgroundAttachment: 'fixed',
             }}
           >
             <div className="pointer-events-none absolute inset-0 bg-black/18" />
