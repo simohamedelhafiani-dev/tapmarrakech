@@ -479,6 +479,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
         <div className="min-w-0 rounded-3xl border border-ink/5 bg-white p-2 shadow-sm sm:p-4">
           <div className="space-y-4">
+            {activeTab === 'Design' && (
             <div id="loyalty-design" className="scroll-mt-6 rounded-2xl border border-ink/10 p-5">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Modèles</p>
@@ -568,6 +569,10 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                 <label className="block text-xs font-medium text-ink/50">Sous-titre<input value={design.design_config.front_subtitle} onChange={e => updateConfig({front_subtitle:e.target.value})} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm"/></label>
               </div>
 
+            </div>
+            )}
+
+            {activeTab === 'Structure' && (
               <div id="loyalty-structure" className="scroll-mt-6 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
                 <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Structure</p>
                 <p className="mt-1 text-xs text-ink/45">Les réglages ci-dessous pilotent le programme de fidélité déjà utilisé par cet établissement.</p>
@@ -718,7 +723,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
           </div>
         </div>
 
-        <div id="loyalty-preview" className="scroll-mt-6 rounded-2xl border border-ink/10 bg-[#f7f7f3] p-4">
+        <div id="loyalty-preview" className="sticky top-4 scroll-mt-6 rounded-2xl border border-ink/10 bg-[#f7f7f3] p-4">
             <div className="flex items-center justify-between">
               <div><p className="text-[10px] font-bold uppercase tracking-[.16em] text-gold">Aperçu en temps réel</p><p className="mt-1 text-xs text-ink/45">Voici exactement ce que vos clients verront.</p></div>
               <span className="rounded-full bg-white px-3 py-1.5 text-[10px] font-semibold text-forest shadow-sm">Client</span>
