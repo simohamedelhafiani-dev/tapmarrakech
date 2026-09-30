@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react';
 import { useMenuManager } from '@/hooks/useMenuManager';
-import CategoryList from '@/components/admin/menu/CategoryList';
-import ItemManager from '@/components/admin/menu/ItemManager';
+import CategorySidebar from '@/components/admin/menu/CategorySidebar';
+import ItemEditor from '@/components/admin/menu/ItemEditor';
+import MenuPreview from '@/components/admin/menu/MenuPreview';
 
 type MenuStudioProps = {
   establishmentId: string;
@@ -8,38 +10,54 @@ type MenuStudioProps = {
 
 export default function MenuStudio({ establishmentId }: MenuStudioProps) {
   const menu = useMenuManager(establishmentId);
+  const [selectedCategoryId, setSelectedCategoryId] = useState('');
 
-  const tracedAddCategory = async (input: Parameters<typeof menu.addCategory>[0]) => {
-    console.log('[STUDIO] Calling addCategory()', input);
-    const result = await menu.addCategory(input);
-    console.log('[STUDIO] addCategory() -> SUCCESS', result);
-    return result;
-  };
-  const tracedDeleteCategory = async (categoryId: string, action: 'move' | 'delete' = 'delete', destinationCategoryId?: string) => {
-    console.log('[STUDIO] Calling deleteCategory()', { categoryId, action, destinationCategoryId });
-    const result = await menu.deleteCategory(categoryId, action, destinationCategoryId);
-    console.log('[STUDIO] deleteCategory() -> SUCCESS', { categoryId, result });
-    return result;
-  };
-  const tracedReindex = async () => {
-    console.log('[STUDIO] Calling reindexAll()');
-    await menu.reindexAll();
-    console.log('[STUDIO] reindexAll() -> RESOLVED', { error: menu.error });
-  };
+  useEffect(() => {
+    if (!menu.categories.length) {
+      setSelectedCategoryId('');
+      return;
+    }
+
+    const selectedStillExists = menu.categories.some(
+      category => category.id === selectedCategoryId,
+    );
+
+    if (!selectedStillExists) {
+      const firstActive = menu.categories.find(category => category.active);
+      setSelectedCategoryId((firstActive ?? menu.categories[0]).id);
+    }
+  }, [menu.categories, selectedCategoryId]);
+
+  const selectedCategory =
+    menu.categories.find(category => category.id === selectedCategoryId) ?? null;
+
+  const selectedItems = selectedCategory
+    ? (menu.itemsByCategory[selectedCategory.id] ?? [])
+    : [];
 
   return (
     <div className="space-y-5">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Menu Studio</p>
-          <h3 className="mt-1 font-display text-3xl text-forest">Construis ton menu</h3>
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">
+            Menu Studio
+          </p>
+          <h3 className="mt-1 font-display text-3xl text-forest">
+            Construis ton menu
+          </h3>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-ink/45">
-            Le Studio centralise la structure du menu. Les règles de données, d’ordre et de publication restent dans le moteur.
+            Navigue à gauche, travaille au centre et visualise immédiatement à droite.
           </p>
         </div>
 
         <div className="inline-flex items-center gap-2 self-start rounded-full bg-white px-3 py-2 text-[10px] font-semibold text-forest shadow-sm md:self-auto">
-          <span className={menu.loading ? 'h-2 w-2 animate-pulse rounded-full bg-amber-400' : 'h-2 w-2 rounded-full bg-green-500'} />
+          <span
+            className={
+              menu.loading
+                ? 'h-2 w-2 animate-pulse rounded-full bg-amber-400'
+                : 'h-2 w-2 rounded-full bg-green-500'
+            }
+          />
           {menu.loading ? 'Synchronisation…' : 'Moteur synchronisé'}
         </div>
       </div>
@@ -50,36 +68,26 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
         </div>
       )}
 
-      <CategoryList
-        categories={menu.categories}
-        itemsByCategory={menu.itemsByCategory}
-        saving={menu.saving}
-        onAdd={tracedAddCategory}
-        onUpdate={menu.updateCategory}
-        onToggleActive={menu.toggleCategoryActive}
-        onDelete={tracedDeleteCategory}
-        onReindex={tracedReindex}
-      />
+      <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)_320px] lg:items-start">
+        <CategorySidebar
+          categories={menu.categories}
+          selectedCategoryId={selectedCategoryId}
+          saving={menu.saving}
+          onSelect={setSelectedCategoryId}
+          onAdd={menu.addCategory}
+        />
 
-      <ItemManager
-        establishmentId={establishmentId}
-        categories={menu.categories}
-        itemsByCategory={menu.itemsByCategory}
-        saving={menu.saving}
-        onAdd={menu.addItem}
-        onUpdate={menu.updateItem}
-        onMove={menu.moveItem}
-        onToggleActive={menu.toggleItemActive}
-        onDelete={menu.deleteItem}
-      />
+        <ItemEditor
+          category={selectedCategory}
+          items={selectedItems}
+          saving={menu.saving}
+        />
 
-      <section className="rounded-3xl border border-dashed border-forest/15 bg-white/70 p-8 text-center">
-        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Étape suivante</p>
-        <h4 className="mt-2 text-lg font-semibold text-forest">Articles</h4>
-        <p className="mx-auto mt-2 max-w-xl text-xs leading-5 text-ink/40">
-          Le gestionnaire d’articles sera branché directement sur le même moteur certifié : création, édition, déplacement et publication.
-        </p>
-      </section>
+        <MenuPreview
+          category={selectedCategory}
+          items={selectedItems}
+        />
+      </div>
     </div>
   );
 }
