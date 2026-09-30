@@ -21,6 +21,7 @@ const normalizeItemOrder = (rows: MenuItem[]) =>
   [...rows].sort((a,b) => a.display_order - b.display_order || a.created_at.localeCompare(b.created_at));
 
 export function useMenuManager(establishmentId: string | null) {
+  const mutationVersionRef = useRef(0); // stale-load guard
   const [categories,setCategories] = useState<MenuCategory[]>([]);
   const [items,setItems] = useState<MenuItem[]>([]);
   const [loading,setLoading] = useState(false);
