@@ -140,21 +140,59 @@ export function useMenuManager(establishmentId: string | null) {
     return updateCategory(categoryId,{active:!category.active});
   },[categories,updateCategory]);
 
-  const deleteCategory=useCallback(async(categoryId:string)=>{
-    console.log('[HOOK] Executing deleteCategory()', { establishmentId, categoryId });
+  const deleteCategory=useCallback(async(categoryId:string,action:'move'|'delete'='delete',destinationCategoryId?:string)=>{
+    console.log('[HOOK] Executing deleteCategory()', { establishmentId, categoryId, action, destinationCategoryId });
     if(!establishmentId)throw new Error('Établissement requis.');
-    if(!categories.some(c=>c.id===categoryId))throw new Error('Catégorie introuvable.');
-    if(items.some(i=>i.category_id===categoryId))throw new Error('Impossible de supprimer une catégorie qui contient des articles.');
+    const category=categories.find(c=>c.id===categoryId);
+    if(!category)throw new Error('Catégorie introuvable.');
+    const categoryItems=items.filter(i=>i.category_id===categoryId);
+
+    if(action==='move'){
+      if(!destinationCategoryId)throw new Error('Catégorie destination requise.');
+      const destination=categories.find(c=>c.id===destinationCategoryId);
+      if(!destination||destination.id===categoryId)throw new Error('Catégorie destination invalide.');
+      if(!destination.active)throw new Error('La catégorie destination doit être active.');
+    }
+
     mutationVersionRef.current += 1;
     setSaving(true);setError(null);
     try{
-      const {error:e}=await supabase.from('menu_categories').delete().eq('id',categoryId).eq('establishment_id',establishmentId);
-      if(e)throw e;setCategories(rows=>rows.filter(r=>r.id!==categoryId));
-      console.log('[HOOK] Result: DELETE_CATEGORY -> SUCCESS', { categoryId });
-      console.log('[MenuManager] ACTION: DELETE_CATEGORY -> RESULT: SUCCESS',{categoryId});return true;
-    }catch(cause){setError(cause instanceof Error?cause.message:'Impossible de supprimer la catégorie.');console.error('[MenuManager] CATEGORY DELETE ERROR:',cause);throw cause;}
-    finally{setSaving(false);}
-  },[categories,establishmentId,items]);
+      if(categoryItems.length>0){
+        if(action==='move'){
+          const {error:e}=await supabase.from('menu_items').update({category_id:destinationCategoryId!})
+            .eq('establishment_id',establishmentId).eq('category_id',categoryId);
+          if(e)throw e;
+        }else{
+          const {error:e}=await supabase.from('menu_items').delete()
+            .eq('establishment_id',establishmentId).eq('category_id',categoryId);
+          if(e)throw e;
+        }
+      }
+
+      const {error:e}=await supabase.from('menu_categories').delete()
+        .eq('id',categoryId).eq('establishment_id',establishmentId);
+      if(e)throw e;
+
+      mutationVersionRef.current += 1;
+      await reindexAll();
+
+      if(action==='move'){
+        setItems(rows=>rows.map(item=>item.category_id===categoryId?{...item,category_id:destinationCategoryId!}:item));
+      }else{
+        setItems(rows=>rows.filter(item=>item.category_id!==categoryId));
+      }
+      setCategories(rows=>rows.filter(row=>row.id!==categoryId));
+
+      console.log('[HOOK] Result: DELETE_CATEGORY -> SUCCESS', { categoryId, action, itemsAffected: categoryItems.length });
+      console.log('[MenuManager] ACTION: DELETE_CATEGORY -> RESULT: SUCCESS',{categoryId,action,itemsAffected:categoryItems.length});
+      return true;
+    }catch(cause){
+      setError(cause instanceof Error?cause.message:'Impossible de supprimer la catégorie.');
+      console.error('[MenuManager] CATEGORY DELETE ERROR:',cause);
+      await load();
+      throw cause;
+    }finally{setSaving(false);}
+  },[categories,establishmentId,items,load,reindexAll]);
 
   const addItem=useCallback(async(input:NewItem)=>{
     if(!establishmentId)throw new Error('Établissement requis.');
