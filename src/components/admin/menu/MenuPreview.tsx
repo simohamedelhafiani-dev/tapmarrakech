@@ -1,3 +1,5 @@
+import { useEffect, useMemo, useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { MenuCategory, MenuItem } from '@/hooks/useMenuManager';
 import type { MenuDesignDraft } from '@/components/admin/menu/MenuConfigurator';
 
@@ -46,7 +48,8 @@ export default function MenuPreview({
   draft,
 }: MenuPreviewProps) {
   const activeDraft = draft ?? {
-    template: 'editorial',
+    template: 'editorial' as const,
+    navigation: 'scroll' as const,
     wallpaperUrl: null,
     wallpaperFile: null,
     wallpaperObjectUrl: null,
@@ -56,6 +59,35 @@ export default function MenuPreview({
   };
 
   const colors = theme[activeDraft.template];
+  const activeCategories = useMemo(
+    () => categories.filter(category => category.active),
+    [categories],
+  );
+  const [bookPage, setBookPage] = useState(0);
+  const [appCategoryId, setAppCategoryId] = useState(activeCategories[0]?.id ?? '');
+
+  useEffect(() => {
+    if (!activeCategories.length) {
+      setBookPage(0);
+      setAppCategoryId('');
+      return;
+    }
+
+    setBookPage(current => Math.min(current, activeCategories.length - 1));
+
+    if (!activeCategories.some(category => category.id === appCategoryId)) {
+      setAppCategoryId(activeCategories[0].id);
+    }
+  }, [activeCategories, appCategoryId]);
+
+  const visibleCategories =
+    activeDraft.navigation === 'book'
+      ? activeCategories.slice(bookPage, bookPage + 1)
+      : activeDraft.navigation === 'app'
+        ? activeCategories.filter(category => category.id === appCategoryId)
+        : activeCategories;
+
+  const currentBookPage = activeCategories.length ? bookPage + 1 : 0;
 
   return (
     <aside className="min-w-0 overflow-hidden rounded-3xl border border-ink/5 bg-white shadow-sm lg:sticky lg:top-4 lg:self-start">
@@ -80,7 +112,43 @@ export default function MenuPreview({
             </>
           )}
 
-          <div className="relative p-5 sm:p-6">
+          <div className="relative">
+            <header className="p-5 pb-4 text-center sm:p-6 sm:pb-4">
+              <p className={`text-[9px] font-bold uppercase tracking-[0.32em] ${colors.accent}`}>Menu</p>
+              <h4 className={`mt-2 text-3xl leading-tight ${colors.heading}`}>
+                {establishmentName || 'Votre établissement'}
+              </h4>
+              <p className={`mt-2 text-[10px] leading-4 ${colors.muted}`}>
+                Une carte pensée pour votre expérience client.
+              </p>
+            </header>
+
+            {activeDraft.navigation === 'app' && activeCategories.length > 0 && (
+              <nav className="sticky top-0 z-10 border-y border-current/10 bg-black/10 px-3 py-2 backdrop-blur-md">
+                <div className="flex gap-1.5 overflow-x-auto">
+                  {activeCategories.map(category => {
+                    const active = category.id === appCategoryId;
+                    return (
+                      <button
+                        key={category.id}
+                        type="button"
+                        onClick={() => setAppCategoryId(category.id)}
+                        className={[
+                          'shrink-0 rounded-full border px-3 py-1.5 text-[9px] font-semibold transition',
+                          active
+                            ? 'border-gold bg-gold text-white'
+                            : 'border-current/10 bg-black/5 text-current/60 hover:border-gold/40',
+                        ].join(' ')}
+                      >
+                        {category.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              </nav>
+            )}
+
+            <div className="p-5 sm:p-6">
             <header className="border-b border-current/10 pb-5 text-center">
               <p className={`text-[9px] font-bold uppercase tracking-[0.32em] ${colors.accent}`}>Menu</p>
               <h4 className={`mt-2 text-3xl leading-tight ${colors.heading}`}>
@@ -92,7 +160,7 @@ export default function MenuPreview({
             </header>
 
             <div className="mt-5 space-y-6">
-              {categories.filter(category => category.active).map((category) => {
+              {visibleCategories.map((category) => {
                 const items = (itemsByCategory[category.id] ?? []).filter(item => item.active);
                 return (
                   <section key={category.id}>
@@ -123,6 +191,39 @@ export default function MenuPreview({
                   </section>
                 );
               })}
+              </div>
+
+              {activeDraft.navigation === 'book' && (
+                <div className="mt-7 border-t border-current/10 pt-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <button
+                      type="button"
+                      disabled={bookPage === 0}
+                      onClick={() => setBookPage(page => Math.max(0, page - 1))}
+                      className="inline-flex items-center gap-1 rounded-full border border-current/10 px-3 py-2 text-[9px] font-semibold transition hover:border-gold/50 disabled:cursor-not-allowed disabled:opacity-30"
+                    >
+                      <ChevronLeft size={12} />
+                      Précédent
+                    </button>
+
+                    <span className={`text-[9px] font-semibold ${colors.muted}`}>
+                      Page {currentBookPage}/{activeCategories.length || 1}
+                    </span>
+
+                    <button
+                      type="button"
+                      disabled={bookPage >= activeCategories.length - 1}
+                      onClick={() =>
+                        setBookPage(page => Math.min(activeCategories.length - 1, page + 1))
+                      }
+                      className="inline-flex items-center gap-1 rounded-full border border-current/10 px-3 py-2 text-[9px] font-semibold transition hover:border-gold/50 disabled:cursor-not-allowed disabled:opacity-30"
+                    >
+                      Suivant
+                      <ChevronRight size={12} />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
