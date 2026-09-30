@@ -104,14 +104,14 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
     setDraft({
       template,
       navigation,
-      wallpaperUrl:
+      wallpaperUrl,
       wallpaperFile: null,
       wallpaperObjectUrl: null,
       wallpaperRemoved: false,
       overlayOpacity,
       aiDesign,
     });
-    setPublishedSnapshot({ template, wallpaperUrl, overlayOpacity, aiDesign });
+    setPublishedSnapshot({ template, navigation, wallpaperUrl, overlayOpacity, aiDesign });
     setLoadingDesign(false);
   }, [establishmentId]);
 
