@@ -1511,29 +1511,6 @@ function AIPremiumMenu({
 
   return (
     <div className={`relative mt-2 overflow-hidden ${palette.page}`}>
-      <section
-        className={`relative overflow-hidden px-5 pb-10 pt-7 ${
-          style === 'dark' ? 'bg-[#0d241e]' : 'bg-[#173d32]'
-        }`}
-      >
-        <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-gold/10 blur-3xl" />
-        <div className="absolute -bottom-32 -left-20 h-72 w-72 rounded-full bg-black/20 blur-3xl" />
-
-        <div className="relative">
-          <p className="text-[9px] font-bold uppercase tracking-[0.34em] text-gold">
-            {design.hero?.eyebrow || place.name || 'La carte'}
-          </p>
-          <h1 className="mt-2 max-w-[430px] font-display text-[42px] leading-[0.94] text-white">
-            {design.hero?.title || place.name || 'Notre menu'}
-          </h1>
-          {design.hero?.subtitle && (
-            <p className="mt-4 max-w-[390px] text-sm leading-6 text-white/60">
-              {design.hero.subtitle}
-            </p>
-          )}
-        </div>
-      </section>
-
       {navSections.length > 1 && (
         <>
           <style>{`
