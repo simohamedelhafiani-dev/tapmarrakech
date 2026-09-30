@@ -7,6 +7,7 @@ import ItemEditor from '@/components/admin/menu/ItemEditor';
 import MenuPreview from '@/components/admin/menu/MenuPreview';
 import MenuConfigurator, {
   type MenuDesignDraft,
+  type MenuNavigationMode,
   type MenuTemplate,
 } from '@/components/admin/menu/MenuConfigurator';
 
@@ -17,6 +18,7 @@ type MenuStudioProps = {
 type RawDesign = Record<string, unknown>;
 
 const TEMPLATE_VALUES: MenuTemplate[] = ['editorial', 'luxury', 'cards', 'dark'];
+const NAVIGATION_VALUES: MenuNavigationMode[] = ['scroll', 'book', 'app'];
 
 const normalizeObject = (value: unknown): RawDesign =>
   value && typeof value === 'object' && !Array.isArray(value) ? (value as RawDesign) : {};
@@ -56,6 +58,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
 
   const [draft, setDraft] = useState<MenuDesignDraft>({
     template: 'editorial',
+    navigation: 'scroll',
     wallpaperUrl: null,
     wallpaperFile: null,
     wallpaperObjectUrl: null,
@@ -85,6 +88,10 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
     const template: MenuTemplate = TEMPLATE_VALUES.includes(rawTemplate as MenuTemplate)
       ? (rawTemplate as MenuTemplate)
       : 'editorial';
+    const rawNavigation = raw.navigation_mode;
+    const navigation: MenuNavigationMode = NAVIGATION_VALUES.includes(rawNavigation as MenuNavigationMode)
+      ? (rawNavigation as MenuNavigationMode)
+      : 'scroll';
     const wallpaperUrl = typeof raw.background_image_url === 'string' ? raw.background_image_url : null;
     const overlayOpacity =
       typeof raw.overlay_opacity === 'number'
@@ -95,7 +102,8 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
     setEstablishmentName(data?.name ?? '');
     setDraft({
       template,
-      wallpaperUrl,
+      navigation,
+      wallpaperUrl:
       wallpaperFile: null,
       wallpaperObjectUrl: null,
       wallpaperRemoved: false,
