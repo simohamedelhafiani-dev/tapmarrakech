@@ -1454,8 +1454,8 @@ function AIPremiumMenu({
 
   const palette = wallpaper
     ? {
-        page: 'bg-transparent text-white',
-        body: 'bg-transparent',
+        page: 'bg-[#f0ece2] text-white',
+        body: 'bg-[#f0ece2]',
         muted: 'text-white/65',
         accent: 'text-gold',
         line: 'border-white/15',
@@ -1510,10 +1510,10 @@ function AIPremiumMenu({
   };
 
   return (
-    <div className={`relative mt-2 overflow-hidden ${wallpaper ? 'bg-transparent' : palette.page}`}>
+    <div className={`relative mt-2 overflow-hidden ${palette.page}`}>
       <section
         className={`relative overflow-hidden px-5 pb-10 pt-7 ${
-          wallpaper ? 'bg-black/20' : style === 'dark' ? 'bg-[#0d241e]' : 'bg-[#173d32]'
+          style === 'dark' ? 'bg-[#0d241e]' : 'bg-[#173d32]'
         }`}
       >
         <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-gold/10 blur-3xl" />
@@ -1536,7 +1536,7 @@ function AIPremiumMenu({
 
       {navSections.length > 1 && (
         <div className={`sticky top-0 z-20 overflow-x-auto border-b px-5 py-3 scrollbar-hide ${
-          wallpaper ? 'border-white/10 bg-black/45' : 'border-ink/10 bg-[#f0ece2]/95'
+          'border-ink/10 bg-[#f0ece2]/95'
         }`}>
           <div className="flex min-w-max gap-2">
             {navSections.map((section: any, index: number) => (
@@ -1560,7 +1560,7 @@ function AIPremiumMenu({
         </div>
       )}
 
-      <div className={`relative px-5 pb-14 pt-8 ${wallpaper ? 'bg-transparent' : palette.body}`}>
+      <div className={`relative px-5 pb-14 pt-8 ${palette.body}`}>
         {(design.intro?.title || design.intro?.text) && (
           <section className={`mb-10 rounded-[28px] border p-5 shadow-xl ${palette.card}`}>
             {design.intro.title && (
@@ -1601,9 +1601,22 @@ function AIPremiumMenu({
               <section
                 id={`ai-menu-section-${index}`}
                 key={`${section.type}-${section.category_id ?? index}-${index}`}
-                className="scroll-mt-20"
+                className={`scroll-mt-20 ${wallpaper ? 'relative overflow-hidden rounded-[30px] border border-white/10 p-5 shadow-2xl' : ''}`}
+                style={
+                  wallpaper
+                    ? {
+                        backgroundImage: `url("${wallpaper}")`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                      }
+                    : undefined
+                }
               >
-                <div className="mb-5">
+                {wallpaper && (
+                  <div className="absolute inset-0 bg-black/45" aria-hidden="true" />
+                )}
+                <div className={`relative ${wallpaper ? 'z-10' : ''}`}>
+                  <div className="mb-5">
                   <div className="flex items-center gap-3">
                     <span className={`h-px w-8 ${style === 'dark' ? 'bg-gold/50' : 'bg-gold'}`} />
                     <p className={`text-[8px] font-bold uppercase tracking-[0.3em] ${palette.accent}`}>
@@ -1618,9 +1631,9 @@ function AIPremiumMenu({
                       {section.subtitle}
                     </p>
                   )}
-                </div>
+                  </div>
 
-                {layout === 'feature' ? (
+                  {layout === 'feature' ? (
                   <div className="space-y-4">
                     {sectionItems.slice(0, 4).map((item) => (
                       <article
@@ -1731,7 +1744,8 @@ function AIPremiumMenu({
                       </article>
                     ))}
                   </div>
-                )}
+                  )}
+                </div>
               </section>
             );
           })}
