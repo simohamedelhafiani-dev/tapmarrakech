@@ -1,5 +1,7 @@
 import { useRef, useState } from 'react';
 import { Check, ChevronDown, ImagePlus, Loader2, Sparkles, Upload, X, Wand2 } from 'lucide-react';
+import MenuPreview from '@/components/admin/menu/MenuPreview';
+import type { MenuCategory, MenuItem } from '@/hooks/useMenuManager';
 
 export type MenuTemplate = 'editorial' | 'luxury' | 'cards' | 'dark';
 export type MenuNavigationMode = 'scroll' | 'book' | 'app';
@@ -24,6 +26,9 @@ type MenuConfiguratorProps = {
   onPublish: () => void;
   onGenerateAi: () => void;
   aiCandidates: Array<{ id: string; design: Record<string, unknown>; template: MenuTemplate }>;
+  categories: MenuCategory[];
+  itemsByCategory: Record<string, MenuItem[]>;
+  establishmentName?: string;
   onApplyAiCandidate: (candidate: { design: Record<string, unknown>; template: MenuTemplate }) => void;
 };
 
@@ -49,6 +54,9 @@ export default function MenuConfigurator({
   onPublish,
   onGenerateAi,
   aiCandidates,
+  categories,
+  itemsByCategory,
+  establishmentName,
   onApplyAiCandidate,
 }: MenuConfiguratorProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -122,41 +130,53 @@ export default function MenuConfigurator({
         </button>
 
         {aiCandidates.length > 0 && (
-          <div className="mt-4 grid gap-3 lg:grid-cols-3">
+          <div className="mt-4 grid gap-4 xl:grid-cols-3">
             {aiCandidates.map((candidate, index) => {
+              const previewDraft: MenuDesignDraft = {
+                ...draft,
+                template: candidate.template,
+                aiDesign: candidate.design,
+                wallpaperFile: null,
+                wallpaperObjectUrl: null,
+                wallpaperRemoved: false,
+              };
+
               const hero = candidate.design.hero as { title?: string; subtitle?: string | null } | undefined;
               const sections = Array.isArray(candidate.design.sections) ? candidate.design.sections : [];
 
               return (
-                <article key={candidate.id} className="rounded-2xl border border-ink/8 bg-white p-4 shadow-sm">
-                  <div className="flex items-center justify-between gap-2">
+                <article key={candidate.id} className="overflow-hidden rounded-2xl border border-ink/8 bg-white shadow-sm">
+                  <div className="flex items-center justify-between gap-2 border-b border-ink/5 px-3 py-2.5">
                     <span className="rounded-full bg-gold/10 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-gold">
                       Proposition {index + 1}
                     </span>
                     <span className="text-[9px] font-semibold uppercase text-ink/35">{candidate.template}</span>
                   </div>
 
-                  <h5 className="mt-3 text-sm font-semibold text-forest">
-                    {hero?.title || 'Direction créative'}
-                  </h5>
-                  <p className="mt-1 min-h-8 text-[10px] leading-4 text-ink/40">
-                    {hero?.subtitle || 'Une proposition générée à partir de la structure actuelle.'}
-                  </p>
-
-                  <div className="mt-3 flex items-center justify-between text-[9px] text-ink/35">
-                    <span>{sections.length} section{sections.length > 1 ? 's' : ''}</span>
-                    <span className="font-semibold text-forest">Prête à tester</span>
+                  <div className="p-2">
+                    <MenuPreview
+                      establishmentName={establishmentName}
+                      categories={categories}
+                      itemsByCategory={itemsByCategory}
+                      draft={previewDraft}
+                      compact
+                    />
                   </div>
 
-                  <button
-                    type="button"
-                    disabled={publishing}
-                    onClick={() => onApplyAiCandidate(candidate)}
-                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-forest/15 bg-forest/5 px-3 py-2.5 text-[10px] font-semibold text-forest transition hover:border-gold hover:bg-gold/10"
-                  >
-                    <Check size={13} />
-                    Utiliser cette proposition
-                  </button>
+                  <div className="border-t border-ink/5 p-3">
+                    <h5 className="text-xs font-semibold text-forest">{hero?.title || 'Direction créative'}</h5>
+                    <p className="mt-1 min-h-8 text-[9px] leading-4 text-ink/40">{hero?.subtitle || 'Proposition générée par l’IA.'}</p>
+                    <div className="mt-2 text-[9px] text-ink/35">{sections.length} section{sections.length > 1 ? 's' : ''}</div>
+                    <button
+                      type="button"
+                      disabled={publishing}
+                      onClick={() => onApplyAiCandidate(candidate)}
+                      className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-forest px-3 py-2.5 text-[10px] font-semibold text-white transition hover:bg-forest/90 disabled:opacity-50"
+                    >
+                      <Check size={13} />
+                      Utiliser cette proposition
+                    </button>
+                  </div>
                 </article>
               );
             })}
