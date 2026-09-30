@@ -85,6 +85,21 @@ export default function ItemManager({ establishmentId, categories, itemsByCatego
         </div>
       </div>
       {error && <div className='mx-5 mt-4 rounded-xl bg-red-50 px-4 py-3 text-xs text-red-700'>{error}</div>}
+      {(adding || editingId) && (
+        <div className='mx-5 mt-5 rounded-2xl border border-forest/10 bg-white p-5 shadow-sm sm:mx-6'>
+  <div className='flex items-center justify-between'><h4 className='text-sm font-semibold text-forest'>{editingId ? 'Modifier l’article' : 'Nouvel article'}</h4><button type='button' onClick={reset}><X size={16} /></button></div>
+  <div className='mt-4 grid gap-3 md:grid-cols-2'>
+    <input value={form.name} onChange={e => setForm({...form, name:e.target.value})} placeholder='Nom de l’article' className='rounded-xl border border-ink/10 px-4 py-3 text-sm' />
+    <input value={form.price} onChange={e => setForm({...form, price:e.target.value})} placeholder='Prix (DH)' type='number' min='0' className='rounded-xl border border-ink/10 px-4 py-3 text-sm' />
+    <textarea value={form.description} onChange={e => setForm({...form, description:e.target.value})} placeholder='Description' className='min-h-24 rounded-xl border border-ink/10 px-4 py-3 text-sm md:col-span-2' />
+    <select value={selectedCategoryId} onChange={e => setSelectedCategoryId(e.target.value)} className='rounded-xl border border-ink/10 px-4 py-3 text-sm'>{activeCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
+    {editingId && <input type='file' accept='image/png,image/jpeg,image/webp' onChange={e => e.target.files?.[0] && void upload(e.target.files[0])} disabled={uploading} className='rounded-xl border border-ink/10 bg-white px-3 py-2 text-xs' />}
+  </div>
+  {form.image_url && <img src={form.image_url} alt='' className='mt-3 h-24 w-24 rounded-xl object-cover' />}
+  <div className='mt-4 flex justify-end gap-2'><button type='button' onClick={reset} className='rounded-xl bg-[#f7f7f3] px-4 py-2.5 text-xs font-semibold'>Annuler</button><button type='button' onClick={() => void save()} disabled={saving || uploading} className='inline-flex items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white'><Check size={14} /> Enregistrer</button></div>
+        </div>
+      )}
+
       <div className='space-y-2 p-5 sm:p-6'>
         {selectedItems.length === 0 && !adding && <div className='rounded-2xl border border-dashed border-ink/10 bg-[#f7f7f3] p-8 text-center text-xs text-ink/40'>Aucun article dans cette catégorie.</div>}
         {selectedItems.map((item, index) => <div key={item.id} className='flex flex-col gap-3 rounded-2xl border border-ink/5 bg-[#f7f7f3] p-4 md:flex-row md:items-center'>
@@ -93,18 +108,7 @@ export default function ItemManager({ establishmentId, categories, itemsByCatego
           <div className='min-w-0 flex-1'><p className='truncate text-sm font-semibold text-forest'>{item.name}</p><p className='text-[11px] text-ink/40'>{item.price} DH · {item.active ? 'Actif' : 'Inactif'}</p>{item.description && <p className='mt-1 truncate text-xs text-ink/45'>{item.description}</p>}</div>
           <div className='flex gap-2'><button type='button' onClick={() => startEdit(item)} disabled={saving} className='inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[11px] font-semibold text-forest'><Pencil size={13} /> Modifier</button><button type='button' onClick={() => void onToggleActive(item.id)} disabled={saving} className={item.active ? 'rounded-full bg-green-100 px-3 py-1.5 text-[10px] font-semibold text-green-700' : 'rounded-full bg-ink/10 px-3 py-1.5 text-[10px] font-semibold text-ink/45'}>{item.active ? 'Actif' : 'Inactif'}</button><button type='button' onClick={() => void onDelete(item.id)} disabled={saving} className='grid h-8 w-8 place-items-center rounded-lg bg-white text-ink/35 hover:text-red-600'><Trash2 size={14} /></button></div>
         </div>)}
-        {(adding || editingId) && <div className='rounded-2xl border border-forest/10 bg-white p-5 shadow-sm'>
-          <div className='flex items-center justify-between'><h4 className='text-sm font-semibold text-forest'>{editingId ? 'Modifier l’article' : 'Nouvel article'}</h4><button type='button' onClick={reset}><X size={16} /></button></div>
-          <div className='mt-4 grid gap-3 md:grid-cols-2'>
-            <input value={form.name} onChange={e => setForm({...form, name:e.target.value})} placeholder='Nom de l’article' className='rounded-xl border border-ink/10 px-4 py-3 text-sm' />
-            <input value={form.price} onChange={e => setForm({...form, price:e.target.value})} placeholder='Prix (DH)' type='number' min='0' className='rounded-xl border border-ink/10 px-4 py-3 text-sm' />
-            <textarea value={form.description} onChange={e => setForm({...form, description:e.target.value})} placeholder='Description' className='min-h-24 rounded-xl border border-ink/10 px-4 py-3 text-sm md:col-span-2' />
-            <select value={selectedCategoryId} onChange={e => setSelectedCategoryId(e.target.value)} className='rounded-xl border border-ink/10 px-4 py-3 text-sm'>{activeCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
-            {editingId && <input type='file' accept='image/png,image/jpeg,image/webp' onChange={e => e.target.files?.[0] && void upload(e.target.files[0])} disabled={uploading} className='rounded-xl border border-ink/10 bg-white px-3 py-2 text-xs' />}
-          </div>
-          {form.image_url && <img src={form.image_url} alt='' className='mt-3 h-24 w-24 rounded-xl object-cover' />}
-          <div className='mt-4 flex justify-end gap-2'><button type='button' onClick={reset} className='rounded-xl bg-[#f7f7f3] px-4 py-2.5 text-xs font-semibold'>Annuler</button><button type='button' onClick={() => void save()} disabled={saving || uploading} className='inline-flex items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white'><Check size={14} /> Enregistrer</button></div>
-        </div>}
+
       </div>
     </section>
   );
