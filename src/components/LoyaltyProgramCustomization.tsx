@@ -531,7 +531,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                 </div>
               </div>
 
-              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <div className={activeTab === 'Structure' ? 'mt-5 grid gap-3 sm:grid-cols-2' : 'hidden'}>
                 <label className="block text-xs font-medium text-ink/50">Titre<input value={design.design_config.front_title} onChange={e => updateConfig({front_title:e.target.value})} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm"/></label>
                 <label className="block text-xs font-medium text-ink/50">Sous-titre<input value={design.design_config.front_subtitle} onChange={e => updateConfig({front_subtitle:e.target.value})} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm"/></label>
               </div>
@@ -569,7 +569,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
               </div>
 
                 </div>
-              <div id="loyalty-rewards" className="mt-4 scroll-mt-6 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
+              <div id="loyalty-rewards" className={activeTab === 'Structure' ? 'mt-4 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4' : 'hidden'}>
                 {cardMode === 'STAMP' ? (
                   <div className="grid gap-3 sm:grid-cols-3">
                     <label className="text-xs text-ink/50">Nombre de tampons<input type="number" min="1" max="12" value={stampGoal} onChange={e=>setStampGoal(e.target.value)} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5"/></label>
@@ -630,7 +630,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                 </div>
               )}
 
-              <div id="loyalty-content" className="mt-5 scroll-mt-6 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
+              <div id="loyalty-content" className={activeTab === 'Structure' ? 'mt-5 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4' : 'hidden'}>
                 <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Contenu de la carte</p>
                 <p className="mt-1 text-[10px] text-ink/45">Modifie les avantages et les offres affichés au client.</p>
                 <p className="mt-4 text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Avantages & offres</p>
