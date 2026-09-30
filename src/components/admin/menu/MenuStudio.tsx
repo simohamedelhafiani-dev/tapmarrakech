@@ -48,6 +48,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
   const [loadingDesign, setLoadingDesign] = useState(true);
   const [publishing, setPublishing] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
+  const [aiCandidates, setAiCandidates] = useState<Array<{ id: string; design: Record<string, unknown>; template: MenuTemplate }>>([]);
   const [designError, setDesignError] = useState<string | null>(null);
   const [publishedSnapshot, setPublishedSnapshot] = useState<{
     template: MenuTemplate;
@@ -183,33 +184,62 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
 
   const generateAiDesign = async () => {
     if (!establishmentId || aiLoading) return;
+
     setAiLoading(true);
     setDesignError(null);
+    setAiCandidates([]);
 
     try {
-      const { data, error } = await supabase.functions.invoke('design-menu', {
-        body: {
-          establishment_id: establishmentId,
-          menu: buildMenuForAi(),
-        },
-      });
+      const variants = [
+        { id: 'variant-1', label: 'Éditorial' },
+        { id: 'variant-2', label: 'Premium' },
+        { id: 'variant-3', label: 'Créatif' },
+      ];
 
-      if (error) throw error;
+      const results = await Promise.all(
+        variants.map(async variant => {
+          const { data, error } = await supabase.functions.invoke('design-menu', {
+            body: {
+              establishment_id: establishmentId,
+              menu: buildMenuForAi(),
+              variant: variant.label,
+            },
+          });
 
-      const ai = extractAiDesign(data?.design);
-      if (!ai) throw new Error('L’IA n’a pas retourné de design exploitable.');
+          if (error) throw error;
 
-      const mappedTemplate = mapAiStyleToTemplate(ai.style);
-      setDraft(current => ({
-        ...current,
-        aiDesign: ai,
-        ...(mappedTemplate ? { template: mappedTemplate } : {}),
-      }));
+          const ai = extractAiDesign(data?.design);
+          if (!ai) throw new Error('Une variante IA est vide ou inexploitable.');
+
+          const mappedTemplate = mapAiStyleToTemplate(ai.style) ?? 'editorial';
+
+          return {
+            id: variant.id,
+            design: ai,
+            template: mappedTemplate,
+          };
+        }),
+      );
+
+      setAiCandidates(results);
     } catch (cause) {
-      setDesignError(cause instanceof Error ? cause.message : 'Impossible de générer le design IA.');
+      setDesignError(
+        cause instanceof Error
+          ? cause.message
+          : 'Impossible de générer les variantes IA.',
+      );
     } finally {
       setAiLoading(false);
     }
+  };
+
+  const applyAiCandidate = (candidate: { design: Record<string, unknown>; template: MenuTemplate }) => {
+    setDraft(current => ({
+      ...current,
+      aiDesign: candidate.design,
+      template: candidate.template,
+    }));
+    setAiCandidates([]);
   };
 
   const publish = async () => {
@@ -392,6 +422,8 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
                 onChange={changeDraft}
                 onPublish={() => void publish()}
                 onGenerateAi={() => void generateAiDesign()}
+                aiCandidates={aiCandidates}
+                onApplyAiCandidate={applyAiCandidate}
               />
             </div>
           )}
