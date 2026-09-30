@@ -82,29 +82,20 @@ export function useMenuManager(establishmentId: string | null) {
     mutationVersionRef.current += 1;
     setSaving(true);setError(null);
     try {
-      const orderedCategories=normalizeCategoryOrder(categories);
-      for(let index=0;index<orderedCategories.length;index++){
-        const {error:e}=await supabase.from('menu_categories').update({display_order:index})
-          .eq('id',orderedCategories[index].id).eq('establishment_id',establishmentId);
-        if(e)throw e;
-      }
-      const orderedItems=normalizeItemOrder(items);
-      const groups=new Map<string,MenuItem[]>();
-      for(const item of orderedItems) groups.set(item.category_id,[...(groups.get(item.category_id)??[]),item]);
-      for(const group of groups.values()) for(let index=0;index<group.length;index++){
-        const {error:e}=await supabase.from('menu_items').update({display_order:index})
-          .eq('id',group[index].id).eq('establishment_id',establishmentId);
-        if(e)throw e;
-      }
+      const { data, error: rpcError } = await supabase.rpc('reindex_menu', {
+        p_establishment_id: establishmentId,
+      });
+      if(rpcError)throw rpcError;
       await load();
-      console.log('[HOOK] Result: REINDEX -> SUCCESS');
-      console.log('[MenuManager] ACTION: REINDEX -> RESULT: SUCCESS (All aligned)');
+      console.log('[HOOK] Result: REINDEX -> SUCCESS', data);
+      console.log('[MenuManager] ACTION: REINDEX -> RESULT: SUCCESS (Server transaction)', data);
     } catch(cause) {
       setError(cause instanceof Error?cause.message:'Impossible de réindexer le menu.');
       console.error('[HOOK] Result: REINDEX -> ERROR', cause);
       console.error('[MenuManager] ACTION: REINDEX -> RESULT: ERROR',cause);
+      throw cause;
     } finally { setSaving(false); }
-  },[categories,establishmentId,items,load]);
+  },[categories.length,establishmentId,items.length,load]);
 
   const addCategory=useCallback(async(input:NewCategory)=>{
     console.log('[HOOK] Executing addCategory()', { establishmentId, input });
