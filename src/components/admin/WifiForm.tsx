@@ -119,7 +119,7 @@ export default function WifiForm({ establishmentId }: WifiFormProps) {
               Configure le réseau qui sera proposé aux clients. Le QR est généré localement à partir des informations saisies.
             </p>
           </div>
-          <span className={\`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-semibold \${active ? 'bg-forest/5 text-forest' : 'bg-ink/5 text-ink/45'}\`}>
+          <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-semibold ${active ? 'bg-forest/5 text-forest' : 'bg-ink/5 text-ink/45'}`}>
             <Wifi size={13} />
             {active ? 'Actif' : 'Désactivé'}
           </span>
