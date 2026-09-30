@@ -81,9 +81,16 @@ const isValidPhone = (value: string) =>
   /^\+?[0-9][0-9 .()-]{6,19}$/.test(value.trim());
 
 const isValidUrl = (value: string) => {
+  const trimmed = value.trim();
+  if (!trimmed) return false;
+
   try {
-    const url = new URL(value.trim());
-    return url.protocol === 'http:' || url.protocol === 'https:';
+    const candidate = /^https?:\\/\\//i.test(trimmed)
+      ? trimmed
+      : \`https://${trimmed}\\`;
+    const url = new URL(candidate);
+    return (url.protocol === 'http:' || url.protocol === 'https:') &&
+      (url.hostname === 'localhost' || url.hostname.includes('.'));
   } catch {
     return false;
   }
