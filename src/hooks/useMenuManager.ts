@@ -78,7 +78,6 @@ export function useMenuManager(establishmentId: string | null) {
   const reindexAll=useCallback(async()=>{
     if(!establishmentId)return;
     mutationVersionRef.current += 1;
-    mutationVersionRef.current += 1;
     setSaving(true);setError(null);
     try {
       const orderedCategories=normalizeCategoryOrder(categories);
