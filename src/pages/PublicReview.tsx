@@ -1510,22 +1510,7 @@ function AIPremiumMenu({
   };
 
   return (
-    <div
-      className="relative mt-2 overflow-hidden"
-      style={
-        wallpaper
-          ? {
-              backgroundImage: `url("${wallpaper}")`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center top',
-              backgroundAttachment: 'fixed',
-            }
-          : undefined
-      }
-    >
-      {wallpaper && (
-        <div className="pointer-events-none absolute inset-0 bg-black/30" aria-hidden="true" />
-      )}
+    <div className="relative mt-2 overflow-hidden">
       <section className="relative px-5 pb-10 pt-7">
         <div className="relative">
           <p className="text-[9px] font-bold uppercase tracking-[0.34em] text-gold">
@@ -1557,7 +1542,6 @@ function AIPremiumMenu({
           `}</style>
 <div
           className="menu-category-scrollbar sticky top-0 z-20 overflow-x-auto border-b border-white/10 px-5 py-3"
-          style={wallpaper ? { backgroundColor: 'transparent' } : { backgroundColor: '#173d32' }}
         >
           <div className="flex min-w-max gap-2">
             {navSections.map((section: any, index: number) => (
@@ -1629,9 +1613,9 @@ function AIPremiumMenu({
               <section
                 id={`ai-menu-section-${index}`}
                 key={`${section.type}-${section.category_id ?? index}-${index}`}
-                className={`scroll-mt-20 ${wallpaper ? 'relative rounded-[30px] border border-white/10 bg-black/20 p-5 shadow-xl backdrop-blur-[1px]' : ''}`}
+                className={`scroll-mt-20 ${wallpaper ? 'relative rounded-[30px] border border-white/10 p-5' : ''}`}
               >
-                <div className={`relative ${wallpaper ? 'z-10' : ''}`}>
+                <div className="relative">
                   <div className="mb-5">
                   <div className="flex items-center gap-3">
                     <span className={`h-px w-8 ${style === 'dark' ? 'bg-gold/50' : 'bg-gold'}`} />
