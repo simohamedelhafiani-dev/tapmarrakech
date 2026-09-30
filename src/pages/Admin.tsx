@@ -49,6 +49,7 @@ import RecentLoyaltyCustomers from '@/components/admin/RecentLoyaltyCustomers';
 import EstablishmentPerformanceTable from '@/components/admin/EstablishmentPerformanceTable';
 import EstablishmentsSection from '@/components/admin/EstablishmentsSection';
 import ProfileForm from '@/components/admin/ProfileForm';
+import WifiForm from '@/components/admin/WifiForm';
 import { useRecentActivity } from '@/hooks/useRecentActivity';
 import { useRecentLoyaltyCustomers } from '@/hooks/useRecentLoyaltyCustomers';
 import { useAdminOverviewStats } from '@/hooks/useAdminOverviewStats';
@@ -1197,7 +1198,6 @@ function EstablishmentWorkspace({
 
   const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState<any>(establishment);
-  const [wifi, setWifi] = useState({ ssid: '', password: '', active: true });
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
   const [promotions, setPromotions] = useState<Promotion[]>([]);
@@ -1241,10 +1241,6 @@ function EstablishmentWorkspace({
     if (tab === 'public') {
       const { data } = await supabase.from('establishments').select('*').eq('id', establishment.id).maybeSingle();
       if (data) setProfile(data);
-    }
-    if (tab === 'wifi') {
-      const { data } = await supabase.from('establishment_wifi').select('ssid,wifi_password,active').eq('establishment_id', establishment.id).maybeSingle();
-      if (data) setWifi({ ssid: data.ssid ?? '', password: data.wifi_password ?? '', active: data.active ?? true });
     }
     if (tab === 'menu') {
       const [{ data: c }, { data: i }, { data: establishmentRow }] = await Promise.all([
@@ -1372,12 +1368,6 @@ function EstablishmentWorkspace({
       mounted = false;
     };
   }, [establishment.id]);
-
-  const saveWifi = async () => {
-    setSaving(true);
-    const { error } = await supabase.from('establishment_wifi').upsert({ establishment_id: establishment.id, ssid: wifi.ssid, wifi_password: wifi.password || null, active: wifi.active }, { onConflict: 'establishment_id' });
-    setSaving(false); if (error) return alert(error.message); alert('Wi-Fi enregistré.');
-  };
 
   const saveTemplates = async () => {
     setSaving(true);
@@ -1879,7 +1869,7 @@ function EstablishmentWorkspace({
           onSaved={onReload}
         />
       )}
-      {tab === 'wifi' && <div className="max-w-xl rounded-2xl border border-ink/5 bg-white p-6 shadow-sm"><h3 className="text-lg font-semibold">Wi-Fi client</h3><p className="mt-1 mb-5 text-xs text-ink/45">Ces informations alimenteront le module Wi-Fi de la page publique.</p><div className="space-y-4"><label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">Nom du réseau</span><input value={wifi.ssid} onChange={(e) => setWifi({ ...wifi, ssid: e.target.value })} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></label><label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">Mot de passe</span><input value={wifi.password} onChange={(e) => setWifi({ ...wifi, password: e.target.value })} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></label><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={wifi.active} onChange={(e) => setWifi({ ...wifi, active: e.target.checked })} /> Module actif</label><button disabled={saving} onClick={saveWifi} className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white">Enregistrer le Wi-Fi</button></div></div>}
+      {tab === 'wifi' && <WifiForm establishmentId={establishment.id} />}
 
       {tab === 'menu' && <div className="space-y-5">
         <div className="rounded-2xl border border-forest/10 bg-white p-6 shadow-sm">
