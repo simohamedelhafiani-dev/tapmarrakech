@@ -48,6 +48,7 @@ import EvolutionCharts from '@/components/admin/EvolutionCharts';
 import RecentLoyaltyCustomers from '@/components/admin/RecentLoyaltyCustomers';
 import EstablishmentPerformanceTable from '@/components/admin/EstablishmentPerformanceTable';
 import EstablishmentsSection from '@/components/admin/EstablishmentsSection';
+import ProfileForm from '@/components/admin/ProfileForm';
 import { useRecentActivity } from '@/hooks/useRecentActivity';
 import { useRecentLoyaltyCustomers } from '@/hooks/useRecentLoyaltyCustomers';
 import { useAdminOverviewStats } from '@/hooks/useAdminOverviewStats';
@@ -1237,7 +1238,7 @@ function EstablishmentWorkspace({
   const businessType = businessTypes.find((x) => x.id === establishment.ai_business_type_id)?.name ?? profile.business_type ?? 'Établissement';
 
   const loadTab = async () => {
-    if (tab === 'profile' || tab === 'public') {
+    if (tab === 'public') {
       const { data } = await supabase.from('establishments').select('*').eq('id', establishment.id).maybeSingle();
       if (data) setProfile(data);
     }
@@ -1371,22 +1372,6 @@ function EstablishmentWorkspace({
       mounted = false;
     };
   }, [establishment.id]);
-
-  const saveProfile = async () => {
-    setSaving(true);
-    const payload = {
-      name: profile.name, slug: profile.slug, business_type: profile.business_type || null, ai_business_type_id: profile.ai_business_type_id || null, address: profile.address || null,
-      city: profile.city || null, phone: profile.phone || null, email: profile.email || null, website_url: profile.website_url || null,
-      description: profile.description || null, instagram_url: profile.instagram_url || null, facebook_url: profile.facebook_url || null,
-      tiktok_url: profile.tiktok_url || null, whatsapp_number: profile.whatsapp_number || null,
-      page_template_id: profile.page_template_id || null, menu_template_id: profile.menu_template_id || null,
-      logo_url: profile.logo_url || null,
-    };
-    const { error } = await supabase.from('establishments').update(payload).eq('id', establishment.id);
-    setSaving(false);
-    if (error) return alert(error.message);
-    await onReload(); alert('Établissement enregistré.');
-  };
 
   const saveWifi = async () => {
     setSaving(true);
@@ -1812,10 +1797,6 @@ function EstablishmentWorkspace({
     { id: 'reviews', label: 'Avis' }, { id: 'loyalty', label: 'Fidélité' }, { id: 'team', label: 'Équipe' }, { id: 'analytics', label: 'Analytics' }, { id: 'public', label: 'Liens publics' },
   ];
 
-  const field = (label: string, key: string, type = 'text') => (
-    <label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">{label}</span><input type={type} value={profile[key] ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, [key]: e.target.value }))} className="w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm outline-none focus:border-forest" /></label>
-  );
-
   return (
     <div>
       <div className="relative mb-6 overflow-hidden rounded-[30px] border border-ink/5 bg-white p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] sm:p-8">
@@ -1877,31 +1858,13 @@ function EstablishmentWorkspace({
         {tabs.map((x) => <button key={x.id} onClick={() => setTab(x.id)} className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-xs font-semibold ${tab === x.id ? 'bg-forest text-white' : 'text-ink/55 hover:bg-[#f7f7f3]'}`}>{x.label}</button>)}
       </div>
 
-      {tab === 'profile' && <div className="space-y-5">
-        <div className="rounded-[26px] border border-ink/5 bg-white p-6 shadow-[0_12px_40px_rgba(15,23,42,0.045)]">
-          <div className="mb-5 flex items-center justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Identité</p><h3 className="mt-1 text-lg font-semibold text-forest">Informations de l’établissement</h3></div><span className="rounded-full bg-forest/5 px-3 py-1.5 text-[10px] font-semibold text-forest">Profil</span></div>
-          <div className="grid gap-4 md:grid-cols-2">
-        {field('Nom', 'name')}{field('Slug public', 'slug')}{field('Adresse', 'address')}{field('Ville', 'city')}{field('Téléphone', 'phone')}{field('Email', 'email', 'email')}{field('Site web', 'website_url')}{field('WhatsApp', 'whatsapp_number')}{field('Instagram', 'instagram_url')}{field('Facebook', 'facebook_url')}{field('TikTok', 'tiktok_url')}
-        <label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">Type</span><select value={profile.ai_business_type_id ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, ai_business_type_id: e.target.value || null }))} className="w-full rounded-xl border border-ink/10 bg-[#fbfbf8] px-3 py-3 text-sm outline-none focus:border-forest/30">{businessTypes.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
-        <label className="block md:col-span-2"><span className="mb-1 block text-xs font-medium text-ink/50">Description</span><textarea value={profile.description ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, description: e.target.value }))} rows={4} className="w-full rounded-xl border border-ink/10 bg-[#fbfbf8] px-3 py-3 text-sm outline-none focus:border-forest/30" /></label>
-        <div className="md:col-span-2 rounded-2xl border border-ink/5 bg-[#f7f7f3] p-5">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center">
-            <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-2xl bg-forest text-2xl font-semibold text-gold">
-              {profile.logo_url ? <img src={profile.logo_url} alt={`Logo ${profile.name ?? establishment.name}`} className="h-full w-full object-cover" /> : (profile.name ?? establishment.name)?.[0]?.toUpperCase()}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-forest">Logo de l’établissement</p>
-              <p className="mt-1 text-xs leading-5 text-ink/45">Le même logo est utilisé par la page publique et les espaces établissement lorsque l’URL est renseignée.</p>
-              <input value={profile.logo_url ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, logo_url: e.target.value }))} placeholder="https://.../logo.png" className="mt-3 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm outline-none focus:border-forest" />
-              {profile.logo_url && <button type="button" onClick={() => setProfile((v: any) => ({ ...v, logo_url: null }))} className="mt-2 text-xs font-medium text-red-600">Supprimer le logo</button>}
-            </div>
-          </div>
-        </div>
-        <div className="md:col-span-2"><button disabled={saving} onClick={saveProfile} className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white">{saving ? 'Enregistrement...' : 'Enregistrer le profil'}</button></div>
-          </div>
-        </div>
-      </div>}
-
+      {tab === 'profile' && (
+        <ProfileForm
+          engine={establishmentProfileEngine}
+          businessTypes={businessTypes}
+          onSaved={onReload}
+        />
+      )}
       {tab === 'wifi' && <div className="max-w-xl rounded-2xl border border-ink/5 bg-white p-6 shadow-sm"><h3 className="text-lg font-semibold">Wi-Fi client</h3><p className="mt-1 mb-5 text-xs text-ink/45">Ces informations alimenteront le module Wi-Fi de la page publique.</p><div className="space-y-4"><label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">Nom du réseau</span><input value={wifi.ssid} onChange={(e) => setWifi({ ...wifi, ssid: e.target.value })} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></label><label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">Mot de passe</span><input value={wifi.password} onChange={(e) => setWifi({ ...wifi, password: e.target.value })} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></label><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={wifi.active} onChange={(e) => setWifi({ ...wifi, active: e.target.checked })} /> Module actif</label><button disabled={saving} onClick={saveWifi} className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white">Enregistrer le Wi-Fi</button></div></div>}
 
       {tab === 'menu' && <div className="space-y-5">
