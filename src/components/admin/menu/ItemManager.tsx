@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Check, ImagePlus, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import type { MenuCategory, MenuItem } from '@/hooks/useMenuManager';
@@ -24,6 +24,18 @@ export default function ItemManager({ establishmentId, categories, itemsByCatego
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const selectedItems = selectedCategoryId ? (itemsByCategory[selectedCategoryId] ?? []) : [];
+
+  useEffect(() => {
+    if (!activeCategories.length) {
+      setSelectedCategoryId('');
+      return;
+    }
+    if (!activeCategories.some(category => category.id === selectedCategoryId)) {
+      setSelectedCategoryId(activeCategories[0].id);
+      setEditingId(null);
+      setAdding(false);
+    }
+  }, [activeCategories, selectedCategoryId]);
 
   const reset = () => { setEditingId(null); setAdding(false); setForm({ name: '', description: '', price: '', image_url: '' }); };
   const startEdit = (item: MenuItem) => { setEditingId(item.id); setAdding(false); setSelectedCategoryId(item.category_id); setForm({ name: item.name, description: item.description ?? '', price: String(item.price ?? ''), image_url: item.image_url ?? '' }); setError(null); };
