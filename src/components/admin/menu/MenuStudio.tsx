@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Palette, Wrench } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useMenuManager } from '@/hooks/useMenuManager';
 import CategorySidebar from '@/components/admin/menu/CategorySidebar';
@@ -35,8 +36,11 @@ const extractAiDesign = (value: unknown): Record<string, unknown> | null => {
   return Object.keys(raw).length ? raw : null;
 };
 
+type StudioTab = 'structure' | 'design';
+
 export default function MenuStudio({ establishmentId }: MenuStudioProps) {
   const menu = useMenuManager(establishmentId);
+  const [activeTab, setActiveTab] = useState<StudioTab>('structure');
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [establishmentName, setEstablishmentName] = useState('');
   const [loadingDesign, setLoadingDesign] = useState(true);
@@ -286,6 +290,11 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
     }
   };
 
+  const tabs: Array<{ id: StudioTab; label: string; icon: typeof Wrench }> = [
+    { id: 'structure', label: 'Structure', icon: Wrench },
+    { id: 'design', label: 'Design', icon: Palette },
+  ];
+
   return (
     <div className="space-y-5">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -293,7 +302,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
           <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Menu Studio</p>
           <h3 className="mt-1 font-display text-3xl text-forest">Construis ton menu</h3>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-ink/45">
-            Édite le contenu à gauche, le design au-dessus du miroir et visualise chaque changement immédiatement.
+            Sépare la structure du contenu et l’apparence du menu, avec un aperçu toujours visible.
           </p>
         </div>
 
@@ -303,45 +312,77 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
         </div>
       </div>
 
+      <div className="rounded-2xl border border-ink/5 bg-[#f8f8f4] p-1.5 shadow-sm">
+        <div className="grid grid-cols-2 gap-1">
+          {tabs.map(({ id, label, icon: Icon }) => {
+            const active = activeTab === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setActiveTab(id)}
+                className={[
+                  'group flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-xs font-semibold transition-all duration-200',
+                  active
+                    ? 'bg-white text-forest shadow-sm ring-1 ring-gold/25'
+                    : 'text-ink/45 hover:bg-white/70 hover:text-forest',
+                ].join(' ')}
+                aria-selected={active}
+                role="tab"
+              >
+                <Icon size={15} className={active ? 'text-gold' : 'text-ink/35 transition-colors group-hover:text-gold'} />
+                <span>{label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {(menu.error || designError) && (
         <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-xs text-red-700">
           {menu.error || designError}
         </div>
       )}
 
-      <div className="grid gap-4 xl:grid-cols-[220px_minmax(0,1fr)_340px] xl:items-start">
-        <CategorySidebar
-          categories={menu.categories}
-          selectedCategoryId={selectedCategoryId}
-          saving={menu.saving}
-          onSelect={setSelectedCategoryId}
-          onAdd={menu.addCategory}
-          onToggleActive={menu.toggleCategoryActive}
-        />
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
+        <div className="min-w-0">
+          {activeTab === 'structure' ? (
+            <div className="grid gap-4 xl:grid-cols-[220px_minmax(0,1fr)] xl:items-start">
+              <CategorySidebar
+                categories={menu.categories}
+                selectedCategoryId={selectedCategoryId}
+                saving={menu.saving}
+                onSelect={setSelectedCategoryId}
+                onAdd={menu.addCategory}
+                onToggleActive={menu.toggleCategoryActive}
+              />
 
-        <div className="min-w-0 space-y-4">
-          <MenuConfigurator
-            draft={draft}
-            hasChanges={hasChanges}
-            publishing={publishing}
-            aiLoading={aiLoading}
-            onChange={changeDraft}
-            onPublish={() => void publish()}
-            onGenerateAi={() => void generateAiDesign()}
-          />
-
-          <ItemEditor
-            establishmentId={establishmentId}
-            categories={menu.categories}
-            category={selectedCategory}
-            items={selectedItems}
-            saving={menu.saving}
-            onAdd={menu.addItem}
-            onUpdate={menu.updateItem}
-            onMove={menu.moveItem}
-            onToggleActive={menu.toggleItemActive}
-            onDelete={menu.deleteItem}
-          />
+              <ItemEditor
+                establishmentId={establishmentId}
+                categories={menu.categories}
+                category={selectedCategory}
+                items={selectedItems}
+                saving={menu.saving}
+                onAdd={menu.addItem}
+                onUpdate={menu.updateItem}
+                onMove={menu.moveItem}
+                onToggleActive={menu.toggleItemActive}
+                onDelete={menu.deleteItem}
+              />
+            </div>
+          ) : (
+            <div className="min-h-[620px] rounded-3xl border border-ink/5 bg-white p-2 shadow-sm sm:p-4">
+              <MenuConfigurator
+                draft={draft}
+                hasChanges={hasChanges}
+                publishing={publishing}
+                aiLoading={aiLoading}
+                onChange={changeDraft}
+                onPublish={() => void publish()}
+                onGenerateAi={() => void generateAiDesign()}
+              />
+            </div>
+          )}
         </div>
 
         <MenuPreview
