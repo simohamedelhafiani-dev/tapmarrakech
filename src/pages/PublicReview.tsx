@@ -837,6 +837,7 @@ export default function PublicReview() {
                   categories={categories}
                   items={items}
                   itemsByCategory={itemsByCategory}
+                  template={menuTemplate}
                   navigation={menuNavigation}
                   photoMode={(p as any).menu_ai_photo_mode === 'without_photos' ? 'without_photos' : 'with_photos'}
                 />
@@ -1437,6 +1438,7 @@ function AIPremiumMenu({
   categories,
   items,
   itemsByCategory,
+  template = 'editorial',
   navigation = 'scroll',
   photoMode,
 }: {
@@ -1445,10 +1447,18 @@ function AIPremiumMenu({
   categories: MenuCategory[];
   items: MenuItem[];
   itemsByCategory: Record<string, MenuItem[]>;
+  template?: 'editorial' | 'luxury' | 'cards' | 'dark';
   navigation?: 'scroll' | 'book' | 'app';
   photoMode: 'with_photos' | 'without_photos';
 }) {
-  const style = design?.style ?? 'editorial';
+  const style =
+    template === 'dark'
+      ? 'immersive'
+      : template === 'cards'
+        ? 'minimal'
+        : template === 'luxury'
+          ? 'luxury'
+          : 'editorial';
   const sections = Array.isArray(design?.sections) ? design.sections : [];
   const itemMap = new Map(items.map((item) => [item.id, item]));
   const categoryMap = new Map(categories.map((category) => [category.id, category]));
@@ -1465,6 +1475,25 @@ function AIPremiumMenu({
   });
 
   const navSections = visibleSections.filter((section: any) => section?.title).slice(0, 12);
+  const [bookPage, setBookPage] = useState(0);
+  const [appSectionIndex, setAppSectionIndex] = useState(0);
+
+  useEffect(() => {
+    if (!visibleSections.length) {
+      setBookPage(0);
+      setAppSectionIndex(0);
+      return;
+    }
+    setBookPage(current => Math.min(current, visibleSections.length - 1));
+    setAppSectionIndex(current => Math.min(current, visibleSections.length - 1));
+  }, [visibleSections.length]);
+
+  const displaySections =
+    navigation === 'book'
+      ? visibleSections.slice(bookPage, bookPage + 1)
+      : navigation === 'app'
+        ? visibleSections.slice(appSectionIndex, appSectionIndex + 1)
+        : visibleSections;
 
   const wallpaper =
     design?.background_image_url ||
@@ -1546,7 +1575,7 @@ function AIPremiumMenu({
         </div>
       </section>
 
-      {navSections.length > 1 && (
+      {navigation === 'app' && navSections.length > 1 && (
         <>
           <style>{`
             .menu-category-scrollbar {
@@ -1567,10 +1596,10 @@ function AIPremiumMenu({
               <button
                 key={`nav-${index}`}
                 type="button"
-                onClick={() => scrollToSection(visibleSections.indexOf(section))}
+                onClick={() => setAppSectionIndex(visibleSections.indexOf(section))}
                 className={
                   'rounded-full border px-4 py-2 text-[10px] font-semibold shadow-sm ' +
-                  (index === 0
+                  (visibleSections.indexOf(section) === appSectionIndex
                     ? 'border-gold/60 bg-gold text-forest'
                     : 'border-white/20 bg-black/25 text-white')
                 }
@@ -1584,6 +1613,30 @@ function AIPremiumMenu({
       )}
 
       <div className="relative px-5 pb-14 pt-8">
+
+        {navigation === 'book' && visibleSections.length > 0 && (
+          <div className="mb-7 flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/15 px-3 py-2.5">
+            <button
+              type="button"
+              disabled={bookPage === 0}
+              onClick={() => setBookPage(page => Math.max(0, page - 1))}
+              className="inline-flex items-center gap-1 rounded-full border border-white/15 px-3 py-2 text-[10px] font-semibold text-white disabled:opacity-30"
+            >
+              <ChevronLeft size={13} /> Précédent
+            </button>
+            <span className="text-[10px] font-bold text-gold">
+              Page {bookPage + 1}/{visibleSections.length}
+            </span>
+            <button
+              type="button"
+              disabled={bookPage >= visibleSections.length - 1}
+              onClick={() => setBookPage(page => Math.min(visibleSections.length - 1, page + 1))}
+              className="inline-flex items-center gap-1 rounded-full border border-white/15 px-3 py-2 text-[10px] font-semibold text-white disabled:opacity-30"
+            >
+              Suivant <ChevronRight size={13} />
+            </button>
+          </div>
+        )}
 
         <div className="relative z-10">
         {(design.intro?.title || design.intro?.text) && (
@@ -1608,7 +1661,7 @@ function AIPremiumMenu({
         )}
 
         <div className="space-y-12">
-          {visibleSections.map((section: any, index: number) => {
+          {displaySections.map((section: any, index: number) => {
             const sectionItems =
               section.type === 'featured'
                 ? (section.item_ids ?? [])
