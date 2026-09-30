@@ -107,7 +107,6 @@ export function useMenuManager(establishmentId: string | null) {
     if(!establishmentId)throw new Error('Établissement requis.');
     const name=input.name.trim(); if(!name)throw new Error('Le nom de la catégorie est requis.');
     mutationVersionRef.current += 1;
-    mutationVersionRef.current += 1;
     setSaving(true);setError(null);
     try {
       const maxOrder=categories.reduce((max,c)=>Math.max(max,c.display_order),-1);
@@ -127,7 +126,6 @@ export function useMenuManager(establishmentId: string | null) {
     if(!establishmentId)throw new Error('Établissement requis.');
     const current=categories.find(c=>c.id===categoryId);if(!current)throw new Error('Catégorie introuvable.');
     const name=input.name===undefined?current.name:input.name.trim();if(!name)throw new Error('Le nom de la catégorie est requis.');
-    mutationVersionRef.current += 1;
     mutationVersionRef.current += 1;
     setSaving(true);setError(null);
     try{
@@ -151,7 +149,6 @@ export function useMenuManager(establishmentId: string | null) {
     if(!categories.some(c=>c.id===categoryId))throw new Error('Catégorie introuvable.');
     if(items.some(i=>i.category_id===categoryId))throw new Error('Impossible de supprimer une catégorie qui contient des articles.');
     mutationVersionRef.current += 1;
-    mutationVersionRef.current += 1;
     setSaving(true);setError(null);
     try{
       const {error:e}=await supabase.from('menu_categories').delete().eq('id',categoryId).eq('establishment_id',establishmentId);
@@ -167,7 +164,6 @@ export function useMenuManager(establishmentId: string | null) {
     const name=input.name.trim();const price=Number(input.price);
     if(!name)throw new Error('Le nom du produit est requis.');
     if(!Number.isFinite(price)||price<0)throw new Error('Le prix doit être un nombre positif ou nul.');
-    mutationVersionRef.current += 1;
     mutationVersionRef.current += 1;
     setSaving(true);setError(null);
     try{
@@ -190,7 +186,6 @@ export function useMenuManager(establishmentId: string | null) {
     const name=input.name===undefined?current.name:input.name.trim();const price=input.price===undefined?current.price:Number(input.price);
     if(!name)throw new Error('Le nom du produit est requis.');if(!Number.isFinite(price)||price<0)throw new Error('Le prix doit être un nombre positif ou nul.');
     mutationVersionRef.current += 1;
-    mutationVersionRef.current += 1;
     setSaving(true);setError(null);
     try{
       const {data,error:e}=await supabase.from('menu_items').update({
@@ -210,7 +205,6 @@ export function useMenuManager(establishmentId: string | null) {
     if(!item||!source||!destination)throw new Error('Article ou catégorie introuvable.');
     if(!destination.active)throw new Error('La catégorie destination doit être active.');
     if(item.category_id===destinationCategoryId)return item;
-    mutationVersionRef.current += 1;
     mutationVersionRef.current += 1;
     setSaving(true);setError(null);
     try{
@@ -235,7 +229,6 @@ export function useMenuManager(establishmentId: string | null) {
   const deleteItem=useCallback(async(itemId:string)=>{
     if(!establishmentId)throw new Error('Établissement requis.');
     const item=items.find(i=>i.id===itemId);if(!item)throw new Error('Article introuvable.');
-    mutationVersionRef.current += 1;
     mutationVersionRef.current += 1;
     setSaving(true);setError(null);
     try{
