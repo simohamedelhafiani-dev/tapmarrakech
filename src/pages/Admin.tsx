@@ -38,6 +38,7 @@ import {
   Upload,
   Sparkles,
   FileText,
+  Gem,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -51,6 +52,7 @@ import EstablishmentsSection from '@/components/admin/EstablishmentsSection';
 import ProfileForm from '@/components/admin/ProfileForm';
 import WifiForm from '@/components/admin/WifiForm';
 import MenuStudio from '@/components/admin/menu/MenuStudio';
+import LoyaltyStudio from '@/components/loyalty/LoyaltyStudio';
 import { useRecentActivity } from '@/hooks/useRecentActivity';
 import { useRecentLoyaltyCustomers } from '@/hooks/useRecentLoyaltyCustomers';
 import { useAdminOverviewStats } from '@/hooks/useAdminOverviewStats';
@@ -141,6 +143,7 @@ type AdminSection =
   | 'analytics'
   | 'reports'
   | 'billing'
+  | 'loyalty'
   | 'system';
 
 export default function Admin() {
@@ -491,6 +494,11 @@ export default function Admin() {
       icon: CreditCard,
     },
     {
+      id: 'loyalty',
+      label: '💎 Fidélité',
+      icon: Gem,
+    },
+    {
       id: 'system',
       label: 'Supervision technique',
       icon: Activity,
@@ -714,6 +722,40 @@ export default function Admin() {
 
           {section === 'billing' && (
             <BillingSection establishments={establishments} billing={billing} reload={loadBilling} />
+          )}
+
+          {section === 'loyalty' && (
+            <section className="space-y-5">
+              {establishments.length > 0 ? (
+                <>
+                  {establishments.length > 1 && (
+                    <div className="rounded-2xl border border-ink/5 bg-white p-4 shadow-sm">
+                      <label className="block max-w-md text-xs font-semibold text-forest">
+                        Établissement
+                        <select
+                          value={selectedEstablishmentId ?? establishments[0].id}
+                          onChange={(event) => setSelectedEstablishmentId(event.target.value)}
+                          className="mt-2 w-full rounded-xl border border-ink/10 bg-white px-3 py-3 text-sm font-normal text-ink outline-none focus:border-forest"
+                        >
+                          {establishments.map((establishment) => (
+                            <option key={establishment.id} value={establishment.id}>
+                              {establishment.name}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    </div>
+                  )}
+                  <LoyaltyStudio establishmentId={selectedEstablishmentId ?? establishments[0].id} />
+                </>
+              ) : (
+                <div className="rounded-2xl border border-ink/5 bg-white p-10 text-center shadow-sm">
+                  <Gem className="mx-auto text-gold" size={28} />
+                  <h2 className="mt-3 font-display text-2xl text-forest">Fidélité</h2>
+                  <p className="mt-2 text-sm text-ink/45">Créez d’abord un établissement pour configurer son programme de fidélité.</p>
+                </div>
+              )}
+            </section>
           )}
 
           {section === 'system' && (
