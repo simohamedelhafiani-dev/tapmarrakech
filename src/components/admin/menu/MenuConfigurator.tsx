@@ -22,10 +22,12 @@ type MenuConfiguratorProps = {
   hasChanges: boolean;
   publishing: boolean;
   aiLoading: boolean;
+  aiPhotoMode: 'with_photos' | 'without_photos';
+  onAiPhotoModeChange: (mode: 'with_photos' | 'without_photos') => void;
   onChange: (patch: Partial<MenuDesignDraft>) => void;
   onPublish: () => void;
   onGenerateAi: () => void;
-  aiCandidates: Array<{ id: string; design: Record<string, unknown>; template: MenuTemplate }>;
+  aiCandidates: Array<{ id: string; design: Record<string, unknown>; template: MenuTemplate; photoMode: 'with_photos' | 'without_photos' }>;
   categories: MenuCategory[];
   itemsByCategory: Record<string, MenuItem[]>;
   establishmentName?: string;
@@ -50,6 +52,8 @@ export default function MenuConfigurator({
   hasChanges,
   publishing,
   aiLoading,
+  aiPhotoMode,
+  onAiPhotoModeChange,
   onChange,
   onPublish,
   onGenerateAi,
@@ -119,6 +123,33 @@ export default function MenuConfigurator({
           <Wand2 size={18} className="shrink-0 text-gold" />
         </div>
 
+<div className="mt-4 grid grid-cols-2 gap-2">
+          {([
+            { id: 'with_photos' as const, label: 'Avec photos', description: 'Utilise les photos disponibles' },
+            { id: 'without_photos' as const, label: 'Sans photos', description: 'Design 100% texte' },
+          ]).map((mode) => {
+            const active = aiPhotoMode === mode.id;
+            return (
+              <button
+                key={mode.id}
+                type="button"
+                onClick={() => onAiPhotoModeChange(mode.id)}
+                disabled={aiLoading || publishing}
+                className={[
+                  'rounded-xl border px-3 py-2.5 text-left transition',
+                  active ? 'border-gold bg-gold/10 ring-1 ring-gold/20' : 'border-ink/8 bg-white hover:border-forest/20',
+                ].join(' ')}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] font-semibold text-forest">{mode.label}</span>
+                  {active && <Check size={12} className="text-gold" />}
+                </div>
+                <p className="mt-1 text-[9px] leading-4 text-ink/35">{mode.description}</p>
+              </button>
+            );
+          })}
+        </div>
+
         <button
           type="button"
           onClick={onGenerateAi}
@@ -135,7 +166,7 @@ export default function MenuConfigurator({
               const previewDraft: MenuDesignDraft = {
                 ...draft,
                 template: candidate.template,
-                aiDesign: candidate.design,
+                aiDesign: { ...candidate.design, photo_mode: candidate.photoMode },
                 wallpaperFile: null,
                 wallpaperObjectUrl: null,
                 wallpaperRemoved: false,
@@ -166,7 +197,10 @@ export default function MenuConfigurator({
                   <div className="border-t border-ink/5 p-3">
                     <h5 className="text-xs font-semibold text-forest">{hero?.title || 'Direction créative'}</h5>
                     <p className="mt-1 min-h-8 text-[9px] leading-4 text-ink/40">{hero?.subtitle || 'Proposition générée par l’IA.'}</p>
-                    <div className="mt-2 text-[9px] text-ink/35">{sections.length} section{sections.length > 1 ? 's' : ''}</div>
+                    <div className="mt-2 flex items-center justify-between gap-2 text-[9px] text-ink/35">
+                      <span>{sections.length} section{sections.length > 1 ? 's' : ''}</span>
+                      <span>{candidate.photoMode === 'without_photos' ? 'Sans photos' : 'Avec photos'}</span>
+                    </div>
                     <button
                       type="button"
                       disabled={publishing}
