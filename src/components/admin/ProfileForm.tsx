@@ -13,6 +13,7 @@ import {
   validateEstablishmentProfile,
   useEstablishmentProfile,
 } from '@/hooks/useEstablishmentProfile';
+import UploadLogo from '@/components/admin/UploadLogo';
 
 type ProfileBusinessType = {
   id: string;
