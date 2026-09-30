@@ -50,6 +50,7 @@ import EstablishmentPerformanceTable from '@/components/admin/EstablishmentPerfo
 import EstablishmentsSection from '@/components/admin/EstablishmentsSection';
 import ProfileForm from '@/components/admin/ProfileForm';
 import WifiForm from '@/components/admin/WifiForm';
+import MenuTestHarness from '@/components/admin/MenuTestHarness';
 import { useRecentActivity } from '@/hooks/useRecentActivity';
 import { useRecentLoyaltyCustomers } from '@/hooks/useRecentLoyaltyCustomers';
 import { useAdminOverviewStats } from '@/hooks/useAdminOverviewStats';
@@ -631,6 +632,9 @@ export default function Admin() {
         </header>
 
         <main className="mx-auto w-full max-w-[1500px] p-4 sm:p-5 md:p-8 lg:p-10">
+          {new URLSearchParams(window.location.search).get('menuHarness') === '1' && establishments[0]?.id && (
+            <MenuTestHarness establishmentId={establishments[0].id} />
+          )}
           {section === 'overview' && (
             <Overview
               establishments={establishments}
