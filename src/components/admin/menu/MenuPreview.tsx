@@ -8,6 +8,7 @@ type MenuPreviewProps = {
   categories: MenuCategory[];
   itemsByCategory: Record<string, MenuItem[]>;
   draft?: MenuDesignDraft;
+  compact?: boolean;
 };
 
 const theme = {
@@ -58,6 +59,7 @@ export default function MenuPreview({
   categories,
   itemsByCategory,
   draft,
+  compact = false,
 }: MenuPreviewProps) {
   const activeDraft = draft ?? {
     template: 'editorial' as const,
@@ -72,8 +74,39 @@ export default function MenuPreview({
 
   const colors = theme[activeDraft.template];
 
+  const aiDesign = activeDraft.aiDesign;
+  const aiHero =
+    aiDesign && typeof aiDesign.hero === 'object' && aiDesign.hero !== null
+      ? (aiDesign.hero as { title?: string; subtitle?: string | null })
+      : null;
+
+  const aiSections = Array.isArray(aiDesign?.sections)
+    ? aiDesign.sections.filter(
+        (section): section is { category_id?: string; item_ids?: string[] } =>
+          !!section && typeof section === 'object',
+      )
+    : [];
+
+  const orderedCategories = useMemo(() => {
+    if (!aiSections.length) return categories.filter(category => category.active);
+
+    const byId = new Map(categories.map(category => [category.id, category]));
+    const ordered = aiSections
+      .map(section => (section.category_id ? byId.get(section.category_id) : undefined))
+      .filter((category): category is MenuCategory => !!category && category.active);
+
+    const used = new Set(ordered.map(category => category.id));
+    return [
+      ...ordered,
+      ...categories.filter(category => category.active && !used.has(category.id)),
+    ];
+  }, [categories, aiSections]);
+
+  const displayName = aiHero?.title || establishmentName || 'Votre établissement';
+  const displaySubtitle = aiHero?.subtitle || 'Une carte pensée pour votre expérience client.';
+
   const activeCategories = useMemo(
-    () => categories.filter(category => category.active),
+    () => orderedCategories,
     [categories],
   );
 
@@ -177,7 +210,7 @@ export default function MenuPreview({
 
   return (
     <aside className="min-w-0 overflow-hidden rounded-3xl border border-ink/5 bg-white shadow-sm lg:sticky lg:top-4 lg:self-start">
-      <div className="border-b border-ink/5 bg-white p-5">
+      {!compact && <div className="border-b border-ink/5 bg-white p-5">
         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Aperçu en direct</p>
         <h3 className="mt-1 text-base font-semibold text-forest">
           {establishmentName || 'Menu public'}
@@ -185,10 +218,10 @@ export default function MenuPreview({
         <p className="mt-1 text-[11px] text-ink/35">
           Miroir du Draft · aucune sauvegarde automatique
         </p>
-      </div>
+      </div>}
 
-      <div className="p-3">
-        <div className={`relative max-h-[calc(100vh-180px)] min-h-[520px] overflow-y-auto rounded-[26px] ${colors.shell}`}>
+      <div className={compact ? "p-0" : "p-3"}>
+        <div className={`relative max-h-[520px] min-h-[360px] overflow-y-auto rounded-[26px] ${colors.shell}`}>
           {activeDraft.wallpaperUrl && (
             <>
               <div
@@ -210,11 +243,11 @@ export default function MenuPreview({
               <p className={`text-[9px] font-bold uppercase tracking-[0.32em] ${colors.accent}`}>
                 Menu
               </p>
-              <h4 className={`mt-2 text-3xl leading-tight ${colors.heading}`}>
-                {establishmentName || 'Votre établissement'}
+              <h4 className={`mt-2 ${compact ? 'text-xl' : 'text-3xl'} leading-tight ${colors.heading}`}>
+                {displayName}
               </h4>
               <p className={`mt-2 text-[10px] leading-4 ${colors.muted}`}>
-                Une carte pensée pour votre expérience client.
+                {displaySubtitle}
               </p>
 
               <div className="mt-4 flex justify-center">
@@ -250,7 +283,7 @@ export default function MenuPreview({
               </nav>
             )}
 
-            <div className="p-5 sm:p-6">
+            <div className={compact ? "p-3" : "p-5 sm:p-6"}>
               {activeDraft.navigation === 'book' && (
                 <div className="mb-5 flex items-center justify-between rounded-xl border border-current/10 bg-black/5 px-3 py-2">
                   <span className={`text-[9px] font-semibold ${colors.muted}`}>Mode livre</span>
@@ -260,11 +293,11 @@ export default function MenuPreview({
                 </div>
               )}
 
-              <div className="space-y-7">
+              <div className={compact ? 'space-y-4' : 'space-y-7'}>
                 {visibleCategories.map(category => (
                   <section key={category.id}>
-                    <div className={`mb-3 ${colors.category}`}>
-                      <h5 className={`text-lg font-semibold ${colors.heading}`}>
+                    <div className={compact ? `mb-2 ${colors.category}` : `mb-3 ${colors.category}`}>
+                      <h5 className={`${compact ? 'text-sm' : 'text-lg'} font-semibold ${colors.heading}`}>
                         {category.name}
                       </h5>
                       {category.description && (
