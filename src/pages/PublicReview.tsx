@@ -848,6 +848,7 @@ export default function PublicReview() {
                   categories={categories}
                   itemsByCategory={itemsByCategory}
                   navigation={menuNavigation}
+                  photoMode={(p as any).menu_ai_photo_mode === 'without_photos' || (menuAiDesign as any)?.photo_mode === 'without_photos' ? 'without_photos' : 'with_photos'}
                 />
               )}
             </div>
@@ -1834,12 +1835,14 @@ function MenuTemplate({
   categories,
   itemsByCategory,
   navigation = 'scroll',
+  photoMode = 'with_photos',
 }: {
   template: string;
   place: any;
   categories: MenuCategory[];
   itemsByCategory: Record<string, MenuItem[]>;
   navigation?: 'scroll' | 'book' | 'app';
+  photoMode?: 'with_photos' | 'without_photos';
 }) {
   const visible = categories.filter((category) => (itemsByCategory[category.id] ?? []).length > 0);
   const [bookPage, setBookPage] = useState(0);
@@ -1970,7 +1973,7 @@ function MenuTemplate({
                 {(itemsByCategory[category.id] ?? []).map((item) => (
                   <article key={item.id} className="overflow-hidden rounded-[24px] bg-white shadow-sm ring-1 ring-ink/5">
                     <div className="aspect-[1.15] overflow-hidden bg-[#eee9df]">
-                      {item.image_url ? <img src={item.image_url} alt="" className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-ink/15"><UtensilsCrossed size={25} /></div>}
+                      {photoMode === 'with_photos' && item.image_url ? <img src={item.image_url} alt="" className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-ink/15"><UtensilsCrossed size={25} /></div>}
                     </div>
                     <div className="p-3.5">
                       <h3 className="line-clamp-2 text-sm font-bold text-forest">{item.name}</h3>
@@ -2036,7 +2039,7 @@ function MenuTemplate({
             <div className="space-y-3">
               {(itemsByCategory[category.id] ?? []).map((item) => (
                 <article key={item.id} className="flex overflow-hidden rounded-[22px] bg-white p-3 shadow-sm ring-1 ring-ink/5">
-                  {item.image_url && <img src={item.image_url} alt="" className="h-24 w-24 shrink-0 rounded-[16px] object-cover" />}
+                  {photoMode === 'with_photos' && item.image_url && <img src={item.image_url} alt="" className="h-24 w-24 shrink-0 rounded-[16px] object-cover" />}
                   <div className="min-w-0 flex-1 p-2">
                     <div className="flex items-start justify-between gap-3"><h3 className="font-semibold text-forest">{item.name}</h3><span className="shrink-0 text-sm font-bold text-gold">{Number(item.price).toLocaleString('fr-FR')} MAD</span></div>
                     {item.description && <p className="mt-2 text-xs leading-5 text-ink/45">{item.description}</p>}
