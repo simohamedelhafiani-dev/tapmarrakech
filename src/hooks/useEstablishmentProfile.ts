@@ -385,6 +385,7 @@ export function useEstablishmentProfile(establishmentId: string | null) {
     setField: updateField,
     updateProfile,
     reload: loadProfile,
+    initialSlug: initialProfile?.slug ?? null,
     validate: () => (profile ? validateEstablishmentProfile(profile) : {}),
   };
 }
