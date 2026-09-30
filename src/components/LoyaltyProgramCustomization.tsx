@@ -97,6 +97,9 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<'logo' | 'photo' | 'wallpapers' | null>(null);
   const [activeTab, setActiveTab] = useState<'Structure' | 'Design'>('Structure');
+  const [publishedSnapshot, setPublishedSnapshot] = useState<Design | null>(null);
+  const [pendingLogoFile, setPendingLogoFile] = useState<File | null>(null);
+  const [pendingPhotoFile, setPendingPhotoFile] = useState<File | null>(null);
   const logoInput = useRef<HTMLInputElement>(null);
   const photoInput = useRef<HTMLInputElement>(null);
   const wallpapersInput = useRef<HTMLInputElement>(null);
@@ -116,7 +119,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     const row = Array.isArray(designData) ? designData[0] : designData;
     if (row) {
       const nextConfig = { ...defaultLoyaltyDesignConfig, ...(row.design_config ?? {}) };
-      setDesign({
+      const loadedDesign: Design = {
         template_id: row.template_id ?? baseDesign.template_id,
         primary_color: row.primary_color ?? baseDesign.primary_color,
         secondary_color: row.secondary_color ?? baseDesign.secondary_color,
@@ -126,7 +129,11 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
         border_radius: Number(row.border_radius ?? baseDesign.border_radius),
         design_config: nextConfig,
         published: Boolean(row.published),
-      });
+      };
+      setDesign(loadedDesign);
+      setPublishedSnapshot(loadedDesign);
+      setPendingLogoFile(null);
+      setPendingPhotoFile(null);
       setCardMode(nextConfig.card_mode === 'STAMP' ? 'STAMP' : 'QR');
     }
     if (place) setEstablishment({ name: place.name || 'Votre établissement', logo_url: place.logo_url || null, business_type: place.business_type || null });
@@ -281,22 +288,15 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     // Le modèle change le design, pas le type de programme : QR et tampons utilisent le même template.\n    setCardMode(cardMode);
   }
 
-  async function uploadAsset(file: File, kind: 'logo' | 'photo') {
+  function chooseAsset(file: File, kind: 'logo' | 'photo') {
     if (!file.type.startsWith('image/')) return alert('Choisis une image PNG, JPG ou WEBP.');
-    if (file.size > 5 * 1024 * 1024) return alert('L’image doit faire moins de 5 Mo.');
-    setUploading(kind);
-    try {
-      const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-      const path = `loyalty-cards/${establishmentId}/${kind}-${Date.now()}.${extension}`;
-      const { error } = await supabase.storage.from('loyalty-assets').upload(path, file, { upsert: true, contentType: file.type });
-      if (error) throw error;
-      const { data } = supabase.storage.from('loyalty-assets').getPublicUrl(path);
-      updateConfig(kind === 'logo' ? { logo_url: data.publicUrl } : { background_image_url: data.publicUrl, ai_generation_id: undefined });
-    } catch (error) {
-      alert(error instanceof Error ? error.message : 'Impossible d’envoyer cette image.');
-    } finally {
-      setUploading(null);
-    }
+    if (file.size > 12 * 1024 * 1024) return alert('L’image doit faire moins de 12 Mo.');
+    const objectUrl = URL.createObjectURL(file);
+    updateConfig(kind === 'logo'
+      ? { logo_url: objectUrl }
+      : { background_image_url: objectUrl, ai_generation_id: undefined });
+    if (kind === 'logo') setPendingLogoFile(file);
+    else setPendingPhotoFile(file);
   }
 
   async function uploadWallpapers(files: FileList | null) {
@@ -326,9 +326,9 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     }
   }
 
-  async function save(publish: boolean) {
+  async function saveStructure() {
     setSaving(true);
-    const { error: programError } = await supabase.rpc('save_loyalty_program_settings', {
+    const { error } = await supabase.rpc('save_loyalty_program_settings', {
       p_establishment_id: establishmentId,
       p_program_type: cardMode === 'STAMP' ? 'STAMP' : 'POINTS',
       p_stamp_goal: Number(stampGoal) || 10,
@@ -340,34 +340,68 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
       p_currency: 'MAD',
       p_enabled: programEnabled,
     });
-    if (programError) {
-      setSaving(false);
-      return alert(programError.message);
-    }
+    setSaving(false);
+    if (error) return alert(error.message);
+    alert('Structure du programme enregistrée.');
+  }
 
-    const { error } = await supabase.rpc('save_loyalty_card_builder_config', {
-      p_establishment_id: establishmentId,
-      p_design_config: {
+  async function publishDesign() {
+    if (saving) return;
+    setSaving(true);
+    try {
+      let logoUrl = design.design_config.logo_url || null;
+      let photoUrl = design.design_config.background_image_url || null;
+      const uploadPending = async (file: File, kind: 'logo' | 'photo') => {
+        const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+        const path = 'loyalty-cards/' + establishmentId + '/' + kind + '-' + Date.now() + '-' + Math.random().toString(36).slice(2) + '.' + extension;
+        const { error } = await supabase.storage.from('loyalty-assets').upload(path, file, { upsert: false, contentType: file.type, cacheControl: '31536000' });
+        if (error) throw error;
+        return supabase.storage.from('loyalty-assets').getPublicUrl(path).data.publicUrl;
+      };
+      if (pendingLogoFile) logoUrl = await uploadPending(pendingLogoFile, 'logo');
+      if (pendingPhotoFile) photoUrl = await uploadPending(pendingPhotoFile, 'photo');
+
+      const nextConfig = {
         ...design.design_config,
+        logo_url: logoUrl || undefined,
+        background_image_url: photoUrl,
         card_mode: cardMode,
         show_qr: cardMode === 'QR',
         show_points: true,
         business_type: establishment.business_type,
-      },
-      p_template_id: design.template_id,
-      p_primary_color: design.primary_color,
-      p_secondary_color: design.secondary_color,
-      p_background_color: design.background_color,
-      p_text_color: design.text_color,
-      p_button_color: design.button_color,
-      p_border_radius: design.border_radius,
-      p_published: publish,
-    });
-    setSaving(false);
-    if (error) return alert(error.message);
-    setDesign(d => ({ ...d, published: publish }));
-    alert(publish ? 'Carte fidélité publiée.' : 'Brouillon enregistré.');
+      };
+      const { error } = await supabase.rpc('save_loyalty_card_builder_config', {
+        p_establishment_id: establishmentId,
+        p_design_config: nextConfig,
+        p_template_id: design.template_id,
+        p_primary_color: design.primary_color,
+        p_secondary_color: design.secondary_color,
+        p_background_color: design.background_color,
+        p_text_color: design.text_color,
+        p_button_color: design.button_color,
+        p_border_radius: design.border_radius,
+        p_published: true,
+      });
+      if (error) throw error;
+
+      const published: Design = { ...design, design_config: nextConfig, published: true };
+      setDesign(published);
+      setPublishedSnapshot(published);
+      setPendingLogoFile(null);
+      setPendingPhotoFile(null);
+      alert('Design de la carte publié.');
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Impossible de publier le design.');
+    } finally {
+      setSaving(false);
+    }
   }
+
+  const stable = (value: unknown) => JSON.stringify(value ?? null);
+  const hasDesignChanges = Boolean(publishedSnapshot) && (
+    stable({ ...design, published: undefined }) !== stable({ ...publishedSnapshot, published: undefined }) ||
+    Boolean(pendingLogoFile) || Boolean(pendingPhotoFile)
+  );
 
   const visualExperience: LoyaltyExperienceConfig = {
     type: cardMode === 'STAMP' ? 'STAMP' : 'POINTS',
@@ -413,38 +447,33 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
 
   return (
     <section className="space-y-6">
-      <div className="rounded-[2rem] border border-ink/5 bg-white p-5 shadow-soft md:p-7">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">Fidélité</p>
-            <h2 className="mt-1 font-display text-3xl text-forest">Loyalty Studio</h2>
-            <p className="mt-1 text-sm text-ink/45">Structure, Design et Miroir de la carte fidélité existante de l’établissement.</p>
-          </div>
-          <div className="flex gap-2">
-            <button type="button" onClick={() => void save(false)} disabled={saving} className="rounded-xl border border-forest/20 bg-white px-4 py-3 text-xs font-semibold text-forest">Enregistrer</button>
-            <button type="button" onClick={() => void save(true)} disabled={saving} className="rounded-xl bg-forest px-5 py-3 text-xs font-semibold text-white">{saving ? 'Publication…' : 'Publier la carte'}</button>
-          </div>
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Fidélité Studio</p>
+          <h2 className="mt-1 font-display text-3xl text-forest">Construis ta carte fidélité</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-ink/45">Sépare la structure du programme et son apparence, avec un miroir toujours visible.</p>
         </div>
+        <div className="inline-flex items-center gap-2 self-start rounded-full bg-white px-3 py-2 text-[10px] font-semibold text-forest shadow-sm md:self-auto">
+          <span className={saving ? 'h-2 w-2 animate-pulse rounded-full bg-amber-400' : hasDesignChanges ? 'h-2 w-2 rounded-full bg-amber-400' : 'h-2 w-2 rounded-full bg-green-500'} />
+          {saving ? 'Synchronisation…' : hasDesignChanges ? 'Modifications locales' : 'Design publié'}
+        </div>
+      </div>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_0.9fr]">
-          <div className="space-y-5">
-            <div className="flex items-center gap-2 rounded-2xl border border-ink/10 bg-[#fafaf8] p-1">
-              {(['Structure', 'Design'] as const).map(tab => (
-                <button
-                  key={tab}
-                  type="button"
-                  onClick={() => {
-                    setActiveTab(tab);
-                    const targetId = tab === 'Structure' ? 'loyalty-structure' : 'loyalty-design';
-                    window.requestAnimationFrame(() => document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
-                  }}
-                  className={`flex-1 rounded-xl px-3 py-2.5 text-center text-[10px] font-semibold transition ${activeTab === tab ? 'bg-white text-forest shadow-sm' : 'text-ink/35 hover:text-forest'}`}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
+      <div className="rounded-2xl border border-ink/5 bg-[#f8f8f4] p-1.5 shadow-sm">
+        <div className="grid grid-cols-2 gap-1">
+          {(['Structure', 'Design'] as const).map(tab => {
+            const active = activeTab === tab;
+            return (
+              <button key={tab} type="button" onClick={() => setActiveTab(tab)} className={active ? 'rounded-xl bg-white px-4 py-3 text-xs font-semibold text-forest shadow-sm ring-1 ring-gold/25' : 'rounded-xl px-4 py-3 text-xs font-semibold text-ink/45 hover:bg-white/70 hover:text-forest'}>{tab}</button>
+            );
+          })}
+        </div>
+      </div>
 
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
+        <div className="min-w-0 rounded-3xl border border-ink/5 bg-white p-2 shadow-sm sm:p-4">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">        <div className="grid gap-4">
+          <div className="space-y-4">
             <div id="loyalty-design" className="scroll-mt-6 rounded-2xl border border-ink/10 p-5">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Modèles</p>
@@ -476,8 +505,8 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                 <AssetPicker title="Logo de l’établissement" description="PNG, JPG ou WEBP · 5 Mo max" value={design.design_config.logo_url || establishment.logo_url} fallback={establishment.logo_url} loading={uploading === 'logo'} inputRef={logoInput} />
                 <AssetPicker title="Photo de fond" description="Une photo qui représente votre établissement" value={design.design_config.background_image_url} loading={uploading === 'photo'} inputRef={photoInput} />
               </div>
-              <input ref={logoInput} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={e => { const file=e.target.files?.[0]; if(file) void uploadAsset(file,'logo'); e.currentTarget.value=''; }} />
-              <input ref={photoInput} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={e => { const file=e.target.files?.[0]; if(file) void uploadAsset(file,'photo'); e.currentTarget.value=''; }} />
+              <input ref={logoInput} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={e => { const file=e.target.files?.[0]; if(file) chooseAsset(file,'logo'); e.currentTarget.value=''; }} />
+              <input ref={photoInput} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={e => { const file=e.target.files?.[0]; if(file) chooseAsset(file,'photo'); e.currentTarget.value=''; }} />
               <input ref={wallpapersInput} type="file" accept="image/png,image/jpeg,image/webp" multiple className="hidden" onChange={e => { void uploadWallpapers(e.target.files); e.currentTarget.value=''; }} />
 
               <div className="mt-5 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
@@ -678,8 +707,9 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
               </div>
             </div>
           </div>
+        </div>
 
-          <div id="loyalty-preview" className="scroll-mt-6 rounded-2xl border border-ink/10 bg-[#f7f7f3] p-4">
+        <div id="loyalty-preview" className="scroll-mt-6 rounded-2xl border border-ink/10 bg-[#f7f7f3] p-4">
             <div className="flex items-center justify-between">
               <div><p className="text-[10px] font-bold uppercase tracking-[.16em] text-gold">Aperçu en temps réel</p><p className="mt-1 text-xs text-ink/45">Voici exactement ce que vos clients verront.</p></div>
               <span className="rounded-full bg-white px-3 py-1.5 text-[10px] font-semibold text-forest shadow-sm">Client</span>
