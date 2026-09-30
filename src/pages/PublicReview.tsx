@@ -1600,14 +1600,20 @@ function AIPremiumMenu({
         )}
         <div className={`relative ${wallpaper ? 'z-10' : ''}`}>
         {(design.intro?.title || design.intro?.text) && (
-          <section className={`mb-10 rounded-[28px] border p-5 shadow-xl ${palette.card}`}>
+          <section
+            className={
+              wallpaper
+                ? 'mb-8 px-1 py-2'
+                : `mb-10 rounded-[28px] border p-5 shadow-xl ${palette.card}`
+            }
+          >
             {design.intro.title && (
-              <h2 className={`font-display text-2xl ${palette.product}`}>
+              <h2 className={`font-display text-2xl ${wallpaper ? 'text-white' : palette.product}`}>
                 {design.intro.title}
               </h2>
             )}
             {design.intro.text && (
-              <p className={`mt-2 text-sm leading-6 ${palette.muted}`}>
+              <p className={`mt-2 text-sm leading-6 ${wallpaper ? 'text-white/70' : palette.muted}`}>
                 {design.intro.text}
               </p>
             )}
