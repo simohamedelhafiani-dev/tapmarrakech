@@ -453,11 +453,17 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
           <h2 className="mt-1 font-display text-3xl text-forest">Construis ta carte fidélité</h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-ink/45">Sépare la structure du programme et son apparence, avec un miroir toujours visible.</p>
         </div>
-        <div className="inline-flex items-center gap-2 self-start rounded-full bg-white px-3 py-2 text-[10px] font-semibold text-forest shadow-sm md:self-auto">
-          <span className={saving ? 'h-2 w-2 animate-pulse rounded-full bg-amber-400' : hasDesignChanges ? 'h-2 w-2 rounded-full bg-amber-400' : 'h-2 w-2 rounded-full bg-green-500'} />
-          {saving ? 'Synchronisation…' : hasDesignChanges ? 'Modifications locales' : 'Design publié'}
-        </div>
-      </div>
+        <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
+          <div className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-3 py-2 text-[10px] font-semibold text-forest shadow-sm">
+            <span className={saving ? 'h-2 w-2 animate-pulse rounded-full bg-amber-400' : hasDesignChanges ? 'h-2 w-2 rounded-full bg-amber-400' : 'h-2 w-2 rounded-full bg-green-500'} />
+            {saving ? 'Synchronisation…' : hasDesignChanges ? 'Modifications locales' : 'Design publié'}
+          </div>
+          {activeTab === 'Structure' ? (
+            <button type="button" onClick={() => void saveStructure()} disabled={saving} className="rounded-xl bg-forest px-4 py-2.5 text-[11px] font-semibold text-white disabled:opacity-50">{saving ? 'Enregistrement…' : 'Enregistrer la structure'}</button>
+          ) : (
+            <button type="button" onClick={() => void publishDesign()} disabled={!hasDesignChanges || saving} className="rounded-xl bg-forest px-4 py-2.5 text-[11px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-35">{saving ? 'Publication…' : hasDesignChanges ? 'Publier les modifications' : 'Design publié'}</button>
+          )}
+        </div>     </div>
 
       <div className="rounded-2xl border border-ink/5 bg-[#f8f8f4] p-1.5 shadow-sm">
         <div className="grid grid-cols-2 gap-1">
@@ -472,7 +478,6 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
         <div className="min-w-0 rounded-3xl border border-ink/5 bg-white p-2 shadow-sm sm:p-4">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">        <div className="grid gap-4">
           <div className="space-y-4">
             <div id="loyalty-design" className="scroll-mt-6 rounded-2xl border border-ink/10 p-5">
               <div>
@@ -706,6 +711,10 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                 <label className="text-xs text-ink/50">Style des tampons<select disabled={cardMode !== 'STAMP'} value={design.design_config.stamp_style} onChange={e=>updateConfig({stamp_style:e.target.value as LoyaltyDesignConfig['stamp_style']})} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 disabled:opacity-40"><option value="circles">Cercles</option><option value="squares">Carrés</option><option value="stars">Étoiles</option><option value="hearts">Cœurs</option></select></label>
               </div>
             </div>
+          </div>
+        </div>
+
+            )}
           </div>
         </div>
 
