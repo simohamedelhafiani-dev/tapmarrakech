@@ -13,7 +13,7 @@ export type MenuItem = {
 type NewCategory = { name: string; description?: string | null; active?: boolean };
 type NewItem = { category_id: string; name: string; description?: string | null; price: number; image_url?: string | null; active?: boolean };
 type UpdateCategory = Partial<NewCategory>;
-type UpdateItem = Partial<Omit<NewItem, 'category_id'>>;
+type UpdateItem = Partial<Omit<NewItem, 'category_id'>> & { category_id?: string };
 
 const normalizeCategoryOrder = (rows: MenuCategory[]) =>
   [...rows].sort((a,b) => a.display_order - b.display_order || a.created_at.localeCompare(b.created_at));
