@@ -249,33 +249,7 @@ export default function ProfileForm({ engine, businessTypes, onSaved }: ProfileF
         </div>
       </div>
 
-      <div className="rounded-[26px] border border-ink/5 bg-white p-6 shadow-[0_12px_40px_rgba(15,23,42,0.045)]">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center">
-          <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-2xl bg-forest text-2xl font-semibold text-gold">
-            {profile.logo_url ? (
-              <img src={profile.logo_url} alt={`Logo ${profile.name}`} className="h-full w-full object-cover" />
-            ) : (
-              profile.name?.[0]?.toUpperCase()
-            )}
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-forest">Logo de l’établissement</p>
-            <p className="mt-1 text-xs leading-5 text-ink/45">Le logo est utilisé par la page publique et les espaces établissement.</p>
-            <input
-              value={profile.logo_url ?? ''}
-              onChange={(event) => setField('logo_url', event.target.value || null)}
-              disabled={engine.saving}
-              placeholder="https://.../logo.png"
-              className="mt-3 w-full rounded-xl border border-ink/10 bg-[#fbfbf8] px-3 py-2.5 text-sm outline-none focus:border-forest/30"
-            />
-            {profile.logo_url && (
-              <button type="button" onClick={() => setField('logo_url', null)} disabled={engine.saving} className="mt-2 text-xs font-medium text-red-600">
-                Supprimer le logo
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
+      <UploadLogo profile={profile} engine={engine} />
 
       <div className="rounded-2xl border border-ink/5 bg-[#f7f7f3] p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
