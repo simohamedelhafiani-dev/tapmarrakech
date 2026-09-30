@@ -14,9 +14,9 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
     console.log('[STUDIO] addCategory() -> SUCCESS', result);
     return result;
   };
-  const tracedDeleteCategory = async (categoryId: string) => {
-    console.log('[STUDIO] Calling deleteCategory()', { categoryId });
-    const result = await menu.deleteCategory(categoryId);
+  const tracedDeleteCategory = async (categoryId: string, action: 'move' | 'delete' = 'delete', destinationCategoryId?: string) => {
+    console.log('[STUDIO] Calling deleteCategory()', { categoryId, action, destinationCategoryId });
+    const result = await menu.deleteCategory(categoryId, action, destinationCategoryId);
     console.log('[STUDIO] deleteCategory() -> SUCCESS', { categoryId, result });
     return result;
   };
