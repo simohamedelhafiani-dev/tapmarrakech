@@ -53,6 +53,7 @@ import { useRecentLoyaltyCustomers } from '@/hooks/useRecentLoyaltyCustomers';
 import { useAdminOverviewStats } from '@/hooks/useAdminOverviewStats';
 import { useEstablishmentPerformance } from '@/hooks/useEstablishmentPerformance';
 import { useEstablishments } from '@/hooks/useEstablishments';
+import { useEstablishmentProfile } from '@/hooks/useEstablishmentProfile';
 
 type Establishment = {
   id: string;
@@ -1173,6 +1174,26 @@ function EstablishmentWorkspace({
   onReload: () => Promise<void>;
 }) {
   const [tab, setTab] = useState<WorkspaceTab>('profile');
+  const establishmentProfileEngine = useEstablishmentProfile(establishment.id);
+
+  useEffect(() => {
+    console.log('[EstablishmentProfile] STATUS:', {
+      status: establishmentProfileEngine.loading ? 'loading' : establishmentProfileEngine.profile ? 'success' : 'error',
+      establishmentId: establishment.id,
+      profile: establishmentProfileEngine.profile,
+      isDirty: establishmentProfileEngine.isDirty,
+      slugStatus: establishmentProfileEngine.slugStatus,
+      error: establishmentProfileEngine.error?.message ?? null,
+    });
+  }, [
+    establishment.id,
+    establishmentProfileEngine.loading,
+    establishmentProfileEngine.profile,
+    establishmentProfileEngine.isDirty,
+    establishmentProfileEngine.slugStatus,
+    establishmentProfileEngine.error,
+  ]);
+
   const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState<any>(establishment);
   const [wifi, setWifi] = useState({ ssid: '', password: '', active: true });
