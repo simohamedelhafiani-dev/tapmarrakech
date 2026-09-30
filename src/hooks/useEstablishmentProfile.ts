@@ -85,9 +85,9 @@ const isValidUrl = (value: string) => {
   if (!trimmed) return false;
 
   try {
-    const candidate = /^https?:\\/\\//i.test(trimmed)
+    const candidate = /^https?:\/\//i.test(trimmed)
       ? trimmed
-      : \`https://${trimmed}\\`;
+      : `https://${trimmed}`;
     const url = new URL(candidate);
     return (url.protocol === 'http:' || url.protocol === 'https:') &&
       (url.hostname === 'localhost' || url.hostname.includes('.'));
