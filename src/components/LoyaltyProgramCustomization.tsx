@@ -630,7 +630,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                 </div>
               )}
 
-              <div id="loyalty-content" className={activeTab === 'Structure' ? 'mt-5 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4' : 'hidden'}>
+              <div id="loyalty-content" className={activeTab === 'Design' ? 'mt-5 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4' : 'hidden'}>
                 <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Contenu de la carte</p>
                 <p className="mt-1 text-[10px] text-ink/45">Modifie les avantages et les offres affichés au client.</p>
                 <p className="mt-4 text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Avantages & offres</p>
@@ -677,7 +677,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                 </div>
               </div>
 
-              <div className={activeTab === 'Structure' ? 'mt-5 grid gap-3 sm:grid-cols-2' : 'hidden'}>
+              <div className={activeTab === 'Design' ? 'mt-5 grid gap-3 sm:grid-cols-2' : 'hidden'}>
                 <label className="text-xs text-ink/50">Coins arrondis <span className="float-right">{design.border_radius}px</span><input type="range" min="12" max="36" value={design.border_radius} onChange={e=>setDesign(d=>({...d,border_radius:Number(e.target.value),published:false}))} className="mt-3 w-full"/></label>
                 <label className="text-xs text-ink/50">Style des tampons<select disabled={cardMode !== 'STAMP'} value={design.design_config.stamp_style} onChange={e=>updateConfig({stamp_style:e.target.value as LoyaltyDesignConfig['stamp_style']})} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 disabled:opacity-40"><option value="circles">Cercles</option><option value="squares">Carrés</option><option value="stars">Étoiles</option><option value="hearts">Cœurs</option></select></label>
               </div>
