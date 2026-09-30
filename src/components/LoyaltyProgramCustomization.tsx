@@ -556,14 +556,6 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                 ))}
               </div>
 
-              <div className="mt-5">
-                <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-ink/40">Type de fidélité</p>
-                <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                  <ModeButton active={cardMode === 'QR'} icon={<QrCode size={23}/>} title="QR Code" description="Une carte avec un QR unique pour le client." onClick={() => chooseMode('QR')} />
-                  <ModeButton active={cardMode === 'STAMP'} icon={<Stamp size={23}/>} title="Tampons" description="Une carte de visites avec des tampons." onClick={() => chooseMode('STAMP')} />
-                </div>
-              </div>
-
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 <label className="block text-xs font-medium text-ink/50">Titre<input value={design.design_config.front_title} onChange={e => updateConfig({front_title:e.target.value})} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm"/></label>
                 <label className="block text-xs font-medium text-ink/50">Sous-titre<input value={design.design_config.front_subtitle} onChange={e => updateConfig({front_subtitle:e.target.value})} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm"/></label>
@@ -576,6 +568,13 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
               <div id="loyalty-structure" className="scroll-mt-6 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
                 <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Structure</p>
                 <p className="mt-1 text-xs text-ink/45">Les réglages ci-dessous pilotent le programme de fidélité déjà utilisé par cet établissement.</p>
+                <div className="mt-4 rounded-2xl border border-forest/10 bg-white p-4">
+                  <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Type de programme</p>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <ModeButton active={cardMode === 'QR'} icon={<QrCode size={23}/>} title="Points + QR" description="Le client cumule des points grâce à ses achats." onClick={() => chooseMode('QR')} />
+                    <ModeButton active={cardMode === 'STAMP'} icon={<Stamp size={23}/>} title="Tampons" description="Le client progresse avec un tampon à chaque visite." onClick={() => chooseMode('STAMP')} />
+                  </div>
+                </div>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   <label className="text-xs font-medium text-ink/50">
                     Points par MAD
