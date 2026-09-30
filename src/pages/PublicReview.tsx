@@ -1535,8 +1535,20 @@ function AIPremiumMenu({
       </section>
 
       {navSections.length > 1 && (
-        <div
-          className="sticky top-0 z-20 overflow-x-auto border-b border-white/10 px-5 py-3 scrollbar-hide"
+        <>
+          <style>{`
+            .menu-category-scrollbar {
+              scrollbar-width: none;
+              -ms-overflow-style: none;
+            }
+            .menu-category-scrollbar::-webkit-scrollbar {
+              display: none;
+              width: 0;
+              height: 0;
+            }
+          `}</style>
+<div
+          className="menu-category-scrollbar sticky top-0 z-20 overflow-x-auto border-b border-white/10 px-5 py-3"
           style={
             wallpaper
               ? {
