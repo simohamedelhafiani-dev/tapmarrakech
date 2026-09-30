@@ -123,10 +123,7 @@ export default function ProfileForm({ engine, businessTypes, onSaved }: ProfileF
     engine.setField(field, value);
   };
 
-  const slugChanged = profile.slug !== engine.profile.slug ? false : false;
-  const currentSlug = engine.profile.slug;
-  const initialSlug = profile.slug;
-  const slugWasChanged = engine.slugStatus !== 'available' || currentSlug !== initialSlug;
+  const slugWasChanged = engine.initialSlug !== null && profile.slug !== engine.initialSlug;
   const slugInfo = slugState(engine.slugStatus, engine.slugMessage);
   const hasBlockingErrors = Object.keys(liveErrors).length > 0 || engine.slugStatus === 'taken' || engine.slugStatus === 'invalid' || engine.slugStatus === 'error' || engine.slugStatus === 'checking';
   const showError = (field: keyof ProfileValidationErrors) => touched[field as keyof EstablishmentProfile] ? liveErrors[field] : undefined;
@@ -191,7 +188,7 @@ export default function ProfileForm({ engine, businessTypes, onSaved }: ProfileF
                 {slugInfo.text}
               </p>
             )}
-            {engine.initialSlug !== undefined && slugWasChanged && (
+            {slugWasChanged && (
               <div className="mt-2 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-[11px] leading-4 text-amber-800">
                 <AlertTriangle size={14} className="mt-0.5 shrink-0" />
                 <span>Attention, modifier le slug changera l’URL publique de votre établissement.</span>
