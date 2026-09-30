@@ -26,7 +26,11 @@ export default function CategoryList({
   const [newName, setNewName] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
-  const [actionError, setActionError] = useState<string | null>(null);\n  const [expandedId, setExpandedId] = useState<string | null>(null);\n  const [deleteTarget, setDeleteTarget] = useState<MenuCategory | null>(null);\n  const [deleteMode, setDeleteMode] = useState<'move' | 'delete'>('move');\n  const [destinationId, setDestinationId] = useState('');
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<MenuCategory | null>(null);
+  const [deleteMode, setDeleteMode] = useState<'move' | 'delete'>('move');
+  const [destinationId, setDestinationId] = useState('');
 
   const submitNewCategory = async () => {
     console.log('[UI] Click: ADD_CATEGORY', { newName, saving });
@@ -163,8 +167,7 @@ export default function CategoryList({
               const itemCount = itemsByCategory[category.id]?.length ?? 0;
 
               return (
-                <div
-                  key={category.id}
+                <div key={category.id} className="space-y-2">
                   className="flex flex-col gap-3 rounded-2xl border border-ink/5 bg-[#f7f7f3] p-4 sm:flex-row sm:items-center"
                 >
                   <div className="flex min-w-0 flex-1 items-center gap-3">
@@ -242,7 +245,6 @@ export default function CategoryList({
                       </>
                     )}
                   </div>
-                </div>
                 {expandedId === category.id && (
                   <div className="rounded-2xl border border-ink/5 bg-white p-4">
                     {itemCount === 0 ? <p className="text-xs text-ink/40">Aucun article dans cette catégorie.</p> : (
