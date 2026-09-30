@@ -75,6 +75,7 @@ export default function MenuPreview({
   const colors = theme[activeDraft.template];
 
   const aiDesign = activeDraft.aiDesign;
+  const showPhotos = aiDesign?.photo_mode !== 'without_photos';
   const aiHero =
     aiDesign && typeof aiDesign.hero === 'object' && aiDesign.hero !== null
       ? (aiDesign.hero as { title?: string; subtitle?: string | null })
@@ -155,7 +156,7 @@ export default function MenuPreview({
         <div className="grid gap-3">
           {items.map(item => (
             <article key={item.id} className={colors.card}>
-              {item.image_url && (
+              {showPhotos && item.image_url && (
                 <img
                   src={item.image_url}
                   alt=""
@@ -195,7 +196,7 @@ export default function MenuPreview({
               </span>
             </div>
 
-            {activeDraft.template === 'luxury' && item.image_url && (
+            {showPhotos && activeDraft.template === 'luxury' && item.image_url && (
               <img
                 src={item.image_url}
                 alt=""
