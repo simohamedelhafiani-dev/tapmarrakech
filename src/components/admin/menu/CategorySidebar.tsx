@@ -1,4 +1,4 @@
-import { Plus } from 'lucide-react';
+import { CheckCircle2, CircleOff, Plus } from 'lucide-react';
 import type { MenuCategory } from '@/hooks/useMenuManager';
 
 type CategorySidebarProps = {
@@ -7,6 +7,7 @@ type CategorySidebarProps = {
   saving: boolean;
   onSelect: (categoryId: string) => void;
   onAdd: (input: { name: string; description?: string | null; active?: boolean }) => Promise<MenuCategory>;
+  onToggleActive: (categoryId: string) => Promise<MenuCategory>;
 };
 
 export default function CategorySidebar({
@@ -15,6 +16,7 @@ export default function CategorySidebar({
   saving,
   onSelect,
   onAdd,
+  onToggleActive,
 }: CategorySidebarProps) {
   const addCategory = async () => {
     const name = window.prompt('Nom de la catégorie');
@@ -49,32 +51,52 @@ export default function CategorySidebar({
           categories.map((category, index) => {
             const selected = category.id === selectedCategoryId;
             return (
-              <button
+              <div
                 key={category.id}
-                type="button"
-                onClick={() => onSelect(category.id)}
-                disabled={saving}
                 className={[
-                  'flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition',
+                  'flex w-full items-center gap-2 rounded-2xl px-2 py-2 transition',
                   selected
                     ? 'bg-forest text-white shadow-sm'
                     : 'text-forest hover:bg-[#f7f7f3]',
-                  !category.active ? 'opacity-55' : '',
+                  !category.active ? 'opacity-60' : '',
                 ].join(' ')}
               >
-                <span className={[
-                  'grid h-7 w-7 shrink-0 place-items-center rounded-lg text-[10px] font-bold',
-                  selected ? 'bg-white/15 text-white' : 'bg-[#f7f7f3] text-forest',
-                ].join(' ')}>
-                  {index + 1}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-xs font-semibold">{category.name}</span>
-                  <span className={selected ? 'text-[10px] text-white/60' : 'text-[10px] text-ink/35'}>
-                    {category.active ? 'Actif' : 'Inactif'}
+                <button
+                  type="button"
+                  onClick={() => onSelect(category.id)}
+                  disabled={saving}
+                  className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-1 py-1 text-left"
+                >
+                  <span className={[
+                    'grid h-7 w-7 shrink-0 place-items-center rounded-lg text-[10px] font-bold',
+                    selected ? 'bg-white/15 text-white' : 'bg-[#f7f7f3] text-forest',
+                  ].join(' ')}>
+                    {index + 1}
                   </span>
-                </span>
-              </button>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-xs font-semibold">{category.name}</span>
+                    <span className={selected ? 'text-[10px] text-white/60' : 'text-[10px] text-ink/35'}>
+                      {category.active ? 'Actif' : 'Inactif'}
+                    </span>
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => void onToggleActive(category.id)}
+                  disabled={saving}
+                  title={category.active ? 'Désactiver la catégorie' : 'Activer la catégorie'}
+                  aria-label={category.active ? 'Désactiver la catégorie' : 'Activer la catégorie'}
+                  className={[
+                    'grid h-8 w-8 shrink-0 place-items-center rounded-xl transition disabled:opacity-40',
+                    selected
+                      ? 'bg-white/10 text-white hover:bg-white/20'
+                      : 'bg-white text-forest shadow-sm hover:bg-[#eef1e9]',
+                  ].join(' ')}
+                >
+                  {category.active ? <CircleOff size={14} /> : <CheckCircle2 size={14} />}
+                </button>
+              </div>
             );
           })
         )}
