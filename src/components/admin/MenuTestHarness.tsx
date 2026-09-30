@@ -184,17 +184,34 @@ export default function MenuTestHarness({ establishmentId }: Props) {
           return;
         }
 
-        if (phase === 12 && !cleanupStarted.current) {
+        if (phase === 12 && !cleanupStarted.current && context.item0) {
           cleanupStarted.current = true;
-          console.log('[MenuHarness] CLEANUP -> removing temporary data');
-
-          if (context.item0) await manager.deleteItem(context.item0);
-          if (context.item2) await manager.deleteItem(context.item2);
-          if (context.categoryA) await manager.deleteCategory(context.categoryA);
-          if (context.categoryB) await manager.deleteCategory(context.categoryB);
-
-          console.log('[MenuHarness] CERTIFICATION RUN COMPLETE -> ALL ASSERTIONS PASSED + CLEANUP COMPLETE');
+          console.log('[MenuHarness] CLEANUP 1/4 -> deleting temporary item 0');
+          await manager.deleteItem(context.item0);
           setPhase(13);
+          return;
+        }
+
+        if (phase === 13 && context.item2) {
+          console.log('[MenuHarness] CLEANUP 2/4 -> deleting temporary item 2');
+          await manager.deleteItem(context.item2);
+          setPhase(14);
+          return;
+        }
+
+        if (phase === 14 && context.categoryA) {
+          console.log('[MenuHarness] CLEANUP 3/4 -> deleting temporary category A');
+          await manager.deleteCategory(context.categoryA);
+          setPhase(15);
+          return;
+        }
+
+        if (phase === 15 && context.categoryB) {
+          console.log('[MenuHarness] CLEANUP 4/4 -> deleting temporary category B');
+          await manager.deleteCategory(context.categoryB);
+          console.log('[MenuHarness] CERTIFICATION RUN COMPLETE -> ALL ASSERTIONS PASSED + CLEANUP COMPLETE');
+          setPhase(16);
+          return;
         }
       } catch (error) {
         setFailed(true);
@@ -205,7 +222,7 @@ export default function MenuTestHarness({ establishmentId }: Props) {
     void run();
   }, [context, establishmentId, failed, manager, phase]);
 
-  if (phase === 13) return null;
+  if (phase === 16) return null;
 
   return null;
 }
