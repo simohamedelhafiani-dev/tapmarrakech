@@ -125,7 +125,7 @@ export default function ProfileForm({ engine, businessTypes, onSaved }: ProfileF
 
   const slugWasChanged = engine.initialSlug !== null && profile.slug !== engine.initialSlug;
   const slugInfo = slugState(engine.slugStatus, engine.slugMessage);
-  const hasBlockingErrors = Object.keys(liveErrors).length > 0 || engine.slugStatus === 'taken' || engine.slugStatus === 'invalid' || engine.slugStatus === 'error' || engine.slugStatus === 'checking';
+  const hasBlockingErrors = engine.slugStatus === 'taken' || engine.slugStatus === 'invalid' || engine.slugStatus === 'error' || engine.slugStatus === 'checking';
   const showError = (field: keyof ProfileValidationErrors) => touched[field as keyof EstablishmentProfile] ? liveErrors[field] : undefined;
 
   const handleSave = async () => {
