@@ -8,6 +8,24 @@ type MenuStudioProps = {
 export default function MenuStudio({ establishmentId }: MenuStudioProps) {
   const menu = useMenuManager(establishmentId);
 
+  const tracedAddCategory = async (input: Parameters<typeof menu.addCategory>[0]) => {
+    console.log('[STUDIO] Calling addCategory()', input);
+    const result = await menu.addCategory(input);
+    console.log('[STUDIO] addCategory() -> SUCCESS', result);
+    return result;
+  };
+  const tracedDeleteCategory = async (categoryId: string) => {
+    console.log('[STUDIO] Calling deleteCategory()', { categoryId });
+    const result = await menu.deleteCategory(categoryId);
+    console.log('[STUDIO] deleteCategory() -> SUCCESS', { categoryId, result });
+    return result;
+  };
+  const tracedReindex = async () => {
+    console.log('[STUDIO] Calling reindexAll()');
+    await menu.reindexAll();
+    console.log('[STUDIO] reindexAll() -> RESOLVED', { error: menu.error });
+  };
+
   return (
     <div className="space-y-5">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -35,11 +53,11 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
         categories={menu.categories}
         itemsByCategory={menu.itemsByCategory}
         saving={menu.saving}
-        onAdd={menu.addCategory}
+        onAdd={tracedAddCategory}
         onUpdate={menu.updateCategory}
         onToggleActive={menu.toggleCategoryActive}
-        onDelete={menu.deleteCategory}
-        onReindex={menu.reindexAll}
+        onDelete={tracedDeleteCategory}
+        onReindex={tracedReindex}
       />
 
       <section className="rounded-3xl border border-dashed border-forest/15 bg-white/70 p-8 text-center">
