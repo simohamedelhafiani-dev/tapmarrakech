@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Check, ChevronDown, ImagePlus, Loader2, Sparkles, Upload, X } from 'lucide-react';
+import { Check, ChevronDown, ImagePlus, Loader2, Sparkles, Upload, X, Wand2 } from 'lucide-react';
 
 export type MenuTemplate = 'editorial' | 'luxury' | 'cards' | 'dark';
 export type MenuNavigationMode = 'scroll' | 'book' | 'app';
@@ -23,6 +23,8 @@ type MenuConfiguratorProps = {
   onChange: (patch: Partial<MenuDesignDraft>) => void;
   onPublish: () => void;
   onGenerateAi: () => void;
+  aiCandidates: Array<{ id: string; design: Record<string, unknown>; template: MenuTemplate }>;
+  onApplyAiCandidate: (candidate: { design: Record<string, unknown>; template: MenuTemplate }) => void;
 };
 
 const navigationModes: Array<{ id: MenuNavigationMode; label: string; description: string }> = [
@@ -46,6 +48,8 @@ export default function MenuConfigurator({
   onChange,
   onPublish,
   onGenerateAi,
+  aiCandidates,
+  onApplyAiCandidate,
 }: MenuConfiguratorProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
@@ -92,15 +96,72 @@ export default function MenuConfigurator({
           </p>
         </div>
 
+
+      </div>
+
+      <div className="rounded-2xl border border-forest/10 bg-forest/[0.03] p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-gold">Assistant IA</p>
+            <h4 className="mt-1 text-sm font-semibold text-forest">Générer plusieurs directions</h4>
+            <p className="mt-1 max-w-xl text-[10px] leading-4 text-ink/40">
+              L’IA prépare 3 propositions à partir de ton menu. Rien n’est appliqué ni publié tant que tu n’as pas choisi une proposition.
+            </p>
+          </div>
+          <Wand2 size={18} className="shrink-0 text-gold" />
+        </div>
+
         <button
           type="button"
           onClick={onGenerateAi}
           disabled={aiLoading || publishing}
-          className="inline-flex items-center justify-center gap-2 rounded-xl border border-gold/30 bg-gold/10 px-3 py-2 text-[11px] font-semibold text-forest disabled:opacity-50"
+          className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-forest px-4 py-3 text-[11px] font-semibold text-white transition hover:bg-forest/90 disabled:opacity-50"
         >
           {aiLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-          {aiLoading ? 'Analyse IA…' : 'Design IA'}
+          {aiLoading ? 'Génération de 3 propositions…' : 'Générer 3 propositions IA'}
         </button>
+
+        {aiCandidates.length > 0 && (
+          <div className="mt-4 grid gap-3 lg:grid-cols-3">
+            {aiCandidates.map((candidate, index) => {
+              const hero = candidate.design.hero as { title?: string; subtitle?: string | null } | undefined;
+              const sections = Array.isArray(candidate.design.sections) ? candidate.design.sections : [];
+
+              return (
+                <article key={candidate.id} className="rounded-2xl border border-ink/8 bg-white p-4 shadow-sm">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="rounded-full bg-gold/10 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-gold">
+                      Proposition {index + 1}
+                    </span>
+                    <span className="text-[9px] font-semibold uppercase text-ink/35">{candidate.template}</span>
+                  </div>
+
+                  <h5 className="mt-3 text-sm font-semibold text-forest">
+                    {hero?.title || 'Direction créative'}
+                  </h5>
+                  <p className="mt-1 min-h-8 text-[10px] leading-4 text-ink/40">
+                    {hero?.subtitle || 'Une proposition générée à partir de la structure actuelle.'}
+                  </p>
+
+                  <div className="mt-3 flex items-center justify-between text-[9px] text-ink/35">
+                    <span>{sections.length} section{sections.length > 1 ? 's' : ''}</span>
+                    <span className="font-semibold text-forest">Prête à tester</span>
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled={publishing}
+                    onClick={() => onApplyAiCandidate(candidate)}
+                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-forest/15 bg-forest/5 px-3 py-2.5 text-[10px] font-semibold text-forest transition hover:border-gold hover:bg-gold/10"
+                  >
+                    <Check size={13} />
+                    Utiliser cette proposition
+                  </button>
+                </article>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <div>
