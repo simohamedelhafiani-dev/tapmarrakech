@@ -1235,7 +1235,7 @@ function EstablishmentWorkspace({
   const publicLink = `${window.location.origin}/p/${establishment.slug}`;
   const [scannerLink, setScannerLink] = useState<string | null>(null);
   const [scannerQr, setScannerQr] = useState<string | null>(null);
-  const businessType = businessTypes.find((x) => x.id === establishment.ai_business_type_id)?.name ?? profile.business_type ?? 'Établissement';
+  const businessType = businessTypes.find((x) => x.id === establishmentProfileEngine.profile?.ai_business_type_id)?.name ?? establishmentProfileEngine.profile?.business_type ?? profile.business_type ?? 'Établissement';
 
   const loadTab = async () => {
     if (tab === 'public') {
