@@ -1880,7 +1880,7 @@ function MenuTemplate({
   const navigationControls = navigation !== 'scroll' ? (
     <div className="mt-5 mb-7">
       {navigation === 'app' ? (
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="sticky top-0 z-30 -mx-2 flex gap-2 overflow-x-auto bg-[#fffdf9]/95 px-2 py-2 pb-3 backdrop-blur-md">
           {visible.map(category => (
             <button
               key={category.id}
