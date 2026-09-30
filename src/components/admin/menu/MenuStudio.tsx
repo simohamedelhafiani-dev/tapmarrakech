@@ -51,6 +51,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
   const [designError, setDesignError] = useState<string | null>(null);
   const [publishedSnapshot, setPublishedSnapshot] = useState<{
     template: MenuTemplate;
+    navigation: MenuNavigationMode;
     wallpaperUrl: string | null;
     overlayOpacity: number;
     aiDesign: Record<string, unknown> | null;
@@ -150,6 +151,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
     if (draft.wallpaperFile || draft.wallpaperRemoved) return true;
     return (
       draft.template !== publishedSnapshot.template ||
+      draft.navigation !== publishedSnapshot.navigation ||
       draft.wallpaperUrl !== publishedSnapshot.wallpaperUrl ||
       draft.overlayOpacity !== publishedSnapshot.overlayOpacity ||
       stable(draft.aiDesign) !== stable(publishedSnapshot.aiDesign)
@@ -258,6 +260,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
         ...currentDesign,
         ...(draft.aiDesign ? { ai_design: draft.aiDesign } : {}),
         overlay_opacity: draft.overlayOpacity,
+        navigation_mode: draft.navigation,
         background_image_url: draft.wallpaperRemoved ? null : wallpaperUrl,
       };
 
@@ -278,6 +281,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
       const publishedWallpaper = draft.wallpaperRemoved ? null : wallpaperUrl;
       const nextSnapshot = {
         template: draft.template,
+        navigation: draft.navigation,
         wallpaperUrl: publishedWallpaper,
         overlayOpacity: draft.overlayOpacity,
         aiDesign: draft.aiDesign,
