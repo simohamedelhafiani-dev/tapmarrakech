@@ -26,7 +26,6 @@ export default function LoyaltyJoin() {
   const [birthDate, setBirthDate] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
   const [accessToken, setAccessToken] = useState('');
 
   useEffect(() => {
@@ -123,7 +122,6 @@ export default function LoyaltyJoin() {
         if (!row?.access_token) throw new Error('Impossible de créer votre carte fidélité.');
 
         setEstablishmentName(row.establishment_name || establishmentName);
-        setSuccessMessage('Félicitations ' + firstName.trim() + ' ! Votre carte fidélité est prête.');
         setAccessToken(String(row.access_token));
         return;
       }
@@ -144,7 +142,6 @@ export default function LoyaltyJoin() {
       const row = (Array.isArray(data) ? data[0] : data) as ReferralResult | null;
       if (!row?.access_token) throw new Error('Impossible de créer votre carte fidélité.');
 
-      setSuccessMessage('Félicitations ' + firstName.trim() + ' ! Votre carte fidélité est prête.');
       setAccessToken(String(row.access_token));
     } catch (rpcError) {
       const message = rpcError instanceof Error ? rpcError.message : String(rpcError);
@@ -153,7 +150,9 @@ export default function LoyaltyJoin() {
           ? 'Ce numéro est déjà inscrit dans le programme fidélité.'
           : message === 'loyalty_program_disabled'
             ? 'Le programme fidélité est momentanément indisponible.'
-            : message,
+            : message === 'referral_limit_reached'
+              ? 'Ce client ne peut plus parrainer de nouveaux membres pour le moment.'
+              : message,
       );
       setLoading(false);
     }
