@@ -39,6 +39,8 @@ type LoyaltyCustomer = {
   last_name: string | null;
   birth_date: string | null;
   points_balance: number;
+  stamps_balance?: number;
+  stamps_total?: number;
   total_points_earned: number;
   total_points_redeemed: number;
   visit_count: number;
@@ -126,6 +128,7 @@ export default function Employee() {
   const [establishmentId, setEstablishmentId] = useState('');
   const [establishmentLogoUrl, setEstablishmentLogoUrl] = useState<string | null>(null);
   const [loyaltyProgram, setLoyaltyProgram] = useState({ program_type: 'POINTS' as 'STAMP'|'DISCOUNT'|'POINTS', stamp_goal: 10 });
+  const isStampProgram = loyaltyProgram.program_type === 'STAMP';
   const [loyaltyDesign, setLoyaltyDesign] = useState({
     template_id: 'luxury',
     primary_color: '#173D32',
@@ -520,6 +523,21 @@ export default function Employee() {
     alert(row?.reward_ready ? `Tampon ajouté. Récompense disponible : ${row.reward_name || 'cadeau'}` : `Tampon ajouté. ${row?.stamps_balance ?? 0} / ${loyaltyProgram.stamp_goal}`);
   }
 
+  async function redeemStampReward(customer: LoyaltyCustomer) {
+    if (!employeeSupabase || !session) return;
+    setSaving(true);
+    const { data, error } = await employeeSupabase.rpc('redeem_loyalty_stamp_reward_by_employee', {
+      p_session_token: session.session_token,
+      p_customer_id: customer.id,
+    });
+    setSaving(false);
+    if (error) return alert(error.message);
+    const row = Array.isArray(data) ? data[0] : data;
+    await loadCustomers();
+    setShowCard({ ...customer, stamps_balance: Number(row?.new_stamps_balance ?? 0) });
+    alert(`Récompense réclamée : ${row?.reward_name || 'cadeau'}\nNouveau solde : ${row?.new_stamps_balance ?? 0} tampon(s).`);
+  }
+
   async function createCustomer() {
     if (!employeeSupabase) return;
     if (!establishmentId) return;
@@ -890,7 +908,8 @@ export default function Employee() {
     } as LoyaltyCustomer);
 
     setShowScanner(false);
-    setShowPoints(customer);
+    if (isStampProgram) setShowCard(customer);
+    else setShowPoints(customer);
     setPurchaseAmount('');
     setPointsResponsibleCode('');
     setPointsInvoiceNumber('');
@@ -1025,7 +1044,7 @@ export default function Employee() {
               Fidélité
             </h1>
             <p className="mt-2 text-sm text-ink/50">
-              Recherchez un client, ajoutez ses points ou utilisez une récompense.
+              {isStampProgram ? 'Recherchez un client, ajoutez un tampon ou réclamez sa récompense.' : 'Recherchez un client, ajoutez ses points ou utilisez une récompense.'}
             </p>
           </div>
 
@@ -1149,20 +1168,38 @@ export default function Employee() {
                   <div className="flex flex-wrap items-center gap-3">
                     <div className="rounded-xl bg-[#f7f7f3] px-4 py-2 text-center">
                       <p className="text-[10px] uppercase tracking-wide text-ink/40">
-                        Points
+                        {isStampProgram ? 'Tampons' : 'Points'}
                       </p>
                       <p className="font-semibold text-forest">
-                        {customer.points_balance}
+                        {isStampProgram ? `${customer.stamps_balance ?? 0} / ${loyaltyProgram.stamp_goal}` : customer.points_balance}
                       </p>
                     </div>
 
-                    <button
-                      onClick={() => setShowPoints(customer)}
-                      className="inline-flex items-center gap-2 rounded-xl border border-forest/15 px-4 py-2.5 text-xs font-semibold text-forest hover:bg-forest/5"
-                    >
-                      <Coins size={16} />
-                      Ajouter points
-                    </button>
+                    {isStampProgram ? (
+                      <>
+                        <button onClick={() => void addStamp(customer)} disabled={saving} className="inline-flex items-center gap-2 rounded-xl border border-gold/30 bg-white px-4 py-2.5 text-xs font-semibold text-forest hover:bg-gold/5 disabled:opacity-50">
+                          <Gift size={16} />
+                          Ajouter un tampon
+                        </button>
+                        {(customer.stamps_balance ?? 0) >= loyaltyProgram.stamp_goal && (
+                          <button onClick={() => void redeemStampReward(customer)} disabled={saving} className="inline-flex items-center gap-2 rounded-xl bg-gold px-4 py-2.5 text-xs font-semibold text-forest hover:opacity-90 disabled:opacity-50">
+                            <Gift size={16} />
+                            Réclamer récompense
+                          </button>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <button onClick={() => setShowPoints(customer)} className="inline-flex items-center gap-2 rounded-xl border border-forest/15 px-4 py-2.5 text-xs font-semibold text-forest hover:bg-forest/5">
+                          <Coins size={16} />
+                          Ajouter points
+                        </button>
+                        <button onClick={() => openRewards(customer)} className="inline-flex items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white hover:bg-forest-light">
+                          <Gift size={16} />
+                          Utiliser points
+                        </button>
+                      </>
+                    )
 
                     <button
                       onClick={() => openEditCustomer(customer)}
