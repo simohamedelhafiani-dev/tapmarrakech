@@ -225,7 +225,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
         discountValidDays: program.discountValidDays,
       };
 
-      await supabase.rpc('save_loyalty_card_builder_config', {
+      const { error: liveSaveError } = await supabase.rpc('save_loyalty_card_builder_config', {
         p_establishment_id: establishmentId,
         p_design_config: designConfig,
         p_template_id: design.templateId,
@@ -237,6 +237,10 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
         p_border_radius: 34,
         p_published: true,
       });
+
+      if (!liveSaveError) {
+        setDesign(current => current.published ? current : { ...current, published: true });
+      }
     }, 180);
 
     return () => {
