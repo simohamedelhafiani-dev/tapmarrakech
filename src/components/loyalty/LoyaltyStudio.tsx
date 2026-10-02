@@ -108,9 +108,9 @@ const emptyReward: RewardDraft = {
 };
 
 function bonusLabel(type: LoyaltyReferralBonusType, value: number) {
-  if (type === 'STAMP') return \`\${value} tampon(s)\`;
-  if (type === 'REDUCTION') return \`\${value}% de réduction\`;
-  return \`\${value} point(s)\`;
+  if (type === 'STAMP') return `${value} tampon(s)`;
+  if (type === 'REDUCTION') return `${value}% de réduction`;
+  return `${value} point(s)`;
 }
 
 function normalizeReward(row: Record<string, unknown>): Reward {
