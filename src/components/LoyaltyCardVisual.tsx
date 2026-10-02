@@ -17,7 +17,7 @@ export type LoyaltyDesignConfig = {
   logo_url?: string | null;
   ai_prompt?: string;
   ai_generation_id?: string;
-  card_mode?: 'STAMP' | 'POINTS_REWARD' | 'POINTS_DISCOUNT';
+  card_mode?: 'QR' | 'STAMP' | 'POINTS_REWARD' | 'POINTS_DISCOUNT';
   loyaltyType?: 'STAMP' | 'POINTS' | 'DISCOUNT' | 'REWARD' | 'TIER' | 'CHALLENGE' | 'CASHBACK' | 'COLLECTION';
   cardTitle?: string;
   cardSubtitle?: string;
