@@ -157,6 +157,8 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [rewardDraft, setRewardDraft] = useState<RewardDraft>(emptyReward);
   const [rewardSaving, setRewardSaving] = useState(false);
+  const [conversionMad, setConversionMad] = useState(1);
+  const [conversionPoints, setConversionPoints] = useState(1);
   const [design, setDesign] = useState<DesignState>(DEFAULT_DESIGN);
   const [establishment, setEstablishment] = useState({
     name: 'Votre établissement',
@@ -207,6 +209,8 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
         enabled: settings.enabled,
       });
 
+      setConversionMad(1);
+      setConversionPoints(settings.pointsPerCurrency);
       setReferral(referralState.draftConfig);
       setReferralStats(referralStateStats.acquiredCount);
       setRewards(
@@ -730,7 +734,21 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
               <StudioCard eyebrow="Conversion" title="Taux de fidélité">
                 <div className="grid gap-4 md:grid-cols-[1fr_auto_1fr] md:items-end">
                   <Field label="MAD dépensés">
-                    <input value="1" readOnly className="h-12 w-full rounded-xl border border-ink/10 bg-white px-4 text-sm font-medium text-forest outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-forest/10 placeholder:text-ink/25 bg-[#f7f7f3] text-ink/50" />
+                    <input
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      value={conversionMad}
+                      onChange={e => {
+                        const mad = Math.max(0.01, Number(e.target.value) || 0.01);
+                        setConversionMad(mad);
+                        setProgram(current => ({
+                          ...current,
+                          pointsPerCurrency: Math.max(0.01, conversionPoints / mad),
+                        }));
+                      }}
+                      className="h-12 w-full rounded-xl border border-ink/10 bg-white px-4 text-sm font-medium text-forest outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-forest/10 placeholder:text-ink/25"
+                    />
                   </Field>
                   <span className="hidden pb-3 text-xs font-bold text-ink/25 md:block">=</span>
                   <Field label="Points gagnés">
@@ -738,17 +756,21 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                       type="number"
                       min=".01"
                       step=".01"
-                      value={program.pointsPerCurrency}
-                      onChange={e => setProgram(current => ({
-                        ...current,
-                        pointsPerCurrency: Math.max(0.01, Number(e.target.value) || 0.01),
-                      }))}
+                      value={conversionPoints}
+                      onChange={e => {
+                        const points = Math.max(0.01, Number(e.target.value) || 0.01);
+                        setConversionPoints(points);
+                        setProgram(current => ({
+                          ...current,
+                          pointsPerCurrency: Math.max(0.01, points / conversionMad),
+                        }));
+                      }}
                       className="h-12 w-full rounded-xl border border-ink/10 bg-white px-4 text-sm font-medium text-forest outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-forest/10 placeholder:text-ink/25"
                     />
                   </Field>
                 </div>
                 <p className="mt-3 rounded-xl bg-[#f7f7f3] px-3 py-2.5 text-[10px] text-ink/45">
-                  Chaque 1 MAD dépensé génère {program.pointsPerCurrency} point(s).
+                  Chaque {conversionMad} MAD dépensé génère {conversionPoints} point(s).
                 </p>
               </StudioCard>
 
