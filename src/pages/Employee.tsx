@@ -1199,7 +1199,7 @@ export default function Employee() {
                           Utiliser points
                         </button>
                       </>
-                    )
+                    )}
 
                     <button
                       onClick={() => openEditCustomer(customer)}
