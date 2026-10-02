@@ -1086,7 +1086,15 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
             </div>
             <div className="mt-6 flex min-h-0 w-full flex-1 flex-col items-center justify-center">
 
-              <LoyaltyPreview config={visualExperience} />
+              <div
+                style={{
+                  width: '320px',
+                  height: '640px',
+                  flexShrink: 0,
+                }}
+              >
+                <LoyaltyPreview config={visualExperience} />
+              </div>
 
               <div className="mt-4 rounded-[22px] border border-ink/10 bg-white p-4 shadow-sm">
                 <div className="flex items-center justify-between gap-3">
