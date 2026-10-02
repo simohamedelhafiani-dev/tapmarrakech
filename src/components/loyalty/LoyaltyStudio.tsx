@@ -368,7 +368,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
 
         <aside className="sticky top-6 h-fit rounded-[28px] bg-[#f1f3f0] p-5">
           <div className="mb-4 flex items-center justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[.18em] text-gold">Preview permanent</p><p className="mt-1 text-xs text-ink/40">300 × 450 px</p></div><span className="rounded-full bg-white px-3 py-1 text-[9px] font-semibold text-forest">Wallet</span></div>
-          <div className="flex min-h-[450px] items-center justify-center overflow-visible"><LoyaltyPreview config={previewConfig}/></div>
+          <div className="flex h-[450px] items-center justify-center overflow-visible"><LoyaltyPreview config={previewConfig}/></div>
           <div className="mt-4 rounded-2xl bg-white p-4"><p className="text-[10px] uppercase tracking-[.16em] text-gold">Récompense visible</p><p className="mt-1 text-sm font-semibold text-forest">{program.stampRewardName || rewards[0]?.name || 'Cadeau fidélité'}</p></div>
         </aside>
       </div>
