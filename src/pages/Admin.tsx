@@ -43,7 +43,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
-import LoyaltyProgramCustomization from '@/components/LoyaltyProgramCustomization';
+import LoyaltyStudio from '@/components/loyalty/LoyaltyStudio';
 import RecentActivity from '@/components/admin/RecentActivity';
 import EvolutionCharts from '@/components/admin/EvolutionCharts';
 import RecentLoyaltyCustomers from '@/components/admin/RecentLoyaltyCustomers';
@@ -769,7 +769,7 @@ export default function Admin() {
                     </label>
                   </div>
                   {selectedEstablishmentId && (
-                    <LoyaltyProgramCustomization establishmentId={selectedEstablishmentId} />
+                    <LoyaltyStudio establishmentId={selectedEstablishmentId} />
                   )}
                 </>
               ) : (
