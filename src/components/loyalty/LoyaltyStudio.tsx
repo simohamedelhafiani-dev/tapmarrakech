@@ -248,7 +248,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     if (!establishmentId) return;
 
     setPreviewChannelReady(false);
-    const channel = supabase.channel(\`loyalty-design-preview-\${establishmentId}\`);
+    const channel = supabase.channel(`loyalty-design-preview-${establishmentId}`);
     previewChannelRef.current = channel;
 
     void channel.subscribe((status) => {
@@ -421,7 +421,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     setSaving(true);
     try {
       const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-      const path = \`loyalty-cards/\${establishmentId}/wallpaper-\${Date.now()}.\${ext}\`;
+      const path = `loyalty-cards/${establishmentId}/wallpaper-${Date.now()}.${ext}`;
       const { error } = await supabase.storage
         .from('promotion-images')
         .upload(path, file, { upsert: true, contentType: file.type });
