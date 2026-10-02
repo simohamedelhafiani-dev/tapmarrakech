@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, Gift, Loader2 } from 'lucide-react';
+import { Gift, Loader2 } from 'lucide-react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 
@@ -28,7 +28,6 @@ export default function LoyaltyJoin() {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [accessToken, setAccessToken] = useState('');
-  const [redirectReady, setRedirectReady] = useState(false);
 
   useEffect(() => {
     if (!isGlobalEnrollment) {
@@ -160,38 +159,10 @@ export default function LoyaltyJoin() {
     }
   }
 
-  if (accessToken && redirectReady) {
-    return <Navigate to={`/loyalty/\${accessToken}?welcome=1`} replace />;
-  }
-
   if (accessToken) {
-    return (
-      <main className="min-h-screen bg-[#eef0ed] px-4 py-8">
-        <div className="mx-auto flex min-h-[80vh] max-w-md items-center justify-center">
-          <div className="w-full rounded-[2rem] bg-white p-8 text-center shadow-xl">
-            <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-[#e7f1eb] text-[#173D32]">
-              <CheckCircle2 className="h-8 w-8" />
-            </div>
-            <p className="mt-5 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#D3A84C]">
-              Inscription confirmée
-            </p>
-            <h1 className="mt-2 font-display text-3xl text-[#173D32]">Bienvenue !</h1>
-            <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-ink/55">
-              {successMessage || 'Votre carte fidélité est prête.'}
-            </p>
-            {establishmentName && (
-              <p className="mt-2 text-xs font-semibold text-[#173D32]">{establishmentName}</p>
-            )}
-            <div className="mx-auto mt-6 h-1.5 w-24 overflow-hidden rounded-full bg-[#edf0ed]">
-              <div className="h-full w-full animate-pulse rounded-full bg-[#D3A84C]" />
-            </div>
-            <p className="mt-3 text-[10px] text-ink/35">Ouverture de votre carte…</p>
-
-          </div>
-        </div>
-      </main>
-    );
+    return <Navigate to={`/loyalty/\${accessToken}?welcome=1&referral=1`} replace />;
   }
+
 
   if (!referralCode && !establishmentId) {
     return (
