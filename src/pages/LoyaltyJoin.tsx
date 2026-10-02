@@ -149,7 +149,7 @@ export default function LoyaltyJoin() {
   }
 
   if (accessToken) {
-    return <Navigate to={`/loyalty/${accessToken}?welcome=1&referral=1`} replace />;
+    return <Navigate to={`/loyalty/${accessToken}?welcome=1`} replace />;
   }
 
 
