@@ -17,7 +17,7 @@ export type LoyaltyDesignConfig = {
   logo_url?: string | null;
   ai_prompt?: string;
   ai_generation_id?: string;
-  card_mode?: 'QR' | 'STAMP';
+  card_mode?: 'STAMP' | 'POINTS_REWARD' | 'POINTS_DISCOUNT';
   loyaltyType?: 'STAMP' | 'POINTS' | 'DISCOUNT' | 'REWARD' | 'TIER' | 'CHALLENGE' | 'CASHBACK' | 'COLLECTION';
   cardTitle?: string;
   cardSubtitle?: string;
@@ -43,7 +43,7 @@ export const defaultLoyaltyDesignConfig: LoyaltyDesignConfig = {
   stamp_style: 'circles',
   background_image_url: null,
   logo_url: null,
-  card_mode: 'QR',
+  card_mode: 'POINTS_REWARD',
 };
 
 export type LoyaltyVisualCard = {
@@ -138,7 +138,7 @@ export function LoyaltyCardVisual({
   }, [card.cardUrl, showQr, design.primary_color, side]);
 
   const loyaltyType = config.loyaltyType ?? programType;
-  const cardMode = config.card_mode ?? (loyaltyType === 'STAMP' ? 'STAMP' : 'QR');
+  const cardMode = config.card_mode ?? (loyaltyType === 'STAMP' ? 'STAMP' : loyaltyType === 'DISCOUNT' ? 'POINTS_DISCOUNT' : 'POINTS_REWARD');
   const logoUrl = config.logo_url || card.logoUrl;
   const stampGoal = Math.max(1, Math.min(card.stampGoal ?? 10, 12));
   const stampsBalance = Math.max(0, Math.min(card.stampsBalance ?? 0, stampGoal));
