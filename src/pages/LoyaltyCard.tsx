@@ -638,6 +638,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                 stampRewardName: raw.rewardName || program.stamp_reward_name,
                 discountPercent: raw.discountPercent ?? program.discount_percent ?? undefined,
                 discountPointsThreshold: discountThreshold,
+                discountExpiresAt: discountUnlockDate,
                 discountValidDays,
                 customerName: fullName,
                 loyaltyNumber: card.loyalty_number,
