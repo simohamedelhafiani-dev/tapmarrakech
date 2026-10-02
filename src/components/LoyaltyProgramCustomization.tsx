@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Check, Gift, ImagePlus, Link2, Loader2, Pencil, Plus, QrCode, Share2, Stamp, Trash2, Upload, X } from 'lucide-react';
+import QRCode from 'qrcode';
 import { supabase } from '@/lib/supabase';
 import { defaultLoyaltyDesignConfig, type LoyaltyDesignConfig } from './LoyaltyCardVisual';
 import { LoyaltyExperience, type LoyaltyExperienceConfig } from './loyalty/LoyaltyExperience';
@@ -113,6 +114,8 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
   const [referralCode, setReferralCode] = useState('');
   const [referralGenerating, setReferralGenerating] = useState(false);
   const [referralCopied, setReferralCopied] = useState(false);
+  const [masterQrDataUrl, setMasterQrDataUrl] = useState('');
+  const [masterLinkCopied, setMasterLinkCopied] = useState(false);
 
   const {
     generateReferralCode,
@@ -210,6 +213,47 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
       cancelled = true;
     };
   }, [establishmentId, getReferralConfig]);
+
+  useEffect(() => {
+    if (!establishmentId) {
+      setMasterQrDataUrl('');
+      return;
+    }
+
+    let active = true;
+    const url = window.location.origin + '/loyalty/join?est=' + encodeURIComponent(establishmentId);
+
+    void QRCode.toDataURL(url, {
+      width: 260,
+      margin: 1,
+      errorCorrectionLevel: 'M',
+      color: { dark: '#173D32', light: '#FFFFFF' },
+    }).then(dataUrl => {
+      if (active) setMasterQrDataUrl(dataUrl);
+    }).catch(error => {
+      console.error('Impossible de générer le QR maître:', error);
+      if (active) setMasterQrDataUrl('');
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [establishmentId]);
+
+  function masterEnrollmentUrl() {
+    return window.location.origin + '/loyalty/join?est=' + encodeURIComponent(establishmentId);
+  }
+
+  async function copyMasterEnrollmentLink() {
+    const url = masterEnrollmentUrl();
+    try {
+      await navigator.clipboard.writeText(url);
+      setMasterLinkCopied(true);
+      window.setTimeout(() => setMasterLinkCopied(false), 1800);
+    } catch {
+      alert('Impossible de copier le lien NFC.');
+    }
+  }
 
   function openRewardEditor(reward?: LoyaltyRewardAdmin) {
     setEditingReward(reward ?? null);
@@ -691,6 +735,51 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                 </div>
                 <div className="mt-3 rounded-xl border border-forest/10 bg-white p-3 text-[10px] text-ink/45">
                   Exemple : 250 MAD = {Math.floor(Math.max(0, Number(pointsPerCurrency) || 0) * 250)} points.
+                </div>
+              </div>
+
+              <div className="mt-4 rounded-2xl border border-[#D6B15A]/25 bg-gradient-to-br from-[#173D32] to-[#102a22] p-5 text-white">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-[#D6B15A]">Accès Client</p>
+                    <h3 className="mt-1 text-lg font-semibold">QR Code Maître</h3>
+                    <p className="mt-1 max-w-xl text-[10px] leading-4 text-white/55">
+                      Un seul lien permanent pour inscrire n’importe quel nouveau client. Le même lien peut être programmé dans une plaque NFC.
+                    </p>
+                  </div>
+                  <span className="shrink-0 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-[9px] font-semibold text-white/70">
+                    Permanent
+                  </span>
+                </div>
+
+                <div className="mt-4 grid gap-4 md:grid-cols-[auto_1fr] md:items-center">
+                  <div className="mx-auto flex h-[230px] w-[230px] items-center justify-center rounded-2xl bg-white p-3">
+                    {masterQrDataUrl ? (
+                      <img src={masterQrDataUrl} alt="QR Code maître d'inscription" className="h-full w-full rounded-xl" />
+                    ) : (
+                      <div className="h-full w-full animate-pulse rounded-xl bg-[#eef0ed]" />
+                    )}
+                  </div>
+
+                  <div className="min-w-0">
+                    <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                      <p className="text-[9px] font-semibold uppercase tracking-[.16em] text-white/45">Lien d’enrôlement</p>
+                      <p className="mt-2 break-all text-xs leading-5 text-white/80">{masterEnrollmentUrl()}</p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => void copyMasterEnrollmentLink()}
+                      className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#D6B15A] px-4 py-3 text-[11px] font-semibold text-[#173D32] transition hover:brightness-105"
+                    >
+                      {masterLinkCopied ? <Check size={15} /> : <Link2 size={15} />}
+                      {masterLinkCopied ? 'Lien copié !' : 'Copier le lien NFC'}
+                    </button>
+
+                    <p className="mt-2 text-center text-[9px] leading-4 text-white/40">
+                      Scannez le QR ou copiez ce lien pour programmer vos plaques NFC, cartes ou supports imprimés.
+                    </p>
+                  </div>
                 </div>
               </div>
 
