@@ -298,7 +298,6 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
       setUploading(null);
     }
   }
-
   async function uploadWallpapers(files: FileList | null) {
     if (!files?.length) return;
     const validFiles = Array.from(files).filter(file => file.type.startsWith('image/') && file.size <= 5 * 1024 * 1024);
@@ -326,9 +325,9 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     }
   }
 
-  async function saveStructure() {
+  async function save(publish: boolean) {
     setSaving(true);
-    const { error } = await supabase.rpc('save_loyalty_program_settings', {
+    const { error: programError } = await supabase.rpc('save_loyalty_program_settings', {
       p_establishment_id: establishmentId,
       p_program_type: cardMode === 'STAMP' ? 'STAMP' : 'POINTS',
       p_stamp_goal: Number(stampGoal) || 10,
@@ -340,13 +339,11 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
       p_currency: 'MAD',
       p_enabled: programEnabled,
     });
-    setSaving(false);
-    if (error) return alert(error.message);
-    alert('Structure du programme enregistrée.');
-  }
+    if (programError) {
+      setSaving(false);
+      return alert(programError.message);
+    }
 
-  async function publishDesign() {
-    setSaving(true);
     const { error } = await supabase.rpc('save_loyalty_card_builder_config', {
       p_establishment_id: establishmentId,
       p_design_config: {
@@ -363,12 +360,12 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
       p_text_color: design.text_color,
       p_button_color: design.button_color,
       p_border_radius: design.border_radius,
-      p_published: true,
+      p_published: publish,
     });
     setSaving(false);
     if (error) return alert(error.message);
-    setDesign(d => ({ ...d, published: true }));
-    alert('Design de la carte publié.');
+    setDesign(d => ({ ...d, published: publish }));
+    alert(publish ? 'Carte fidélité publiée.' : 'Brouillon enregistré.');
   }
 
   const visualExperience: LoyaltyExperienceConfig = {
@@ -418,16 +415,13 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
       <div className="rounded-[2rem] border border-ink/5 bg-white p-5 shadow-soft md:p-7">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Fidélité Studio</p>
-            <h2 className="mt-1 font-display text-3xl text-forest">Construis ta carte fidélité</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-ink/45">Sépare la structure du programme et son apparence, avec un miroir client toujours visible.</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">Fidélité</p>
+            <h2 className="mt-1 font-display text-3xl text-forest">Loyalty Studio</h2>
+            <p className="mt-1 text-sm text-ink/45">Structure, Design et Miroir de la carte fidélité existante de l’établissement.</p>
           </div>
           <div className="flex gap-2">
-            {activeTab === 'Structure' ? (
-              <button type="button" onClick={() => void saveStructure()} disabled={saving} className="rounded-xl bg-forest px-5 py-3 text-xs font-semibold text-white">{saving ? 'Enregistrement…' : 'Enregistrer la structure'}</button>
-            ) : (
-              <button type="button" onClick={() => void publishDesign()} disabled={saving} className="rounded-xl bg-forest px-5 py-3 text-xs font-semibold text-white">{saving ? 'Publication…' : 'Publier le design'}</button>
-            )}
+            <button type="button" onClick={() => void save(false)} disabled={saving} className="rounded-xl border border-forest/20 bg-white px-4 py-3 text-xs font-semibold text-forest">Enregistrer</button>
+            <button type="button" onClick={() => void save(true)} disabled={saving} className="rounded-xl bg-forest px-5 py-3 text-xs font-semibold text-white">{saving ? 'Publication…' : 'Publier la carte'}</button>
           </div>
         </div>
 
@@ -438,7 +432,11 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                 <button
                   key={tab}
                   type="button"
-                  onClick={() => setActiveTab(tab)}
+                  onClick={() => {
+                    setActiveTab(tab);
+                    const targetId = tab === 'Structure' ? 'loyalty-structure' : 'loyalty-design';
+                    window.requestAnimationFrame(() => document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+                  }}
                   className={`flex-1 rounded-xl px-3 py-2.5 text-center text-[10px] font-semibold transition ${activeTab === tab ? 'bg-white text-forest shadow-sm' : 'text-ink/35 hover:text-forest'}`}
                 >
                   {tab}
@@ -446,8 +444,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
               ))}
             </div>
 
-            <div id="loyalty-design" className={activeTab === 'Design' ? 'space-y-5' : 'hidden'}>
-              <div className="rounded-2xl border border-ink/10 p-5">
+            <div id="loyalty-design" className="scroll-mt-6 rounded-2xl border border-ink/10 p-5">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Modèles</p>
                 <p className="mt-1 text-xs text-ink/45">Choisis un modèle de départ, puis personnalise-le avec tes couleurs, ton logo et ta photo.</p>
@@ -523,7 +520,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                 ))}
               </div>
 
-              <div className="hidden">
+              <div className="mt-5">
                 <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-ink/40">Type de fidélité</p>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   <ModeButton active={cardMode === 'QR'} icon={<QrCode size={23}/>} title="QR Code" description="Une carte avec un QR unique pour le client." onClick={() => chooseMode('QR')} />
@@ -536,9 +533,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                 <label className="block text-xs font-medium text-ink/50">Sous-titre<input value={design.design_config.front_subtitle} onChange={e => updateConfig({front_subtitle:e.target.value})} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm"/></label>
               </div>
 
-              </div>
-              <div id="loyalty-structure" className={activeTab === 'Structure' ? 'space-y-4' : 'hidden'}>
-                <div className="rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
+              <div id="loyalty-structure" className="scroll-mt-6 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
                 <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Structure</p>
                 <p className="mt-1 text-xs text-ink/45">Les réglages ci-dessous pilotent le programme de fidélité déjà utilisé par cet établissement.</p>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -566,17 +561,9 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                 <div className="mt-3 rounded-xl border border-forest/10 bg-white p-3 text-[10px] text-ink/45">
                   Exemple : 250 MAD = {Math.floor(Math.max(0, Number(pointsPerCurrency) || 0) * 250)} points.
                 </div>
-                <div className="mt-5">
-                <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-ink/40">Type de fidélité</p>
-                <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                  <ModeButton active={cardMode === 'QR'} icon={<QrCode size={23}/>} title="QR Code" description="Une carte avec un QR unique pour le client." onClick={() => chooseMode('QR')} />
-                  <ModeButton active={cardMode === 'STAMP'} icon={<Stamp size={23}/>} title="Tampons" description="Une carte de visites avec des tampons." onClick={() => chooseMode('STAMP')} />
-                </div>
-              </div>
               </div>
 
-                </div>
-              <div id="loyalty-rewards" className={activeTab === 'Structure' ? 'mt-4 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4' : 'hidden'}>
+              <div id="loyalty-rewards" className="mt-4 scroll-mt-6 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
                 {cardMode === 'STAMP' ? (
                   <div className="grid gap-3 sm:grid-cols-3">
                     <label className="text-xs text-ink/50">Nombre de tampons<input type="number" min="1" max="12" value={stampGoal} onChange={e=>setStampGoal(e.target.value)} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5"/></label>
@@ -609,8 +596,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                   <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
                     <div className="flex items-center justify-between"><div><p className="text-[10px] font-semibold uppercase tracking-[.18em] text-gold">Fidélité points</p><h3 className="mt-1 text-xl font-semibold text-forest">{editingReward ? 'Modifier la récompense' : 'Ajouter une récompense'}</h3></div><button type="button" onClick={() => setRewardEditorOpen(false)} className="rounded-xl p-2 text-ink/40"><X size={18}/></button></div>
                     <div className="mt-5 space-y-3">
-                      <label className="block text-xs text-ink/50">Nom<input value={rewardName} onChange={e=>setRewardName(e.target.value)} placeholder="Dessert offert" className="mt-1 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"/></label>
-                      <label className="block text-xs text-ink/50">Description<input value={rewardDescription} onChange={e=>setRewardDescription(e.target.value)} placeholder="Un dessert au choix" className="mt-1 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"/></label>
+                      <label className="block text-xs text-ink/50">Nom<input value={rewardName} onChange={e=>setRewardName(e.target.value)} placeholder="Dessert offert" className="mt-1 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"/></label>                      <label className="block text-xs text-ink/50">Description<input value={rewardDescription} onChange={e=>setRewardDescription(e.target.value)} placeholder="Un dessert au choix" className="mt-1 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"/></label>
                       <div className="grid gap-3 sm:grid-cols-2">
                         <label className="text-xs text-ink/50">Points nécessaires<input type="number" min="1" value={rewardPoints} onChange={e=>setRewardPoints(e.target.value)} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5"/></label>
                         <label className="text-xs text-ink/50">Type<select value={rewardType} onChange={e=>setRewardType(e.target.value as 'GIFT'|'DISCOUNT')} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5"><option value="GIFT">🎁 Cadeau</option><option value="DISCOUNT">% Réduction</option></select></label>
@@ -637,7 +623,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                 </div>
               )}
 
-              <div id="loyalty-content" className={activeTab === 'Design' ? 'mt-5 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4' : 'hidden'}>
+              <div id="loyalty-content" className="mt-5 scroll-mt-6 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
                 <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Contenu de la carte</p>
                 <p className="mt-1 text-[10px] text-ink/45">Modifie les avantages et les offres affichés au client.</p>
                 <p className="mt-4 text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Avantages & offres</p>
@@ -684,15 +670,14 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                 </div>
               </div>
 
-              <div className={activeTab === 'Design' ? 'mt-5 grid gap-3 sm:grid-cols-2' : 'hidden'}>
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 <label className="text-xs text-ink/50">Coins arrondis <span className="float-right">{design.border_radius}px</span><input type="range" min="12" max="36" value={design.border_radius} onChange={e=>setDesign(d=>({...d,border_radius:Number(e.target.value),published:false}))} className="mt-3 w-full"/></label>
                 <label className="text-xs text-ink/50">Style des tampons<select disabled={cardMode !== 'STAMP'} value={design.design_config.stamp_style} onChange={e=>updateConfig({stamp_style:e.target.value as LoyaltyDesignConfig['stamp_style']})} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 disabled:opacity-40"><option value="circles">Cercles</option><option value="squares">Carrés</option><option value="stars">Étoiles</option><option value="hearts">Cœurs</option></select></label>
               </div>
             </div>
           </div>
-        </div>
 
-          <div id="loyalty-preview" className="sticky top-4 scroll-mt-6 rounded-2xl border border-ink/5 bg-white p-3 shadow-sm">
+          <div id="loyalty-preview" className="scroll-mt-6 rounded-2xl border border-ink/10 bg-[#f7f7f3] p-4">
             <div className="flex items-center justify-between">
               <div><p className="text-[10px] font-bold uppercase tracking-[.16em] text-gold">Aperçu en temps réel</p><p className="mt-1 text-xs text-ink/45">Voici exactement ce que vos clients verront.</p></div>
               <span className="rounded-full bg-white px-3 py-1.5 text-[10px] font-semibold text-forest shadow-sm">Client</span>
