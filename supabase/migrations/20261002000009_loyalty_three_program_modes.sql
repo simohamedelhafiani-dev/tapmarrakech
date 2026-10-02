@@ -143,6 +143,8 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.get_loyalty_program_settings(uuid);
+
 CREATE OR REPLACE FUNCTION public.get_loyalty_program_settings(p_establishment_id uuid)
 RETURNS TABLE(
   program_type text, stamp_goal integer, stamp_reward_name text, stamp_reward_description text,
@@ -240,6 +242,8 @@ BEGIN
   RETURN v_new;
 END;
 $$;
+
+DROP FUNCTION IF EXISTS public.get_public_loyalty_program_context(uuid);
 
 CREATE OR REPLACE FUNCTION public.get_public_loyalty_program_context(p_access_token uuid)
 RETURNS TABLE(
