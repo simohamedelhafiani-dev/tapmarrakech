@@ -36,6 +36,8 @@ export type LoyaltyDesignConfig = {
   rewardDescription?: string;
   rewardName?: string;
   discountPercent?: number;
+  discountPointsThreshold?: number;
+  discountValidDays?: number;
   benefits?: { title: string; description?: string; icon?: string }[];
   offers?: { title: string; description?: string; eyebrow?: string }[];
   business_type?: string | null;
@@ -64,7 +66,9 @@ export type LoyaltyVisualCard = {
   stampGoal?: number;
   stampRewardName?: string | null;
   discountPercent?: number;
+  discountPointsThreshold?: number;
   discountExpiresAt?: string | null;
+  discountValidDays?: number;
   customerName?: string;
   loyaltyNumber?: string;
   cardUrl?: string;
@@ -244,9 +248,18 @@ export function LoyaltyCardVisual({
               </div>
               <div style={{ marginTop: '1cqw', fontSize: '3.33cqw', fontWeight: 800, letterSpacing: '.18em', textTransform: 'uppercase', color: design.secondary_color }}>points</div>
               {mode === 'DISCOUNT' && (
-                <div style={{ marginTop: '4.67cqw', padding: '3cqw 4.67cqw', borderRadius: '5cqw', border: `1px solid ${design.secondary_color}66`, background: `${design.secondary_color}18`, fontSize: '6.67cqw', fontWeight: 900 }}>
-                  -{discount}%
-                </div>
+                <>
+                  <div style={{ marginTop: '4.67cqw', padding: '3cqw 4.67cqw', borderRadius: '5cqw', border: `1px solid ${design.secondary_color}66`, background: `${design.secondary_color}18`, fontSize: '6.67cqw', fontWeight: 900 }}>
+                    -{discount}%
+                  </div>
+                  <div style={{ marginTop: '3cqw', width: '100%', padding: '2.67cqw 3.33cqw', borderRadius: '3.33cqw', background: 'rgba(255,255,255,.08)', fontSize: '3cqw', lineHeight: 1.45, opacity: .82 }}>
+                    {points >= Number(config.discountPointsThreshold ?? 1000)
+                      ? card.discountExpiresAt
+                        ? `Seuil atteint · profitez de votre réduction jusqu’au ${new Date(card.discountExpiresAt).toLocaleDateString('fr-FR')}`
+                        : `Seuil de ${Number(config.discountPointsThreshold ?? 1000).toLocaleString('fr-FR')} points atteint · votre réduction est disponible`
+                      : `Atteignez ${Number(config.discountPointsThreshold ?? 1000).toLocaleString('fr-FR')} points pour bénéficier de -${discount}%`}
+                  </div>
+                </>
               )}
               {mode === 'POINTS' && config.rewardName && (
                 <div style={{ marginTop: '4cqw', fontSize: '3.33cqw', opacity: .68 }}>{config.rewardName}</div>
