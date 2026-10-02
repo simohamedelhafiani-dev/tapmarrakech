@@ -9,6 +9,30 @@ type LoyaltyPreviewProps = {
 const CARD_WIDTH = 300;
 const CARD_HEIGHT = 450;
 
+function hexToRgb(hex: string) {
+  const value = hex.replace('#', '');
+  const normalized =
+    value.length === 3
+      ? value.split('').map(char => char + char).join('')
+      : value;
+
+  const number = Number.parseInt(normalized, 16);
+  return {
+    r: (number >> 16) & 255,
+    g: (number >> 8) & 255,
+    b: number & 255,
+  };
+}
+
+function getContrastColor(color: string) {
+  if (!color || !color.startsWith('#')) return '#17201c';
+
+  const { r, g, b } = hexToRgb(color);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+  return luminance < 0.52 ? '#ffffff' : '#17201c';
+}
+
 export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
   const [qr, setQr] = useState('');
   const [scale, setScale] = useState(1);
@@ -18,12 +42,25 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
     config.type === 'CHALLENGE' ||
     config.type === 'COLLECTION';
 
+  const isLuxury =
+    config.templateId === 'obsidian' ||
+    config.templateId === 'titanium' ||
+    config.templateId === 'luxury' ||
+    config.templateId === 'hospitality';
+
+  const contrastText = getContrastColor(config.backgroundColor);
+  const textColor = config.textColor || contrastText;
+  const primary = config.primaryColor || config.backgroundColor;
+  const secondary = config.secondaryColor || '#c9a45c';
+  const background = config.backgroundColor || '#ffffff';
+
   const balance = isStamp
     ? `${config.visits ?? 0} / ${Math.max(1, config.visitGoal ?? 10)}`
     : (config.pointsBalance ?? 0).toLocaleString('fr-FR');
 
-  const accent = config.secondaryColor || '#c9a45c';
-  const textColor = config.textColor || '#17201c';
+  const progress = isStamp
+    ? Math.min(100, ((config.visits ?? 0) / Math.max(1, config.visitGoal ?? 10)) * 100)
+    : Math.min(100, ((config.pointsBalance ?? 0) / Math.max(1, config.pointsGoal ?? 1000)) * 100);
 
   useEffect(() => {
     let active = true;
@@ -34,19 +71,14 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
     }
 
     void QRCode.toDataURL(config.qrValue, {
-      width: 300,
+      width: 280,
       margin: 1,
-      color: {
-        dark: '#111111',
-        light: '#ffffff',
-      },
-    })
-      .then(value => {
-        if (active) setQr(value);
-      })
-      .catch(() => {
-        if (active) setQr('');
-      });
+      color: { dark: '#111111', light: '#ffffff' },
+    }).then(value => {
+      if (active) setQr(value);
+    }).catch(() => {
+      if (active) setQr('');
+    });
 
     return () => {
       active = false;
@@ -54,33 +86,24 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
   }, [config.qrValue]);
 
   useEffect(() => {
-    const updateScale = () => {
-      const horizontalSpace = window.innerWidth - 32;
-      const verticalSpace = window.innerHeight - 32;
+    const resize = () => {
+      const availableWidth = window.innerWidth - 32;
+      const availableHeight = window.innerHeight - 32;
 
-      setScale(
-        Math.min(
-          1,
-          horizontalSpace / CARD_WIDTH,
-          verticalSpace / CARD_HEIGHT,
-        ),
-      );
+      setScale(Math.min(1, availableWidth / CARD_WIDTH, availableHeight / CARD_HEIGHT));
     };
 
-    updateScale();
-    window.addEventListener('resize', updateScale);
+    resize();
+    window.addEventListener('resize', resize);
 
-    return () => window.removeEventListener('resize', updateScale);
+    return () => window.removeEventListener('resize', resize);
   }, []);
 
   return (
     <div className="bg-slate-100 w-full h-full flex items-center justify-center p-4 overflow-hidden">
       <div
         className="max-w-full max-h-full flex items-center justify-center"
-        style={{
-          width: CARD_WIDTH * scale,
-          height: CARD_HEIGHT * scale,
-        }}
+        style={{ width: CARD_WIDTH * scale, height: CARD_HEIGHT * scale }}
       >
         <div
           className="flex flex-col justify-between overflow-y-auto shrink-0 rounded-[2rem] p-8 shadow-2xl"
@@ -89,114 +112,126 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
             height: CARD_HEIGHT,
             maxWidth: '100%',
             maxHeight: '100%',
+            backgroundColor: background,
             color: textColor,
-            backgroundColor: config.backgroundColor || '#ffffff',
+            borderRadius: config.borderRadius || 32,
             backgroundImage: config.coverImageUrl
-              ? `linear-gradient(rgba(0,0,0,.22),rgba(0,0,0,.62)), url("${config.coverImageUrl}")`
+              ? `linear-gradient(180deg, rgba(0,0,0,.12), rgba(0,0,0,.58)), url("${config.coverImageUrl}")`
               : undefined,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            transform: `scale(${scale})`,
-            transformOrigin: 'center center',
           }}
         >
-          <div>
-            {config.logoUrl ? (
-              <img
-                src={config.logoUrl}
-                alt=""
-                className="mx-auto h-14 w-14 rounded-2xl bg-white object-contain p-2 shadow"
-              />
-            ) : (
-              <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-black/5 text-sm font-bold">
-                {(config.establishmentName || 'CL').slice(0, 2).toUpperCase()}
+          <div
+            className="flex min-h-0 flex-1 flex-col justify-between"
+            style={{
+              fontFamily:
+                config.templateId === 'editorial' || config.templateId === 'apple-wallet'
+                  ? 'Georgia, serif'
+                  : 'inherit',
+            }}
+          >
+            <div>
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex min-w-0 items-center gap-2">
+                  {config.logoUrl ? (
+                    <img
+                      src={config.logoUrl}
+                      alt=""
+                      className="h-14 w-14 shrink-0 rounded-2xl bg-white object-contain p-2 shadow"
+                    />
+                  ) : (
+                    <div
+                      className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl"
+                      style={{ backgroundColor: secondary + '30' }}
+                    >
+                      {(config.establishmentName || 'CL').slice(0, 2).toUpperCase()}
+                    </div>
+                  )}
+
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-bold">
+                      {config.establishmentName || 'Votre établissement'}
+                    </p>
+                    <p className="mt-1 text-[7px] uppercase tracking-[.2em]" style={{ color: secondary }}>
+                      {isLuxury ? 'MEMBER EXPERIENCE' : 'PROGRAMME FIDÉLITÉ'}
+                    </p>
+                  </div>
+                </div>
+
+                <span
+                  className="shrink-0 rounded-full border px-2 py-1 text-[6px] font-bold uppercase tracking-[.14em]"
+                  style={{
+                    borderColor: secondary + '80',
+                    backgroundColor: secondary + '18',
+                    color: textColor,
+                  }}
+                >
+                  {config.currentTier || 'MEMBER'}
+                </span>
               </div>
-            )}
 
-            <h2 className="mt-3 text-center text-lg font-bold">
-              {config.establishmentName || 'Votre établissement'}
-            </h2>
+              <div className="mt-6 text-center">
+                <p className="text-[8px] uppercase tracking-[.22em]" style={{ color: secondary }}>
+                  Votre fidélité
+                </p>
 
-            <p className="mt-1 text-center text-[9px] uppercase tracking-[.2em] opacity-60">
-              Programme fidélité
-            </p>
-          </div>
+                <p className="mt-2 text-4xl font-bold leading-none">
+                  {balance}
+                </p>
 
-          <div className="text-center">
-            <p className="text-[9px] uppercase tracking-[.2em] opacity-60">
-              Votre solde
-            </p>
+                <p className="mt-2 text-[7px] uppercase tracking-[.18em] opacity-60">
+                  {isStamp ? 'tampons' : 'points'}
+                </p>
 
-            <p className="mt-2 text-4xl font-bold leading-none">
-              {balance}
-            </p>
-
-            <p className="mt-2 text-[9px] uppercase tracking-[.18em] opacity-60">
-              {isStamp ? 'tampons' : 'points'}
-            </p>
-
-            <div
-              className="mx-auto mt-4 h-1.5 w-full max-w-[210px] rounded-full"
-              style={{ backgroundColor: `${accent}33` }}
-            >
-              <div
-                className="h-full rounded-full"
-                style={{
-                  width: `${Math.min(
-                    100,
-                    isStamp
-                      ? ((config.visits ?? 0) /
-                          Math.max(1, config.visitGoal ?? 10)) *
-                          100
-                      : ((config.pointsBalance ?? 0) /
-                          Math.max(1, config.pointsGoal ?? 1000)) *
-                          100,
-                  )}%`,
-                  backgroundColor: accent,
-                }}
-              />
+                <div className="mx-auto mt-4 w-full max-w-[210px]">
+                  <div
+                    className="h-1.5 rounded-full"
+                    style={{ backgroundColor: secondary + '35' }}
+                  >
+                    <div
+                      className="h-full rounded-full"
+                      style={{ width: progress + '%', backgroundColor: secondary }}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="mt-4 rounded-2xl bg-black/5 p-3">
-              <p className="text-[9px] uppercase tracking-[.16em] opacity-60">
+            <div className="rounded-2xl p-3" style={{ backgroundColor: primary + '22' }}>
+              <p className="text-[8px] uppercase tracking-[.16em]" style={{ color: secondary }}>
                 Prochaine récompense
               </p>
               <p className="mt-2 text-sm font-semibold">
                 {config.rewardName || 'Votre cadeau'}
               </p>
-            </div>
-          </div>
-
-          <div>
-            <div className="mx-auto w-[86px] rounded-2xl bg-white p-2 shadow-lg">
-              {qr ? (
-                <img
-                  src={qr}
-                  alt="QR fidélité"
-                  className="block w-full rounded-lg"
-                />
-              ) : (
-                <div className="aspect-square rounded-lg bg-slate-100" />
+              {config.rewardDescription && (
+                <p className="mt-1 text-[8px] leading-3 opacity-65">
+                  {config.rewardDescription}
+                </p>
               )}
             </div>
 
-            <p className="mt-2 text-center text-[8px] uppercase tracking-[.16em] opacity-60">
-              QR fidélité
-            </p>
-
-            <div className="mt-3 flex items-end justify-between border-t border-black/10 pt-3">
-              <div>
-                <p className="text-[7px] uppercase tracking-[.15em] opacity-50">
-                  Membre
-                </p>
-                <p className="mt-1 text-xs font-semibold">
-                  {config.customerName || 'Client'}
-                </p>
+            <div>
+              <div className="mx-auto w-[86px] rounded-2xl bg-white p-2 shadow-lg">
+                {qr ? (
+                  <img src={qr} alt="QR fidélité" className="block w-full rounded-lg" />
+                ) : (
+                  <div className="aspect-square rounded-lg bg-slate-100" />
+                )}
               </div>
 
-              <p className="text-xs font-semibold">
-                {config.currentTier || 'MEMBER'}
+              <p className="mt-2 text-center text-[7px] font-semibold uppercase tracking-[.16em]" style={{ color: secondary }}>
+                QR fidélité
               </p>
+
+              <div className="mt-3 flex items-end justify-between border-t pt-3" style={{ borderColor: secondary + '35' }}>
+                <div>
+                  <p className="text-[6px] uppercase tracking-[.15em] opacity-50">Membre</p>
+                  <p className="mt-1 text-[9px] font-semibold">{config.customerName || 'Client'}</p>
+                </div>
+                <p className="text-[9px] font-semibold">{config.currentTier || 'MEMBER'}</p>
+              </div>
             </div>
           </div>
         </div>
