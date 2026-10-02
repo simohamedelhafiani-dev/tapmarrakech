@@ -3,7 +3,7 @@ import { Gift, ImagePlus, Loader2, Save, Settings2, Sparkles, Stamp, Star, Perce
 import { supabase } from '@/lib/supabase';
 import { useLoyaltyManager, type LoyaltyProgramType, type LoyaltyReferralBonusType, type LoyaltyReferralConfig } from '@/hooks/useLoyaltyManager';
 import LoyaltyPreview from './LoyaltyPreview';
-import { WALLET_TEMPLATES } from './LoyaltyPreview';
+import { WALLET_TEMPLATES } from '@/components/LoyaltyCardVisual';
 import type { LoyaltyExperienceConfig, LoyaltyExperienceReward } from './LoyaltyExperience';
 
 type Props = { establishmentId: string };
