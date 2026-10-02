@@ -1084,7 +1084,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
               <div><p className="text-[10px] font-bold uppercase tracking-[.16em] text-gold">Aperçu en temps réel</p><p className="mt-1 text-xs text-ink/45">Voici exactement ce que vos clients verront.</p></div>
               <span className="rounded-full bg-white px-3 py-1.5 text-[10px] font-semibold text-forest shadow-sm">Client</span>
             </div>
-            <div className="mt-6 flex flex-1 flex-col items-center justify-center">
+            <div className="mt-6 flex min-h-0 w-full flex-1 flex-col items-center justify-center">
 
               <LoyaltyPreview config={visualExperience} />
 
