@@ -145,6 +145,27 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
 
   useEffect(() => { void load(); }, [establishmentId]);
 
+  const previewChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const [previewChannelReady, setPreviewChannelReady] = useState(false);
+
+  useEffect(() => {
+    if (!establishmentId) return;
+
+    setPreviewChannelReady(false);
+    const channel = supabase.channel(`loyalty-design-preview-${establishmentId}`);
+    previewChannelRef.current = channel;
+
+    void channel.subscribe((status) => {
+      if (status === 'SUBSCRIBED') setPreviewChannelReady(true);
+    });
+
+    return () => {
+      previewChannelRef.current = null;
+      setPreviewChannelReady(false);
+      void supabase.removeChannel(channel);
+    };
+  }, [establishmentId]);
+
   const template = WALLET_TEMPLATES[design.templateId] ?? WALLET_TEMPLATES['onyx-black'];
 
   const previewConfig = useMemo<LoyaltyExperienceConfig>(() => ({
@@ -175,6 +196,41 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     published: design.published,
     stampStyle: design.stampStyle,
   }), [program, design, establishment, rewards]);
+
+  useEffect(() => {
+    if (!establishmentId || !previewChannelRef.current || !previewChannelReady) return;
+
+    void previewChannelRef.current.send({
+      type: 'broadcast',
+      event: 'loyalty-design-preview',
+      payload: {
+        establishmentId,
+        design: {
+          template_id: design.templateId,
+          primary_color: design.primaryColor,
+          secondary_color: design.secondaryColor,
+          background_color: design.backgroundColor,
+          text_color: design.textColor,
+          button_color: design.buttonColor,
+          border_radius: 34,
+        },
+        designConfig: {
+          background_image_url: design.wallpaperUrl,
+          wallpaperUrl: design.wallpaperUrl,
+          logo_url: design.logoUrl || establishment.logoUrl,
+          loyaltyType: program.programType,
+          card_mode: program.programType,
+          stamp_style: design.stampStyle,
+          rewardName: program.stampRewardName || rewards[0]?.name || 'Cadeau fidélité',
+          rewardDescription: program.stampRewardDescription,
+          pointsPerCurrency: program.pointsPerCurrency,
+          discountPointsThreshold: program.discountPointsThreshold,
+          discountPercent: program.discountPercent,
+          discountValidDays: program.discountValidDays,
+        },
+      },
+    });
+  }, [establishmentId, design, establishment.logoUrl, program, rewards, previewChannelReady]);
 
   const selectTemplate = (id: string) => {
     const t = WALLET_TEMPLATES[id];
