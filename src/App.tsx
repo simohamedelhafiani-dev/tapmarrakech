@@ -11,6 +11,7 @@ import { LanguageProvider } from '@/contexts/LanguageContext';
 
 import PublicReview from '@/pages/PublicReview';
 import LoyaltyCard from '@/pages/LoyaltyCard';
+import LoyaltyJoin from '@/pages/LoyaltyJoin';
 import Login from '@/pages/Login';
 import { ForgotPassword, Register } from '@/pages/AuthPages';
 
@@ -169,6 +170,7 @@ function App() {
           <Route path="/p/:slug/:section" element={<PublicReview />} />
           <Route path="/p/:slug" element={<PublicReview />} />
           <Route path="/loyalty" element={<LoyaltyLaunch />} />
+          <Route path="/loyalty/join" element={<LoyaltyJoin />} />
           <Route path="/loyalty/:token" element={<LoyaltyCard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
