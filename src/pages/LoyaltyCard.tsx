@@ -159,7 +159,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
     if (!referralCode) return;
 
     try {
-      await navigator.clipboard.writeText(referralCode);
+      await navigator.clipboard.writeText(referralUrl);
       setReferralCopied(true);
       window.setTimeout(() => setReferralCopied(false), 2200);
     } catch {
