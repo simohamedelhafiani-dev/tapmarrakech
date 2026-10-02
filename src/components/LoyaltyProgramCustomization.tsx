@@ -44,6 +44,14 @@ const LOYALTY_PRESETS: LoyaltyPreset[] = [
   { id: 'hospitality', name: '05 — Hospitality', description: 'Univers hôtel, restaurant et travel : photographie immersive, chaleur et statut membre.', primary: '#3A2115', secondary: '#E2B66D', background: '#2B1B13', text: '#FFFFFF', radius: 30, mode: 'QR', title: 'Plus qu’un repas, une expérience.', subtitle: 'Saveurs. Partage. Souvenirs.', stampStyle: 'circles' },
   { id: 'apple-wallet', name: '06 — Apple Wallet', description: 'Minimalisme premium, hiérarchie typographique et lecture instantanée sur mobile.', primary: '#403A32', secondary: '#B9975B', background: '#F2EEE6', text: '#1B1A18', radius: 28, mode: 'QR', title: 'Beauty in every detail.', subtitle: 'Vos privilèges, toujours avec vous.', stampStyle: 'circles' },
   { id: 'wallet', name: '07 — Premium Wallet', description: 'Carte Wallet haut de gamme : verre fumé, lumière diagonale, hiérarchie premium et QR central.', primary: '#0B0B0B', secondary: '#D6B15A', background: '#1A1A1A', text: '#FFFFFF', radius: 36, mode: 'QR', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
+  { id: 'onyx-black', name: '08 — Onyx Black', description: 'Wallet noir profond, contraste net et finition premium.', primary: '#181818', secondary: '#D7D7D7', background: '#070707', text: '#FFFFFF', radius: 36, mode: 'QR', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
+  { id: 'royal-gold', name: '09 — Royal Gold', description: 'Wallet noir chaud et signature or pour une expérience luxe.', primary: '#6E4B18', secondary: '#D6B15A', background: '#17110A', text: '#FFF8E8', radius: 36, mode: 'QR', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
+  { id: 'deep-ocean', name: '10 — Deep Ocean', description: 'Wallet bleu profond avec effet verre et lumière froide.', primary: '#0D4050', secondary: '#6FD3E8', background: '#061923', text: '#F4FCFF', radius: 36, mode: 'QR', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
+  { id: 'minimal-white', name: '11 — Minimal White', description: 'Wallet clair minimaliste, moderne et ultra lisible.', primary: '#FFFFFF', secondary: '#777777', background: '#F5F5F2', text: '#151515', radius: 36, mode: 'QR', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
+  { id: 'forest-green', name: '12 — Forest Green', description: 'Wallet vert profond inspiré des univers premium hospitality.', primary: '#164D3A', secondary: '#B9D8A4', background: '#071A14', text: '#F7FFF9', radius: 36, mode: 'QR', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
+  { id: 'ruby-red', name: '13 — Ruby Red', description: 'Wallet rouge rubis profond avec signature éditoriale.', primary: '#6D1724', secondary: '#E8A0A8', background: '#21080D', text: '#FFF5F5', radius: 36, mode: 'QR', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
+  { id: 'silver-chrome', name: '14 — Silver Chrome', description: 'Wallet chrome argenté avec reflets métalliques.', primary: '#BFC4C9', secondary: '#F5F5F5', background: '#777B80', text: '#FFFFFF', radius: 36, mode: 'QR', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
+  { id: 'midnight-blue', name: '15 — Midnight Blue', description: 'Wallet bleu nuit avec effet verre et profondeur.', primary: '#17275F', secondary: '#9DB7FF', background: '#080D24', text: '#F4F7FF', radius: 36, mode: 'QR', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
 ];
 
 type Design = {
@@ -59,7 +67,7 @@ type Design = {
 };
 
 const baseDesign: Design = {
-  template_id: 'luxury',
+  template_id: 'onyx-black',
   primary_color: '#0B3327',
   secondary_color: '#D6B15A',
   background_color: '#F7F7F3',
@@ -191,12 +199,11 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
           stampStyle: c.stampStyle || 'circles',
         } as LoyaltyPreset;
       });
-      const walletPreset = LOYALTY_PRESETS.find(template => template.id === 'wallet');
-      setAvailableTemplates(
-        walletPreset && !mapped.some(template => template.id === 'wallet')
-          ? [...mapped, walletPreset]
-          : mapped,
-      );
+      const presetIds = new Set(LOYALTY_PRESETS.map(template => template.id));
+      setAvailableTemplates([
+        ...LOYALTY_PRESETS,
+        ...mapped.filter(template => !presetIds.has(template.id)),
+      ]);
     } else {
       setAvailableTemplates(LOYALTY_PRESETS);
     }
