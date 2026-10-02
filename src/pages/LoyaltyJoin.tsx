@@ -1,23 +1,85 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { CheckCircle2, Gift, Loader2 } from 'lucide-react';
 import { Navigate, useSearchParams } from 'react-router-dom';
-import { Gift, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+
+type EnrollmentResult = {
+  establishment_name: string;
+  access_token: string;
+};
+
+type ReferralResult = {
+  access_token: string;
+};
 
 export default function LoyaltyJoin() {
   const [searchParams] = useSearchParams();
   const referralCode = searchParams.get('ref')?.trim() ?? '';
+  const establishmentId = searchParams.get('est')?.trim() ?? '';
+  const isGlobalEnrollment = !referralCode && Boolean(establishmentId);
 
+  const [establishmentName, setEstablishmentName] = useState('');
+  const [loadingContext, setLoadingContext] = useState(Boolean(isGlobalEnrollment));
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [accessToken, setAccessToken] = useState('');
 
+  useEffect(() => {
+    if (!isGlobalEnrollment) {
+      setLoadingContext(false);
+      return;
+    }
+
+    let active = true;
+
+    const loadContext = async () => {
+      setLoadingContext(true);
+      setError('');
+
+      const { data, error: contextError } = await supabase.rpc(
+        'get_public_loyalty_enrollment_context',
+        { p_establishment_id: establishmentId },
+      );
+
+      if (!active) return;
+
+      if (contextError) {
+        setError(
+          contextError.message === 'loyalty_program_disabled'
+            ? 'Le programme fidélité est momentanément indisponible.'
+            : 'Ce lien d’inscription est invalide.',
+        );
+        setLoadingContext(false);
+        return;
+      }
+
+      const row = Array.isArray(data) ? data[0] : data;
+      setEstablishmentName(row?.establishment_name ?? '');
+      setLoadingContext(false);
+    };
+
+    void loadContext();
+
+    return () => {
+      active = false;
+    };
+  }, [establishmentId, isGlobalEnrollment]);
+
   const canSubmit = useMemo(
-    () => Boolean(referralCode && firstName.trim() && lastName.trim() && phone.trim()),
-    [referralCode, firstName, lastName, phone],
+    () =>
+      Boolean(
+        !loadingContext &&
+        firstName.trim() &&
+        lastName.trim() &&
+        phone.trim() &&
+        (isGlobalEnrollment || referralCode),
+      ),
+    [loadingContext, firstName, lastName, phone, isGlobalEnrollment, referralCode],
   );
 
   async function join() {
@@ -26,115 +88,210 @@ export default function LoyaltyJoin() {
     setLoading(true);
     setError('');
 
-    const { data, error: rpcError } = await supabase.rpc(
-      'register_public_loyalty_customer_with_referral',
-      {
-        p_referral_code: referralCode,
-        p_first_name: firstName.trim(),
-        p_last_name: lastName.trim(),
-        p_phone: phone.trim(),
-        p_birth_date: birthDate || null,
-      },
-    );
+    try {
+      if (isGlobalEnrollment) {
+        const { data, error: rpcError } = await supabase.rpc(
+          'register_public_loyalty_customer_for_enrollment',
+          {
+            p_establishment_id: establishmentId,
+            p_first_name: firstName.trim(),
+            p_last_name: lastName.trim(),
+            p_phone: phone.trim(),
+            p_birth_date: birthDate || null,
+          },
+        );
 
-    if (rpcError) {
+        if (rpcError) throw rpcError;
+
+        const row = (Array.isArray(data) ? data[0] : data) as EnrollmentResult | null;
+        if (!row?.access_token) throw new Error('Impossible de créer votre carte fidélité.');
+
+        setEstablishmentName(row.establishment_name || establishmentName);
+        setSuccessMessage('Félicitations ' + firstName.trim() + ' ! Votre carte fidélité est prête.');
+        setAccessToken(String(row.access_token));
+        return;
+      }
+
+      const { data, error: rpcError } = await supabase.rpc(
+        'register_public_loyalty_customer_with_referral',
+        {
+          p_referral_code: referralCode,
+          p_first_name: firstName.trim(),
+          p_last_name: lastName.trim(),
+          p_phone: phone.trim(),
+          p_birth_date: birthDate || null,
+        },
+      );
+
+      if (rpcError) throw rpcError;
+
+      const row = (Array.isArray(data) ? data[0] : data) as ReferralResult | null;
+      if (!row?.access_token) throw new Error('Impossible de créer votre carte fidélité.');
+
+      setSuccessMessage('Félicitations ' + firstName.trim() + ' ! Votre carte fidélité est prête.');
+      setAccessToken(String(row.access_token));
+    } catch (rpcError) {
+      const message = rpcError instanceof Error ? rpcError.message : String(rpcError);
       setError(
-        rpcError.message === 'already_registered'
+        message === 'already_registered'
           ? 'Ce numéro est déjà inscrit dans le programme fidélité.'
-          : rpcError.message,
+          : message === 'loyalty_program_disabled'
+            ? 'Le programme fidélité est momentanément indisponible.'
+            : message,
       );
       setLoading(false);
-      return;
     }
-
-    const row = Array.isArray(data) ? data[0] : data;
-    if (!row?.access_token) {
-      setError('Impossible de créer votre carte fidélité.');
-      setLoading(false);
-      return;
-    }
-
-    setAccessToken(String(row.access_token));
   }
 
   if (accessToken) {
-    return <Navigate to={`/loyalty/${accessToken}`} replace />;
+    return (
+      <main className="min-h-screen bg-[#eef0ed] px-4 py-8">
+        <div className="mx-auto flex min-h-[80vh] max-w-md items-center justify-center">
+          <div className="w-full rounded-[2rem] bg-white p-8 text-center shadow-xl">
+            <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-[#e7f1eb] text-[#173D32]">
+              <CheckCircle2 className="h-8 w-8" />
+            </div>
+            <p className="mt-5 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#D3A84C]">
+              Inscription confirmée
+            </p>
+            <h1 className="mt-2 font-display text-3xl text-[#173D32]">Bienvenue !</h1>
+            <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-ink/55">
+              {successMessage || 'Votre carte fidélité est prête.'}
+            </p>
+            {establishmentName && (
+              <p className="mt-2 text-xs font-semibold text-[#173D32]">{establishmentName}</p>
+            )}
+            <div className="mx-auto mt-6 h-1.5 w-24 overflow-hidden rounded-full bg-[#edf0ed]">
+              <div className="h-full w-full animate-pulse rounded-full bg-[#D3A84C]" />
+            </div>
+            <p className="mt-3 text-[10px] text-ink/35">Ouverture de votre carte…</p>
+            <Navigate to={`/loyalty/${accessToken}?welcome=1`} replace />
+          </div>
+        </div>
+      </main>
+    );
   }
 
-  if (!referralCode) {
+  if (!referralCode && !establishmentId) {
     return (
       <main className="min-h-screen bg-[#f7f7f3] px-4 py-8">
         <div className="mx-auto max-w-md rounded-[2rem] bg-white p-7 text-center shadow-xl">
           <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#e5eee9] text-[#173D32]">
             <Gift className="h-6 w-6" />
           </div>
-          <h1 className="mt-5 font-display text-2xl text-[#173D32]">Invitation invalide</h1>
+          <h1 className="mt-5 font-display text-2xl text-[#173D32]">Lien d’inscription invalide</h1>
           <p className="mt-2 text-sm leading-6 text-ink/50">
-            Ce lien de parrainage est incomplet ou invalide.
+            Scannez le QR Code ou la plaque NFC de l’établissement pour rejoindre son programme fidélité.
           </p>
         </div>
       </main>
     );
   }
 
+  if (loadingContext) {
+    return (
+      <main className="grid min-h-screen place-items-center bg-[#eef0ed] px-4">
+        <div className="text-center">
+          <div className="mx-auto h-9 w-9 animate-spin rounded-full border-2 border-[#173D32] border-t-transparent" />
+          <p className="mt-4 text-sm text-[#173D32]/55">Préparation de votre inscription…</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (error && isGlobalEnrollment && !establishmentName) {
+    return (
+      <main className="grid min-h-screen place-items-center bg-[#eef0ed] px-4 py-8">
+        <div className="w-full max-w-md rounded-[2rem] bg-white p-7 text-center shadow-xl">
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-red-50 text-red-600">
+            <Gift className="h-6 w-6" />
+          </div>
+          <h1 className="mt-5 font-display text-2xl text-[#173D32]">Inscription indisponible</h1>
+          <p className="mt-2 text-sm leading-6 text-ink/50">{error}</p>
+        </div>
+      </main>
+    );
+  }
+
+  const title = isGlobalEnrollment ? 'Bienvenue chez vous' : 'Rejoignez le programme fidélité';
+  const description = isGlobalEnrollment
+    ? 'Créez votre carte fidélité' + (establishmentName ? ' de ' + establishmentName : '') + ' en quelques secondes.'
+    : 'Vous avez été invité par un client. Créez votre carte fidélité pour recevoir vos avantages.';
+
   return (
-    <main className="min-h-screen bg-[#eef0ed] px-4 py-8">
+    <main className="min-h-screen bg-[#eef0ed] px-3 py-5 sm:px-4 sm:py-8">
       <div className="mx-auto max-w-md">
         <section className="overflow-hidden rounded-[2rem] bg-white shadow-xl">
           <div className="bg-[#173D32] px-6 py-7 text-white">
-            <div className="grid h-12 w-12 place-items-center rounded-2xl bg-[#D6B15A] text-[#173D32]">
-              <Gift className="h-5 w-5" />
+            <div className="flex items-center gap-3">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#D6B15A] text-[#173D32]">
+                <Gift className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">
+                  Programme fidélité
+                </p>
+                {establishmentName && (
+                  <p className="mt-1 truncate text-sm font-semibold text-white">{establishmentName}</p>
+                )}
+              </div>
             </div>
-            <h1 className="mt-5 font-display text-3xl">Rejoignez le programme fidélité</h1>
-            <p className="mt-2 text-sm leading-6 text-white/65">
-              Vous avez été invité par un client. Créez votre carte fidélité pour recevoir vos avantages.
-            </p>
+
+            <h1 className="mt-6 font-display text-3xl leading-tight">{title}</h1>
+            <p className="mt-2 text-sm leading-6 text-white/65">{description}</p>
           </div>
 
-          <div className="space-y-4 p-6">
-            <div>
-              <label className="text-xs font-semibold text-ink/60">Prénom *</label>
-              <input
-                value={firstName}
-                onChange={e => setFirstName(e.target.value)}
-                autoComplete="given-name"
-                className="mt-2 w-full rounded-xl border border-ink/10 bg-[#fafaf7] px-4 py-3 text-sm outline-none focus:border-[#D3A84C]"
-                placeholder="Votre prénom"
-              />
+          <div className="space-y-4 p-5 sm:p-6">
+            <div className="grid grid-cols-2 gap-3">
+              <label className="block text-xs font-semibold text-ink/60">
+                Prénom *
+                <input
+                  value={firstName}
+                  onChange={e => setFirstName(e.target.value)}
+                  autoComplete="given-name"
+                  autoFocus
+                  className="mt-1.5 w-full rounded-xl border border-ink/10 bg-[#fafaf7] px-4 py-3 text-sm outline-none transition focus:border-[#D3A84C] focus:ring-2 focus:ring-[#D3A84C]/10"
+                  placeholder="Prénom"
+                />
+              </label>
+              <label className="block text-xs font-semibold text-ink/60">
+                Nom *
+                <input
+                  value={lastName}
+                  onChange={e => setLastName(e.target.value)}
+                  autoComplete="family-name"
+                  className="mt-1.5 w-full rounded-xl border border-ink/10 bg-[#fafaf7] px-4 py-3 text-sm outline-none transition focus:border-[#D3A84C] focus:ring-2 focus:ring-[#D3A84C]/10"
+                  placeholder="Nom"
+                />
+              </label>
             </div>
 
-            <div>
-              <label className="text-xs font-semibold text-ink/60">Nom *</label>
-              <input
-                value={lastName}
-                onChange={e => setLastName(e.target.value)}
-                autoComplete="family-name"
-                className="mt-2 w-full rounded-xl border border-ink/10 bg-[#fafaf7] px-4 py-3 text-sm outline-none focus:border-[#D3A84C]"
-                placeholder="Votre nom"
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-ink/60">Téléphone *</label>
+            <label className="block text-xs font-semibold text-ink/60">
+              Téléphone *
               <input
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
                 autoComplete="tel"
                 inputMode="tel"
-                className="mt-2 w-full rounded-xl border border-ink/10 bg-[#fafaf7] px-4 py-3 text-sm outline-none focus:border-[#D3A84C]"
-                placeholder="+212 6..."
+                enterKeyHint="done"
+                className="mt-1.5 w-full rounded-xl border border-ink/10 bg-[#fafaf7] px-4 py-3 text-sm outline-none transition focus:border-[#D3A84C] focus:ring-2 focus:ring-[#D3A84C]/10"
+                placeholder="+212 6 12 34 56 78"
               />
-            </div>
+            </label>
 
-            <div>
-              <label className="text-xs font-semibold text-ink/60">Date de naissance</label>
-              <input
-                type="date"
-                value={birthDate}
-                onChange={e => setBirthDate(e.target.value)}
-                className="mt-2 w-full rounded-xl border border-ink/10 bg-[#fafaf7] px-4 py-3 text-sm outline-none focus:border-[#D3A84C]"
-              />
-            </div>
+            <details className="rounded-xl border border-ink/10 bg-[#fafaf7]">
+              <summary className="cursor-pointer px-4 py-3 text-xs font-semibold text-ink/55">
+                Ajouter ma date de naissance (facultatif)
+              </summary>
+              <div className="border-t border-ink/10 px-4 pb-4 pt-3">
+                <input
+                  type="date"
+                  value={birthDate}
+                  onChange={e => setBirthDate(e.target.value)}
+                  className="w-full rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm outline-none focus:border-[#D3A84C]"
+                />
+              </div>
+            </details>
 
             {error && (
               <div className="rounded-xl bg-red-50 px-4 py-3 text-xs leading-5 text-red-700">
@@ -146,14 +303,14 @@ export default function LoyaltyJoin() {
               type="button"
               onClick={() => void join()}
               disabled={!canSubmit || loading}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#173D32] px-5 py-4 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#173D32] px-5 py-4 text-sm font-semibold text-white shadow-lg transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              {loading ? 'Création de votre carte…' : 'Rejoindre le programme'}
+              {loading ? 'Création de votre carte…' : 'Créer ma carte fidélité'}
             </button>
 
             <p className="text-center text-[10px] leading-4 text-ink/35">
-              Votre inscription est liée automatiquement au parrainage de cette invitation.
+              Inscription gratuite · Votre carte sera disponible immédiatement.
             </p>
           </div>
         </section>
