@@ -148,7 +148,7 @@ export function LoyaltyProgress({ config }: { config: LoyaltyExperienceConfig })
     );
   }
 
-  if (config.type === 'POINTS' || config.type === 'REWARD') {
+  if (config.type === 'POINTS' || config.type === 'POINTS_REWARD' || config.type === 'REWARD') {
     const points = config.pointsBalance ?? 0;
     const goal = Math.max(points, config.pointsGoal ?? 1000);
     const remaining = Math.max(0, goal - points);
@@ -164,7 +164,7 @@ export function LoyaltyProgress({ config }: { config: LoyaltyExperienceConfig })
     );
   }
 
-  if (config.type === 'DISCOUNT') {
+  if (config.type === 'DISCOUNT' || config.type === 'POINTS_DISCOUNT') {
     return (
       <div className="rounded-[24px] p-5 text-white shadow-[0_14px_35px_rgba(0,0,0,.12)]" style={{ background: config.primaryColor }}>
         <p className="text-[9px] font-bold uppercase tracking-[0.2em] opacity-55">Avantage fidélité</p>
