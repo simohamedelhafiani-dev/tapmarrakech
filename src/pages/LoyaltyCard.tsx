@@ -67,6 +67,7 @@ export default function LoyaltyCard() {
   const [error, setError] = useState('');
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [cardSaved, setCardSaved] = useState(false);
   const [liveVersion, setLiveVersion] = useState(0);
   const [isLiveRefreshing, setIsLiveRefreshing] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
@@ -83,18 +84,6 @@ export default function LoyaltyCard() {
     const timeout = window.setTimeout(() => setShowWelcome(false), 4500);
     return () => window.clearTimeout(timeout);
   }, []);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('referral') !== '1' || !program.referral_enabled) return;
-
-    setReferralOpen(true);
-    void loadReferralCode();
-
-    params.delete('referral');
-    const cleanUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '') + window.location.hash;
-    window.history.replaceState({}, '', cleanUrl);
-  }, [program.referral_enabled]);
 
   const cardUrl = window.location.href;
 
@@ -131,7 +120,7 @@ export default function LoyaltyCard() {
     : '';
 
   useEffect(() => {
-    if (!referralOpen || !referralUrl) {
+    if ((!referralOpen && !cardSaved) || !referralUrl) {
       setReferralQrDataUrl('');
       return;
     }
@@ -157,6 +146,11 @@ export default function LoyaltyCard() {
       active = false;
     };
   }, [referralOpen, referralUrl]);
+
+  useEffect(() => {
+    if (!cardSaved || !program.referral_enabled) return;
+    void loadReferralCode();
+  }, [cardSaved, program.referral_enabled]);
 
   const referralMessage = referralCode
     ? `🎁 Je t’invite à rejoindre le programme fidélité de ${card?.establishment_name || 'cet établissement'}.
@@ -201,6 +195,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
       setIsInstalled(Boolean(media?.matches || (window.navigator as Navigator & { standalone?: boolean }).standalone === true));
     };
     checkInstalled();
+    setCardSaved(Boolean(media?.matches || (window.navigator as Navigator & { standalone?: boolean }).standalone === true));
     media?.addEventListener?.('change', checkInstalled);
 
     const handler = (event: Event) => {
@@ -222,7 +217,10 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
       await installPrompt.prompt();
       const choice = await installPrompt.userChoice;
       setInstallPrompt(null);
-      if (choice.outcome === 'accepted') setIsInstalled(true);
+      if (choice.outcome === 'accepted') {
+        setIsInstalled(true);
+        setCardSaved(true);
+      }
       return;
     }
 
@@ -233,6 +231,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
           text: 'Ma carte fidélité',
           url: cardUrl,
         });
+        setCardSaved(true);
         return;
       } catch {
         // User cancelled sharing; keep the page open.
@@ -603,6 +602,43 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         <div className={`transition-opacity duration-200 ${isLiveRefreshing ? 'opacity-90' : 'opacity-100'}`}>
           <LoyaltyExperience config={experience} />
         </div>
+
+        {program.referral_enabled && cardSaved && (
+          <div className="mt-4 overflow-hidden rounded-2xl border border-[#D3A84C]/35 bg-white p-4 shadow-[0_10px_30px_rgba(23,61,50,0.08)]">
+            <div className="text-center">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#173D32]/45">
+                Votre QR Code de parrainage
+              </p>
+              <p className="mt-1 text-xs leading-5 text-[#173D32]/60">
+                Il apparaît une fois votre carte enregistrée sur votre téléphone.
+              </p>
+              <div className="mx-auto mt-3 flex min-h-[220px] w-full items-center justify-center rounded-2xl bg-[#F7F7F3] p-2">
+                {referralQrDataUrl ? (
+                  <img
+                    src={referralQrDataUrl}
+                    alt="QR Code de parrainage"
+                    className="h-[210px] w-[210px] max-w-full rounded-xl"
+                  />
+                ) : (
+                  <div className="h-[210px] w-[210px] animate-pulse rounded-xl bg-[#eef0ed]" />
+                )}
+              </div>
+              {referralUrl && (
+                <p className="mt-2 break-all text-[9px] leading-4 text-[#173D32]/35">
+                  {referralUrl}
+                </p>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => void openReferral()}
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[#173D32] px-4 py-3 text-xs font-semibold text-white"
+            >
+              <Gift className="h-4 w-4" />
+              Partager mon parrainage
+            </button>
+          </div>
+        )}
 
         {program.referral_enabled && (
           <button
