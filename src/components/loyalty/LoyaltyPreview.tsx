@@ -6,31 +6,113 @@ type LoyaltyPreviewProps = {
   config: LoyaltyExperienceConfig;
 };
 
-const CARD_WIDTH = 300;
-const CARD_HEIGHT = 450;
-
-type TemplateStyle = {
-  fontFamily?: string;
-  radius: number;
-  shadow: string;
+type WalletTemplate = {
+  id: string;
+  name: string;
+  background: string;
+  text: string;
+  accent: string;
+  primary: string;
+  fontFamily: string;
+  effect: 'gradient' | 'glass' | 'solid';
 };
 
-const TEMPLATE_STYLES: Record<string, TemplateStyle> = {
-  wallet: {
+export const WALLET_TEMPLATES: Record<string, WalletTemplate> = {
+  'onyx-black': {
+    id: 'onyx-black',
+    name: 'Onyx Black',
+    background: '#070707',
+    text: '#FFFFFF',
+    accent: '#D7D7D7',
+    primary: '#181818',
     fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
-    radius: 48,
-    shadow: '0 28px 70px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.22), inset 0 -18px 36px rgba(0,0,0,.22)',
+    effect: 'gradient',
+  },
+  'royal-gold': {
+    id: 'royal-gold',
+    name: 'Royal Gold',
+    background: '#17110A',
+    text: '#FFF8E8',
+    accent: '#D6B15A',
+    primary: '#6E4B18',
+    fontFamily: 'Georgia, serif',
+    effect: 'gradient',
+  },
+  'deep-ocean': {
+    id: 'deep-ocean',
+    name: 'Deep Ocean',
+    background: '#061923',
+    text: '#F4FCFF',
+    accent: '#6FD3E8',
+    primary: '#0D4050',
+    fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
+    effect: 'glass',
+  },
+  'minimal-white': {
+    id: 'minimal-white',
+    name: 'Minimal White',
+    background: '#F5F5F2',
+    text: '#151515',
+    accent: '#777777',
+    primary: '#FFFFFF',
+    fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
+    effect: 'solid',
+  },
+  'forest-green': {
+    id: 'forest-green',
+    name: 'Forest Green',
+    background: '#071A14',
+    text: '#F7FFF9',
+    accent: '#B9D8A4',
+    primary: '#164D3A',
+    fontFamily: 'Georgia, serif',
+    effect: 'gradient',
+  },
+  'ruby-red': {
+    id: 'ruby-red',
+    name: 'Ruby Red',
+    background: '#21080D',
+    text: '#FFF5F5',
+    accent: '#E8A0A8',
+    primary: '#6D1724',
+    fontFamily: 'Georgia, serif',
+    effect: 'gradient',
+  },
+  'silver-chrome': {
+    id: 'silver-chrome',
+    name: 'Silver Chrome',
+    background: '#777B80',
+    text: '#FFFFFF',
+    accent: '#F5F5F5',
+    primary: '#BFC4C9',
+    fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
+    effect: 'gradient',
+  },
+  'midnight-blue': {
+    id: 'midnight-blue',
+    name: 'Midnight Blue',
+    background: '#080D24',
+    text: '#F4F7FF',
+    accent: '#9DB7FF',
+    primary: '#17275F',
+    fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
+    effect: 'glass',
   },
 };
 
 function hexToRgb(hex: string) {
-  const value = hex.replace('#', '');
+  const value = hex.replace('#', '').trim();
   const normalized =
     value.length === 3
       ? value.split('').map(char => char + char).join('')
       : value;
 
   const number = Number.parseInt(normalized, 16);
+
+  if (!Number.isFinite(number)) {
+    return { r: 0, g: 0, b: 0 };
+  }
+
   return {
     r: (number >> 16) & 255,
     g: (number >> 8) & 255,
@@ -39,49 +121,39 @@ function hexToRgb(hex: string) {
 }
 
 function getContrastColor(color: string) {
-  if (!color || !color.startsWith('#')) return '#17201c';
+  if (!color || !color.startsWith('#')) return '#FFFFFF';
 
   const { r, g, b } = hexToRgb(color);
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 
-  return luminance < 0.52 ? '#ffffff' : '#17201c';
+  return luminance < 0.55 ? '#FFFFFF' : '#111111';
 }
 
 export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
   const [qr, setQr] = useState('');
-  const [scale, setScale] = useState(1);
-  const [frame, setFrame] = useState<HTMLDivElement | null>(null);
+
+  const template =
+    WALLET_TEMPLATES[config.templateId] ||
+    WALLET_TEMPLATES['onyx-black'];
 
   const isStamp =
     config.type === 'STAMP' ||
     config.type === 'CHALLENGE' ||
     config.type === 'COLLECTION';
 
-  const isWallet = config.templateId === 'wallet';
-
-  const isLuxury =
-    config.templateId === 'obsidian' ||
-    config.templateId === 'titanium' ||
-    config.templateId === 'luxury' ||
-    config.templateId === 'hospitality';
-
-  const contrastText = getContrastColor(config.backgroundColor);
-  const textColor = config.textColor || contrastText;
-  const primary = config.primaryColor || config.backgroundColor;
-  const secondary = config.secondaryColor || '#c9a45c';
-  const background = config.backgroundColor || '#ffffff';
-  const templateStyle = TEMPLATE_STYLES[config.templateId] ?? {
-    radius: config.borderRadius || 32,
-    shadow: '0 25px 50px rgba(0,0,0,.20)',
-  };
-
   const balance = isStamp
     ? `${config.visits ?? 0} / ${Math.max(1, config.visitGoal ?? 10)}`
     : (config.pointsBalance ?? 0).toLocaleString('fr-FR');
 
-  const progress = isStamp
-    ? Math.min(100, ((config.visits ?? 0) / Math.max(1, config.visitGoal ?? 10)) * 100)
-    : Math.min(100, ((config.pointsBalance ?? 0) / Math.max(1, config.pointsGoal ?? 1000)) * 100);
+  const draftBackground = config.backgroundColor || '';
+  const draftPrimary = config.primaryColor || '';
+  const draftAccent = config.secondaryColor || '';
+  const draftText = config.textColor || '';
+
+  const backgroundColor = draftBackground || template.background;
+  const primaryColor = draftPrimary || template.primary;
+  const accentColor = draftAccent || template.accent;
+  const textColor = draftText || getContrastColor(backgroundColor);
 
   useEffect(() => {
     let active = true;
@@ -92,190 +164,290 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
     }
 
     void QRCode.toDataURL(config.qrValue, {
-      width: 280,
+      width: 260,
       margin: 1,
-      color: { dark: '#111111', light: '#ffffff' },
-    }).then(value => {
-      if (active) setQr(value);
-    }).catch(() => {
-      if (active) setQr('');
-    });
+      color: {
+        dark: '#111111',
+        light: '#FFFFFF',
+      },
+    })
+      .then(value => {
+        if (active) setQr(value);
+      })
+      .catch(() => {
+        if (active) setQr('');
+      });
 
     return () => {
       active = false;
     };
   }, [config.qrValue]);
 
-  useEffect(() => {
-    if (!frame) return;
+  const backgroundImage = (() => {
+    const draftOverlay = `linear-gradient(145deg, ${primaryColor}66, transparent 55%, ${accentColor}22)`;
 
-    const resize = () => {
-      const availableWidth = Math.max(1, frame.clientWidth - 32);
-      const availableHeight = Math.max(1, frame.clientHeight - 32);
+    if (config.coverImageUrl) {
+      return [
+        'linear-gradient(180deg, rgba(0,0,0,.12), rgba(0,0,0,.58))',
+        draftOverlay,
+        `url("${config.coverImageUrl}")`,
+      ].join(', ');
+    }
 
-      setScale(Math.min(1, availableWidth / CARD_WIDTH, availableHeight / CARD_HEIGHT));
-    };
+    if (template.effect === 'glass') {
+      return [
+        `linear-gradient(135deg, ${primaryColor}CC 0%, transparent 48%, ${accentColor}22 100%)`,
+        'linear-gradient(145deg, rgba(255,255,255,.10), rgba(255,255,255,0) 48%)',
+      ].join(', ');
+    }
 
-    resize();
+    if (template.effect === 'gradient') {
+      return [
+        `linear-gradient(145deg, ${backgroundColor} 0%, ${primaryColor} 52%, ${backgroundColor} 100%)`,
+        draftOverlay,
+      ].join(', ');
+    }
 
-    const observer = new ResizeObserver(resize);
-    observer.observe(frame);
-
-    return () => observer.disconnect();
-  }, [frame]);
+    return draftOverlay;
+  })();
 
   return (
-    <div ref={setFrame} className="bg-slate-100 h-full min-h-0 w-full flex-1 flex items-center justify-center p-4 overflow-hidden">
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        height: '100%',
+        minHeight: 0,
+        minWidth: 0,
+        overflow: 'hidden',
+        boxSizing: 'border-box',
+      }}
+    >
       <div
-        className="max-w-full max-h-full flex items-center justify-center"
-        style={{ width: CARD_WIDTH * scale, height: CARD_HEIGHT * scale }}
+        style={{
+          width: '100%',
+          height: '100%',
+          minHeight: 0,
+          minWidth: 0,
+          overflow: 'hidden',
+          boxSizing: 'border-box',
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          borderRadius: '48px',
+          border: `1px solid rgba(255,255,255,.20)`,
+          backgroundColor,
+          backgroundImage,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          color: textColor,
+          fontFamily: template.fontFamily,
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,.18), inset 0 -24px 50px rgba(0,0,0,.20), 0 24px 60px rgba(0,0,0,.20)',
+          padding: 'clamp(24px, 4%, 40px)',
+        }}
       >
         <div
-          className={`flex flex-col justify-between overflow-hidden shrink-0 border border-white/20 backdrop-blur-md ${isWallet ? 'p-6' : 'p-8'}`}
           style={{
-            width: CARD_WIDTH,
-            height: CARD_HEIGHT,
-            maxWidth: '100%',
-            maxHeight: '100%',
-            backgroundColor: isWallet ? 'rgba(10,10,10,.76)' : background,
-            color: isWallet ? '#ffffff' : textColor,
-            borderRadius: templateStyle.radius,
-            boxShadow: templateStyle.shadow,
-            backgroundImage: isWallet
-              ? [
-                  'linear-gradient(135deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.045) 22%, rgba(255,255,255,0) 48%, rgba(255,255,255,.06) 72%, rgba(255,255,255,0) 100%)',
-                  config.coverImageUrl ? `linear-gradient(180deg, rgba(0,0,0,.30), rgba(0,0,0,.78)), url("${config.coverImageUrl}")` : 'linear-gradient(145deg, rgba(26,26,26,.96), rgba(0,0,0,.98))',
-                ].join(', ')
-              : config.coverImageUrl
-                ? `linear-gradient(180deg, rgba(0,0,0,.12), rgba(0,0,0,.58)), url("${config.coverImageUrl}")`
-                : undefined,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            fontFamily: templateStyle.fontFamily,
+            position: 'absolute',
+            inset: 0,
+            pointerEvents: 'none',
+            background: 'linear-gradient(125deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.04) 22%, rgba(255,255,255,0) 48%, rgba(255,255,255,.06) 72%, rgba(255,255,255,0) 100%)',
+          }}
+        />
+
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '16px',
+            width: '100%',
           }}
         >
           <div
-            className="flex min-h-0 flex-1 flex-col justify-between"
             style={{
-              fontFamily:
-                config.templateId === 'editorial' || config.templateId === 'apple-wallet'
-                  ? 'Georgia, serif'
-                  : 'inherit',
+              minWidth: 0,
+              overflow: 'hidden',
+              fontSize: '18px',
+              fontWeight: 700,
+              letterSpacing: '.01em',
+              whiteSpace: 'nowrap',
+              textOverflow: 'ellipsis',
             }}
           >
-            {isWallet ? (
-              <div className="flex min-h-0 flex-1 flex-col justify-between">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="min-w-0 truncate text-[13px] font-medium tracking-[.01em]" style={{ color: textColor }}>
-                    {config.establishmentName || 'Votre établissement'}
-                  </p>
-                  {config.logoUrl ? (
-                    <img
-                      src={config.logoUrl}
-                      alt=""
-                      className="h-11 w-11 shrink-0 rounded-xl bg-white/90 object-contain p-1.5 shadow-lg"
-                    />
-                  ) : (
-                    <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-white/20 bg-white/10 text-[10px] font-semibold text-white/80">
-                      {(config.establishmentName || 'CL').slice(0, 2).toUpperCase()}
-                    </div>
-                  )}
-                </div>
+            {config.establishmentName || 'Votre établissement'}
+          </div>
 
-                <div className="flex flex-col items-center justify-center text-center">
-                  <p className="text-5xl font-black leading-none tracking-[-.045em] sm:text-6xl">
-                    {balance}
-                  </p>
-                  <p className="mt-2 text-[7px] font-semibold uppercase tracking-[.34em] text-white/60">
-                    POINTS
-                  </p>
-                  <div className="mt-5 h-px w-16 bg-white/20" />
-                  <p className="mt-3 text-[7px] uppercase tracking-[.22em] text-white/45">
-                    {config.currentTier || 'MEMBER'}
-                  </p>
-                </div>
+          {config.logoUrl ? (
+            <img
+              src={config.logoUrl}
+              alt=""
+              style={{
+                width: '48px',
+                height: '48px',
+                flexShrink: 0,
+                objectFit: 'contain',
+                borderRadius: '14px',
+                padding: '6px',
+                boxSizing: 'border-box',
+                backgroundColor: 'rgba(255,255,255,.92)',
+                boxShadow: '0 8px 24px rgba(0,0,0,.20)',
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: '48px',
+                height: '48px',
+                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '14px',
+                border: '1px solid rgba(255,255,255,.22)',
+                backgroundColor: 'rgba(255,255,255,.10)',
+                color: textColor,
+                fontSize: '11px',
+                fontWeight: 700,
+              }}
+            >
+              {(config.establishmentName || 'CL').slice(0, 2).toUpperCase()}
+            </div>
+          )}
+        </div>
 
-                <div className="rounded-2xl bg-white p-4 shadow-[0_16px_35px_rgba(0,0,0,.28)]">
-                  <div className="mx-auto w-[92px]">
-                    {qr ? (
-                      <img src={qr} alt="QR fidélité" className="block w-full rounded-lg" />
-                    ) : (
-                      <div className="aspect-square rounded-lg bg-slate-100" />
-                    )}
-                  </div>
-                  <p className="mt-2 truncate text-center text-[8px] font-light tracking-[.02em] text-slate-700">
-                    {config.customerName || 'Client'}
-                  </p>
-                </div>
-              </div>
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 1,
+            flex: 1,
+            minHeight: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textAlign: 'center',
+            width: '100%',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 'clamp(48px, 9vw, 96px)',
+              fontWeight: 900,
+              lineHeight: 1,
+              letterSpacing: '-.05em',
+              color: textColor,
+              textShadow: '0 8px 30px rgba(0,0,0,.22)',
+              overflowWrap: 'anywhere',
+            }}
+          >
+            {balance}
+          </div>
+
+          <div
+            style={{
+              marginTop: '12px',
+              fontSize: '10px',
+              fontWeight: 700,
+              letterSpacing: '.34em',
+              textTransform: 'uppercase',
+              color: accentColor,
+            }}
+          >
+            {isStamp ? 'TAMPONS' : 'POINTS'}
+          </div>
+
+          <div
+            style={{
+              width: '72px',
+              height: '1px',
+              marginTop: '20px',
+              backgroundColor: accentColor,
+              opacity: 0.55,
+            }}
+          />
+
+          <div
+            style={{
+              marginTop: '12px',
+              fontSize: '10px',
+              fontWeight: 600,
+              letterSpacing: '.22em',
+              textTransform: 'uppercase',
+              color: accentColor,
+              opacity: 0.82,
+            }}
+          >
+            {config.currentTier || 'MEMBER'}
+          </div>
+        </div>
+
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '100%',
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: '#FFFFFF',
+              padding: '12px',
+              borderRadius: '20px',
+              boxShadow: '0 14px 35px rgba(0,0,0,.28)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '124px',
+              height: '124px',
+              boxSizing: 'border-box',
+            }}
+          >
+            {qr ? (
+              <img
+                src={qr}
+                alt="QR Code fidélité"
+                style={{
+                  display: 'block',
+                  width: '100px',
+                  height: '100px',
+                }}
+              />
             ) : (
-              <>
-                <div>
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex min-w-0 items-center gap-2">
-                      {config.logoUrl ? (
-                        <img
-                          src={config.logoUrl}
-                          alt=""
-                          className="h-14 w-14 shrink-0 rounded-2xl bg-white object-contain p-2 shadow"
-                        />
-                      ) : (
-                        <div
-                          className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl"
-                          style={{ backgroundColor: secondary + '30' }}
-                        >
-                          {(config.establishmentName || 'CL').slice(0, 2).toUpperCase()}
-                        </div>
-                      )}
-
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-bold">
-                          {config.establishmentName || 'Votre établissement'}
-                        </p>
-                        <p className="mt-1 text-[7px] uppercase tracking-[.2em]" style={{ color: secondary }}>
-                          {isLuxury ? 'MEMBER EXPERIENCE' : 'PROGRAMME FIDÉLITÉ'}
-                        </p>
-                      </div>
-                    </div>
-
-                    <span className="shrink-0 rounded-full border px-2 py-1 text-[6px] font-bold uppercase tracking-[.14em]" style={{ borderColor: secondary + '80', backgroundColor: secondary + '18', color: textColor }}>
-                      {config.currentTier || 'MEMBER'}
-                    </span>
-                  </div>
-
-                  <div className="mt-6 text-center">
-                    <p className="text-[8px] uppercase tracking-[.22em]" style={{ color: secondary }}>Votre fidélité</p>
-                    <p className="mt-2 text-4xl font-bold leading-none">{balance}</p>
-                    <p className="mt-2 text-[7px] uppercase tracking-[.18em] opacity-60">{isStamp ? 'tampons' : 'points'}</p>
-                    <div className="mx-auto mt-4 w-full max-w-[210px]">
-                      <div className="h-1.5 rounded-full" style={{ backgroundColor: secondary + '35' }}>
-                        <div className="h-full rounded-full" style={{ width: progress + '%', backgroundColor: secondary }} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-2xl p-3" style={{ backgroundColor: primary + '22' }}>
-                  <p className="text-[8px] uppercase tracking-[.16em]" style={{ color: secondary }}>Prochaine récompense</p>
-                  <p className="mt-2 text-sm font-semibold">{config.rewardName || 'Votre cadeau'}</p>
-                  {config.rewardDescription && <p className="mt-1 text-[8px] leading-3 opacity-65">{config.rewardDescription}</p>}
-                </div>
-
-                <div>
-                  <div className="mx-auto w-[86px] rounded-2xl bg-white p-2 shadow-lg">
-                    {qr ? <img src={qr} alt="QR fidélité" className="block w-full rounded-lg" /> : <div className="aspect-square rounded-lg bg-slate-100" />}
-                  </div>
-                  <p className="mt-2 text-center text-[7px] font-semibold uppercase tracking-[.16em]" style={{ color: secondary }}>QR fidélité</p>
-                  <div className="mt-3 flex items-end justify-between border-t pt-3" style={{ borderColor: secondary + '35' }}>
-                    <div>
-                      <p className="text-[6px] uppercase tracking-[.15em] opacity-50">Membre</p>
-                      <p className="mt-1 text-[9px] font-semibold">{config.customerName || 'Client'}</p>
-                    </div>
-                    <p className="text-[9px] font-semibold">{config.currentTier || 'MEMBER'}</p>
-                  </div>
-                </div>
-              </>
+              <div
+                style={{
+                  width: '100px',
+                  height: '100px',
+                  backgroundColor: '#F1F1F1',
+                  borderRadius: '8px',
+                }}
+              />
             )}
+          </div>
+
+          <div
+            style={{
+              marginTop: '10px',
+              maxWidth: '100%',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              fontSize: '11px',
+              fontWeight: 400,
+              color: textColor,
+              opacity: 0.78,
+            }}
+          >
+            {config.customerName || 'Client'}
           </div>
         </div>
       </div>
