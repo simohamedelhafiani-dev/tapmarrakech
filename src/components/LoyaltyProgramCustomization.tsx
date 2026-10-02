@@ -752,6 +752,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                    <ModeButton active={cardMode === 'POINTS_REWARD'} icon={<Gift size={23}/>} title="Points & récompenses" description="Les points servent à débloquer un catalogue de récompenses." onClick={() => chooseMode('POINTS_REWARD')} />
                    <ModeButton active={cardMode === 'POINTS_DISCOUNT'} icon={<QrCode size={23}/>} title="Objectif réduction" description="Les points remplissent un seuil puis débloquent une réduction temporaire." onClick={() => chooseMode('POINTS_DISCOUNT')} />
               </div>
+               </div>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 <label className="block text-xs font-medium text-ink/50">Titre<input value={design.design_config.front_title} onChange={e => updateConfig({front_title:e.target.value})} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm"/></label>
