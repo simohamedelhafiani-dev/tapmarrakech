@@ -1,10 +1,11 @@
-
 export { WALLET_TEMPLATES } from '@/components/LoyaltyCardVisual';
 
 import type { LoyaltyExperienceConfig } from './LoyaltyExperience';
 import { LoyaltyCardVisual } from '@/components/LoyaltyCardVisual';
 
-type LoyaltyPreviewProps = { config: LoyaltyExperienceConfig };
+type LoyaltyPreviewProps = {
+  config: LoyaltyExperienceConfig;
+};
 
 export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
   const mode =
@@ -16,12 +17,9 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
 
   return (
     <div
+      className="flex w-full items-center justify-center overflow-visible"
       style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '100%',
-        overflow: 'visible',
+        minWidth: 0,
       }}
     >
       <LoyaltyCardVisual
@@ -31,7 +29,7 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
           secondary_color: config.secondaryColor || '#D7D7D7',
           background_color: config.backgroundColor || '#070707',
           text_color: config.textColor || '#FFFFFF',
-          border_radius: 34,
+          border_radius: config.borderRadius ?? 34,
           config: {
             background_image_url: config.coverImageUrl || null,
             logo_url: config.logoUrl || null,
@@ -62,7 +60,7 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
           cardUrl: config.qrValue,
         }}
         programType={mode}
-        cardWidth="min(90%, 400px)"
+        cardWidth="min(100%, 400px)"
       />
     </div>
   );
