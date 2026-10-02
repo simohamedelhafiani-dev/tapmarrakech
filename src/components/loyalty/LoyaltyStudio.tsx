@@ -753,32 +753,55 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
               </StudioCard>
 
               {program.programType === 'STAMP' && (
-                <StudioCard eyebrow="Tampons" title="Objectif et récompense">
-                  <div className="grid gap-4 md:grid-cols-3">
-                    <Field label="Objectif de tampons">
-                      <input
-                        type="number"
-                        min="1"
-                        max="10"
-                        value={program.stampGoal}
-                        onChange={e => setProgram(current => ({
-                          ...current,
-                          stampGoal: Math.min(10, Math.max(1, Number(e.target.value) || 1)),
-                        }))}
-                        className="h-12 w-full rounded-xl border border-ink/10 bg-white px-4 text-sm font-medium text-forest outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-forest/10 placeholder:text-ink/25"
-                      />
-                    </Field>
-                    <div className="md:col-span-2">
+                <>
+                  <StudioCard eyebrow="Tampons" title="Objectif de tampons">
+                    <div className="max-w-sm">
+                      <Field label="Nombre de tampons à collecter">
+                        <input
+                          type="number"
+                          min="1"
+                          max="10"
+                          value={program.stampGoal}
+                          onChange={e => setProgram(current => ({
+                            ...current,
+                            stampGoal: Math.min(10, Math.max(1, Number(e.target.value) || 1)),
+                          }))}
+                          className="h-12 w-full rounded-xl border border-ink/10 bg-white px-4 text-sm font-medium text-forest outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-forest/10 placeholder:text-ink/25"
+                        />
+                      </Field>
+                      <p className="mt-3 rounded-xl bg-[#f7f7f3] px-3 py-2.5 text-[10px] leading-4 text-ink/45">
+                        Le client reçoit sa récompense automatiquement lorsqu’il atteint cet objectif.
+                      </p>
+                    </div>
+                  </StudioCard>
+
+                  <StudioCard eyebrow="Récompense tampon" title="Récompense après l'objectif">
+                    <div className="grid gap-4 md:grid-cols-2">
                       <Field label="Nom de la récompense">
                         <input
                           value={program.stampRewardName}
                           onChange={e => setProgram(current => ({ ...current, stampRewardName: e.target.value }))}
+                          placeholder="Ex. Café offert, dessert offert..."
+                          className="h-12 w-full rounded-xl border border-ink/10 bg-white px-4 text-sm font-medium text-forest outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-forest/10 placeholder:text-ink/25"
+                        />
+                      </Field>
+                      <Field label="Description de la récompense">
+                        <input
+                          value={program.stampRewardDescription}
+                          onChange={e => setProgram(current => ({ ...current, stampRewardDescription: e.target.value }))}
+                          placeholder="Ex. Un café ou un dessert au choix"
                           className="h-12 w-full rounded-xl border border-ink/10 bg-white px-4 text-sm font-medium text-forest outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-forest/10 placeholder:text-ink/25"
                         />
                       </Field>
                     </div>
-                  </div>
-                </StudioCard>
+                    <div className="mt-4 rounded-xl border border-gold/20 bg-gold/5 px-4 py-3">
+                      <p className="text-[10px] font-semibold text-forest">Récompense dédiée aux tampons</p>
+                      <p className="mt-1 text-[10px] leading-4 text-ink/40">
+                        Cette récompense est indépendante du catalogue des récompenses en points.
+                      </p>
+                    </div>
+                  </StudioCard>
+                </>
               )}
 
               {program.programType === 'POINTS_DISCOUNT' && (
