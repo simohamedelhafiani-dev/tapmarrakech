@@ -60,7 +60,13 @@ export default function LoyaltyJoin() {
       }
 
       const row = Array.isArray(data) ? data[0] : data;
-      setEstablishmentName(row?.establishment_name ?? '');
+      if (!row?.establishment_name) {
+        setError('Ce lien d’inscription est invalide ou le programme est momentanément indisponible.');
+        setLoadingContext(false);
+        return;
+      }
+
+      setEstablishmentName(row.establishment_name);
       setLoadingContext(false);
     };
 
