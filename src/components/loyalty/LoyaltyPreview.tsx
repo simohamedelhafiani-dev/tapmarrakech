@@ -140,10 +140,13 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
     config.type === 'STAMP' ||
     config.type === 'CHALLENGE' ||
     config.type === 'COLLECTION';
+  const isDiscount = config.type === 'DISCOUNT';
 
-  const balance = isStamp
-    ? `${config.visits ?? 0} / ${Math.max(1, config.visitGoal ?? 10)}`
-    : (config.pointsBalance ?? 0).toLocaleString('fr-FR');
+  const balance = isDiscount
+    ? `-${Math.max(0, Number(config.discountPercent ?? 0))}%`
+    : isStamp
+      ? `${config.visits ?? 0} / ${Math.max(1, config.visitGoal ?? 10)}`
+      : (config.pointsBalance ?? 0).toLocaleString('fr-FR');
 
   const draftBackground = config.backgroundColor || '';
   const draftPrimary = config.primaryColor || '';
@@ -359,8 +362,23 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
               color: accentColor,
             }}
           >
-            {isStamp ? 'TAMPONS' : 'POINTS'}
+            {isDiscount ? 'RÉDUCTION' : isStamp ? 'TAMPONS' : 'POINTS'}
           </div>
+
+          {isDiscount && (
+            <div
+              style={{
+                marginTop: '16px',
+                fontSize: '12px',
+                fontWeight: 600,
+                letterSpacing: '.12em',
+                textTransform: 'uppercase',
+                color: accentColor,
+              }}
+            >
+              Valable {Math.max(1, Number(config.discountExpiresAt ? 0 : 0)) || 7} jours
+            </div>
+          )}
 
           <div
             style={{
