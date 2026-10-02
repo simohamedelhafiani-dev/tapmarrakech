@@ -1066,12 +1066,13 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
             </div>
           </div>
 
-          <div id="loyalty-preview" className="scroll-mt-6 flex min-h-[70vh] flex-col rounded-[28px] border border-ink/10 bg-[#f7f7f3] p-4 shadow-inner sm:p-6">
+          <div id="loyalty-preview" className="scroll-mt-6 flex min-h-[78vh] flex-col overflow-hidden rounded-[32px] border border-white/70 bg-[linear-gradient(145deg,#f8faf8_0%,#eef2ef_48%,#e5eae6_100%)] p-5 shadow-[0_24px_70px_rgba(23,61,50,0.10)] sm:p-7">
             <div className="flex items-center justify-between">
               <div><p className="text-[10px] font-bold uppercase tracking-[.16em] text-gold">Aperçu en temps réel</p><p className="mt-1 text-xs text-ink/45">Voici exactement ce que vos clients verront.</p></div>
               <span className="rounded-full bg-white px-3 py-1.5 text-[10px] font-semibold text-forest shadow-sm">Client</span>
             </div>
-            <div className="mt-5 flex flex-1 flex-col items-center justify-center">
+            <div className="mt-6 flex flex-1 flex-col items-center justify-center">
+
               <LoyaltyPreview config={visualExperience} />
 
               <div className="mt-4 rounded-[22px] border border-ink/10 bg-white p-4 shadow-sm">
