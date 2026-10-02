@@ -7,7 +7,7 @@ import { type LoyaltyExperienceConfig } from './loyalty/LoyaltyExperience';
 import LoyaltyPreview from './loyalty/LoyaltyPreview';
 import { useLoyaltyManager, type LoyaltyReferralBonusType, type LoyaltyReferralConfig } from '@/hooks/useLoyaltyManager';
 
-type CardMode = 'QR' | 'STAMP';
+type CardMode = 'QR' | 'STAMP' | 'DISCOUNT';
 
 type LoyaltyRewardAdmin = {
   id: string;
@@ -91,6 +91,8 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
   const [stampRewardName, setStampRewardName] = useState('Cadeau fidélité');
   const [stampRewardDescription, setStampRewardDescription] = useState('');
   const [pointsPerCurrency, setPointsPerCurrency] = useState('1');
+  const [discountPercent, setDiscountPercent] = useState('10');
+  const [discountValidDays, setDiscountValidDays] = useState('7');
   const [programEnabled, setProgramEnabled] = useState(true);
   const [rewards, setRewards] = useState<LoyaltyRewardAdmin[]>([]);
   const [previewCustomer, setPreviewCustomer] = useState<{ id: string; first_name: string | null; points_balance: number; visit_count: number; stamps_balance: number } | null>(null);
@@ -175,7 +177,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
         design_config: nextConfig,
         published: Boolean(row.published),
       });
-      setCardMode(nextConfig.card_mode === 'STAMP' ? 'STAMP' : 'QR');
+      setCardMode(nextConfig.card_mode === 'STAMP' ? 'STAMP' : nextConfig.card_mode === 'DISCOUNT' ? 'DISCOUNT' : 'QR');
     }
     if (place) setEstablishment({ name: place.name || 'Votre établissement', logo_url: place.logo_url || null, business_type: place.business_type || null });
     setRewards((rewardData ?? []) as LoyaltyRewardAdmin[]);
@@ -214,6 +216,8 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
       setStampRewardName(program.stamp_reward_name ?? 'Cadeau fidélité');
       setStampRewardDescription(program.stamp_reward_description ?? '');
       setPointsPerCurrency(String(program.points_per_currency ?? 1));
+       setDiscountPercent(String(program.discount_percent ?? 10));
+       setDiscountValidDays(String(program.discount_valid_days ?? 7));
       setProgramEnabled(Boolean(program.enabled ?? true));
       if (!row?.design_config?.card_mode) setCardMode(program.program_type === 'STAMP' ? 'STAMP' : 'QR');
     }
@@ -538,12 +542,12 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     setSaving(true);
     const { error: programError } = await supabase.rpc('save_loyalty_program_settings', {
       p_establishment_id: establishmentId,
-      p_program_type: cardMode === 'STAMP' ? 'STAMP' : 'POINTS',
+      p_program_type: cardMode === 'DISCOUNT' ? 'DISCOUNT' : cardMode === 'STAMP' ? 'STAMP' : 'POINTS',
       p_stamp_goal: Number(stampGoal) || 10,
       p_stamp_reward_name: cardMode === 'STAMP' ? stampRewardName.trim() : null,
       p_stamp_reward_description: cardMode === 'STAMP' ? stampRewardDescription.trim() || null : null,
-      p_discount_percent: null,
-      p_discount_valid_days: 7,
+      p_discount_percent: cardMode === 'DISCOUNT' ? Math.min(100, Math.max(1, Number(discountPercent) || 10)) : null,
+      p_discount_valid_days: cardMode === 'DISCOUNT' ? Math.max(1, Number(discountValidDays) || 7) : 7,
       p_points_per_currency: Number(pointsPerCurrency) > 0 ? Number(pointsPerCurrency) : 1,
       p_currency: 'MAD',
       p_enabled: programEnabled,
@@ -578,7 +582,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
   }
 
   const visualExperience: LoyaltyExperienceConfig = {
-    type: cardMode === 'STAMP' ? 'STAMP' : 'POINTS',
+    type: cardMode === 'DISCOUNT' ? 'DISCOUNT' : cardMode === 'STAMP' ? 'STAMP' : 'POINTS',
     stampStyle: design.design_config.stamp_style,
     templateId: design.template_id,
     businessType: design.design_config.business_type || establishment.business_type,
@@ -771,7 +775,24 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                   </label>
                 </div>
 
-                <div className="mt-3 rounded-xl border border-[#173D32]/10 bg-white p-3 text-[10px] text-ink/45">
+                {cardMode === 'DISCOUNT' && (
+                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                   <label className="text-xs font-medium text-ink/50">Réduction
+                     <div className="mt-1 flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-3 py-2.5">
+                       <input type="number" min="1" max="100" value={discountPercent} onChange={e => setDiscountPercent(e.target.value)} className="w-full bg-transparent text-sm text-ink outline-none" />
+                       <span className="text-[10px] font-semibold text-ink/35">%</span>
+                     </div>
+                   </label>
+                   <label className="text-xs font-medium text-ink/50">Validité
+                     <div className="mt-1 flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-3 py-2.5">
+                       <input type="number" min="1" max="365" value={discountValidDays} onChange={e => setDiscountValidDays(e.target.value)} className="w-full bg-transparent text-sm text-ink outline-none" />
+                       <span className="text-[10px] font-semibold text-ink/35">jours</span>
+                     </div>
+                   </label>
+                 </div>
+               )}
+
+               <div className="mt-3 rounded-xl border border-[#173D32]/10 bg-white p-3 text-[10px] text-ink/45">
                   <strong className="text-ink/65">Carte à {Math.max(1, Number(stampGoal) || 10)} tampons :</strong> la prévisualisation et la carte publique utilisent ce même nombre. Les tampons supplémentaires restent disponibles après une récompense.
                 </div>
 
