@@ -649,7 +649,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         <p className="mt-2 text-center text-[10px] text-ink/40">Ajoutez-la à votre écran d’accueil ou partagez votre carte.</p>
 
         {referralOpen && (
-          <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#10231d]/55 p-3 backdrop-blur-sm sm:items-center sm:p-6">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#10231d]/55 p-3 backdrop-blur-sm sm:p-6">
             <div
               role="dialog"
               aria-modal="true"
@@ -665,32 +665,22 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                 >
                   <X className="h-4 w-4" />
                 </button>
-
-                <div className="pr-10">
-                  <div className="mb-2 grid h-9 w-9 place-items-center rounded-2xl bg-[#D6B15A] text-[#173D32]">
-                    <Gift className="h-5 w-5" />
-                  </div>
-                  <h2 id="public-referral-title" className="font-display text-xl">
-                    Inviter un ami
-                  </h2>
-                  <p className="mt-1 text-xs text-white/65">
-                    Partagez votre code et invitez un proche à rejoindre le programme fidélité.
-                  </p>
-                </div>
+                <h2 id="public-referral-title" className="pr-10 font-display text-xl">
+                  Inviter un ami
+                </h2>
               </div>
 
-              <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
+              <div className="min-h-0 flex-1 overflow-hidden p-4">
                 {referralLoading ? (
-                  <div className="rounded-2xl bg-white px-4 py-8 text-center shadow-sm">
-                    <div className="mx-auto h-7 w-7 animate-spin rounded-full border-2 border-[#173D32] border-t-transparent" />
-                    <p className="mt-3 text-sm text-[#173D32]/60">Chargement de votre code…</p>
+                  <div className="flex h-full items-center justify-center">
+                    <div className="h-7 w-7 animate-spin rounded-full border-2 border-[#173D32] border-t-transparent" />
                   </div>
                 ) : referralCode ? (
-                  <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+                  <div className="flex h-full flex-col items-center justify-center">
                     <p className="mb-2 text-center text-sm font-semibold text-[#173D32]">
                       Bienvenue dans la famille {card?.establishment_name || "cet établissement"} 🤍
                     </p>
-                    <div className="flex aspect-square w-[min(32vh,210px)] max-w-full items-center justify-center rounded-2xl bg-white p-2 shadow-sm">
+                    <div className="flex aspect-square w-[min(30vh,210px)] max-w-full items-center justify-center rounded-2xl bg-white p-2 shadow-sm">
                       {referralQrDataUrl ? (
                         <img
                           src={referralQrDataUrl}
@@ -703,48 +693,8 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                     </div>
                   </div>
                 ) : (
-                          <div className="h-full w-full animate-pulse rounded-xl bg-[#eef0ed]" />
-                        )}
-                      </div>
-
-                      <p className="mt-2 text-[9px] text-[#173D32]/45">
-                        Scannez ce QR Code pour rejoindre le programme fidélité.
-                      </p>
-
-                      <p className="mt-1 break-all text-[9px] leading-3 text-[#173D32]/45">
-                        {referralUrl}
-                      </p>
-                    </div>
-
-                    <div className="rounded-2xl bg-[#173D32]/[0.06] p-4">
-                      <p className="whitespace-pre-line text-sm leading-6 text-[#173D32]/80">
-                        {referralMessage}
-                      </p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => void shareReferral()}
-                      className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#173D32] px-5 py-4 text-sm font-semibold text-white shadow-lg transition hover:brightness-110"
-                    >
-                      <Share2 className="h-4 w-4" />
-                      Partager maintenant
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => void copyReferralCode()}
-                      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#173D32]/12 bg-white px-5 py-3.5 text-sm font-semibold text-[#173D32] transition hover:bg-[#173D32]/[0.04]"
-                    >
-                      <Link2 className="h-4 w-4" />
-                      {referralCopied ? 'Lien copié ✓' : 'Copier le lien'}
-                    </button>
-                  </>
-                ) : (
-                  <div className="rounded-2xl bg-white p-5 text-center shadow-sm">
-                    <p className="text-sm leading-6 text-[#173D32]/65">
-                      Votre code de parrainage n’est pas encore disponible.
-                    </p>
+                  <div className="flex h-full items-center justify-center text-center text-sm text-[#173D32]/60">
+                    Votre code de parrainage n’est pas encore disponible.
                   </div>
                 )}
               </div>
