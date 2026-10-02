@@ -28,6 +28,7 @@ export default function LoyaltyJoin() {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [accessToken, setAccessToken] = useState('');
+  const [redirectReady, setRedirectReady] = useState(false);
 
   useEffect(() => {
     if (!isGlobalEnrollment) {
@@ -77,10 +78,20 @@ export default function LoyaltyJoin() {
         firstName.trim() &&
         lastName.trim() &&
         phone.trim() &&
-        (isGlobalEnrollment || referralCode),
+        (isGlobalEnrollment ? Boolean(establishmentName) : Boolean(referralCode)),
       ),
     [loadingContext, firstName, lastName, phone, isGlobalEnrollment, referralCode],
   );
+
+  useEffect(() => {
+    if (!accessToken) {
+      setRedirectReady(false);
+      return;
+    }
+
+    const timeout = window.setTimeout(() => setRedirectReady(true), 900);
+    return () => window.clearTimeout(timeout);
+  }, [accessToken]);
 
   async function join() {
     if (!canSubmit || loading) return;
@@ -141,6 +152,10 @@ export default function LoyaltyJoin() {
       );
       setLoading(false);
     }
+  }
+
+  if (accessToken && redirectReady) {
+    return <Navigate to={\`/loyalty/\${accessToken}?welcome=1\`} replace />;
   }
 
   if (accessToken) {
