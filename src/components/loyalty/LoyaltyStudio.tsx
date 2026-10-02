@@ -730,7 +730,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
               <StudioCard eyebrow="Conversion" title="Taux de fidélité">
                 <div className="grid gap-4 md:grid-cols-[1fr_auto_1fr] md:items-end">
                   <Field label="MAD dépensés">
-                    <input value="1" readOnly className="studio-input bg-[#f7f7f3] text-ink/50" />
+                    <input value="1" readOnly className="h-12 w-full rounded-xl border border-ink/10 bg-white px-4 text-sm font-medium text-forest outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-forest/10 placeholder:text-ink/25 bg-[#f7f7f3] text-ink/50" />
                   </Field>
                   <span className="hidden pb-3 text-xs font-bold text-ink/25 md:block">=</span>
                   <Field label="Points gagnés">
@@ -743,7 +743,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                         ...current,
                         pointsPerCurrency: Math.max(0.01, Number(e.target.value) || 0.01),
                       }))}
-                      className="studio-input"
+                      className="h-12 w-full rounded-xl border border-ink/10 bg-white px-4 text-sm font-medium text-forest outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-forest/10 placeholder:text-ink/25"
                     />
                   </Field>
                 </div>
@@ -765,7 +765,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                           ...current,
                           stampGoal: Math.min(10, Math.max(1, Number(e.target.value) || 1)),
                         }))}
-                        className="studio-input"
+                        className="h-12 w-full rounded-xl border border-ink/10 bg-white px-4 text-sm font-medium text-forest outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-forest/10 placeholder:text-ink/25"
                       />
                     </Field>
                     <div className="md:col-span-2">
@@ -773,7 +773,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                         <input
                           value={program.stampRewardName}
                           onChange={e => setProgram(current => ({ ...current, stampRewardName: e.target.value }))}
-                          className="studio-input"
+                          className="h-12 w-full rounded-xl border border-ink/10 bg-white px-4 text-sm font-medium text-forest outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-forest/10 placeholder:text-ink/25"
                         />
                       </Field>
                     </div>
@@ -793,7 +793,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                           ...current,
                           discountPointsThreshold: Math.max(1, Number(e.target.value) || 1),
                         }))}
-                        className="studio-input"
+                        className="h-12 w-full rounded-xl border border-ink/10 bg-white px-4 text-sm font-medium text-forest outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-forest/10 placeholder:text-ink/25"
                       />
                     </Field>
                     <Field label="Réduction">
@@ -807,7 +807,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                             ...current,
                             discountPercent: Math.min(100, Math.max(1, Number(e.target.value) || 1)),
                           }))}
-                          className="studio-input pr-10"
+                          className="h-12 w-full rounded-xl border border-ink/10 bg-white px-4 text-sm font-medium text-forest outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-forest/10 placeholder:text-ink/25 pr-10"
                         />
                         <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-ink/35">%</span>
                       </div>
@@ -823,7 +823,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                             ...current,
                             discountValidDays: Math.min(365, Math.max(1, Number(e.target.value) || 1)),
                           }))}
-                          className="studio-input pr-14"
+                          className="h-12 w-full rounded-xl border border-ink/10 bg-white px-4 text-sm font-medium text-forest outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-forest/10 placeholder:text-ink/25 pr-14"
                         />
                         <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-ink/35">jours</span>
                       </div>
@@ -888,13 +888,13 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
               <StudioCard eyebrow={rewardDraft.id ? 'Édition' : 'Nouveau'} title={rewardDraft.id ? 'Modifier la récompense' : 'Ajouter une récompense'}>
                 <div className="grid gap-4 md:grid-cols-2">
                   <Field label="Nom">
-                    <input value={rewardDraft.name} onChange={e => setRewardDraft(current => ({ ...current, name: e.target.value }))} placeholder="Ex. Dessert offert" className="studio-input" />
+                    <input value={rewardDraft.name} onChange={e => setRewardDraft(current => ({ ...current, name: e.target.value }))} placeholder="Ex. Dessert offert" className="h-12 w-full rounded-xl border border-ink/10 bg-white px-4 text-sm font-medium text-forest outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-forest/10 placeholder:text-ink/25" />
                   </Field>
                   <Field label="Points requis">
-                    <input type="number" min="1" value={rewardDraft.pointsRequired} onChange={e => setRewardDraft(current => ({ ...current, pointsRequired: Math.max(1, Number(e.target.value) || 1) }))} className="studio-input" />
+                    <input type="number" min="1" value={rewardDraft.pointsRequired} onChange={e => setRewardDraft(current => ({ ...current, pointsRequired: Math.max(1, Number(e.target.value) || 1) }))} className="h-12 w-full rounded-xl border border-ink/10 bg-white px-4 text-sm font-medium text-forest outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-forest/10 placeholder:text-ink/25" />
                   </Field>
                   <Field label="Type">
-                    <select value={rewardDraft.rewardType} onChange={e => setRewardDraft(current => ({ ...current, rewardType: e.target.value as RewardType }))} className="studio-input">
+                    <select value={rewardDraft.rewardType} onChange={e => setRewardDraft(current => ({ ...current, rewardType: e.target.value as RewardType }))} className="h-12 w-full rounded-xl border border-ink/10 bg-white px-4 text-sm font-medium text-forest outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-forest/10 placeholder:text-ink/25">
                       <option value="GIFT">Cadeau</option>
                       <option value="DISCOUNT">Réduction</option>
                     </select>
@@ -902,16 +902,16 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   {rewardDraft.rewardType === 'DISCOUNT' && (
                     <>
                       <Field label="Pourcentage de réduction">
-                        <input type="number" min="1" max="20" value={rewardDraft.discountPercent} onChange={e => setRewardDraft(current => ({ ...current, discountPercent: Math.min(20, Math.max(1, Number(e.target.value) || 1)) }))} className="studio-input" />
+                        <input type="number" min="1" max="20" value={rewardDraft.discountPercent} onChange={e => setRewardDraft(current => ({ ...current, discountPercent: Math.min(20, Math.max(1, Number(e.target.value) || 1)) }))} className="h-12 w-full rounded-xl border border-ink/10 bg-white px-4 text-sm font-medium text-forest outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-forest/10 placeholder:text-ink/25" />
                       </Field>
                       <Field label="Plafond de réduction (MAD)">
-                        <input type="number" min="0" value={rewardDraft.discountMaxAmount ?? ''} onChange={e => setRewardDraft(current => ({ ...current, discountMaxAmount: e.target.value === '' ? null : Math.max(0, Number(e.target.value)) }))} className="studio-input" placeholder="Optionnel" />
+                        <input type="number" min="0" value={rewardDraft.discountMaxAmount ?? ''} onChange={e => setRewardDraft(current => ({ ...current, discountMaxAmount: e.target.value === '' ? null : Math.max(0, Number(e.target.value)) }))} className="h-12 w-full rounded-xl border border-ink/10 bg-white px-4 text-sm font-medium text-forest outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-forest/10 placeholder:text-ink/25" placeholder="Optionnel" />
                       </Field>
                     </>
                   )}
                   <div className="md:col-span-2">
                     <Field label="Description">
-                      <textarea value={rewardDraft.description} onChange={e => setRewardDraft(current => ({ ...current, description: e.target.value }))} rows={3} className="studio-input resize-none" placeholder="Ce que le client reçoit..." />
+                      <textarea value={rewardDraft.description} onChange={e => setRewardDraft(current => ({ ...current, description: e.target.value }))} rows={3} className="h-12 w-full rounded-xl border border-ink/10 bg-white px-4 text-sm font-medium text-forest outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-forest/10 placeholder:text-ink/25 resize-none" placeholder="Ce que le client reçoit..." />
                     </Field>
                   </div>
                 </div>
@@ -977,7 +977,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                           max_referrals: e.target.value === '' ? null : Math.max(0, Math.floor(Number(e.target.value) || 0)),
                         }))}
                         placeholder="Illimité"
-                        className="studio-input pr-20"
+                        className="h-12 w-full rounded-xl border border-ink/10 bg-white px-4 text-sm font-medium text-forest outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-forest/10 placeholder:text-ink/25 pr-20"
                       />
                       <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-ink/30">par client</span>
                     </div>
@@ -1193,7 +1193,7 @@ function ReferralField({
     <div>
       <p className="text-xs font-semibold text-ink/55">{label}</p>
       <div className="mt-2 grid grid-cols-[1fr_110px] gap-2">
-        <select value={type} onChange={e => onChange(e.target.value as LoyaltyReferralBonusType, value)} className="studio-input">
+        <select value={type} onChange={e => onChange(e.target.value as LoyaltyReferralBonusType, value)} className="h-12 w-full rounded-xl border border-ink/10 bg-white px-4 text-sm font-medium text-forest outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-forest/10 placeholder:text-ink/25">
           <option value="POINTS">Points</option>
           <option value="STAMP">Tampons</option>
           <option value="REDUCTION">Réduction</option>
@@ -1203,7 +1203,7 @@ function ReferralField({
           min="0"
           value={value}
           onChange={e => onChange(type, Math.max(0, Number(e.target.value) || 0))}
-          className="studio-input"
+          className="h-12 w-full rounded-xl border border-ink/10 bg-white px-4 text-sm font-medium text-forest outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-forest/10 placeholder:text-ink/25"
         />
       </div>
     </div>
