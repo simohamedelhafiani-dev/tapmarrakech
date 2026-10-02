@@ -654,9 +654,9 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
               role="dialog"
               aria-modal="true"
               aria-labelledby="public-referral-title"
-              className="w-full max-w-[430px] overflow-hidden rounded-[2rem] bg-[#F7F7F3] shadow-2xl"
+              className="flex h-[40vh] max-h-[40vh] w-full max-w-[430px] flex-col overflow-hidden rounded-[2rem] bg-[#F7F7F3] shadow-2xl"
             >
-              <div className="relative bg-[#173D32] px-6 pb-7 pt-6 text-white">
+              <div className="relative shrink-0 bg-[#173D32] px-6 pb-4 pt-4 text-white">
                 <button
                   type="button"
                   onClick={() => setReferralOpen(false)}
@@ -667,19 +667,19 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                 </button>
 
                 <div className="pr-10">
-                  <div className="mb-3 grid h-11 w-11 place-items-center rounded-2xl bg-[#D6B15A] text-[#173D32]">
+                  <div className="mb-2 grid h-9 w-9 place-items-center rounded-2xl bg-[#D6B15A] text-[#173D32]">
                     <Gift className="h-5 w-5" />
                   </div>
-                  <h2 id="public-referral-title" className="font-display text-2xl">
+                  <h2 id="public-referral-title" className="font-display text-xl">
                     Inviter un ami
                   </h2>
-                  <p className="mt-1 text-sm text-white/65">
+                  <p className="mt-1 text-xs text-white/65">
                     Partagez votre code et invitez un proche à rejoindre le programme fidélité.
                   </p>
                 </div>
               </div>
 
-              <div className="space-y-4 p-5">
+              <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
                 {referralLoading ? (
                   <div className="rounded-2xl bg-white px-4 py-8 text-center shadow-sm">
                     <div className="mx-auto h-7 w-7 animate-spin rounded-full border-2 border-[#173D32] border-t-transparent" />
@@ -687,28 +687,28 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                   </div>
                 ) : referralCode ? (
                   <>
-                    <div className="rounded-2xl border border-[#D3A84C]/35 bg-white p-5 text-center shadow-sm">
+                    <div className="rounded-2xl border border-[#D3A84C]/35 bg-white p-3 text-center shadow-sm">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#173D32]/45">
                         Inviter avec votre QR Code
                       </p>
 
-                      <div className="mx-auto mt-4 flex min-h-[260px] w-full items-center justify-center rounded-2xl bg-white p-3">
+                      <div className="mx-auto mt-3 flex aspect-square w-[min(38vh,240px)] max-w-full items-center justify-center rounded-2xl bg-white p-2">
                         {referralQrDataUrl ? (
                           <img
                             src={referralQrDataUrl}
                             alt="QR Code de parrainage"
-                            className="h-[240px] w-[240px] max-w-full rounded-xl"
+                            className="h-full w-full rounded-xl"
                           />
                         ) : (
-                          <div className="h-[240px] w-[240px] animate-pulse rounded-xl bg-[#eef0ed]" />
+                          <div className="h-full w-full animate-pulse rounded-xl bg-[#eef0ed]" />
                         )}
                       </div>
 
-                      <p className="mt-3 text-[10px] text-[#173D32]/45">
+                      <p className="mt-2 text-[9px] text-[#173D32]/45">
                         Scannez ce QR Code pour rejoindre le programme fidélité.
                       </p>
 
-                      <p className="mt-2 break-all text-[10px] leading-4 text-[#173D32]/45">
+                      <p className="mt-1 break-all text-[9px] leading-3 text-[#173D32]/45">
                         {referralUrl}
                       </p>
                     </div>
