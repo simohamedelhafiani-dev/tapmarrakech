@@ -199,6 +199,31 @@ export default function Admin() {
     });
   }, [establishmentListLoading, establishmentList, establishmentListError]);
 
+  useEffect(() => {
+    if (!establishments.length) {
+      setSelectedEstablishmentId(null);
+      return;
+    }
+
+    if (selectedEstablishmentId && establishments.some((establishment) => establishment.id === selectedEstablishmentId)) {
+      return;
+    }
+
+    // Quand aucun établissement n'est encore sélectionné, privilégier celui
+    // dont le programme fidélité est actif afin d'éviter de générer un QR
+    // d'inscription pour un établissement désactivé.
+    void (async () => {
+      const { data } = await supabase
+        .from('loyalty_settings')
+        .select('establishment_id,enabled')
+        .in('establishment_id', establishments.map((establishment) => establishment.id))
+        .eq('enabled', true)
+        .limit(1);
+
+      setSelectedEstablishmentId(data?.[0]?.establishment_id ?? establishments[0].id);
+    })();
+  }, [establishments, selectedEstablishmentId]);
+
   const [staffLoading, setStaffLoading] = useState(true);
 
   const loadEstablishments = async () => {
@@ -728,25 +753,25 @@ export default function Admin() {
             <section className="space-y-5">
               {establishments.length > 0 ? (
                 <>
-                  {establishments.length > 1 && (
-                    <div className="rounded-2xl border border-ink/5 bg-white p-4 shadow-sm">
-                      <label className="block max-w-md text-xs font-semibold text-forest">
-                        Établissement
-                        <select
-                          value={selectedEstablishmentId ?? establishments[0].id}
-                          onChange={(event) => setSelectedEstablishmentId(event.target.value)}
-                          className="mt-2 w-full rounded-xl border border-ink/10 bg-white px-3 py-3 text-sm font-normal text-ink outline-none focus:border-forest"
-                        >
-                          {establishments.map((establishment) => (
-                            <option key={establishment.id} value={establishment.id}>
-                              {establishment.name}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                    </div>
+                  <div className="rounded-2xl border border-ink/5 bg-white p-4 shadow-sm">
+                    <label className="block max-w-md text-xs font-semibold text-forest">
+                      Établissement
+                      <select
+                        value={selectedEstablishmentId ?? ''}
+                        onChange={(event) => setSelectedEstablishmentId(event.target.value || null)}
+                        className="mt-2 w-full rounded-xl border border-ink/10 bg-white px-3 py-3 text-sm font-normal text-ink outline-none focus:border-forest"
+                      >
+                        {establishments.map((establishment) => (
+                          <option key={establishment.id} value={establishment.id}>
+                            {establishment.name}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+                  {selectedEstablishmentId && (
+                    <LoyaltyProgramCustomization establishmentId={selectedEstablishmentId} />
                   )}
-                  <LoyaltyProgramCustomization establishmentId={selectedEstablishmentId ?? establishments[0].id} />
                 </>
               ) : (
                 <div className="rounded-2xl border border-ink/5 bg-white p-10 text-center shadow-sm">
