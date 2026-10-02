@@ -30,8 +30,8 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
         alignItems: 'center',
         justifyContent: 'center',
         width: '100%',
-        height: '100%',
-        overflow: 'hidden',
+        minHeight: 450,
+        overflow: 'visible',
       }}
     >
       <LoyaltyCardVisual
