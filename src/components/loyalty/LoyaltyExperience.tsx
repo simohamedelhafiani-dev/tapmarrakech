@@ -695,7 +695,7 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
         {offers.length > 0 && <div className="mt-4 rounded-[19px] border border-white/25 bg-black/20 p-4 backdrop-blur-xl"><div className="flex items-center justify-between"><div><p className="text-[8px] uppercase tracking-[.18em] text-white/45">{offers[0].eyebrow || 'Offre du moment'}</p><p className="mt-1 text-base font-semibold">{offers[0].title}</p>{offers[0].description && <p className="mt-1 text-[9px] text-white/55">{offers[0].description}</p>}</div><span className="text-xl text-white/75">›</span></div></div>}
         <div className="mt-4 flex flex-col items-center pt-1">
           <div className="h-[112px] w-[112px]">{qrBlock}</div>
-          <p className="mt-1 text-center text-[7px] font-semibold" uppercase tracking-[.16em] text-white/65">QR fidélité · gagner des points</p>
+          <p className="mt-1 text-center text-[7px] font-semibold uppercase tracking-[.16em] text-white/65">QR fidélité · gagner des points</p>
           <p className="mt-0.5 text-center text-[7px] text-white/40">Le responsable scanne ce QR pour ajouter vos points</p>
           <div className="mt-3 flex w-full items-end justify-between border-t border-white/10 pt-3">
             <div><p className="text-[8px] uppercase tracking-[.2em] text-white/45">Membre</p><p className="mt-1 text-sm">{member}</p></div>
