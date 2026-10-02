@@ -550,7 +550,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
           </div>
         )}
 
-        <div className="flex w-full items-center justify-center overflow-hidden">
+        <div style={{ width: '100vw', height: '100vh', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', left: '50%', transform: 'translateX(-50%)' }}>
           <div className={isLiveRefreshing ? 'opacity-90 transition-opacity duration-200' : 'opacity-100 transition-opacity duration-200'}>
             <LoyaltyCardVisual
               design={{
