@@ -52,7 +52,6 @@ import EstablishmentsSection from '@/components/admin/EstablishmentsSection';
 import ProfileForm from '@/components/admin/ProfileForm';
 import WifiForm from '@/components/admin/WifiForm';
 import MenuStudio from '@/components/admin/menu/MenuStudio';
-import LoyaltyProgramCustomization from '@/components/LoyaltyProgramCustomization';
 import { useRecentActivity } from '@/hooks/useRecentActivity';
 import { useRecentLoyaltyCustomers } from '@/hooks/useRecentLoyaltyCustomers';
 import { useAdminOverviewStats } from '@/hooks/useAdminOverviewStats';
