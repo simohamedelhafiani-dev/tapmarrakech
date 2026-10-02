@@ -67,6 +67,8 @@ export default function LoyaltyCard() {
   const [error, setError] = useState('');
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [liveVersion, setLiveVersion] = useState(0);
+  const [isLiveRefreshing, setIsLiveRefreshing] = useState(false);
 
   const cardUrl = window.location.href;
 
@@ -327,19 +329,50 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
   }, [token, cardUrl]);
 
   useEffect(() => {
-    if (!card?.customer_id) return;
+    if (!card?.customer_id || !card.establishment_id) return;
+
+    let refreshTimeout: number | null = null;
+    let disposed = false;
 
     const refreshCard = async () => {
-      const [{ data: cardData }, { data: programData }, { data: historyData }, { data: rewardsData }] = await Promise.all([
+      if (disposed) return;
+
+      setIsLiveRefreshing(true);
+
+      const [
+        { data: cardData },
+        { data: designData },
+        { data: programData },
+        { data: historyData },
+        { data: rewardsData },
+      ] = await Promise.all([
         supabase.rpc('get_public_loyalty_card', { p_access_token: token }),
+        supabase.rpc('get_public_loyalty_card_config', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_program_context', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_history', { p_access_token: token, p_limit: 20 }),
         supabase.rpc('get_public_loyalty_rewards', { p_access_token: token }),
       ]);
 
+      if (disposed) return;
+
       if (cardData?.[0]) setCard(cardData[0] as Card);
       setHistory((historyData ?? []) as HistoryItem[]);
       setRewards((rewardsData ?? []) as LoyaltyExperienceReward[]);
+
+      const designRow = Array.isArray(designData) ? designData[0] : designData;
+      if (designRow) {
+        setDesign({
+          template_id: designRow.template_id ?? 'custom',
+          primary_color: designRow.primary_color ?? '#173D32',
+          secondary_color: designRow.secondary_color ?? '#D3A84C',
+          background_color: designRow.background_color ?? '#F7F7F3',
+          text_color: designRow.text_color ?? '#FFFFFF',
+          button_color: designRow.button_color ?? '#173D32',
+          border_radius: Number(designRow.border_radius ?? 24),
+        });
+        setDesignConfig({ ...defaultLoyaltyDesignConfig, ...(designRow.design_config ?? {}) });
+      }
+
       const programRow = Array.isArray(programData) ? programData[0] : programData;
       if (programRow) {
         setProgram({
@@ -352,10 +385,46 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
           referral_enabled: Boolean(programRow.referral_enabled),
         });
       }
+
+      // RPC calls are POST requests and are not browser-cacheable in the usual
+      // way. We version the visual assets instead, which is the part that can
+      // otherwise remain cached on a phone/PWA after a published upload.
+      setLiveVersion(Date.now());
+      requestAnimationFrame(() => {
+        if (!disposed) setIsLiveRefreshing(false);
+      });
+    };
+
+    const scheduleRefresh = () => {
+      if (refreshTimeout !== null) window.clearTimeout(refreshTimeout);
+      refreshTimeout = window.setTimeout(() => {
+        refreshTimeout = null;
+        void refreshCard();
+      }, 80);
     };
 
     const channel = supabase
-      .channel(`loyalty-card-${card.customer_id}`)
+      .channel(`loyalty-card-live-${card.customer_id}-${card.establishment_id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'loyalty_card_designs',
+          filter: `establishment_id=eq.${card.establishment_id}`,
+        },
+        scheduleRefresh,
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'loyalty_settings',
+          filter: `establishment_id=eq.${card.establishment_id}`,
+        },
+        scheduleRefresh,
+      )
       .on(
         'postgres_changes',
         {
@@ -364,9 +433,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
           table: 'loyalty_customers',
           filter: `id=eq.${card.customer_id}`,
         },
-        () => {
-          void refreshCard();
-        },
+        scheduleRefresh,
       )
       .on(
         'postgres_changes',
@@ -376,15 +443,12 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
           table: 'loyalty_transactions',
           filter: `customer_id=eq.${card.customer_id}`,
         },
-        () => {
-          void refreshCard();
-        },
+        scheduleRefresh,
       )
       .subscribe();
 
-    // Realtime is the primary path. The short polling fallback makes the
-    // customer card update even when a device/browser temporarily misses a
-    // Supabase Realtime event (common with installed PWAs/background tabs).
+    // Realtime is the primary path. This lightweight fallback only protects
+    // installed PWAs/background tabs from missed websocket events.
     const refreshWhileVisible = () => {
       if (document.visibilityState === 'visible') void refreshCard();
     };
@@ -393,12 +457,14 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
     document.addEventListener('visibilitychange', refreshWhileVisible);
 
     return () => {
+      disposed = true;
+      if (refreshTimeout !== null) window.clearTimeout(refreshTimeout);
       window.clearInterval(refreshInterval);
       window.removeEventListener('focus', refreshWhileVisible);
       document.removeEventListener('visibilitychange', refreshWhileVisible);
       void supabase.removeChannel(channel);
     };
-  }, [card?.customer_id, token]);
+  }, [card?.customer_id, card?.establishment_id, token]);
 
   if (loading) return <PageShell><Loader /></PageShell>;
 
@@ -452,8 +518,8 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
     type: mode,
     businessType: raw.business_type,
     establishmentName: card.establishment_name,
-    logoUrl: card.establishment_logo_url || raw.logo_url,
-    coverImageUrl: raw.background_image_url,
+    logoUrl: card.establishment_logo_url ? withLiveVersion(card.establishment_logo_url, liveVersion) : raw.logo_url ? withLiveVersion(raw.logo_url, liveVersion) : undefined,
+    coverImageUrl: raw.background_image_url ? withLiveVersion(raw.background_image_url, liveVersion) : undefined,
     primaryColor: design.primary_color,
     secondaryColor: design.secondary_color,
     backgroundColor: design.background_color,
@@ -493,7 +559,9 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
   return (
     <main className="min-h-screen bg-[#eef0ed] px-3 py-5 sm:px-6 sm:py-8">
       <div className="mx-auto w-full max-w-[430px]">
-        <LoyaltyExperience config={experience} />
+        <div className={`transition-opacity duration-200 ${isLiveRefreshing ? 'opacity-90' : 'opacity-100'}`}>
+          <LoyaltyExperience config={experience} />
+        </div>
 
         {program.referral_enabled && (
           <button
@@ -624,6 +692,17 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
       </div>
     </main>
   );
+}
+
+function withLiveVersion(url: string, version: number) {
+  if (!version || !url) return url;
+  try {
+    const nextUrl = new URL(url, window.location.origin);
+    nextUrl.searchParams.set('v', String(version));
+    return nextUrl.toString();
+  } catch {
+    return url;
+  }
 }
 
 function PageShell({ children }: { children: ReactNode }) {
