@@ -4,7 +4,7 @@ import QRCode from 'qrcode';
 import { supabase } from '@/lib/supabase';
 import { defaultLoyaltyDesignConfig, type LoyaltyDesignConfig } from './LoyaltyCardVisual';
 import { LoyaltyExperience, type LoyaltyExperienceConfig } from './loyalty/LoyaltyExperience';
-import { useLoyaltyManager, type LoyaltyReferralConfig } from '@/hooks/useLoyaltyManager';
+import { useLoyaltyManager, type LoyaltyReferralBonusType, type LoyaltyReferralConfig } from '@/hooks/useLoyaltyManager';
 
 type CardMode = 'QR' | 'STAMP';
 
@@ -101,14 +101,25 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
   const [activeTab, setActiveTab] = useState<'Structure' | 'Acquisition' | 'Design'>('Structure');
   const [referralDraft, setReferralDraft] = useState<LoyaltyReferralConfig>({
     enabled: false,
+    referrer_bonus_type: 'POINTS',
+    referrer_bonus_value: 50,
+    referee_bonus_type: 'POINTS',
+    referee_bonus_value: 0,
+    max_referrals: null,
     referrer_bonus_points: 50,
     referee_bonus_points: 0,
   });
   const [referralPublished, setReferralPublished] = useState<LoyaltyReferralConfig>({
     enabled: false,
+    referrer_bonus_type: 'POINTS',
+    referrer_bonus_value: 50,
+    referee_bonus_type: 'POINTS',
+    referee_bonus_value: 0,
+    max_referrals: null,
     referrer_bonus_points: 50,
     referee_bonus_points: 0,
   });
+  const [referralAcquiredCount, setReferralAcquiredCount] = useState(0);
   const [referralSaving, setReferralSaving] = useState(false);
   const [referralInviteOpen, setReferralInviteOpen] = useState(false);
   const [referralCode, setReferralCode] = useState('');
@@ -122,6 +133,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     getReferralConfig,
     saveReferralDraft,
     publishReferral,
+    getReferralStats,
   } = useLoyaltyManager(establishmentId);
   const logoInput = useRef<HTMLInputElement>(null);
   const photoInput = useRef<HTMLInputElement>(null);
@@ -199,11 +211,12 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     let cancelled = false;
     if (!establishmentId) return;
 
-    void getReferralConfig()
-      .then(config => {
+    void Promise.all([getReferralConfig(), getReferralStats()])
+      .then(([config, stats]) => {
         if (cancelled) return;
         setReferralDraft(config.draftConfig);
         setReferralPublished(config.publishedConfig);
+        setReferralAcquiredCount(stats.acquiredCount);
       })
       .catch(error => {
         console.error('Impossible de charger la configuration de parrainage:', error);
@@ -212,7 +225,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     return () => {
       cancelled = true;
     };
-  }, [establishmentId, getReferralConfig]);
+  }, [establishmentId, getReferralConfig, getReferralStats]);
 
   useEffect(() => {
     if (!establishmentId) {
@@ -465,13 +478,20 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     return window.location.origin + '/loyalty/join?ref=' + encodeURIComponent(code);
   }
 
+  function referralBonusLabel(type: LoyaltyReferralBonusType, value: number) {
+    if (value <= 0) return 'aucun bonus';
+    if (type === 'STAMP') return `${value} tampon${value > 1 ? 's' : ''}`;
+    if (type === 'REDUCTION') return `-${value}% de réduction`;
+    return `${value} point${value > 1 ? 's' : ''}`;
+  }
+
   function referralMessage(code: string) {
-    const referrerBonus = referralPublished.referrer_bonus_points;
-    const refereeBonus = referralPublished.referee_bonus_points;
-    const bonusText = refereeBonus > 0
-      ? `🎁 Gagne ${refereeBonus} points de bienvenue, et moi ${referrerBonus} points quand tu rejoins le programme.`
-      : `🎁 Rejoins le programme fidélité avec mon code et je gagne ${referrerBonus} points de bonus.`;
-    return `Je t’invite à rejoindre le programme fidélité de ${establishment.name}. ${bonusText} Mon code : ${code} ${referralShareUrl(code)}`;
+    const referrerBonus = referralBonusLabel(referralPublished.referrer_bonus_type, referralPublished.referrer_bonus_value);
+    const refereeBonus = referralBonusLabel(referralPublished.referee_bonus_type, referralPublished.referee_bonus_value);
+    const bonusText = referralPublished.referee_bonus_value > 0
+      ? `🎁 Ton avantage : ${refereeBonus}. Moi, je reçois ${referrerBonus} quand tu rejoins le programme.`
+      : `🎁 Je reçois ${referrerBonus} quand tu rejoins le programme.`;
+    return `Je t’invite à rejoindre le programme fidélité de ${establishment.name}. ${bonusText} ${referralShareUrl(code)}`;
   }
 
   async function copyReferralMessage() {
@@ -788,11 +808,33 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                   <div>
                     <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Acquisition · Parrainage</p>
                     <p className="mt-1 text-sm font-semibold text-forest">Paramètres de parrainage</p>
-                    <p className="mt-1 max-w-xl text-[10px] leading-4 text-ink/45">Configure les bonus avant publication. Le brouillon est séparé des règles actuellement actives.</p>
+                    <p className="mt-1 max-w-xl text-[10px] leading-4 text-ink/45">
+                      Configure précisément la récompense du parrain, celle du filleul et la limite de parrainages.
+                    </p>
                   </div>
                   <span className={`rounded-full px-3 py-1.5 text-[9px] font-semibold ${referralPublished.enabled ? 'bg-forest/10 text-forest' : 'bg-ink/5 text-ink/40'}`}>
                     {referralPublished.enabled ? 'Règles actives' : 'Désactivé'}
                   </span>
+                </div>
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-2xl border border-forest/10 bg-forest/[0.04] p-4">
+                    <p className="text-[9px] font-semibold uppercase tracking-[.16em] text-ink/40">Acquisition</p>
+                    <p className="mt-1 text-2xl font-bold text-forest">{referralAcquiredCount}</p>
+                    <p className="mt-1 text-[10px] text-ink/45">clients acquis via parrainage</p>
+                  </div>
+                  <div className="rounded-2xl border border-ink/10 bg-white p-4">
+                    <p className="text-[9px] font-semibold uppercase tracking-[.16em] text-ink/40">Limite par parrain</p>
+                    <p className="mt-1 text-lg font-semibold text-forest">
+                      {referralDraft.max_referrals === null ? 'Illimitée' : `${referralDraft.max_referrals} parrainages`}
+                    </p>
+                    <p className="mt-1 text-[10px] text-ink/45">contrôlée côté serveur</p>
+                  </div>
+                  <div className="rounded-2xl border border-ink/10 bg-white p-4">
+                    <p className="text-[9px] font-semibold uppercase tracking-[.16em] text-ink/40">Boucle</p>
+                    <p className="mt-1 text-lg font-semibold text-forest">QR automatique</p>
+                    <p className="mt-1 text-[10px] text-ink/45">le nouveau client peut parrainer à son tour</p>
+                  </div>
                 </div>
 
                 <div className="mt-4 rounded-2xl border border-ink/10 bg-white p-4">
@@ -806,41 +848,117 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                     Activer le programme de parrainage
                   </label>
 
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                    <label className="text-xs font-medium text-ink/50">
-                      Bonus Parrain
-                      <div className="mt-1 flex items-center gap-2 rounded-xl border border-ink/10 bg-[#fafaf8] px-3 py-2.5">
-                        <input
-                          type="number"
-                          min="0"
-                          max="1000000"
-                          value={referralDraft.referrer_bonus_points}
-                          onChange={e => setReferralDraft(draft => ({ ...draft, referrer_bonus_points: Math.max(0, Number(e.target.value) || 0) }))}
-                          className="w-full bg-transparent text-sm text-ink outline-none"
-                        />
-                        <span className="text-[10px] font-semibold text-ink/35">pts</span>
-                      </div>
-                    </label>
-                    <label className="text-xs font-medium text-ink/50">
-                      Bonus Filleul
-                      <div className="mt-1 flex items-center gap-2 rounded-xl border border-ink/10 bg-[#fafaf8] px-3 py-2.5">
-                        <input
-                          type="number"
-                          min="0"
-                          max="1000000"
-                          value={referralDraft.referee_bonus_points}
-                          onChange={e => setReferralDraft(draft => ({ ...draft, referee_bonus_points: Math.max(0, Number(e.target.value) || 0) }))}
-                          className="w-full bg-transparent text-sm text-ink outline-none"
-                        />
-                        <span className="text-[10px] font-semibold text-ink/35">pts</span>
-                      </div>
-                    </label>
+                  <div className="mt-5 grid gap-4 lg:grid-cols-2">
+                    <div className="rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
+                      <p className="text-xs font-semibold text-forest">Récompense du parrain</p>
+                      <p className="mt-1 text-[10px] text-ink/40">Ce que reçoit le client qui invite.</p>
+
+                      <label className="mt-4 block text-xs font-medium text-ink/50">
+                        Type de récompense
+                        <select
+                          value={referralDraft.referrer_bonus_type}
+                          onChange={e => setReferralDraft(draft => ({
+                            ...draft,
+                            referrer_bonus_type: e.target.value as LoyaltyReferralBonusType,
+                          }))}
+                          className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm text-ink"
+                        >
+                          <option value="POINTS">Points</option>
+                          <option value="STAMP">Stamps</option>
+                          <option value="REDUCTION">Réduction</option>
+                        </select>
+                      </label>
+
+                      <label className="mt-3 block text-xs font-medium text-ink/50">
+                        Valeur du bonus
+                        <div className="mt-1 flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-3 py-2.5">
+                          <input
+                            type="number"
+                            min="0"
+                            max={referralDraft.referrer_bonus_type === 'REDUCTION' ? '100' : '1000000'}
+                            step={referralDraft.referrer_bonus_type === 'REDUCTION' ? '0.5' : '1'}
+                            value={referralDraft.referrer_bonus_value}
+                            onChange={e => setReferralDraft(draft => ({ ...draft, referrer_bonus_value: Math.max(0, Number(e.target.value) || 0) }))}
+                            className="w-full bg-transparent text-sm text-ink outline-none"
+                          />
+                          <span className="text-[10px] font-semibold text-ink/35">
+                            {referralDraft.referrer_bonus_type === 'REDUCTION' ? '%' : referralDraft.referrer_bonus_type === 'STAMP' ? 'stamps' : 'pts'}
+                          </span>
+                        </div>
+                      </label>
+                    </div>
+
+                    <div className="rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
+                      <p className="text-xs font-semibold text-forest">Bonus du filleul</p>
+                      <p className="mt-1 text-[10px] text-ink/40">Ce que reçoit le nouveau client à son inscription.</p>
+
+                      <label className="mt-4 block text-xs font-medium text-ink/50">
+                        Type de récompense
+                        <select
+                          value={referralDraft.referee_bonus_type}
+                          onChange={e => setReferralDraft(draft => ({
+                            ...draft,
+                            referee_bonus_type: e.target.value as LoyaltyReferralBonusType,
+                          }))}
+                          className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm text-ink"
+                        >
+                          <option value="POINTS">Points</option>
+                          <option value="STAMP">Stamps</option>
+                          <option value="REDUCTION">Réduction</option>
+                        </select>
+                      </label>
+
+                      <label className="mt-3 block text-xs font-medium text-ink/50">
+                        Valeur du bonus
+                        <div className="mt-1 flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-3 py-2.5">
+                          <input
+                            type="number"
+                            min="0"
+                            max={referralDraft.referee_bonus_type === 'REDUCTION' ? '100' : '1000000'}
+                            step={referralDraft.referee_bonus_type === 'REDUCTION' ? '0.5' : '1'}
+                            value={referralDraft.referee_bonus_value}
+                            onChange={e => setReferralDraft(draft => ({ ...draft, referee_bonus_value: Math.max(0, Number(e.target.value) || 0) }))}
+                            className="w-full bg-transparent text-sm text-ink outline-none"
+                          />
+                          <span className="text-[10px] font-semibold text-ink/35">
+                            {referralDraft.referee_bonus_type === 'REDUCTION' ? '%' : referralDraft.referee_bonus_type === 'STAMP' ? 'stamps' : 'pts'}
+                          </span>
+                        </div>
+                      </label>
+                    </div>
                   </div>
 
-                  <div className="mt-4 rounded-xl border border-gold/15 bg-[#fbf7ed] p-3 text-[10px] leading-4 text-ink/50">
-                    {referralDraft.referee_bonus_points > 0
-                      ? `À chaque parrainage validé : +${referralDraft.referrer_bonus_points} pts pour le parrain et +${referralDraft.referee_bonus_points} pts de bienvenue pour le filleul.`
-                      : `À chaque parrainage validé : +${referralDraft.referrer_bonus_points} pts pour le parrain. Aucun bonus de bienvenue n’est configuré pour le filleul.`}
+                  <div className="mt-4 rounded-2xl border border-gold/15 bg-[#fbf7ed] p-4">
+                    <label className="block text-xs font-medium text-ink/50">
+                      Limite de parrainages par client
+                      <div className="mt-1 flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-3 py-2.5">
+                        <input
+                          type="number"
+                          min="0"
+                          max="1000000"
+                          value={referralDraft.max_referrals ?? ''}
+                          onChange={e => {
+                            const value = e.target.value.trim();
+                            setReferralDraft(draft => ({
+                              ...draft,
+                              max_referrals: value === '' ? null : Math.max(0, Number(value) || 0),
+                            }));
+                          }}
+                          className="w-full bg-transparent text-sm text-ink outline-none"
+                          placeholder="Illimité"
+                        />
+                        <span className="whitespace-nowrap text-[10px] font-semibold text-ink/35">fois</span>
+                      </div>
+                    </label>
+                    <p className="mt-2 text-[10px] leading-4 text-ink/40">
+                      Laisser vide pour autoriser un nombre illimité de filleuls. La limite est vérifiée et verrouillée côté SQL avant chaque attribution.
+                    </p>
+                  </div>
+
+                  <div className="mt-4 rounded-xl border border-forest/10 bg-forest/[0.03] p-3 text-[10px] leading-4 text-ink/50">
+                    {referralDraft.referrer_bonus_value > 0
+                      ? `Parrain : ${referralBonusLabel(referralDraft.referrer_bonus_type, referralDraft.referrer_bonus_value)} · Filleul : ${referralBonusLabel(referralDraft.referee_bonus_type, referralDraft.referee_bonus_value)}.`
+                      : 'Configure une récompense pour activer le parrainage.'}
                   </div>
 
                   <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
@@ -848,83 +966,21 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                       type="button"
                       disabled={referralSaving}
                       onClick={() => void saveReferralDraftOnly()}
-                      className="rounded-xl border border-forest/20 bg-white px-4 py-2.5 text-[10px] font-semibold text-forest disabled:opacity-50"
+                      className="rounded-xl border border-ink/10 bg-white px-4 py-3 text-xs font-semibold text-forest disabled:opacity-50"
                     >
-                      Enregistrer le brouillon
+                      {referralSaving ? 'Enregistrement...' : 'Enregistrer le brouillon'}
                     </button>
                     <button
                       type="button"
                       disabled={referralSaving}
                       onClick={() => void publishReferralRules()}
-                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-[10px] font-semibold text-white disabled:opacity-50"
+                      className="rounded-xl bg-forest px-4 py-3 text-xs font-semibold text-white disabled:opacity-50"
                     >
-                      {referralSaving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
-                      Publier les règles
+                      {referralSaving ? 'Publication...' : 'Publier les règles'}
                     </button>
                   </div>
                 </div>
               </div>
-
-              <div id="loyalty-rewards" className="mt-4 scroll-mt-6 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
-                {cardMode === 'STAMP' ? (
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    <label className="text-xs text-ink/50">Nombre de tampons<input type="number" min="1" max="12" value={stampGoal} onChange={e=>setStampGoal(e.target.value)} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5"/></label>
-                    <label className="text-xs text-ink/50">Récompense<input value={stampRewardName} onChange={e=>setStampRewardName(e.target.value)} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5"/></label>
-                    <label className="text-xs text-ink/50">Description<input value={stampRewardDescription} onChange={e=>setStampRewardDescription(e.target.value)} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5"/></label>
-                  </div>
-                ) : (
-                  <>
-                    <div className="flex items-center justify-between gap-3">
-                      <div><p className="text-sm font-semibold text-forest">Récompenses en points</p><p className="mt-1 text-[10px] text-ink/45">Ajoute des cadeaux ou des réductions que les clients débloquent avec leurs points.</p></div>
-                      <button type="button" onClick={() => openRewardEditor()} className="inline-flex items-center gap-2 rounded-xl bg-forest px-3 py-2.5 text-[10px] font-semibold text-white"><Plus size={14}/> Ajouter</button>
-                    </div>
-                    <div className="mt-4 space-y-2">
-                      {rewards.filter(r => r.active).map(r => (
-                        <div key={r.id} className="flex items-center gap-3 rounded-2xl border border-ink/10 bg-white p-3.5">
-                          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-forest/5 text-forest">{r.reward_type === 'DISCOUNT' ? <span className="text-xs font-bold">%</span> : <Gift size={17}/>}</div>
-                          <div className="min-w-0 flex-1"><p className="text-xs font-semibold text-forest">{r.name}</p><p className="mt-1 text-[10px] text-ink/45">{r.points_required} points · {r.reward_type === 'DISCOUNT' ? '-' + r.discount_percent + '%' : 'Cadeau'}</p>{r.description && <p className="mt-1 truncate text-[10px] text-ink/35">{r.description}</p>}</div>
-                          <button type="button" onClick={() => openRewardEditor(r)} className="rounded-xl p-2 text-ink/40 hover:bg-[#f7f7f3] hover:text-forest"><Pencil size={15}/></button>
-                          <button type="button" onClick={() => void removeReward(r)} className="rounded-xl p-2 text-ink/40 hover:bg-red-50 hover:text-red-600"><Trash2 size={15}/></button>
-                        </div>
-                      ))}
-                      {!rewards.some(r => r.active) && <div className="rounded-xl border border-dashed border-ink/10 px-4 py-6 text-center text-xs text-ink/35">Aucune récompense configurée.</div>}
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {rewardEditorOpen && (
-                <div className="fixed inset-0 z-[120] grid place-items-center bg-black/60 p-4" onClick={() => !rewardSaving && setRewardEditorOpen(false)}>
-                  <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
-                    <div className="flex items-center justify-between"><div><p className="text-[10px] font-semibold uppercase tracking-[.18em] text-gold">Fidélité points</p><h3 className="mt-1 text-xl font-semibold text-forest">{editingReward ? 'Modifier la récompense' : 'Ajouter une récompense'}</h3></div><button type="button" onClick={() => setRewardEditorOpen(false)} className="rounded-xl p-2 text-ink/40"><X size={18}/></button></div>
-                    <div className="mt-5 space-y-3">
-                      <label className="block text-xs text-ink/50">Nom<input value={rewardName} onChange={e=>setRewardName(e.target.value)} placeholder="Dessert offert" className="mt-1 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"/></label>                      <label className="block text-xs text-ink/50">Description<input value={rewardDescription} onChange={e=>setRewardDescription(e.target.value)} placeholder="Un dessert au choix" className="mt-1 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"/></label>
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <label className="text-xs text-ink/50">Points nécessaires<input type="number" min="1" value={rewardPoints} onChange={e=>setRewardPoints(e.target.value)} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5"/></label>
-                        <label className="text-xs text-ink/50">Type<select value={rewardType} onChange={e=>setRewardType(e.target.value as 'GIFT'|'DISCOUNT')} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5"><option value="GIFT">🎁 Cadeau</option><option value="DISCOUNT">% Réduction</option></select></label>
-                      </div>
-                      {rewardType === 'DISCOUNT' && <div className="grid gap-3 sm:grid-cols-2"><label className="text-xs text-ink/50">Réduction (%)<input type="number" min="1" max="20" value={discountPercent} onChange={e=>setDiscountPercent(e.target.value)} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5"/></label><label className="text-xs text-ink/50">Plafond (MAD)<input type="number" min="0" value={discountMaxAmount} onChange={e=>setDiscountMaxAmount(e.target.value)} placeholder="Aucun" className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5"/></label></div>}
-                      <div className="mt-3">
-                        <p className="text-xs text-ink/50">Jours de validité</p>
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {[['MONDAY','Lun'],['TUESDAY','Mar'],['WEDNESDAY','Mer'],['THURSDAY','Jeu'],['FRIDAY','Ven'],['SATURDAY','Sam'],['SUNDAY','Dim']].map(([day,label]) => {
-                            const active = validDays.includes(day);
-                            return (
-                              <button key={day} type="button" onClick={() => setValidDays(days => active ? days.filter(d => d !== day) : [...days, day])}
-                                className={'rounded-full border px-3 py-1.5 text-[10px] font-semibold ' + (active ? 'border-forest bg-forest text-white' : 'border-ink/10 bg-white text-ink/45')}>
-                                {label}
-                              </button>
-                            );
-                          })}
-                        </div>
-                        <p className="mt-2 text-[10px] text-ink/40">La récompense ne pourra être réclamée ou utilisée que les jours sélectionnés.</p>
-                      </div>
-                    </div>
-                    <button type="button" disabled={rewardSaving} onClick={() => void saveReward()} className="mt-5 w-full rounded-xl bg-forest py-3.5 text-sm font-semibold text-white disabled:opacity-50">{rewardSaving ? 'Enregistrement...' : editingReward ? 'Enregistrer les modifications' : 'Créer la récompense'}</button>
-                  </div>
-                </div>
-              )}
-
               <div id="loyalty-content" className="mt-5 scroll-mt-6 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
                 <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Contenu de la carte</p>
                 <p className="mt-1 text-[10px] text-ink/45">Modifie les avantages et les offres affichés au client.</p>
@@ -1016,9 +1072,9 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                         <p className="text-[9px] font-bold uppercase tracking-[.2em] text-gold">Invitation fidélité</p>
                         <h3 className="mt-1 text-xl font-semibold text-forest">Invite un ami</h3>
                         <p className="mt-1 text-xs leading-5 text-ink/45">
-                          {referralPublished.referee_bonus_points > 0
-                            ? `Ton ami reçoit ${referralPublished.referee_bonus_points} pts de bienvenue et toi ${referralPublished.referrer_bonus_points} pts après validation.`
-                            : `Tu reçois ${referralPublished.referrer_bonus_points} pts après validation du parrainage.`}
+                          {referralPublished.referee_bonus_value > 0
+                            ? `Ton ami reçoit ${referralBonusLabel(referralPublished.referee_bonus_type, referralPublished.referee_bonus_value)} et toi ${referralBonusLabel(referralPublished.referrer_bonus_type, referralPublished.referrer_bonus_value)} après validation.`
+                            : `Tu reçois ${referralBonusLabel(referralPublished.referrer_bonus_type, referralPublished.referrer_bonus_value)} après validation du parrainage.`}
                         </p>
                       </div>
                       <button type="button" onClick={() => setReferralInviteOpen(false)} className="rounded-xl p-2 text-ink/35">
