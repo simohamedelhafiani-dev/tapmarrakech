@@ -376,7 +376,7 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
                 color: accentColor,
               }}
             >
-              Valable {Math.max(1, Number(config.discountExpiresAt ? 0 : 0)) || 7} jours
+              Valable {Math.max(1, Number(config.discountValidDays) || 7)} jours
             </div>
           )}
 
