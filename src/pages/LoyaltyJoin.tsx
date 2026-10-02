@@ -155,7 +155,7 @@ export default function LoyaltyJoin() {
   }
 
   if (accessToken && redirectReady) {
-    return <Navigate to={\`/loyalty/\${accessToken}?welcome=1\`} replace />;
+    return <Navigate to={`/loyalty/\${accessToken}?welcome=1`} replace />;
   }
 
   if (accessToken) {
