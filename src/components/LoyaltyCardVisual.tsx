@@ -187,7 +187,7 @@ export function LoyaltyCardVisual({
         aspectRatio: '2 / 3',
         position: 'relative',
         overflow: 'hidden',
-        borderRadius: 'min(6cqw, 34px)',
+        borderRadius: '6%',
         border: '1px solid rgba(255,255,255,.18)',
         backgroundColor: design.background_color,
         backgroundImage: background,
