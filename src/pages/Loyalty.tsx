@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import LoyaltyProgramCustomization from '@/components/LoyaltyProgramCustomization';
+import LoyaltyStudio from '@/components/loyalty/LoyaltyStudio';
 
 type Establishment = {
   id: string;
@@ -507,7 +507,7 @@ export default function Loyalty() {
         </div>
       </div>
 
-      <LoyaltyProgramCustomization establishmentId={establishmentId} />
+      <LoyaltyStudio establishmentId={establishmentId} />
 
       {/* ESTABLISHMENT */}
       {establishments.length > 1 && (
