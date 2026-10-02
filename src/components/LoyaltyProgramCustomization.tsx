@@ -94,7 +94,6 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
   const [discountPercent, setDiscountPercent] = useState('10');
   const [discountValidDays, setDiscountValidDays] = useState('7');
   const [discountPointsThreshold, setDiscountPointsThreshold] = useState('1000');
-  const [discountPointsThreshold, setDiscountPointsThreshold] = useState('1000');
   const [programEnabled, setProgramEnabled] = useState(true);
   const [rewards, setRewards] = useState<LoyaltyRewardAdmin[]>([]);
   const [previewCustomer, setPreviewCustomer] = useState<{ id: string; first_name: string | null; points_balance: number; visit_count: number; stamps_balance: number } | null>(null);
