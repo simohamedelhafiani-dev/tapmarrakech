@@ -357,6 +357,42 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
   }, [token, cardUrl]);
 
   useEffect(() => {
+    if (!card?.establishment_id) return;
+
+    const channel = supabase
+      .channel(`loyalty-design-preview-${card.establishment_id}`)
+      .on('broadcast', { event: 'loyalty-design-preview' }, ({ payload }) => {
+        if (!payload || payload.establishmentId !== card.establishment_id) return;
+
+        if (payload.design) {
+          setDesign((current) => ({
+            ...current,
+            ...payload.design,
+          }));
+        }
+
+        if (payload.designConfig) {
+          setDesignConfig((current) => ({
+            ...current,
+            ...payload.designConfig,
+          }));
+        }
+
+        if (payload.designConfig?.loyaltyType) {
+          setProgram((current) => ({
+            ...current,
+            program_type: payload.designConfig.loyaltyType,
+          }));
+        }
+      })
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [card?.establishment_id]);
+
+  useEffect(() => {
     if (!card?.customer_id || !card.establishment_id) return;
 
     let refreshTimeout: number | null = null;
