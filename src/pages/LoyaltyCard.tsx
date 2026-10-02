@@ -487,15 +487,13 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
     const refreshWhileVisible = () => {
       if (document.visibilityState === 'visible') void refreshCard();
     };
-    const refreshInterval = window.setInterval(refreshWhileVisible, 3000);
-    window.addEventListener('focus', refreshWhileVisible);
+    const refreshInterval = window.setInterval(refreshWhileVisible, 15000);
     document.addEventListener('visibilitychange', refreshWhileVisible);
 
     return () => {
       disposed = true;
       if (refreshTimeout !== null) window.clearTimeout(refreshTimeout);
       window.clearInterval(refreshInterval);
-      window.removeEventListener('focus', refreshWhileVisible);
       document.removeEventListener('visibilitychange', refreshWhileVisible);
       void supabase.removeChannel(channel);
     };
@@ -613,7 +611,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         <div className="flex h-[70vh] max-h-[620px] min-h-[480px] w-full items-center justify-center overflow-hidden rounded-[30px]">
           <div
             className={`origin-center transition-opacity duration-200 ${isLiveRefreshing ? 'opacity-90' : 'opacity-100'}`}
-            style={{ transform: 'scale(0.5)' }}
+            style={{ transform: 'scale(0.8)' }}
           >
             <LoyaltyExperience config={experience} />
           </div>
