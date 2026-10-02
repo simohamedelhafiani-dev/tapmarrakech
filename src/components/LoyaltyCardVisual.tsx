@@ -159,8 +159,6 @@ export function LoyaltyCardVisual({
   const points = Math.max(0, Number(card.points ?? 0));
   const discount = Math.max(0, Number(card.discountPercent ?? config.discountPercent ?? 10));
   const logoUrl = config.logo_url || card.logoUrl || null;
-  const radius = Math.max(28, Number(design.border_radius ?? 34));
-
   const background = useMemo(() => (
     wallpaper
       ? `linear-gradient(145deg, ${design.primary_color}D9 0%, ${design.primary_color}82 52%, ${design.primary_color}55 100%),url("${wallpaper}")`
@@ -169,7 +167,7 @@ export function LoyaltyCardVisual({
 
   if (side === 'back') {
     return (
-      <div style={{ width: cardWidth ?? 'min(90vw, 400px)', height: 'auto', aspectRatio: '2 / 3', position: 'relative', overflow: 'hidden', borderRadius: 'min(6cqw, 34px)', background, color: design.text_color, boxSizing: 'border-box', boxShadow: '0 28px 70px rgba(0,0,0,.38)', containerType: 'inline-size' }}>
+      <div style={{ width: cardWidth ?? 'min(90vw, 400px)', height: 'auto', aspectRatio: '2 / 3', position: 'relative', overflow: 'hidden', borderRadius: '6%', background, color: design.text_color, boxSizing: 'border-box', boxShadow: '0 28px 70px rgba(0,0,0,.38)', containerType: 'inline-size' }}>
         <div style={{ position: 'absolute', inset: 0, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backgroundImage: background }} />
         <div style={{ position: 'relative', zIndex: 1, height: '100%', display: 'grid', placeItems: 'center', padding: '9.33cqw', textAlign: 'center', boxSizing: 'border-box' }}>
           <div>
@@ -200,6 +198,7 @@ export function LoyaltyCardVisual({
         boxSizing: 'border-box',
         boxShadow: 'inset 0 1px 0 rgba(255,255,255,.20), inset 0 -30px 60px rgba(0,0,0,.22), 0 28px 70px rgba(0,0,0,.38)',
         fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        containerType: 'inline-size',
       }}
     >
       <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'linear-gradient(125deg,rgba(255,255,255,.15),rgba(255,255,255,.03) 25%,transparent 50%,rgba(255,255,255,.05) 78%,transparent)' }} />
