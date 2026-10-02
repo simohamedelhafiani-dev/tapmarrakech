@@ -5,7 +5,8 @@ import type { ReactNode } from 'react';
 
 type BeforeInstallPromptEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }> };
 import { defaultLoyaltyDesignConfig } from '@/components/LoyaltyCardVisual';
-import { LoyaltyExperience, type LoyaltyExperienceConfig, type LoyaltyExperienceReward } from '@/components/loyalty/LoyaltyExperience';
+import type { LoyaltyExperienceReward } from '@/components/loyalty/LoyaltyExperience';
+import { LoyaltyCardVisual, type LoyaltyDesignConfig } from '@/components/LoyaltyCardVisual';
 import { supabase } from '@/lib/supabase';
 
 type Card = {
@@ -356,6 +357,42 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
   }, [token, cardUrl]);
 
   useEffect(() => {
+    if (!card?.establishment_id) return;
+
+    const channel = supabase
+      .channel(`loyalty-design-preview-${card.establishment_id}`)
+      .on('broadcast', { event: 'loyalty-design-preview' }, ({ payload }) => {
+        if (!payload || payload.establishmentId !== card.establishment_id) return;
+
+        if (payload.design) {
+          setDesign((current) => ({
+            ...current,
+            ...payload.design,
+          }));
+        }
+
+        if (payload.designConfig) {
+          setDesignConfig((current) => ({
+            ...current,
+            ...payload.designConfig,
+          }));
+        }
+
+        if (payload.designConfig?.loyaltyType) {
+          setProgram((current) => ({
+            ...current,
+            program_type: payload.designConfig.loyaltyType,
+          }));
+        }
+      })
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [card?.establishment_id]);
+
+  useEffect(() => {
     if (!card?.customer_id || !card.establishment_id) return;
 
     let refreshTimeout: number | null = null;
@@ -517,88 +554,19 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
   const fullName = `${card.first_name} ${card.last_name ?? ''}`.trim();
 
   const configuredType = (designConfig as typeof designConfig & { loyaltyType?: string }).loyaltyType;
-  const mode: LoyaltyExperienceConfig['type'] =
+  const mode =
     configuredType === 'STAMP' || designConfig.card_mode === 'STAMP' || program.program_type === 'STAMP'
       ? 'STAMP'
       : configuredType === 'POINTS_DISCOUNT' || designConfig.card_mode === 'POINTS_DISCOUNT' || program.program_type === 'POINTS_DISCOUNT'
-        ? 'POINTS_DISCOUNT'
-        : configuredType === 'POINTS_REWARD' || designConfig.card_mode === 'POINTS_REWARD' || program.program_type === 'POINTS_REWARD'
-          ? 'POINTS_REWARD'
-          : configuredType === 'DISCOUNT'
-          ? 'DISCOUNT'
-        : configuredType === 'TIER'
-          ? 'TIER'
-          : configuredType === 'CASHBACK'
-            ? 'CASHBACK'
-            : configuredType === 'CHALLENGE'
-              ? 'CHALLENGE'
-              : configuredType === 'COLLECTION'
-                ? 'COLLECTION'
-                : configuredType === 'REWARD'
-                  ? 'REWARD'
-                  : 'POINTS';
+        ? 'DISCOUNT'
+        : 'POINTS';
 
   const raw = designConfig as typeof designConfig & {
-    benefits?: LoyaltyExperienceConfig['benefits'];
-    offers?: LoyaltyExperienceConfig['offers'];
-    tiers?: LoyaltyExperienceConfig['tiers'];
-    pointsGoal?: number;
-    cashbackBalance?: number;
+    background_image_url?: string | null;
+    logo_url?: string | null;
     discountPercent?: number;
-    discountExpiresAt?: string;
-    discountValidDays?: number;
-    discountPointsThreshold?: number;
     rewardName?: string;
-    rewardDescription?: string;
-    intro?: string;
-    currentTier?: string;
-    business_type?: string | null;
   };
-
-  const experience: LoyaltyExperienceConfig = {
-    type: mode,
-    businessType: raw.business_type,
-    establishmentName: card.establishment_name,
-    logoUrl: card.establishment_logo_url ? withLiveVersion(card.establishment_logo_url, liveVersion) : raw.logo_url ? withLiveVersion(raw.logo_url, liveVersion) : undefined,
-    coverImageUrl: raw.background_image_url ? withLiveVersion(raw.background_image_url, liveVersion) : undefined,
-    primaryColor: design.primary_color,
-    secondaryColor: design.secondary_color,
-    backgroundColor: design.background_color,
-    textColor: design.text_color === '#FFFFFF' ? '#17201c' : design.text_color,
-    borderRadius: design.border_radius,
-    customerName: fullName,
-    pointsBalance: card.points_balance,
-    pointsGoal: raw.pointsGoal ?? Math.max(1000, rewards[rewards.length - 1]?.points_required ?? 1000),
-    visits: program.stamps_balance,
-    visitGoal: program.stamp_goal,
-    rewardName: raw.rewardName || program.stamp_reward_name,
-    rewardDescription: raw.rewardDescription || program.stamp_reward_description,
-    discountPercent: raw.discountPercent ?? program.discount_percent,
-    discountExpiresAt: raw.discountExpiresAt,
-    discountValidDays: raw.discountValidDays ?? program.discount_valid_days,
-    discountPointsThreshold: raw.discountPointsThreshold ?? program.discount_points_threshold,
-    cashbackBalance: raw.cashbackBalance,
-    currentTier: raw.currentTier,
-    tiers: raw.tiers,
-    benefits: raw.benefits,
-    offers: raw.offers,
-    rewards,
-    history: history.map(item => ({
-      id: item.id,
-      title: item.description || item.type || 'Opération fidélité',
-      date: new Date(item.created_at).toLocaleDateString('fr-FR'),
-      points: item.points,
-      amount: item.amount,
-    })),
-    qrValue: cardUrl,
-    intro: raw.intro || designConfig.front_subtitle,
-    // The customer card must use the exact premium customer layout shown in the admin preview.
-    // Keep the admin preview untouched; this only aligns the public/customer card renderer.
-    templateId: 'luxury',
-    published: true,
-    stampStyle: designConfig.stamp_style,
-  };
-
   return (
     <main className="min-h-screen bg-[#eef0ed] px-3 py-5 sm:px-6 sm:py-8">
       <div className="flex w-full flex-col items-center gap-4">
@@ -618,12 +586,39 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
           </div>
         )}
 
-        <div className="flex h-[70vh] max-h-[620px] min-h-[480px] w-full items-center justify-center overflow-hidden rounded-[30px]">
-          <div
-            className={`origin-center transition-opacity duration-200 ${isLiveRefreshing ? 'opacity-90' : 'opacity-100'}`}
-            style={{ transform: 'scale(1)' }}
-          >
-            <LoyaltyExperience config={experience} />
+        <div style={{ width: '100vw', height: '100vh', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', left: '50%', transform: 'translateX(-50%)' }}>
+          <div className={isLiveRefreshing ? 'opacity-90 transition-opacity duration-200' : 'opacity-100 transition-opacity duration-200'}>
+            <LoyaltyCardVisual
+              design={{
+                template_id: design.template_id,
+                primary_color: design.primary_color,
+                secondary_color: design.secondary_color,
+                background_color: design.background_color,
+                text_color: design.text_color,
+                border_radius: 34,
+                config: {
+                  ...designConfig,
+                  background_image_url: raw.background_image_url || null,
+                  logo_url: raw.logo_url || card.establishment_logo_url || null,
+                  loyaltyType: configuredType as LoyaltyDesignConfig['loyaltyType'],
+                  card_mode: mode === 'STAMP' ? 'STAMP' : mode === 'DISCOUNT' ? 'POINTS_DISCOUNT' : 'POINTS_REWARD',
+                  show_qr: true,
+                },
+              }}
+              card={{
+                establishmentName: card.establishment_name,
+                logoUrl: card.establishment_logo_url,
+                points: card.points_balance,
+                stampsBalance: program.stamps_balance,
+                stampGoal: program.stamp_goal,
+                stampRewardName: raw.rewardName || program.stamp_reward_name,
+                discountPercent: raw.discountPercent ?? program.discount_percent ?? undefined,
+                customerName: fullName,
+                loyaltyNumber: card.loyalty_number,
+                cardUrl: cardUrl,
+              }}
+              programType={mode}
+            />
           </div>
         </div>
 

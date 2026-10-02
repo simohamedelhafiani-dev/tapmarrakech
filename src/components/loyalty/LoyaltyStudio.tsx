@@ -3,7 +3,7 @@ import { Gift, ImagePlus, Loader2, Save, Settings2, Sparkles, Stamp, Star, Perce
 import { supabase } from '@/lib/supabase';
 import { useLoyaltyManager, type LoyaltyProgramType, type LoyaltyReferralBonusType, type LoyaltyReferralConfig } from '@/hooks/useLoyaltyManager';
 import LoyaltyPreview from './LoyaltyPreview';
-import { WALLET_TEMPLATES } from './LoyaltyPreview';
+import { WALLET_TEMPLATES } from '@/components/LoyaltyCardVisual';
 import type { LoyaltyExperienceConfig, LoyaltyExperienceReward } from './LoyaltyExperience';
 
 type Props = { establishmentId: string };
@@ -141,9 +141,33 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       });
     }
     setLoading(false);
+    designHydratedRef.current = true;
   };
 
   useEffect(() => { void load(); }, [establishmentId]);
+
+  const previewChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const [previewChannelReady, setPreviewChannelReady] = useState(false);
+  const liveDesignTimerRef = useRef<number | null>(null);
+  const designHydratedRef = useRef(false);
+
+  useEffect(() => {
+    if (!establishmentId) return;
+
+    setPreviewChannelReady(false);
+    const channel = supabase.channel(`loyalty-design-preview-${establishmentId}`);
+    previewChannelRef.current = channel;
+
+    void channel.subscribe((status) => {
+      if (status === 'SUBSCRIBED') setPreviewChannelReady(true);
+    });
+
+    return () => {
+      previewChannelRef.current = null;
+      setPreviewChannelReady(false);
+      void supabase.removeChannel(channel);
+    };
+  }, [establishmentId]);
 
   const template = WALLET_TEMPLATES[design.templateId] ?? WALLET_TEMPLATES['onyx-black'];
 
@@ -175,6 +199,92 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     published: design.published,
     stampStyle: design.stampStyle,
   }), [program, design, establishment, rewards]);
+
+  useEffect(() => {
+    if (!establishmentId || !designHydratedRef.current) return;
+
+    if (liveDesignTimerRef.current !== null) {
+      window.clearTimeout(liveDesignTimerRef.current);
+    }
+
+    liveDesignTimerRef.current = window.setTimeout(async () => {
+      liveDesignTimerRef.current = null;
+
+      const designConfig = {
+        background_image_url: design.wallpaperUrl,
+        wallpaperUrl: design.wallpaperUrl,
+        logo_url: design.logoUrl || establishment.logoUrl,
+        loyaltyType: program.programType,
+        card_mode: program.programType,
+        stamp_style: design.stampStyle,
+        rewardName: program.stampRewardName || rewards[0]?.name || 'Cadeau fidélité',
+        rewardDescription: program.stampRewardDescription,
+        pointsPerCurrency: program.pointsPerCurrency,
+        discountPointsThreshold: program.discountPointsThreshold,
+        discountPercent: program.discountPercent,
+        discountValidDays: program.discountValidDays,
+      };
+
+      const { error: liveSaveError } = await supabase.rpc('save_loyalty_card_builder_config', {
+        p_establishment_id: establishmentId,
+        p_design_config: designConfig,
+        p_template_id: design.templateId,
+        p_primary_color: design.primaryColor,
+        p_secondary_color: design.secondaryColor,
+        p_background_color: design.backgroundColor,
+        p_text_color: design.textColor,
+        p_button_color: design.buttonColor,
+        p_border_radius: 34,
+        p_published: true,
+      });
+
+      if (!liveSaveError) {
+        setDesign(current => current.published ? current : { ...current, published: true });
+      }
+    }, 180);
+
+    return () => {
+      if (liveDesignTimerRef.current !== null) {
+        window.clearTimeout(liveDesignTimerRef.current);
+        liveDesignTimerRef.current = null;
+      }
+    };
+  }, [establishmentId, design, establishment.logoUrl, program.programType, program.stampRewardName, program.stampRewardDescription, program.pointsPerCurrency, program.discountPointsThreshold, program.discountPercent, program.discountValidDays, rewards]);
+
+  useEffect(() => {
+    if (!establishmentId || !previewChannelRef.current || !previewChannelReady) return;
+
+    void previewChannelRef.current.send({
+      type: 'broadcast',
+      event: 'loyalty-design-preview',
+      payload: {
+        establishmentId,
+        design: {
+          template_id: design.templateId,
+          primary_color: design.primaryColor,
+          secondary_color: design.secondaryColor,
+          background_color: design.backgroundColor,
+          text_color: design.textColor,
+          button_color: design.buttonColor,
+          border_radius: 34,
+        },
+        designConfig: {
+          background_image_url: design.wallpaperUrl,
+          wallpaperUrl: design.wallpaperUrl,
+          logo_url: design.logoUrl || establishment.logoUrl,
+          loyaltyType: program.programType,
+          card_mode: program.programType,
+          stamp_style: design.stampStyle,
+          rewardName: program.stampRewardName || rewards[0]?.name || 'Cadeau fidélité',
+          rewardDescription: program.stampRewardDescription,
+          pointsPerCurrency: program.pointsPerCurrency,
+          discountPointsThreshold: program.discountPointsThreshold,
+          discountPercent: program.discountPercent,
+          discountValidDays: program.discountValidDays,
+        },
+      },
+    });
+  }, [establishmentId, design, establishment.logoUrl, program, rewards, previewChannelReady]);
 
   const selectTemplate = (id: string) => {
     const t = WALLET_TEMPLATES[id];
@@ -368,7 +478,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
 
         <aside className="sticky top-6 h-fit rounded-[28px] bg-[#f1f3f0] p-5">
           <div className="mb-4 flex items-center justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[.18em] text-gold">Preview permanent</p><p className="mt-1 text-xs text-ink/40">300 × 450 px</p></div><span className="rounded-full bg-white px-3 py-1 text-[9px] font-semibold text-forest">Wallet</span></div>
-          <div className="flex min-h-[480px] items-center justify-center overflow-hidden rounded-[24px] bg-[#e8ebe7] p-3"><LoyaltyPreview config={previewConfig}/></div>
+          <div className="flex w-full items-center justify-center overflow-visible"><LoyaltyPreview config={previewConfig}/></div>
           <div className="mt-4 rounded-2xl bg-white p-4"><p className="text-[10px] uppercase tracking-[.16em] text-gold">Récompense visible</p><p className="mt-1 text-sm font-semibold text-forest">{program.stampRewardName || rewards[0]?.name || 'Cadeau fidélité'}</p></div>
         </aside>
       </div>

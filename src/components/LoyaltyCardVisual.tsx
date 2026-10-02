@@ -1,5 +1,15 @@
-import { useEffect, useState } from 'react';
-import { Gift, Star } from 'lucide-react';
+export const WALLET_TEMPLATES = {
+  'onyx-black': { id: 'onyx-black', name: 'Onyx Black', primary: '#181818', accent: '#D7D7D7', background: '#070707', text: '#FFFFFF' },
+  'royal-gold': { id: 'royal-gold', name: 'Royal Gold', primary: '#3A2A12', accent: '#E7C66A', background: '#120C05', text: '#FFF9E8' },
+  'deep-ocean': { id: 'deep-ocean', name: 'Deep Ocean', primary: '#123B4A', accent: '#8ED9E8', background: '#071B22', text: '#F2FCFF' },
+  'minimal-white': { id: 'minimal-white', name: 'Minimal White', primary: '#E9ECE8', accent: '#20352C', background: '#F8FAF7', text: '#17231D' },
+  'emerald-luxe': { id: 'emerald-luxe', name: 'Emerald Luxe', primary: '#123D2B', accent: '#C8E6B8', background: '#071D14', text: '#F5FFF8' },
+  'burgundy': { id: 'burgundy', name: 'Burgundy', primary: '#4A1725', accent: '#F0B8C5', background: '#210A11', text: '#FFF4F6' },
+  'midnight-blue': { id: 'midnight-blue', name: 'Midnight Blue', primary: '#172A52', accent: '#AFC7FF', background: '#080F22', text: '#F5F8FF' },
+  'sandstone': { id: 'sandstone', name: 'Sandstone', primary: '#8A6848', accent: '#FFF0D4', background: '#332619', text: '#FFF9EF' },
+} as const;
+
+import { useEffect, useMemo, useState } from 'react';
 import QRCode from 'qrcode';
 
 export type LoyaltyDesignConfig = {
@@ -58,43 +68,50 @@ export type LoyaltyVisualCard = {
   customerName?: string;
   loyaltyNumber?: string;
   cardUrl?: string;
-  phone?: string | null;
-  address?: string | null;
 };
 
-function StampMark({
-  filled,
-  style,
-  secondaryColor,
-  compact,
-}: {
-  filled: boolean;
-  style: LoyaltyDesignConfig['stamp_style'];
-  secondaryColor: string;
-  compact: boolean;
-}) {
-  const size = compact ? 'h-7 w-7' : 'h-9 w-9 sm:h-10 sm:w-10';
+type VisualDesign = {
+  primary_color: string;
+  secondary_color: string;
+  background_color: string;
+  text_color: string;
+  border_radius?: number;
+  template_id?: string;
+  config?: Partial<LoyaltyDesignConfig>;
+};
 
-  if (style === 'stars') {
-    return (
-      <span className={`grid ${size} place-items-center rounded-xl border-2`} style={{ borderColor: secondaryColor, background: filled ? secondaryColor : 'transparent' }}>
-        <Star size={compact ? 13 : 18} fill={filled ? 'currentColor' : 'none'} style={{ color: filled ? '#ffffff' : secondaryColor }} />
-      </span>
-    );
-  }
+function normalizeMode(
+  design: VisualDesign,
+  programType: 'STAMP' | 'DISCOUNT' | 'POINTS' | 'REWARD' | 'TIER',
+) {
+  const cfg = { ...defaultLoyaltyDesignConfig, ...(design.config ?? {}) };
+  if (cfg.card_mode === 'STAMP' || cfg.loyaltyType === 'STAMP' || programType === 'STAMP') return 'STAMP';
+  if (cfg.card_mode === 'POINTS_DISCOUNT' || cfg.loyaltyType === 'DISCOUNT' || programType === 'DISCOUNT') return 'DISCOUNT';
+  return 'POINTS';
+}
 
-  if (style === 'hearts') {
-    return (
-      <span className={`grid ${size} place-items-center rounded-full border-2`} style={{ borderColor: secondaryColor, background: filled ? secondaryColor : 'transparent' }}>
-        <span className="text-xs" style={{ color: filled ? '#ffffff' : secondaryColor }}>♥</span>
-      </span>
-    );
-  }
-
+function StampMark({ filled, style, accent }: { filled: boolean; style: LoyaltyDesignConfig['stamp_style']; accent: string }) {
+  const shape = style === 'squares' ? '10px' : '50%';
+  const mark = style === 'stars' ? '★' : style === 'hearts' ? '♥' : filled ? '✓' : '';
   return (
-    <span className={`grid ${size} place-items-center border-2 ${style === 'squares' ? 'rounded-lg' : 'rounded-full'}`} style={{ borderColor: secondaryColor, background: filled ? secondaryColor : 'transparent' }}>
-      {filled && <span className="h-2 w-2 rounded-full bg-white" />}
-    </span>
+    <div
+      style={{
+        width: '11.33cqw',
+        aspectRatio: '1',
+        height: 'auto',
+        borderRadius: shape === '10px' ? '3.33cqw' : '50%',
+        border: `0.5cqw solid ${accent}`,
+        background: filled ? `${accent}38` : 'rgba(255,255,255,.04)',
+        display: 'grid',
+        placeItems: 'center',
+        color: accent,
+        fontSize: '4.33cqw',
+        fontWeight: 800,
+        boxSizing: 'border-box',
+      }}
+    >
+      {mark}
+    </div>
   );
 }
 
@@ -102,23 +119,19 @@ export function LoyaltyCardVisual({
   design,
   card,
   side = 'front',
-  compact = false,
   programType = 'POINTS',
+  cardWidth,
 }: {
-  design: {
-    primary_color: string;
-    secondary_color: string;
-    background_color: string;
-    text_color: string;
-    border_radius: number;
-    config?: Partial<LoyaltyDesignConfig>;
-  };
+  design: VisualDesign;
   card: LoyaltyVisualCard;
   side?: 'front' | 'back';
   compact?: boolean;
   programType?: 'STAMP' | 'DISCOUNT' | 'POINTS' | 'REWARD' | 'TIER';
+  cardWidth?: string;
 }) {
   const config = { ...defaultLoyaltyDesignConfig, ...(design.config ?? {}) };
+  const mode = normalizeMode(design, programType);
+  const wallpaper = config.background_image_url;
   const showQr = Boolean(config.show_qr || config.showQr);
   const [qr, setQr] = useState('');
 
@@ -127,171 +140,130 @@ export function LoyaltyCardVisual({
       setQr('');
       return;
     }
-
+    let active = true;
     void QRCode.toDataURL(card.cardUrl, {
-      width: 320,
+      width: 180,
       margin: 1,
-      color: { dark: design.primary_color, light: '#ffffff' },
-    })
-      .then(setQr)
-      .catch(() => setQr(''));
-  }, [card.cardUrl, showQr, design.primary_color, side]);
+      errorCorrectionLevel: 'M',
+      color: { dark: design.primary_color, light: '#FFFFFF' },
+    }).then(value => {
+      if (active) setQr(value);
+    }).catch(() => {
+      if (active) setQr('');
+    });
+    return () => { active = false; };
+  }, [card.cardUrl, design.primary_color, showQr, side]);
 
-  const loyaltyType = config.loyaltyType ?? programType;
-  const cardMode = config.card_mode ?? (loyaltyType === 'STAMP' ? 'STAMP' : loyaltyType === 'DISCOUNT' ? 'POINTS_DISCOUNT' : 'POINTS_REWARD');
-  const logoUrl = config.logo_url || card.logoUrl;
-  const stampGoal = Math.max(1, Math.min(card.stampGoal ?? 10, 12));
-  const stampsBalance = Math.max(0, Math.min(card.stampsBalance ?? 0, stampGoal));
+  const goal = Math.max(1, Math.min(12, Number(card.stampGoal ?? 10)));
+  const stamps = Math.max(0, Math.min(goal, Number(card.stampsBalance ?? 0)));
+  const points = Math.max(0, Number(card.points ?? 0));
+  const discount = Math.max(0, Number(card.discountPercent ?? config.discountPercent ?? 10));
+  const logoUrl = config.logo_url || card.logoUrl || null;
+  const background = useMemo(() => (
+    wallpaper
+      ? `linear-gradient(145deg, ${design.primary_color}D9 0%, ${design.primary_color}82 52%, ${design.primary_color}55 100%),url("${wallpaper}")`
+      : `linear-gradient(145deg, ${design.background_color} 0%, ${design.primary_color} 54%, ${design.background_color} 100%)`
+  ), [design.background_color, design.primary_color, wallpaper]);
 
-  const background = 'linear-gradient(145deg, ' + design.primary_color + ' 0%, ' + design.primary_color + 'f4 58%, ' + design.primary_color + ' 100%)';
+  if (side === 'back') {
+    return (
+      <div style={{ width: cardWidth ?? 'min(90vw, 400px)', height: 'auto', aspectRatio: '2 / 3', position: 'relative', overflow: 'hidden', borderRadius: '6%', background, color: design.text_color, boxSizing: 'border-box', boxShadow: '0 28px 70px rgba(0,0,0,.38)', containerType: 'inline-size' }}>
+        <div style={{ position: 'absolute', inset: 0, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backgroundImage: background }} />
+        <div style={{ position: 'relative', zIndex: 1, height: '100%', display: 'grid', placeItems: 'center', padding: '9.33cqw', textAlign: 'center', boxSizing: 'border-box' }}>
+          <div>
+            <div style={{ color: design.secondary_color, fontSize: '3.33cqw', fontWeight: 800, letterSpacing: '.24em', textTransform: 'uppercase' }}>{config.back_title}</div>
+            <div style={{ marginTop: '4cqw', fontSize: '4.33cqw', lineHeight: 1.6, opacity: .72 }}>{config.back_message}</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
-      className={`relative aspect-[0.78/1] w-full overflow-hidden text-white shadow-2xl ${compact ? 'p-5' : 'p-6 sm:p-7'}`}
-      style={{ background, borderRadius: design.border_radius }}
+      style={{
+        width: cardWidth ?? 'min(90vw, 400px)',
+        height: 'auto',
+        aspectRatio: '2 / 3',
+        position: 'relative',
+        overflow: 'hidden',
+        borderRadius: '6%',
+        border: '1px solid rgba(255,255,255,.18)',
+        backgroundColor: design.background_color,
+        backgroundImage: background,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        color: design.text_color,
+        boxSizing: 'border-box',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,.20), inset 0 -30px 60px rgba(0,0,0,.22), 0 28px 70px rgba(0,0,0,.38)',
+        fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        containerType: 'inline-size',
+      }}
     >
-      {config.background_image_url ? (
-        <>
-          <div
-            className="pointer-events-none absolute inset-0 z-0"
-            style={{
-              backgroundImage: `linear-gradient(145deg, ${design.primary_color}88 0%, ${design.primary_color}55 45%, ${design.primary_color}33 100%), url(${config.background_image_url})`,
-              backgroundPosition: 'center',
-              backgroundSize: 'cover',
-              backgroundRepeat: 'no-repeat',
-            }}
-          />
-          <div
-            className="pointer-events-none absolute inset-0 z-0"
-            style={{ background: `linear-gradient(180deg, ${design.primary_color}66 0%, transparent 42%, ${design.primary_color}88 100%)` }}
-          />
-        </>
-      ) : (
-        <div
-          className="pointer-events-none absolute inset-0 z-0"
-          style={{ background }}
-        />
-      )}
-      <div
-        className="pointer-events-none absolute -bottom-20 -left-16 h-44 w-44 rounded-full opacity-10"
-        style={{ background: design.secondary_color }}
-      />
-
-      {side === 'front' ? (
-        <div className="relative flex h-full flex-col">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex min-w-0 items-center gap-3" style={{ transform: `translate(${config.logo_x}px, ${config.logo_y}px)` }}>
-              {logoUrl ? (
-                <img src={logoUrl} alt="" className={`shrink-0 rounded-full bg-white object-contain shadow-lg ${compact ? 'h-14 w-14 p-1.5' : 'h-[76px] w-[76px] p-2'}`} />
-              ) : (
-                <div className={`grid shrink-0 place-items-center rounded-full border-2 bg-white/10 font-semibold ${compact ? 'h-14 w-14 text-xs' : 'h-[76px] w-[76px] text-sm'}`} style={{ borderColor: design.secondary_color, color: design.secondary_color }}>
-                  {card.establishmentName.slice(0, 2).toUpperCase()}
-                </div>
-              )}
-              <div className="min-w-0">
-                <p className={`max-w-[145px] truncate font-semibold uppercase tracking-[0.14em] ${compact ? 'text-[10px]' : 'text-sm'}`}>{card.establishmentName}</p>
-                <p className="mt-1 text-[9px] uppercase tracking-[0.25em] opacity-60">Programme fidélité</p>
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'linear-gradient(125deg,rgba(255,255,255,.15),rgba(255,255,255,.03) 25%,transparent 50%,rgba(255,255,255,.05) 78%,transparent)' }} />
+      <div style={{ position: 'relative', zIndex: 1, height: '100%', display: 'flex', flexDirection: 'column', padding: '7.33cqw', boxSizing: 'border-box' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4cqw' }}>
+          <div style={{ minWidth: 0, display: 'flex', alignItems: 'center', gap: '3.33cqw' }}>
+            {logoUrl ? (
+              <img src={logoUrl} alt="" style={{ width: '14cqw', height: '14cqw', flex: '0 0 14cqw', borderRadius: '4.33cqw', objectFit: 'contain', padding: '1.67cqw', boxSizing: 'border-box', background: 'rgba(255,255,255,.92)' }} />
+            ) : (
+              <div style={{ width: '14cqw', height: '14cqw', flex: '0 0 14cqw', display: 'grid', placeItems: 'center', borderRadius: '4.33cqw', border: `1px solid ${design.secondary_color}88`, background: 'rgba(255,255,255,.10)', color: design.secondary_color, fontSize: '3.67cqw', fontWeight: 800 }}>
+                {(card.establishmentName || 'CL').slice(0, 2).toUpperCase()}
               </div>
-            </div>
-            <div className="shrink-0 text-right">
-              <p className={`font-semibold uppercase tracking-[0.22em] ${compact ? 'text-[8px]' : 'text-[10px]'}`} style={{ color: design.secondary_color }}>Carte fidélité</p>
-              <p className="mt-2 max-w-[125px] text-[8px] uppercase tracking-[0.18em] opacity-55">{cardMode === 'STAMP' ? 'Collectionnez vos visites' : 'Votre carte digitale'}</p>
+            )}
+            <div style={{ minWidth: 0 }}>
+              <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '4cqw', fontWeight: 800 }}>{card.establishmentName || 'Votre établissement'}</div>
+              <div style={{ marginTop: '1cqw', fontSize: '2.33cqw', letterSpacing: '.22em', textTransform: 'uppercase', opacity: .52 }}>Programme fidélité</div>
             </div>
           </div>
+          <div style={{ flex: '0 0 auto', fontSize: '2.33cqw', letterSpacing: '.16em', textTransform: 'uppercase', color: design.secondary_color, fontWeight: 800 }}>Carte</div>
+        </div>
 
-          <div className="mt-8 min-h-0 flex-1">
-            <p className="text-[10px] uppercase tracking-[0.28em] opacity-55">Bonjour</p>
-            {card.customerName && (
-              <p className={`mt-1 font-semibold tracking-tight ${compact ? 'text-xl' : 'text-2xl sm:text-[30px]'}`}>{card.customerName}</p>
-            )}
-            <p className={`mt-3 max-w-[270px] leading-5 opacity-70 ${compact ? 'text-[10px]' : 'text-xs sm:text-sm'}`}>{config.front_subtitle}</p>
-
-            {loyaltyType === 'POINTS' && config.show_points && (
-              <div className="mt-7">
-                <p className="text-[9px] uppercase tracking-[0.28em] opacity-55">Vos points</p>
-                <p className={`mt-1 font-bold leading-none tracking-tight ${compact ? 'text-5xl' : 'text-6xl sm:text-[68px]'}`}>{card.points ?? 0}</p>
-              </div>
-            )}
-
-            {loyaltyType === 'DISCOUNT' && (
-              <div className="mt-7 rounded-2xl border border-white/15 bg-white/10 p-4">
-                <p className="text-[9px] uppercase tracking-[0.2em] opacity-60">Votre avantage</p>
-                <p className={`mt-1 font-bold ${compact ? 'text-4xl' : 'text-5xl'}`}>-{config.discountPercent ?? 10}%</p>
-                <p className="mt-1 text-[10px] opacity-70">{config.progressText || 'sur votre prochaine visite'}</p>
-              </div>
-            )}
-
-            {loyaltyType === 'REWARD' && (
-              <div className="mt-7 rounded-2xl border border-white/15 bg-white/10 p-4">
-                <Gift size={18} style={{ color: design.secondary_color }} />
-                <p className="mt-2 text-lg font-semibold">{config.rewardName || config.rewardTitle || 'Votre récompense'}</p>
-                <p className="mt-1 text-[10px] opacity-60">{config.rewardDescription || 'Votre fidélité est récompensée.'}</p>
-              </div>
-            )}
-
-            {loyaltyType === 'TIER' && (
-              <div className="mt-7 grid grid-cols-3 gap-2">
-                {['Bronze', 'Silver', 'Gold'].map((tier, index) => (
-                  <div key={tier} className="rounded-xl bg-white/10 p-2 text-center">
-                    <p className="text-[8px] uppercase tracking-wider opacity-60">{tier}</p>
-                    <p className="mt-1 text-sm font-bold">{index === 0 ? '-5%' : index === 1 ? '-10%' : '-20%'}</p>
-                  </div>
-                ))}
-              </div>
-            )}
+        <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+          <div style={{ fontSize: '3cqw', fontWeight: 800, letterSpacing: '.24em', textTransform: 'uppercase', color: design.secondary_color }}>
+            {mode === 'STAMP' ? 'CARTE À TAMPONS' : mode === 'DISCOUNT' ? 'POINTS & RÉDUCTION' : 'POINTS & RÉCOMPENSES'}
           </div>
 
-          {cardMode === 'STAMP' ? (
-            <div className="mt-6">
-              <div className="flex items-end justify-between gap-3">
-                <div>
-                  <p className="text-[9px] uppercase tracking-[0.22em] opacity-55">Vos visites</p>
-                  <p className="mt-1 text-sm font-semibold">{stampsBalance} / {stampGoal}</p>
-                </div>
-                <div className="flex items-center gap-2 rounded-full border px-3 py-1.5" style={{ borderColor: design.secondary_color }}>
-                  <Gift size={14} style={{ color: design.secondary_color }} />
-                  <span className="max-w-[150px] truncate text-[10px] font-semibold">{card.stampRewardName || 'Récompense'}</span>
-                </div>
+          {card.customerName && <div style={{ marginTop: '2.33cqw', fontSize: '4cqw', fontWeight: 700, opacity: .78 }}>{card.customerName}</div>}
+
+          {mode === 'STAMP' ? (
+            <>
+              <div style={{ marginTop: '3.33cqw', fontSize: '14cqw', lineHeight: 1, fontWeight: 900 }}>
+                {stamps}<span style={{ fontSize: '5.33cqw', opacity: .45 }}> / {goal}</span>
               </div>
-              <div className="mt-3 grid grid-cols-5 place-items-center gap-2">
-                {Array.from({ length: stampGoal }).map((_, i) => (
-                  <StampMark key={i} filled={i < stampsBalance} style={config.stamp_style} secondaryColor={design.secondary_color} compact={compact} />
-                ))}
+              <div style={{ marginTop: '5.33cqw', width: '100%', display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '2.33cqw' }}>
+                {Array.from({ length: goal }).map((_, index) => <StampMark key={index} filled={index < stamps} style={config.stamp_style} accent={design.secondary_color} />)}
               </div>
-            </div>
+              <div style={{ marginTop: '4.33cqw', fontSize: '3.67cqw', opacity: .65 }}>{card.stampRewardName || config.rewardName || 'Cadeau fidélité'}</div>
+            </>
           ) : (
-            <div className="mt-4 flex flex-col items-center">
-              {showQr && qr ? (
-                <div className={`rounded-2xl bg-white shadow-xl ${compact ? 'h-28 w-28 p-2' : 'h-32 w-32 p-2.5 sm:h-36 sm:w-36'}`}>
-                  <img src={qr} alt="QR code de la carte fidélité" className="h-full w-full" />
-                </div>
-              ) : (
-                <div className={`grid place-items-center rounded-2xl border border-white/15 bg-white/5 text-center ${compact ? 'h-28 w-28' : 'h-32 w-32 sm:h-36 sm:w-36'}`}>
-                  <span className="max-w-[80px] text-[8px] uppercase tracking-[0.16em] opacity-45">QR en préparation</span>
+            <>
+              <div style={{ marginTop: '2.33cqw', fontSize: '19.33cqw', lineHeight: .92, fontWeight: 900, letterSpacing: '-.045em' }}>
+                {points.toLocaleString('fr-FR')}
+              </div>
+              <div style={{ marginTop: '1cqw', fontSize: '3.33cqw', fontWeight: 800, letterSpacing: '.18em', textTransform: 'uppercase', color: design.secondary_color }}>points</div>
+              {mode === 'DISCOUNT' && (
+                <div style={{ marginTop: '4.67cqw', padding: '3cqw 4.67cqw', borderRadius: '5cqw', border: `1px solid ${design.secondary_color}66`, background: `${design.secondary_color}18`, fontSize: '6.67cqw', fontWeight: 900 }}>
+                  -{discount}%
                 </div>
               )}
-              <p className="mt-3 text-center text-[9px] uppercase tracking-[0.2em] opacity-55">
-                {showQr ? 'Présentez ou scannez votre QR code' : 'Présentez votre carte'}
-              </p>
-            </div>
+              {mode === 'POINTS' && config.rewardName && (
+                <div style={{ marginTop: '4cqw', fontSize: '3.33cqw', opacity: .68 }}>{config.rewardName}</div>
+              )}
+            </>
           )}
 
-          <div className="mt-4 flex items-center justify-between gap-3">
-            <div className="flex min-w-0 items-center gap-2 text-[8px] uppercase tracking-[0.2em] opacity-55">
-              <span className="h-px w-7 shrink-0" style={{ background: design.secondary_color }} />
-              <span className="truncate">{cardMode === 'STAMP' ? 'Récompense à la dernière visite' : 'Présentez votre carte'}</span>
-            </div>
-            <span className="shrink-0 text-[9px] uppercase tracking-[0.18em] opacity-70">by Tap Marrakech</span>
-          </div>
+          <div style={{ marginTop: '5.67cqw', width: '18cqw', height: '0.33cqw', background: design.secondary_color, opacity: .55 }} />
         </div>
-      ) : (
-        <div className="relative z-10 grid h-full place-items-center text-center">
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.24em] opacity-60">{config.back_title}</p>
-            <p className="mt-3 text-sm opacity-70">{config.back_message}</p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div style={{ width: '23.33cqw', height: '23.33cqw', padding: '2cqw', boxSizing: 'border-box', borderRadius: '4.33cqw', background: '#fff', display: 'grid', placeItems: 'center', boxShadow: '0 12px 28px rgba(0,0,0,.28)' }}>
+            {showQr && qr ? <img src={qr} alt="QR Code fidélité" style={{ width: '19.33cqw', height: '19.33cqw', display: 'block' }} /> : <div style={{ width: '19.33cqw', height: '19.33cqw' }} />}
           </div>
+          <div style={{ marginTop: '2.67cqw', fontSize: '2.67cqw', letterSpacing: '.16em', textTransform: 'uppercase', opacity: .5 }}>{card.customerName || 'Client'}</div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
