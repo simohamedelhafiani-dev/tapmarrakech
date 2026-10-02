@@ -104,7 +104,6 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
   const [rewardDescription, setRewardDescription] = useState('');
   const [rewardPoints, setRewardPoints] = useState('500');
   const [rewardType, setRewardType] = useState<'GIFT' | 'DISCOUNT'>('GIFT');
-  const [discountPercent, setDiscountPercent] = useState('10');
   const [discountMaxAmount, setDiscountMaxAmount] = useState('');
   const [validDays, setValidDays] = useState<string[]>(['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY']);
   const [rewardSaving, setRewardSaving] = useState(false);
