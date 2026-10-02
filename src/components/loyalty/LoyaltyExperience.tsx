@@ -140,8 +140,8 @@ export function LoyaltyProgress({ config }: { config: LoyaltyExperienceConfig })
           <div><p className="text-[9px] font-bold uppercase tracking-[0.2em] opacity-45">{label}</p><p className="mt-1 text-3xl font-bold tracking-tight">{current}<span className="text-base opacity-35"> / {goal}</span></p></div>
           <span className="rounded-full px-3 py-1.5 text-[10px] font-semibold" style={{ color: config.primaryColor, background: config.secondaryColor + '22' }}>{remaining > 0 ? `Encore ${remaining}` : 'Objectif atteint'}</span>
         </div>
-        <div className="mt-4 grid grid-cols-5 gap-2">{Array.from({ length: Math.min(goal, 12) }).map((_, i) => <StampIcon key={i} filled={i < current} />)}</div>
-        <p className="mt-3 text-xs opacity-55">{config.progressLabel || (remaining > 0 ? `Encore ${remaining} visites avant votre récompense` : 'Votre récompense est disponible')}</p>
+        <div className="mt-4 grid grid-cols-5 gap-2">{Array.from({ length: goal }).map((_, i) => <StampIcon key={i} filled={i < Math.min(current, goal)} />)}</div>
+        <p className="mt-3 text-xs opacity-55">{config.progressLabel || (remaining > 0 ? `Encore ${remaining} tampon(s) avant votre récompense` : current > goal ? `${current - goal} tampon(s) supplémentaire(s) seront conservés après la récompense` : 'Votre récompense est disponible')}</p>
       </div>
     );
   }
