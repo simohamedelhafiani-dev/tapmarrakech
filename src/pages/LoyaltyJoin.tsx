@@ -180,7 +180,7 @@ export default function LoyaltyJoin() {
               <div className="h-full w-full animate-pulse rounded-full bg-[#D3A84C]" />
             </div>
             <p className="mt-3 text-[10px] text-ink/35">Ouverture de votre carte…</p>
-            <Navigate to={`/loyalty/${accessToken}?welcome=1`} replace />
+
           </div>
         </div>
       </main>
