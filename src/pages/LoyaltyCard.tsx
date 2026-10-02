@@ -421,6 +421,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         supabase.rpc('get_public_loyalty_program_context', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_history', { p_access_token: token, p_limit: 20 }),
         supabase.rpc('get_public_loyalty_rewards', { p_access_token: token }),
+        supabase.rpc('get_public_loyalty_discount_status', { p_access_token: token }),
       ]);
 
       if (disposed) return;
@@ -452,6 +453,9 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
           stamp_reward_name: programRow.stamp_reward_name ?? null,
           stamp_reward_description: programRow.stamp_reward_description ?? null,
           discount_percent: programRow.discount_percent != null ? Number(programRow.discount_percent) : null,
+          discount_valid_days: Number(programRow.discount_valid_days ?? 7),
+          discount_points_threshold: Number(programRow.discount_points_threshold ?? 1000),
+          discount_expires_at: (Array.isArray(discountData) ? discountData[0]?.expires_at : discountData?.expires_at) ?? null,
           referral_enabled: Boolean(programRow.referral_enabled),
         });
       }
