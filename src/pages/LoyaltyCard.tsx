@@ -730,6 +730,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
             </div>
           </div>
         )}
+        </div>
       </div>
     </main>
   );
