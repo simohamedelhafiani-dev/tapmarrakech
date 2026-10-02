@@ -240,11 +240,7 @@ function App() {
               />
               <Route
                 path="/dashboard/loyalty/settings"
-                element={
-                  <SubscriptionFeatureRoute feature="loyalty">
-                    <LoyaltySettings />
-                  </SubscriptionFeatureRoute>
-                }
+                element={<Navigate to="/dashboard/loyalty" replace />}
               />
             </Route>
           </Route>
