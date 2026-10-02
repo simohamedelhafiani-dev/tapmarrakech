@@ -626,9 +626,17 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
           <button
             type="button"
             onClick={() => void openReferral()}
-            className="mt-4 flex w-full items-center justify-center gap-3 rounded-2xl border border-[#D3A84C]/35 bg-white px-5 py-4 text-sm font-semibold text-[#173D32] shadow-[0_10px_30px_rgba(23,61,50,0.08)] transition hover:-translate-y-0.5 hover:shadow-lg"
+            className="mt-4 flex w-full items-center justify-center gap-3 rounded-2xl px-5 py-4 text-sm font-semibold shadow-[0_10px_30px_rgba(23,61,50,0.14)] transition hover:-translate-y-0.5 hover:shadow-lg"
+            style={{
+              backgroundColor: design.primary_color,
+              color: design.text_color,
+              border: `1px solid ${design.secondary_color}`,
+            }}
           >
-            <span className="grid h-9 w-9 place-items-center rounded-full bg-[#173D32] text-[#D6B15A]">
+            <span
+              className="grid h-9 w-9 place-items-center rounded-full"
+              style={{ backgroundColor: design.secondary_color, color: design.primary_color }}
+            >
               <Gift className="h-4 w-4" />
             </span>
             <span>🎁 Inviter un ami</span>
@@ -656,12 +664,16 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
               aria-labelledby="public-referral-title"
               className="flex h-[40vh] max-h-[40vh] w-full max-w-[430px] flex-col overflow-hidden rounded-[2rem] bg-[#F7F7F3] shadow-2xl"
             >
-              <div className="relative shrink-0 bg-[#173D32] px-6 pb-4 pt-4 text-white">
+              <div
+                className="relative shrink-0 px-6 pb-4 pt-4"
+                style={{ backgroundColor: design.primary_color, color: design.text_color }}
+              >
                 <button
                   type="button"
                   onClick={() => setReferralOpen(false)}
                   aria-label="Fermer"
-                  className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
+                  className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-white/10 transition hover:bg-white/20"
+                  style={{ color: design.text_color }}
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -677,7 +689,10 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                   </div>
                 ) : referralCode ? (
                   <div className="flex h-full flex-col items-center justify-center">
-                    <p className="mb-2 text-center text-sm font-semibold text-[#173D32]">
+                    <p
+                      className="mb-2 text-center text-sm font-semibold"
+                      style={{ color: design.primary_color }}
+                    >
                       Bienvenue dans la famille {card?.establishment_name || "cet établissement"} 🤍
                     </p>
                     <div className="flex aspect-square w-[min(30vh,210px)] max-w-full items-center justify-center rounded-2xl bg-white p-2 shadow-sm">
