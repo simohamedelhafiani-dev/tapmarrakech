@@ -278,7 +278,8 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
         show_points: false,
       },
     }));
-    // Le modèle change le design, pas le type de programme : QR et tampons utilisent le même template.\n    setCardMode(cardMode);
+    // Le modèle change le design, pas le type de programme : QR et tampons utilisent le même template.
+    setCardMode(cardMode);
   }
 
   async function uploadAsset(file: File, kind: 'logo' | 'photo') {
