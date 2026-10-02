@@ -97,7 +97,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
   const [rewardSaving, setRewardSaving] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<'logo' | 'photo' | 'wallpapers' | null>(null);
-  const [activeTab, setActiveTab] = useState<'Structure' | 'Design'>('Structure');
+  const [activeTab, setActiveTab] = useState<'Structure' | 'Acquisition' | 'Design'>('Structure');
   const [referralDraft, setReferralDraft] = useState<LoyaltyReferralConfig>({
     enabled: false,
     referrer_bonus_points: 50,
@@ -559,13 +559,13 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
         <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_0.9fr]">
           <div className="space-y-5">
             <div className="flex items-center gap-2 rounded-2xl border border-ink/10 bg-[#fafaf8] p-1">
-              {(['Structure', 'Design'] as const).map(tab => (
+              {(['Structure', 'Acquisition', 'Design'] as const).map(tab => (
                 <button
                   key={tab}
                   type="button"
                   onClick={() => {
                     setActiveTab(tab);
-                    const targetId = tab === 'Structure' ? 'loyalty-structure' : 'loyalty-design';
+                    const targetId = tab === 'Structure' ? 'loyalty-structure' : tab === 'Acquisition' ? 'loyalty-acquisition' : 'loyalty-design';
                     window.requestAnimationFrame(() => document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
                   }}
                   className={`flex-1 rounded-xl px-3 py-2.5 text-center text-[10px] font-semibold transition ${activeTab === tab ? 'bg-white text-forest shadow-sm' : 'text-ink/35 hover:text-forest'}`}
