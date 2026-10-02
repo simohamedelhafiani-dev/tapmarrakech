@@ -611,8 +611,8 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     visitGoal: Number(stampGoal) || 10,
     rewardName: cardMode === 'STAMP' ? stampRewardName : (rewards[0]?.name ?? 'Aucune récompense'),
     rewardDescription: cardMode === 'STAMP' ? (stampRewardDescription || null) : (rewards[0]?.description ?? null),
-     discountPercent: cardMode === 'DISCOUNT' ? Number(discountPercent) || 10 : null,
-     discountValidDays: cardMode === 'DISCOUNT' ? Number(discountValidDays) || 7 : 7,
+     discountPercent: cardMode === 'POINTS_DISCOUNT' ? Number(discountPercent) || 10 : null,
+     discountValidDays: cardMode === 'POINTS_DISCOUNT' ? Number(discountValidDays) || 7 : 7,
     intro: design.design_config.front_subtitle,
     benefits: design.design_config.benefits || [],
     offers: design.design_config.offers || [],
@@ -748,9 +748,9 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
               <div className="mt-5">
                 <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-ink/40">Type de fidélité</p>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                  <ModeButton active={cardMode === 'QR'} icon={<QrCode size={23}/>} title="QR Code" description="Une carte avec un QR unique pour le client." onClick={() => chooseMode('QR')} />
-                  <ModeButton active={cardMode === 'STAMP'} icon={<Stamp size={23}/>} title="Tampons" description="Une carte de visites avec des tampons." onClick={() => chooseMode('STAMP')} />
-                </div>
+                   <ModeButton active={cardMode === 'STAMP'} icon={<Stamp size={23}/>} title="Tampons" description="Le client remplit une grille jusqu'à 10 tampons." onClick={() => chooseMode('STAMP')} />
+                   <ModeButton active={cardMode === 'POINTS_REWARD'} icon={<Gift size={23}/>} title="Points & récompenses" description="Les points servent à débloquer un catalogue de récompenses." onClick={() => chooseMode('POINTS_REWARD')} />
+                   <ModeButton active={cardMode === 'POINTS_DISCOUNT'} icon={<QrCode size={23}/>} title="Objectif réduction" description="Les points remplissent un seuil puis débloquent une réduction temporaire." onClick={() => chooseMode('POINTS_DISCOUNT')} />
               </div>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
