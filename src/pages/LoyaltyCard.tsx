@@ -415,6 +415,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         { data: programData },
         { data: historyData },
         { data: rewardsData },
+        { data: discountData },
       ] = await Promise.all([
         supabase.rpc('get_public_loyalty_card', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_card_config', { p_access_token: token }),
