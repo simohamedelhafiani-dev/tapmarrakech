@@ -601,6 +601,8 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     visitGoal: Number(stampGoal) || 10,
     rewardName: cardMode === 'STAMP' ? stampRewardName : (rewards[0]?.name ?? 'Aucune récompense'),
     rewardDescription: cardMode === 'STAMP' ? (stampRewardDescription || null) : (rewards[0]?.description ?? null),
+     discountPercent: cardMode === 'DISCOUNT' ? Number(discountPercent) || 10 : null,
+     discountValidDays: cardMode === 'DISCOUNT' ? Number(discountValidDays) || 7 : 7,
     intro: design.design_config.front_subtitle,
     benefits: design.design_config.benefits || [],
     offers: design.design_config.offers || [],
