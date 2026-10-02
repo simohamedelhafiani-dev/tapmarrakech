@@ -1,12 +1,34 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Gift, ImagePlus, Loader2, Save, Settings2, Sparkles, Stamp, Star, Percent, Trash2 } from 'lucide-react';
+import {
+  Gift,
+  ImagePlus,
+  Loader2,
+  Palette,
+  Percent,
+  Rocket,
+  Save,
+  Settings2,
+  Sparkles,
+  Stamp,
+  Star,
+  Trash2,
+  UserPlus,
+  X,
+} from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { useLoyaltyManager, type LoyaltyProgramType, type LoyaltyReferralBonusType, type LoyaltyReferralConfig } from '@/hooks/useLoyaltyManager';
+import {
+  useLoyaltyManager,
+  type LoyaltyProgramType,
+  type LoyaltyReferralBonusType,
+  type LoyaltyReferralConfig,
+} from '@/hooks/useLoyaltyManager';
 import LoyaltyPreview from './LoyaltyPreview';
 import { WALLET_TEMPLATES } from '@/components/LoyaltyCardVisual';
 import type { LoyaltyExperienceConfig, LoyaltyExperienceReward } from './LoyaltyExperience';
 
 type Props = { establishmentId: string };
+type TabId = 'settings' | 'rewards' | 'referral' | 'design';
+type RewardType = 'GIFT' | 'DISCOUNT';
 
 type Reward = {
   id: string;
@@ -14,6 +36,19 @@ type Reward = {
   description: string | null;
   points_required: number;
   active: boolean;
+  reward_type: RewardType;
+  discount_percent: number | null;
+  discount_max_amount: number | null;
+};
+
+type RewardDraft = {
+  id: string | null;
+  name: string;
+  description: string;
+  pointsRequired: number;
+  rewardType: RewardType;
+  discountPercent: number;
+  discountMaxAmount: number | null;
 };
 
 type DesignState = {
@@ -44,36 +79,62 @@ const DEFAULT_DESIGN: DesignState = {
   published: false,
 };
 
-const TYPES: { id: LoyaltyProgramType; label: string; description: string; icon: typeof Stamp }[] = [
-  { id: 'STAMP', label: 'Tampons', description: '1 tampon par visite ou selon votre règle.', icon: Stamp },
-  { id: 'POINTS_REWARD', label: 'Points', description: 'X MAD = Y points, puis récompenses.', icon: Star },
-  { id: 'POINTS_DISCOUNT', label: 'Réduction', description: 'Cumulez des points jusqu’au seuil défini.', icon: Percent },
+const TABS: { id: TabId; label: string; caption: string; icon: typeof Settings2 }[] = [
+  { id: 'settings', label: 'Paramètres', caption: 'Programme', icon: Settings2 },
+  { id: 'rewards', label: 'Récompenses', caption: 'Catalogue', icon: Gift },
+  { id: 'referral', label: 'Parrainage', caption: 'Acquisition', icon: Rocket },
+  { id: 'design', label: 'Design', caption: 'Visuels', icon: Palette },
 ];
 
+const TYPES: {
+  id: LoyaltyProgramType;
+  label: string;
+  description: string;
+  icon: typeof Stamp;
+}[] = [
+  { id: 'STAMP', label: 'Tampons', description: 'Un tampon par visite et une récompense à l’objectif.', icon: Stamp },
+  { id: 'POINTS_REWARD', label: 'Points + cadeaux', description: 'X MAD = Y points, puis échange contre des cadeaux.', icon: Star },
+  { id: 'POINTS_DISCOUNT', label: 'Points + réduction', description: 'Accumulez des points et débloquez une réduction.', icon: Percent },
+];
+
+const emptyReward: RewardDraft = {
+  id: null,
+  name: '',
+  description: '',
+  pointsRequired: 100,
+  rewardType: 'GIFT',
+  discountPercent: 10,
+  discountMaxAmount: null,
+};
+
 function bonusLabel(type: LoyaltyReferralBonusType, value: number) {
-  if (type === 'STAMP') return `${value} tampon(s)`;
-  if (type === 'REDUCTION') return `${value}% de réduction`;
-  return `${value} point(s)`;
+  if (type === 'STAMP') return \`\${value} tampon(s)\`;
+  if (type === 'REDUCTION') return \`\${value}% de réduction\`;
+  return \`\${value} point(s)\`;
+}
+
+function normalizeReward(row: Record<string, unknown>): Reward {
+  return {
+    id: String(row.id),
+    name: String(row.name ?? ''),
+    description: row.description ? String(row.description) : null,
+    points_required: Number(row.points_required ?? 0),
+    active: row.active !== false,
+    reward_type: row.reward_type === 'DISCOUNT' ? 'DISCOUNT' : 'GIFT',
+    discount_percent: row.discount_percent == null ? null : Number(row.discount_percent),
+    discount_max_amount: row.discount_max_amount == null ? null : Number(row.discount_max_amount),
+  };
 }
 
 export default function LoyaltyStudio({ establishmentId }: Props) {
   const manager = useLoyaltyManager(establishmentId);
-  const [tab, setTab] = useState<'structure' | 'design'>('structure');
+  const [tab, setTab] = useState<TabId>('settings');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
-  const [program, setProgram] = useState<{
-    programType: LoyaltyProgramType;
-    stampGoal: number;
-    stampRewardName: string;
-    stampRewardDescription: string;
-    pointsPerCurrency: number;
-    discountPointsThreshold: number;
-    discountPercent: number;
-    discountValidDays: number;
-    enabled: boolean;
-  }>({
-    programType: 'POINTS_REWARD',
+  const [referralStats, setReferralStats] = useState(0);
+  const [program, setProgram] = useState({
+    programType: 'POINTS_REWARD' as LoyaltyProgramType,
     stampGoal: 10,
     stampRewardName: 'Cadeau fidélité',
     stampRewardDescription: '',
@@ -94,68 +155,100 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     referee_bonus_points: 0,
   });
   const [rewards, setRewards] = useState<Reward[]>([]);
+  const [rewardDraft, setRewardDraft] = useState<RewardDraft>(emptyReward);
+  const [rewardSaving, setRewardSaving] = useState(false);
   const [design, setDesign] = useState<DesignState>(DEFAULT_DESIGN);
-  const [establishment, setEstablishment] = useState({ name: 'Votre établissement', logoUrl: null as string | null });
+  const [establishment, setEstablishment] = useState({
+    name: 'Votre établissement',
+    logoUrl: null as string | null,
+  });
   const wallpaperInput = useRef<HTMLInputElement>(null);
+  const designHydratedRef = useRef(false);
+  const previewChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const [previewChannelReady, setPreviewChannelReady] = useState(false);
+  const liveDesignTimerRef = useRef<number | null>(null);
 
   const load = async () => {
     if (!establishmentId) return;
     setLoading(true);
-    const [{ data: place }, settings, referralState, { data: designData }, { data: rewardData }] = await Promise.all([
-      supabase.from('establishments').select('name,logo_url').eq('id', establishmentId).maybeSingle(),
-      manager.getProgramSettings(),
-      manager.getReferralConfig(),
-      supabase.rpc('get_loyalty_card_builder_config', { p_establishment_id: establishmentId }),
-      supabase.from('loyalty_rewards').select('id,name,description,points_required,active').eq('establishment_id', establishmentId).order('points_required', { ascending: true }),
-    ]);
-    if (place) setEstablishment({ name: place.name || 'Votre établissement', logoUrl: place.logo_url || null });
-    setProgram({
-      programType: settings.programType,
-      stampGoal: settings.stampGoal,
-      stampRewardName: settings.stampRewardName || 'Cadeau fidélité',
-      stampRewardDescription: settings.stampRewardDescription || '',
-      pointsPerCurrency: settings.pointsPerCurrency,
-      discountPointsThreshold: settings.discountPointsThreshold,
-      discountPercent: settings.discountPercent ?? 10,
-      discountValidDays: settings.discountValidDays,
-      enabled: settings.enabled,
-    });
-    setReferral(referralState.draftConfig);
-    setRewards((rewardData ?? []) as Reward[]);
-    const row = Array.isArray(designData) ? designData[0] : designData;
-    if (row) {
-      const cfg = row.design_config ?? {};
-      setDesign({
-        ...DEFAULT_DESIGN,
-        templateId: row.template_id ?? DEFAULT_DESIGN.templateId,
-        primaryColor: row.primary_color ?? DEFAULT_DESIGN.primaryColor,
-        secondaryColor: row.secondary_color ?? DEFAULT_DESIGN.secondaryColor,
-        backgroundColor: row.background_color ?? DEFAULT_DESIGN.backgroundColor,
-        textColor: row.text_color ?? DEFAULT_DESIGN.textColor,
-        buttonColor: row.button_color ?? DEFAULT_DESIGN.buttonColor,
-        borderRadius: Number(row.border_radius ?? DEFAULT_DESIGN.borderRadius),
-        wallpaperUrl: cfg.background_image_url ?? cfg.wallpaperUrl ?? null,
-        logoUrl: cfg.logo_url ?? place?.logo_url ?? null,
-        stampStyle: cfg.stamp_style ?? 'circles',
-        published: Boolean(row.published),
+    setMessage('');
+
+    try {
+      const [{ data: place }, settings, referralState, referralStateStats, { data: designData }, { data: rewardData }] =
+        await Promise.all([
+          supabase.from('establishments').select('name,logo_url').eq('id', establishmentId).maybeSingle(),
+          manager.getProgramSettings(),
+          manager.getReferralConfig(),
+          manager.getReferralStats(),
+          supabase.rpc('get_loyalty_card_builder_config', { p_establishment_id: establishmentId }),
+          supabase
+            .from('loyalty_rewards')
+            .select('id,name,description,points_required,active,reward_type,discount_percent,discount_max_amount')
+            .eq('establishment_id', establishmentId)
+            .order('points_required', { ascending: true }),
+        ]);
+
+      if (place) {
+        setEstablishment({
+          name: place.name || 'Votre établissement',
+          logoUrl: place.logo_url || null,
+        });
+      }
+
+      setProgram({
+        programType: settings.programType,
+        stampGoal: settings.stampGoal,
+        stampRewardName: settings.stampRewardName || 'Cadeau fidélité',
+        stampRewardDescription: settings.stampRewardDescription || '',
+        pointsPerCurrency: settings.pointsPerCurrency,
+        discountPointsThreshold: settings.discountPointsThreshold,
+        discountPercent: settings.discountPercent ?? 10,
+        discountValidDays: settings.discountValidDays,
+        enabled: settings.enabled,
       });
+
+      setReferral(referralState.draftConfig);
+      setReferralStats(referralStateStats.acquiredCount);
+      setRewards(
+        ((rewardData ?? []) as unknown as Record<string, unknown>[]).map(normalizeReward),
+      );
+
+      const row = Array.isArray(designData) ? designData[0] : designData;
+      if (row) {
+        const cfg = row.design_config ?? {};
+        setDesign({
+          ...DEFAULT_DESIGN,
+          templateId: row.template_id ?? DEFAULT_DESIGN.templateId,
+          primaryColor: row.primary_color ?? DEFAULT_DESIGN.primaryColor,
+          secondaryColor: row.secondary_color ?? DEFAULT_DESIGN.secondaryColor,
+          backgroundColor: row.background_color ?? DEFAULT_DESIGN.backgroundColor,
+          textColor: row.text_color ?? DEFAULT_DESIGN.textColor,
+          buttonColor: row.button_color ?? DEFAULT_DESIGN.buttonColor,
+          borderRadius: Number(row.border_radius ?? DEFAULT_DESIGN.borderRadius),
+          wallpaperUrl: cfg.background_image_url ?? cfg.wallpaperUrl ?? null,
+          logoUrl: cfg.logo_url ?? place?.logo_url ?? null,
+          stampStyle: cfg.stamp_style ?? 'circles',
+          published: Boolean(row.published),
+        });
+      }
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Impossible de charger le Loyalty Studio.');
+    } finally {
+      setLoading(false);
+      designHydratedRef.current = true;
     }
-    setLoading(false);
-    designHydratedRef.current = true;
   };
 
-  useEffect(() => { void load(); }, [establishmentId]);
-
-  const previewChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
-  const [previewChannelReady, setPreviewChannelReady] = useState(false);
-  const liveDesignTimerRef = useRef<number | null>(null);
-  const designHydratedRef = useRef(false);
+  useEffect(() => {
+    designHydratedRef.current = false;
+    void load();
+  }, [establishmentId]);
 
   useEffect(() => {
     if (!establishmentId) return;
 
     setPreviewChannelReady(false);
-    const channel = supabase.channel(`loyalty-design-preview-${establishmentId}`);
+    const channel = supabase.channel(\`loyalty-design-preview-\${establishmentId}\`);
     previewChannelRef.current = channel;
 
     void channel.subscribe((status) => {
@@ -169,8 +262,6 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     };
   }, [establishmentId]);
 
-  const template = WALLET_TEMPLATES[design.templateId] ?? WALLET_TEMPLATES['onyx-black'];
-
   const previewConfig = useMemo<LoyaltyExperienceConfig>(() => ({
     type: program.programType,
     establishmentName: establishment.name,
@@ -180,7 +271,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     secondaryColor: design.secondaryColor,
     backgroundColor: design.backgroundColor,
     textColor: design.textColor,
-    borderRadius: 34,
+    borderRadius: design.borderRadius,
     customerName: 'Votre client',
     pointsBalance: 720,
     pointsGoal: Math.max(1000, rewards[0]?.points_required ?? 1000),
@@ -192,7 +283,10 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     discountValidDays: program.discountValidDays,
     discountPointsThreshold: program.discountPointsThreshold,
     rewards: rewards.filter(r => r.active).map(r => ({
-      id: r.id, name: r.name, description: r.description, points_required: r.points_required,
+      id: r.id,
+      name: r.name,
+      description: r.description,
+      points_required: r.points_required,
     })) as LoyaltyExperienceReward[],
     qrValue: 'https://tapmarrakech.vercel.app/',
     templateId: design.templateId,
@@ -225,7 +319,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
         discountValidDays: program.discountValidDays,
       };
 
-      const { error: liveSaveError } = await supabase.rpc('save_loyalty_card_builder_config', {
+      const { error } = await supabase.rpc('save_loyalty_card_builder_config', {
         p_establishment_id: establishmentId,
         p_design_config: designConfig,
         p_template_id: design.templateId,
@@ -234,11 +328,11 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
         p_background_color: design.backgroundColor,
         p_text_color: design.textColor,
         p_button_color: design.buttonColor,
-        p_border_radius: 34,
+        p_border_radius: design.borderRadius,
         p_published: true,
       });
 
-      if (!liveSaveError) {
+      if (!error) {
         setDesign(current => current.published ? current : { ...current, published: true });
       }
     }, 180);
@@ -249,7 +343,19 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
         liveDesignTimerRef.current = null;
       }
     };
-  }, [establishmentId, design, establishment.logoUrl, program.programType, program.stampRewardName, program.stampRewardDescription, program.pointsPerCurrency, program.discountPointsThreshold, program.discountPercent, program.discountValidDays, rewards]);
+  }, [
+    establishmentId,
+    design,
+    establishment.logoUrl,
+    program.programType,
+    program.stampRewardName,
+    program.stampRewardDescription,
+    program.pointsPerCurrency,
+    program.discountPointsThreshold,
+    program.discountPercent,
+    program.discountValidDays,
+    rewards,
+  ]);
 
   useEffect(() => {
     if (!establishmentId || !previewChannelRef.current || !previewChannelReady) return;
@@ -266,7 +372,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
           background_color: design.backgroundColor,
           text_color: design.textColor,
           button_color: design.buttonColor,
-          border_radius: 34,
+          border_radius: design.borderRadius,
         },
         designConfig: {
           background_image_url: design.wallpaperUrl,
@@ -287,16 +393,22 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   }, [establishmentId, design, establishment.logoUrl, program, rewards, previewChannelReady]);
 
   const selectTemplate = (id: string) => {
-    const t = WALLET_TEMPLATES[id];
-    if (!t) return;
-    setDesign(d => ({
-      ...d,
+    const template = WALLET_TEMPLATES[id];
+    if (!template) return;
+
+    setDesign(current => ({
+      ...current,
       templateId: id,
-      primaryColor: t.primary,
-      secondaryColor: t.accent,
-      backgroundColor: t.background,
-      textColor: t.text,
+      primaryColor: template.primary,
+      secondaryColor: template.accent,
+      backgroundColor: template.background,
+      textColor: template.text,
+      buttonColor: template.primary,
     }));
+  };
+
+  const updateColor = (key: keyof Pick<DesignState, 'primaryColor' | 'secondaryColor' | 'backgroundColor' | 'textColor' | 'buttonColor'>, value: string) => {
+    setDesign(current => ({ ...current, templateId: 'custom', [key]: value }));
   };
 
   const uploadWallpaper = async (file: File) => {
@@ -305,17 +417,22 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       setMessage('Image trop lourde (8 Mo maximum).');
       return;
     }
+
     setSaving(true);
     try {
       const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-      const path = `loyalty-cards/${establishmentId}/wallpaper-${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from('promotion-images').upload(path, file, { upsert: true, contentType: file.type });
+      const path = \`loyalty-cards/\${establishmentId}/wallpaper-\${Date.now()}.\${ext}\`;
+      const { error } = await supabase.storage
+        .from('promotion-images')
+        .upload(path, file, { upsert: true, contentType: file.type });
+
       if (error) throw error;
+
       const { data } = supabase.storage.from('promotion-images').getPublicUrl(path);
-      setDesign(d => ({ ...d, wallpaperUrl: data.publicUrl, published: false }));
-      setMessage('Wallpaper enregistré dans le brouillon.');
-    } catch (e) {
-      setMessage(e instanceof Error ? e.message : 'Upload impossible.');
+      setDesign(current => ({ ...current, wallpaperUrl: data.publicUrl, published: false }));
+      setMessage('Wallpaper prêt dans le miroir.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Upload impossible.');
     } finally {
       setSaving(false);
     }
@@ -324,6 +441,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   const saveAll = async (publish: boolean) => {
     setSaving(true);
     setMessage('');
+
     try {
       await manager.saveProgramSettings({
         programType: program.programType,
@@ -336,162 +454,758 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
         discountValidDays: program.discountValidDays,
         enabled: program.enabled,
       });
+
       await manager.saveReferralDraft(referral);
       if (publish) await manager.publishReferral();
-      const designConfig = {
-        background_image_url: design.wallpaperUrl,
-        wallpaperUrl: design.wallpaperUrl,
-        logo_url: design.logoUrl || establishment.logoUrl,
-        loyaltyType: program.programType,
-        card_mode: program.programType,
-        stamp_style: design.stampStyle,
-        rewardName: program.stampRewardName || rewards[0]?.name || 'Cadeau fidélité',
-        rewardDescription: program.stampRewardDescription,
-        pointsPerCurrency: program.pointsPerCurrency,
-        discountPointsThreshold: program.discountPointsThreshold,
-        discountPercent: program.discountPercent,
-        discountValidDays: program.discountValidDays,
-      };
-      await supabase.rpc('save_loyalty_card_builder_config', {
-        p_establishment_id: establishmentId,
-        p_design_config: designConfig,
-        p_template_id: design.templateId,
-        p_primary_color: design.primaryColor,
-        p_secondary_color: design.secondaryColor,
-        p_background_color: design.backgroundColor,
-        p_text_color: design.textColor,
-        p_button_color: design.buttonColor,
-        p_border_radius: 34,
-        p_published: publish,
-      });
-      setDesign(d => ({ ...d, published: publish }));
+
+      await saveDesign(publish);
+      setDesign(current => ({ ...current, published: publish }));
       setMessage(publish ? 'Configuration publiée.' : 'Brouillon enregistré.');
-    } catch (e) {
-      setMessage(e instanceof Error ? e.message : 'Impossible d’enregistrer.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Impossible d’enregistrer.');
     } finally {
       setSaving(false);
     }
   };
 
-  const saveReward = async (name: string, points: number) => {
-    if (!name.trim() || points <= 0) return;
-    const { error } = await supabase.from('loyalty_rewards').insert({
-      establishment_id: establishmentId,
-      name: name.trim(),
-      description: null,
-      points_required: Math.floor(points),
-      active: true,
+  const saveDesign = async (publish: boolean) => {
+    const designConfig = {
+      background_image_url: design.wallpaperUrl,
+      wallpaperUrl: design.wallpaperUrl,
+      logo_url: design.logoUrl || establishment.logoUrl,
+      loyaltyType: program.programType,
+      card_mode: program.programType,
+      stamp_style: design.stampStyle,
+      rewardName: program.stampRewardName || rewards[0]?.name || 'Cadeau fidélité',
+      rewardDescription: program.stampRewardDescription,
+      pointsPerCurrency: program.pointsPerCurrency,
+      discountPointsThreshold: program.discountPointsThreshold,
+      discountPercent: program.discountPercent,
+      discountValidDays: program.discountValidDays,
+    };
+
+    const { error } = await supabase.rpc('save_loyalty_card_builder_config', {
+      p_establishment_id: establishmentId,
+      p_design_config: designConfig,
+      p_template_id: design.templateId,
+      p_primary_color: design.primaryColor,
+      p_secondary_color: design.secondaryColor,
+      p_background_color: design.backgroundColor,
+      p_text_color: design.textColor,
+      p_button_color: design.buttonColor,
+      p_border_radius: design.borderRadius,
+      p_published: publish,
     });
-    if (!error) await load();
-    else setMessage(error.message);
+
+    if (error) throw error;
+  };
+
+  const saveReward = async () => {
+    if (!rewardDraft.name.trim() || rewardDraft.pointsRequired <= 0) {
+      setMessage('Renseignez un nom et un seuil de points valide.');
+      return;
+    }
+
+    if (rewardDraft.rewardType === 'DISCOUNT' && (rewardDraft.discountPercent <= 0 || rewardDraft.discountPercent > 20)) {
+      setMessage('La réduction doit être comprise entre 1 et 20%.');
+      return;
+    }
+
+    setRewardSaving(true);
+    setMessage('');
+
+    try {
+      if (rewardDraft.id) {
+        const { error } = await supabase
+          .from('loyalty_rewards')
+          .update({
+            name: rewardDraft.name.trim(),
+            description: rewardDraft.description.trim() || null,
+            points_required: Math.floor(rewardDraft.pointsRequired),
+            reward_type: rewardDraft.rewardType,
+            discount_percent: rewardDraft.rewardType === 'DISCOUNT' ? rewardDraft.discountPercent : null,
+            discount_max_amount: rewardDraft.rewardType === 'DISCOUNT' ? rewardDraft.discountMaxAmount : null,
+          })
+          .eq('id', rewardDraft.id)
+          .eq('establishment_id', establishmentId);
+
+        if (error) throw error;
+        setMessage('Récompense mise à jour.');
+      } else {
+        const { error } = await supabase.rpc('create_loyalty_reward', {
+          p_establishment_id: establishmentId,
+          p_name: rewardDraft.name.trim(),
+          p_description: rewardDraft.description.trim() || null,
+          p_points_required: Math.floor(rewardDraft.pointsRequired),
+          p_reward_type: rewardDraft.rewardType,
+          p_discount_percent: rewardDraft.rewardType === 'DISCOUNT' ? rewardDraft.discountPercent : null,
+          p_discount_max_amount: rewardDraft.rewardType === 'DISCOUNT' ? rewardDraft.discountMaxAmount : null,
+        });
+
+        if (error) throw error;
+        setMessage('Récompense ajoutée.');
+      }
+
+      setRewardDraft(emptyReward);
+      const { data, error } = await supabase
+        .from('loyalty_rewards')
+        .select('id,name,description,points_required,active,reward_type,discount_percent,discount_max_amount')
+        .eq('establishment_id', establishmentId)
+        .order('points_required', { ascending: true });
+
+      if (error) throw error;
+      setRewards(((data ?? []) as unknown as Record<string, unknown>[]).map(normalizeReward));
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Impossible d’enregistrer la récompense.');
+    } finally {
+      setRewardSaving(false);
+    }
+  };
+
+  const editReward = (reward: Reward) => {
+    setRewardDraft({
+      id: reward.id,
+      name: reward.name,
+      description: reward.description || '',
+      pointsRequired: reward.points_required,
+      rewardType: reward.reward_type,
+      discountPercent: reward.discount_percent ?? 10,
+      discountMaxAmount: reward.discount_max_amount,
+    });
+    setTab('rewards');
   };
 
   const deleteReward = async (id: string) => {
-    const { error } = await supabase.from('loyalty_rewards').delete().eq('id', id).eq('establishment_id', establishmentId);
-    if (!error) setRewards(r => r.filter(item => item.id !== id));
-    else setMessage(error.message);
+    const { error } = await supabase
+      .from('loyalty_rewards')
+      .delete()
+      .eq('id', id)
+      .eq('establishment_id', establishmentId);
+
+    if (error) {
+      setMessage(error.message);
+      return;
+    }
+
+    setRewards(current => current.filter(reward => reward.id !== id));
+    if (rewardDraft.id === id) setRewardDraft(emptyReward);
+    setMessage('Récompense supprimée.');
   };
 
-  if (loading) return <div className="grid min-h-[560px] place-items-center rounded-[28px] bg-white"><Loader2 className="animate-spin text-gold" /></div>;
+  const toggleReward = async (reward: Reward) => {
+    const { error } = await supabase
+      .from('loyalty_rewards')
+      .update({ active: !reward.active })
+      .eq('id', reward.id)
+      .eq('establishment_id', establishmentId);
+
+    if (error) {
+      setMessage(error.message);
+      return;
+    }
+
+    setRewards(current =>
+      current.map(item => item.id === reward.id ? { ...item, active: !item.active } : item),
+    );
+  };
+
+  const selectedTemplate = WALLET_TEMPLATES[design.templateId];
+
+  if (loading) {
+    return (
+      <div className="grid min-h-[560px] place-items-center rounded-[30px] bg-white">
+        <Loader2 className="animate-spin text-gold" />
+      </div>
+    );
+  }
 
   return (
     <section className="rounded-[30px] border border-ink/5 bg-white p-4 shadow-soft md:p-6">
       <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[.2em] text-gold">Loyalty Studio</p>
+          <p className="text-[10px] font-bold uppercase tracking-[.22em] text-gold">Loyalty Studio</p>
           <h2 className="mt-1 font-display text-3xl text-forest">Carte fidélité</h2>
-          <p className="mt-1 text-sm text-ink/45">Structure, réglages précis et design Wallet dans un seul studio.</p>
+          <p className="mt-1 max-w-xl text-sm text-ink/45">
+            Un espace unique pour piloter le programme, l’acquisition et l’identité de la carte.
+          </p>
         </div>
-        <div className="flex gap-2">
-          <button type="button" onClick={() => void saveAll(false)} disabled={saving} className="rounded-xl border border-forest/15 bg-white px-4 py-2.5 text-xs font-semibold text-forest">Enregistrer</button>
-          <button type="button" onClick={() => void saveAll(true)} disabled={saving} className="inline-flex items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white"><Save size={14}/>{saving ? '...' : 'Publier'}</button>
+
+        <div className="flex items-center gap-2">
+          <span className={\`hidden rounded-full px-3 py-1.5 text-[10px] font-semibold sm:inline-flex \${design.published ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}\`}>
+            {design.published ? 'Publié' : 'Brouillon'}
+          </span>
+          <button
+            type="button"
+            onClick={() => void saveAll(false)}
+            disabled={saving}
+            className="rounded-xl border border-forest/15 bg-white px-4 py-2.5 text-xs font-semibold text-forest transition hover:bg-[#f7f7f3] disabled:opacity-50"
+          >
+            Enregistrer
+          </button>
+          <button
+            type="button"
+            onClick={() => void saveAll(true)}
+            disabled={saving}
+            className="inline-flex items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:-translate-y-0.5 disabled:opacity-50"
+          >
+            <Save size={14} />
+            {saving ? '...' : 'Publier'}
+          </button>
         </div>
       </div>
 
-      {message && <div className="mb-4 rounded-xl bg-[#f7f7f3] px-4 py-3 text-xs text-forest">{message}</div>}
+      {message && (
+        <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl bg-[#f7f7f3] px-4 py-3 text-xs text-forest">
+          <span>{message}</span>
+          <button type="button" onClick={() => setMessage('')} className="text-ink/30 hover:text-ink/60">
+            <X size={14} />
+          </button>
+        </div>
+      )}
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <div>
-          <div className="mb-5 flex rounded-2xl bg-[#f7f7f3] p-1">
-            <button type="button" onClick={() => setTab('structure')} className={`flex-1 rounded-xl px-4 py-2.5 text-xs font-semibold ${tab === 'structure' ? 'bg-white text-forest shadow-sm' : 'text-ink/45'}`}><Settings2 size={14} className="mr-2 inline"/>Structure</button>
-            <button type="button" onClick={() => setTab('design')} className={`flex-1 rounded-xl px-4 py-2.5 text-xs font-semibold ${tab === 'design' ? 'bg-white text-forest shadow-sm' : 'text-ink/45'}`}><Sparkles size={14} className="mr-2 inline"/>Design</button>
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
+        <div className="min-w-0">
+          <div className="mb-5 overflow-x-auto rounded-2xl bg-[#f3f5f2] p-1.5">
+            <div className="grid min-w-[640px] grid-cols-4 gap-1">
+              {TABS.map(item => {
+                const Icon = item.icon;
+                const active = tab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setTab(item.id)}
+                    className={\`group rounded-xl px-3 py-3 text-left transition \${active ? 'bg-white shadow-sm' : 'text-ink/45 hover:bg-white/60'}\`}
+                  >
+                    <span className="flex items-center gap-2.5">
+                      <span className={\`grid h-8 w-8 shrink-0 place-items-center rounded-lg \${active ? 'bg-forest text-white' : 'bg-white text-ink/40'}\`}>
+                        <Icon size={15} />
+                      </span>
+                      <span className="min-w-0">
+                        <span className={\`block truncate text-xs font-bold \${active ? 'text-forest' : 'text-ink/55'}\`}>{item.label}</span>
+                        <span className="block truncate text-[9px] uppercase tracking-[.12em] text-ink/30">{item.caption}</span>
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          {tab === 'structure' ? (
+          {tab === 'settings' && (
             <div className="space-y-5">
-              <div className="rounded-2xl border border-ink/8 bg-white p-5">
-                <p className="text-[10px] font-bold uppercase tracking-[.18em] text-gold">Type de carte</p>
-                <div className="mt-3 grid gap-3 md:grid-cols-3">
+              <StudioCard eyebrow="Activation" title="Piloter le programme">
+                <div className="flex items-center justify-between gap-4 rounded-2xl bg-[#f7f7f3] p-4">
+                  <div>
+                    <p className="text-sm font-semibold text-forest">Programme fidélité</p>
+                    <p className="mt-1 text-[10px] leading-4 text-ink/40">
+                      Les clients peuvent utiliser leur carte lorsque le programme est actif.
+                    </p>
+                  </div>
+                  <Toggle checked={program.enabled} onChange={enabled => setProgram(current => ({ ...current, enabled }))} />
+                </div>
+              </StudioCard>
+
+              <StudioCard eyebrow="Mécanique" title="Type de carte">
+                <div className="grid gap-3 md:grid-cols-3">
                   {TYPES.map(item => {
                     const Icon = item.icon;
-                    return <button key={item.id} type="button" onClick={() => setProgram(p => ({ ...p, programType: item.id }))} className={`rounded-2xl border p-4 text-left ${program.programType === item.id ? 'border-forest bg-forest/[.04] ring-2 ring-forest/10' : 'border-ink/10'}`}><Icon size={18} className="text-gold"/><p className="mt-3 text-sm font-semibold text-forest">{item.label}</p><p className="mt-1 text-[10px] leading-4 text-ink/45">{item.description}</p></button>;
+                    const active = program.programType === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setProgram(current => ({ ...current, programType: item.id }))}
+                        className={\`rounded-2xl border p-4 text-left transition \${active ? 'border-forest bg-forest/[.04] ring-2 ring-forest/10' : 'border-ink/10 hover:border-forest/20'}\`}
+                      >
+                        <Icon size={18} className={active ? 'text-gold' : 'text-ink/35'} />
+                        <p className="mt-3 text-sm font-semibold text-forest">{item.label}</p>
+                        <p className="mt-1 text-[10px] leading-4 text-ink/45">{item.description}</p>
+                      </button>
+                    );
                   })}
                 </div>
-              </div>
+              </StudioCard>
 
-              <div className="rounded-2xl border border-ink/8 bg-white p-5">
-                <p className="text-[10px] font-bold uppercase tracking-[.18em] text-gold">Moteur de points</p>
-                <div className="mt-4 grid gap-4 md:grid-cols-2">
-                  <label className="text-xs font-semibold text-ink/55">MAD dépensés<input type="number" min="1" step=".01" value={1} readOnly className="mt-2 w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-3 py-3 text-sm"/></label>
-                  <label className="text-xs font-semibold text-ink/55">Points gagnés<input type="number" min=".01" step=".01" value={program.pointsPerCurrency} onChange={e => setProgram(p => ({ ...p, pointsPerCurrency: Number(e.target.value) || 0.01 }))} className="mt-2 w-full rounded-xl border border-ink/10 px-3 py-3 text-sm"/></label>
+              <StudioCard eyebrow="Conversion" title="Taux de fidélité">
+                <div className="grid gap-4 md:grid-cols-[1fr_auto_1fr] md:items-end">
+                  <Field label="MAD dépensés">
+                    <input value="1" readOnly className="studio-input bg-[#f7f7f3] text-ink/50" />
+                  </Field>
+                  <span className="hidden pb-3 text-xs font-bold text-ink/25 md:block">=</span>
+                  <Field label="Points gagnés">
+                    <input
+                      type="number"
+                      min=".01"
+                      step=".01"
+                      value={program.pointsPerCurrency}
+                      onChange={e => setProgram(current => ({
+                        ...current,
+                        pointsPerCurrency: Math.max(0.01, Number(e.target.value) || 0.01),
+                      }))}
+                      className="studio-input"
+                    />
+                  </Field>
                 </div>
-                <p className="mt-3 text-[10px] text-ink/40">Règle active : 1 MAD = {program.pointsPerCurrency} point(s). L’administrateur contrôle ce taux.</p>
-              </div>
+                <p className="mt-3 rounded-xl bg-[#f7f7f3] px-3 py-2.5 text-[10px] text-ink/45">
+                  Chaque 1 MAD dépensé génère {program.pointsPerCurrency} point(s).
+                </p>
+              </StudioCard>
 
-              {program.programType === 'STAMP' && <div className="rounded-2xl border border-ink/8 bg-white p-5"><p className="text-[10px] font-bold uppercase tracking-[.18em] text-gold">Tampons</p><div className="mt-4 grid gap-4 md:grid-cols-3"><label className="text-xs font-semibold text-ink/55">Objectif<input type="number" min="1" max="10" value={program.stampGoal} onChange={e=>setProgram(p=>({...p,stampGoal:Math.min(10,Math.max(1,Number(e.target.value)||1))}))} className="mt-2 w-full rounded-xl border border-ink/10 px-3 py-3 text-sm"/></label><label className="md:col-span-2 text-xs font-semibold text-ink/55">Récompense<input value={program.stampRewardName} onChange={e=>setProgram(p=>({...p,stampRewardName:e.target.value}))} className="mt-2 w-full rounded-xl border border-ink/10 px-3 py-3 text-sm"/></label></div></div>}
+              {program.programType === 'STAMP' && (
+                <StudioCard eyebrow="Tampons" title="Objectif et récompense">
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <Field label="Objectif de tampons">
+                      <input
+                        type="number"
+                        min="1"
+                        max="10"
+                        value={program.stampGoal}
+                        onChange={e => setProgram(current => ({
+                          ...current,
+                          stampGoal: Math.min(10, Math.max(1, Number(e.target.value) || 1)),
+                        }))}
+                        className="studio-input"
+                      />
+                    </Field>
+                    <div className="md:col-span-2">
+                      <Field label="Nom de la récompense">
+                        <input
+                          value={program.stampRewardName}
+                          onChange={e => setProgram(current => ({ ...current, stampRewardName: e.target.value }))}
+                          className="studio-input"
+                        />
+                      </Field>
+                    </div>
+                  </div>
+                </StudioCard>
+              )}
 
-              {program.programType === 'POINTS_DISCOUNT' && <div className="rounded-2xl border border-ink/8 bg-white p-5"><p className="text-[10px] font-bold uppercase tracking-[.18em] text-gold">Seuil de réduction</p><div className="mt-4 grid gap-4 md:grid-cols-3"><label className="text-xs font-semibold text-ink/55">Seuil points<input type="number" min="1" value={program.discountPointsThreshold} onChange={e=>setProgram(p=>({...p,discountPointsThreshold:Math.max(1,Number(e.target.value)||1)}))} className="mt-2 w-full rounded-xl border border-ink/10 px-3 py-3 text-sm"/></label><label className="text-xs font-semibold text-ink/55">% réduction<input type="number" min="1" max="100" value={program.discountPercent} onChange={e=>setProgram(p=>({...p,discountPercent:Math.min(100,Math.max(1,Number(e.target.value)||1))}))} className="mt-2 w-full rounded-xl border border-ink/10 px-3 py-3 text-sm"/></label><label className="text-xs font-semibold text-ink/55">Validité (jours)<input type="number" min="1" max="365" value={program.discountValidDays} onChange={e=>setProgram(p=>({...p,discountValidDays:Math.min(365,Math.max(1,Number(e.target.value)||1))}))} className="mt-2 w-full rounded-xl border border-ink/10 px-3 py-3 text-sm"/></label></div></div>}
+              {program.programType === 'POINTS_DISCOUNT' && (
+                <StudioCard eyebrow="Réduction" title="Déblocage de l'avantage">
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <Field label="Seuil de points">
+                      <input
+                        type="number"
+                        min="1"
+                        value={program.discountPointsThreshold}
+                        onChange={e => setProgram(current => ({
+                          ...current,
+                          discountPointsThreshold: Math.max(1, Number(e.target.value) || 1),
+                        }))}
+                        className="studio-input"
+                      />
+                    </Field>
+                    <Field label="Réduction">
+                      <div className="relative">
+                        <input
+                          type="number"
+                          min="1"
+                          max="100"
+                          value={program.discountPercent}
+                          onChange={e => setProgram(current => ({
+                            ...current,
+                            discountPercent: Math.min(100, Math.max(1, Number(e.target.value) || 1)),
+                          }))}
+                          className="studio-input pr-10"
+                        />
+                        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-ink/35">%</span>
+                      </div>
+                    </Field>
+                    <Field label="Validité">
+                      <div className="relative">
+                        <input
+                          type="number"
+                          min="1"
+                          max="365"
+                          value={program.discountValidDays}
+                          onChange={e => setProgram(current => ({
+                            ...current,
+                            discountValidDays: Math.min(365, Math.max(1, Number(e.target.value) || 1)),
+                          }))}
+                          className="studio-input pr-14"
+                        />
+                        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-ink/35">jours</span>
+                      </div>
+                    </Field>
+                  </div>
+                </StudioCard>
+              )}
+            </div>
+          )}
 
-              <div className="rounded-2xl border border-ink/8 bg-white p-5">
-                <div className="flex items-center justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[.18em] text-gold">Récompenses</p><p className="mt-1 text-[10px] text-ink/40">Nom et seuil de points affichés sur la carte.</p></div></div>
-                <div className="mt-4 space-y-2">{rewards.map(r=><div key={r.id} className="flex items-center gap-3 rounded-xl border border-ink/8 bg-[#fafaf8] p-3"><Gift size={15} className="text-gold"/><div className="min-w-0 flex-1"><p className="truncate text-xs font-semibold text-forest">{r.name}</p><p className="text-[10px] text-ink/40">{r.points_required} points</p></div><button type="button" onClick={()=>void deleteReward(r.id)} className="p-2 text-ink/30 hover:text-red-500"><Trash2 size={14}/></button></div>)}</div>
-                <RewardQuickAdd onAdd={saveReward}/>
-              </div>
-
-              <div className="rounded-2xl border border-ink/8 bg-white p-5">
-                <p className="text-[10px] font-bold uppercase tracking-[.18em] text-gold">Parrainage</p>
-                <label className="mt-4 flex items-center gap-3 text-xs font-semibold text-forest"><input type="checkbox" checked={referral.enabled} onChange={e=>setReferral(r=>({...r,enabled:e.target.checked}))}/> Activer le parrainage</label>
-                <div className="mt-4 grid gap-4 md:grid-cols-2">
-                  <ReferralField label="Bonus du parrain" type={referral.referrer_bonus_type} value={referral.referrer_bonus_value} onChange={(type,value)=>setReferral(r=>({...r,referrer_bonus_type:type,referrer_bonus_value:value}))}/>
-                  <ReferralField label="Bonus du filleul" type={referral.referee_bonus_type} value={referral.referee_bonus_value} onChange={(type,value)=>setReferral(r=>({...r,referee_bonus_type:type,referee_bonus_value:value}))}/>
+          {tab === 'rewards' && (
+            <div className="space-y-5">
+              <StudioCard eyebrow="Catalogue" title="Récompenses">
+                <div className="mb-5 grid gap-3 md:grid-cols-3">
+                  <Metric label="Récompenses" value={rewards.length} />
+                  <Metric label="Actives" value={rewards.filter(reward => reward.active).length} />
+                  <Metric label="Plus petit seuil" value={rewards.length ? \`\${Math.min(...rewards.map(r => r.points_required))} pts\` : '—'} />
                 </div>
-                <p className="mt-3 text-[10px] text-ink/40">{referral.enabled ? `Parrain : ${bonusLabel(referral.referrer_bonus_type, referral.referrer_bonus_value)} · Filleul : ${bonusLabel(referral.referee_bonus_type, referral.referee_bonus_value)}` : 'Parrainage désactivé.'}</p>
+
+                <div className="space-y-2">
+                  {rewards.length === 0 && (
+                    <div className="rounded-2xl border border-dashed border-ink/10 px-5 py-10 text-center">
+                      <Gift className="mx-auto text-ink/20" size={22} />
+                      <p className="mt-3 text-sm font-semibold text-forest">Votre catalogue est vide</p>
+                      <p className="mt-1 text-[10px] text-ink/40">Ajoutez votre première récompense ci-dessous.</p>
+                    </div>
+                  )}
+
+                  {rewards.map(reward => (
+                    <div key={reward.id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-ink/8 bg-[#fafaf8] p-3">
+                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-gold shadow-sm">
+                        {reward.reward_type === 'DISCOUNT' ? <Percent size={16} /> : <Gift size={16} />}
+                      </span>
+                      <div className="min-w-[150px] flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-xs font-semibold text-forest">{reward.name}</p>
+                          <span className={\`rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-[.12em] \${reward.active ? 'bg-emerald-50 text-emerald-700' : 'bg-ink/5 text-ink/35'}\`}>
+                            {reward.active ? 'Active' : 'Inactive'}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-[10px] text-ink/40">
+                          {reward.points_required} points · {reward.reward_type === 'DISCOUNT' ? \`\${reward.discount_percent ?? 0}% de réduction\` : 'Cadeau'}
+                        </p>
+                        {reward.description && <p className="mt-1 truncate text-[10px] text-ink/30">{reward.description}</p>}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button type="button" onClick={() => void toggleReward(reward)} className="rounded-lg px-2.5 py-2 text-[10px] font-semibold text-ink/45 hover:bg-white hover:text-forest">
+                          {reward.active ? 'Désactiver' : 'Activer'}
+                        </button>
+                        <button type="button" onClick={() => editReward(reward)} className="rounded-lg px-2.5 py-2 text-[10px] font-semibold text-forest hover:bg-white">
+                          Modifier
+                        </button>
+                        <button type="button" onClick={() => void deleteReward(reward.id)} className="rounded-lg p-2 text-ink/25 hover:bg-red-50 hover:text-red-500">
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </StudioCard>
+
+              <StudioCard eyebrow={rewardDraft.id ? 'Édition' : 'Nouveau'} title={rewardDraft.id ? 'Modifier la récompense' : 'Ajouter une récompense'}>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Field label="Nom">
+                    <input value={rewardDraft.name} onChange={e => setRewardDraft(current => ({ ...current, name: e.target.value }))} placeholder="Ex. Dessert offert" className="studio-input" />
+                  </Field>
+                  <Field label="Points requis">
+                    <input type="number" min="1" value={rewardDraft.pointsRequired} onChange={e => setRewardDraft(current => ({ ...current, pointsRequired: Math.max(1, Number(e.target.value) || 1) }))} className="studio-input" />
+                  </Field>
+                  <Field label="Type">
+                    <select value={rewardDraft.rewardType} onChange={e => setRewardDraft(current => ({ ...current, rewardType: e.target.value as RewardType }))} className="studio-input">
+                      <option value="GIFT">Cadeau</option>
+                      <option value="DISCOUNT">Réduction</option>
+                    </select>
+                  </Field>
+                  {rewardDraft.rewardType === 'DISCOUNT' && (
+                    <>
+                      <Field label="Pourcentage de réduction">
+                        <input type="number" min="1" max="20" value={rewardDraft.discountPercent} onChange={e => setRewardDraft(current => ({ ...current, discountPercent: Math.min(20, Math.max(1, Number(e.target.value) || 1)) }))} className="studio-input" />
+                      </Field>
+                      <Field label="Plafond de réduction (MAD)">
+                        <input type="number" min="0" value={rewardDraft.discountMaxAmount ?? ''} onChange={e => setRewardDraft(current => ({ ...current, discountMaxAmount: e.target.value === '' ? null : Math.max(0, Number(e.target.value)) }))} className="studio-input" placeholder="Optionnel" />
+                      </Field>
+                    </>
+                  )}
+                  <div className="md:col-span-2">
+                    <Field label="Description">
+                      <textarea value={rewardDraft.description} onChange={e => setRewardDraft(current => ({ ...current, description: e.target.value }))} rows={3} className="studio-input resize-none" placeholder="Ce que le client reçoit..." />
+                    </Field>
+                  </div>
+                </div>
+                <div className="mt-4 flex justify-end gap-2">
+                  {rewardDraft.id && (
+                    <button type="button" onClick={() => setRewardDraft(emptyReward)} className="rounded-xl border border-ink/10 px-4 py-2.5 text-xs font-semibold text-ink/50">
+                      Annuler
+                    </button>
+                  )}
+                  <button type="button" onClick={() => void saveReward()} disabled={rewardSaving} className="inline-flex items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-50">
+                    <Gift size={14} />
+                    {rewardSaving ? 'Enregistrement...' : rewardDraft.id ? 'Mettre à jour' : 'Ajouter'}
+                  </button>
+                </div>
+              </StudioCard>
+            </div>
+          )}
+
+          {tab === 'referral' && (
+            <div className="space-y-5">
+              <StudioCard eyebrow="Acquisition" title="Transformer les clients en ambassadeurs">
+                <div className="grid gap-4 md:grid-cols-[1fr_auto]">
+                  <div className="rounded-2xl bg-[#f7f7f3] p-4">
+                    <div className="flex items-start gap-3">
+                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-gold shadow-sm">
+                        <UserPlus size={17} />
+                      </span>
+                      <div>
+                        <p className="text-sm font-semibold text-forest">Programme de parrainage</p>
+                        <p className="mt-1 text-[10px] leading-4 text-ink/40">
+                          Récompensez le parrain et le nouveau client après leur mise en relation.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <Toggle checked={referral.enabled} onChange={enabled => setReferral(current => ({ ...current, enabled }))} />
+                </div>
+
+                <div className="mt-5 grid gap-4 md:grid-cols-2">
+                  <ReferralField
+                    label="Bonus du parrain"
+                    type={referral.referrer_bonus_type}
+                    value={referral.referrer_bonus_value}
+                    onChange={(type, value) => setReferral(current => ({ ...current, referrer_bonus_type: type, referrer_bonus_value: value }))}
+                  />
+                  <ReferralField
+                    label="Bonus du filleul"
+                    type={referral.referee_bonus_type}
+                    value={referral.referee_bonus_value}
+                    onChange={(type, value) => setReferral(current => ({ ...current, referee_bonus_type: type, referee_bonus_value: value }))}
+                  />
+                </div>
+
+                <div className="mt-4">
+                  <Field label="Limite maximale de parrainages par client">
+                    <div className="relative max-w-sm">
+                      <input
+                        type="number"
+                        min="0"
+                        value={referral.max_referrals ?? ''}
+                        onChange={e => setReferral(current => ({
+                          ...current,
+                          max_referrals: e.target.value === '' ? null : Math.max(0, Math.floor(Number(e.target.value) || 0)),
+                        }))}
+                        placeholder="Illimité"
+                        className="studio-input pr-20"
+                      />
+                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-ink/30">par client</span>
+                    </div>
+                  </Field>
+                </div>
+
+                <div className="mt-5 grid gap-3 md:grid-cols-3">
+                  <Metric label="Clients acquis" value={referralStats} icon={<UserPlus size={15} />} />
+                  <Metric label="Bonus parrain" value={bonusLabel(referral.referrer_bonus_type, referral.referrer_bonus_value)} />
+                  <Metric label="Bonus filleul" value={bonusLabel(referral.referee_bonus_type, referral.referee_bonus_value)} />
+                </div>
+              </StudioCard>
+
+              <div className="rounded-2xl border border-ink/8 bg-[#f7f7f3] p-4 text-[10px] leading-5 text-ink/45">
+                Les changements sont conservés avec le bouton <strong className="text-forest">Enregistrer</strong>. Le miroir de droite reflète immédiatement les paramètres qui modifient la carte.
               </div>
             </div>
-          ) : (
+          )}
+
+          {tab === 'design' && (
             <div className="space-y-5">
-              <div className="rounded-2xl border border-ink/8 bg-white p-5">
-                <p className="text-[10px] font-bold uppercase tracking-[.18em] text-gold">8 Wallet Premium</p>
-                <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  {Object.values(WALLET_TEMPLATES).map(t=><button key={t.id} type="button" onClick={()=>selectTemplate(t.id)} className={`overflow-hidden rounded-2xl border text-left ${design.templateId===t.id?'border-forest ring-2 ring-forest/10':'border-ink/10'}`}><div className="h-20" style={{background:t.background}}/><div className="bg-white px-3 py-2"><p className="text-[10px] font-semibold text-forest">{t.name}</p></div></button>)}
+              <StudioCard eyebrow="Wallet" title="Choisir une identité">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {Object.values(WALLET_TEMPLATES).map(item => {
+                    const active = design.templateId === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => selectTemplate(item.id)}
+                        className={\`overflow-hidden rounded-2xl border text-left transition \${active ? 'border-forest ring-2 ring-forest/10' : 'border-ink/10 hover:border-forest/20'}\`}
+                      >
+                        <div className="relative h-20 overflow-hidden" style={{ background: item.background }}>
+                          <div className="absolute inset-x-3 bottom-3 h-1 rounded-full" style={{ background: item.accent }} />
+                        </div>
+                        <div className="bg-white px-3 py-2.5">
+                          <p className="text-[10px] font-semibold text-forest">{item.name}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
-              </div>
-              <div className="rounded-2xl border border-ink/8 bg-white p-5">
-                <div className="flex items-center gap-3"><ImagePlus size={17} className="text-gold"/><div><p className="text-sm font-semibold text-forest">Wallpaper</p><p className="text-[10px] text-ink/40">Le wallpaper du brouillon est appliqué en cover sur la carte.</p></div></div>
-                <div className="mt-4 flex gap-3"><button type="button" onClick={()=>wallpaperInput.current?.click()} className="rounded-xl border border-forest/15 px-4 py-2.5 text-xs font-semibold text-forest">Choisir une image</button>{design.wallpaperUrl && <button type="button" onClick={()=>setDesign(d=>({...d,wallpaperUrl:null,published:false}))} className="rounded-xl border border-red-100 px-4 py-2.5 text-xs text-red-600">Retirer</button>}</div>
-                <input ref={wallpaperInput} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={e=>{const f=e.target.files?.[0];if(f)void uploadWallpaper(f);e.currentTarget.value='';}}/>
-                {design.wallpaperUrl && <img src={design.wallpaperUrl} alt="" className="mt-4 h-28 w-full rounded-2xl object-cover"/>}
-              </div>
+                {selectedTemplate && (
+                  <p className="mt-3 text-[10px] text-ink/35">
+                    Template actif : <span className="font-semibold text-forest">{selectedTemplate.name}</span>
+                  </p>
+                )}
+              </StudioCard>
+
+              <StudioCard eyebrow="Wallpaper" title="Arrière-plan de la carte">
+                <div className="grid gap-4 md:grid-cols-[1fr_220px] md:items-center">
+                  <div>
+                    <p className="text-sm font-semibold text-forest">Image immersive</p>
+                    <p className="mt-1 text-[10px] leading-4 text-ink/40">
+                      Le wallpaper est recadré automatiquement en cover pour rester élégant sur mobile et desktop.
+                    </p>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <button type="button" onClick={() => wallpaperInput.current?.click()} className="inline-flex items-center gap-2 rounded-xl border border-forest/15 bg-white px-4 py-2.5 text-xs font-semibold text-forest">
+                        <ImagePlus size={14} />
+                        {design.wallpaperUrl ? 'Remplacer' : 'Choisir une image'}
+                      </button>
+                      {design.wallpaperUrl && (
+                        <button type="button" onClick={() => setDesign(current => ({ ...current, wallpaperUrl: null, published: false }))} className="rounded-xl border border-red-100 px-4 py-2.5 text-xs font-semibold text-red-600">
+                          Retirer
+                        </button>
+                      )}
+                    </div>
+                    <input ref={wallpaperInput} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={e => { const file = e.target.files?.[0]; if (file) void uploadWallpaper(file); e.currentTarget.value = ''; }} />
+                  </div>
+                  <div className="h-28 overflow-hidden rounded-2xl bg-ink/5">
+                    {design.wallpaperUrl ? <img src={design.wallpaperUrl} alt="" className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-[10px] text-ink/25">Aucun wallpaper</div>}
+                  </div>
+                </div>
+              </StudioCard>
+
+              <StudioCard eyebrow="Palette" title="Couleurs personnalisées">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <ColorField label="Primaire" value={design.primaryColor} onChange={value => updateColor('primaryColor', value)} />
+                  <ColorField label="Secondaire / accent" value={design.secondaryColor} onChange={value => updateColor('secondaryColor', value)} />
+                  <ColorField label="Fond" value={design.backgroundColor} onChange={value => updateColor('backgroundColor', value)} />
+                  <ColorField label="Texte" value={design.textColor} onChange={value => updateColor('textColor', value)} />
+                  <ColorField label="Bouton" value={design.buttonColor} onChange={value => updateColor('buttonColor', value)} />
+                </div>
+                <div className="mt-5">
+                  <Field label={\`Rayon des angles · \${design.borderRadius}px\`}>
+                    <input type="range" min="8" max="40" value={design.borderRadius} onChange={e => setDesign(current => ({ ...current, templateId: 'custom', borderRadius: Number(e.target.value) }))} className="w-full accent-forest" />
+                  </Field>
+                </div>
+                <div className="mt-5">
+                  <Field label="Style des tampons">
+                    <div className="grid grid-cols-4 gap-2">
+                      {(['circles', 'squares', 'stars', 'hearts'] as const).map(style => (
+                        <button key={style} type="button" onClick={() => setDesign(current => ({ ...current, stampStyle: style }))} className={\`rounded-xl border px-2 py-2.5 text-[10px] font-semibold capitalize \${design.stampStyle === style ? 'border-forest bg-forest text-white' : 'border-ink/10 text-ink/45'}\`}>
+                          {style === 'circles' ? 'Ronds' : style === 'squares' ? 'Carrés' : style === 'stars' ? 'Étoiles' : 'Cœurs'}
+                        </button>
+                      ))}
+                    </div>
+                  </Field>
+                </div>
+              </StudioCard>
             </div>
           )}
         </div>
 
-        <aside className="sticky top-6 h-fit rounded-[28px] bg-[#f1f3f0] p-5">
-          <div className="mb-4 flex items-center justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[.18em] text-gold">Preview permanent</p><p className="mt-1 text-xs text-ink/40">300 × 450 px</p></div><span className="rounded-full bg-white px-3 py-1 text-[9px] font-semibold text-forest">Wallet</span></div>
-          <div className="flex w-full items-center justify-center overflow-visible"><LoyaltyPreview config={previewConfig}/></div>
-          <div className="mt-4 rounded-2xl bg-white p-4"><p className="text-[10px] uppercase tracking-[.16em] text-gold">Récompense visible</p><p className="mt-1 text-sm font-semibold text-forest">{program.stampRewardName || rewards[0]?.name || 'Cadeau fidélité'}</p></div>
+        <aside className="sticky top-6 h-fit overflow-hidden rounded-[30px] bg-[#eef1ed] p-4 sm:p-5">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[.2em] text-gold">Le Miroir</p>
+              <p className="mt-1 text-xs text-ink/40">Aperçu permanent et synchronisé</p>
+            </div>
+            <span className="rounded-full bg-white px-3 py-1.5 text-[9px] font-bold uppercase tracking-[.12em] text-forest">
+              {TABS.find(item => item.id === tab)?.label}
+            </span>
+          </div>
+
+          <div className="flex min-h-[500px] w-full items-center justify-center overflow-visible rounded-[24px] bg-white/40 p-3 sm:min-h-[560px]">
+            <LoyaltyPreview config={previewConfig} />
+          </div>
+
+          <div className="mt-4 rounded-2xl bg-white p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[9px] uppercase tracking-[.16em] text-gold">Carte actuelle</p>
+                <p className="mt-1 text-sm font-semibold text-forest">{establishment.name}</p>
+              </div>
+              <span className={\`h-2.5 w-2.5 rounded-full \${previewChannelReady ? 'bg-emerald-500' : 'bg-amber-400'}\`} title={previewChannelReady ? 'Synchronisation active' : 'Connexion en cours'} />
+            </div>
+            <p className="mt-2 text-[10px] leading-4 text-ink/35">
+              {program.programType === 'STAMP'
+                ? \`\${program.stampGoal} tampons\`
+                : program.programType === 'POINTS_DISCOUNT'
+                  ? \`\${program.discountPointsThreshold} points · \${program.discountPercent}%\`
+                  : \`\${program.pointsPerCurrency} point(s) / MAD\`}
+            </p>
+          </div>
         </aside>
       </div>
     </section>
   );
 }
 
-function RewardQuickAdd({ onAdd }: { onAdd: (name: string, points: number) => Promise<void> }) {
-  const [name,setName]=useState('');
-  const [points,setPoints]=useState('100');
-  return <div className="mt-4 grid gap-2 sm:grid-cols-[1fr_130px_auto]"><input value={name} onChange={e=>setName(e.target.value)} placeholder="Nom de la récompense" className="rounded-xl border border-ink/10 px-3 py-2.5 text-xs"/><input type="number" min="1" value={points} onChange={e=>setPoints(e.target.value)} placeholder="Points" className="rounded-xl border border-ink/10 px-3 py-2.5 text-xs"/><button type="button" onClick={async()=>{await onAdd(name,Number(points));setName('');}} className="rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Ajouter</button></div>;
+function StudioCard({ eyebrow, title, children }: { eyebrow: string; title: string; children: React.ReactNode }) {
+  return (
+    <section className="rounded-[24px] border border-ink/8 bg-white p-5 shadow-[0_10px_35px_rgba(20,30,24,0.035)]">
+      <div className="mb-5">
+        <p className="text-[9px] font-bold uppercase tracking-[.2em] text-gold">{eyebrow}</p>
+        <h3 className="mt-1 text-lg font-semibold text-forest">{title}</h3>
+      </div>
+      {children}
+    </section>
+  );
 }
 
-function ReferralField({ label, type, value, onChange }: { label:string; type:LoyaltyReferralBonusType; value:number; onChange:(type:LoyaltyReferralBonusType,value:number)=>void }) {
-  return <div><p className="text-xs font-semibold text-ink/55">{label}</p><div className="mt-2 grid grid-cols-[1fr_110px] gap-2"><select value={type} onChange={e=>onChange(e.target.value as LoyaltyReferralBonusType,value)} className="rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-xs"><option value="POINTS">Points</option><option value="STAMP">Tampons</option><option value="REDUCTION">Réduction</option></select><input type="number" min="0" value={value} onChange={e=>onChange(type,Math.max(0,Number(e.target.value)||0))} className="rounded-xl border border-ink/10 px-3 py-2.5 text-xs"/></div></div>;
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block text-[10px] font-bold uppercase tracking-[.1em] text-ink/45">
+      {label}
+      {children}
+    </label>
+  );
+}
+
+function Metric({ label, value, icon }: { label: string; value: string | number; icon?: React.ReactNode }) {
+  return (
+    <div className="rounded-2xl border border-ink/8 bg-white p-3.5">
+      <div className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[.12em] text-ink/35">
+        {icon}
+        {label}
+      </div>
+      <p className="mt-2 text-lg font-semibold text-forest">{value}</p>
+    </div>
+  );
+}
+
+function Toggle({ checked, onChange }: { checked: boolean; onChange: (checked: boolean) => void }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      className={\`relative h-7 w-12 shrink-0 rounded-full p-1 transition \${checked ? 'bg-forest' : 'bg-ink/15'}\`}
+    >
+      <span className={\`block h-5 w-5 rounded-full bg-white shadow-sm transition \${checked ? 'translate-x-5' : 'translate-x-0'}\`} />
+    </button>
+  );
+}
+
+function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+  return (
+    <label className="block text-[10px] font-bold uppercase tracking-[.1em] text-ink/45">
+      {label}
+      <div className="mt-2 flex items-center gap-2 rounded-xl border border-ink/10 bg-white p-2">
+        <input type="color" value={value} onChange={e => onChange(e.target.value)} className="h-9 w-10 cursor-pointer rounded-lg border-0 bg-transparent p-0" />
+        <input value={value} onChange={e => onChange(e.target.value)} className="min-w-0 flex-1 bg-transparent px-1 text-xs font-semibold uppercase text-forest outline-none" />
+      </div>
+    </label>
+  );
+}
+
+function ReferralField({
+  label,
+  type,
+  value,
+  onChange,
+}: {
+  label: string;
+  type: LoyaltyReferralBonusType;
+  value: number;
+  onChange: (type: LoyaltyReferralBonusType, value: number) => void;
+}) {
+  return (
+    <div>
+      <p className="text-xs font-semibold text-ink/55">{label}</p>
+      <div className="mt-2 grid grid-cols-[1fr_110px] gap-2">
+        <select value={type} onChange={e => onChange(e.target.value as LoyaltyReferralBonusType, value)} className="studio-input">
+          <option value="POINTS">Points</option>
+          <option value="STAMP">Tampons</option>
+          <option value="REDUCTION">Réduction</option>
+        </select>
+        <input
+          type="number"
+          min="0"
+          value={value}
+          onChange={e => onChange(type, Math.max(0, Number(e.target.value) || 0))}
+          className="studio-input"
+        />
+      </div>
+    </div>
+  );
 }
