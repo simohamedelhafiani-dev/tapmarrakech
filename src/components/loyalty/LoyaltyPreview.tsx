@@ -246,7 +246,7 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
           color: textColor,
           fontFamily: template.fontFamily,
           boxShadow: 'inset 0 1px 0 rgba(255,255,255,.18), inset 0 -24px 50px rgba(0,0,0,.20), 0 24px 60px rgba(0,0,0,.20)',
-          padding: 'clamp(24px, 4%, 40px)',
+          padding: '32px',
         }}
       >
         <div
@@ -337,7 +337,7 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
         >
           <div
             style={{
-              fontSize: 'clamp(48px, 9vw, 96px)',
+              fontSize: '72px',
               fontWeight: 900,
               lineHeight: 1,
               letterSpacing: '-.05em',
