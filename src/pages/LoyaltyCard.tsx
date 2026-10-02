@@ -686,20 +686,23 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                     <p className="mt-3 text-sm text-[#173D32]/60">Chargement de votre code…</p>
                   </div>
                 ) : referralCode ? (
-                  <>
-                    <div className="rounded-2xl border border-[#D3A84C]/35 bg-white p-3 text-center shadow-sm">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#173D32]/45">
-                        Inviter avec votre QR Code
-                      </p>
-
-                      <div className="mx-auto mt-3 flex aspect-square w-[min(38vh,240px)] max-w-full items-center justify-center rounded-2xl bg-white p-2">
-                        {referralQrDataUrl ? (
-                          <img
-                            src={referralQrDataUrl}
-                            alt="QR Code de parrainage"
-                            className="h-full w-full rounded-xl"
-                          />
-                        ) : (
+                  <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+                    <p className="mb-2 text-center text-sm font-semibold text-[#173D32]">
+                      Bienvenue dans la famille {card?.establishment_name || "cet établissement"} 🤍
+                    </p>
+                    <div className="flex aspect-square w-[min(32vh,210px)] max-w-full items-center justify-center rounded-2xl bg-white p-2 shadow-sm">
+                      {referralQrDataUrl ? (
+                        <img
+                          src={referralQrDataUrl}
+                          alt="QR Code de parrainage"
+                          className="h-full w-full rounded-xl"
+                        />
+                      ) : (
+                        <div className="h-full w-full animate-pulse rounded-xl bg-[#eef0ed]" />
+                      )}
+                    </div>
+                  </div>
+                ) : (
                           <div className="h-full w-full animate-pulse rounded-xl bg-[#eef0ed]" />
                         )}
                       </div>
