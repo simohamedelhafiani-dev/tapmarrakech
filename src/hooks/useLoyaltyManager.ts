@@ -174,6 +174,49 @@ export function useLoyaltyManager(establishmentId?: string) {
     };
   }, [establishmentId]);
 
+
+  const saveProgramSettings = useCallback(
+    async (settings: {
+      programType: LoyaltyProgramType;
+      stampGoal?: number;
+      stampRewardName?: string | null;
+      stampRewardDescription?: string | null;
+      discountPercent?: number | null;
+      discountValidDays?: number;
+      pointsPerCurrency?: number;
+      currency?: string;
+      enabled?: boolean;
+      discountPointsThreshold?: number;
+    }) => {
+      if (!establishmentId) throw new Error('Establishment ID is required');
+
+      const programType = settings.programType;
+      const pointsPerCurrency = Math.max(0.01, Number(settings.pointsPerCurrency ?? 1));
+      const stampGoal = Math.min(10, Math.max(1, Math.floor(Number(settings.stampGoal ?? 10))));
+      const discountPointsThreshold = Math.max(1, Math.floor(Number(settings.discountPointsThreshold ?? 1000)));
+      const discountPercent =
+        settings.discountPercent == null ? null : Math.min(100, Math.max(1, Number(settings.discountPercent)));
+      const discountValidDays = Math.min(365, Math.max(1, Math.floor(Number(settings.discountValidDays ?? 7))));
+
+      const { error } = await supabase.rpc('save_loyalty_program_settings', {
+        p_establishment_id: establishmentId,
+        p_program_type: programType,
+        p_stamp_goal: stampGoal,
+        p_stamp_reward_name: settings.stampRewardName ?? null,
+        p_stamp_reward_description: settings.stampRewardDescription ?? null,
+        p_discount_percent: discountPercent,
+        p_discount_valid_days: discountValidDays,
+        p_points_per_currency: pointsPerCurrency,
+        p_currency: settings.currency?.trim() || 'MAD',
+        p_enabled: settings.enabled ?? true,
+        p_discount_points_threshold: discountPointsThreshold,
+      });
+
+      if (error) throw error;
+    },
+    [establishmentId],
+  );
+
   const getReferralConfig = useCallback(async (): Promise<LoyaltyReferralConfigState> => {
     if (!establishmentId) throw new Error('Establishment ID is required');
 
@@ -236,6 +279,7 @@ export function useLoyaltyManager(establishmentId?: string) {
     generateReferralCode,
     processReferral,
     getProgramSettings,
+    saveProgramSettings,
     getReferralConfig,
     saveReferralDraft,
     publishReferral,
