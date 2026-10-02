@@ -44,6 +44,7 @@ export type LoyaltyExperienceConfig = {
   rewardDescription?: string | null;
   discountPercent?: number | null;
   discountExpiresAt?: string | null;
+  discountValidDays?: number;
   cashbackBalance?: number;
   currentTier?: string | null;
   tiers?: { name: string; min: number; benefit: string }[];
