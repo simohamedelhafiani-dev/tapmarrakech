@@ -141,12 +141,15 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       });
     }
     setLoading(false);
+    designHydratedRef.current = true;
   };
 
   useEffect(() => { void load(); }, [establishmentId]);
 
   const previewChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const [previewChannelReady, setPreviewChannelReady] = useState(false);
+  const liveDesignTimerRef = useRef<number | null>(null);
+  const designHydratedRef = useRef(false);
 
   useEffect(() => {
     if (!establishmentId) return;
@@ -196,6 +199,53 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     published: design.published,
     stampStyle: design.stampStyle,
   }), [program, design, establishment, rewards]);
+
+  useEffect(() => {
+    if (!establishmentId || !designHydratedRef.current) return;
+
+    if (liveDesignTimerRef.current !== null) {
+      window.clearTimeout(liveDesignTimerRef.current);
+    }
+
+    liveDesignTimerRef.current = window.setTimeout(async () => {
+      liveDesignTimerRef.current = null;
+
+      const designConfig = {
+        background_image_url: design.wallpaperUrl,
+        wallpaperUrl: design.wallpaperUrl,
+        logo_url: design.logoUrl || establishment.logoUrl,
+        loyaltyType: program.programType,
+        card_mode: program.programType,
+        stamp_style: design.stampStyle,
+        rewardName: program.stampRewardName || rewards[0]?.name || 'Cadeau fidélité',
+        rewardDescription: program.stampRewardDescription,
+        pointsPerCurrency: program.pointsPerCurrency,
+        discountPointsThreshold: program.discountPointsThreshold,
+        discountPercent: program.discountPercent,
+        discountValidDays: program.discountValidDays,
+      };
+
+      await supabase.rpc('save_loyalty_card_builder_config', {
+        p_establishment_id: establishmentId,
+        p_design_config: designConfig,
+        p_template_id: design.templateId,
+        p_primary_color: design.primaryColor,
+        p_secondary_color: design.secondaryColor,
+        p_background_color: design.backgroundColor,
+        p_text_color: design.textColor,
+        p_button_color: design.buttonColor,
+        p_border_radius: 34,
+        p_published: true,
+      });
+    }, 180);
+
+    return () => {
+      if (liveDesignTimerRef.current !== null) {
+        window.clearTimeout(liveDesignTimerRef.current);
+        liveDesignTimerRef.current = null;
+      }
+    };
+  }, [establishmentId, design, establishment.logoUrl, program.programType, program.stampRewardName, program.stampRewardDescription, program.pointsPerCurrency, program.discountPointsThreshold, program.discountPercent, program.discountValidDays, rewards]);
 
   useEffect(() => {
     if (!establishmentId || !previewChannelRef.current || !previewChannelReady) return;
