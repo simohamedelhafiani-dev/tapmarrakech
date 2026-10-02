@@ -4,7 +4,7 @@ import QRCode from 'qrcode';
 import type { CSSProperties, ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
 
-export type LoyaltyExperienceType = 'STAMP' | 'POINTS' | 'DISCOUNT' | 'TIER' | 'REWARD' | 'CASHBACK' | 'CHALLENGE' | 'COLLECTION';
+export type LoyaltyExperienceType = 'STAMP' | 'POINTS' | 'POINTS_REWARD' | 'DISCOUNT' | 'POINTS_DISCOUNT' | 'TIER' | 'REWARD' | 'CASHBACK' | 'CHALLENGE' | 'COLLECTION';
 
 export type LoyaltyExperienceReward = {
   id: string;
@@ -45,6 +45,7 @@ export type LoyaltyExperienceConfig = {
   discountPercent?: number | null;
   discountExpiresAt?: string | null;
   discountValidDays?: number;
+  discountPointsThreshold?: number;
   cashbackBalance?: number;
   currentTier?: string | null;
   tiers?: { name: string; min: number; benefit: string }[];
