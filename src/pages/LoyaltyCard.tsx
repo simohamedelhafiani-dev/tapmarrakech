@@ -546,6 +546,8 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
     cashbackBalance?: number;
     discountPercent?: number;
     discountExpiresAt?: string;
+    discountValidDays?: number;
+    discountPointsThreshold?: number;
     rewardName?: string;
     rewardDescription?: string;
     intro?: string;
@@ -573,6 +575,8 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
     rewardDescription: raw.rewardDescription || program.stamp_reward_description,
     discountPercent: raw.discountPercent ?? program.discount_percent,
     discountExpiresAt: raw.discountExpiresAt,
+    discountValidDays: raw.discountValidDays ?? program.discount_valid_days,
+    discountPointsThreshold: raw.discountPointsThreshold ?? program.discount_points_threshold,
     cashbackBalance: raw.cashbackBalance,
     currentTier: raw.currentTier,
     tiers: raw.tiers,
