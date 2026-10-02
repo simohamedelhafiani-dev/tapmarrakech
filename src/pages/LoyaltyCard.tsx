@@ -603,7 +603,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         <div className="flex h-[70vh] max-h-[720px] min-h-[420px] w-full items-center justify-center overflow-hidden rounded-[30px]">
           <div
             className={`origin-top transition-opacity duration-200 ${isLiveRefreshing ? 'opacity-90' : 'opacity-100'}`}
-            style={{ transform: 'scale(0.7)', width: '142.857%' }}
+            style={{ transform: 'scale(0.7)' }}
           >
             <LoyaltyExperience config={experience} />
           </div>
