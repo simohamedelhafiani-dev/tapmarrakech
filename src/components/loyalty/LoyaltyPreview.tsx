@@ -227,10 +227,10 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
     >
       <div
         style={{
-          width: '100%',
-          height: '100%',
-          minHeight: 0,
-          minWidth: 0,
+          width: '320px',
+          height: '640px',
+          minHeight: '640px',
+          minWidth: '320px',
           overflow: 'hidden',
           boxSizing: 'border-box',
           position: 'relative',
@@ -246,7 +246,7 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
           color: textColor,
           fontFamily: template.fontFamily,
           boxShadow: 'inset 0 1px 0 rgba(255,255,255,.18), inset 0 -24px 50px rgba(0,0,0,.20), 0 24px 60px rgba(0,0,0,.20)',
-          padding: '32px',
+          padding: '30px',
         }}
       >
         <div
