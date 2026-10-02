@@ -3,7 +3,7 @@ import { Check, Gift, ImagePlus, Link2, Loader2, Pencil, Plus, QrCode, Share2, S
 import QRCode from 'qrcode';
 import { supabase } from '@/lib/supabase';
 import { defaultLoyaltyDesignConfig, type LoyaltyDesignConfig } from './LoyaltyCardVisual';
-import { LoyaltyExperience, type LoyaltyExperienceConfig } from './loyalty/LoyaltyExperience';
+import { type LoyaltyExperienceConfig } from './loyalty/LoyaltyExperience';
 import LoyaltyPreview from './loyalty/LoyaltyPreview';
 import { useLoyaltyManager, type LoyaltyReferralBonusType, type LoyaltyReferralConfig } from '@/hooks/useLoyaltyManager';
 
@@ -1071,7 +1071,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
               <div><p className="text-[10px] font-bold uppercase tracking-[.16em] text-gold">Aperçu en temps réel</p><p className="mt-1 text-xs text-ink/45">Voici exactement ce que vos clients verront.</p></div>
               <span className="rounded-full bg-white px-3 py-1.5 text-[10px] font-semibold text-forest shadow-sm">Client</span>
             </div>
-            <div className="mt-5 flex flex-1 items-center justify-center">
+            <div className="mt-5 flex flex-1 flex-col items-center justify-center">
               <LoyaltyPreview config={visualExperience} />
 
               <div className="mt-4 rounded-[22px] border border-ink/10 bg-white p-4 shadow-sm">
