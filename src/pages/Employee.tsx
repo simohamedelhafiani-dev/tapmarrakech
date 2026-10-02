@@ -1414,7 +1414,8 @@ export default function Employee() {
                   type="button"
                   onClick={() => {
                     setShowScanner(false);
-                    setShowPoints(customer);
+                    if (isStampProgram) setShowCard(customer);
+                    else setShowPoints(customer);
                     setManualCustomerSearch('');
                   }}
                   className="flex w-full items-center justify-between border-b border-ink/5 bg-white px-4 py-3 text-left last:border-0 hover:bg-[#f7f7f3]"
