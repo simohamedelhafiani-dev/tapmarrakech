@@ -84,6 +84,18 @@ export default function LoyaltyCard() {
     return () => window.clearTimeout(timeout);
   }, []);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('referral') !== '1' || !program.referral_enabled) return;
+
+    setReferralOpen(true);
+    void loadReferralCode();
+
+    params.delete('referral');
+    const cleanUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '') + window.location.hash;
+    window.history.replaceState({}, '', cleanUrl);
+  }, [program.referral_enabled]);
+
   const cardUrl = window.location.href;
 
   async function loadReferralCode() {
