@@ -191,7 +191,12 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
           stampStyle: c.stampStyle || 'circles',
         } as LoyaltyPreset;
       });
-      setAvailableTemplates(mapped);
+      const walletPreset = LOYALTY_PRESETS.find(template => template.id === 'wallet');
+      setAvailableTemplates(
+        walletPreset && !mapped.some(template => template.id === 'wallet')
+          ? [...mapped, walletPreset]
+          : mapped,
+      );
     } else {
       setAvailableTemplates(LOYALTY_PRESETS);
     }
