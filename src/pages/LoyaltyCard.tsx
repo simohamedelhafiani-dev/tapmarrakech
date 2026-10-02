@@ -48,12 +48,14 @@ export default function LoyaltyCard() {
   });
   const [designConfig, setDesignConfig] = useState(defaultLoyaltyDesignConfig);
   const [program, setProgram] = useState({
-    program_type: 'POINTS' as 'STAMP' | 'DISCOUNT' | 'POINTS',
+    program_type: 'POINTS_REWARD' as 'STAMP' | 'POINTS_REWARD' | 'POINTS_DISCOUNT',
     stamp_goal: 10,
     stamps_balance: 0,
     stamp_reward_name: null as string | null,
     stamp_reward_description: null as string | null,
     discount_percent: null as number | null,
+    discount_valid_days: 7,
+    discount_points_threshold: 1000,
     referral_enabled: false,
   });
   const [referralCode, setReferralCode] = useState<string | null>(null);
@@ -313,7 +315,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
       const programRow = Array.isArray(programData) ? programData[0] : programData;
       if (programRow) {
         setProgram({
-          program_type: programRow.program_type ?? 'POINTS',
+          program_type: programRow.program_type === 'STAMP' ? 'STAMP' : programRow.program_type === 'POINTS_DISCOUNT' || programRow.program_type === 'DISCOUNT' ? 'POINTS_DISCOUNT' : 'POINTS_REWARD',
           stamp_goal: Number(programRow.stamp_goal ?? 10),
           stamps_balance: Number(programRow.stamps_balance ?? 0),
           stamp_reward_name: programRow.stamp_reward_name ?? null,
@@ -518,8 +520,10 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
   const mode: LoyaltyExperienceConfig['type'] =
     configuredType === 'STAMP' || designConfig.card_mode === 'STAMP' || program.program_type === 'STAMP'
       ? 'STAMP'
-      : configuredType === 'DISCOUNT'
-        ? 'DISCOUNT'
+      : configuredType === 'POINTS_DISCOUNT' || designConfig.card_mode === 'POINTS_DISCOUNT' || program.program_type === 'POINTS_DISCOUNT'
+        ? 'POINTS_DISCOUNT'
+        : configuredType === 'DISCOUNT'
+          ? 'DISCOUNT'
         : configuredType === 'TIER'
           ? 'TIER'
           : configuredType === 'CASHBACK'
