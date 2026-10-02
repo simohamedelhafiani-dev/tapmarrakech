@@ -7,7 +7,7 @@ import { type LoyaltyExperienceConfig } from './loyalty/LoyaltyExperience';
 import LoyaltyPreview from './loyalty/LoyaltyPreview';
 import { useLoyaltyManager, type LoyaltyReferralBonusType, type LoyaltyReferralConfig } from '@/hooks/useLoyaltyManager';
 
-type CardMode = 'QR' | 'STAMP' | 'DISCOUNT';
+type CardMode = 'STAMP' | 'POINTS_REWARD' | 'POINTS_DISCOUNT';
 
 type LoyaltyRewardAdmin = {
   id: string;
@@ -86,13 +86,15 @@ const baseDesign: Design = {
 export default function LoyaltyProgramCustomization({ establishmentId }: { establishmentId: string }) {
   const [design, setDesign] = useState<Design>(baseDesign);
   const [establishment, setEstablishment] = useState<{ name: string; logo_url: string | null; business_type: string | null }>({ name: 'Votre établissement', logo_url: null, business_type: null });
-  const [cardMode, setCardMode] = useState<CardMode>('QR');
+  const [cardMode, setCardMode] = useState<CardMode>('POINTS_REWARD');
   const [stampGoal, setStampGoal] = useState('10');
   const [stampRewardName, setStampRewardName] = useState('Cadeau fidélité');
   const [stampRewardDescription, setStampRewardDescription] = useState('');
   const [pointsPerCurrency, setPointsPerCurrency] = useState('1');
   const [discountPercent, setDiscountPercent] = useState('10');
   const [discountValidDays, setDiscountValidDays] = useState('7');
+  const [discountPointsThreshold, setDiscountPointsThreshold] = useState('1000');
+  const [discountPointsThreshold, setDiscountPointsThreshold] = useState('1000');
   const [programEnabled, setProgramEnabled] = useState(true);
   const [rewards, setRewards] = useState<LoyaltyRewardAdmin[]>([]);
   const [previewCustomer, setPreviewCustomer] = useState<{ id: string; first_name: string | null; points_balance: number; visit_count: number; stamps_balance: number } | null>(null);
@@ -141,6 +143,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
 
   const {
     generateReferralCode,
+    getProgramSettings,
     getReferralConfig,
     saveReferralDraft,
     publishReferral,
@@ -176,7 +179,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
         design_config: nextConfig,
         published: Boolean(row.published),
       });
-      setCardMode(nextConfig.card_mode === 'STAMP' ? 'STAMP' : nextConfig.card_mode === 'DISCOUNT' ? 'DISCOUNT' : 'QR');
+      setCardMode(nextConfig.card_mode === 'STAMP' ? 'STAMP' : nextConfig.card_mode === 'POINTS_DISCOUNT' ? 'POINTS_DISCOUNT' : 'POINTS_REWARD');
     }
     if (place) setEstablishment({ name: place.name || 'Votre établissement', logo_url: place.logo_url || null, business_type: place.business_type || null });
     setRewards((rewardData ?? []) as LoyaltyRewardAdmin[]);
@@ -217,8 +220,9 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
       setPointsPerCurrency(String(program.points_per_currency ?? 1));
        setDiscountPercent(String(program.discount_percent ?? 10));
        setDiscountValidDays(String(program.discount_valid_days ?? 7));
+       setDiscountPointsThreshold(String(program.discount_points_threshold ?? 1000));
       setProgramEnabled(Boolean(program.enabled ?? true));
-      if (!row?.design_config?.card_mode) setCardMode(program.program_type === 'STAMP' ? 'STAMP' : 'QR');
+      if (!row?.design_config?.card_mode) setCardMode(program.program_type === 'STAMP' ? 'STAMP' : program.program_type === 'POINTS_DISCOUNT' ? 'POINTS_DISCOUNT' : 'POINTS_REWARD');
     }
   }
 
@@ -367,10 +371,17 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
 
   function chooseMode(mode: CardMode) {
     setCardMode(mode);
+    setReferralDraft(current => ({
+      ...current,
+      referrer_bonus_type: mode === 'STAMP' ? 'STAMP' : 'POINTS',
+      referee_bonus_type: mode === 'STAMP' ? 'STAMP' : 'POINTS',
+      referrer_bonus_value: Math.max(0, Number(current.referrer_bonus_value) || 0),
+      referee_bonus_value: Math.max(0, Number(current.referee_bonus_value) || 0),
+    }));
     updateConfig({
       card_mode: mode,
-      show_qr: mode === 'QR',
-      show_points: false,
+      show_qr: true,
+      show_points: mode !== 'STAMP',
     });
   }
 
@@ -390,11 +401,10 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
         front_subtitle: preset.subtitle,
         stamp_style: preset.stampStyle,
         card_mode: cardMode,
-        show_qr: cardMode === 'QR',
-        show_points: false,
+        show_qr: true,
+        show_points: cardMode !== 'STAMP',
       },
     }));
-    // Le modèle change le design, pas le type de programme : QR et tampons utilisent le même template.
     setCardMode(cardMode);
   }
 
@@ -541,7 +551,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     setSaving(true);
     const { error: programError } = await supabase.rpc('save_loyalty_program_settings', {
       p_establishment_id: establishmentId,
-      p_program_type: cardMode === 'DISCOUNT' ? 'DISCOUNT' : cardMode === 'STAMP' ? 'STAMP' : 'POINTS',
+      p_program_type: cardMode,
       p_stamp_goal: Number(stampGoal) || 10,
       p_stamp_reward_name: cardMode === 'STAMP' ? stampRewardName.trim() : null,
       p_stamp_reward_description: cardMode === 'STAMP' ? stampRewardDescription.trim() || null : null,
@@ -581,7 +591,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
   }
 
   const visualExperience: LoyaltyExperienceConfig = {
-    type: cardMode === 'DISCOUNT' ? 'DISCOUNT' : cardMode === 'STAMP' ? 'STAMP' : 'POINTS',
+    type: cardMode,
     stampStyle: design.design_config.stamp_style,
     templateId: design.template_id,
     businessType: design.design_config.business_type || establishment.business_type,
@@ -596,6 +606,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     customerName: previewCustomer?.first_name || 'Client',
     pointsBalance: Number(previewCustomer?.points_balance ?? 0),
     pointsGoal: Number(rewards[0]?.points_required ?? 0),
+     discountPointsThreshold: cardMode === 'POINTS_DISCOUNT' ? Math.max(1, Number(discountPointsThreshold) || 1000) : undefined,
     visits: Number(previewCustomer?.stamps_balance ?? 0),
     visitGoal: Number(stampGoal) || 10,
     rewardName: cardMode === 'STAMP' ? stampRewardName : (rewards[0]?.name ?? 'Aucune récompense'),
@@ -756,13 +767,13 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                     <input
                       type="number"
                       min="1"
-                      max="100"
+                      max="10"
                       step="1"
                       value={stampGoal}
                       onChange={e => setStampGoal(e.target.value.replace(/\\D/g, '').slice(0, 3))}
                       className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm text-ink outline-none"
                     />
-                    <span className="mt-1 block text-[10px] text-ink/35">Ex. 6, 8, 10 ou 12 cases. Ce nombre définit exactement la grille affichée au client.</span>
+                    <span className="mt-1 block text-[10px] text-ink/35">Ex. 6, 8 ou 10 cases. Le maximum est de 10 tampons.</span>
                   </label>
                   <label className="text-xs font-medium text-ink/50">
                     Récompense à la carte complète
@@ -776,49 +787,29 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                   </label>
                 </div>
 
-                {cardMode === 'DISCOUNT' && (
-                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                   <label className="text-xs font-medium text-ink/50">Réduction
-                     <div className="mt-1 flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-3 py-2.5">
-                       <input type="number" min="1" max="100" value={discountPercent} onChange={e => setDiscountPercent(e.target.value)} className="w-full bg-transparent text-sm text-ink outline-none" />
-                       <span className="text-[10px] font-semibold text-ink/35">%</span>
-                     </div>
-                   </label>
-                   <label className="text-xs font-medium text-ink/50">Validité
-                     <div className="mt-1 flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-3 py-2.5">
-                       <input type="number" min="1" max="365" value={discountValidDays} onChange={e => setDiscountValidDays(e.target.value)} className="w-full bg-transparent text-sm text-ink outline-none" />
-                       <span className="text-[10px] font-semibold text-ink/35">jours</span>
-                     </div>
-                   </label>
-                 </div>
-               )}
+                {cardMode === 'POINTS_DISCOUNT' && (
+                  <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                    <label className="text-xs font-medium text-ink/50">Seuil de points
+                      <div className="mt-1 flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-3 py-2.5">
+                        <input type="number" min="1" value={discountPointsThreshold} onChange={e => setDiscountPointsThreshold(e.target.value)} className="w-full bg-transparent text-sm text-ink outline-none" />
+                        <span className="text-[10px] font-semibold text-ink/35">pts</span>
+                      </div>
+                    </label>
+                    <label className="text-xs font-medium text-ink/50">Réduction
+                      <div className="mt-1 flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-3 py-2.5">
+                        <input type="number" min="1" max="100" value={discountPercent} onChange={e => setDiscountPercent(e.target.value)} className="w-full bg-transparent text-sm text-ink outline-none" />
+                        <span className="text-[10px] font-semibold text-ink/35">%</span>
+                      </div>
+                    </label>
+                    <label className="text-xs font-medium text-ink/50">Validité
+                      <div className="mt-1 flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-3 py-2.5">
+                        <input type="number" min="1" max="365" value={discountValidDays} onChange={e => setDiscountValidDays(e.target.value)} className="w-full bg-transparent text-sm text-ink outline-none" />
+                        <span className="text-[10px] font-semibold text-ink/35">jours</span>
+                      </div>
+                    </label>
+                  </div>
+                )}
 
-               <div className="mt-3 rounded-xl border border-[#173D32]/10 bg-white p-3 text-[10px] text-ink/45">
-                  <strong className="text-ink/65">Carte à {Math.max(1, Number(stampGoal) || 10)} tampons :</strong> la prévisualisation et la carte publique utilisent ce même nombre. Les tampons supplémentaires restent disponibles après une récompense.
-                </div>
-
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  <label className="text-xs font-medium text-ink/50">
-                    Points par MAD
-                    <input
-                      type="number"
-                      min="0.01"
-                      step="0.01"
-                      value={pointsPerCurrency}
-                      onChange={e => setPointsPerCurrency(e.target.value)}
-                      className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm text-ink outline-none"
-                    />
-                  </label>
-                  <label className="flex items-end gap-3 rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-xs text-ink/60">
-                    <input
-                      type="checkbox"
-                      checked={programEnabled}
-                      onChange={e => setProgramEnabled(e.target.checked)}
-                      className="h-4 w-4 rounded"
-                    />
-                    Programme actif
-                  </label>
-                </div>
                 <div className="mt-3 rounded-xl border border-forest/10 bg-white p-3 text-[10px] text-ink/45">
                   Exemple : 250 MAD = {Math.floor(Math.max(0, Number(pointsPerCurrency) || 0) * 250)} points.
                 </div>
