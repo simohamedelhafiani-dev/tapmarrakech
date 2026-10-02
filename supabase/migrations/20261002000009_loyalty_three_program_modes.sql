@@ -7,16 +7,8 @@ ALTER TABLE public.loyalty_settings
   ADD COLUMN IF NOT EXISTS discount_points_threshold integer NOT NULL DEFAULT 1000;
 
 ALTER TABLE public.loyalty_settings DROP CONSTRAINT IF EXISTS loyalty_settings_program_type_check;
-ALTER TABLE public.loyalty_settings ADD CONSTRAINT loyalty_settings_program_type_check
-  CHECK (program_type IN ('STAMP','POINTS_REWARD','POINTS_DISCOUNT'));
-
 ALTER TABLE public.loyalty_settings DROP CONSTRAINT IF EXISTS loyalty_settings_stamp_goal_check;
-ALTER TABLE public.loyalty_settings ADD CONSTRAINT loyalty_settings_stamp_goal_check
-  CHECK (stamp_goal BETWEEN 1 AND 10);
-
 ALTER TABLE public.loyalty_settings DROP CONSTRAINT IF EXISTS loyalty_settings_discount_points_threshold_check;
-ALTER TABLE public.loyalty_settings ADD CONSTRAINT loyalty_settings_discount_points_threshold_check
-  CHECK (discount_points_threshold >= 1);
 
 UPDATE public.loyalty_settings
 SET program_type = CASE
@@ -26,6 +18,15 @@ SET program_type = CASE
 END,
 stamp_goal = LEAST(GREATEST(COALESCE(stamp_goal, 10), 1), 10),
 discount_points_threshold = GREATEST(COALESCE(discount_points_threshold, 1000), 1);
+
+ALTER TABLE public.loyalty_settings ADD CONSTRAINT loyalty_settings_program_type_check
+  CHECK (program_type IN ('STAMP','POINTS_REWARD','POINTS_DISCOUNT'));
+
+ALTER TABLE public.loyalty_settings ADD CONSTRAINT loyalty_settings_stamp_goal_check
+  CHECK (stamp_goal BETWEEN 1 AND 10);
+
+ALTER TABLE public.loyalty_settings ADD CONSTRAINT loyalty_settings_discount_points_threshold_check
+  CHECK (discount_points_threshold >= 1);
 
 CREATE OR REPLACE FUNCTION public.normalize_loyalty_referral_config_for_program()
 RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = 'public' AS $$
