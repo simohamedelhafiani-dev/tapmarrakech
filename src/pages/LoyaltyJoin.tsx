@@ -87,16 +87,6 @@ export default function LoyaltyJoin() {
     [loadingContext, firstName, lastName, phone, isGlobalEnrollment, referralCode],
   );
 
-  useEffect(() => {
-    if (!accessToken) {
-      setRedirectReady(false);
-      return;
-    }
-
-    const timeout = window.setTimeout(() => setRedirectReady(true), 900);
-    return () => window.clearTimeout(timeout);
-  }, [accessToken]);
-
   async function join() {
     if (!canSubmit || loading) return;
 
