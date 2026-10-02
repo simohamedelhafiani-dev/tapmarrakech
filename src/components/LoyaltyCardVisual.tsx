@@ -260,7 +260,7 @@ export function LoyaltyCardVisual({
 
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <div style={{ width: '23.33cqw', height: '23.33cqw', padding: '2cqw', boxSizing: 'border-box', borderRadius: '4.33cqw', background: '#fff', display: 'grid', placeItems: 'center', boxShadow: '0 12px 28px rgba(0,0,0,.28)' }}>
-            {showQr && qr ? <img src={qr} alt="QR Code fidélité" style={{ width: '19.33cqw', height: '19.33cqw', display: 'block' }} /> : <div style={{ width: 58, height: 58 }} />}
+            {showQr && qr ? <img src={qr} alt="QR Code fidélité" style={{ width: '19.33cqw', height: '19.33cqw', display: 'block' }} /> : <div style={{ width: '19.33cqw', height: '19.33cqw' }} />}
           </div>
           <div style={{ marginTop: '2.67cqw', fontSize: '2.67cqw', letterSpacing: '.16em', textTransform: 'uppercase', opacity: .5 }}>{card.customerName || 'Client'}</div>
         </div>
