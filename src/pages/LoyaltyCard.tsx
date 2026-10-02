@@ -120,7 +120,7 @@ export default function LoyaltyCard() {
     : '';
 
   useEffect(() => {
-    if ((!referralOpen && !cardSaved) || !referralUrl) {
+    if (!referralOpen || !cardSaved || !referralUrl) {
       setReferralQrDataUrl('');
       return;
     }
@@ -604,43 +604,6 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         </div>
 
         {program.referral_enabled && cardSaved && (
-          <div className="mt-4 overflow-hidden rounded-2xl border border-[#D3A84C]/35 bg-white p-4 shadow-[0_10px_30px_rgba(23,61,50,0.08)]">
-            <div className="text-center">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#173D32]/45">
-                Votre QR Code de parrainage
-              </p>
-              <p className="mt-1 text-xs leading-5 text-[#173D32]/60">
-                Il apparaît une fois votre carte enregistrée sur votre téléphone.
-              </p>
-              <div className="mx-auto mt-3 flex min-h-[220px] w-full items-center justify-center rounded-2xl bg-[#F7F7F3] p-2">
-                {referralQrDataUrl ? (
-                  <img
-                    src={referralQrDataUrl}
-                    alt="QR Code de parrainage"
-                    className="h-[210px] w-[210px] max-w-full rounded-xl"
-                  />
-                ) : (
-                  <div className="h-[210px] w-[210px] animate-pulse rounded-xl bg-[#eef0ed]" />
-                )}
-              </div>
-              {referralUrl && (
-                <p className="mt-2 break-all text-[9px] leading-4 text-[#173D32]/35">
-                  {referralUrl}
-                </p>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={() => void openReferral()}
-              className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[#173D32] px-4 py-3 text-xs font-semibold text-white"
-            >
-              <Gift className="h-4 w-4" />
-              Partager mon parrainage
-            </button>
-          </div>
-        )}
-
-        {program.referral_enabled && (
           <button
             type="button"
             onClick={() => void openReferral()}
