@@ -83,7 +83,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
   const [pointsPerCurrency, setPointsPerCurrency] = useState('1');
   const [programEnabled, setProgramEnabled] = useState(true);
   const [rewards, setRewards] = useState<LoyaltyRewardAdmin[]>([]);
-  const [previewCustomer, setPreviewCustomer] = useState<{ id: string; first_name: string | null; points_balance: number; visit_count: number } | null>(null);
+  const [previewCustomer, setPreviewCustomer] = useState<{ id: string; first_name: string | null; points_balance: number; visit_count: number; stamps_balance: number } | null>(null);
   const [previewTransactions, setPreviewTransactions] = useState<Array<{ id: string; description: string | null; created_at: string; points: number }>>([]);
   const [availableTemplates, setAvailableTemplates] = useState<LoyaltyPreset[]>(LOYALTY_PRESETS);
   const [rewardEditorOpen, setRewardEditorOpen] = useState(false);
@@ -147,7 +147,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
       supabase.rpc('get_loyalty_program_settings', { p_establishment_id: establishmentId }),
       supabase.from('loyalty_rewards').select('id,name,description,points_required,active,reward_type,discount_percent,discount_max_amount,valid_days').eq('establishment_id', establishmentId).order('points_required', { ascending: true }),
       supabase.from('templates').select('id,name,description,config').eq('kind', 'loyalty').eq('active', true).order('name'),
-      supabase.from('loyalty_customers').select('id,first_name,points_balance,visit_count').eq('establishment_id', establishmentId).order('created_at', { ascending: false }).limit(1),
+      supabase.from('loyalty_customers').select('id,first_name,points_balance,visit_count,stamps_balance').eq('establishment_id', establishmentId).order('created_at', { ascending: false }).limit(1),
       supabase.from('loyalty_transactions').select('id,description,created_at,points').eq('establishment_id', establishmentId).order('created_at', { ascending: false }).limit(6),
     ]);
 
@@ -169,7 +169,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     }
     if (place) setEstablishment({ name: place.name || 'Votre établissement', logo_url: place.logo_url || null, business_type: place.business_type || null });
     setRewards((rewardData ?? []) as LoyaltyRewardAdmin[]);
-    setPreviewCustomer((customerRows?.[0] as { id: string; first_name: string | null; points_balance: number; visit_count: number } | undefined) ?? null);
+    setPreviewCustomer((customerRows?.[0] as { id: string; first_name: string | null; points_balance: number; visit_count: number; stamps_balance: number } | undefined) ?? null);
     setPreviewTransactions((transactionRows ?? []) as Array<{ id: string; description: string | null; created_at: string; points: number }>);
     if (templateRows?.length) {
       const mapped = (templateRows as Array<{ id: string; name: string; description: string | null; config: Record<string, any> }>).map((row) => {
@@ -579,7 +579,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
     customerName: previewCustomer?.first_name || 'Client',
     pointsBalance: Number(previewCustomer?.points_balance ?? 0),
     pointsGoal: Number(rewards[0]?.points_required ?? 0),
-    visits: Number(previewCustomer?.visit_count ?? 0),
+    visits: Number(previewCustomer?.stamps_balance ?? 0),
     visitGoal: Number(stampGoal) || 10,
     rewardName: cardMode === 'STAMP' ? stampRewardName : (rewards[0]?.name ?? 'Aucune récompense'),
     rewardDescription: cardMode === 'STAMP' ? (stampRewardDescription || null) : (rewards[0]?.description ?? null),
@@ -731,6 +731,36 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
               <div id="loyalty-structure" className="scroll-mt-6 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
                 <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Structure</p>
                 <p className="mt-1 text-xs text-ink/45">Les réglages ci-dessous pilotent le programme de fidélité déjà utilisé par cet établissement.</p>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <label className="text-xs font-medium text-ink/50">
+                    Nombre de tampons sur la carte
+                    <input
+                      type="number"
+                      min="1"
+                      max="100"
+                      step="1"
+                      value={stampGoal}
+                      onChange={e => setStampGoal(e.target.value.replace(/\\D/g, '').slice(0, 3))}
+                      className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm text-ink outline-none"
+                    />
+                    <span className="mt-1 block text-[10px] text-ink/35">Ex. 6, 8, 10 ou 12 cases. Ce nombre définit exactement la grille affichée au client.</span>
+                  </label>
+                  <label className="text-xs font-medium text-ink/50">
+                    Récompense à la carte complète
+                    <input
+                      value={stampRewardName}
+                      onChange={e => setStampRewardName(e.target.value)}
+                      disabled={cardMode !== 'STAMP'}
+                      className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm text-ink outline-none disabled:opacity-40"
+                      placeholder="Cadeau fidélité"
+                    />
+                  </label>
+                </div>
+
+                <div className="mt-3 rounded-xl border border-[#173D32]/10 bg-white p-3 text-[10px] text-ink/45">
+                  <strong className="text-ink/65">Carte à {Math.max(1, Number(stampGoal) || 10)} tampons :</strong> la prévisualisation et la carte publique utilisent ce même nombre. Les tampons supplémentaires restent disponibles après une récompense.
+                </div>
+
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   <label className="text-xs font-medium text-ink/50">
                     Points par MAD
