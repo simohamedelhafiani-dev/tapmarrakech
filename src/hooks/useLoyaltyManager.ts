@@ -1,6 +1,20 @@
 import { useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 
+export type LoyaltyProgramType = 'STAMP' | 'POINTS_REWARD' | 'POINTS_DISCOUNT';
+
+export type LoyaltyProgramSettings = {
+  programType: LoyaltyProgramType;
+  stampGoal: number;
+  stampRewardName: string | null;
+  stampRewardDescription: string | null;
+  pointsPerCurrency: number;
+  discountPointsThreshold: number;
+  discountPercent: number | null;
+  discountValidDays: number;
+  enabled: boolean;
+};
+
 export type LoyaltyReferralBonusType = 'POINTS' | 'STAMP' | 'REDUCTION';
 
 export type LoyaltyReferralConfig = {
@@ -129,6 +143,37 @@ export function useLoyaltyManager(establishmentId?: string) {
     [],
   );
 
+  const getProgramSettings = useCallback(async (): Promise<LoyaltyProgramSettings> => {
+    if (!establishmentId) throw new Error('Establishment ID is required');
+
+    const { data, error } = await supabase.rpc('get_loyalty_program_settings', {
+      p_establishment_id: establishmentId,
+    });
+
+    if (error) throw error;
+
+    const row = Array.isArray(data) ? data[0] : data;
+    const rawType = row?.program_type;
+    const programType: LoyaltyProgramType =
+      rawType === 'STAMP'
+        ? 'STAMP'
+        : rawType === 'POINTS_DISCOUNT' || rawType === 'DISCOUNT'
+          ? 'POINTS_DISCOUNT'
+          : 'POINTS_REWARD';
+
+    return {
+      programType,
+      stampGoal: Math.min(10, Math.max(1, Number(row?.stamp_goal ?? 10))),
+      stampRewardName: row?.stamp_reward_name ?? null,
+      stampRewardDescription: row?.stamp_reward_description ?? null,
+      pointsPerCurrency: Math.max(0.01, Number(row?.points_per_currency ?? 1)),
+      discountPointsThreshold: Math.max(1, Number(row?.discount_points_threshold ?? 1000)),
+      discountPercent: row?.discount_percent != null ? Number(row.discount_percent) : null,
+      discountValidDays: Math.max(1, Number(row?.discount_valid_days ?? 7)),
+      enabled: Boolean(row?.enabled ?? true),
+    };
+  }, [establishmentId]);
+
   const getReferralConfig = useCallback(async (): Promise<LoyaltyReferralConfigState> => {
     if (!establishmentId) throw new Error('Establishment ID is required');
 
@@ -190,6 +235,7 @@ export function useLoyaltyManager(establishmentId?: string) {
   return {
     generateReferralCode,
     processReferral,
+    getProgramSettings,
     getReferralConfig,
     saveReferralDraft,
     publishReferral,
