@@ -322,6 +322,8 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
           stamp_reward_name: programRow.stamp_reward_name ?? null,
           stamp_reward_description: programRow.stamp_reward_description ?? null,
           discount_percent: programRow.discount_percent != null ? Number(programRow.discount_percent) : null,
+          discount_valid_days: Number(programRow.discount_valid_days ?? 7),
+          discount_points_threshold: Number(programRow.discount_points_threshold ?? 1000),
           referral_enabled: Boolean(programRow.referral_enabled),
         });
       }
@@ -561,10 +563,32 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         ? 'DISCOUNT'
         : 'POINTS';
 
+  const discountThreshold = Number((designConfig as typeof designConfig & { discountPointsThreshold?: number }).discountPointsThreshold ?? program.discount_points_threshold ?? 1000);
+  const discountValidDays = Number((designConfig as typeof designConfig & { discountValidDays?: number }).discountValidDays ?? program.discount_valid_days ?? 7);
+
+  const discountUnlockDate = (() => {
+    if (mode !== 'DISCOUNT' || Number(card.points_balance ?? 0) < discountThreshold) return null;
+    const ordered = [...history].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    if (!ordered.length) return null;
+    const total = ordered.reduce((sum, item) => sum + Number(item.points || 0), 0);
+    let running = Number(card.points_balance ?? 0) - total;
+    for (const item of ordered) {
+      running += Number(item.points || 0);
+      if (running >= discountThreshold) {
+        const expires = new Date(item.created_at);
+        expires.setDate(expires.getDate() + Math.max(1, discountValidDays));
+        return expires.toISOString();
+      }
+    }
+    return null;
+  })();
+
   const raw = designConfig as typeof designConfig & {
     background_image_url?: string | null;
     logo_url?: string | null;
     discountPercent?: number;
+    discountPointsThreshold?: number;
+    discountValidDays?: number;
     rewardName?: string;
   };
   return (
@@ -613,6 +637,8 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                 stampGoal: program.stamp_goal,
                 stampRewardName: raw.rewardName || program.stamp_reward_name,
                 discountPercent: raw.discountPercent ?? program.discount_percent ?? undefined,
+                discountPointsThreshold: discountThreshold,
+                discountValidDays,
                 customerName: fullName,
                 loyaltyNumber: card.loyalty_number,
                 cardUrl: cardUrl,
