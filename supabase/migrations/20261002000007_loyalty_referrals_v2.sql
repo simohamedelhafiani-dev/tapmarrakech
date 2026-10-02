@@ -108,7 +108,7 @@ begin
 
   elsif p_bonus_type = 'REDUCTION' then
     if v_value <= 0 or v_value > 100 then
-      raise exception 'La réduction doit être comprise entre 1 et 100 %';
+      raise exception 'La réduction doit être comprise entre 1 et 100 %%';
     end if;
 
     select greatest(coalesce(s.discount_valid_days, 7), 1)
@@ -171,8 +171,8 @@ begin
   if v_referee_value < 0 then raise exception 'Le bonus du filleul est invalide'; end if;
   if v_referrer_type in ('POINTS','STAMP') and v_referrer_value <> trunc(v_referrer_value) then raise exception 'La valeur du bonus du parrain doit être un entier'; end if;
   if v_referee_type in ('POINTS','STAMP') and v_referee_value <> trunc(v_referee_value) then raise exception 'La valeur du bonus du filleul doit être un entier'; end if;
-  if v_referrer_type = 'REDUCTION' and (v_referrer_value <= 0 or v_referrer_value > 100) then raise exception 'La réduction du parrain doit être comprise entre 1 et 100 %'; end if;
-  if v_referee_type = 'REDUCTION' and (v_referee_value < 0 or v_referee_value > 100) then raise exception 'La réduction du filleul doit être comprise entre 0 et 100 %'; end if;
+  if v_referrer_type = 'REDUCTION' and (v_referrer_value <= 0 or v_referrer_value > 100) then raise exception 'La réduction du parrain doit être comprise entre 1 et 100 %%'; end if;
+  if v_referee_type = 'REDUCTION' and (v_referee_value < 0 or v_referee_value > 100) then raise exception 'La réduction du filleul doit être comprise entre 0 et 100 %%'; end if;
 
   if p_config ? 'max_referrals' and p_config ->> 'max_referrals' is not null then
     v_max_referrals := (p_config ->> 'max_referrals')::integer;
