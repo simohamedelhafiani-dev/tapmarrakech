@@ -821,7 +821,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                   <div className="rounded-2xl border border-forest/10 bg-forest/[0.04] p-4">
                     <p className="text-[9px] font-semibold uppercase tracking-[.16em] text-ink/40">Acquisition</p>
                     <p className="mt-1 text-2xl font-bold text-forest">{referralAcquiredCount}</p>
-                    <p className="mt-1 text-[10px] text-ink/45">clients acquis via parrainage</p>
+                    <p className="mt-1 text-[10px] text-ink/45">{referralAcquiredCount === 1 ? "client a été acquis via parrainage" : "clients ont été acquis via parrainage"}</p>
                   </div>
                   <div className="rounded-2xl border border-ink/10 bg-white p-4">
                     <p className="text-[9px] font-semibold uppercase tracking-[.16em] text-ink/40">Limite par parrain</p>
