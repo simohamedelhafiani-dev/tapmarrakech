@@ -462,7 +462,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
   }
 
   function referralShareUrl(code: string) {
-    return window.location.origin + '/loyalty?ref=' + encodeURIComponent(code);
+    return window.location.origin + '/loyalty/join?ref=' + encodeURIComponent(code);
   }
 
   function referralMessage(code: string) {
