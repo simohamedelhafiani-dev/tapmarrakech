@@ -583,7 +583,8 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
 
   return (
     <main className="min-h-screen bg-[#eef0ed] px-3 py-5 sm:px-6 sm:py-8">
-      <div className="mx-auto w-full max-w-[430px]">
+      <div className="flex min-h-[calc(100vh-2.5rem)] w-full flex-col items-center justify-center gap-4 sm:min-h-[calc(100vh-4rem)]">
+        <div className="flex h-[70vh] max-h-[720px] min-h-[420px] w-full max-w-[430px] flex-col overflow-y-auto rounded-[30px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {showWelcome && (
           <div className="mb-4 flex items-center gap-3 rounded-2xl border border-[#D6B15A]/30 bg-white px-4 py-3 shadow-[0_10px_30px_rgba(23,61,50,0.08)]">
             <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#e7f1eb] text-[#173D32]">
