@@ -53,7 +53,11 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
   const accentColor=config.secondaryColor || template.accent;
   const textColor=config.textColor || getContrastColor(backgroundColor);
 
-  const backgroundImage=template.effect==='glass'
+  
+  const wallpaper = config.coverImageUrl || (config as LoyaltyExperienceConfig & { wallpaperUrl?: string | null }).wallpaperUrl || null;
+  const backgroundImage=wallpaper
+    ? `linear-gradient(145deg, ${primaryColor}CC 0%, ${primaryColor}88 48%, ${primaryColor}55 100%),url("${wallpaper}")`
+    : template.effect==='glass'
     ? `linear-gradient(135deg, ${primaryColor}CC 0%, transparent 48%, ${accentColor}22 100%),linear-gradient(145deg,rgba(255,255,255,.10),rgba(255,255,255,0) 48%)`
     : template.effect==='gradient'
       ? `linear-gradient(145deg,${backgroundColor} 0%,${primaryColor} 52%,${backgroundColor} 100%),linear-gradient(145deg,${primaryColor}66,transparent 55%,${accentColor}22)`
@@ -78,16 +82,16 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
   return (
     <div style={{display:'flex',alignItems:'center',justifyContent:'center',width:'100%',height:'100%',minHeight:0,minWidth:0,overflow:'hidden',boxSizing:'border-box'}}>
       <div style={{
-        width:'320px',height:'640px',minHeight:'640px',minWidth:'320px',overflow:'hidden',boxSizing:'border-box',
+        width:'300px',height:'450px',minHeight:'450px',minWidth:'300px',overflow:'hidden',boxSizing:'border-box',
         position:'relative',display:'flex',flexDirection:'column',justifyContent:'space-between',
-        borderRadius:'48px',border:'1px solid rgba(255,255,255,.20)',backgroundColor,backgroundImage,
-        backgroundSize:'cover',backgroundPosition:'center',color:textColor,fontFamily:template.fontFamily,
-        boxShadow:'inset 0 1px 0 rgba(255,255,255,.18),inset 0 -24px 50px rgba(0,0,0,.20),0 24px 60px rgba(0,0,0,.20)',padding:'30px'
+        borderRadius:'34px',border:'1px solid rgba(255,255,255,.20)',backgroundColor,backgroundImage,
+        backgroundSize:'cover',backgroundPosition:'center',backgroundRepeat:'no-repeat',color:textColor,fontFamily:template.fontFamily,
+        boxShadow:'inset 0 1px 0 rgba(255,255,255,.18),inset 0 -24px 50px rgba(0,0,0,.20),0 24px 60px rgba(0,0,0,.20)',padding:'22px'
       }}>
         <div style={{position:'absolute',inset:0,pointerEvents:'none',background:'linear-gradient(125deg,rgba(255,255,255,.16),rgba(255,255,255,.04) 22%,rgba(255,255,255,0) 48%,rgba(255,255,255,.06) 72%,rgba(255,255,255,0))'}}/>
         <div style={{position:'relative',zIndex:1,display:'flex',alignItems:'center',justifyContent:'space-between',gap:16,width:'100%'}}>
-          <div style={{minWidth:0,overflow:'hidden',fontSize:18,fontWeight:700,whiteSpace:'nowrap',textOverflow:'ellipsis'}}>{config.establishmentName || 'Votre établissement'}</div>
-          {config.logoUrl ? <img src={config.logoUrl} alt="" style={{width:48,height:48,flexShrink:0,objectFit:'contain',borderRadius:14,padding:6,boxSizing:'border-box',backgroundColor:'rgba(255,255,255,.92)'}}/> :
+          <div style={{minWidth:0,overflow:'hidden',fontSize:14,fontWeight:700,whiteSpace:'nowrap',textOverflow:'ellipsis'}}>{config.establishmentName || 'Votre établissement'}</div>
+          {config.logoUrl ? <img src={config.logoUrl} alt="" style={{width:38,height:38,flexShrink:0,objectFit:'contain',borderRadius:14,padding:6,boxSizing:'border-box',backgroundColor:'rgba(255,255,255,.92)'}}/> :
             <div style={{width:48,height:48,flexShrink:0,display:'grid',placeItems:'center',borderRadius:14,border:'1px solid rgba(255,255,255,.22)',backgroundColor:'rgba(255,255,255,.10)',fontSize:11,fontWeight:700}}>{(config.establishmentName||'CL').slice(0,2).toUpperCase()}</div>}
         </div>
 
@@ -95,7 +99,7 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
           {isStamp && (
             <>
               <div style={{fontSize:11,fontWeight:800,letterSpacing:'.28em',textTransform:'uppercase',color:accentColor}}>CARTE À TAMPONS</div>
-              <div style={{marginTop:10,fontSize:40,fontWeight:900,lineHeight:1}}>{config.visits ?? 0}<span style={{fontSize:16,opacity:.45}}> / {visitGoal}</span></div>
+              <div style={{marginTop:10,fontSize:32,fontWeight:900,lineHeight:1}}>{config.visits ?? 0}<span style={{fontSize:16,opacity:.45}}> / {visitGoal}</span></div>
               <div style={{marginTop:18,width:'100%',display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:8}}>
                 {Array.from({length:visitGoal}).map((_,i)=>(
                   <div key={i} style={{height:36,borderRadius: i<visits ? 12 : 10,border:`1px solid ${accentColor}`,background:i<visits ? `${accentColor}35` : 'transparent',display:'grid',placeItems:'center',color:accentColor,fontSize:13,fontWeight:800}}>
@@ -111,7 +115,7 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
           {isPointsReward && (
             <>
               <div style={{fontSize:11,fontWeight:800,letterSpacing:'.28em',textTransform:'uppercase',color:accentColor}}>POINTS & RÉCOMPENSES</div>
-              <div style={{marginTop:10,fontSize:52,fontWeight:900,lineHeight:1}}>{points.toLocaleString('fr-FR')}<span style={{fontSize:15,opacity:.5}}> pts</span></div>
+              <div style={{marginTop:10,fontSize:40,fontWeight:900,lineHeight:1}}>{points.toLocaleString('fr-FR')}<span style={{fontSize:15,opacity:.5}}> pts</span></div>
               <div style={{marginTop:20,width:'100%',display:'grid',gap:8}}>
                 {rewards.length ? rewards.map(reward=>(
                   <div key={reward.id} style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:10,padding:'10px 12px',borderRadius:14,border:`1px solid ${accentColor}55`,background:'rgba(255,255,255,.08)',textAlign:'left'}}>
@@ -149,8 +153,8 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
         </div>
 
         <div style={{position:'relative',zIndex:1,display:'flex',flexDirection:'column',alignItems:'center',width:'100%'}}>
-          <div style={{background:'#FFF',padding:10,borderRadius:18,boxShadow:'0 14px 35px rgba(0,0,0,.28)',display:'grid',placeItems:'center',width:112,height:112,boxSizing:'border-box'}}>
-            {qr ? <img src={qr} alt="QR Code fidélité" style={{display:'block',width:92,height:92}}/> : <div style={{width:92,height:92}}/>}
+          <div style={{background:'#FFF',padding:7,borderRadius:14,boxShadow:'0 14px 35px rgba(0,0,0,.28)',display:'grid',placeItems:'center',width:82,height:82,boxSizing:'border-box'}}>
+            {qr ? <img src={qr} alt="QR Code fidélité" style={{display:'block',width:66,height:66}}/> : <div style={{width:92,height:92}}/>}
           </div>
           <div style={{marginTop:10,fontSize:10,fontWeight:700,letterSpacing:'.18em',textTransform:'uppercase',opacity:.58}}>{config.customerName || 'Client'}</div>
         </div>
