@@ -674,7 +674,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                 <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Modèles</p>
                 <p className="mt-1 text-xs text-ink/45">Choisis un modèle de départ, puis personnalise-le avec tes couleurs, ton logo et ta photo.</p>
               </div>
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <div className="mt-3 grid gap-3 sm:grid-cols-3">
                 {availableTemplates.map(preset => {
                   const active = design.template_id === preset.id;
                   return (
