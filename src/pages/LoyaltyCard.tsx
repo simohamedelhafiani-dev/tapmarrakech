@@ -69,6 +69,20 @@ export default function LoyaltyCard() {
   const [isInstalled, setIsInstalled] = useState(false);
   const [liveVersion, setLiveVersion] = useState(0);
   const [isLiveRefreshing, setIsLiveRefreshing] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('welcome') !== '1') return;
+
+    setShowWelcome(true);
+    params.delete('welcome');
+    const cleanUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '') + window.location.hash;
+    window.history.replaceState({}, '', cleanUrl);
+
+    const timeout = window.setTimeout(() => setShowWelcome(false), 4500);
+    return () => window.clearTimeout(timeout);
+  }, []);
 
   const cardUrl = window.location.href;
 
@@ -559,6 +573,21 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
   return (
     <main className="min-h-screen bg-[#eef0ed] px-3 py-5 sm:px-6 sm:py-8">
       <div className="mx-auto w-full max-w-[430px]">
+        {showWelcome && (
+          <div className="mb-4 flex items-center gap-3 rounded-2xl border border-[#D6B15A]/30 bg-white px-4 py-3 shadow-[0_10px_30px_rgba(23,61,50,0.08)]">
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#e7f1eb] text-[#173D32]">
+              <Gift className="h-4 w-4" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-[#173D32]">Bienvenue dans votre programme fidélité 🎉</p>
+              <p className="mt-0.5 text-[10px] leading-4 text-ink/45">Votre carte est maintenant active. Gardez-la sur votre téléphone.</p>
+            </div>
+            <button type="button" onClick={() => setShowWelcome(false)} className="ml-auto shrink-0 p-1 text-ink/30" aria-label="Fermer">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
         <div className={`transition-opacity duration-200 ${isLiveRefreshing ? 'opacity-90' : 'opacity-100'}`}>
           <LoyaltyExperience config={experience} />
         </div>
