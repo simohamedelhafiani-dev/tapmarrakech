@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Gift, Link2, Share2, X } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 type BeforeInstallPromptEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }> };
@@ -52,7 +53,12 @@ export default function LoyaltyCard() {
     stamp_reward_name: null as string | null,
     stamp_reward_description: null as string | null,
     discount_percent: null as number | null,
+    referral_enabled: false,
   });
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [referralOpen, setReferralOpen] = useState(false);
+  const [referralLoading, setReferralLoading] = useState(false);
+  const [referralCopied, setReferralCopied] = useState(false);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [rewards, setRewards] = useState<LoyaltyExperienceReward[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,6 +67,73 @@ export default function LoyaltyCard() {
   const [isInstalled, setIsInstalled] = useState(false);
 
   const cardUrl = window.location.href;
+
+  async function loadReferralCode() {
+    if (!token || referralLoading || referralCode) return;
+
+    setReferralLoading(true);
+    setReferralCopied(false);
+
+    try {
+      const { data, error: referralError } = await supabase.rpc('get_public_referral_code', {
+        p_access_token: token,
+      });
+
+      if (referralError) {
+        console.error('Failed to load referral code:', referralError);
+        return;
+      }
+
+      const row = Array.isArray(data) ? data[0] : data;
+      setReferralCode(row?.referral_code ?? null);
+    } finally {
+      setReferralLoading(false);
+    }
+  }
+
+  async function openReferral() {
+    setReferralOpen(true);
+    await loadReferralCode();
+  }
+
+  const referralMessage = referralCode
+    ? `🎁 Je t’invite à rejoindre le programme fidélité de ${card?.establishment_name || 'cet établissement'}.
+
+Utilise mon code de parrainage : ${referralCode}
+
+Tu peux rejoindre le programme fidélité et profiter des avantages proposés par l’établissement.`
+    : '';
+
+  async function shareReferral() {
+    if (!referralCode) return;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `Invitation fidélité — ${card?.establishment_name || 'Programme fidélité'}`,
+          text: referralMessage,
+          url: cardUrl,
+        });
+        return;
+      }
+
+      await copyReferralCode();
+    } catch {
+      // User cancelled native sharing; keep the panel open.
+    }
+  }
+
+  async function copyReferralCode() {
+    if (!referralCode) return;
+
+    try {
+      await navigator.clipboard.writeText(referralCode);
+      setReferralCopied(true);
+      window.setTimeout(() => setReferralCopied(false), 2200);
+    } catch {
+      // Clipboard can be unavailable on some browsers/contexts.
+    }
+  }
 
   useEffect(() => {
     const media = window.matchMedia?.('(display-mode: standalone)');
@@ -187,6 +260,7 @@ export default function LoyaltyCard() {
           stamp_reward_name: programRow.stamp_reward_name ?? null,
           stamp_reward_description: programRow.stamp_reward_description ?? null,
           discount_percent: programRow.discount_percent != null ? Number(programRow.discount_percent) : null,
+          referral_enabled: Boolean(programRow.referral_enabled),
         });
       }
 
@@ -243,6 +317,7 @@ export default function LoyaltyCard() {
           stamp_reward_name: programRow.stamp_reward_name ?? null,
           stamp_reward_description: programRow.stamp_reward_description ?? null,
           discount_percent: programRow.discount_percent != null ? Number(programRow.discount_percent) : null,
+          referral_enabled: Boolean(programRow.referral_enabled),
         });
       }
     };
@@ -387,11 +462,116 @@ export default function LoyaltyCard() {
     <main className="min-h-screen bg-[#eef0ed] px-3 py-5 sm:px-6 sm:py-8">
       <div className="mx-auto w-full max-w-[430px]">
         <LoyaltyExperience config={experience} />
-        {!isInstalled && <button type="button" onClick={() => void saveCardOnPhone()} className="mt-4 flex w-full items-center justify-center gap-3 rounded-2xl bg-[#D6B15A] px-5 py-4 text-sm font-semibold text-[#17130f] shadow-lg transition hover:brightness-105">
-          <span className="text-lg">▣</span>
-          Enregistrer ma carte sur mon téléphone
-        </button>}
+
+        {program.referral_enabled && (
+          <button
+            type="button"
+            onClick={() => void openReferral()}
+            className="mt-4 flex w-full items-center justify-center gap-3 rounded-2xl border border-[#D3A84C]/35 bg-white px-5 py-4 text-sm font-semibold text-[#173D32] shadow-[0_10px_30px_rgba(23,61,50,0.08)] transition hover:-translate-y-0.5 hover:shadow-lg"
+          >
+            <span className="grid h-9 w-9 place-items-center rounded-full bg-[#173D32] text-[#D6B15A]">
+              <Gift className="h-4 w-4" />
+            </span>
+            <span>🎁 Inviter un ami</span>
+          </button>
+        )}
+
+        {!isInstalled && (
+          <button
+            type="button"
+            onClick={() => void saveCardOnPhone()}
+            className="mt-4 flex w-full items-center justify-center gap-3 rounded-2xl bg-[#D6B15A] px-5 py-4 text-sm font-semibold text-[#17130f] shadow-lg transition hover:brightness-105"
+          >
+            <span className="text-lg">▣</span>
+            Enregistrer ma carte sur mon téléphone
+          </button>
+        )}
+
         <p className="mt-2 text-center text-[10px] text-ink/40">Ajoutez-la à votre écran d’accueil ou partagez votre carte.</p>
+
+        {referralOpen && (
+          <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#10231d]/55 p-3 backdrop-blur-sm sm:items-center sm:p-6">
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="public-referral-title"
+              className="w-full max-w-[430px] overflow-hidden rounded-[2rem] bg-[#F7F7F3] shadow-2xl"
+            >
+              <div className="relative bg-[#173D32] px-6 pb-7 pt-6 text-white">
+                <button
+                  type="button"
+                  onClick={() => setReferralOpen(false)}
+                  aria-label="Fermer"
+                  className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+
+                <div className="pr-10">
+                  <div className="mb-3 grid h-11 w-11 place-items-center rounded-2xl bg-[#D6B15A] text-[#173D32]">
+                    <Gift className="h-5 w-5" />
+                  </div>
+                  <h2 id="public-referral-title" className="font-display text-2xl">
+                    Inviter un ami
+                  </h2>
+                  <p className="mt-1 text-sm text-white/65">
+                    Partagez votre code et invitez un proche à rejoindre le programme fidélité.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4 p-5">
+                {referralLoading ? (
+                  <div className="rounded-2xl bg-white px-4 py-8 text-center shadow-sm">
+                    <div className="mx-auto h-7 w-7 animate-spin rounded-full border-2 border-[#173D32] border-t-transparent" />
+                    <p className="mt-3 text-sm text-[#173D32]/60">Chargement de votre code…</p>
+                  </div>
+                ) : referralCode ? (
+                  <>
+                    <div className="rounded-2xl border border-[#D3A84C]/35 bg-white p-5 text-center shadow-sm">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#173D32]/45">
+                        Votre code de parrainage
+                      </p>
+                      <p className="mt-2 font-mono text-3xl font-bold tracking-[0.22em] text-[#173D32]">
+                        {referralCode}
+                      </p>
+                    </div>
+
+                    <div className="rounded-2xl bg-[#173D32]/[0.06] p-4">
+                      <p className="whitespace-pre-line text-sm leading-6 text-[#173D32]/80">
+                        {referralMessage}
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => void shareReferral()}
+                      className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#173D32] px-5 py-4 text-sm font-semibold text-white shadow-lg transition hover:brightness-110"
+                    >
+                      <Share2 className="h-4 w-4" />
+                      Partager maintenant
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => void copyReferralCode()}
+                      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#173D32]/12 bg-white px-5 py-3.5 text-sm font-semibold text-[#173D32] transition hover:bg-[#173D32]/[0.04]"
+                    >
+                      <Link2 className="h-4 w-4" />
+                      {referralCopied ? 'Code copié ✓' : 'Copier le code'}
+                    </button>
+                  </>
+                ) : (
+                  <div className="rounded-2xl bg-white p-5 text-center shadow-sm">
+                    <p className="text-sm leading-6 text-[#173D32]/65">
+                      Votre code de parrainage n’est pas encore disponible.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );
