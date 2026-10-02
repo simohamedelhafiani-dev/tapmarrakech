@@ -36,6 +36,7 @@ function getContrastColor(color: string) {
 export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
   const [qr, setQr] = useState('');
   const [scale, setScale] = useState(1);
+  const [frame, setFrame] = useState<HTMLDivElement | null>(null);
 
   const isStamp =
     config.type === 'STAMP' ||
@@ -86,21 +87,25 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
   }, [config.qrValue]);
 
   useEffect(() => {
+    if (!frame) return;
+
     const resize = () => {
-      const availableWidth = window.innerWidth - 32;
-      const availableHeight = window.innerHeight - 32;
+      const availableWidth = Math.max(1, frame.clientWidth - 32);
+      const availableHeight = Math.max(1, frame.clientHeight - 32);
 
       setScale(Math.min(1, availableWidth / CARD_WIDTH, availableHeight / CARD_HEIGHT));
     };
 
     resize();
-    window.addEventListener('resize', resize);
 
-    return () => window.removeEventListener('resize', resize);
-  }, []);
+    const observer = new ResizeObserver(resize);
+    observer.observe(frame);
+
+    return () => observer.disconnect();
+  }, [frame]);
 
   return (
-    <div className="bg-slate-100 w-full h-full flex items-center justify-center p-4 overflow-hidden">
+    <div ref={setFrame} className="bg-slate-100 h-full min-h-0 w-full flex-1 flex items-center justify-center p-4 overflow-hidden">
       <div
         className="max-w-full max-h-full flex items-center justify-center"
         style={{ width: CARD_WIDTH * scale, height: CARD_HEIGHT * scale }}
