@@ -119,7 +119,7 @@ BEGIN
   IF p_stamp_goal < 1 OR p_stamp_goal > 10 THEN RAISE EXCEPTION 'Le nombre de tampons doit être compris entre 1 et 10'; END IF;
   IF p_program_type = 'POINTS_DISCOUNT'
      AND (p_discount_percent IS NULL OR p_discount_percent <= 0 OR p_discount_percent > 100)
-    THEN RAISE EXCEPTION 'La réduction doit être comprise entre 1 et 100%'; END IF;
+    THEN RAISE EXCEPTION 'La réduction doit être comprise entre 1 et 100%%'; END IF;
   IF p_program_type = 'POINTS_DISCOUNT'
      AND (p_discount_points_threshold IS NULL OR p_discount_points_threshold < 1)
     THEN RAISE EXCEPTION 'Le seuil de points doit être supérieur à 0'; END IF;
