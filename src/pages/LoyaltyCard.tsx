@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Gift, Link2, Share2, X } from 'lucide-react';
+import QRCode from 'qrcode';
 import type { ReactNode } from 'react';
 
 type BeforeInstallPromptEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }> };
@@ -59,6 +60,7 @@ export default function LoyaltyCard() {
   const [referralOpen, setReferralOpen] = useState(false);
   const [referralLoading, setReferralLoading] = useState(false);
   const [referralCopied, setReferralCopied] = useState(false);
+  const [referralQrDataUrl, setReferralQrDataUrl] = useState('');
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [rewards, setRewards] = useState<LoyaltyExperienceReward[]>([]);
   const [loading, setLoading] = useState(true);
@@ -96,12 +98,42 @@ export default function LoyaltyCard() {
     await loadReferralCode();
   }
 
+  const referralUrl = referralCode
+    ? `${window.location.origin}/loyalty/join?ref=${encodeURIComponent(referralCode)}`
+    : '';
+
+  useEffect(() => {
+    if (!referralOpen || !referralUrl) {
+      setReferralQrDataUrl('');
+      return;
+    }
+
+    let active = true;
+
+    void QRCode.toDataURL(referralUrl, {
+      width: 240,
+      margin: 1,
+      errorCorrectionLevel: 'M',
+      color: {
+        dark: '#173D32',
+        light: '#FFFFFF',
+      },
+    }).then(dataUrl => {
+      if (active) setReferralQrDataUrl(dataUrl);
+    }).catch(error => {
+      console.error('Failed to generate referral QR code:', error);
+      if (active) setReferralQrDataUrl('');
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [referralOpen, referralUrl]);
+
   const referralMessage = referralCode
     ? `🎁 Je t’invite à rejoindre le programme fidélité de ${card?.establishment_name || 'cet établissement'}.
 
-Utilise mon code de parrainage : ${referralCode}
-
-Tu peux rejoindre le programme fidélité et profiter des avantages proposés par l’établissement.`
+Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
     : '';
 
   async function shareReferral() {
@@ -112,7 +144,7 @@ Tu peux rejoindre le programme fidélité et profiter des avantages proposés pa
         await navigator.share({
           title: `Invitation fidélité — ${card?.establishment_name || 'Programme fidélité'}`,
           text: referralMessage,
-          url: cardUrl,
+          url: referralUrl,
         });
         return;
       }
@@ -530,10 +562,27 @@ Tu peux rejoindre le programme fidélité et profiter des avantages proposés pa
                   <>
                     <div className="rounded-2xl border border-[#D3A84C]/35 bg-white p-5 text-center shadow-sm">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#173D32]/45">
-                        Votre code de parrainage
+                        Inviter avec votre QR Code
                       </p>
-                      <p className="mt-2 font-mono text-3xl font-bold tracking-[0.22em] text-[#173D32]">
-                        {referralCode}
+
+                      <div className="mx-auto mt-4 flex min-h-[260px] w-full items-center justify-center rounded-2xl bg-white p-3">
+                        {referralQrDataUrl ? (
+                          <img
+                            src={referralQrDataUrl}
+                            alt="QR Code de parrainage"
+                            className="h-[240px] w-[240px] max-w-full rounded-xl"
+                          />
+                        ) : (
+                          <div className="h-[240px] w-[240px] animate-pulse rounded-xl bg-[#eef0ed]" />
+                        )}
+                      </div>
+
+                      <p className="mt-3 text-[10px] text-[#173D32]/45">
+                        Scannez ce QR Code pour rejoindre le programme fidélité.
+                      </p>
+
+                      <p className="mt-2 break-all text-[10px] leading-4 text-[#173D32]/45">
+                        {referralUrl}
                       </p>
                     </div>
 
@@ -558,7 +607,7 @@ Tu peux rejoindre le programme fidélité et profiter des avantages proposés pa
                       className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#173D32]/12 bg-white px-5 py-3.5 text-sm font-semibold text-[#173D32] transition hover:bg-[#173D32]/[0.04]"
                     >
                       <Link2 className="h-4 w-4" />
-                      {referralCopied ? 'Code copié ✓' : 'Copier le code'}
+                      {referralCopied ? 'Lien copié ✓' : 'Copier le lien'}
                     </button>
                   </>
                 ) : (
