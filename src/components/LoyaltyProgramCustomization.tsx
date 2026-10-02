@@ -4,6 +4,7 @@ import QRCode from 'qrcode';
 import { supabase } from '@/lib/supabase';
 import { defaultLoyaltyDesignConfig, type LoyaltyDesignConfig } from './LoyaltyCardVisual';
 import { LoyaltyExperience, type LoyaltyExperienceConfig } from './loyalty/LoyaltyExperience';
+import LoyaltyPreview from './loyalty/LoyaltyPreview';
 import { useLoyaltyManager, type LoyaltyReferralBonusType, type LoyaltyReferralConfig } from '@/hooks/useLoyaltyManager';
 
 type CardMode = 'QR' | 'STAMP';
@@ -620,7 +621,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
           </div>
         </div>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_0.9fr]">
+        <div className="mt-6 grid items-stretch gap-6 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)]">
           <div className="space-y-5">
             <div className="flex items-center gap-2 rounded-2xl border border-ink/10 bg-[#fafaf8] p-1">
               {(['Structure', 'Acquisition', 'Design'] as const).map(tab => (
@@ -1065,13 +1066,13 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
             </div>
           </div>
 
-          <div id="loyalty-preview" className="scroll-mt-6 rounded-2xl border border-ink/10 bg-[#f7f7f3] p-4">
+          <div id="loyalty-preview" className="scroll-mt-6 flex min-h-[70vh] flex-col rounded-[28px] border border-ink/10 bg-[#f7f7f3] p-4 shadow-inner sm:p-6">
             <div className="flex items-center justify-between">
               <div><p className="text-[10px] font-bold uppercase tracking-[.16em] text-gold">Aperçu en temps réel</p><p className="mt-1 text-xs text-ink/45">Voici exactement ce que vos clients verront.</p></div>
               <span className="rounded-full bg-white px-3 py-1.5 text-[10px] font-semibold text-forest shadow-sm">Client</span>
             </div>
-            <div className="mx-auto mt-5 w-full max-w-[430px]">
-              <LoyaltyExperience config={visualExperience} />
+            <div className="mt-5 flex flex-1 items-center justify-center">
+              <LoyaltyPreview config={visualExperience} />
 
               <div className="mt-4 rounded-[22px] border border-ink/10 bg-white p-4 shadow-sm">
                 <div className="flex items-center justify-between gap-3">
