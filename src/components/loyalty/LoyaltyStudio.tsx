@@ -631,7 +631,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
         </div>
 
         <div className="flex items-center gap-2">
-          <span className={\`hidden rounded-full px-3 py-1.5 text-[10px] font-semibold sm:inline-flex \${design.published ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}\`}>
+          <span className={`hidden rounded-full px-3 py-1.5 text-[10px] font-semibold sm:inline-flex ${design.published ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
             {design.published ? 'Publié' : 'Brouillon'}
           </span>
           <button
@@ -675,14 +675,14 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                     key={item.id}
                     type="button"
                     onClick={() => setTab(item.id)}
-                    className={\`group rounded-xl px-3 py-3 text-left transition \${active ? 'bg-white shadow-sm' : 'text-ink/45 hover:bg-white/60'}\`}
+                    className={`group rounded-xl px-3 py-3 text-left transition ${active ? 'bg-white shadow-sm' : 'text-ink/45 hover:bg-white/60'}`}
                   >
                     <span className="flex items-center gap-2.5">
-                      <span className={\`grid h-8 w-8 shrink-0 place-items-center rounded-lg \${active ? 'bg-forest text-white' : 'bg-white text-ink/40'}\`}>
+                      <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ${active ? 'bg-forest text-white' : 'bg-white text-ink/40'}`}>
                         <Icon size={15} />
                       </span>
                       <span className="min-w-0">
-                        <span className={\`block truncate text-xs font-bold \${active ? 'text-forest' : 'text-ink/55'}\`}>{item.label}</span>
+                        <span className={`block truncate text-xs font-bold ${active ? 'text-forest' : 'text-ink/55'}`}>{item.label}</span>
                         <span className="block truncate text-[9px] uppercase tracking-[.12em] text-ink/30">{item.caption}</span>
                       </span>
                     </span>
@@ -716,7 +716,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                         key={item.id}
                         type="button"
                         onClick={() => setProgram(current => ({ ...current, programType: item.id }))}
-                        className={\`rounded-2xl border p-4 text-left transition \${active ? 'border-forest bg-forest/[.04] ring-2 ring-forest/10' : 'border-ink/10 hover:border-forest/20'}\`}
+                        className={`rounded-2xl border p-4 text-left transition ${active ? 'border-forest bg-forest/[.04] ring-2 ring-forest/10' : 'border-ink/10 hover:border-forest/20'}`}
                       >
                         <Icon size={18} className={active ? 'text-gold' : 'text-ink/35'} />
                         <p className="mt-3 text-sm font-semibold text-forest">{item.label}</p>
@@ -840,7 +840,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                 <div className="mb-5 grid gap-3 md:grid-cols-3">
                   <Metric label="Récompenses" value={rewards.length} />
                   <Metric label="Actives" value={rewards.filter(reward => reward.active).length} />
-                  <Metric label="Plus petit seuil" value={rewards.length ? \`\${Math.min(...rewards.map(r => r.points_required))} pts\` : '—'} />
+                  <Metric label="Plus petit seuil" value={rewards.length ? `${Math.min(...rewards.map(r => r.points_required))} pts` : '—'} />
                 </div>
 
                 <div className="space-y-2">
@@ -860,12 +860,12 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                       <div className="min-w-[150px] flex-1">
                         <div className="flex flex-wrap items-center gap-2">
                           <p className="text-xs font-semibold text-forest">{reward.name}</p>
-                          <span className={\`rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-[.12em] \${reward.active ? 'bg-emerald-50 text-emerald-700' : 'bg-ink/5 text-ink/35'}\`}>
+                          <span className={`rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-[.12em] ${reward.active ? 'bg-emerald-50 text-emerald-700' : 'bg-ink/5 text-ink/35'}`}>
                             {reward.active ? 'Active' : 'Inactive'}
                           </span>
                         </div>
                         <p className="mt-1 text-[10px] text-ink/40">
-                          {reward.points_required} points · {reward.reward_type === 'DISCOUNT' ? \`\${reward.discount_percent ?? 0}% de réduction\` : 'Cadeau'}
+                          {reward.points_required} points · {reward.reward_type === 'DISCOUNT' ? `${reward.discount_percent ?? 0}% de réduction` : 'Cadeau'}
                         </p>
                         {reward.description && <p className="mt-1 truncate text-[10px] text-ink/30">{reward.description}</p>}
                       </div>
@@ -1008,7 +1008,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                         key={item.id}
                         type="button"
                         onClick={() => selectTemplate(item.id)}
-                        className={\`overflow-hidden rounded-2xl border text-left transition \${active ? 'border-forest ring-2 ring-forest/10' : 'border-ink/10 hover:border-forest/20'}\`}
+                        className={`overflow-hidden rounded-2xl border text-left transition ${active ? 'border-forest ring-2 ring-forest/10' : 'border-ink/10 hover:border-forest/20'}`}
                       >
                         <div className="relative h-20 overflow-hidden" style={{ background: item.background }}>
                           <div className="absolute inset-x-3 bottom-3 h-1 rounded-full" style={{ background: item.accent }} />
@@ -1062,7 +1062,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   <ColorField label="Bouton" value={design.buttonColor} onChange={value => updateColor('buttonColor', value)} />
                 </div>
                 <div className="mt-5">
-                  <Field label={\`Rayon des angles · \${design.borderRadius}px\`}>
+                  <Field label={`Rayon des angles · ${design.borderRadius}px`}>
                     <input type="range" min="8" max="40" value={design.borderRadius} onChange={e => setDesign(current => ({ ...current, templateId: 'custom', borderRadius: Number(e.target.value) }))} className="w-full accent-forest" />
                   </Field>
                 </div>
@@ -1070,7 +1070,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   <Field label="Style des tampons">
                     <div className="grid grid-cols-4 gap-2">
                       {(['circles', 'squares', 'stars', 'hearts'] as const).map(style => (
-                        <button key={style} type="button" onClick={() => setDesign(current => ({ ...current, stampStyle: style }))} className={\`rounded-xl border px-2 py-2.5 text-[10px] font-semibold capitalize \${design.stampStyle === style ? 'border-forest bg-forest text-white' : 'border-ink/10 text-ink/45'}\`}>
+                        <button key={style} type="button" onClick={() => setDesign(current => ({ ...current, stampStyle: style }))} className={`rounded-xl border px-2 py-2.5 text-[10px] font-semibold capitalize ${design.stampStyle === style ? 'border-forest bg-forest text-white' : 'border-ink/10 text-ink/45'}`}>
                           {style === 'circles' ? 'Ronds' : style === 'squares' ? 'Carrés' : style === 'stars' ? 'Étoiles' : 'Cœurs'}
                         </button>
                       ))}
@@ -1103,14 +1103,14 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                 <p className="text-[9px] uppercase tracking-[.16em] text-gold">Carte actuelle</p>
                 <p className="mt-1 text-sm font-semibold text-forest">{establishment.name}</p>
               </div>
-              <span className={\`h-2.5 w-2.5 rounded-full \${previewChannelReady ? 'bg-emerald-500' : 'bg-amber-400'}\`} title={previewChannelReady ? 'Synchronisation active' : 'Connexion en cours'} />
+              <span className={`h-2.5 w-2.5 rounded-full ${previewChannelReady ? 'bg-emerald-500' : 'bg-amber-400'}`} title={previewChannelReady ? 'Synchronisation active' : 'Connexion en cours'} />
             </div>
             <p className="mt-2 text-[10px] leading-4 text-ink/35">
               {program.programType === 'STAMP'
-                ? \`\${program.stampGoal} tampons\`
+                ? `${program.stampGoal} tampons`
                 : program.programType === 'POINTS_DISCOUNT'
-                  ? \`\${program.discountPointsThreshold} points · \${program.discountPercent}%\`
-                  : \`\${program.pointsPerCurrency} point(s) / MAD\`}
+                  ? `${program.discountPointsThreshold} points · ${program.discountPercent}%`
+                  : `${program.pointsPerCurrency} point(s) / MAD`}
             </p>
           </div>
         </aside>
@@ -1159,9 +1159,9 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (checked: b
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className={\`relative h-7 w-12 shrink-0 rounded-full p-1 transition \${checked ? 'bg-forest' : 'bg-ink/15'}\`}
+      className={`relative h-7 w-12 shrink-0 rounded-full p-1 transition ${checked ? 'bg-forest' : 'bg-ink/15'}`}
     >
-      <span className={\`block h-5 w-5 rounded-full bg-white shadow-sm transition \${checked ? 'translate-x-5' : 'translate-x-0'}\`} />
+      <span className={`block h-5 w-5 rounded-full bg-white shadow-sm transition ${checked ? 'translate-x-5' : 'translate-x-0'}`} />
     </button>
   );
 }
