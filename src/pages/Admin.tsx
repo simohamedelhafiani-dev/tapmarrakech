@@ -1826,7 +1826,7 @@ function EstablishmentWorkspace({
           </div>
           <div className="flex flex-wrap gap-2">
             {scannerLink && <a href={scannerLink} target="_blank" rel="noreferrer" className="rounded-3xl border border-gold/30 bg-[#111111] px-4 py-3 text-xs font-semibold text-[#E1C27A] transition hover:border-gold hover:bg-[#111111]">Scanner fidélité ↗</a>}
-            <a href={publicLink} target="_blank" rel="noreferrer" className="rounded-3xl bg-[#111111] px-4 py-3 text-center text-xs font-semibold text-[#FFFFFF] shadow-lg shadow-forest/10 transition hover:bg-[#111111]-light">Ouvrir la page publique ↗</a>
+            <a href={publicLink} target="_blank" rel="noreferrer" className="rounded-3xl bg-[#111111] px-4 py-3 text-center text-xs font-semibold text-[#FFFFFF] shadow-lg shadow-black/30 transition hover:bg-[#C9A45C] hover:text-[#050505]">Ouvrir la page publique ↗</a>
           </div>
         </div>
       </div>
