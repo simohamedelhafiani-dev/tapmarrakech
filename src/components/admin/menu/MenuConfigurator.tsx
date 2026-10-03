@@ -31,7 +31,7 @@ type MenuConfiguratorProps = {
   categories: MenuCategory[];
   itemsByCategory: Record<string, MenuItem[]>;
   establishmentName?: string;
-  onApplyAiCandidate: (candidate: { design: Record<string, unknown>; template: MenuTemplate }) => void;
+  onApplyAiCandidate: (candidate: { design: Record<string, unknown>; template: MenuTemplate; photoMode: 'with_photos' | 'without_photos' }) => void;
 };
 
 const navigationModes: Array<{ id: MenuNavigationMode; label: string; description: string }> = [
