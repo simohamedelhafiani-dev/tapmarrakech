@@ -143,7 +143,7 @@ export function LoyaltyProgress({ config }: { config: LoyaltyExperienceConfig })
           <span className="rounded-full px-3 py-1.5 text-[10px] font-semibold" style={{ color: config.primaryColor, background: config.secondaryColor + '22' }}>{remaining > 0 ? `Encore ${remaining}` : 'Objectif atteint'}</span>
         </div>
         <div className="mt-4 grid grid-cols-5 gap-2">{Array.from({ length: goal }).map((_, i) => <StampIcon key={i} filled={i < Math.min(current, goal)} />)}</div>
-        <p className="mt-3 text-xs opacity-55">{config.progressLabel || (remaining > 0 ? `Encore ${remaining} tampon(s) avant votre récompense` : current > goal ? `${current - goal} tampon(s) supplémentaire(s) seront conservés après la récompense` : 'Votre récompense est disponible')}</p>
+        <p className="mt-3 text-xs opacity-55">{config.progressLabel || (remaining > 0 ? `Encore ${remaining} tampon(s) avant votre récompense` : 'Votre récompense est disponible · après réclamation, le compteur repart à 0')}</p>
       </div>
     );
   }
@@ -169,7 +169,7 @@ export function LoyaltyProgress({ config }: { config: LoyaltyExperienceConfig })
       <div className="rounded-[24px] p-5 text-white shadow-[0_14px_35px_rgba(0,0,0,.12)]" style={{ background: config.primaryColor }}>
         <p className="text-[9px] font-bold uppercase tracking-[0.2em] opacity-55">Avantage fidélité</p>
         <div className="mt-1 flex items-end justify-between gap-4"><p className="text-5xl font-bold tracking-tight">-{config.discountPercent ?? 10}%</p><Ticket size={32} style={{ color: config.secondaryColor }}/></div>
-        <p className="mt-2 text-xs opacity-70">{config.discountExpiresAt ? `Valable jusqu’au ${new Date(config.discountExpiresAt).toLocaleDateString('fr-FR')}` : 'Votre avantage est disponible'}</p>
+        <p className="mt-2 text-xs opacity-70">{config.discountExpiresAt ? `Achats illimités avec cet avantage jusqu’au ${new Date(config.discountExpiresAt).toLocaleDateString('fr-FR')}` : 'Votre avantage est disponible sur plusieurs achats'}</p>
       </div>
     );
   }
