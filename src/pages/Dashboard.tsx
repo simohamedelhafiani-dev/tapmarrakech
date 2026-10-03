@@ -150,46 +150,6 @@ const ranges = [
   },
 ];
 
-function Stat({
-  label,
-  value,
-  detail,
-  icon: Icon,
-  accent,
-}: {
-  label: string;
-  value: string | number;
-  detail: string;
-  icon: typeof Star;
-  accent: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-ink/5 bg-white p-5 shadow-soft">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs font-medium text-ink/50">
-            {label}
-          </p>
-
-          <p className="mt-3 font-display text-3xl text-forest">
-            {value}
-          </p>
-        </div>
-
-        <div
-          className={`grid h-10 w-10 place-items-center rounded-xl ${accent}`}
-        >
-          <Icon size={18} />
-        </div>
-      </div>
-
-      <p className="mt-4 text-[11px] text-ink/45">
-        {detail}
-      </p>
-    </div>
-  );
-}
-
 export default function Dashboard() {
   const { user, role } = useAuth();
 
