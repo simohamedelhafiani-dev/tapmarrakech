@@ -538,12 +538,8 @@ export default function Admin() {
     <div className="min-h-screen bg-[#050505] text-[#EDE9DF] selection:bg-[#C9A45C]/30">
       <header className="sticky top-0 z-50 border-b border-[#242424] bg-[#050505]/95 px-3 py-3 backdrop-blur-2xl sm:px-5">
         <div className="mx-auto flex max-w-[1700px] items-center gap-3">
-          <button type="button" onClick={() => setSection('overview')} className="flex shrink-0 items-center gap-3 text-left" aria-label="KELYANI">
-            <KelyaniMark size={40} />
-            <div className="hidden sm:block">
-              <p className="font-display text-lg tracking-[.08em] text-[#E1C27A]">KELYANI</p>
-              <p className="text-[8px] font-semibold uppercase tracking-[.24em] text-[#F5F5DC]/35">Command Center</p>
-            </div>
+          <button type="button" onClick={() => setSection('overview')} className="flex shrink-0 items-center text-left" aria-label="KELYANI">
+            <KelyaniMark size={120} />
           </button>
 
           <div className="mx-auto hidden min-w-0 flex-1 max-w-2xl md:block">
