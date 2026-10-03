@@ -635,7 +635,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
         </div>
 
         <div className="flex items-center gap-2">
-          <span className={`hidden rounded-full px-3 py-1.5 text-[10px] font-semibold sm:inline-flex ${design.published ? 'bg-[#111111] text-[#E1C27A]' : 'bg-[#111111] text-[#F5F5DC]'}
+          <span className={`hidden rounded-full px-3 py-1.5 text-[10px] font-semibold sm:inline-flex ${design.published ? 'bg-[#111111] text-[#E1C27A]' : 'bg-[#111111] text-[#F5F5DC]'}`}>
             {design.published ? 'Publié' : 'Brouillon'}
           </span>
           <button
@@ -682,11 +682,11 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                     className={`group rounded-xl px-3 py-3 text-left transition ${active ? 'bg-[#111111] shadow-sm' : 'text-[#F5F5DC] hover:bg-[#111111]/60'}`}
                   >
                     <span className="flex items-center gap-2.5">
-                      <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ${active ? 'bg-gold-gradient text-[#050505]' : 'bg-[#111111] text-[#F5F5DC]
+                      <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ${active ? 'bg-gold-gradient text-[#050505]' : 'bg-[#111111] text-[#F5F5DC]'}`}>
                         <Icon size={15} />
                       </span>
                       <span className="min-w-0">
-                        <span className={`block truncate text-xs font-bold ${active ? 'text-[#E1C27A]' : 'text-[#F5F5DC]
+                        <span className={`block truncate text-xs font-bold ${active ? 'text-[#E1C27A]' : 'text-[#F5F5DC]'}`}>
                         <span className="block truncate text-[9px] uppercase tracking-[.12em] text-[#F5F5DC]">{item.caption}</span>
                       </span>
                     </span>
@@ -912,7 +912,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                       <div className="min-w-[150px] flex-1">
                         <div className="flex flex-wrap items-center gap-2">
                           <p className="text-xs font-semibold text-[#E1C27A]">{reward.name}</p>
-                          <span className={`rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-[.12em] ${reward.active ? 'bg-[#111111] text-[#E1C27A]' : 'bg-[#111111] text-[#F5F5DC]'}
+                          <span className={`rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-[.12em] ${reward.active ? 'bg-[#111111] text-[#E1C27A]' : 'bg-[#111111] text-[#F5F5DC]'}`}>
                             {reward.active ? 'Active' : 'Inactive'}
                           </span>
                         </div>
@@ -1155,7 +1155,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                 <p className="text-[9px] uppercase tracking-[.16em] text-gold">Carte actuelle</p>
                 <p className="mt-1 text-sm font-semibold text-[#E1C27A]">{establishment.name}</p>
               </div>
-              <span className={`h-2.5 w-2.5 rounded-full ${previewChannelReady ? 'bg-[#C9A45C]' : 'bg-[#242424]'} title={previewChannelReady ? 'Synchronisation active' : 'Connexion en cours'} />
+              <span className={`h-2.5 w-2.5 rounded-full ${previewChannelReady ? 'bg-[#C9A45C]' : 'bg-[#242424]'}`} title={previewChannelReady ? 'Synchronisation active' : 'Connexion en cours'} />
             </div>
             <p className="mt-2 text-[10px] leading-4 text-[#F5F5DC]">
               {program.programType === 'STAMP'
