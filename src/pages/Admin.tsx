@@ -543,12 +543,12 @@ export default function Admin() {
         />
       )}
 
-      <header className="sticky top-0 z-50 border-b border-white/[.06] bg-[#050505]/85 px-3 py-3 backdrop-blur-2xl sm:px-5">
+      <header className="sticky top-0 z-50 border-b border-[#242424] bg-[#050505]/85 px-3 py-3 backdrop-blur-2xl sm:px-5">
         <div className="mx-auto flex max-w-[1700px] items-center gap-3">
           <button
             type="button"
             onClick={() => setOpen(!open)}
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-white/10 bg-white/[.04] text-white/70 lg:hidden"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-3xl border border-[#242424] bg-[#111111] text-[#FFFFFF] lg:hidden"
             aria-label="Navigation"
           >
             <Menu size={18} />
@@ -556,11 +556,11 @@ export default function Admin() {
 
           <button type="button" onClick={() => setSection('overview')} className="shrink-0 text-left">
             <p className="font-display text-2xl tracking-[.08em] text-[#E1C27A]">KELYANI</p>
-            <p className="hidden text-[8px] font-semibold uppercase tracking-[.28em] text-white/35 sm:block">Command Center</p>
+            <p className="hidden text-[8px] font-semibold uppercase tracking-[.28em] text-[#FFFFFF] sm:block">Command Center</p>
           </button>
 
           <nav
-            className={`absolute left-3 right-3 top-[72px] z-50 flex max-h-[calc(100vh-90px)] flex-col gap-1 overflow-y-auto rounded-[24px] border border-white/10 bg-[#111111]/95 p-2 shadow-luxury backdrop-blur-2xl lg:static lg:ml-6 lg:flex lg:max-h-none lg:flex-1 lg:flex-row lg:items-center lg:justify-center lg:overflow-visible lg:rounded-full lg:border-white/[.07] lg:bg-white/[.035] lg:p-1 ${open ? 'flex' : 'hidden'} lg:flex`}
+            className={`absolute left-3 right-3 top-[72px] z-50 flex max-h-[calc(100vh-90px)] flex-col gap-1 overflow-y-auto rounded-[24px] border border-[#242424] bg-[#111111]/95 p-2 shadow-luxury backdrop-blur-2xl lg:static lg:ml-6 lg:flex lg:max-h-none lg:flex-1 lg:flex-row lg:items-center lg:justify-center lg:overflow-visible lg:rounded-full lg:border-[#242424] lg:bg-[#111111] lg:p-1 ${open ? 'flex' : 'hidden'} lg:flex`}
           >
             {menuItems.map(({ id, label, icon: Icon }) => {
               const active = section === id;
@@ -569,7 +569,7 @@ export default function Admin() {
                   key={id}
                   type="button"
                   onClick={() => { setSection(id); setOpen(false); }}
-                  className={`group flex shrink-0 items-center gap-2 rounded-full px-3 py-2.5 text-[10px] font-semibold transition-all ${active ? 'bg-gold-gradient text-[#050505] shadow-gold' : 'text-white/45 hover:bg-white/[.06] hover:text-white'}`}
+                  className={`group flex shrink-0 items-center gap-2 rounded-full px-3 py-2.5 text-[10px] font-semibold transition-all ${active ? 'bg-gold-gradient text-[#050505] shadow-gold' : 'text-[#FFFFFF] hover:bg-[#111111] hover:text-[#FFFFFF]'}`}
                 >
                   <Icon size={14} strokeWidth={1.8} />
                   <span className="hidden xl:inline">{label}</span>
@@ -579,22 +579,22 @@ export default function Admin() {
           </nav>
 
           <div className="ml-auto flex shrink-0 items-center gap-2">
-            <label className="hidden items-center rounded-full border border-white/10 bg-white/[.04] px-3 py-2 text-[10px] font-semibold text-white/55 sm:flex">
+            <label className="hidden items-center rounded-full border border-[#242424] bg-[#111111] px-3 py-2 text-[10px] font-semibold text-[#FFFFFF] sm:flex">
               <select value={language} onChange={(event) => setLanguage(event.target.value as Language)} aria-label="Language" className="bg-transparent outline-none">
                 <option className="bg-[#111111]" value="fr">FR</option>
                 <option className="bg-[#111111]" value="en">EN</option>
                 <option className="bg-[#111111]" value="ar">AR</option>
               </select>
             </label>
-            <button type="button" className="relative grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/[.04] text-white/55" aria-label="Notifications">
+            <button type="button" className="relative grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#FFFFFF]" aria-label="Notifications">
               <Bell size={16} />
               <span className="absolute right-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-[#C9A45C]" />
             </button>
-            <button type="button" onClick={reloadAll} className="hidden h-10 items-center gap-2 rounded-full border border-white/10 bg-white/[.04] px-3 text-[10px] font-semibold text-white/55 transition hover:border-[#C9A45C]/40 hover:text-white sm:flex">
+            <button type="button" onClick={reloadAll} className="hidden h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#FFFFFF] transition hover:border-[#C9A45C]/40 hover:text-[#FFFFFF] sm:flex">
               <RefreshCw size={13} />
               Actualiser
             </button>
-            <button type="button" onClick={logout} className="grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/[.04] text-white/55 transition hover:border-[#C9A45C]/40 hover:text-[#E1C27A]" aria-label="Déconnexion">
+            <button type="button" onClick={logout} className="grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#FFFFFF] transition hover:border-[#C9A45C]/40 hover:text-[#E1C27A]" aria-label="Déconnexion">
               <LogOut size={15} />
             </button>
           </div>
@@ -690,13 +690,13 @@ export default function Admin() {
             <section className="space-y-5">
               {establishments.length > 0 ? (
                 <>
-                  <div className="rounded-2xl border border-ink/5 bg-white p-4 shadow-sm">
-                    <label className="block max-w-md text-xs font-semibold text-forest">
+                  <div className="rounded-3xl border border-[#242424] bg-[#111111] p-4 shadow-sm">
+                    <label className="block max-w-md text-xs font-semibold text-[#E1C27A]">
                       Établissement
                       <select
                         value={selectedEstablishmentId ?? ''}
                         onChange={(event) => setSelectedEstablishmentId(event.target.value || null)}
-                        className="mt-2 w-full rounded-xl border border-ink/10 bg-white px-3 py-3 text-sm font-normal text-ink outline-none focus:border-forest"
+                        className="mt-2 w-full rounded-3xl border border-[#242424] bg-[#111111] px-3 py-3 text-sm font-normal text-[#F5F5DC] outline-none focus:border-[#242424]"
                       >
                         {establishments.map((establishment) => (
                           <option key={establishment.id} value={establishment.id}>
@@ -711,10 +711,10 @@ export default function Admin() {
                   )}
                 </>
               ) : (
-                <div className="rounded-2xl border border-ink/5 bg-white p-10 text-center shadow-sm">
+                <div className="rounded-3xl border border-[#242424] bg-[#111111] p-10 text-center shadow-sm">
                   <Gem className="mx-auto text-gold" size={28} />
-                  <h2 className="mt-3 font-display text-2xl text-forest">Fidélité</h2>
-                  <p className="mt-2 text-sm text-ink/45">Créez d’abord un établissement pour configurer son programme de fidélité.</p>
+                  <h2 className="mt-3 font-display text-2xl text-[#E1C27A]">Fidélité</h2>
+                  <p className="mt-2 text-sm text-[#F5F5DC]">Créez d’abord un établissement pour configurer son programme de fidélité.</p>
                 </div>
               )}
             </section>
@@ -949,11 +949,11 @@ function Overview({
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
         <div>
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-forest/45">Vue globale</p>
-          <h2 className="text-3xl font-semibold tracking-tight text-ink md:text-[38px]">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#E1C27A]">Vue globale</p>
+          <h2 className="text-3xl font-semibold tracking-tight text-[#F5F5DC] md:text-[38px]">
             Bonjour, Administrateur 👋
           </h2>
-          <p className="mt-2 text-sm text-ink/50">
+          <p className="mt-2 text-sm text-[#F5F5DC]">
             Voici un aperçu de la performance de votre plateforme aujourd’hui.
           </p>
         </div>
@@ -961,7 +961,7 @@ function Overview({
           <select
             value={selectedEstablishment}
             onChange={(event) => setSelectedEstablishment(event.target.value)}
-            className="rounded-xl border border-ink/10 bg-white px-4 py-3 text-xs font-semibold text-ink shadow-sm outline-none"
+            className="rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-xs font-semibold text-[#F5F5DC] shadow-sm outline-none"
           >
             <option value="all">Tous les établissements</option>
             {establishments.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
@@ -1006,64 +1006,64 @@ function Overview({
       />
 
       <div className="grid gap-5 xl:grid-cols-[1.65fr_.85fr]">
-        <div className="rounded-3xl border border-ink/5 bg-white p-6 shadow-soft">
+        <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-soft">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-forest/45">Pilotage</p>
-              <h3 className="mt-1 text-lg font-semibold text-ink">Performance de la plateforme</h3>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#E1C27A]">Pilotage</p>
+              <h3 className="mt-1 text-lg font-semibold text-[#F5F5DC]">Performance de la plateforme</h3>
             </div>
-            <span className="rounded-full bg-forest/5 px-3 py-1.5 text-[10px] font-semibold text-forest">Temps réel</span>
+            <span className="rounded-full bg-[#111111] px-3 py-1.5 text-[10px] font-semibold text-[#E1C27A]">Temps réel</span>
           </div>
 
           <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <div className="rounded-2xl bg-[#f7f7f3] p-5">
-              <p className="text-xs text-ink/45">Avis</p>
-              <p className="mt-2 text-3xl font-semibold text-forest">{detailLoading ? '—' : detail.reviews.toLocaleString('fr-FR')}</p>
-              <p className="mt-1 text-[11px] text-ink/35">note moyenne {detailLoading ? '—' : detail.averageRating.toFixed(1)} / 5</p>
+            <div className="rounded-3xl bg-[#111111] p-5">
+              <p className="text-xs text-[#F5F5DC]">Avis</p>
+              <p className="mt-2 text-3xl font-semibold text-[#E1C27A]">{detailLoading ? '—' : detail.reviews.toLocaleString('fr-FR')}</p>
+              <p className="mt-1 text-[11px] text-[#F5F5DC]">note moyenne {detailLoading ? '—' : detail.averageRating.toFixed(1)} / 5</p>
             </div>
-            <div className="rounded-2xl bg-[#f7f7f3] p-5">
-              <p className="text-xs text-ink/45">Fidélité</p>
-              <p className="mt-2 text-3xl font-semibold text-forest">{detailLoading ? '—' : detail.loyaltyCustomers.toLocaleString('fr-FR')}</p>
-              <p className="mt-1 text-[11px] text-ink/35">clients actifs</p>
+            <div className="rounded-3xl bg-[#111111] p-5">
+              <p className="text-xs text-[#F5F5DC]">Fidélité</p>
+              <p className="mt-2 text-3xl font-semibold text-[#E1C27A]">{detailLoading ? '—' : detail.loyaltyCustomers.toLocaleString('fr-FR')}</p>
+              <p className="mt-1 text-[11px] text-[#F5F5DC]">clients actifs</p>
             </div>
-            <div className="rounded-2xl bg-[#f7f7f3] p-5">
-              <p className="text-xs text-ink/45">Activité</p>
-              <p className="mt-2 text-3xl font-semibold text-forest">{detailLoading ? '—' : detail.analyticsEvents.toLocaleString('fr-FR')}</p>
-              <p className="mt-1 text-[11px] text-ink/35">événements analytics</p>
+            <div className="rounded-3xl bg-[#111111] p-5">
+              <p className="text-xs text-[#F5F5DC]">Activité</p>
+              <p className="mt-2 text-3xl font-semibold text-[#E1C27A]">{detailLoading ? '—' : detail.analyticsEvents.toLocaleString('fr-FR')}</p>
+              <p className="mt-1 text-[11px] text-[#F5F5DC]">événements analytics</p>
             </div>
           </div>
 
-          <div className="mt-5 rounded-2xl border border-forest/10 bg-forest p-5 text-white">
+          <div className="mt-5 rounded-3xl border border-[#242424] bg-[#111111] p-5 text-[#FFFFFF]">
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-gold">Fidélité</p>
                 <h4 className="mt-1 text-lg font-semibold">Une expérience qui fait revenir les clients.</h4>
-                <p className="mt-1 text-xs text-white/55">CA fidélité sélectionné : {detail.loyaltyRevenue.toLocaleString('fr-FR')} DH</p>
+                <p className="mt-1 text-xs text-[#FFFFFF]">CA fidélité sélectionné : {detail.loyaltyRevenue.toLocaleString('fr-FR')} DH</p>
               </div>
-              <button onClick={() => onNavigate('codes')} className="rounded-xl bg-gold px-4 py-2.5 text-xs font-bold text-forest transition hover:bg-gold/90">Gérer la fidélité →</button>
+              <button onClick={() => onNavigate('codes')} className="rounded-3xl bg-gold px-4 py-2.5 text-xs font-bold text-[#E1C27A] transition hover:bg-gold/90">Gérer la fidélité →</button>
             </div>
           </div>
         </div>
 
-        <div className="rounded-3xl border border-ink/5 bg-white p-6 shadow-soft">
+        <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-soft">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-forest/45">Activité</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#E1C27A]">Activité</p>
               <h3 className="mt-1 text-lg font-semibold">Derniers établissements</h3>
             </div>
-            <button onClick={() => onNavigate('establishments')} className="text-xs font-semibold text-forest">Voir tout →</button>
+            <button onClick={() => onNavigate('establishments')} className="text-xs font-semibold text-[#E1C27A]">Voir tout →</button>
           </div>
           <div className="mt-5 space-y-2">
             {recent.length === 0 ? (
-              <p className="py-8 text-center text-sm text-ink/35">Aucun établissement.</p>
+              <p className="py-8 text-center text-sm text-[#F5F5DC]">Aucun établissement.</p>
             ) : recent.map((item) => (
-              <button key={item.id} onClick={() => onNavigate('establishments')} className="flex w-full items-center gap-3 rounded-xl p-3 text-left transition hover:bg-[#f7f7f3]">
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-forest/10 text-forest"><Building2 size={17} /></div>
+              <button key={item.id} onClick={() => onNavigate('establishments')} className="flex w-full items-center gap-3 rounded-3xl p-3 text-left transition hover:bg-[#111111]">
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-3xl bg-[#111111] text-[#E1C27A]"><Building2 size={17} /></div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold">{item.name}</p>
-                  <p className="mt-0.5 text-[11px] text-ink/35">/{item.slug}</p>
+                  <p className="mt-0.5 text-[11px] text-[#F5F5DC]">/{item.slug}</p>
                 </div>
-                <span className="text-[10px] font-semibold text-forest">Ouvrir →</span>
+                <span className="text-[10px] font-semibold text-[#E1C27A]">Ouvrir →</span>
               </button>
             ))}
           </div>
@@ -1071,30 +1071,30 @@ function Overview({
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[1.2fr_.8fr]">
-        <div className="rounded-3xl border border-ink/5 bg-white p-6 shadow-soft">
+        <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-soft">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-forest/45">Accès rapide</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#E1C27A]">Accès rapide</p>
               <h3 className="mt-1 text-lg font-semibold">Actions administrateur</h3>
             </div>
           </div>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             {quickActions.map(({ id, label, icon: Icon }) => (
-              <button key={id} onClick={() => onNavigate(id)} className="group flex items-center gap-3 rounded-2xl border border-ink/5 bg-[#fbfbf8] p-4 text-left transition hover:-translate-y-0.5 hover:border-forest/15 hover:bg-white hover:shadow-sm">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-forest shadow-sm group-hover:bg-forest group-hover:text-white"><Icon size={17} /></span>
+              <button key={id} onClick={() => onNavigate(id)} className="group flex items-center gap-3 rounded-3xl border border-[#242424] bg-[#111111] p-4 text-left transition hover:-translate-y-0.5 hover:border-[#242424] hover:bg-[#111111] hover:shadow-sm">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-3xl bg-[#111111] text-[#E1C27A] shadow-sm group-hover:bg-[#111111] group-hover:text-[#FFFFFF]"><Icon size={17} /></span>
                 <span className="text-xs font-semibold">{label}</span>
               </button>
             ))}
           </div>
         </div>
 
-        <div className="rounded-3xl border border-ink/5 bg-white p-6 shadow-soft">
+        <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-soft">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-forest/45">Santé plateforme</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#E1C27A]">Santé plateforme</p>
               <h3 className="mt-1 text-lg font-semibold">Statistiques rapides</h3>
             </div>
-            <button onClick={() => onNavigate('system')} className="text-xs font-semibold text-forest">Supervision →</button>
+            <button onClick={() => onNavigate('system')} className="text-xs font-semibold text-[#E1C27A]">Supervision →</button>
           </div>
           <div className="mt-5 space-y-3">
             <QuickStat label="Événements analytics" value={globalStats.analyticsEvents.toLocaleString('fr-FR')} />
@@ -1119,23 +1119,23 @@ function AdminMetric({ icon: Icon, label, value, detail }: { icon: typeof Star; 
     <div
       data-kpi-label={label}
       data-kpi-value={String(value)}
-      className="rounded-2xl border border-ink/5 bg-white p-4 shadow-soft"
+      className="rounded-3xl border border-[#242424] bg-[#111111] p-4 shadow-soft"
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="grid h-10 w-10 place-items-center rounded-xl bg-forest/10 text-forest"><Icon size={18} /></div>
+        <div className="grid h-10 w-10 place-items-center rounded-3xl bg-[#111111] text-[#E1C27A]"><Icon size={18} /></div>
       </div>
-      <p className="mt-4 text-xs font-medium text-ink/45">{label}</p>
-      <p className="mt-1 text-2xl font-semibold tracking-tight text-ink">{value}</p>
-      <p className="mt-1 text-[10px] text-ink/35">{detail}</p>
+      <p className="mt-4 text-xs font-medium text-[#F5F5DC]">{label}</p>
+      <p className="mt-1 text-2xl font-semibold tracking-tight text-[#F5F5DC]">{value}</p>
+      <p className="mt-1 text-[10px] text-[#F5F5DC]">{detail}</p>
     </div>
   );
 }
 
 function QuickStat({ label, value, alert = false }: { label: string; value: string; alert?: boolean }) {
   return (
-    <div className="flex items-center justify-between rounded-xl bg-[#f7f7f3] px-4 py-3">
-      <span className="text-xs text-ink/50">{label}</span>
-      <span className={`text-sm font-semibold ${alert ? 'text-red-600' : 'text-forest'}`}>{value}</span>
+    <div className="flex items-center justify-between rounded-3xl bg-[#111111] px-4 py-3">
+      <span className="text-xs text-[#F5F5DC]">{label}</span>
+      <span className={`text-sm font-semibold ${alert ? 'text-[#E1C27A] : 'text-[#E1C27A]'}`}>{value}</span>
     </div>
   );
 }
@@ -1808,63 +1808,63 @@ function EstablishmentWorkspace({
 
   return (
     <>
-      <div className="relative mb-6 overflow-hidden rounded-[30px] border border-ink/5 bg-white p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] sm:p-8">
+      <div className="relative mb-6 overflow-hidden rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] sm:p-8">
         <div className="absolute right-0 top-0 h-44 w-44 rounded-full bg-gold/10 blur-3xl" />
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <button onClick={onBack} className="mb-5 inline-flex items-center gap-2 text-[11px] font-semibold text-forest/65 transition hover:text-forest">← Retour aux établissements</button>
+            <button onClick={onBack} className="mb-5 inline-flex items-center gap-2 text-[11px] font-semibold text-[#E1C27A] transition hover:text-[#E1C27A]">← Retour aux établissements</button>
             <div className="flex items-center gap-4">
-              <div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-forest text-2xl font-display text-gold shadow-lg shadow-forest/10">
+              <div className="grid h-16 w-16 shrink-0 place-items-center rounded-3xl bg-[#111111] text-2xl font-display text-gold shadow-lg shadow-forest/10">
                 {(profile.name ?? establishment.name)?.[0]?.toUpperCase()}
               </div>
               <div>
                 <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">Espace établissement</p>
-                <h2 className="font-display text-3xl tracking-tight text-forest sm:text-4xl">{profile.name ?? establishment.name}</h2>
-                <p className="mt-1 text-xs text-ink/40">{businessType} · espace de gestion complet</p>
+                <h2 className="font-display text-3xl tracking-tight text-[#E1C27A] sm:text-4xl">{profile.name ?? establishment.name}</h2>
+                <p className="mt-1 text-xs text-[#F5F5DC]">{businessType} · espace de gestion complet</p>
               </div>
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            {scannerLink && <a href={scannerLink} target="_blank" rel="noreferrer" className="rounded-xl border border-gold/30 bg-[#fdf9ef] px-4 py-3 text-xs font-semibold text-forest transition hover:border-gold hover:bg-white">Scanner fidélité ↗</a>}
-            <a href={publicLink} target="_blank" rel="noreferrer" className="rounded-xl bg-forest px-4 py-3 text-center text-xs font-semibold text-white shadow-lg shadow-forest/10 transition hover:bg-forest-light">Ouvrir la page publique ↗</a>
+            {scannerLink && <a href={scannerLink} target="_blank" rel="noreferrer" className="rounded-3xl border border-gold/30 bg-[#111111] px-4 py-3 text-xs font-semibold text-[#E1C27A] transition hover:border-gold hover:bg-[#111111]">Scanner fidélité ↗</a>}
+            <a href={publicLink} target="_blank" rel="noreferrer" className="rounded-3xl bg-[#111111] px-4 py-3 text-center text-xs font-semibold text-[#FFFFFF] shadow-lg shadow-forest/10 transition hover:bg-[#111111]-light">Ouvrir la page publique ↗</a>
           </div>
         </div>
       </div>
 
-      <div className="mb-6 overflow-hidden rounded-[28px] border border-forest/10 bg-forest text-white shadow-[0_18px_55px_rgba(23,61,50,0.14)]">
+      <div className="mb-6 overflow-hidden rounded-3xl border border-[#242424] bg-[#111111] text-[#FFFFFF] shadow-[0_18px_55px_rgba(23,61,50,0.14)]">
         <div className="grid lg:grid-cols-[1fr_210px]">
           <div className="relative p-6 sm:p-7">
             <div className="absolute -right-20 -top-20 h-52 w-52 rounded-full bg-gold/10 blur-3xl" />
             <div className="relative">
               <div className="flex items-center gap-2">
-                <span className="grid h-9 w-9 place-items-center rounded-xl bg-gold text-forest"><Gift size={16} /></span>
+                <span className="grid h-9 w-9 place-items-center rounded-3xl bg-gold text-[#E1C27A]"><Gift size={16} /></span>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold">Accès équipe</p>
                   <h3 className="mt-1 text-lg font-semibold">Scanner fidélité</h3>
                 </div>
               </div>
-              <p className="mt-4 max-w-xl text-xs leading-5 text-white/60">Le responsable peut scanner ce QR code directement avec son téléphone pour ouvrir l’espace de scan et ajouter les points aux cartes clients.</p>
+              <p className="mt-4 max-w-xl text-xs leading-5 text-[#FFFFFF]">Le responsable peut scanner ce QR code directement avec son téléphone pour ouvrir l’espace de scan et ajouter les points aux cartes clients.</p>
               <div className="mt-5 flex flex-wrap gap-2">
-                {scannerLink && <button type="button" onClick={() => navigator.clipboard.writeText(scannerLink).then(() => alert('Lien scanner copié.'))} className="rounded-xl bg-white px-4 py-2.5 text-xs font-semibold text-forest transition hover:bg-white/90">Copier le lien</button>}
-                {scannerLink && <a href={scannerLink} target="_blank" rel="noreferrer" className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-white/15">Ouvrir le scanner ↗</a>}
+                {scannerLink && <button type="button" onClick={() => navigator.clipboard.writeText(scannerLink).then(() => alert('Lien scanner copié.'))} className="rounded-3xl bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#E1C27A] transition hover:bg-[#111111]">Copier le lien</button>}
+                {scannerLink && <a href={scannerLink} target="_blank" rel="noreferrer" className="rounded-3xl border border-[#242424] bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#FFFFFF] transition hover:bg-[#111111]">Ouvrir le scanner ↗</a>}
               </div>
-              <p className="mt-4 break-all text-[10px] text-white/30">{scannerLink ?? 'Génération du lien sécurisé…'}</p>
+              <p className="mt-4 break-all text-[10px] text-[#FFFFFF]">{scannerLink ?? 'Génération du lien sécurisé…'}</p>
             </div>
           </div>
-          <div className="flex items-center justify-center border-t border-white/10 bg-white/[0.04] p-5 lg:border-l lg:border-t-0">
+          <div className="flex items-center justify-center border-t border-[#242424] bg-[#111111] p-5 lg:border-l lg:border-t-0">
             {scannerQr ? (
-              <div className="rounded-[22px] bg-white p-3 shadow-xl shadow-black/10">
-                <img src={scannerQr} alt="QR code du scanner fidélité" className="h-40 w-40 rounded-xl" />
+              <div className="rounded-[22px] bg-[#111111] p-3 shadow-xl shadow-black/10">
+                <img src={scannerQr} alt="QR code du scanner fidélité" className="h-40 w-40 rounded-3xl" />
               </div>
             ) : (
-              <div className="grid h-40 w-40 place-items-center rounded-[22px] border border-white/10 bg-white/5 text-center text-[10px] text-white/35">QR en cours…</div>
+              <div className="grid h-40 w-40 place-items-center rounded-[22px] border border-[#242424] bg-[#111111] text-center text-[10px] text-[#FFFFFF]">QR en cours…</div>
             )}
           </div>
         </div>
       </div>
 
-      <div className="mb-6 flex gap-2 overflow-x-auto rounded-2xl border border-ink/5 bg-white p-2 shadow-sm">
-        {tabs.map((x) => <button key={x.id} onClick={() => setTab(x.id)} className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-xs font-semibold ${tab === x.id ? 'bg-forest text-white' : 'text-ink/55 hover:bg-[#f7f7f3]'}`}>{x.label}</button>)}
+      <div className="mb-6 flex gap-2 overflow-x-auto rounded-3xl border border-[#242424] bg-[#111111] p-2 shadow-sm">
+        {tabs.map((x) => <button key={x.id} onClick={() => setTab(x.id)} className={`whitespace-nowrap rounded-3xl px-4 py-2.5 text-xs font-semibold ${tab === x.id ? 'bg-[#111111] text-[#FFFFFF]' : 'text-[#F5F5DC] hover:bg-[#111111]'}`}>{x.label}</button>)}
       </div>
 
       {tab === 'profile' && (
@@ -1880,23 +1880,23 @@ function EstablishmentWorkspace({
 
       {editingMenuItemId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl">
-            <div className="flex items-start justify-between gap-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Édition du produit</p><h3 className="mt-1 text-xl font-semibold text-forest">Modifier le produit</h3></div><button type="button" onClick={() => setEditingMenuItemId(null)} className="rounded-xl p-2 text-ink/40 hover:bg-[#f7f7f3]"><X size={18} /></button></div>
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-[#111111] p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Édition du produit</p><h3 className="mt-1 text-xl font-semibold text-[#E1C27A]">Modifier le produit</h3></div><button type="button" onClick={() => setEditingMenuItemId(null)} className="rounded-3xl p-2 text-[#F5F5DC] hover:bg-[#111111]"><X size={18} /></button></div>
             <div className="mt-6 grid gap-4 md:grid-cols-2">
-              <label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">Nom du produit</span><input value={editingMenuItem.name} onChange={(e) => setEditingMenuItem((v) => ({ ...v, name: e.target.value }))} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></label>
-              <label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">Catégorie</span><select value={editingMenuItem.category_id} onChange={(e) => setEditingMenuItem((v) => ({ ...v, category_id: e.target.value }))} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm">{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
-              <label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">Prix (MAD)</span><input type="number" min="0" step="0.01" value={editingMenuItem.price} onChange={(e) => setEditingMenuItem((v) => ({ ...v, price: e.target.value }))} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></label>
-              <label className="block"><span className="mb-1 block text-xs font-medium text-ink/50">URL photo</span><input value={editingMenuItem.image_url} onChange={(e) => setEditingMenuItem((v) => ({ ...v, image_url: e.target.value }))} placeholder="https://..." className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></label>
-              <label className="block md:col-span-2"><span className="mb-1 block text-xs font-medium text-ink/50">Description / composants</span><textarea rows={5} value={editingMenuItem.description} onChange={(e) => setEditingMenuItem((v) => ({ ...v, description: e.target.value }))} placeholder="Ex. tomates, mozzarella, basilic, huile d'olive..." className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></label>
+              <label className="block"><span className="mb-1 block text-xs font-medium text-[#F5F5DC]">Nom du produit</span><input value={editingMenuItem.name} onChange={(e) => setEditingMenuItem((v) => ({ ...v, name: e.target.value }))} className="w-full rounded-3xl border border-[#242424] px-3 py-2.5 text-sm" /></label>
+              <label className="block"><span className="mb-1 block text-xs font-medium text-[#F5F5DC]">Catégorie</span><select value={editingMenuItem.category_id} onChange={(e) => setEditingMenuItem((v) => ({ ...v, category_id: e.target.value }))} className="w-full rounded-3xl border border-[#242424] px-3 py-2.5 text-sm">{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
+              <label className="block"><span className="mb-1 block text-xs font-medium text-[#F5F5DC]">Prix (MAD)</span><input type="number" min="0" step="0.01" value={editingMenuItem.price} onChange={(e) => setEditingMenuItem((v) => ({ ...v, price: e.target.value }))} className="w-full rounded-3xl border border-[#242424] px-3 py-2.5 text-sm" /></label>
+              <label className="block"><span className="mb-1 block text-xs font-medium text-[#F5F5DC]">URL photo</span><input value={editingMenuItem.image_url} onChange={(e) => setEditingMenuItem((v) => ({ ...v, image_url: e.target.value }))} placeholder="https://..." className="w-full rounded-3xl border border-[#242424] px-3 py-2.5 text-sm" /></label>
+              <label className="block md:col-span-2"><span className="mb-1 block text-xs font-medium text-[#F5F5DC]">Description / composants</span><textarea rows={5} value={editingMenuItem.description} onChange={(e) => setEditingMenuItem((v) => ({ ...v, description: e.target.value }))} placeholder="Ex. tomates, mozzarella, basilic, huile d'olive..." className="w-full rounded-3xl border border-[#242424] px-3 py-2.5 text-sm" /></label>
             </div>
-            <div className="mt-4 rounded-2xl border border-dashed border-ink/15 bg-[#f7f7f3] p-4"><div className="flex flex-col gap-4 sm:flex-row sm:items-center"><div className="h-28 w-28 shrink-0 overflow-hidden rounded-2xl bg-white">{editingMenuItem.image_url ? <img src={editingMenuItem.image_url} alt="" className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-xs text-ink/30">Pas de photo</div>}</div><div><p className="text-sm font-semibold text-forest">Photo du produit</p><p className="mt-1 text-xs text-ink/40">JPG, PNG ou WEBP.</p><label className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white"><Upload size={14} />{menuImageUploading ? 'Envoi…' : 'Choisir une photo'}<input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={menuImageUploading} onChange={(e) => { const file = e.target.files?.[0]; if (file) void uploadMenuItemImage(file); e.currentTarget.value = ''; }} /></label></div></div></div>
-            <div className="mt-6 flex justify-end gap-2"><button type="button" onClick={() => setEditingMenuItemId(null)} className="rounded-xl border border-ink/10 px-4 py-2.5 text-xs font-semibold">Annuler</button><button type="button" disabled={menuItemSaving || menuImageUploading} onClick={saveEditedMenuItem} className="rounded-xl bg-forest px-5 py-2.5 text-xs font-semibold text-white disabled:opacity-50">{menuItemSaving ? 'Enregistrement…' : 'Enregistrer les modifications'}</button></div>
+            <div className="mt-4 rounded-3xl border border-dashed border-[#242424] bg-[#111111] p-4"><div className="flex flex-col gap-4 sm:flex-row sm:items-center"><div className="h-28 w-28 shrink-0 overflow-hidden rounded-3xl bg-[#111111]">{editingMenuItem.image_url ? <img src={editingMenuItem.image_url} alt="" className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-xs text-[#F5F5DC]">Pas de photo</div>}</div><div><p className="text-sm font-semibold text-[#E1C27A]">Photo du produit</p><p className="mt-1 text-xs text-[#F5F5DC]">JPG, PNG ou WEBP.</p><label className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-3xl bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#FFFFFF]"><Upload size={14} />{menuImageUploading ? 'Envoi…' : 'Choisir une photo'}<input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={menuImageUploading} onChange={(e) => { const file = e.target.files?.[0]; if (file) void uploadMenuItemImage(file); e.currentTarget.value = ''; }} /></label></div></div></div>
+            <div className="mt-6 flex justify-end gap-2"><button type="button" onClick={() => setEditingMenuItemId(null)} className="rounded-3xl border border-[#242424] px-4 py-2.5 text-xs font-semibold">Annuler</button><button type="button" disabled={menuItemSaving || menuImageUploading} onClick={saveEditedMenuItem} className="rounded-3xl bg-[#111111] px-5 py-2.5 text-xs font-semibold text-[#FFFFFF] disabled:opacity-50">{menuItemSaving ? 'Enregistrement…' : 'Enregistrer les modifications'}</button></div>
           </div>
         </div>
       )}
-      {tab === 'promotions' && <div className="space-y-5"><div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Créer une promotion</h3><div className="mt-4 grid gap-3 md:grid-cols-4"><input value={promotion.name} onChange={(e) => setPromotion({ ...promotion, name: e.target.value })} placeholder="Nom" className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><input value={promotion.description} onChange={(e) => setPromotion({ ...promotion, description: e.target.value })} placeholder="Description" className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><input value={promotion.normal_price} onChange={(e) => setPromotion({ ...promotion, normal_price: e.target.value })} placeholder="Prix normal" type="number" className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /><input value={promotion.promo_price} onChange={(e) => setPromotion({ ...promotion, promo_price: e.target.value })} placeholder="Prix promo" type="number" className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm" /></div><button onClick={addPromotion} className="mt-3 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">Ajouter</button></div><div className="grid gap-3 md:grid-cols-2">{promotions.map((p) => <div key={p.id} className="rounded-2xl border border-ink/5 bg-white p-5"><div className="flex justify-between"><strong>{p.name}</strong><button onClick={async () => { const { error } = await supabase.from('promotions').update({ active: !p.active }).eq('id', p.id); if (error) alert(error.message); else loadTab(); }} className="text-xs text-ink/45">{p.active ? 'Actif' : 'Inactif'}</button></div><p className="mt-2 text-sm text-ink/55">{p.description || 'Sans description'}</p><p className="mt-3 text-sm font-semibold">{p.promo_price ?? '—'} MAD <span className="ml-2 text-xs text-ink/35 line-through">{p.normal_price ?? ''}</span></p></div>)}</div></div>}
+      {tab === 'promotions' && <div className="space-y-5"><div className="rounded-3xl border border-[#242424] bg-[#111111] p-5"><h3 className="font-semibold">Créer une promotion</h3><div className="mt-4 grid gap-3 md:grid-cols-4"><input value={promotion.name} onChange={(e) => setPromotion({ ...promotion, name: e.target.value })} placeholder="Nom" className="rounded-3xl border border-[#242424] px-3 py-2.5 text-sm" /><input value={promotion.description} onChange={(e) => setPromotion({ ...promotion, description: e.target.value })} placeholder="Description" className="rounded-3xl border border-[#242424] px-3 py-2.5 text-sm" /><input value={promotion.normal_price} onChange={(e) => setPromotion({ ...promotion, normal_price: e.target.value })} placeholder="Prix normal" type="number" className="rounded-3xl border border-[#242424] px-3 py-2.5 text-sm" /><input value={promotion.promo_price} onChange={(e) => setPromotion({ ...promotion, promo_price: e.target.value })} placeholder="Prix promo" type="number" className="rounded-3xl border border-[#242424] px-3 py-2.5 text-sm" /></div><button onClick={addPromotion} className="mt-3 rounded-3xl bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#FFFFFF]">Ajouter</button></div><div className="grid gap-3 md:grid-cols-2">{promotions.map((p) => <div key={p.id} className="rounded-3xl border border-[#242424] bg-[#111111] p-5"><div className="flex justify-between"><strong>{p.name}</strong><button onClick={async () => { const { error } = await supabase.from('promotions').update({ active: !p.active }).eq('id', p.id); if (error) alert(error.message); else loadTab(); }} className="text-xs text-[#F5F5DC]">{p.active ? 'Actif' : 'Inactif'}</button></div><p className="mt-2 text-sm text-[#F5F5DC]">{p.description || 'Sans description'}</p><p className="mt-3 text-sm font-semibold">{p.promo_price ?? '—'} MAD <span className="ml-2 text-xs text-[#F5F5DC] line-through">{p.normal_price ?? ''}</span></p></div>)}</div></div>}
 
-      {tab === 'reviews' && <div className="space-y-4"><div className="grid gap-3 md:grid-cols-3"><StatCard label="Avis" value={reviews.length} /><StatCard label="Note moyenne" value={reviews.length ? (reviews.reduce((a, r) => a + Number(r.rating || 0), 0) / reviews.length).toFixed(1) : '—'} /><StatCard label="Dernier avis" value={reviews[0] ? new Date(reviews[0].created_at).toLocaleDateString('fr-FR') : '—'} /></div><div className="rounded-2xl border border-ink/5 bg-white p-5">{reviews.length === 0 ? <p className="text-sm text-ink/45">Aucun avis.</p> : <div className="space-y-3">{reviews.map((r) => <div key={r.id} className="rounded-xl bg-[#f7f7f3] p-4"><div className="flex justify-between"><strong>{r.rating}/5</strong><span className="text-xs text-ink/35">{new Date(r.created_at).toLocaleDateString('fr-FR')}</span></div><p className="mt-2 text-sm text-ink/60">{r.feedback || r.comment || 'Aucun commentaire'}</p></div>)}</div>}</div></div>}
+      {tab === 'reviews' && <div className="space-y-4"><div className="grid gap-3 md:grid-cols-3"><StatCard label="Avis" value={reviews.length} /><StatCard label="Note moyenne" value={reviews.length ? (reviews.reduce((a, r) => a + Number(r.rating || 0), 0) / reviews.length).toFixed(1) : '—'} /><StatCard label="Dernier avis" value={reviews[0] ? new Date(reviews[0].created_at).toLocaleDateString('fr-FR') : '—'} /></div><div className="rounded-3xl border border-[#242424] bg-[#111111] p-5">{reviews.length === 0 ? <p className="text-sm text-[#F5F5DC]">Aucun avis.</p> : <div className="space-y-3">{reviews.map((r) => <div key={r.id} className="rounded-3xl bg-[#111111] p-4"><div className="flex justify-between"><strong>{r.rating}/5</strong><span className="text-xs text-[#F5F5DC]">{new Date(r.created_at).toLocaleDateString('fr-FR')}</span></div><p className="mt-2 text-sm text-[#F5F5DC]">{r.feedback || r.comment || 'Aucun commentaire'}</p></div>)}</div>}</div></div>}
 
       {tab === 'loyalty' && (
         <div className="space-y-5">
@@ -1908,12 +1908,12 @@ function EstablishmentWorkspace({
           </div>
 
           <div className="grid gap-5 md:grid-cols-2">
-            <div className="rounded-2xl border border-ink/5 bg-white p-5">
+            <div className="rounded-3xl border border-[#242424] bg-[#111111] p-5">
               <h3 className="font-semibold">Paramètres</h3>
 
               <div className="mt-4 flex gap-3">
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-ink/50">
+                  <span className="mb-1 block text-xs font-medium text-[#F5F5DC]">
                     Points par unité monétaire
                   </span>
                   <input
@@ -1927,12 +1927,12 @@ function EstablishmentWorkspace({
                         points_per_currency: Number(e.target.value),
                       })
                     }
-                    className="w-40 rounded-xl border border-ink/10 px-3 py-2.5 text-sm"
+                    className="w-40 rounded-3xl border border-[#242424] px-3 py-2.5 text-sm"
                   />
                 </label>
 
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-ink/50">
+                  <span className="mb-1 block text-xs font-medium text-[#F5F5DC]">
                     Devise
                   </span>
                   <select
@@ -1940,7 +1940,7 @@ function EstablishmentWorkspace({
                     onChange={(e) =>
                       setLoyalty({ ...loyalty, currency: e.target.value })
                     }
-                    className="rounded-xl border border-ink/10 px-3 py-2.5 text-sm"
+                    className="rounded-3xl border border-[#242424] px-3 py-2.5 text-sm"
                   >
                     <option value="MAD">MAD</option>
                     <option value="EUR">EUR</option>
@@ -1963,13 +1963,13 @@ function EstablishmentWorkspace({
                 type="button"
                 disabled={saving}
                 onClick={saveLoyaltySettings}
-                className="mt-4 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-4 rounded-3xl bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#FFFFFF] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {saving ? 'Enregistrement...' : 'Enregistrer'}
               </button>
             </div>
 
-            <div className="rounded-2xl border border-ink/5 bg-white p-5">
+            <div className="rounded-3xl border border-[#242424] bg-[#111111] p-5">
               <h3 className="font-semibold">Nouvelle récompense</h3>
 
               <div className="mt-4 space-y-3">
@@ -1979,7 +1979,7 @@ function EstablishmentWorkspace({
                     setReward({ ...reward, name: e.target.value })
                   }
                   placeholder="Nom"
-                  className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"
+                  className="w-full rounded-3xl border border-[#242424] px-3 py-2.5 text-sm"
                 />
 
                 <input
@@ -1994,7 +1994,7 @@ function EstablishmentWorkspace({
                   type="number"
                   min="1"
                   step="1"
-                  className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"
+                  className="w-full rounded-3xl border border-[#242424] px-3 py-2.5 text-sm"
                 />
 
                 <textarea
@@ -2004,14 +2004,14 @@ function EstablishmentWorkspace({
                   }
                   placeholder="Description"
                   rows={3}
-                  className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"
+                  className="w-full rounded-3xl border border-[#242424] px-3 py-2.5 text-sm"
                 />
 
                 <button
                   type="button"
                   disabled={saving}
                   onClick={addReward}
-                  className="rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-3xl bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#FFFFFF] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {saving ? 'Ajout...' : 'Ajouter'}
                 </button>
@@ -2019,25 +2019,25 @@ function EstablishmentWorkspace({
             </div>
           </div>
 
-          <div className="rounded-2xl border border-ink/5 bg-white p-5">
+          <div className="rounded-3xl border border-[#242424] bg-[#111111] p-5">
             <h3 className="font-semibold">Récompenses</h3>
 
             <div className="mt-4 grid gap-2 md:grid-cols-2">
               {rewards.length === 0 ? (
-                <p className="text-sm text-ink/45">
+                <p className="text-sm text-[#F5F5DC]">
                   Aucune récompense configurée.
                 </p>
               ) : (
                 rewards.map((rewardItem) => (
                   <div
                     key={rewardItem.id}
-                    className="flex items-center justify-between rounded-xl bg-[#f7f7f3] p-3"
+                    className="flex items-center justify-between rounded-3xl bg-[#111111] p-3"
                   >
                     <span>
                       <strong className="text-sm">
                         {rewardItem.name}
                       </strong>
-                      <span className="ml-2 text-xs text-ink/40">
+                      <span className="ml-2 text-xs text-[#F5F5DC]">
                         {rewardItem.points_required} pts
                       </span>
                     </span>
@@ -2046,7 +2046,7 @@ function EstablishmentWorkspace({
                       type="button"
                       disabled={saving}
                       onClick={() => toggleReward(rewardItem)}
-                      className="text-xs text-ink/45 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="text-xs text-[#F5F5DC] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {rewardItem.active ? 'Actif' : 'Inactif'}
                     </button>
@@ -2058,16 +2058,16 @@ function EstablishmentWorkspace({
         </div>
       )}
 
-      {tab === 'team' && <div className="rounded-2xl border border-ink/5 bg-white p-5"><h3 className="font-semibold">Équipe de l’établissement</h3><p className="mt-1 text-xs text-ink/45">Les comptes sont gérés depuis les sections Responsables / Employés de l’Admin.</p><div className="mt-5 space-y-2">{team.length === 0 ? <p className="text-sm text-ink/45">Aucun membre affecté.</p> : team.map((m) => <div key={m.id} className="flex justify-between rounded-xl bg-[#f7f7f3] p-3 text-sm"><span>{m.name}</span><span className="text-xs text-ink/45">{m.role} · {m.active ? 'Actif' : 'Inactif'}</span></div>)}</div></div>}
+      {tab === 'team' && <div className="rounded-3xl border border-[#242424] bg-[#111111] p-5"><h3 className="font-semibold">Équipe de l’établissement</h3><p className="mt-1 text-xs text-[#F5F5DC]">Les comptes sont gérés depuis les sections Responsables / Employés de l’Admin.</p><div className="mt-5 space-y-2">{team.length === 0 ? <p className="text-sm text-[#F5F5DC]">Aucun membre affecté.</p> : team.map((m) => <div key={m.id} className="flex justify-between rounded-3xl bg-[#111111] p-3 text-sm"><span>{m.name}</span><span className="text-xs text-[#F5F5DC]">{m.role} · {m.active ? 'Actif' : 'Inactif'}</span></div>)}</div></div>}
 
       {tab === 'analytics' && <div className="grid gap-4 md:grid-cols-3"><StatCard label="Événements enregistrés" value={eventsCount} /><StatCard label="Avis" value={reviews.length || '—'} /><StatCard label="Page publique" value={`/p/${establishment.slug}`} /></div>}
 
       {tab === 'public' && (
   <div className="space-y-5">
-    <div className="rounded-2xl border border-gold/20 bg-[#fbf8ee] p-6">
-      <p className="text-xs font-bold uppercase tracking-[0.14em] text-forest">Liens publics de l’établissement</p>
-      <h3 className="mt-2 text-xl font-semibold text-ink">Accès client</h3>
-      <p className="mt-2 text-sm text-ink/50">Tous les liens que l’Admin peut copier et ouvrir pour QR / NFC.</p>
+    <div className="rounded-3xl border border-gold/20 bg-[#111111] p-6">
+      <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#E1C27A]">Liens publics de l’établissement</p>
+      <h3 className="mt-2 text-xl font-semibold text-[#F5F5DC]">Accès client</h3>
+      <p className="mt-2 text-sm text-[#F5F5DC]">Tous les liens que l’Admin peut copier et ouvrir pour QR / NFC.</p>
       <div className="mt-5 grid gap-3 md:grid-cols-2">
         {[
           { label: 'Page établissement', description: 'Page publique principale', url: publicLink },
@@ -2075,25 +2075,25 @@ function EstablishmentWorkspace({
           { label: 'Menu digital', description: 'Accès direct au menu', url: window.location.origin + '/p/' + establishment.slug + '/menu' },
           { label: 'Avis Google', description: 'Accès direct à la section avis', url: window.location.origin + '/p/' + establishment.slug + '/reviews' },
         ].map((link) => (
-          <div key={link.label} className="rounded-2xl border border-ink/5 bg-white p-4">
-            <p className="text-sm font-semibold text-ink">{link.label}</p>
-            <p className="mt-1 text-xs text-ink/45">{link.description}</p>
-            <p className="mt-3 break-all rounded-lg bg-[#f7f7f3] p-2.5 text-[10px] text-ink/45">{link.url}</p>
+          <div key={link.label} className="rounded-3xl border border-[#242424] bg-[#111111] p-4">
+            <p className="text-sm font-semibold text-[#F5F5DC]">{link.label}</p>
+            <p className="mt-1 text-xs text-[#F5F5DC]">{link.description}</p>
+            <p className="mt-3 break-all rounded-lg bg-[#111111] p-2.5 text-[10px] text-[#F5F5DC]">{link.url}</p>
             <div className="mt-3 flex gap-2">
-              <button type="button" onClick={() => navigator.clipboard.writeText(link.url).then(() => alert('Lien copié.'))} className="rounded-xl bg-forest px-3 py-2 text-[11px] font-semibold text-white">Copier</button>
-              <a href={link.url} target="_blank" rel="noreferrer" className="rounded-xl border border-ink/10 px-3 py-2 text-[11px] font-semibold text-forest">Ouvrir ↗</a>
+              <button type="button" onClick={() => navigator.clipboard.writeText(link.url).then(() => alert('Lien copié.'))} className="rounded-3xl bg-[#111111] px-3 py-2 text-[11px] font-semibold text-[#FFFFFF]">Copier</button>
+              <a href={link.url} target="_blank" rel="noreferrer" className="rounded-3xl border border-[#242424] px-3 py-2 text-[11px] font-semibold text-[#E1C27A]">Ouvrir ↗</a>
             </div>
           </div>
         ))}
       </div>
     </div>
-    <div className="rounded-2xl border border-ink/5 bg-white p-6">
+    <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6">
       <h3 className="font-semibold">Templates</h3>
       <div className="mt-4 grid gap-3 md:grid-cols-2">
-        <label className="text-xs text-ink/50">Template page<select value={profile.page_template_id ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, page_template_id: e.target.value || null }))} className="mt-1 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"><option value="">Automatique / défaut</option>{templates.filter((t) => t.kind === 'page' && t.active).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label>
-        <label className="text-xs text-ink/50">Template menu<select value={profile.menu_template_id ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, menu_template_id: e.target.value || null }))} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm"><option value="">Automatique / défaut</option>{templates.filter((t) => t.kind === 'menu' && t.active).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label>
+        <label className="text-xs text-[#F5F5DC]">Template page<select value={profile.page_template_id ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, page_template_id: e.target.value || null }))} className="mt-1 w-full rounded-3xl border border-[#242424] px-3 py-2.5 text-sm"><option value="">Automatique / défaut</option>{templates.filter((t) => t.kind === 'page' && t.active).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label>
+        <label className="text-xs text-[#F5F5DC]">Template menu<select value={profile.menu_template_id ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, menu_template_id: e.target.value || null }))} className="mt-1 w-full rounded-3xl border border-[#242424] bg-[#111111] px-3 py-2.5 text-sm"><option value="">Automatique / défaut</option>{templates.filter((t) => t.kind === 'menu' && t.active).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label>
       </div>
-      <button onClick={saveTemplates} disabled={saving} className="mt-4 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-40">Enregistrer les templates</button>
+      <button onClick={saveTemplates} disabled={saving} className="mt-4 rounded-3xl bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#FFFFFF] disabled:opacity-40">Enregistrer les templates</button>
     </div>
   </div>
       )}
@@ -2111,16 +2111,16 @@ function StatCard({
   value: string | number;
 }) {
   return (
-    <div className="rounded-2xl border border-ink/5 bg-white p-5 shadow-sm">
+    <div className="rounded-3xl border border-[#242424] bg-[#111111] p-5 shadow-sm">
       <div className="flex items-center justify-between">
         {Icon ? (
-          <div className="grid h-10 w-10 place-items-center rounded-xl bg-forest/10 text-forest">
+          <div className="grid h-10 w-10 place-items-center rounded-3xl bg-[#111111] text-[#E1C27A]">
             <Icon size={19} />
           </div>
         ) : null}
-        <span className="text-2xl font-semibold text-forest">{value}</span>
+        <span className="text-2xl font-semibold text-[#E1C27A]">{value}</span>
       </div>
-      <p className="mt-3 text-xs font-medium text-ink/50">{label}</p>
+      <p className="mt-3 text-xs font-medium text-[#F5F5DC]">{label}</p>
     </div>
   );
 }
@@ -2193,14 +2193,14 @@ function CreateEstablishmentForm({
   };
 
   return (
-    <div className="mb-6 rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
+    <div className="mb-6 rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
       <div className="mb-5 flex items-center justify-between">
         <div>
           <h3 className="text-base font-semibold">
             Nouvel établissement
           </h3>
 
-          <p className="mt-1 text-xs text-ink/40">
+          <p className="mt-1 text-xs text-[#F5F5DC]">
             Créez d’abord l’établissement. Vous pourrez ensuite
             créer son responsable et ses employés.
           </p>
@@ -2208,7 +2208,7 @@ function CreateEstablishmentForm({
 
         <button
           onClick={close}
-          className="text-ink/40 hover:text-ink"
+          className="text-[#F5F5DC] hover:text-[#F5F5DC]"
         >
           <X size={20} />
         </button>
@@ -2224,7 +2224,7 @@ function CreateEstablishmentForm({
             value={name}
             onChange={(e) => handleNameChange(e.target.value)}
             placeholder="Ex : Restaurant Atlas"
-            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none transition focus:border-forest"
+            className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm outline-none transition focus:border-[#242424]"
           />
         </div>
 
@@ -2239,7 +2239,7 @@ function CreateEstablishmentForm({
               setSlug(generateSlug(e.target.value))
             }
             placeholder="restaurant-atlas"
-            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none transition focus:border-forest"
+            className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm outline-none transition focus:border-[#242424]"
           />
         </div>
 
@@ -2251,7 +2251,7 @@ function CreateEstablishmentForm({
           <select
             value={aiBusinessTypeId}
             onChange={(e) => setAIBusinessTypeId(e.target.value)}
-            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+            className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#242424]"
           >
             <option value="">Sélectionner le type de commerce</option>
             {businessTypes.filter((type) => type.active).map((type) => (
@@ -2261,7 +2261,7 @@ function CreateEstablishmentForm({
             ))}
           </select>
 
-          <p className="mt-2 text-[11px] text-ink/35">
+          <p className="mt-2 text-[11px] text-[#F5F5DC]">
             Ce choix détermine le comportement de l’analyse IA pour cet établissement.
           </p>
         </div>
@@ -2270,7 +2270,7 @@ function CreateEstablishmentForm({
       <div className="mt-5 flex justify-end gap-3">
         <button
           onClick={close}
-          className="rounded-xl border border-ink/10 px-5 py-3 text-sm font-medium"
+          className="rounded-3xl border border-[#242424] px-5 py-3 text-sm font-medium"
         >
           Annuler
         </button>
@@ -2278,7 +2278,7 @@ function CreateEstablishmentForm({
         <button
           onClick={create}
           disabled={saving}
-          className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+          className="rounded-3xl bg-[#111111] px-5 py-3 text-sm font-semibold text-[#FFFFFF] disabled:opacity-50"
         >
           {saving ? 'Création...' : 'Créer l’établissement'}
         </button>
@@ -2327,15 +2327,15 @@ function ResponsiblesSection({
     <div>
       <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#E1C27A]">
             Administration
           </p>
 
-          <h2 className="font-display text-3xl text-forest md:text-4xl">
+          <h2 className="font-display text-3xl text-[#E1C27A] md:text-4xl">
             Responsables
           </h2>
 
-          <p className="mt-2 text-sm text-ink/50">
+          <p className="mt-2 text-sm text-[#F5F5DC]">
             Créez et gérez les responsables de chaque établissement.
           </p>
         </div>
@@ -2343,16 +2343,16 @@ function ResponsiblesSection({
         <button
           onClick={() => setShowForm(true)}
           disabled={establishments.length === 0}
-          className="inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white transition hover:bg-forest-light disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex items-center gap-2 rounded-3xl bg-[#111111] px-5 py-3 text-sm font-semibold text-[#FFFFFF] transition hover:bg-[#111111]-light disabled:cursor-not-allowed disabled:opacity-40"
         >
           <UserPlus size={16} />
           Nouveau responsable
         </button>
       </div>
 
-      <div className="mb-5 max-w-xl rounded-2xl border border-ink/5 bg-white p-4 shadow-sm">
+      <div className="mb-5 max-w-xl rounded-3xl border border-[#242424] bg-[#111111] p-4 shadow-sm">
         <label className="mb-2 block text-xs font-semibold">Établissement sélectionné</label>
-        <select value={selectedEstablishment} onChange={(e) => setSelectedEstablishment(e.target.value)} className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest">
+        <select value={selectedEstablishment} onChange={(e) => setSelectedEstablishment(e.target.value)} className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#242424]">
           <option value="all">Tous les établissements</option>
           {establishments.map((establishment) => <option key={establishment.id} value={establishment.id}>{establishment.name}</option>)}
         </select>
@@ -2367,9 +2367,9 @@ function ResponsiblesSection({
         />
       )}
 
-      <div className="overflow-hidden rounded-2xl border border-ink/5 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-3xl border border-[#242424] bg-[#111111] shadow-sm">
         {loading ? (
-          <div className="p-8 text-sm text-ink/40">
+          <div className="p-8 text-sm text-[#F5F5DC]">
             Chargement...
           </div>
         ) : visibleStaff.length === 0 ? (
@@ -2438,15 +2438,15 @@ function EmployeesSection({
     <div>
       <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#E1C27A]">
             Administration
           </p>
 
-          <h2 className="font-display text-3xl text-forest md:text-4xl">
+          <h2 className="font-display text-3xl text-[#E1C27A] md:text-4xl">
             Employés
           </h2>
 
-          <p className="mt-2 text-sm text-ink/50">
+          <p className="mt-2 text-sm text-[#F5F5DC]">
             Créez et gérez les employés rattachés aux établissements.
           </p>
         </div>
@@ -2454,16 +2454,16 @@ function EmployeesSection({
         <button
           onClick={() => setShowForm(true)}
           disabled={establishments.length === 0}
-          className="inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white transition hover:bg-forest-light disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex items-center gap-2 rounded-3xl bg-[#111111] px-5 py-3 text-sm font-semibold text-[#FFFFFF] transition hover:bg-[#111111]-light disabled:cursor-not-allowed disabled:opacity-40"
         >
           <UserPlus size={16} />
           Nouvel employé
         </button>
       </div>
 
-      <div className="mb-5 max-w-xl rounded-2xl border border-ink/5 bg-white p-4 shadow-sm">
+      <div className="mb-5 max-w-xl rounded-3xl border border-[#242424] bg-[#111111] p-4 shadow-sm">
         <label className="mb-2 block text-xs font-semibold">Établissement sélectionné</label>
-        <select value={selectedEstablishment} onChange={(e) => setSelectedEstablishment(e.target.value)} className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest">
+        <select value={selectedEstablishment} onChange={(e) => setSelectedEstablishment(e.target.value)} className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#242424]">
           <option value="all">Tous les établissements</option>
           {establishments.map((establishment) => <option key={establishment.id} value={establishment.id}>{establishment.name}</option>)}
         </select>
@@ -2478,9 +2478,9 @@ function EmployeesSection({
         />
       )}
 
-      <div className="overflow-hidden rounded-2xl border border-ink/5 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-3xl border border-[#242424] bg-[#111111] shadow-sm">
         {loading ? (
-          <div className="p-8 text-sm text-ink/40">
+          <div className="p-8 text-sm text-[#F5F5DC]">
             Chargement...
           </div>
         ) : visibleStaff.length === 0 ? (
@@ -2680,18 +2680,18 @@ function CreateStaffForm({
   };
 
   return (
-    <div className="mb-6 rounded-2xl border border-gold/20 bg-white p-6 shadow-sm">
+    <div className="mb-6 rounded-3xl border border-gold/20 bg-[#111111] p-6 shadow-sm">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
             Nouveau compte
           </p>
 
-          <h3 className="mt-1 font-display text-2xl text-forest">
+          <h3 className="mt-1 font-display text-2xl text-[#E1C27A]">
             Créer un {roleLabel.toLowerCase()}
           </h3>
 
-          <p className="mt-1 text-xs text-ink/40">
+          <p className="mt-1 text-xs text-[#F5F5DC]">
             {role === 'employee'
               ? 'L’employé se connectera uniquement avec son code.'
               : 'Le responsable se connectera avec son email et son mot de passe.'}
@@ -2701,7 +2701,7 @@ function CreateStaffForm({
         <button
           onClick={close}
           disabled={saving}
-          className="text-ink/40 hover:text-ink disabled:opacity-40"
+          className="text-[#F5F5DC] hover:text-[#F5F5DC] disabled:opacity-40"
         >
           <X size={20} />
         </button>
@@ -2719,7 +2719,7 @@ function CreateStaffForm({
               setEstablishmentId(e.target.value)
             }
             disabled={saving}
-            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest disabled:opacity-50"
+            className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#242424] disabled:opacity-50"
           >
             {establishments.map((establishment) => (
               <option
@@ -2746,7 +2746,7 @@ function CreateStaffForm({
                 ? 'Ex : Ahmed Alaoui'
                 : 'Ex : Yassine Benali'
             }
-            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest disabled:opacity-50"
+            className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#242424] disabled:opacity-50"
           />
         </div>
 
@@ -2763,7 +2763,7 @@ function CreateStaffForm({
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={saving}
                 placeholder="email@exemple.com"
-                className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest disabled:opacity-50"
+                className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#242424] disabled:opacity-50"
               />
             </div>
 
@@ -2778,10 +2778,10 @@ function CreateStaffForm({
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={saving}
                 placeholder="Minimum 6 caractères"
-                className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest disabled:opacity-50"
+                className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#242424] disabled:opacity-50"
               />
 
-              <p className="mt-2 text-[11px] text-ink/35">
+              <p className="mt-2 text-[11px] text-[#F5F5DC]">
                 Tu peux donner ce mot de passe au responsable.
               </p>
             </div>
@@ -2801,10 +2801,10 @@ function CreateStaffForm({
               disabled={saving}
               placeholder="Ex : 4829"
               autoComplete="off"
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-center text-lg font-semibold tracking-[0.25em] outline-none focus:border-forest disabled:opacity-50"
+              className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-center text-lg font-semibold tracking-[0.25em] outline-none focus:border-[#242424] disabled:opacity-50"
             />
 
-            <p className="mt-2 text-[11px] text-ink/35">
+            <p className="mt-2 text-[11px] text-[#F5F5DC]">
               Minimum 4 caractères. Le code est enregistré sous forme sécurisée et ne sera pas affiché dans l’application après la création.
             </p>
           </div>
@@ -2815,7 +2815,7 @@ function CreateStaffForm({
         <button
           onClick={close}
           disabled={saving}
-          className="rounded-xl border border-ink/10 px-5 py-3 text-sm font-medium disabled:opacity-40"
+          className="rounded-3xl border border-[#242424] px-5 py-3 text-sm font-medium disabled:opacity-40"
         >
           Annuler
         </button>
@@ -2823,7 +2823,7 @@ function CreateStaffForm({
         <button
           onClick={createAccount}
           disabled={saving}
-          className="inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-3xl bg-[#111111] px-5 py-3 text-sm font-semibold text-[#FFFFFF] disabled:opacity-50"
         >
           <UserPlus size={16} />
 
@@ -2881,7 +2881,7 @@ function StaffRow({
   return (
     <div className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
       <div className="flex min-w-0 items-center gap-4">
-        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-forest text-white">
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-3xl bg-[#111111] text-[#FFFFFF]">
           {member.role === 'MANAGER' ? (
             <UserRound size={19} />
           ) : (
@@ -2890,22 +2890,22 @@ function StaffRow({
         </div>
 
         <div className="min-w-0">
-          <h3 className="truncate text-sm font-semibold text-forest">
+          <h3 className="truncate text-sm font-semibold text-[#E1C27A]">
             {member.name}
           </h3>
 
-          <p className="mt-1 truncate text-xs text-ink/45">
+          <p className="mt-1 truncate text-xs text-[#F5F5DC]">
             {member.email}
           </p>
 
-          <p className="mt-1 text-xs text-ink/40">
+          <p className="mt-1 text-xs text-[#F5F5DC]">
             {establishmentName}
           </p>
         </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <span className="rounded-full bg-[#f4ead3] px-3 py-1.5 text-[10px] font-semibold text-forest">
+        <span className="rounded-full bg-[#f4ead3] px-3 py-1.5 text-[10px] font-semibold text-[#E1C27A]">
           {member.role === 'MANAGER'
             ? 'RESPONSABLE'
             : 'EMPLOYÉ'}
@@ -2914,8 +2914,8 @@ function StaffRow({
         <span
           className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${
             member.active
-              ? 'bg-green-100 text-green-700'
-              : 'bg-red-100 text-red-700'
+              ? 'bg-[#111111] text-[#E1C27A]
+              : 'bg-[#111111] text-[#E1C27A]
           }`}
         >
           {member.active ? 'ACTIF' : 'DÉSACTIVÉ'}
@@ -2928,8 +2928,8 @@ function StaffRow({
           disabled={saving}
           className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium transition ${
             member.active
-              ? 'border-red-200 text-red-600 hover:bg-red-50'
-              : 'border-green-200 text-green-700 hover:bg-green-50'
+              ? 'border-[#242424] text-[#E1C27A] hover:bg-[#111111]
+              : 'border-[#242424] text-[#E1C27A] hover:bg-[#111111]
           } disabled:opacity-40`}
         >
           <Power size={14} />
@@ -2951,7 +2951,7 @@ function StaffRow({
 function EditStaffButton({ member, establishments, reload }: { member: StaffMember; establishments: Establishment[]; reload: () => Promise<void> }) {
   const [open, setOpen] = useState(false);
   return <>
-    <button onClick={() => setOpen(true)} className="inline-flex items-center gap-2 rounded-lg border border-ink/10 px-3 py-2 text-xs font-medium hover:bg-[#f7f7f3]"><Pencil size={14} />Modifier</button>
+    <button onClick={() => setOpen(true)} className="inline-flex items-center gap-2 rounded-lg border border-[#242424] px-3 py-2 text-xs font-medium hover:bg-[#111111]"><Pencil size={14} />Modifier</button>
     {open && <EditStaffModal member={member} establishments={establishments} close={() => setOpen(false)} reload={reload} />}
   </>;
 }
@@ -2994,18 +2994,18 @@ function EditStaffModal({ member, establishments, close, reload }: { member: Sta
     await reload(); close();
   };
 
-  return <div className="fixed inset-0 z-[80] grid place-items-center bg-ink/50 p-4">
-    <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
-      <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">Administration</p><h3 className="mt-1 font-display text-2xl text-forest">Modifier {isEmployee ? 'l’employé' : 'le responsable'}</h3></div><button onClick={close} disabled={saving}><X size={20}/></button></div>
+  return <div className="fixed inset-0 z-[80] grid place-items-center bg-[#111111] p-4">
+    <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-[#111111] p-6 shadow-2xl">
+      <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">Administration</p><h3 className="mt-1 font-display text-2xl text-[#E1C27A]">Modifier {isEmployee ? 'l’employé' : 'le responsable'}</h3></div><button onClick={close} disabled={saving}><X size={20}/></button></div>
       <div className="mt-6 grid gap-4 md:grid-cols-2">
-        <label className="block"><span className="mb-1 block text-xs font-semibold">Nom</span><input value={name} onChange={e=>setName(e.target.value)} className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm"/></label>
-        {!isEmployee && <label className="block"><span className="mb-1 block text-xs font-semibold">Email</span><input type="email" value={email} onChange={e=>setEmail(e.target.value)} className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm"/></label>}
-        <label className="block md:col-span-2"><span className="mb-1 block text-xs font-semibold">Établissement</span><select value={establishmentId} onChange={e=>setEstablishmentId(e.target.value)} className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm">{establishments.map(e=><option key={e.id} value={e.id}>{e.name}</option>)}</select></label>
-        {!isEmployee && <label className="block md:col-span-2"><span className="mb-1 block text-xs font-semibold">Nouveau mot de passe <span className="font-normal text-ink/35">(laisser vide pour conserver)</span></span><input type="password" value={password} onChange={e=>setPassword(e.target.value)} className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm"/></label>}
-        {isEmployee && <label className="block md:col-span-2"><span className="mb-1 block text-xs font-semibold">Nouveau code employé <span className="font-normal text-ink/35">(laisser vide pour conserver)</span></span><input value={code} onChange={e=>setCode(e.target.value)} placeholder="4 à 12 caractères" className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-center text-lg tracking-[0.2em]"/></label>}
-        <label className="flex items-center gap-3 rounded-xl bg-[#f7f7f3] p-4 md:col-span-2"><input type="checkbox" checked={active} onChange={e=>setActive(e.target.checked)}/><span><strong className="block text-sm text-forest">Accès actif</strong><span className="text-xs text-ink/40">Désactiver coupe l’accès sans supprimer l’historique.</span></span></label>
+        <label className="block"><span className="mb-1 block text-xs font-semibold">Nom</span><input value={name} onChange={e=>setName(e.target.value)} className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm"/></label>
+        {!isEmployee && <label className="block"><span className="mb-1 block text-xs font-semibold">Email</span><input type="email" value={email} onChange={e=>setEmail(e.target.value)} className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm"/></label>}
+        <label className="block md:col-span-2"><span className="mb-1 block text-xs font-semibold">Établissement</span><select value={establishmentId} onChange={e=>setEstablishmentId(e.target.value)} className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm">{establishments.map(e=><option key={e.id} value={e.id}>{e.name}</option>)}</select></label>
+        {!isEmployee && <label className="block md:col-span-2"><span className="mb-1 block text-xs font-semibold">Nouveau mot de passe <span className="font-normal text-[#F5F5DC]">(laisser vide pour conserver)</span></span><input type="password" value={password} onChange={e=>setPassword(e.target.value)} className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm"/></label>}
+        {isEmployee && <label className="block md:col-span-2"><span className="mb-1 block text-xs font-semibold">Nouveau code employé <span className="font-normal text-[#F5F5DC]">(laisser vide pour conserver)</span></span><input value={code} onChange={e=>setCode(e.target.value)} placeholder="4 à 12 caractères" className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-center text-lg tracking-[0.2em]"/></label>}
+        <label className="flex items-center gap-3 rounded-3xl bg-[#111111] p-4 md:col-span-2"><input type="checkbox" checked={active} onChange={e=>setActive(e.target.checked)}/><span><strong className="block text-sm text-[#E1C27A]">Accès actif</strong><span className="text-xs text-[#F5F5DC]">Désactiver coupe l’accès sans supprimer l’historique.</span></span></label>
       </div>
-      <div className="mt-6 flex flex-wrap justify-between gap-3"><button onClick={retire} disabled={saving} className="rounded-xl border border-red-200 px-4 py-3 text-xs font-semibold text-red-600">Retirer de l’établissement</button><div className="flex gap-3"><button onClick={close} disabled={saving} className="rounded-xl border border-ink/10 px-5 py-3 text-sm">Annuler</button><button onClick={save} disabled={saving} className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white">{saving ? 'Enregistrement...' : 'Enregistrer'}</button></div></div>
+      <div className="mt-6 flex flex-wrap justify-between gap-3"><button onClick={retire} disabled={saving} className="rounded-3xl border border-[#242424] px-4 py-3 text-xs font-semibold text-[#E1C27A]">Retirer de l’établissement</button><div className="flex gap-3"><button onClick={close} disabled={saving} className="rounded-3xl border border-[#242424] px-5 py-3 text-sm">Annuler</button><button onClick={save} disabled={saving} className="rounded-3xl bg-[#111111] px-5 py-3 text-sm font-semibold text-[#FFFFFF]">{saving ? 'Enregistrement...' : 'Enregistrer'}</button></div></div>
     </div>
   </div>;
 }
@@ -3062,8 +3062,8 @@ function RewardCodesSection({
     return (
       <div>
         <div className="mb-8">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">Fidélité</p>
-          <h2 className="font-display text-3xl text-forest md:text-4xl">Codes récompenses</h2>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#E1C27A]">Fidélité</p>
+          <h2 className="font-display text-3xl text-[#E1C27A] md:text-4xl">Codes récompenses</h2>
         </div>
         <EmptyStaff icon={Gift} title="Aucun établissement" description="Créez d’abord un établissement avant de configurer son code récompense." />
       </div>
@@ -3080,9 +3080,9 @@ function RewardCodesSection({
   return (
     <div>
       <div className="mb-8">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">Fidélité</p>
-        <h2 className="font-display text-3xl text-forest md:text-4xl">Codes récompenses</h2>
-        <p className="mt-2 max-w-3xl text-sm text-ink/50">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#E1C27A]">Fidélité</p>
+        <h2 className="font-display text-3xl text-[#E1C27A] md:text-4xl">Codes récompenses</h2>
+        <p className="mt-2 max-w-3xl text-sm text-[#F5F5DC]">
           Gestion des responsables et du code de validation des récompenses. Pour des raisons de sécurité, le code existant n’est jamais relu ni affiché en clair : l’Admin peut uniquement le remplacer.
         </p>
       </div>
@@ -3096,27 +3096,27 @@ function RewardCodesSection({
               key={establishment.id}
               type="button"
               onClick={() => setSelectedEstablishment(establishment.id)}
-              className={`rounded-2xl border bg-white p-5 text-left shadow-sm transition ${isSelected ? 'border-gold/50 ring-2 ring-gold/10' : 'border-ink/5 hover:border-ink/15'}`}
+              className={`rounded-3xl border bg-[#111111] p-5 text-left shadow-sm transition ${isSelected ? 'border-gold/50 ring-2 ring-gold/10' : 'border-[#242424] hover:border-[#242424]
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink/35">Établissement</p>
-                  <h3 className="mt-1 text-base font-semibold text-forest">{establishment.name}</h3>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#F5F5DC]">Établissement</p>
+                  <h3 className="mt-1 text-base font-semibold text-[#E1C27A]">{establishment.name}</h3>
                 </div>
-                <span className="rounded-full bg-forest/10 px-3 py-1 text-[10px] font-semibold text-forest">
+                <span className="rounded-full bg-[#111111] px-3 py-1 text-[10px] font-semibold text-[#E1C27A]">
                   {responsibles.length} responsable{responsibles.length > 1 ? 's' : ''}
                 </span>
               </div>
               <div className="mt-4 space-y-2">
                 {responsibles.length === 0 ? (
-                  <p className="text-xs text-ink/40">Aucun responsable affecté.</p>
+                  <p className="text-xs text-[#F5F5DC]">Aucun responsable affecté.</p>
                 ) : responsibles.map((member) => (
-                  <div key={member.id} className="flex items-center justify-between rounded-xl bg-[#f7f7f3] px-3 py-2">
+                  <div key={member.id} className="flex items-center justify-between rounded-3xl bg-[#111111] px-3 py-2">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-ink">{member.name}</p>
-                      <p className="truncate text-xs text-ink/40">{member.email}</p>
+                      <p className="truncate text-sm font-medium text-[#F5F5DC]">{member.name}</p>
+                      <p className="truncate text-xs text-[#F5F5DC]">{member.email}</p>
                     </div>
-                    <span className="shrink-0 rounded-lg bg-white px-2 py-1 font-mono text-xs text-ink/45">••••••</span>
+                    <span className="shrink-0 rounded-lg bg-[#111111] px-2 py-1 font-mono text-xs text-[#F5F5DC]">••••••</span>
                   </div>
                 ))}
               </div>
@@ -3125,43 +3125,43 @@ function RewardCodesSection({
         })}
       </div>
 
-      <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
+      <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">Configuration</p>
-            <h3 className="mt-1 text-xl font-semibold text-forest">
+            <h3 className="mt-1 text-xl font-semibold text-[#E1C27A]">
               Code de {establishments.find((item) => item.id === selectedEstablishment)?.name ?? 'l’établissement'}
             </h3>
-            <p className="mt-2 text-xs leading-5 text-ink/45">
+            <p className="mt-2 text-xs leading-5 text-[#F5F5DC]">
               Le responsable conserve son accès. Une demande de changement peut être traitée ici en remplaçant le code actuel.
             </p>
           </div>
-          <div className="rounded-xl bg-[#f7f7f3] px-4 py-3">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink/35">Code actuel</p>
-            <p className="mt-1 font-mono text-sm tracking-[0.2em] text-ink/50">••••••</p>
+          <div className="rounded-3xl bg-[#111111] px-4 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#F5F5DC]">Code actuel</p>
+            <p className="mt-1 font-mono text-sm tracking-[0.2em] text-[#F5F5DC]">••••••</p>
           </div>
         </div>
 
         <div className="mt-6 grid gap-5 md:grid-cols-2">
           <label className="block">
             <span className="mb-2 block text-xs font-semibold">Nouveau code récompense</span>
-            <input type="password" value={code} onChange={(e) => setCode(e.target.value)} placeholder="Minimum 4 caractères" autoComplete="new-password" className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-center text-lg tracking-[0.2em] outline-none focus:border-forest" />
+            <input type="password" value={code} onChange={(e) => setCode(e.target.value)} placeholder="Minimum 4 caractères" autoComplete="new-password" className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-center text-lg tracking-[0.2em] outline-none focus:border-[#242424]" />
           </label>
           <label className="block">
             <span className="mb-2 block text-xs font-semibold">Confirmer le code</span>
-            <input type="password" value={confirmCode} onChange={(e) => setConfirmCode(e.target.value)} placeholder="Retapez le code" autoComplete="new-password" className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-center text-lg tracking-[0.2em] outline-none focus:border-forest" />
+            <input type="password" value={confirmCode} onChange={(e) => setConfirmCode(e.target.value)} placeholder="Retapez le code" autoComplete="new-password" className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-center text-lg tracking-[0.2em] outline-none focus:border-[#242424]" />
           </label>
         </div>
 
-        <div className="mt-5 flex items-center gap-3 rounded-xl border border-gold/20 bg-[#fdf9ef] p-4">
+        <div className="mt-5 flex items-center gap-3 rounded-3xl border border-gold/20 bg-[#111111] p-4">
           <LockKeyhole size={18} className="shrink-0 text-gold" />
-          <p className="text-xs leading-5 text-ink/50">
+          <p className="text-xs leading-5 text-[#F5F5DC]">
             Le stockage du code reste protégé par le mécanisme existant. Cette interface ne tente pas de récupérer le code en clair.
           </p>
         </div>
 
         <div className="mt-5 flex justify-end">
-          <button onClick={saveCode} disabled={saving || !code.trim() || !confirmCode.trim()} className="inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-40">
+          <button onClick={saveCode} disabled={saving || !code.trim() || !confirmCode.trim()} className="inline-flex items-center gap-2 rounded-3xl bg-[#111111] px-5 py-3 text-sm font-semibold text-[#FFFFFF] disabled:opacity-40">
             <CheckCircle2 size={16} />
             {saving ? 'Enregistrement...' : 'Remplacer le code'}
           </button>
@@ -3333,22 +3333,22 @@ function ReviewAnalysisSection({
     <div>
       <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#E1C27A]">
             Intelligence artificielle
           </p>
 
-          <h2 className="font-display text-3xl text-forest md:text-4xl">
+          <h2 className="font-display text-3xl text-[#E1C27A] md:text-4xl">
             Analyse des avis
           </h2>
 
-          <p className="mt-2 max-w-2xl text-sm text-ink/50">
+          <p className="mt-2 max-w-2xl text-sm text-[#F5F5DC]">
             Analyse automatiquement les avis clients et transforme les retours en
             actions concrètes adaptées au secteur de l’établissement.
           </p>
         </div>
       </div>
 
-      <div className="mb-6 rounded-2xl border border-ink/5 bg-white p-5 shadow-sm">
+      <div className="mb-6 rounded-3xl border border-[#242424] bg-[#111111] p-5 shadow-sm">
         <div className="flex flex-col gap-4 md:flex-row md:items-end">
           <div className="flex-1">
             <label className="mb-2 block text-xs font-semibold">
@@ -3362,7 +3362,7 @@ function ReviewAnalysisSection({
                 setResult(null);
                 setError('');
               }}
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#242424]"
             >
               <option value="all">Tous les établissements</option>
               {establishments.map((establishment) => (
@@ -3376,7 +3376,7 @@ function ReviewAnalysisSection({
           <button
             onClick={analyzeReviews}
             disabled={loading || establishments.length === 0}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex items-center justify-center gap-2 rounded-3xl bg-[#111111] px-5 py-3 text-sm font-semibold text-[#FFFFFF] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Brain size={17} />
             {loading ? 'Analyse en cours...' : 'Analyser avec l’IA'}
@@ -3384,21 +3384,21 @@ function ReviewAnalysisSection({
         </div>
 
         {error && (
-          <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mt-4 rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#E1C27A]">
             {error}
           </div>
         )}
       </div>
 
       {!result && !loading && !error && (
-        <div className="rounded-2xl border border-dashed border-ink/10 bg-white p-10 text-center">
-          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-forest/10 text-forest">
+        <div className="rounded-3xl border border-dashed border-[#242424] bg-[#111111] p-10 text-center">
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-3xl bg-[#111111] text-[#E1C27A]">
             <Brain size={25} />
           </div>
           <h3 className="mt-5 text-base font-semibold">
             Prêt à analyser les avis
           </h3>
-          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-ink/45">
+          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#F5F5DC]">
             Choisis un établissement ou tous les établissements, puis lance
             l’analyse IA.
           </p>
@@ -3406,12 +3406,12 @@ function ReviewAnalysisSection({
       )}
 
       {loading && (
-        <div className="rounded-2xl border border-ink/5 bg-white p-12 text-center shadow-sm">
-          <div className="mx-auto h-9 w-9 animate-spin rounded-full border-2 border-forest border-t-transparent" />
-          <p className="mt-4 text-sm font-medium text-ink/60">
+        <div className="rounded-3xl border border-[#242424] bg-[#111111] p-12 text-center shadow-sm">
+          <div className="mx-auto h-9 w-9 animate-spin rounded-full border-2 border-[#242424] border-t-transparent" />
+          <p className="mt-4 text-sm font-medium text-[#F5F5DC]">
             L’IA analyse les avis de {selectedName}...
           </p>
-          <p className="mt-1 text-xs text-ink/35">
+          <p className="mt-1 text-xs text-[#F5F5DC]">
             Cela peut prendre quelques secondes.
           </p>
         </div>
@@ -3442,36 +3442,36 @@ function ReviewAnalysisSection({
             />
           </div>
 
-          <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
+          <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
             <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-forest/45">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#E1C27A]">
                   Synthèse IA
                 </p>
-                <h3 className="mt-2 text-xl font-semibold text-forest">
+                <h3 className="mt-2 text-xl font-semibold text-[#E1C27A]">
                   {selectedName}
                 </h3>
               </div>
 
-              <div className="rounded-xl bg-[#f7f7f3] px-4 py-3 text-center">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink/35">
+              <div className="rounded-3xl bg-[#111111] px-4 py-3 text-center">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#F5F5DC]">
                   Satisfaction
                 </p>
-                <p className="mt-1 text-2xl font-semibold text-forest">
+                <p className="mt-1 text-2xl font-semibold text-[#E1C27A]">
                   {result.analysis.satisfaction_score}/100
                 </p>
               </div>
             </div>
 
-            <p className="mt-5 text-sm leading-7 text-ink/70">
+            <p className="mt-5 text-sm leading-7 text-[#F5F5DC]">
               {result.analysis.summary}
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">
-              <span className="rounded-full bg-forest/10 px-3 py-1.5 text-xs font-semibold text-forest">
+              <span className="rounded-full bg-[#111111] px-3 py-1.5 text-xs font-semibold text-[#E1C27A]">
                 Sentiment : {result.analysis.sentiment}
               </span>
-              <span className="rounded-full bg-ink/5 px-3 py-1.5 text-xs font-semibold text-ink/55">
+              <span className="rounded-full bg-[#111111] px-3 py-1.5 text-xs font-semibold text-[#F5F5DC]">
                 {result.statistics.total_reviews} avis analysés
               </span>
             </div>
@@ -3490,18 +3490,18 @@ function ReviewAnalysisSection({
             />
           </div>
 
-          <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
+          <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-forest/45">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#E1C27A]">
                 Thèmes récurrents
               </p>
-              <h3 className="mt-2 text-xl font-semibold text-forest">
+              <h3 className="mt-2 text-xl font-semibold text-[#E1C27A]">
                 Ce qui ressort des avis
               </h3>
             </div>
 
             {result.analysis.recurring_issues.length === 0 ? (
-              <p className="mt-5 text-sm text-ink/45">
+              <p className="mt-5 text-sm text-[#F5F5DC]">
                 Aucun thème récurrent suffisamment clair n’a été identifié.
               </p>
             ) : (
@@ -3509,18 +3509,18 @@ function ReviewAnalysisSection({
                 {result.analysis.recurring_issues.map((issue, index) => (
                   <div
                     key={`${issue.topic}-${index}`}
-                    className="rounded-xl border border-ink/5 bg-[#fdfdfb] p-4"
+                    className="rounded-3xl border border-[#242424] bg-[#111111] p-4"
                   >
                     <div className="flex flex-wrap items-center gap-2">
-                      <h4 className="font-semibold text-ink">{issue.topic}</h4>
-                      <span className="rounded-full bg-ink/5 px-2.5 py-1 text-[10px] font-semibold text-ink/50">
+                      <h4 className="font-semibold text-[#F5F5DC]">{issue.topic}</h4>
+                      <span className="rounded-full bg-[#111111] px-2.5 py-1 text-[10px] font-semibold text-[#F5F5DC]">
                         {issue.frequency}
                       </span>
-                      <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-semibold text-amber-700">
+                      <span className="rounded-full bg-[#111111] px-2.5 py-1 text-[10px] font-semibold text-[#E1C27A]">
                         Priorité : {issue.priority}
                       </span>
                     </div>
-                    <p className="mt-2 text-sm leading-6 text-ink/60">
+                    <p className="mt-2 text-sm leading-6 text-[#F5F5DC]">
                       {issue.explanation}
                     </p>
                   </div>
@@ -3529,15 +3529,15 @@ function ReviewAnalysisSection({
             )}
           </div>
 
-          <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
+          <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-forest/45">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#E1C27A]">
                 Plan d’action
               </p>
-              <h3 className="mt-2 text-xl font-semibold text-forest">
+              <h3 className="mt-2 text-xl font-semibold text-[#E1C27A]">
                 3 actions prioritaires
               </h3>
-              <p className="mt-2 text-sm text-ink/45">
+              <p className="mt-2 text-sm text-[#F5F5DC]">
                 Les actions proposées sont basées sur les avis analysés et le
                 secteur de l’établissement.
               </p>
@@ -3547,28 +3547,28 @@ function ReviewAnalysisSection({
               {result.analysis.actions_prioritaires.map((action, index) => (
                 <div
                   key={`${action.action}-${index}`}
-                  className="rounded-2xl border border-ink/5 bg-[#fdfdfb] p-5"
+                  className="rounded-3xl border border-[#242424] bg-[#111111] p-5"
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <span className="grid h-9 w-9 place-items-center rounded-xl bg-forest text-sm font-semibold text-white">
+                    <span className="grid h-9 w-9 place-items-center rounded-3xl bg-[#111111] text-sm font-semibold text-[#FFFFFF]">
                       {index + 1}
                     </span>
-                    <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-semibold text-amber-700">
+                    <span className="rounded-full bg-[#111111] px-2.5 py-1 text-[10px] font-semibold text-[#E1C27A]">
                       {action.priority}
                     </span>
                   </div>
 
-                  <h4 className="mt-4 font-semibold leading-6 text-ink">
+                  <h4 className="mt-4 font-semibold leading-6 text-[#F5F5DC]">
                     {action.action}
                   </h4>
 
-                  <p className="mt-3 text-sm leading-6 text-ink/55">
-                    <strong className="text-ink/70">Pourquoi :</strong>{' '}
+                  <p className="mt-3 text-sm leading-6 text-[#F5F5DC]">
+                    <strong className="text-[#F5F5DC]">Pourquoi :</strong>{' '}
                     {action.reason}
                   </p>
 
-                  <p className="mt-3 text-sm leading-6 text-ink/55">
-                    <strong className="text-ink/70">Impact attendu :</strong>{' '}
+                  <p className="mt-3 text-sm leading-6 text-[#F5F5DC]">
+                    <strong className="text-[#F5F5DC]">Impact attendu :</strong>{' '}
                     {action.impact}
                   </p>
                 </div>
@@ -3577,25 +3577,25 @@ function ReviewAnalysisSection({
           </div>
 
           {result.analysis.recommendations.length > 0 && (
-            <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-forest/45">
+            <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#E1C27A]">
                 Recommandations complémentaires
               </p>
               <div className="mt-4 space-y-3">
                 {result.analysis.recommendations.map((recommendation, index) => (
                   <div
                     key={`${recommendation.action}-${index}`}
-                    className="rounded-xl border border-ink/5 bg-[#fdfdfb] p-4"
+                    className="rounded-3xl border border-[#242424] bg-[#111111] p-4"
                   >
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="rounded-full bg-forest/10 px-2.5 py-1 text-[10px] font-semibold text-forest">
+                      <span className="rounded-full bg-[#111111] px-2.5 py-1 text-[10px] font-semibold text-[#E1C27A]">
                         {recommendation.priority}
                       </span>
-                      <h4 className="font-semibold text-ink">
+                      <h4 className="font-semibold text-[#F5F5DC]">
                         {recommendation.action}
                       </h4>
                     </div>
-                    <p className="mt-2 text-sm leading-6 text-ink/55">
+                    <p className="mt-2 text-sm leading-6 text-[#F5F5DC]">
                       {recommendation.reason}
                     </p>
                   </div>
@@ -3608,7 +3608,7 @@ function ReviewAnalysisSection({
             <button
               onClick={analyzeReviews}
               disabled={loading}
-              className="inline-flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-4 py-3 text-xs font-semibold text-ink transition hover:bg-[#f7f7f3] disabled:opacity-40"
+              className="inline-flex items-center gap-2 rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-xs font-semibold text-[#F5F5DC] transition hover:bg-[#111111] disabled:opacity-40"
             >
               <RefreshCw size={14} />
               Relancer l’analyse
@@ -3630,24 +3630,24 @@ function AnalysisListCard({
   emptyText: string;
 }) {
   return (
-    <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-forest/45">
+    <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#E1C27A]">
         {title}
       </p>
 
       {items.length === 0 ? (
-        <p className="mt-5 text-sm text-ink/45">{emptyText}</p>
+        <p className="mt-5 text-sm text-[#F5F5DC]">{emptyText}</p>
       ) : (
         <div className="mt-5 space-y-3">
           {items.map((item, index) => (
             <div
               key={`${item}-${index}`}
-              className="flex gap-3 rounded-xl bg-[#fdfdfb] p-4"
+              className="flex gap-3 rounded-3xl bg-[#111111] p-4"
             >
-              <span className="mt-0.5 text-sm font-semibold text-forest">
+              <span className="mt-0.5 text-sm font-semibold text-[#E1C27A]">
                 ✓
               </span>
-              <p className="text-sm leading-6 text-ink/65">{item}</p>
+              <p className="text-sm leading-6 text-[#F5F5DC]">{item}</p>
             </div>
           ))}
         </div>
@@ -3760,22 +3760,22 @@ function ReviewsSection({
     <div>
       <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#E1C27A]">
             Réputation
           </p>
 
-          <h2 className="font-display text-3xl text-forest md:text-4xl">
+          <h2 className="font-display text-3xl text-[#E1C27A] md:text-4xl">
             Avis reçus
           </h2>
 
-          <p className="mt-2 max-w-2xl text-sm text-ink/50">
+          <p className="mt-2 max-w-2xl text-sm text-[#F5F5DC]">
             Consultez les avis reçus par tous les établissements de la plateforme.
           </p>
         </div>
 
         <button
           onClick={loadReviews}
-          className="inline-flex items-center justify-center gap-2 rounded-xl border border-ink/10 bg-white px-4 py-3 text-xs font-semibold transition hover:bg-[#f7f7f3]"
+          className="inline-flex items-center justify-center gap-2 rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-xs font-semibold transition hover:bg-[#111111]"
         >
           <RefreshCw size={14} />
           Actualiser
@@ -3808,7 +3808,7 @@ function ReviewsSection({
         />
       </div>
 
-      <div className="mb-6 rounded-2xl border border-ink/5 bg-white p-5 shadow-sm">
+      <div className="mb-6 rounded-3xl border border-[#242424] bg-[#111111] p-5 shadow-sm">
         <div className="grid gap-4 md:grid-cols-2">
           <div>
             <label className="mb-2 block text-xs font-semibold">
@@ -3818,7 +3818,7 @@ function ReviewsSection({
             <select
               value={selectedEstablishment}
               onChange={(e) => setSelectedEstablishment(e.target.value)}
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#242424]"
             >
               <option value="all">Tous les établissements</option>
 
@@ -3838,7 +3838,7 @@ function ReviewsSection({
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#242424]"
             >
               <option value="all">Tous les statuts</option>
               <option value="Nouveau">Nouveau</option>
@@ -3849,20 +3849,20 @@ function ReviewsSection({
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-ink/5 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-3xl border border-[#242424] bg-[#111111] shadow-sm">
         {loading ? (
-          <div className="p-10 text-center text-sm text-ink/40">
+          <div className="p-10 text-center text-sm text-[#F5F5DC]">
             Chargement des avis...
           </div>
         ) : filteredReviews.length === 0 ? (
           <div className="p-12 text-center">
-            <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-forest/10 text-forest">
+            <div className="mx-auto grid h-14 w-14 place-items-center rounded-3xl bg-[#111111] text-[#E1C27A]">
               <MessageSquare size={25} />
             </div>
 
             <h3 className="mt-5 text-base font-semibold">Aucun avis</h3>
 
-            <p className="mx-auto mt-2 max-w-md text-sm text-ink/45">
+            <p className="mx-auto mt-2 max-w-md text-sm text-[#F5F5DC]">
               Aucun avis ne correspond aux filtres sélectionnés.
             </p>
           </div>
@@ -3876,20 +3876,20 @@ function ReviewsSection({
               return (
                 <div
                   key={review.id}
-                  className="p-5 transition hover:bg-[#fdfdfb]"
+                  className="p-5 transition hover:bg-[#111111]"
                 >
                   <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-lg bg-forest/10 px-3 py-1.5 text-xs font-semibold text-forest">
+                        <span className="rounded-lg bg-[#111111] px-3 py-1.5 text-xs font-semibold text-[#E1C27A]">
                           {establishmentName}
                         </span>
 
                         <span
                           className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${
                             review.type === 'positive'
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-red-100 text-red-700'
+                              ? 'bg-[#111111] text-[#E1C27A]
+                              : 'bg-[#111111] text-[#E1C27A]
                           }`}
                         >
                           {review.type === 'positive' ? 'POSITIF' : 'NÉGATIF'}
@@ -3898,10 +3898,10 @@ function ReviewsSection({
                         <span
                           className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${
                             review.status === 'Nouveau'
-                              ? 'bg-blue-100 text-blue-700'
+                              ? 'bg-[#111111] text-[#E1C27A]
                               : review.status === 'En cours'
-                              ? 'bg-amber-100 text-amber-700'
-                              : 'bg-green-100 text-green-700'
+                              ? 'bg-[#111111] text-[#E1C27A]
+                              : 'bg-[#111111] text-[#E1C27A]
                           }`}
                         >
                           {review.status}
@@ -3916,7 +3916,7 @@ function ReviewsSection({
                               className={
                                 index < review.rating
                                   ? 'text-gold'
-                                  : 'text-ink/15'
+                                  : 'text-[#F5F5DC]
                               }
                             >
                               ★
@@ -3924,22 +3924,22 @@ function ReviewsSection({
                           ))}
                         </div>
 
-                        <span className="text-xs font-semibold text-ink/60">
+                        <span className="text-xs font-semibold text-[#F5F5DC]">
                           {review.rating}/5
                         </span>
                       </div>
 
                       {review.comment && (
-                        <p className="mt-4 max-w-3xl whitespace-pre-wrap text-sm leading-6 text-ink/70">
+                        <p className="mt-4 max-w-3xl whitespace-pre-wrap text-sm leading-6 text-[#F5F5DC]">
                           « {review.comment} »
                         </p>
                       )}
 
-                      <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs text-ink/40">
+                      <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs text-[#F5F5DC]">
                         {review.name && (
                           <span>
                             Client :{' '}
-                            <strong className="font-medium text-ink/60">
+                            <strong className="font-medium text-[#F5F5DC]">
                               {review.name}
                             </strong>
                           </span>
@@ -3954,7 +3954,7 @@ function ReviewsSection({
                     </div>
 
                     <div className="shrink-0">
-                      <span className="text-[11px] text-ink/30">
+                      <span className="text-[11px] text-[#F5F5DC]">
                         Avis #{review.id.slice(0, 8)}
                       </span>
                     </div>
@@ -3967,7 +3967,7 @@ function ReviewsSection({
       </div>
 
       {reviews.length > 0 && (
-        <p className="mt-4 text-xs text-ink/35">
+        <p className="mt-4 text-xs text-[#F5F5DC]">
           {filteredReviews.length} avis affiché
           {filteredReviews.length > 1 ? 's' : ''} sur {reviews.length}.
         </p>
@@ -4147,18 +4147,18 @@ function AdminAnalyticsSection({
     <div>
       <div className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">Pilotage</p>
-          <h2 className="font-display text-3xl text-forest md:text-4xl">Analytics globales</h2>
-          <p className="mt-2 max-w-3xl text-sm text-ink/50">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#E1C27A]">Pilotage</p>
+          <h2 className="font-display text-3xl text-[#E1C27A] md:text-4xl">Analytics globales</h2>
+          <p className="mt-2 max-w-3xl text-sm text-[#F5F5DC]">
             Une vue consolidée des avis, de la fidélité et des événements enregistrés pour chaque établissement.
           </p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
-          <select value={selectedEstablishment} onChange={(e) => setSelectedEstablishment(e.target.value)} className="rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm font-medium text-ink outline-none focus:border-forest">
+          <select value={selectedEstablishment} onChange={(e) => setSelectedEstablishment(e.target.value)} className="rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm font-medium text-[#F5F5DC] outline-none focus:border-[#242424]">
             <option value="all">Tous les établissements</option>
             {establishments.map((establishment) => <option key={establishment.id} value={establishment.id}>{establishment.name}</option>)}
           </select>
-          <select value={period} onChange={(e) => setPeriod(Number(e.target.value) as 7 | 30 | 90 | 180 | 365)} className="rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm font-medium text-ink outline-none focus:border-forest">
+          <select value={period} onChange={(e) => setPeriod(Number(e.target.value) as 7 | 30 | 90 | 180 | 365)} className="rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm font-medium text-[#F5F5DC] outline-none focus:border-[#242424]">
             <option value={7}>7 derniers jours</option>
             <option value={30}>30 derniers jours</option>
             <option value={90}>3 derniers mois</option>
@@ -4178,23 +4178,23 @@ function AdminAnalyticsSection({
       </div>
 
       <div className="mt-5 grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
-        <div className="rounded-2xl border border-ink/10 bg-white p-5">
+        <div className="rounded-3xl border border-[#242424] bg-[#111111] p-5">
           <div className="mb-5">
-            <h3 className="text-base font-semibold text-forest">Détail par établissement</h3>
-            <p className="mt-1 text-xs text-ink/40">Avis, fidélité, récompenses et analytics sur la période sélectionnée.</p>
+            <h3 className="text-base font-semibold text-[#E1C27A]">Détail par établissement</h3>
+            <p className="mt-1 text-xs text-[#F5F5DC]">Avis, fidélité, récompenses et analytics sur la période sélectionnée.</p>
           </div>
           {loading ? (
-            <div className="py-12 text-center text-sm text-ink/40">Chargement…</div>
+            <div className="py-12 text-center text-sm text-[#F5F5DC]">Chargement…</div>
           ) : byEstablishment.length === 0 ? (
-            <div className="rounded-xl bg-[#f7f7f3] p-8 text-center text-sm text-ink/40">Aucune donnée sur cette période.</div>
+            <div className="rounded-3xl bg-[#111111] p-8 text-center text-sm text-[#F5F5DC]">Aucune donnée sur cette période.</div>
           ) : (
             <div className="space-y-3">
               {byEstablishment.map((item) => (
-                <div key={item.id} className="rounded-xl border border-ink/5 bg-[#fbfbf8] p-4">
+                <div key={item.id} className="rounded-3xl border border-[#242424] bg-[#111111] p-4">
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-ink">{item.name}</p>
-                      <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-ink/45">
+                      <p className="text-sm font-semibold text-[#F5F5DC]">{item.name}</p>
+                      <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-[#F5F5DC]">
                         <span>{item.reviews} avis</span>
                         <span>·</span>
                         <span>{item.ratingTotal && item.reviews ? (item.ratingTotal / item.reviews).toFixed(1) : '0.0'} ★</span>
@@ -4203,11 +4203,11 @@ function AdminAnalyticsSection({
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-right text-xs">
-                      <span className="text-ink/40">CA fidélité <strong className="ml-1 text-forest">{formatMad(item.revenue)}</strong></span>
-                      <span className="text-ink/40">Transactions <strong className="ml-1 text-forest">{item.transactions}</strong></span>
-                      <span className="text-ink/40">Points <strong className="ml-1 text-forest">{item.points.toLocaleString('fr-FR')}</strong></span>
-                      <span className="text-ink/40">Récompenses <strong className="ml-1 text-forest">{item.rewards}</strong></span>
-                      <span className="text-ink/40">Coût récompenses <strong className="ml-1 text-forest">{formatMad(item.rewardCost)}</strong></span>
+                      <span className="text-[#F5F5DC]">CA fidélité <strong className="ml-1 text-[#E1C27A]">{formatMad(item.revenue)}</strong></span>
+                      <span className="text-[#F5F5DC]">Transactions <strong className="ml-1 text-[#E1C27A]">{item.transactions}</strong></span>
+                      <span className="text-[#F5F5DC]">Points <strong className="ml-1 text-[#E1C27A]">{item.points.toLocaleString('fr-FR')}</strong></span>
+                      <span className="text-[#F5F5DC]">Récompenses <strong className="ml-1 text-[#E1C27A]">{item.rewards}</strong></span>
+                      <span className="text-[#F5F5DC]">Coût récompenses <strong className="ml-1 text-[#E1C27A]">{formatMad(item.rewardCost)}</strong></span>
                     </div>
                   </div>
                 </div>
@@ -4216,19 +4216,19 @@ function AdminAnalyticsSection({
           )}
         </div>
 
-        <div className="rounded-2xl border border-ink/10 bg-forest p-5 text-white">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/50">Synthèse période</p>
+        <div className="rounded-3xl border border-[#242424] bg-[#111111] p-5 text-[#FFFFFF]">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#FFFFFF]">Synthèse période</p>
           <h3 className="mt-2 text-xl font-semibold">Vue financière & réputation</h3>
           <div className="mt-6 space-y-4">
-            <div><p className="text-xs text-white/50">CA fidélité</p><p className="mt-1 text-2xl font-semibold">{loading ? '—' : formatMad(revenue)}</p></div>
-            <div><p className="text-xs text-white/50">Coût récompenses</p><p className="mt-1 text-2xl font-semibold">{loading ? '—' : formatMad(rewardCost)}</p></div>
-            <div><p className="text-xs text-white/50">CA après coût récompenses</p><p className="mt-1 text-3xl font-semibold text-gold">{loading ? '—' : formatMad(netContribution)}</p></div>
+            <div><p className="text-xs text-[#FFFFFF]">CA fidélité</p><p className="mt-1 text-2xl font-semibold">{loading ? '—' : formatMad(revenue)}</p></div>
+            <div><p className="text-xs text-[#FFFFFF]">Coût récompenses</p><p className="mt-1 text-2xl font-semibold">{loading ? '—' : formatMad(rewardCost)}</p></div>
+            <div><p className="text-xs text-[#FFFFFF]">CA après coût récompenses</p><p className="mt-1 text-3xl font-semibold text-gold">{loading ? '—' : formatMad(netContribution)}</p></div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-xl bg-white/10 px-4 py-3"><p className="text-[11px] text-white/50">Récompenses</p><p className="mt-1 text-lg font-semibold">{redemptionCount}</p></div>
-              <div className="rounded-xl bg-white/10 px-4 py-3"><p className="text-[11px] text-white/50">Part coût</p><p className="mt-1 text-lg font-semibold">{loading ? '—' : `${rewardCostRate.toFixed(1)} %`}</p></div>
+              <div className="rounded-3xl bg-[#111111] px-4 py-3"><p className="text-[11px] text-[#FFFFFF]">Récompenses</p><p className="mt-1 text-lg font-semibold">{redemptionCount}</p></div>
+              <div className="rounded-3xl bg-[#111111] px-4 py-3"><p className="text-[11px] text-[#FFFFFF]">Part coût</p><p className="mt-1 text-lg font-semibold">{loading ? '—' : `${rewardCostRate.toFixed(1)} %`}</p></div>
             </div>
           </div>
-          <p className="mt-6 text-[11px] leading-5 text-white/40">Les indicateurs sont calculés uniquement à partir des données enregistrées dans les tables consultées. Aucun chiffre d’uptime ou de performance technique n’est inventé.</p>
+          <p className="mt-6 text-[11px] leading-5 text-[#FFFFFF]">Les indicateurs sont calculés uniquement à partir des données enregistrées dans les tables consultées. Aucun chiffre d’uptime ou de performance technique n’est inventé.</p>
         </div>
       </div>
     </div>
@@ -4247,15 +4247,15 @@ function AdminAnalyticsCard({
   helper: string;
 }) {
   return (
-    <div className="rounded-2xl border border-ink/10 bg-white p-5">
+    <div className="rounded-3xl border border-[#242424] bg-[#111111] p-5">
       <div className="flex items-center justify-between gap-4">
-        <p className="text-xs font-medium text-ink/45">{label}</p>
-        <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#f4ead3] text-forest">
+        <p className="text-xs font-medium text-[#F5F5DC]">{label}</p>
+        <div className="grid h-9 w-9 place-items-center rounded-3xl bg-[#f4ead3] text-[#E1C27A]">
           <Icon size={17} />
         </div>
       </div>
-      <p className="mt-5 text-2xl font-semibold text-forest">{value}</p>
-      <p className="mt-1 text-[11px] text-ink/35">{helper}</p>
+      <p className="mt-5 text-2xl font-semibold text-[#E1C27A]">{value}</p>
+      <p className="mt-1 text-[11px] text-[#F5F5DC]">{helper}</p>
     </div>
   );
 }
@@ -4456,15 +4456,15 @@ function AIConfigurationSection({
     <div>
       <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#E1C27A]">
             Intelligence artificielle
           </p>
 
-          <h2 className="font-display text-3xl text-forest md:text-4xl">
+          <h2 className="font-display text-3xl text-[#E1C27A] md:text-4xl">
             Configuration IA
           </h2>
 
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-ink/50">
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-[#F5F5DC]">
             Configure les comportements métier de l’IA. Chaque établissement utilise
             automatiquement le prompt correspondant au type que tu lui attribues.
           </p>
@@ -4475,28 +4475,28 @@ function AIConfigurationSection({
             resetForm();
             setShowForm(true);
           }}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white transition hover:bg-forest-light"
+          className="inline-flex items-center justify-center gap-2 rounded-3xl bg-[#111111] px-5 py-3 text-sm font-semibold text-[#FFFFFF] transition hover:bg-[#111111]-light"
         >
           <Plus size={16} />
           Nouveau type
         </button>
       </div>
 
-      <div className="mb-6 rounded-2xl border border-gold/20 bg-white p-6 shadow-sm">
+      <div className="mb-6 rounded-3xl border border-gold/20 bg-[#111111] p-6 shadow-sm">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
               Génération des promotions
             </p>
-            <h3 className="mt-1 font-display text-2xl text-forest">
+            <h3 className="mt-1 font-display text-2xl text-[#E1C27A]">
               Prompt IA des visuels promotionnels
             </h3>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-ink/50">
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-[#F5F5DC]">
               C’est ici que l’administrateur définit les instructions utilisées par l’IA
               pour créer les images des promotions. Le responsable ne peut pas modifier ce prompt.
             </p>
           </div>
-          <span className="rounded-full bg-forest/5 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-forest">
+          <span className="rounded-full bg-[#111111] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#E1C27A]">
             Admin uniquement
           </span>
         </div>
@@ -4507,7 +4507,7 @@ function AIConfigurationSection({
             onChange={(e) => setPromotionPrompt(e.target.value)}
             rows={10}
             placeholder="Décris le style visuel, la direction artistique, les règles de texte dans l’image et les contraintes à respecter..."
-            className="w-full resize-y rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm leading-6 outline-none focus:border-forest"
+            className="w-full resize-y rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm leading-6 outline-none focus:border-[#242424]"
           />
         </div>
 
@@ -4515,42 +4515,42 @@ function AIConfigurationSection({
           <button
             onClick={savePromotionPrompt}
             disabled={promotionPromptSaving}
-            className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+            className="rounded-3xl bg-[#111111] px-5 py-3 text-sm font-semibold text-[#FFFFFF] disabled:opacity-50"
           >
             {promotionPromptSaving ? 'Enregistrement...' : 'Enregistrer le prompt promotions'}
           </button>
         </div>
       </div>
 
-      <div className="mb-6 rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">Moteur IA global</p><h3 className="mt-1 text-xl font-semibold text-forest">Provider et modèle utilisés par l’analyse</h3></div><span className={`rounded-full px-3 py-1 text-[10px] font-semibold ${aiSettings.enabled ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{aiSettings.enabled ? 'IA ACTIVE' : 'IA DÉSACTIVÉE'}</span></div>
+      <div className="mb-6 rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
+        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">Moteur IA global</p><h3 className="mt-1 text-xl font-semibold text-[#E1C27A]">Provider et modèle utilisés par l’analyse</h3></div><span className={`rounded-full px-3 py-1 text-[10px] font-semibold ${aiSettings.enabled ? 'bg-[#111111] text-[#E1C27A] : 'bg-[#111111] text-[#E1C27A] ? 'IA ACTIVE' : 'IA DÉSACTIVÉE'}</span></div>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
-          <label className="block"><span className="mb-1 block text-xs font-semibold">Provider / moteur</span><input value={aiSettings.provider ?? ''} onChange={e=>setAISettings((v:any)=>({...v,provider:e.target.value}))} placeholder="openai" className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm"/></label>
-          <label className="block"><span className="mb-1 block text-xs font-semibold">Modèle</span><input value={aiSettings.model ?? ''} onChange={e=>setAISettings((v:any)=>({...v,model:e.target.value}))} placeholder="gpt-5.6-luna" className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm"/></label>
-          <label className="block"><span className="mb-1 block text-xs font-semibold">Température</span><input type="number" min="0" max="2" step="0.1" value={aiSettings.temperature ?? 0.2} onChange={e=>setAISettings((v:any)=>({...v,temperature:Number(e.target.value)}))} className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm"/></label>
-          <label className="block"><span className="mb-1 block text-xs font-semibold">Max output tokens</span><input type="number" value={aiSettings.max_output_tokens ?? 4000} onChange={e=>setAISettings((v:any)=>({...v,max_output_tokens:Number(e.target.value)}))} className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm"/></label>
-          <label className="block md:col-span-2"><span className="mb-1 block text-xs font-semibold">Clé API <span className="font-normal text-ink/35">{aiSettings.has_api_key ? '— une clé est déjà enregistrée, vide pour la conserver' : '— aucune clé enregistrée'}</span></span><input type="password" value={aiApiKey} onChange={e=>setAIApiKey(e.target.value)} autoComplete="new-password" className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm"/></label>
-          <label className="flex items-center gap-3 rounded-xl bg-[#f7f7f3] p-4 md:col-span-2"><input type="checkbox" checked={!!aiSettings.enabled} onChange={e=>setAISettings((v:any)=>({...v,enabled:e.target.checked}))}/><span><strong className="block text-sm text-forest">Activer l’IA</strong><span className="text-xs text-ink/40">Le moteur global est utilisé par l’Edge Function d’analyse des avis.</span></span></label>
-          <label className="block md:col-span-2"><span className="mb-1 block text-xs font-semibold">Instructions système globales</span><textarea rows={5} value={aiSettings.system_instructions ?? ''} onChange={e=>setAISettings((v:any)=>({...v,system_instructions:e.target.value}))} className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm leading-6"/></label>
+          <label className="block"><span className="mb-1 block text-xs font-semibold">Provider / moteur</span><input value={aiSettings.provider ?? ''} onChange={e=>setAISettings((v:any)=>({...v,provider:e.target.value}))} placeholder="openai" className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm"/></label>
+          <label className="block"><span className="mb-1 block text-xs font-semibold">Modèle</span><input value={aiSettings.model ?? ''} onChange={e=>setAISettings((v:any)=>({...v,model:e.target.value}))} placeholder="gpt-5.6-luna" className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm"/></label>
+          <label className="block"><span className="mb-1 block text-xs font-semibold">Température</span><input type="number" min="0" max="2" step="0.1" value={aiSettings.temperature ?? 0.2} onChange={e=>setAISettings((v:any)=>({...v,temperature:Number(e.target.value)}))} className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm"/></label>
+          <label className="block"><span className="mb-1 block text-xs font-semibold">Max output tokens</span><input type="number" value={aiSettings.max_output_tokens ?? 4000} onChange={e=>setAISettings((v:any)=>({...v,max_output_tokens:Number(e.target.value)}))} className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm"/></label>
+          <label className="block md:col-span-2"><span className="mb-1 block text-xs font-semibold">Clé API <span className="font-normal text-[#F5F5DC]">{aiSettings.has_api_key ? '— une clé est déjà enregistrée, vide pour la conserver' : '— aucune clé enregistrée'}</span></span><input type="password" value={aiApiKey} onChange={e=>setAIApiKey(e.target.value)} autoComplete="new-password" className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm"/></label>
+          <label className="flex items-center gap-3 rounded-3xl bg-[#111111] p-4 md:col-span-2"><input type="checkbox" checked={!!aiSettings.enabled} onChange={e=>setAISettings((v:any)=>({...v,enabled:e.target.checked}))}/><span><strong className="block text-sm text-[#E1C27A]">Activer l’IA</strong><span className="text-xs text-[#F5F5DC]">Le moteur global est utilisé par l’Edge Function d’analyse des avis.</span></span></label>
+          <label className="block md:col-span-2"><span className="mb-1 block text-xs font-semibold">Instructions système globales</span><textarea rows={5} value={aiSettings.system_instructions ?? ''} onChange={e=>setAISettings((v:any)=>({...v,system_instructions:e.target.value}))} className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm leading-6"/></label>
         </div>
-        <div className="mt-5 flex justify-end"><button onClick={saveAISettings} disabled={aiSettingsSaving} className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white">{aiSettingsSaving ? 'Enregistrement...' : 'Enregistrer le moteur IA'}</button></div>
+        <div className="mt-5 flex justify-end"><button onClick={saveAISettings} disabled={aiSettingsSaving} className="rounded-3xl bg-[#111111] px-5 py-3 text-sm font-semibold text-[#FFFFFF]">{aiSettingsSaving ? 'Enregistrement...' : 'Enregistrer le moteur IA'}</button></div>
       </div>
 
       {showForm && (
-        <div className="mb-6 rounded-2xl border border-gold/20 bg-white p-6 shadow-sm">
+        <div className="mb-6 rounded-3xl border border-gold/20 bg-[#111111] p-6 shadow-sm">
           <div className="mb-6 flex items-start justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
                 {editingId ? 'Modification' : 'Nouveau type'}
               </p>
-              <h3 className="mt-1 font-display text-2xl text-forest">
+              <h3 className="mt-1 font-display text-2xl text-[#E1C27A]">
                 {editingId ? 'Modifier le type IA' : 'Créer un type IA'}
               </h3>
             </div>
 
             <button
               onClick={resetForm}
-              className="text-ink/40 hover:text-ink"
+              className="text-[#F5F5DC] hover:text-[#F5F5DC]"
             >
               <X size={20} />
             </button>
@@ -4565,7 +4565,7 @@ function AIConfigurationSection({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Ex : Restaurant"
-                className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+                className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#242424]"
               />
             </div>
 
@@ -4577,7 +4577,7 @@ function AIConfigurationSection({
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Ex : Restaurants, cafés et lounges"
-                className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+                className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#242424]"
               />
             </div>
 
@@ -4590,14 +4590,14 @@ function AIConfigurationSection({
                 onChange={(e) => setPrompt(e.target.value)}
                 rows={9}
                 placeholder="Décris comment l’IA doit analyser ce type d’établissement..."
-                className="w-full resize-y rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm leading-6 outline-none focus:border-forest"
+                className="w-full resize-y rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm leading-6 outline-none focus:border-[#242424]"
               />
-              <p className="mt-2 text-[11px] text-ink/35">
+              <p className="mt-2 text-[11px] text-[#F5F5DC]">
                 Ce prompt reste dans l’espace Admin et sert de base métier à l’analyse.
               </p>
             </div>
 
-            <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-[#f7f7f3] p-4 md:col-span-2">
+            <label className="flex cursor-pointer items-center gap-3 rounded-3xl bg-[#111111] p-4 md:col-span-2">
               <input
                 type="checkbox"
                 checked={active}
@@ -4605,10 +4605,10 @@ function AIConfigurationSection({
                 className="h-4 w-4 accent-[#173d32]"
               />
               <span>
-                <span className="block text-sm font-semibold text-forest">
+                <span className="block text-sm font-semibold text-[#E1C27A]">
                   Type actif
                 </span>
-                <span className="mt-1 block text-xs text-ink/40">
+                <span className="mt-1 block text-xs text-[#F5F5DC]">
                   Un type désactivé ne sera pas proposé lors de l’attribution à un établissement.
                 </span>
               </span>
@@ -4619,7 +4619,7 @@ function AIConfigurationSection({
             <button
               onClick={resetForm}
               disabled={saving}
-              className="rounded-xl border border-ink/10 px-5 py-3 text-sm font-medium"
+              className="rounded-3xl border border-[#242424] px-5 py-3 text-sm font-medium"
             >
               Annuler
             </button>
@@ -4627,7 +4627,7 @@ function AIConfigurationSection({
             <button
               onClick={save}
               disabled={saving}
-              className="inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-3xl bg-[#111111] px-5 py-3 text-sm font-semibold text-[#FFFFFF] disabled:opacity-50"
             >
               <Save size={16} />
               {saving ? 'Enregistrement...' : 'Enregistrer'}
@@ -4640,20 +4640,20 @@ function AIConfigurationSection({
         {businessTypes.map((type) => (
           <div
             key={type.id}
-            className="rounded-2xl border border-ink/5 bg-white p-5 shadow-sm"
+            className="rounded-3xl border border-[#242424] bg-[#111111] p-5 shadow-sm"
           >
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-forest text-gold">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-3xl bg-[#111111] text-gold">
                     <Brain size={18} />
                   </div>
 
                   <div>
-                    <h3 className="text-base font-semibold text-forest">
+                    <h3 className="text-base font-semibold text-[#E1C27A]">
                       {type.name}
                     </h3>
-                    <p className="text-xs text-ink/40">
+                    <p className="text-xs text-[#F5F5DC]">
                       {type.description || 'Aucune description'}
                     </p>
                   </div>
@@ -4661,19 +4661,19 @@ function AIConfigurationSection({
                   <span
                     className={`rounded-full px-3 py-1 text-[10px] font-semibold ${
                       type.active
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-red-100 text-red-700'
+                        ? 'bg-[#111111] text-[#E1C27A]
+                        : 'bg-[#111111] text-[#E1C27A]
                     }`}
                   >
                     {type.active ? 'ACTIF' : 'DÉSACTIVÉ'}
                   </span>
                 </div>
 
-                <div className="mt-4 rounded-xl bg-[#f7f7f3] p-4">
-                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-ink/35">
+                <div className="mt-4 rounded-3xl bg-[#111111] p-4">
+                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#F5F5DC]">
                     Prompt métier
                   </p>
-                  <p className="whitespace-pre-wrap text-sm leading-6 text-ink/60">
+                  <p className="whitespace-pre-wrap text-sm leading-6 text-[#F5F5DC]">
                     {type.ai_prompt}
                   </p>
                 </div>
@@ -4682,7 +4682,7 @@ function AIConfigurationSection({
               <div className="flex shrink-0 flex-wrap gap-2">
                 <button
                   onClick={() => startEdit(type)}
-                  className="inline-flex items-center gap-2 rounded-lg border border-ink/10 px-3 py-2 text-xs font-medium transition hover:bg-[#f7f7f3]"
+                  className="inline-flex items-center gap-2 rounded-lg border border-[#242424] px-3 py-2 text-xs font-medium transition hover:bg-[#111111]"
                 >
                   <Pencil size={14} />
                   Modifier
@@ -4692,8 +4692,8 @@ function AIConfigurationSection({
                   onClick={() => toggleActive(type)}
                   className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium transition ${
                     type.active
-                      ? 'border-red-200 text-red-600 hover:bg-red-50'
-                      : 'border-green-200 text-green-700 hover:bg-green-50'
+                      ? 'border-[#242424] text-[#E1C27A] hover:bg-[#111111]
+                      : 'border-[#242424] text-[#E1C27A] hover:bg-[#111111]
                   }`}
                 >
                   <Power size={14} />
@@ -4702,7 +4702,7 @@ function AIConfigurationSection({
 
                 <button
                   onClick={() => deleteType(type)}
-                  className="inline-flex items-center gap-2 rounded-lg border border-red-200 px-3 py-2 text-xs font-medium text-red-600 transition hover:bg-red-50"
+                  className="inline-flex items-center gap-2 rounded-lg border border-[#242424] px-3 py-2 text-xs font-medium text-[#E1C27A] transition hover:bg-[#111111]"
                 >
                   Supprimer
                 </button>
@@ -4712,9 +4712,9 @@ function AIConfigurationSection({
         ))}
 
         {businessTypes.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-ink/15 bg-white p-12 text-center">
-            <Brain size={32} className="mx-auto text-ink/20" />
-            <p className="mt-4 text-sm text-ink/45">
+          <div className="rounded-3xl border border-dashed border-[#242424] bg-[#111111] p-12 text-center">
+            <Brain size={32} className="mx-auto text-[#F5F5DC]" />
+            <p className="mt-4 text-sm text-[#F5F5DC]">
               Aucun type IA configuré.
             </p>
           </div>
@@ -4855,19 +4855,19 @@ ${body}
   return (
     <div>
       <div className="mb-8">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">Reporting</p>
-        <h2 className="font-display text-3xl text-forest md:text-4xl">Rapports PDF</h2>
-        <p className="mt-2 max-w-2xl text-sm text-ink/50">Générez des rapports structurés avec en-tête, indicateurs, tableaux et synthèse pour chaque établissement.</p>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#E1C27A]">Reporting</p>
+        <h2 className="font-display text-3xl text-[#E1C27A] md:text-4xl">Rapports PDF</h2>
+        <p className="mt-2 max-w-2xl text-sm text-[#F5F5DC]">Générez des rapports structurés avec en-tête, indicateurs, tableaux et synthèse pour chaque établissement.</p>
       </div>
-      <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
+      <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
         <div className="grid gap-4 md:grid-cols-2">
-          <label className="block"><span className="mb-2 block text-xs font-semibold">Établissement</span><select value={selectedId} onChange={e=>setSelectedId(e.target.value)} className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm">{establishments.map(e=><option key={e.id} value={e.id}>{e.name}</option>)}</select></label>
-          <label className="block"><span className="mb-2 block text-xs font-semibold">Période</span><select value={period} onChange={e=>setPeriod(Number(e.target.value))} className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm"><option value={7}>7 jours</option><option value={15}>15 jours</option><option value={30}>30 jours</option><option value={90}>90 jours</option><option value={180}>180 jours</option><option value={365}>365 jours</option></select></label>
+          <label className="block"><span className="mb-2 block text-xs font-semibold">Établissement</span><select value={selectedId} onChange={e=>setSelectedId(e.target.value)} className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm">{establishments.map(e=><option key={e.id} value={e.id}>{e.name}</option>)}</select></label>
+          <label className="block"><span className="mb-2 block text-xs font-semibold">Période</span><select value={period} onChange={e=>setPeriod(Number(e.target.value))} className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm"><option value={7}>7 jours</option><option value={15}>15 jours</option><option value={30}>30 jours</option><option value={90}>90 jours</option><option value={180}>180 jours</option><option value={365}>365 jours</option></select></label>
         </div>
         <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {([['reviews','Avis & réputation'],['loyalty','Fidélité'],['team','Équipe'],['analytics','Analytics'],['complete','Rapport complet']] as const).map(([id,label])=><button key={id} onClick={()=>printReport(id)} disabled={loading} className="inline-flex items-center justify-center gap-2 rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-xs font-semibold text-forest hover:bg-white disabled:opacity-40"><Printer size={15}/>{loading?'Préparation…':label}</button>)}
+          {([['reviews','Avis & réputation'],['loyalty','Fidélité'],['team','Équipe'],['analytics','Analytics'],['complete','Rapport complet']] as const).map(([id,label])=><button key={id} onClick={()=>printReport(id)} disabled={loading} className="inline-flex items-center justify-center gap-2 rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-xs font-semibold text-[#E1C27A] hover:bg-[#111111] disabled:opacity-40"><Printer size={15}/>{loading?'Préparation…':label}</button>)}
         </div>
-        <p className="mt-5 text-[11px] text-ink/35">Le rapport s’ouvre dans une page imprimable A4 : choisissez « Enregistrer au format PDF » dans l’impression du navigateur.</p>
+        <p className="mt-5 text-[11px] text-[#F5F5DC]">Le rapport s’ouvre dans une page imprimable A4 : choisissez « Enregistrer au format PDF » dans l’impression du navigateur.</p>
       </div>
     </div>
   );
@@ -4890,8 +4890,8 @@ function EmptyStaff({
   description: string;
 }) {
   return (
-    <div className="rounded-2xl border border-ink/5 bg-white p-12 text-center shadow-sm">
-      <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-forest/10 text-forest">
+    <div className="rounded-3xl border border-[#242424] bg-[#111111] p-12 text-center shadow-sm">
+      <div className="mx-auto grid h-14 w-14 place-items-center rounded-3xl bg-[#111111] text-[#E1C27A]">
         <Icon size={25} />
       </div>
 
@@ -4899,7 +4899,7 @@ function EmptyStaff({
         {title}
       </h3>
 
-      <p className="mx-auto mt-2 max-w-md text-sm text-ink/45">
+      <p className="mx-auto mt-2 max-w-md text-sm text-[#F5F5DC]">
         {description}
       </p>
     </div>
@@ -5104,15 +5104,15 @@ function BillingSection({
     <div>
       <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">Business</p>
-          <h2 className="font-display text-3xl text-forest md:text-4xl">Abonnements & facturation</h2>
-          <p className="mt-2 text-sm text-ink/50">Pilotez les plans, abonnements, paiements et échéances de vos commerces clients.</p>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#E1C27A]">Business</p>
+          <h2 className="font-display text-3xl text-[#E1C27A] md:text-4xl">Abonnements & facturation</h2>
+          <p className="mt-2 text-sm text-[#F5F5DC]">Pilotez les plans, abonnements, paiements et échéances de vos commerces clients.</p>
         </div>
-        <button onClick={reload} className="rounded-xl border border-ink/10 bg-white px-4 py-3 text-xs font-semibold">Actualiser</button>
+        <button onClick={reload} className="rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-xs font-semibold">Actualiser</button>
       </div>
 
       {!billing.available ? (
-        <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">
+        <div className="mb-6 rounded-3xl border border-[#242424] bg-[#111111] p-5 text-sm text-[#E1C27A]">
           <strong>Module facturation non configuré.</strong> Les tables d’abonnement doivent être présentes dans Supabase pour activer le suivi réel.
         </div>
       ) : null}
@@ -5124,13 +5124,13 @@ function BillingSection({
         <StatCard icon={CalendarDays} label="Renouvellements < 30 j." value={billing.available ? billing.upcomingRenewals : '—'} />
       </div>
 
-      <div className="mt-6 rounded-2xl border border-ink/5 bg-white p-5 shadow-sm">
+      <div className="mt-6 rounded-3xl border border-[#242424] bg-[#111111] p-5 shadow-sm">
         <div className="grid gap-3 md:grid-cols-[1.4fr_1fr_1fr]">
           <div className="relative">
-            <Search size={16} className="absolute left-3 top-3 text-ink/30" />
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher un commerce..." className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] py-2.5 pl-9 pr-3 text-sm outline-none focus:border-forest" />
+            <Search size={16} className="absolute left-3 top-3 text-[#F5F5DC]" />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher un commerce..." className="w-full rounded-3xl border border-[#242424] bg-[#111111] py-2.5 pl-9 pr-3 text-sm outline-none focus:border-[#242424]" />
           </div>
-          <select value={status} onChange={(e) => setStatus(e.target.value)} className="rounded-xl border border-ink/10 bg-[#f7f7f3] px-3 py-2.5 text-sm">
+          <select value={status} onChange={(e) => setStatus(e.target.value)} className="rounded-3xl border border-[#242424] bg-[#111111] px-3 py-2.5 text-sm">
             <option value="all">Tous les statuts</option>
             <option value="active">Actif</option>
             <option value="trial">Essai</option>
@@ -5138,58 +5138,58 @@ function BillingSection({
             <option value="unpaid">Impayé</option>
             <option value="canceled">Annulé</option>
           </select>
-          <select value={plan} onChange={(e) => setPlan(e.target.value)} className="rounded-xl border border-ink/10 bg-[#f7f7f3] px-3 py-2.5 text-sm">
+          <select value={plan} onChange={(e) => setPlan(e.target.value)} className="rounded-3xl border border-[#242424] bg-[#111111] px-3 py-2.5 text-sm">
             <option value="all">Tous les plans</option>
             {billing.plans.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
         </div>
       </div>
 
-      <div className="mt-6 rounded-2xl border border-forest/10 bg-white p-5 shadow-sm">
+      <div className="mt-6 rounded-3xl border border-[#242424] bg-[#111111] p-5 shadow-sm">
         <div className="flex flex-col justify-between gap-3 md:flex-row md:items-end">
           <div>
             <h3 className="text-sm font-semibold">Attribuer un pack à un établissement</h3>
-            <p className="mt-1 text-xs text-ink/45">Le pack devient immédiatement le pack actif de l’établissement. En période d’essai, l’interface responsable conserve le thème standard.</p>
+            <p className="mt-1 text-xs text-[#F5F5DC]">Le pack devient immédiatement le pack actif de l’établissement. En période d’essai, l’interface responsable conserve le thème standard.</p>
           </div>
-          <span className="rounded-full bg-forest/5 px-3 py-1.5 text-[10px] font-semibold text-forest">Admin uniquement</span>
+          <span className="rounded-full bg-[#111111] px-3 py-1.5 text-[10px] font-semibold text-[#E1C27A]">Admin uniquement</span>
         </div>
         <div className="mt-4 grid gap-3 md:grid-cols-[1.3fr_1fr_.8fr_.7fr_auto]">
-          <select value={assignmentEstablishmentId} onChange={(e) => setAssignmentEstablishmentId(e.target.value)} className="rounded-xl border border-ink/10 bg-[#f7f7f3] px-3 py-2.5 text-sm outline-none focus:border-forest">
+          <select value={assignmentEstablishmentId} onChange={(e) => setAssignmentEstablishmentId(e.target.value)} className="rounded-3xl border border-[#242424] bg-[#111111] px-3 py-2.5 text-sm outline-none focus:border-[#242424]">
             <option value="">Établissement</option>
             {establishments.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
           </select>
-          <select value={assignmentPlanId} onChange={(e) => setAssignmentPlanId(e.target.value)} className="rounded-xl border border-ink/10 bg-[#f7f7f3] px-3 py-2.5 text-sm outline-none focus:border-forest">
+          <select value={assignmentPlanId} onChange={(e) => setAssignmentPlanId(e.target.value)} className="rounded-3xl border border-[#242424] bg-[#111111] px-3 py-2.5 text-sm outline-none focus:border-[#242424]">
             <option value="">Pack</option>
             {billing.plans.filter((item) => item.active).map((item) => <option key={item.id} value={item.id}>{item.name} · {Number(item.price_mad).toLocaleString('fr-FR')} MAD</option>)}
           </select>
-          <select value={assignmentStatus} onChange={(e) => setAssignmentStatus(e.target.value as 'active' | 'trial')} className="rounded-xl border border-ink/10 bg-[#f7f7f3] px-3 py-2.5 text-sm outline-none focus:border-forest">
+          <select value={assignmentStatus} onChange={(e) => setAssignmentStatus(e.target.value as 'active' | 'trial')} className="rounded-3xl border border-[#242424] bg-[#111111] px-3 py-2.5 text-sm outline-none focus:border-[#242424]">
             <option value="active">Actif</option>
             <option value="trial">Essai</option>
           </select>
-          <input type="number" min="1" max="90" value={assignmentTrialDays} onChange={(e) => setAssignmentTrialDays(e.target.value)} disabled={assignmentStatus !== 'trial'} className="rounded-xl border border-ink/10 bg-[#f7f7f3] px-3 py-2.5 text-sm outline-none disabled:opacity-40" placeholder="Jours essai" />
-          <button type="button" onClick={assignSubscription} disabled={savingAssignment} className="inline-flex items-center justify-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-50">
+          <input type="number" min="1" max="90" value={assignmentTrialDays} onChange={(e) => setAssignmentTrialDays(e.target.value)} disabled={assignmentStatus !== 'trial'} className="rounded-3xl border border-[#242424] bg-[#111111] px-3 py-2.5 text-sm outline-none disabled:opacity-40" placeholder="Jours essai" />
+          <button type="button" onClick={assignSubscription} disabled={savingAssignment} className="inline-flex items-center justify-center gap-2 rounded-3xl bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#FFFFFF] disabled:opacity-50">
             <CheckCircle2 size={14} /> {savingAssignment ? 'Attribution…' : 'Attribuer'}
           </button>
         </div>
       </div>
 
-      <div className="mt-6 overflow-x-auto rounded-2xl border border-ink/5 bg-white shadow-sm">
-        <div className="grid min-w-[760px] grid-cols-[1.5fr_1fr_.8fr_1fr_1fr] gap-4 border-b border-ink/5 px-5 py-4 text-[10px] font-semibold uppercase tracking-wider text-ink/35">
+      <div className="mt-6 overflow-x-auto rounded-3xl border border-[#242424] bg-[#111111] shadow-sm">
+        <div className="grid min-w-[760px] grid-cols-[1.5fr_1fr_.8fr_1fr_1fr] gap-4 border-b border-[#242424] px-5 py-4 text-[10px] font-semibold uppercase tracking-wider text-[#F5F5DC]">
           <span>Commerce</span><span>Plan</span><span>Statut</span><span>MRR</span><span>Échéance</span>
         </div>
         {filtered.length === 0 ? (
-          <div className="p-10 text-center text-sm text-ink/40">Aucun abonnement correspondant.</div>
+          <div className="p-10 text-center text-sm text-[#F5F5DC]">Aucun abonnement correspondant.</div>
         ) : (
           filtered.map((sub) => {
             const e = establishmentMap.get(sub.establishment_id);
             return (
-              <div key={sub.id} className="grid min-w-[900px] grid-cols-[1.35fr_1fr_.8fr_1fr_1fr_auto] items-center gap-4 border-b border-ink/5 px-5 py-4 text-sm last:border-0">
-                <div><p className="font-semibold">{e?.name ?? 'Établissement supprimé'}</p><p className="text-xs text-ink/35">{e?.city ?? 'Ville non définie'}</p></div>
+              <div key={sub.id} className="grid min-w-[900px] grid-cols-[1.35fr_1fr_.8fr_1fr_1fr_auto] items-center gap-4 border-b border-[#242424] px-5 py-4 text-sm last:border-0">
+                <div><p className="font-semibold">{e?.name ?? 'Établissement supprimé'}</p><p className="text-xs text-[#F5F5DC]">{e?.city ?? 'Ville non définie'}</p></div>
                 <span>{sub.plan?.name ?? '—'}</span>
-                <span className={`w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold ${sub.status === 'active' ? 'bg-green-100 text-green-700' : sub.status === 'trial' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>{sub.status}</span>
+                <span className={`w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold ${sub.status === 'active' ? 'bg-[#111111] text-[#E1C27A] : sub.status === 'trial' ? 'bg-[#111111] text-[#E1C27A] : 'bg-[#111111] text-[#E1C27A]
                 <span className="font-semibold">{Number(sub.plan?.price_mad ?? 0).toLocaleString('fr-FR')} MAD</span>
-                <span className="text-ink/50">{formatDate(sub.current_period_end)}</span>
-                <button type="button" onClick={() => openSubscriptionEditor(sub)} className="rounded-lg border border-ink/10 bg-white px-3 py-2 text-[11px] font-semibold text-forest transition hover:border-gold hover:bg-[#fdf9ef]">
+                <span className="text-[#F5F5DC]">{formatDate(sub.current_period_end)}</span>
+                <button type="button" onClick={() => openSubscriptionEditor(sub)} className="rounded-lg border border-[#242424] bg-[#111111] px-3 py-2 text-[11px] font-semibold text-[#E1C27A] transition hover:border-gold hover:bg-[#111111]">
                   Modifier
                 </button>
               </div>
@@ -5199,18 +5199,18 @@ function BillingSection({
       </div>
 
       {editingSubscription ? (
-        <div className="fixed inset-0 z-[80] overflow-y-auto bg-ink/50 p-4 backdrop-blur-sm sm:p-8">
+        <div className="fixed inset-0 z-[80] overflow-y-auto bg-[#111111] p-4 backdrop-blur-sm sm:p-8">
           <div className="mx-auto min-h-full max-w-4xl flex items-center">
-            <div className="w-full overflow-hidden rounded-3xl bg-[#f7f7f3] shadow-2xl">
-              <div className="flex items-start justify-between gap-4 border-b border-ink/10 bg-white px-6 py-5 sm:px-8">
+            <div className="w-full overflow-hidden rounded-3xl bg-[#111111] shadow-2xl">
+              <div className="flex items-start justify-between gap-4 border-b border-[#242424] bg-[#111111] px-6 py-5 sm:px-8">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-forest/50">Gestion abonnement</p>
-                  <h3 className="mt-1 font-display text-2xl text-forest">Modifier l’abonnement</h3>
-                  <p className="mt-1 text-xs text-ink/45">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#E1C27A]">Gestion abonnement</p>
+                  <h3 className="mt-1 font-display text-2xl text-[#E1C27A]">Modifier l’abonnement</h3>
+                  <p className="mt-1 text-xs text-[#F5F5DC]">
                     {establishmentMap.get(editingSubscription.establishment_id)?.name ?? 'Établissement'}
                   </p>
                 </div>
-                <button type="button" onClick={closeSubscriptionEditor} className="grid h-10 w-10 place-items-center rounded-xl border border-ink/10 bg-white text-ink/55 hover:bg-[#f7f7f3]" aria-label="Fermer">
+                <button type="button" onClick={closeSubscriptionEditor} className="grid h-10 w-10 place-items-center rounded-3xl border border-[#242424] bg-[#111111] text-[#F5F5DC] hover:bg-[#111111]" aria-label="Fermer">
                   <X size={18} />
                 </button>
               </div>
@@ -5222,7 +5222,7 @@ function BillingSection({
                     <select
                       value={subscriptionForm.planId}
                       onChange={(e) => setSubscriptionForm((v) => ({ ...v, planId: e.target.value }))}
-                      className="mt-2 w-full rounded-xl border border-ink/10 bg-white px-3 py-3 text-sm font-normal outline-none focus:border-forest"
+                      className="mt-2 w-full rounded-3xl border border-[#242424] bg-[#111111] px-3 py-3 text-sm font-normal outline-none focus:border-[#242424]"
                     >
                       {billing.plans.filter((item) => item.active || item.id === subscriptionForm.planId).map((item) => (
                         <option key={item.id} value={item.id}>{item.name} · {Number(item.price_mad).toLocaleString('fr-FR')} MAD/{item.interval === 'year' ? 'an' : 'mois'}</option>
@@ -5235,7 +5235,7 @@ function BillingSection({
                     <select
                       value={subscriptionForm.status}
                       onChange={(e) => setSubscriptionForm((v) => ({ ...v, status: e.target.value as typeof v.status }))}
-                      className="mt-2 w-full rounded-xl border border-ink/10 bg-white px-3 py-3 text-sm font-normal outline-none focus:border-forest"
+                      className="mt-2 w-full rounded-3xl border border-[#242424] bg-[#111111] px-3 py-3 text-sm font-normal outline-none focus:border-[#242424]"
                     >
                       <option value="active">Actif</option>
                       <option value="trial">Période d’essai</option>
@@ -5251,7 +5251,7 @@ function BillingSection({
                       type="datetime-local"
                       value={subscriptionForm.startedAt}
                       onChange={(e) => setSubscriptionForm((v) => ({ ...v, startedAt: e.target.value }))}
-                      className="mt-2 w-full rounded-xl border border-ink/10 bg-white px-3 py-3 text-sm font-normal outline-none focus:border-forest"
+                      className="mt-2 w-full rounded-3xl border border-[#242424] bg-[#111111] px-3 py-3 text-sm font-normal outline-none focus:border-[#242424]"
                     />
                   </label>
 
@@ -5261,7 +5261,7 @@ function BillingSection({
                       type="datetime-local"
                       value={subscriptionForm.periodEnd}
                       onChange={(e) => setSubscriptionForm((v) => ({ ...v, periodEnd: e.target.value }))}
-                      className="mt-2 w-full rounded-xl border border-ink/10 bg-white px-3 py-3 text-sm font-normal outline-none focus:border-forest"
+                      className="mt-2 w-full rounded-3xl border border-[#242424] bg-[#111111] px-3 py-3 text-sm font-normal outline-none focus:border-[#242424]"
                     />
                   </label>
 
@@ -5274,14 +5274,14 @@ function BillingSection({
                       value={subscriptionForm.trialDays}
                       onChange={(e) => setSubscriptionForm((v) => ({ ...v, trialDays: e.target.value }))}
                       disabled={subscriptionForm.status !== 'trial'}
-                      className="mt-2 w-full rounded-xl border border-ink/10 bg-white px-3 py-3 text-sm font-normal outline-none focus:border-forest disabled:bg-ink/5 disabled:text-ink/30"
+                      className="mt-2 w-full rounded-3xl border border-[#242424] bg-[#111111] px-3 py-3 text-sm font-normal outline-none focus:border-[#242424] disabled:bg-[#111111] disabled:text-[#F5F5DC]"
                     />
-                    <span className="mt-1 block text-[10px] font-normal text-ink/40">Utilisé lorsque le statut est « Période d’essai ».</span>
+                    <span className="mt-1 block text-[10px] font-normal text-[#F5F5DC]">Utilisé lorsque le statut est « Période d’essai ».</span>
                   </label>
 
-                  <div className="rounded-xl border border-forest/10 bg-white p-4">
+                  <div className="rounded-3xl border border-[#242424] bg-[#111111] p-4">
                     <p className="text-xs font-semibold">Prolonger rapidement l’échéance</p>
-                    <p className="mt-1 text-[10px] text-ink/40">Ajoute des jours à la date de fin actuelle.</p>
+                    <p className="mt-1 text-[10px] text-[#F5F5DC]">Ajoute des jours à la date de fin actuelle.</p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {[7, 30, 90].map((days) => (
                         <button
@@ -5292,7 +5292,7 @@ function BillingSection({
                             current.setDate(current.getDate() + days);
                             setSubscriptionForm((v) => ({ ...v, periodEnd: toLocalDateTimeInput(current.toISOString()) }));
                           }}
-                          className="rounded-lg border border-ink/10 bg-[#f7f7f3] px-3 py-2 text-[11px] font-semibold text-forest hover:border-gold hover:bg-[#fdf9ef]"
+                          className="rounded-lg border border-[#242424] bg-[#111111] px-3 py-2 text-[11px] font-semibold text-[#E1C27A] hover:border-gold hover:bg-[#111111]"
                         >
                           +{days} jours
                         </button>
@@ -5301,15 +5301,15 @@ function BillingSection({
                   </div>
                 </div>
 
-                <div className="mt-6 rounded-2xl border border-gold/20 bg-[#fdf9ef] p-4 text-xs text-ink/60">
-                  <strong className="text-ink">Modification immédiate :</strong> le responsable verra le nouveau pack et les nouvelles dates dès que son abonnement sera rechargé. Les fonctionnalités restent déterminées par le pack sélectionné.
+                <div className="mt-6 rounded-3xl border border-gold/20 bg-[#111111] p-4 text-xs text-[#F5F5DC]">
+                  <strong className="text-[#F5F5DC]">Modification immédiate :</strong> le responsable verra le nouveau pack et les nouvelles dates dès que son abonnement sera rechargé. Les fonctionnalités restent déterminées par le pack sélectionné.
                 </div>
 
                 <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                  <button type="button" onClick={closeSubscriptionEditor} disabled={savingAssignment} className="rounded-xl border border-ink/10 bg-white px-5 py-3 text-xs font-semibold disabled:opacity-50">
+                  <button type="button" onClick={closeSubscriptionEditor} disabled={savingAssignment} className="rounded-3xl border border-[#242424] bg-[#111111] px-5 py-3 text-xs font-semibold disabled:opacity-50">
                     Annuler
                   </button>
-                  <button type="button" onClick={saveSubscriptionEdit} disabled={savingAssignment} className="inline-flex items-center justify-center gap-2 rounded-xl bg-forest px-5 py-3 text-xs font-semibold text-white disabled:opacity-50">
+                  <button type="button" onClick={saveSubscriptionEdit} disabled={savingAssignment} className="inline-flex items-center justify-center gap-2 rounded-3xl bg-[#111111] px-5 py-3 text-xs font-semibold text-[#FFFFFF] disabled:opacity-50">
                     <Save size={14} />
                     {savingAssignment ? 'Enregistrement…' : 'Enregistrer les modifications'}
                   </button>
@@ -5320,41 +5320,41 @@ function BillingSection({
         </div>
       ) : null}
 
-      <div className="mt-8 rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
+      <div className="mt-8 rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
         <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
           <div>
             <h3 className="text-sm font-semibold">Plans & fonctionnalités</h3>
-            <p className="mt-1 text-xs text-ink/45">Crée, modifie les prix et définis précisément ce que chaque abonnement inclut.</p>
+            <p className="mt-1 text-xs text-[#F5F5DC]">Crée, modifie les prix et définis précisément ce que chaque abonnement inclut.</p>
           </div>
-          <button onClick={() => openPlanEditor()} className="inline-flex items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white"><Plus size={14} /> Nouveau plan</button>
+          <button onClick={() => openPlanEditor()} className="inline-flex items-center gap-2 rounded-3xl bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#FFFFFF]"><Plus size={14} /> Nouveau plan</button>
         </div>
 
         {showPlanEditor ? (
-          <div className="mt-5 rounded-2xl border border-forest/10 bg-[#fbfbf8] p-5">
+          <div className="mt-5 rounded-3xl border border-[#242424] bg-[#111111] p-5">
             <div className="grid gap-4 md:grid-cols-3">
-              <label className="text-xs font-semibold">Nom du plan<input value={planForm.name} onChange={(e) => setPlanForm((v) => ({ ...v, name: e.target.value }))} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm font-normal outline-none focus:border-forest" placeholder="Premium" /></label>
-              <label className="text-xs font-semibold">Prix (MAD)<input type="number" min="0" value={planForm.price_mad} onChange={(e) => setPlanForm((v) => ({ ...v, price_mad: e.target.value }))} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm font-normal outline-none focus:border-forest" placeholder="499" /></label>
-              <label className="text-xs font-semibold">Facturation<select value={planForm.interval} onChange={(e) => setPlanForm((v) => ({ ...v, interval: e.target.value }))} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm font-normal"><option value="month">Mensuelle</option><option value="year">Annuelle</option></select></label>
+              <label className="text-xs font-semibold">Nom du plan<input value={planForm.name} onChange={(e) => setPlanForm((v) => ({ ...v, name: e.target.value }))} className="mt-1 w-full rounded-3xl border border-[#242424] bg-[#111111] px-3 py-2.5 text-sm font-normal outline-none focus:border-[#242424]" placeholder="Premium" /></label>
+              <label className="text-xs font-semibold">Prix (MAD)<input type="number" min="0" value={planForm.price_mad} onChange={(e) => setPlanForm((v) => ({ ...v, price_mad: e.target.value }))} className="mt-1 w-full rounded-3xl border border-[#242424] bg-[#111111] px-3 py-2.5 text-sm font-normal outline-none focus:border-[#242424]" placeholder="499" /></label>
+              <label className="text-xs font-semibold">Facturation<select value={planForm.interval} onChange={(e) => setPlanForm((v) => ({ ...v, interval: e.target.value }))} className="mt-1 w-full rounded-3xl border border-[#242424] bg-[#111111] px-3 py-2.5 text-sm font-normal"><option value="month">Mensuelle</option><option value="year">Annuelle</option></select></label>
             </div>
-            <label className="mt-4 block text-xs font-semibold">Fonctionnalités incluses <span className="font-normal text-ink/40">(une fonctionnalité par ligne)</span>
-              <textarea rows={6} value={planForm.features} onChange={(e) => setPlanForm((v) => ({ ...v, features: e.target.value }))} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-3 text-sm font-normal outline-none focus:border-forest" placeholder={"Page publique\nAvis & réputation\nFidélité\nMenu\nPromotions\nAnalytics\nAssistant IA"} />
+            <label className="mt-4 block text-xs font-semibold">Fonctionnalités incluses <span className="font-normal text-[#F5F5DC]">(une fonctionnalité par ligne)</span>
+              <textarea rows={6} value={planForm.features} onChange={(e) => setPlanForm((v) => ({ ...v, features: e.target.value }))} className="mt-1 w-full rounded-3xl border border-[#242424] bg-[#111111] px-3 py-3 text-sm font-normal outline-none focus:border-[#242424]" placeholder={"Page publique\nAvis & réputation\nFidélité\nMenu\nPromotions\nAnalytics\nAssistant IA"} />
             </label>
             <div className="mt-4 flex justify-end gap-2">
-              <button onClick={() => { setEditingPlan(null); setShowPlanEditor(false); setPlanForm({ name: '', price_mad: '', interval: 'month', features: '' }); }} className="rounded-xl border border-ink/10 bg-white px-4 py-2.5 text-xs font-semibold">Annuler</button>
-              <button onClick={savePlan} disabled={savingPlan} className="inline-flex items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-50"><Save size={14} /> {savingPlan ? 'Enregistrement…' : 'Enregistrer'}</button>
+              <button onClick={() => { setEditingPlan(null); setShowPlanEditor(false); setPlanForm({ name: '', price_mad: '', interval: 'month', features: '' }); }} className="rounded-3xl border border-[#242424] bg-[#111111] px-4 py-2.5 text-xs font-semibold">Annuler</button>
+              <button onClick={savePlan} disabled={savingPlan} className="inline-flex items-center gap-2 rounded-3xl bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#FFFFFF] disabled:opacity-50"><Save size={14} /> {savingPlan ? 'Enregistrement…' : 'Enregistrer'}</button>
             </div>
           </div>
         ) : null}
 
         <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {billing.plans.map((p) => (
-            <div key={p.id} className="rounded-2xl border border-ink/5 bg-[#fdfdfb] p-5">
-              <div className="flex items-start justify-between gap-3"><div><strong className="text-forest">{p.name}</strong><p className="mt-1 text-xs text-ink/40">{p.interval === 'year' ? 'Annuel' : 'Mensuel'} · {p.active ? 'Actif' : 'Inactif'}</p></div><span className="text-lg font-semibold">{Number(p.price_mad).toLocaleString('fr-FR')} MAD</span></div>
-              <div className="mt-4 space-y-1.5">{(p.features ?? []).length ? (p.features ?? []).map((feature) => <div key={feature} className="flex gap-2 text-xs text-ink/60"><span className="text-forest">✓</span>{feature}</div>) : <p className="text-xs text-ink/35">Aucune fonctionnalité définie.</p>}</div>
+            <div key={p.id} className="rounded-3xl border border-[#242424] bg-[#111111] p-5">
+              <div className="flex items-start justify-between gap-3"><div><strong className="text-[#E1C27A]">{p.name}</strong><p className="mt-1 text-xs text-[#F5F5DC]">{p.interval === 'year' ? 'Annuel' : 'Mensuel'} · {p.active ? 'Actif' : 'Inactif'}</p></div><span className="text-lg font-semibold">{Number(p.price_mad).toLocaleString('fr-FR')} MAD</span></div>
+              <div className="mt-4 space-y-1.5">{(p.features ?? []).length ? (p.features ?? []).map((feature) => <div key={feature} className="flex gap-2 text-xs text-[#F5F5DC]"><span className="text-[#E1C27A]">✓</span>{feature}</div>) : <p className="text-xs text-[#F5F5DC]">Aucune fonctionnalité définie.</p>}</div>
               <div className="mt-5 flex gap-2">
-                <button onClick={() => openPlanEditor(p)} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-ink/10 bg-white px-3 py-2 text-xs font-semibold"><Pencil size={13} /> Modifier</button>
-                <button onClick={() => togglePlanActive(p)} className="rounded-xl border border-ink/10 bg-white px-3 py-2 text-xs font-semibold">{p.active ? 'Désactiver' : 'Activer'}</button>
-                <button onClick={() => deletePlan(p)} title="Supprimer" className="rounded-xl border border-red-100 bg-white px-3 py-2 text-red-600"><Trash2 size={13} /></button>
+                <button onClick={() => openPlanEditor(p)} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-3xl border border-[#242424] bg-[#111111] px-3 py-2 text-xs font-semibold"><Pencil size={13} /> Modifier</button>
+                <button onClick={() => togglePlanActive(p)} className="rounded-3xl border border-[#242424] bg-[#111111] px-3 py-2 text-xs font-semibold">{p.active ? 'Désactiver' : 'Activer'}</button>
+                <button onClick={() => deletePlan(p)} title="Supprimer" className="rounded-3xl border border-[#242424] bg-[#111111] px-3 py-2 text-[#E1C27A]"><Trash2 size={13} /></button>
               </div>
             </div>
           ))}
@@ -5374,9 +5374,9 @@ function SystemSection({
   establishments: Establishment[];
 }) {
   const SystemMetric = ({ label, value }: { label: string; value: string | number }) => (
-    <div className="rounded-2xl border border-ink/5 bg-white p-5 shadow-sm">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink/35">{label}</p>
-      <p className="mt-2 text-2xl font-semibold text-forest">{value}</p>
+    <div className="rounded-3xl border border-[#242424] bg-[#111111] p-5 shadow-sm">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#F5F5DC]">{label}</p>
+      <p className="mt-2 text-2xl font-semibold text-[#E1C27A]">{value}</p>
     </div>
   );
 
@@ -5486,11 +5486,11 @@ function SystemSection({
     <div>
       <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">Plateforme</p>
-          <h2 className="font-display text-3xl text-forest md:text-4xl">Supervision technique</h2>
-          <p className="mt-2 max-w-2xl text-sm text-ink/50">Diagnostic en temps réel des services critiques accessibles depuis l’Admin.</p>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#E1C27A]">Plateforme</p>
+          <h2 className="font-display text-3xl text-[#E1C27A] md:text-4xl">Supervision technique</h2>
+          <p className="mt-2 max-w-2xl text-sm text-[#F5F5DC]">Diagnostic en temps réel des services critiques accessibles depuis l’Admin.</p>
         </div>
-        <button onClick={() => void runChecks()} disabled={checking} className="inline-flex items-center justify-center gap-2 rounded-xl bg-forest px-4 py-3 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">
+        <button onClick={() => void runChecks()} disabled={checking} className="inline-flex items-center justify-center gap-2 rounded-3xl bg-[#111111] px-4 py-3 text-xs font-semibold text-[#FFFFFF] disabled:cursor-not-allowed disabled:opacity-50">
           <RefreshCw size={14} className={checking ? 'animate-spin' : ''} />
           {checking ? 'Vérification…' : 'Relancer le diagnostic'}
         </button>
@@ -5504,30 +5504,30 @@ function SystemSection({
 
       <div className="grid gap-4 md:grid-cols-2">
         {checks.map(({ label, status, detail, icon: Icon }) => (
-          <div key={label} className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
+          <div key={label} className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
             <div className="flex items-start justify-between gap-4">
-              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-forest/10 text-forest"><Icon size={20} /></div>
+              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-3xl bg-[#111111] text-[#E1C27A]"><Icon size={20} /></div>
               <span className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${
-                status === 'ok' ? 'bg-green-100 text-green-700' : status === 'error' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
+                status === 'ok' ? 'bg-[#111111] text-[#E1C27A] : status === 'error' ? 'bg-[#111111] text-[#E1C27A] : 'bg-[#111111] text-[#E1C27A]
               }`}>{status === 'ok' ? 'Opérationnel' : status === 'error' ? 'Erreur' : 'Vérification…'}</span>
             </div>
             <h3 className="mt-5 text-base font-semibold">{label}</h3>
-            <p className="mt-2 break-words text-xs leading-5 text-ink/45">{detail}</p>
+            <p className="mt-2 break-words text-xs leading-5 text-[#F5F5DC]">{detail}</p>
           </div>
         ))}
       </div>
 
-      <div className="mt-6 rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
-        <div className="flex items-center gap-3"><Filter size={17} className="text-forest" /><h3 className="font-semibold">État global</h3></div>
-        <div className="mt-4 rounded-xl bg-[#f7f7f3] p-4 text-sm">
-          {errorCount === 0 && checks.length > 0 ? <span className="font-semibold text-forest">Tous les contrôles exécutés sont opérationnels.</span> : <span className="font-semibold text-[#a15c50]">{errorCount} contrôle{errorCount > 1 ? 's' : ''} nécessite{errorCount > 1 ? 'nt' : ''} une vérification.</span>}
+      <div className="mt-6 rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
+        <div className="flex items-center gap-3"><Filter size={17} className="text-[#E1C27A]" /><h3 className="font-semibold">État global</h3></div>
+        <div className="mt-4 rounded-3xl bg-[#111111] p-4 text-sm">
+          {errorCount === 0 && checks.length > 0 ? <span className="font-semibold text-[#E1C27A]">Tous les contrôles exécutés sont opérationnels.</span> : <span className="font-semibold text-[#a15c50]">{errorCount} contrôle{errorCount > 1 ? 's' : ''} nécessite{errorCount > 1 ? 'nt' : ''} une vérification.</span>}
         </div>
         <div className="mt-4 grid gap-3 md:grid-cols-3">
           <SystemMetric label="Avis" value={globalStats.reviews} />
           <SystemMetric label="Événements" value={globalStats.analyticsEvents} />
           <SystemMetric label="Abonnements" value={billing.available ? billing.subscriptions.length : 0} />
         </div>
-        <p className="mt-4 text-xs leading-5 text-ink/40">Dernier diagnostic : {lastChecked ? new Date(lastChecked).toLocaleString('fr-FR') : 'en cours'}. Les métriques d’uptime et de temps de chargement restent distinctes d’un diagnostic fonctionnel.</p>
+        <p className="mt-4 text-xs leading-5 text-[#F5F5DC]">Dernier diagnostic : {lastChecked ? new Date(lastChecked).toLocaleString('fr-FR') : 'en cours'}. Les métriques d’uptime et de temps de chargement restent distinctes d’un diagnostic fonctionnel.</p>
       </div>
     </div>
   );
