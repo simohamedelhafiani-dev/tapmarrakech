@@ -439,7 +439,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
                 onApplyAiCandidate={applyAiCandidate}
               />
             </div>
-          )}
+          ) : null}
         </div>
 
         {activeTab === 'preview' ? (
