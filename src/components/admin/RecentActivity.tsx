@@ -42,7 +42,7 @@ function getActivityIcon(type: ActivityEventType) {
 function getActivityIconClass(type: ActivityEventType): string {
   if (type === 'review') return 'bg-gold/15 text-[#8b6a20]';
   if (type === 'loyalty_customer') return 'bg-[#C9A45C]/10 text-[#C9A45C]';
-  return 'bg-ink/5 text-[#FFFFFF]/50';
+  return 'bg-[#242424] text-[#FFFFFF]/50';
 }
 
 export default function RecentActivity({
@@ -81,12 +81,12 @@ export default function RecentActivity({
                 key={item}
                 className="flex items-center gap-3 rounded-2xl border border-[#242424] p-3"
               >
-                <div className="h-10 w-10 shrink-0 animate-pulse rounded-xl bg-ink/5" />
+                <div className="h-10 w-10 shrink-0 animate-pulse rounded-xl bg-[#242424]" />
                 <div className="min-w-0 flex-1 space-y-2">
-                  <div className="h-3 w-40 animate-pulse rounded bg-ink/5" />
-                  <div className="h-2.5 w-64 max-w-full animate-pulse rounded bg-ink/5" />
+                  <div className="h-3 w-40 animate-pulse rounded bg-[#242424]" />
+                  <div className="h-2.5 w-64 max-w-full animate-pulse rounded bg-[#242424]" />
                 </div>
-                <div className="h-2.5 w-14 animate-pulse rounded bg-ink/5" />
+                <div className="h-2.5 w-14 animate-pulse rounded bg-[#242424]" />
               </div>
             ))}
           </div>
@@ -105,7 +105,7 @@ export default function RecentActivity({
             </button>
           </div>
         ) : events.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-ink/10 bg-[#111111] p-8 text-center">
+          <div className="rounded-2xl border border-dashed border-[#242424] bg-[#111111] p-8 text-center">
             <div className="mx-auto grid h-11 w-11 place-items-center rounded-xl bg-[#C9A45C]/5 text-[#C9A45C]">
               <RefreshCw size={18} />
             </div>
