@@ -108,9 +108,9 @@ export default function Login() {
 
           <div className="relative z-10 flex h-full flex-col">
             <div className="flex items-center justify-between">
-              <button type="button" onClick={() => navigate('/')} className="group flex items-center gap-4 text-left" aria-label="KELYANI">
+              <button type="button" onClick={() => navigate('/')} className="group flex items-center gap-4 text-left transition-transform duration-300 hover:-translate-y-0.5 active:translate-y-0" aria-label="KELYANI">
                 <div className="relative shrink-0">
-                  <div className="absolute inset-0 rounded-[18px] bg-[#C9A45C]/10 blur-xl transition group-hover:bg-[#C9A45C]/20" />
+                  <div className="absolute inset-0 rounded-[18px] bg-[#C9A45C]/10 blur-xl shadow-[0_0_35px_rgba(201,164,92,.08)] transition group-hover:bg-[#C9A45C]/20" />
                   <KelyaniMark size={72} className="relative" />
                 </div>
                 <div className="leading-none">
@@ -118,7 +118,7 @@ export default function Login() {
                   <p className="mt-2 text-[8px] font-semibold uppercase tracking-[0.28em] text-[#C9A45C]/65">CUSTOMER INTELLIGENCE</p>
                 </div>
               </button>
-              <label className="inline-flex items-center rounded-full border border-[#242424] bg-[#111111]/80 px-3 py-2 text-[10px] font-semibold text-[#F5F5DC]/65 backdrop-blur">
+              <label className="inline-flex items-center rounded-full border border-[#242424] bg-[#111111]/80 px-3 py-2 text-[10px] font-semibold text-[#F5F5DC]/65 backdrop-blur-xl shadow-[0_10px_30px_rgba(5,5,5,.35)] transition-all duration-300 hover:border-[#C9A45C]/25 hover:shadow-[0_14px_38px_rgba(5,5,5,.45)]">
                 <Globe2 size={14} className="mr-2 text-[#C9A45C]" />
                 <select value={language} onChange={(event) => setLanguage(event.target.value as Language)} aria-label="Language" className="bg-transparent outline-none">
                   <option className="bg-[#111111]" value="fr">FR</option>
@@ -129,7 +129,7 @@ export default function Login() {
             </div>
 
             <div className="relative mt-auto max-w-3xl pb-2 pt-14 lg:pt-0">
-              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#C9A45C]/25 bg-[#C9A45C]/[0.06] px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.24em] text-[#E1C27A]">
+              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#C9A45C]/25 bg-[#C9A45C]/[0.06] px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.24em] text-[#E1C27A] shadow-[0_8px_28px_rgba(201,164,92,.08)] backdrop-blur-xl">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#C9A45C]" />
                 Plateforme client 2026
               </div>
@@ -148,12 +148,12 @@ export default function Login() {
               </p>
 
               <div className="mt-9 grid max-w-2xl grid-cols-3 gap-3">
-                <div className="group rounded-[22px] border border-white/[0.07] bg-white/[0.025] p-4 backdrop-blur-xl transition hover:-translate-y-1 hover:border-[#C9A45C]/25">
+                <div className="group rounded-[22px] border border-white/[0.07] bg-white/[0.025] p-4 backdrop-blur-xl shadow-[0_18px_45px_rgba(5,5,5,.28),inset_0_1px_0_rgba(245,245,220,.04)] transition-all duration-300 hover:-translate-y-1 hover:border-[#C9A45C]/25 hover:shadow-[0_24px_55px_rgba(5,5,5,.4),inset_0_1px_0_rgba(245,245,220,.06)] active:translate-y-0">
                   <Star size={18} className="text-[#C9A45C]" />
                   <p className="mt-8 text-sm font-semibold text-white">Réputation</p>
                   <p className="mt-1 text-[9px] uppercase tracking-[0.18em] text-white/30">Avis & réponses</p>
                 </div>
-                <div className="group rounded-[22px] border border-[#C9A45C]/20 bg-[#C9A45C]/[0.055] p-4 backdrop-blur-xl transition hover:-translate-y-1">
+                <div className="group rounded-[22px] border border-[#C9A45C]/20 bg-[#C9A45C]/[0.055] p-4 backdrop-blur-xl shadow-[0_18px_45px_rgba(5,5,5,.3),inset_0_1px_0_rgba(225,194,122,.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_26px_60px_rgba(5,5,5,.42),inset_0_1px_0_rgba(225,194,122,.08)] active:translate-y-0">
                   <Heart size={18} className="text-[#C9A45C]" />
                   <p className="mt-8 text-sm font-semibold text-white">Fidélité</p>
                   <p className="mt-1 text-[9px] uppercase tracking-[0.18em] text-white/30">Clients réguliers</p>
@@ -164,7 +164,7 @@ export default function Login() {
                   <p className="mt-1 text-[9px] uppercase tracking-[0.18em] text-white/30">Une seule vision</p>
                 </div>
               </div>
-              <div className="mt-6 flex max-w-2xl items-center gap-3 rounded-[22px] border border-white/[0.06] bg-white/[0.02] px-5 py-4">
+              <div className="mt-6 flex max-w-2xl items-center gap-3 rounded-[22px] border border-white/[0.06] bg-white/[0.02] px-5 py-4 backdrop-blur-xl shadow-[0_16px_42px_rgba(5,5,5,.25),inset_0_1px_0_rgba(245,245,220,.035)]">
                 <div className="h-2 w-2 rounded-full bg-[#C9A45C] shadow-[0_0_14px_rgba(201,164,92,.7)]" />
                 <p className="text-xs text-white/45">Une plateforme pensée pour transformer chaque interaction en relation durable.</p>
               </div>
@@ -178,7 +178,7 @@ export default function Login() {
 
         <section className="flex flex-1 items-center justify-center px-4 py-8 sm:px-8 lg:px-12 xl:px-16">
           <div className="w-full max-w-[500px]">
-            <div className="mb-7 rounded-[28px] border border-white/[0.06] bg-white/[0.018] p-7 backdrop-blur-xl sm:p-8">
+            <div className="mb-7 rounded-[28px] border border-white/[0.06] bg-white/[0.018] p-7 backdrop-blur-xl shadow-[0_24px_70px_rgba(5,5,5,.32),inset_0_1px_0_rgba(245,245,220,.04)] sm:p-8">
               <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-[#C9A45C]">Espace sécurisé</p>
               <h2 className="mt-2 font-display text-3xl tracking-[-0.035em] text-white sm:text-4xl">
                 {selectedRole ? 'Bienvenue dans KELYANI' : 'Accédez à votre espace'}
@@ -190,7 +190,7 @@ export default function Login() {
 
             {!selectedRole ? (
               <div className="space-y-3">
-                <button type="button" onClick={() => selectRole('admin')} className="group flex w-full items-center gap-4 rounded-3xl border border-[#242424] bg-[#111111] p-4 text-left transition hover:-translate-y-0.5 hover:border-[#C9A45C]/45 hover:bg-[#151515]">
+                <button type="button" onClick={() => selectRole('admin')} className="group flex w-full items-center gap-4 rounded-3xl border border-[#242424] bg-[#111111] p-4 text-left shadow-[0_16px_45px_rgba(5,5,5,.32),inset_0_1px_0_rgba(245,245,220,.025)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#C9A45C]/45 hover:bg-[#151515] hover:shadow-[0_24px_55px_rgba(5,5,5,.42),inset_0_1px_0_rgba(245,245,220,.045)] active:translate-y-0">
                   <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#C9A45C]/10 text-[#E1C27A]"><ShieldCheck size={21} /></div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#F5F5DC]/30">Plateforme</p>
@@ -211,7 +211,7 @@ export default function Login() {
                 </button>
               </div>
             ) : (
-              <div className="rounded-[28px] border border-[#242424] bg-[#111111]/90 p-5 shadow-[0_30px_100px_rgba(0,0,0,.35)] backdrop-blur-xl sm:p-6">
+              <div className="rounded-[28px] border border-[#242424] bg-[#111111]/90 p-5 shadow-[0_30px_100px_rgba(5,5,5,.48),inset_0_1px_0_rgba(245,245,220,.04)] backdrop-blur-xl sm:p-6">
                 <div className="mb-6 flex items-center gap-3">
                   <KelyaniMark size={38} />
                   <div>
@@ -228,7 +228,7 @@ export default function Login() {
                     <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#F5F5DC]/45">{t.email}</label>
                     <div className="relative">
                       <UserRound size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#C9A45C]/50" />
-                      <input type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }} placeholder={t.emailPlaceholder} className="w-full rounded-2xl border border-[#242424] bg-[#050505] py-3.5 pl-11 pr-4 text-sm text-white outline-none transition placeholder:text-[#F5F5DC]/20 focus:border-[#C9A45C]/55 focus:ring-4 focus:ring-[#C9A45C]/[0.07]" />
+                      <input type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }} placeholder={t.emailPlaceholder} className="w-full rounded-2xl border border-[#242424] bg-[#050505] py-3.5 pl-11 pr-4 text-sm text-white outline-none shadow-[inset_0_1px_0_rgba(245,245,220,.025),0_10px_25px_rgba(5,5,5,.28)] transition-all duration-300 placeholder:text-[#F5F5DC]/20 hover:border-[#242424] hover:shadow-[inset_0_1px_0_rgba(245,245,220,.04),0_14px_32px_rgba(5,5,5,.34)] focus:border-[#C9A45C]/55 focus:ring-4 focus:ring-[#C9A45C]/[0.07]" />
                     </div>
                   </div>
                   <div>
@@ -238,11 +238,11 @@ export default function Login() {
                     </div>
                     <div className="relative">
                       <LockKeyhole size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#C9A45C]/50" />
-                      <input type={showPassword ? 'text' : 'password'} autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }} placeholder={t.passwordPlaceholder} className="w-full rounded-2xl border border-[#242424] bg-[#050505] py-3.5 pl-11 pr-11 text-sm text-white outline-none transition placeholder:text-[#F5F5DC]/20 focus:border-[#C9A45C]/55 focus:ring-4 focus:ring-[#C9A45C]/[0.07]" />
+                      <input type={showPassword ? 'text' : 'password'} autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }} placeholder={t.passwordPlaceholder} className="w-full rounded-2xl border border-[#242424] bg-[#050505] py-3.5 pl-11 pr-11 text-sm text-white outline-none shadow-[inset_0_1px_0_rgba(245,245,220,.025),0_10px_25px_rgba(5,5,5,.28)] transition-all duration-300 placeholder:text-[#F5F5DC]/20 hover:shadow-[inset_0_1px_0_rgba(245,245,220,.04),0_14px_32px_rgba(5,5,5,.34)] focus:border-[#C9A45C]/55 focus:ring-4 focus:ring-[#C9A45C]/[0.07]" />
                       <button type="button" onClick={() => setShowPassword(value => !value)} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-xl p-2 text-[#F5F5DC]/25 hover:text-[#C9A45C]">{showPassword ? <EyeOff size={16} /> : <Eye size={16} />}</button>
                     </div>
                   </div>
-                  <button onClick={handleLogin} disabled={saving} className="group flex w-full items-center justify-center gap-2 rounded-2xl bg-[#C9A45C] py-3.5 text-sm font-bold text-[#050505] transition hover:bg-[#E1C27A] disabled:opacity-50">
+                  <button onClick={handleLogin} disabled={saving} className="group flex w-full items-center justify-center gap-2 rounded-2xl bg-[#C9A45C] py-3.5 text-sm font-bold text-[#050505] shadow-[0_14px_34px_rgba(201,164,92,.18),inset_0_1px_0_rgba(245,245,220,.22)] transition-all duration-300 hover:bg-[#E1C27A] hover:-translate-y-0.5 hover:shadow-[0_20px_42px_rgba(201,164,92,.24),inset_0_1px_0_rgba(245,245,220,.28)] active:translate-y-0 active:shadow-[0_10px_24px_rgba(201,164,92,.16)] disabled:opacity-50">
                     {saving ? 'Connexion…' : 'Entrer dans KELYANI'} {!saving && <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />}
                   </button>
                 </div>
