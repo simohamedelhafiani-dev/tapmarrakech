@@ -156,12 +156,12 @@ export default function LoyaltyJoin() {
   if (!referralCode && !establishmentId) {
     return (
       <main className="min-h-screen bg-[#f7f7f3] px-4 py-8">
-        <div className="mx-auto max-w-md rounded-[2rem] bg-white p-7 text-center shadow-xl">
-          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#e5eee9] text-[#173D32]">
+        <div className="mx-auto max-w-md rounded-[2rem] bg-[#111111] p-7 text-center shadow-xl">
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#e5eee9] text-[#E1C27A]">
             <Gift className="h-6 w-6" />
           </div>
-          <h1 className="mt-5 font-display text-2xl text-[#173D32]">Lien d’inscription invalide</h1>
-          <p className="mt-2 text-sm leading-6 text-ink/50">
+          <h1 className="mt-5 font-display text-3xl tracking-tight text-[#E1C27A]">Lien d’inscription invalide</h1>
+          <p className="mt-2 text-sm leading-6 text-white/45">
             Scannez le QR Code ou la plaque NFC de l’établissement pour rejoindre son programme fidélité.
           </p>
         </div>
@@ -171,10 +171,10 @@ export default function LoyaltyJoin() {
 
   if (loadingContext) {
     return (
-      <main className="grid min-h-screen place-items-center bg-[#eef0ed] px-4">
+      <main className="grid min-h-screen place-items-center bg-[#050505] px-4">
         <div className="text-center">
           <div className="mx-auto h-9 w-9 animate-spin rounded-full border-2 border-[#173D32] border-t-transparent" />
-          <p className="mt-4 text-sm text-[#173D32]/55">Préparation de votre inscription…</p>
+          <p className="mt-4 text-sm text-[#E1C27A]/55">Préparation de votre inscription…</p>
         </div>
       </main>
     );
@@ -182,13 +182,13 @@ export default function LoyaltyJoin() {
 
   if (error && isGlobalEnrollment && !establishmentName) {
     return (
-      <main className="grid min-h-screen place-items-center bg-[#eef0ed] px-4 py-8">
-        <div className="w-full max-w-md rounded-[2rem] bg-white p-7 text-center shadow-xl">
+      <main className="grid min-h-screen place-items-center bg-[#050505] px-4 py-8">
+        <div className="w-full max-w-md rounded-[2rem] bg-[#111111] p-7 text-center shadow-xl">
           <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-red-50 text-red-600">
             <Gift className="h-6 w-6" />
           </div>
-          <h1 className="mt-5 font-display text-2xl text-[#173D32]">Inscription indisponible</h1>
-          <p className="mt-2 text-sm leading-6 text-ink/50">{error}</p>
+          <h1 className="mt-5 font-display text-2xl text-[#E1C27A]">Inscription indisponible</h1>
+          <p className="mt-2 text-sm leading-6 text-white/45">{error}</p>
         </div>
       </main>
     );
@@ -200,17 +200,17 @@ export default function LoyaltyJoin() {
     : 'Vous avez été invité par un client. Créez votre carte fidélité pour recevoir vos avantages.';
 
   return (
-    <main className="min-h-screen bg-[#eef0ed] px-3 py-5 sm:px-4 sm:py-8">
+    <main className="min-h-screen bg-[#050505] px-3 py-5 sm:px-4 sm:py-8">
       <div className="mx-auto max-w-md">
-        <section className="overflow-hidden rounded-[2rem] bg-white shadow-xl">
-          <div className="bg-[#173D32] px-6 py-7 text-white">
+        <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-[#111111] shadow-luxury">
+          <div className="bg-[#111111] px-6 py-7 text-white">
             <div className="flex items-center gap-3">
-              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#D6B15A] text-[#173D32]">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gold-gradient text-[#E1C27A]">
                 <Gift className="h-5 w-5" />
               </div>
               <div className="min-w-0">
                 <p className="truncate text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">
-                  Programme fidélité
+                  KELYANI · PROGRAMME FIDÉLITÉ
                 </p>
                 {establishmentName && (
                   <p className="mt-1 truncate text-sm font-semibold text-white">{establishmentName}</p>
@@ -224,30 +224,30 @@ export default function LoyaltyJoin() {
 
           <div className="space-y-4 p-5 sm:p-6">
             <div className="grid grid-cols-2 gap-3">
-              <label className="block text-xs font-semibold text-ink/60">
+              <label className="block text-xs font-semibold text-white/55">
                 Prénom *
                 <input
                   value={firstName}
                   onChange={e => setFirstName(e.target.value)}
                   autoComplete="given-name"
                   autoFocus
-                  className="mt-1.5 w-full rounded-xl border border-ink/10 bg-[#fafaf7] px-4 py-3 text-sm outline-none transition focus:border-[#D3A84C] focus:ring-2 focus:ring-[#D3A84C]/10"
+                  className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-4 py-3 text-sm outline-none transition focus:border-[#C9A45C] focus:ring-2 focus:ring-[#D3A84C]/10"
                   placeholder="Prénom"
                 />
               </label>
-              <label className="block text-xs font-semibold text-ink/60">
+              <label className="block text-xs font-semibold text-white/55">
                 Nom *
                 <input
                   value={lastName}
                   onChange={e => setLastName(e.target.value)}
                   autoComplete="family-name"
-                  className="mt-1.5 w-full rounded-xl border border-ink/10 bg-[#fafaf7] px-4 py-3 text-sm outline-none transition focus:border-[#D3A84C] focus:ring-2 focus:ring-[#D3A84C]/10"
+                  className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-4 py-3 text-sm outline-none transition focus:border-[#C9A45C] focus:ring-2 focus:ring-[#D3A84C]/10"
                   placeholder="Nom"
                 />
               </label>
             </div>
 
-            <label className="block text-xs font-semibold text-ink/60">
+            <label className="block text-xs font-semibold text-white/55">
               Téléphone *
               <input
                 value={phone}
@@ -255,21 +255,21 @@ export default function LoyaltyJoin() {
                 autoComplete="tel"
                 inputMode="tel"
                 enterKeyHint="done"
-                className="mt-1.5 w-full rounded-xl border border-ink/10 bg-[#fafaf7] px-4 py-3 text-sm outline-none transition focus:border-[#D3A84C] focus:ring-2 focus:ring-[#D3A84C]/10"
+                className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-4 py-3 text-sm outline-none transition focus:border-[#C9A45C] focus:ring-2 focus:ring-[#D3A84C]/10"
                 placeholder="+212 6 12 34 56 78"
               />
             </label>
 
-            <details className="rounded-xl border border-ink/10 bg-[#fafaf7]">
+            <details className="rounded-xl border border-white/10 bg-[#242424]">
               <summary className="cursor-pointer px-4 py-3 text-xs font-semibold text-ink/55">
                 Ajouter ma date de naissance (facultatif)
               </summary>
-              <div className="border-t border-ink/10 px-4 pb-4 pt-3">
+              <div className="border-t border-white/10 px-4 pb-4 pt-3">
                 <input
                   type="date"
                   value={birthDate}
                   onChange={e => setBirthDate(e.target.value)}
-                  className="w-full rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm outline-none focus:border-[#D3A84C]"
+                  className="w-full rounded-xl border border-white/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#C9A45C]"
                 />
               </div>
             </details>
@@ -284,13 +284,13 @@ export default function LoyaltyJoin() {
               type="button"
               onClick={() => void join()}
               disabled={!canSubmit || loading}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#173D32] px-5 py-4 text-sm font-semibold text-white shadow-lg transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#111111] px-5 py-4 text-sm font-semibold text-white shadow-lg transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
               {loading ? 'Création de votre carte…' : 'Créer ma carte fidélité'}
             </button>
 
-            <p className="text-center text-[10px] leading-4 text-ink/35">
+            <p className="text-center text-[10px] leading-4 text-white/30">
               Inscription gratuite · Votre carte sera disponible immédiatement.
             </p>
           </div>

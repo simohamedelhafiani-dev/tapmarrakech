@@ -17,9 +17,10 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
 
   return (
     <div
-      className="flex w-full items-center justify-center overflow-visible"
+      className="flex w-full min-w-0 items-center justify-center overflow-visible rounded-[28px] border border-white/[.08] bg-[#050505] p-4 shadow-luxury sm:p-6"
       style={{
         minWidth: 0,
+        minHeight: '480px',
       }}
     >
       <LoyaltyCardVisual
@@ -60,7 +61,7 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
           cardUrl: config.qrValue,
         }}
         programType={mode}
-        cardWidth="min(100%, 400px)"
+        cardWidth="300px"
       />
     </div>
   );

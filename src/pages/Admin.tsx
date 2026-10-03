@@ -534,136 +534,74 @@ export default function Admin() {
     'Vue d’ensemble';
 
   return (
-    <div className="min-h-screen bg-[#f7f7f3] text-ink">
+    <div className="min-h-screen bg-[#050505] text-[#EDE9DF] selection:bg-[#C9A45C]/30">
       {open && (
         <button
-          aria-label="Fermer le menu"
+          aria-label="Fermer la navigation"
           onClick={() => setOpen(false)}
-          className="fixed inset-0 z-30 bg-ink/30 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm lg:hidden"
         />
       )}
 
-      <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-[248px] flex-col bg-forest px-4 py-5 text-white shadow-xl transition-transform lg:translate-x-0 ${
-          open ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        <div className="mb-9 flex items-center justify-between px-2">
-          <div className="flex min-h-[64px] flex-1 items-center justify-center">
-            <img
-              src="/tapmarrakech-logo.png"
-              alt="TapMarrakech"
-              className="h-[72px] w-auto max-w-[180px] object-contain"
-            />
-          </div>
-
+      <header className="sticky top-0 z-50 border-b border-white/[.06] bg-[#050505]/85 px-3 py-3 backdrop-blur-2xl sm:px-5">
+        <div className="mx-auto flex max-w-[1700px] items-center gap-3">
           <button
-            className="lg:hidden"
-            onClick={() => setOpen(false)}
+            type="button"
+            onClick={() => setOpen(!open)}
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-white/10 bg-white/[.04] text-white/70 lg:hidden"
+            aria-label="Navigation"
           >
-            <X size={20} />
+            <Menu size={18} />
           </button>
-        </div>
 
-        <p className="mb-3 px-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/35">
-          Administration
-        </p>
+          <button type="button" onClick={() => setSection('overview')} className="shrink-0 text-left">
+            <p className="font-display text-2xl tracking-[.08em] text-[#E1C27A]">KELYANI</p>
+            <p className="hidden text-[8px] font-semibold uppercase tracking-[.28em] text-white/35 sm:block">Command Center</p>
+          </button>
 
-        <nav className="space-y-1">
-          {menuItems.map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => {
-                setSection(id);
-                setOpen(false);
-              }}
-              className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[13px] transition ${
-                section === id
-                  ? 'bg-white text-forest shadow-lg'
-                  : 'text-white/65 hover:bg-white/10 hover:text-white'
-              }`}
-            >
-              <Icon size={18} strokeWidth={1.8} />
-              {label}
-            </button>
-          ))}
-        </nav>
-
-        <div className="mt-auto border-t border-white/10 pt-5">
-          <div className="mb-4 flex items-center gap-3 px-2">
-            <div className="grid h-9 w-9 place-items-center rounded-full bg-gold font-semibold text-forest">
-              {user?.email?.[0]?.toUpperCase()}
-            </div>
-
-            <div className="min-w-0">
-              <p className="truncate text-xs font-medium">
-                {user?.email}
-              </p>
-
-              <p className="text-[10px] text-white/45">
-                Administrateur
-              </p>
-            </div>
-          </div>
-
-          <button
-            onClick={logout}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm text-white/60 transition hover:bg-white/10 hover:text-white"
+          <nav
+            className={`absolute left-3 right-3 top-[72px] z-50 flex max-h-[calc(100vh-90px)] flex-col gap-1 overflow-y-auto rounded-[24px] border border-white/10 bg-[#111111]/95 p-2 shadow-luxury backdrop-blur-2xl lg:static lg:ml-6 lg:flex lg:max-h-none lg:flex-1 lg:flex-row lg:items-center lg:justify-center lg:overflow-visible lg:rounded-full lg:border-white/[.07] lg:bg-white/[.035] lg:p-1 ${open ? 'flex' : 'hidden'} lg:flex`}
           >
-            <LogOut size={17} />
-            Se déconnecter
-          </button>
-        </div>
-      </aside>
+            {menuItems.map(({ id, label, icon: Icon }) => {
+              const active = section === id;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => { setSection(id); setOpen(false); }}
+                  className={`group flex shrink-0 items-center gap-2 rounded-full px-3 py-2.5 text-[10px] font-semibold transition-all ${active ? 'bg-gold-gradient text-[#050505] shadow-gold' : 'text-white/45 hover:bg-white/[.06] hover:text-white'}`}
+                >
+                  <Icon size={14} strokeWidth={1.8} />
+                  <span className="hidden xl:inline">{label}</span>
+                </button>
+              );
+            })}
+          </nav>
 
-      <div className="lg:pl-[248px]">
-        <header className="sticky top-0 z-20 flex min-h-[72px] items-center gap-4 border-b border-ink/5 bg-[#f7f7f3]/90 px-4 py-3 backdrop-blur-xl sm:px-6 md:px-8">
-          <button onClick={() => setOpen(true)} className="text-ink lg:hidden" aria-label="Ouvrir le menu">
-            <Menu />
-          </button>
-
-          <div className="hidden min-w-0 flex-1 max-w-[560px] lg:block">
-            <div className="flex h-11 items-center gap-3 rounded-xl border border-ink/5 bg-white px-4 shadow-sm">
-              <Search size={16} className="text-ink/30" />
-              <span className="text-xs text-ink/35">Rechercher un client, un avis, un établissement...</span>
-              <span className="ml-auto rounded-md border border-ink/10 bg-[#f7f7f3] px-2 py-1 text-[9px] text-ink/35">⌘ K</span>
-            </div>
-          </div>
-
-          <div className="ml-auto flex items-center gap-2">
-            <button type="button" className="relative grid h-10 w-10 place-items-center rounded-xl border border-ink/10 bg-white text-ink/60 shadow-sm" aria-label="Notifications">
-              <Bell size={17} />
-              <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-red-500" />
-            </button>
-            <div className="hidden h-10 items-center gap-2 rounded-xl border border-ink/10 bg-white px-2.5 shadow-sm sm:flex">
-              <div className="grid h-7 w-7 place-items-center rounded-full bg-forest text-xs font-semibold text-white">{user?.email?.[0]?.toUpperCase() ?? 'A'}</div>
-              <div className="max-w-[130px] leading-tight">
-                <p className="truncate text-xs font-semibold text-ink">{user?.email ?? 'Administrateur'}</p>
-                <p className="text-[9px] text-ink/40">Administrateur</p>
-              </div>
-            </div>
-            <label className="hidden items-center gap-2 rounded-full border border-ink/10 bg-white px-3 py-2 text-xs font-medium text-ink/60 shadow-sm sm:flex">
-              <select
-                value={language}
-                onChange={(event) => setLanguage(event.target.value as Language)}
-                aria-label="Language"
-                className="cursor-pointer bg-transparent outline-none"
-              >
-                <option value="fr">Français</option>
-                <option value="en">English</option>
-                <option value="ar">العربية</option>
+          <div className="ml-auto flex shrink-0 items-center gap-2">
+            <label className="hidden items-center rounded-full border border-white/10 bg-white/[.04] px-3 py-2 text-[10px] font-semibold text-white/55 sm:flex">
+              <select value={language} onChange={(event) => setLanguage(event.target.value as Language)} aria-label="Language" className="bg-transparent outline-none">
+                <option className="bg-[#111111]" value="fr">FR</option>
+                <option className="bg-[#111111]" value="en">EN</option>
+                <option className="bg-[#111111]" value="ar">AR</option>
               </select>
             </label>
-            <button
-            onClick={reloadAll}
-            className="flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-3 py-2 text-xs font-medium text-ink transition hover:bg-[#f7f7f3]">
-            <RefreshCw size={14} />
-            <span className="hidden sm:inline">Actualiser</span>
+            <button type="button" className="relative grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/[.04] text-white/55" aria-label="Notifications">
+              <Bell size={16} />
+              <span className="absolute right-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-[#C9A45C]" />
+            </button>
+            <button type="button" onClick={reloadAll} className="hidden h-10 items-center gap-2 rounded-full border border-white/10 bg-white/[.04] px-3 text-[10px] font-semibold text-white/55 transition hover:border-[#C9A45C]/40 hover:text-white sm:flex">
+              <RefreshCw size={13} />
+              Actualiser
+            </button>
+            <button type="button" onClick={logout} className="grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/[.04] text-white/55 transition hover:border-[#C9A45C]/40 hover:text-[#E1C27A]" aria-label="Déconnexion">
+              <LogOut size={15} />
             </button>
           </div>
-        </header>
+        </div>
+      </header>
 
-        <main className="mx-auto w-full max-w-[1500px] p-4 sm:p-5 md:p-8 lg:p-10">
+        <main className="mx-auto w-full max-w-[1700px] px-3 pb-10 pt-6 sm:px-5 md:px-8 lg:px-10 lg:pt-8">
 
           {section === 'overview' && (
             <Overview

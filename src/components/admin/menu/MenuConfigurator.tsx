@@ -3,7 +3,7 @@ import { Check, ChevronDown, ImagePlus, Loader2, Sparkles, Upload, X, Wand2 } fr
 import MenuPreview from '@/components/admin/menu/MenuPreview';
 import type { MenuCategory, MenuItem } from '@/hooks/useMenuManager';
 
-export type MenuTemplate = 'editorial' | 'luxury' | 'cards' | 'dark';
+export type MenuTemplate = 'editorial' | 'luxury' | 'cards' | 'dark' | 'onyx' | 'royal-gold' | 'deep-ocean' | 'pearl';
 export type MenuNavigationMode = 'scroll' | 'book' | 'app';
 
 export type MenuDesignDraft = {
@@ -31,7 +31,7 @@ type MenuConfiguratorProps = {
   categories: MenuCategory[];
   itemsByCategory: Record<string, MenuItem[]>;
   establishmentName?: string;
-  onApplyAiCandidate: (candidate: { design: Record<string, unknown>; template: MenuTemplate }) => void;
+  onApplyAiCandidate: (candidate: { design: Record<string, unknown>; template: MenuTemplate; photoMode: 'with_photos' | 'without_photos' }) => void;
 };
 
 const navigationModes: Array<{ id: MenuNavigationMode; label: string; description: string }> = [
@@ -45,6 +45,10 @@ const templates: Array<{ id: MenuTemplate; label: string; description: string }>
   { id: 'luxury', label: 'Luxury', description: 'Premium, sombre, doré' },
   { id: 'cards', label: 'Cards', description: 'Moderne, structuré, convivial' },
   { id: 'dark', label: 'Dark', description: 'Immersif, contrasté, impactant' },
+  { id: 'onyx', label: 'Onyx', description: 'Noir minéral, glassmorphism' },
+  { id: 'royal-gold', label: 'Royal Gold', description: 'Or royal, lignes éditoriales' },
+  { id: 'deep-ocean', label: 'Deep Ocean', description: 'Bleu profond, premium contemporain' },
+  { id: 'pearl', label: 'Pearl', description: 'Ivoire, minimalisme couture' },
 ];
 
 export default function MenuConfigurator({
@@ -123,7 +127,7 @@ export default function MenuConfigurator({
           <Wand2 size={18} className="shrink-0 text-gold" />
         </div>
 
-<div className="mt-4 grid grid-cols-2 gap-2">
+<div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {([
             { id: 'with_photos' as const, label: 'Avec photos', description: 'Utilise les photos disponibles' },
             { id: 'without_photos' as const, label: 'Sans photos', description: 'Design 100% texte' },

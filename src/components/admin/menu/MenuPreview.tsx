@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronLeft, ChevronRight, BookOpen, LayoutGrid, ScrollText } from 'lucide-react';
+import { ChevronLeft, ChevronRight, BookOpen, LayoutGrid, ScrollText, Sparkle, Waves } from 'lucide-react';
 import type { MenuCategory, MenuItem } from '@/hooks/useMenuManager';
 import type { MenuDesignDraft } from '@/components/admin/menu/MenuConfigurator';
 
@@ -9,6 +9,7 @@ type MenuPreviewProps = {
   itemsByCategory: Record<string, MenuItem[]>;
   draft?: MenuDesignDraft;
   compact?: boolean;
+  fullScreen?: boolean;
 };
 
 const theme = {
@@ -52,6 +53,46 @@ const theme = {
     category: 'border-b border-white/10 pb-2',
     icon: BookOpen,
   },
+  onyx: {
+    shell: 'bg-[#050505] text-white',
+    header: 'bg-[#050505]',
+    card: 'border border-white/10 bg-white/[0.05] rounded-2xl px-4 py-3 backdrop-blur-xl',
+    accent: 'text-[#E1C27A]',
+    muted: 'text-white/55',
+    heading: 'font-display',
+    category: 'border-b border-[#C9A45C]/25 pb-2',
+    icon: BookOpen,
+  },
+  'royal-gold': {
+    shell: 'bg-[#0B0906] text-[#FFF9E8]',
+    header: 'bg-[#0B0906]',
+    card: 'border border-[#C9A45C]/25 bg-[#17110A] rounded-2xl px-4 py-3',
+    accent: 'text-[#E1C27A]',
+    muted: 'text-[#FFF9E8]/55',
+    heading: 'font-display',
+    category: 'border-b border-[#E1C27A]/30 pb-2',
+    icon: Sparkle,
+  },
+  'deep-ocean': {
+    shell: 'bg-[#06151B] text-[#F2FCFF]',
+    header: 'bg-[#06151B]',
+    card: 'border border-[#8ED9E8]/20 bg-[#0A222B] rounded-2xl px-4 py-3',
+    accent: 'text-[#8ED9E8]',
+    muted: 'text-white/55',
+    heading: 'font-display',
+    category: 'border-b border-[#8ED9E8]/25 pb-2',
+    icon: Waves,
+  },
+  pearl: {
+    shell: 'bg-[#F5F1E8] text-[#1B1A17]',
+    header: 'bg-[#F5F1E8]',
+    card: 'border border-[#B59A67]/20 bg-white/70 rounded-2xl px-4 py-3 shadow-sm',
+    accent: 'text-[#9A7A3C]',
+    muted: 'text-[#1B1A17]/50',
+    heading: 'font-display',
+    category: 'border-b border-[#B59A67]/25 pb-2',
+    icon: Sparkle,
+  },
 } as const;
 
 export default function MenuPreview({
@@ -60,6 +101,7 @@ export default function MenuPreview({
   itemsByCategory,
   draft,
   compact = false,
+  fullScreen = false,
 }: MenuPreviewProps) {
   const activeDraft = draft ?? {
     template: 'editorial' as const,
@@ -210,19 +252,19 @@ export default function MenuPreview({
   };
 
   return (
-    <aside className="min-w-0 overflow-hidden rounded-3xl border border-ink/5 bg-white shadow-sm lg:sticky lg:top-4 lg:self-start">
+    <aside className={`min-w-0 overflow-hidden border border-white/[.08] bg-[#111111] shadow-soft ${fullScreen ? "rounded-[32px]" : "rounded-3xl lg:sticky lg:top-24 lg:self-start"}`}>
       {!compact && <div className="border-b border-ink/5 bg-white p-5">
         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Aperçu en direct</p>
         <h3 className="mt-1 text-base font-semibold text-forest">
           {establishmentName || 'Menu public'}
         </h3>
         <p className="mt-1 text-[11px] text-ink/35">
-          Miroir du Draft · aucune sauvegarde automatique
+          Miroir KELYANI · synchronisé avec le Studio
         </p>
       </div>}
 
-      <div className={compact ? "p-0" : "p-3"}>
-        <div className={`relative max-h-[520px] min-h-[360px] overflow-y-auto rounded-[26px] ${colors.shell}`}>
+      <div className={compact ? "p-0" : fullScreen ? "p-3 sm:p-5" : "p-3"}>
+        <div className={`relative overflow-y-auto ${fullScreen ? "min-h-[calc(100vh-190px)] max-h-[calc(100vh-140px)] rounded-[28px]" : "max-h-[520px] min-h-[360px] rounded-[26px]"} ${colors.shell}`}>
           {activeDraft.wallpaperUrl && (
             <>
               <div
@@ -237,14 +279,14 @@ export default function MenuPreview({
           )}
 
           <div className="relative">
-            <header className={`p-6 text-center ${colors.header} `}>
+            <header className={`${fullScreen ? "px-6 py-14 sm:px-12 sm:py-20" : "p-6"} text-center ${colors.header}`}>
               <div className={`mx-auto mb-3 grid h-9 w-9 place-items-center rounded-full border border-current/10 ${colors.accent}`}>
                 <TemplateIcon size={15} />
               </div>
               <p className={`text-[9px] font-bold uppercase tracking-[0.32em] ${colors.accent}`}>
                 Menu
               </p>
-              <h4 className={`mt-2 ${compact ? 'text-xl' : 'text-3xl'} leading-tight ${colors.heading}`}>
+              <h4 className={`mt-2 ${fullScreen ? 'text-5xl sm:text-7xl' : compact ? 'text-xl' : 'text-3xl'} leading-tight ${colors.heading}`}>
                 {displayName}
               </h4>
               <p className={`mt-2 text-[10px] leading-4 ${colors.muted}`}>
