@@ -17,7 +17,7 @@ type MenuStudioProps = {
 
 type RawDesign = Record<string, unknown>;
 
-const TEMPLATE_VALUES: MenuTemplate[] = ['editorial', 'luxury', 'cards', 'dark'];
+const TEMPLATE_VALUES: MenuTemplate[] = ['editorial', 'luxury', 'cards', 'dark', 'onyx', 'royal-gold', 'deep-ocean', 'pearl'];
 const NAVIGATION_VALUES: MenuNavigationMode[] = ['scroll', 'book', 'app'];
 
 const normalizeObject = (value: unknown): RawDesign =>
@@ -30,6 +30,10 @@ const mapAiStyleToTemplate = (style: unknown): MenuTemplate | null => {
   if (style === 'luxury') return 'luxury';
   if (style === 'immersive') return 'dark';
   if (style === 'minimal') return 'cards';
+  if (style === 'onyx') return 'onyx';
+  if (style === 'gold' || style === 'royal-gold') return 'royal-gold';
+  if (style === 'ocean' || style === 'deep-ocean') return 'deep-ocean';
+  if (style === 'pearl') return 'pearl';
   return null;
 };
 
