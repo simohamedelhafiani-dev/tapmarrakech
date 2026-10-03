@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Palette, Wrench } from 'lucide-react';
+import { Eye, Palette, Wrench } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useMenuManager } from '@/hooks/useMenuManager';
 import CategorySidebar from '@/components/admin/menu/CategorySidebar';
@@ -38,7 +38,7 @@ const extractAiDesign = (value: unknown): Record<string, unknown> | null => {
   return Object.keys(raw).length ? raw : null;
 };
 
-type StudioTab = 'structure' | 'design';
+type StudioTab = 'structure' | 'design' | 'preview';
 
 export default function MenuStudio({ establishmentId }: MenuStudioProps) {
   const menu = useMenuManager(establishmentId);
@@ -338,27 +338,28 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
   const tabs: Array<{ id: StudioTab; label: string; icon: typeof Wrench }> = [
     { id: 'structure', label: 'Structure', icon: Wrench },
     { id: 'design', label: 'Design', icon: Palette },
+    { id: 'preview', label: 'Preview', icon: Eye },
   ];
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Menu Studio</p>
-          <h3 className="mt-1 font-display text-3xl text-forest">Construis ton menu</h3>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-ink/45">
+          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-gold">KELYANI · MENU STUDIO</p>
+          <h3 className="mt-1 font-display text-4xl tracking-tight text-white">Construis ton menu</h3>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-white/45">
             Sépare la structure du contenu et l’apparence du menu, avec un aperçu toujours visible.
           </p>
         </div>
 
-        <div className="inline-flex items-center gap-2 self-start rounded-full bg-white px-3 py-2 text-[10px] font-semibold text-forest shadow-sm md:self-auto">
+        <div className="inline-flex items-center gap-2 self-start rounded-full border border-white/10 bg-white/[.04] px-3 py-2 text-[10px] font-semibold text-white/70 shadow-soft md:self-auto">
           <span className={menu.loading || loadingDesign ? 'h-2 w-2 animate-pulse rounded-full bg-amber-400' : 'h-2 w-2 rounded-full bg-green-500'} />
           {menu.loading || loadingDesign ? 'Synchronisation…' : hasChanges ? 'Modifications locales' : 'Design publié'}
         </div>
       </div>
 
-      <div className="rounded-2xl border border-ink/5 bg-[#f8f8f4] p-1.5 shadow-sm">
-        <div className="grid grid-cols-2 gap-1">
+      <div className="rounded-[22px] border border-white/[.08] bg-white/[.035] p-1.5 shadow-soft">
+        <div className="grid grid-cols-3 gap-1">
           {tabs.map(({ id, label, icon: Icon }) => {
             const active = activeTab === id;
             return (
@@ -369,8 +370,8 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
                 className={[
                   'group flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-xs font-semibold transition-all duration-200',
                   active
-                    ? 'bg-white text-forest shadow-sm ring-1 ring-gold/25'
-                    : 'text-ink/45 hover:bg-white/70 hover:text-forest',
+                    ? 'bg-gold-gradient text-[#050505] shadow-gold'
+                    : 'text-white/45 hover:bg-white/[.06] hover:text-white',
                 ].join(' ')}
                 aria-selected={active}
                 role="tab"
@@ -415,8 +416,8 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
                 onDelete={menu.deleteItem}
               />
             </div>
-          ) : (
-            <div className="min-h-[620px] rounded-3xl border border-ink/5 bg-white p-2 shadow-sm sm:p-4">
+          ) : activeTab === 'design' ? (
+            <div className="min-h-[620px] rounded-[28px] border border-white/[.08] bg-[#111111] p-2 shadow-soft sm:p-4">
               <MenuConfigurator
                 draft={draft}
                 hasChanges={hasChanges}
@@ -437,12 +438,24 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
           )}
         </div>
 
-        <MenuPreview
-          establishmentName={establishmentName}
-          categories={menu.categories}
-          itemsByCategory={menu.itemsByCategory}
-          draft={draft}
-        />
+        {activeTab === 'preview' ? (
+          <div className="xl:col-span-2">
+            <MenuPreview
+              establishmentName={establishmentName}
+              categories={menu.categories}
+              itemsByCategory={menu.itemsByCategory}
+              draft={draft}
+              fullScreen
+            />
+          </div>
+        ) : (
+          <MenuPreview
+            establishmentName={establishmentName}
+            categories={menu.categories}
+            itemsByCategory={menu.itemsByCategory}
+            draft={draft}
+          />
+        )}
       </div>
     </div>
   );
