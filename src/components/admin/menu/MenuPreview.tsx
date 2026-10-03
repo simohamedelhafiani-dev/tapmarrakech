@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronLeft, ChevronRight, BookOpen, LayoutGrid, ScrollText } from 'lucide-react';
+import { ChevronLeft, ChevronRight, BookOpen, LayoutGrid, ScrollText, Sparkle, Waves } from 'lucide-react';
 import type { MenuCategory, MenuItem } from '@/hooks/useMenuManager';
 import type { MenuDesignDraft } from '@/components/admin/menu/MenuConfigurator';
 
@@ -52,6 +52,46 @@ const theme = {
     heading: 'font-display',
     category: 'border-b border-white/10 pb-2',
     icon: BookOpen,
+  },
+  onyx: {
+    shell: 'bg-[#050505] text-white',
+    header: 'bg-[#050505]',
+    card: 'border border-white/10 bg-white/[0.05] rounded-2xl px-4 py-3 backdrop-blur-xl',
+    accent: 'text-[#E1C27A]',
+    muted: 'text-white/55',
+    heading: 'font-display',
+    category: 'border-b border-[#C9A45C]/25 pb-2',
+    icon: BookOpen,
+  },
+  'royal-gold': {
+    shell: 'bg-[#0B0906] text-[#FFF9E8]',
+    header: 'bg-[#0B0906]',
+    card: 'border border-[#C9A45C]/25 bg-[#17110A] rounded-2xl px-4 py-3',
+    accent: 'text-[#E1C27A]',
+    muted: 'text-[#FFF9E8]/55',
+    heading: 'font-display',
+    category: 'border-b border-[#E1C27A]/30 pb-2',
+    icon: Sparkle,
+  },
+  'deep-ocean': {
+    shell: 'bg-[#06151B] text-[#F2FCFF]',
+    header: 'bg-[#06151B]',
+    card: 'border border-[#8ED9E8]/20 bg-[#0A222B] rounded-2xl px-4 py-3',
+    accent: 'text-[#8ED9E8]',
+    muted: 'text-white/55',
+    heading: 'font-display',
+    category: 'border-b border-[#8ED9E8]/25 pb-2',
+    icon: Waves,
+  },
+  pearl: {
+    shell: 'bg-[#F5F1E8] text-[#1B1A17]',
+    header: 'bg-[#F5F1E8]',
+    card: 'border border-[#B59A67]/20 bg-white/70 rounded-2xl px-4 py-3 shadow-sm',
+    accent: 'text-[#9A7A3C]',
+    muted: 'text-[#1B1A17]/50',
+    heading: 'font-display',
+    category: 'border-b border-[#B59A67]/25 pb-2',
+    icon: Sparkle,
   },
 } as const;
 
