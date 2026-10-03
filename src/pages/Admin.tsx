@@ -724,7 +724,6 @@ export default function Admin() {
             <SystemSection billing={billing} globalStats={globalStats} establishments={establishments} />
           )}
         </main>
-      </div>
     </div>
   );
 }
