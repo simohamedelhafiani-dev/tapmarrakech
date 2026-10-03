@@ -35,6 +35,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import type { Establishment, Review } from '@/lib/types';
 import { Stars } from '@/components/Stars';
 import { getMySubscriptionAccess, type SubscriptionAccess } from '@/lib/subscriptionAccess';
+import KelyaniMark from '@/components/brand/KelyaniMark';
 
 type LoyaltyCustomer = {
   id: string;
@@ -833,12 +834,10 @@ export default function Dashboard() {
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0">
               <div className="mb-4 flex items-center gap-3">
-                <div className="flex h-14 w-16 items-center justify-center rounded-2xl border border-[#242424] bg-[#050505] px-2 shadow-[0_0_32px_rgba(201,164,92,0.08)]">
-                  <img src="/kelyani-brand.svg" alt="KELYANI" className="h-12 w-14 object-contain" />
-                </div>
-                <div>
-                  <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-[#C9A45C]">KELYANI</p>
-                  <p className="mt-1 text-[10px] text-[#F5F5DC]/30">Customer Experience OS</p>
+                <KelyaniMark size={72} />
+                <div className="leading-none">
+                  <p className="font-display text-xl font-semibold tracking-[.08em] text-[#E1C27A]">KELYANI</p>
+                  <p className="mt-1 text-[7px] font-semibold uppercase tracking-[.22em] text-[#C9A45C]/70">CUSTOMER INTELLIGENCE</p>
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
