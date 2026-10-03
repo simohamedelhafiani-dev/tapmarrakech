@@ -470,11 +470,7 @@ export function DashboardLayout() {
         <header className="sticky top-0 z-50 border-b border-[#242424] bg-[#050505]/95 px-3 py-3 backdrop-blur-2xl sm:px-5">
           <div className="mx-auto flex max-w-[1700px] items-center gap-3">
             <button type="button" onClick={() => navigate('/dashboard')} className="flex shrink-0 items-center gap-3" aria-label="KELYANI">
-              <KelyaniMark size={84} />
-              <div className="hidden sm:block">
-                <p className="font-display text-lg tracking-[.08em] text-[#E1C27A]">KELYANI</p>
-                <p className="text-[8px] font-semibold uppercase tracking-[.24em] text-[#F5F5DC]/35">Command Center</p>
-              </div>
+              <KelyaniMark size={120} />
             </button>
 
             <div className="mx-auto hidden min-w-0 max-w-2xl flex-1 md:block">
