@@ -59,11 +59,11 @@ export default function EstablishmentPerformanceTable({
                 {[1, 2, 3, 4, 5, 6].map((item) => (
                   <div
                     key={item}
-                    className="h-2.5 animate-pulse rounded bg-ink/5"
+                    className="h-2.5 animate-pulse rounded bg-[#242424]"
                   />
                 ))}
               </div>
-              <div className="divide-y divide-ink/5">
+              <div className="divide-y divide-[#242424]">
                 {[1, 2].map((row) => (
                   <div
                     key={row}
@@ -72,7 +72,7 @@ export default function EstablishmentPerformanceTable({
                     {[1, 2, 3, 4, 5, 6].map((cell) => (
                       <div
                         key={cell}
-                        className="h-3 animate-pulse rounded bg-ink/5"
+                        className="h-3 animate-pulse rounded bg-[#242424]"
                       />
                     ))}
                   </div>
@@ -86,12 +86,12 @@ export default function EstablishmentPerformanceTable({
                   key={item}
                   className="rounded-2xl border border-[#242424] p-4"
                 >
-                  <div className="h-4 w-32 animate-pulse rounded bg-ink/5" />
+                  <div className="h-4 w-32 animate-pulse rounded bg-[#242424]" />
                   <div className="mt-4 grid grid-cols-2 gap-3">
                     {[1, 2, 3, 4, 5].map((cell) => (
                       <div
                         key={cell}
-                        className="h-3 animate-pulse rounded bg-ink/5"
+                        className="h-3 animate-pulse rounded bg-[#242424]"
                       />
                     ))}
                   </div>
@@ -114,7 +114,7 @@ export default function EstablishmentPerformanceTable({
             </button>
           </div>
         ) : performanceData.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-ink/10 bg-[#111111] p-8 text-center">
+          <div className="rounded-2xl border border-dashed border-[#242424] bg-[#111111] p-8 text-center">
             <div className="mx-auto grid h-11 w-11 place-items-center rounded-xl bg-[#C9A45C]/5 text-[#C9A45C]">
               <Building2 size={18} />
             </div>
@@ -134,7 +134,7 @@ export default function EstablishmentPerformanceTable({
                 <span className="text-right">Visites</span>
               </div>
 
-              <div className="divide-y divide-ink/5">
+              <div className="divide-y divide-[#242424]">
                 {performanceData.map((performance) => (
                   <div
                     key={performance.establishment_id}
