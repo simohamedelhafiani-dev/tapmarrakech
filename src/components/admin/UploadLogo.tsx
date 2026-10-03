@@ -122,26 +122,26 @@ export default function UploadLogo({ profile, engine }: UploadLogoProps) {
   };
 
   return (
-    <div className="rounded-[26px] border border-ink/5 bg-white p-6 shadow-[0_12px_40px_rgba(15,23,42,0.045)]">
+    <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-[0_12px_40px_rgba(15,23,42,0.045)]">
       <div className="flex flex-col gap-5 md:flex-row md:items-center">
-        <div className="grid h-28 w-28 shrink-0 place-items-center overflow-hidden rounded-3xl bg-forest text-3xl font-semibold text-gold ring-1 ring-ink/5">
+        <div className="grid h-28 w-28 shrink-0 place-items-center overflow-hidden rounded-3xl bg-[#050505] text-3xl font-semibold text-[#C9A45C] ring-1 ring-[#242424]">
           {profile.logo_url ? (
             <img src={profile.logo_url} alt={`Logo ${profile.name}`} className="h-full w-full object-cover" />
           ) : (
-            <ImagePlus size={30} className="text-gold" />
+            <ImagePlus size={30} className="text-[#C9A45C]" />
           )}
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-forest">Logo de l’établissement</p>
-          <p className="mt-1 text-xs leading-5 text-ink/45">PNG, JPG ou WebP · 5 Mo maximum.</p>
+          <p className="text-sm font-semibold text-[#C9A45C]">Logo de l’établissement</p>
+          <p className="mt-1 text-xs leading-5 text-[#F5F5DC]/45">PNG, JPG ou WebP · 5 Mo maximum.</p>
 
           <div className="mt-4 flex flex-wrap gap-2">
             <button
               type="button"
               disabled={uploading || removing || engine.saving}
               onClick={() => inputRef.current?.click()}
-              className="inline-flex items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#E1C27A] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:cursor-not-allowed disabled:opacity-40"
             >
               {uploading ? <Loader2 size={15} className="animate-spin" /> : <Upload size={15} />}
               {uploading ? 'Upload en cours…' : profile.logo_url ? 'Remplacer le logo' : 'Importer un logo'}
@@ -152,7 +152,7 @@ export default function UploadLogo({ profile, engine }: UploadLogoProps) {
                 type="button"
                 disabled={uploading || removing || engine.saving}
                 onClick={() => void handleRemove()}
-                className="inline-flex items-center gap-2 rounded-xl border border-red-200 px-4 py-2.5 text-xs font-semibold text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex items-center gap-2 rounded-xl border border-[#242424] px-4 py-2.5 text-xs font-semibold text-[#E1C27A] disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {removing ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
                 {removing ? 'Suppression…' : 'Supprimer'}
@@ -174,13 +174,13 @@ export default function UploadLogo({ profile, engine }: UploadLogoProps) {
           />
 
           {message && (
-            <p className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-semibold text-forest">
+            <p className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#C9A45C]">
               <CheckCircle2 size={14} />
               {message}
             </p>
           )}
 
-          {error && <p className="mt-3 text-[11px] font-medium text-red-600">{error}</p>}
+          {error && <p className="mt-3 text-[11px] font-medium text-[#E1C27A]">{error}</p>}
         </div>
       </div>
     </div>
