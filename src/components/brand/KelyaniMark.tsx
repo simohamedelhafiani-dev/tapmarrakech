@@ -4,10 +4,10 @@ type KelyaniMarkProps = Omit<ImgHTMLAttributes<HTMLImageElement>, 'src' | 'alt' 
   size?: number;
 };
 
-export default function KelyaniMark({ size = 48, className, ...props }: KelyaniMarkProps) {
+export default function KelyaniMark({ size = 120, className, ...props }: KelyaniMarkProps) {
   return (
     <img
-      src="/Logo Kelyani doré sur fond noir (1).png"
+      src="/kelyani-final.svg"
       alt="KELYANI"
       width={size}
       height={size}
@@ -18,6 +18,7 @@ export default function KelyaniMark({ size = 48, className, ...props }: KelyaniM
         objectFit: 'contain',
         objectPosition: 'center',
         flexShrink: 0,
+        display: 'block',
         ...props.style,
       }}
       {...props}
