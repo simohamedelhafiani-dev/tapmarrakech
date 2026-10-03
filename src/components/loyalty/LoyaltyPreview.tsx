@@ -17,7 +17,7 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
 
   return (
     <div
-      className="flex w-full min-w-0 items-center justify-center overflow-visible rounded-[28px] border border-white/[.08] bg-[#050505] p-4 shadow-luxury sm:p-6"
+      className="flex w-full min-w-0 items-center justify-center overflow-visible rounded-3xl border border-[#242424]/[.08] bg-[#050505] p-4 shadow-luxury sm:p-6"
       style={{
         minWidth: 0,
         minHeight: '480px',
