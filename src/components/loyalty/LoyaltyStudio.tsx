@@ -857,21 +857,28 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                         <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-ink/35">%</span>
                       </div>
                     </Field>
-                    <Field label="Validité">
-                      <div className="relative">
-                        <input
-                          type="number"
-                          min="1"
-                          max="365"
-                          value={program.discountValidDays}
-                          onChange={e => setProgram(current => ({
-                            ...current,
-                            discountValidDays: Math.min(365, Math.max(1, Number(e.target.value) || 1)),
-                          }))}
-                          className="h-12 w-full rounded-xl border border-ink/10 bg-white px-4 text-sm font-medium text-forest outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-forest/10 placeholder:text-ink/25 pr-14"
-                        />
-                        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-ink/35">jours</span>
-                      </div>
+                    <Field label="Validité de la carte">
+                      <select
+                        value={program.discountValidDays}
+                        onChange={e => setProgram(current => ({
+                          ...current,
+                          discountValidDays: Number(e.target.value),
+                        }))}
+                        className="h-12 w-full rounded-xl border border-ink/10 bg-white px-4 text-sm font-medium text-forest outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-forest/10"
+                      >
+                        <option value={1}>24 heures</option>
+                        <option value={7}>7 jours</option>
+                        <option value={15}>15 jours</option>
+                        <option value={30}>30 jours</option>
+                        <option value={60}>60 jours</option>
+                        <option value={90}>90 jours</option>
+                        <option value={180}>6 mois</option>
+                        <option value={365}>1 an</option>
+                      </select>
+                      <p className="mt-2 text-[10px] leading-4 text-ink/40">
+                        La durée démarre automatiquement lorsque le client atteint {program.discountPointsThreshold.toLocaleString('fr-FR')} points.
+                        La date d’expiration sera affichée sur sa carte dès que la réduction est débloquée.
+                      </p>
                     </Field>
                   </div>
                 </StudioCard>
