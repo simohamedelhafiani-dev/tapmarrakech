@@ -61,6 +61,7 @@ export default function MenuPreview({
   itemsByCategory,
   draft,
   compact = false,
+  fullScreen = false,
 }: MenuPreviewProps) {
   const activeDraft = draft ?? {
     template: 'editorial' as const,
