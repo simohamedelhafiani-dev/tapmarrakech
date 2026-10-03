@@ -535,73 +535,65 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-[#EDE9DF] selection:bg-[#C9A45C]/30">
-      {open && (
-        <button
-          aria-label="Fermer la navigation"
-          onClick={() => setOpen(false)}
-          className="fixed inset-0 z-40 bg-[#050505]/70 backdrop-blur-sm lg:hidden"
-        />
-      )}
-
-      <header className="sticky top-0 z-50 border-b border-[#242424]/[.06] bg-[#050505]/85 px-3 py-3 backdrop-blur-2xl sm:px-5">
+      <header className="sticky top-0 z-50 border-b border-[#242424] bg-[#050505]/95 px-3 py-3 backdrop-blur-2xl sm:px-5">
         <div className="mx-auto flex max-w-[1700px] items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setOpen(!open)}
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-[#242424]/10 bg-[#111111]/[.04] text-[#FFFFFF]/70 lg:hidden"
-            aria-label="Navigation"
-          >
-            <Menu size={18} />
+          <button type="button" onClick={() => setSection('overview')} className="shrink-0 text-left" aria-label="KELYANI">
+            <p className="font-display text-xl tracking-[.08em] text-[#E1C27A] sm:text-2xl">KELYANI</p>
+            <p className="hidden text-[8px] font-semibold uppercase tracking-[.28em] text-[#F5F5DC]/45 sm:block">Command Center</p>
           </button>
 
-          <button type="button" onClick={() => setSection('overview')} className="shrink-0 text-left">
-            <p className="font-display text-2xl tracking-[.08em] text-[#E1C27A]">KELYANI</p>
-            <p className="hidden text-[8px] font-semibold uppercase tracking-[.28em] text-[#FFFFFF]/35 sm:block">Command Center</p>
-          </button>
-
-          <nav
-            className={`absolute left-3 right-3 top-[72px] z-50 flex max-h-[calc(100vh-90px)] flex-col gap-1 overflow-y-auto rounded-[24px] border border-[#242424]/10 bg-[#111111]/95 p-2 shadow-luxury backdrop-blur-2xl lg:static lg:ml-6 lg:flex lg:max-h-none lg:flex-1 lg:flex-row lg:items-center lg:justify-center lg:overflow-visible lg:rounded-full lg:border-[#242424]/[.07] lg:bg-[#111111]/[.035] lg:p-1 ${open ? 'flex' : 'hidden'} lg:flex`}
-          >
-            {menuItems.map(({ id, label, icon: Icon }) => {
-              const active = section === id;
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => { setSection(id); setOpen(false); }}
-                  className={`group flex shrink-0 items-center gap-2 rounded-full px-3 py-2.5 text-[10px] font-semibold transition-all ${active ? 'bg-[#C9A45C]-gradient text-[#050505] shadow-[0_10px_35px_rgba(201,164,92,0.18)]' : 'text-[#FFFFFF]/45 hover:bg-[#111111]/[.06] hover:text-[#FFFFFF]'}`}
-                >
-                  <Icon size={14} strokeWidth={1.8} />
-                  <span className="hidden xl:inline">{label}</span>
-                </button>
-              );
-            })}
-          </nav>
+          <div className="mx-auto hidden min-w-0 flex-1 max-w-2xl md:block">
+            <label className="relative block">
+              <Search size={15} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#C9A45C]" />
+              <input
+                type="search"
+                placeholder="Rechercher dans KELYANI..."
+                aria-label="Rechercher dans KELYANI"
+                className="h-11 w-full rounded-2xl border border-[#242424] bg-[#111111] pl-11 pr-4 text-sm text-[#FFFFFF] outline-none placeholder:text-[#F5F5DC]/35 focus:border-[#C9A45C]/60 focus:ring-1 focus:ring-[#C9A45C]/20"
+              />
+            </label>
+          </div>
 
           <div className="ml-auto flex shrink-0 items-center gap-2">
-            <label className="hidden items-center rounded-full border border-[#242424]/10 bg-[#111111]/[.04] px-3 py-2 text-[10px] font-semibold text-[#FFFFFF]/55 sm:flex">
-              <select value={language} onChange={(event) => setLanguage(event.target.value as Language)} aria-label="Language" className="bg-transparent outline-none">
+            <div className="hidden items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 py-2 text-[10px] font-semibold text-[#F5F5DC]/65 sm:flex">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#C9A45C]" />
+              Connecté
+            </div>
+            <label className="hidden items-center rounded-full border border-[#242424] bg-[#111111] px-3 py-2 text-[10px] font-semibold text-[#F5F5DC]/65 lg:flex">
+              <select value={language} onChange={(event) => setLanguage(event.target.value as Language)} aria-label="Language" className="bg-transparent text-[#F5F5DC] outline-none">
                 <option className="bg-[#111111]" value="fr">FR</option>
                 <option className="bg-[#111111]" value="en">EN</option>
                 <option className="bg-[#111111]" value="ar">AR</option>
               </select>
             </label>
-            <button type="button" className="relative grid h-10 w-10 place-items-center rounded-full border border-[#242424]/10 bg-[#111111]/[.04] text-[#FFFFFF]/55" aria-label="Notifications">
+            <button type="button" className="relative grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#F5F5DC]/65 transition hover:border-[#C9A45C]/50 hover:text-[#E1C27A]" aria-label="Notifications">
               <Bell size={16} />
               <span className="absolute right-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-[#C9A45C]" />
             </button>
-            <button type="button" onClick={reloadAll} className="hidden h-10 items-center gap-2 rounded-full border border-[#242424]/10 bg-[#111111]/[.04] px-3 text-[10px] font-semibold text-[#FFFFFF]/55 transition hover:border-[#C9A45C]/40 hover:text-[#FFFFFF] sm:flex">
+            <button type="button" onClick={reloadAll} className="hidden h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#F5F5DC]/65 transition hover:border-[#C9A45C]/50 hover:text-[#E1C27A] lg:flex">
               <RefreshCw size={13} />
               Actualiser
             </button>
-            <button type="button" onClick={logout} className="grid h-10 w-10 place-items-center rounded-full border border-[#242424]/10 bg-[#111111]/[.04] text-[#FFFFFF]/55 transition hover:border-[#C9A45C]/40 hover:text-[#E1C27A]" aria-label="Déconnexion">
+            <button type="button" onClick={logout} className="grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#F5F5DC]/65 transition hover:border-[#C9A45C]/50 hover:text-[#E1C27A]" aria-label="Déconnexion">
               <LogOut size={15} />
             </button>
           </div>
         </div>
+
+        <div className="mx-auto mt-3 md:hidden">
+          <label className="relative block">
+            <Search size={15} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#C9A45C]" />
+            <input
+              type="search"
+              placeholder="Rechercher..."
+              aria-label="Rechercher"
+              className="h-10 w-full rounded-2xl border border-[#242424] bg-[#111111] pl-11 pr-4 text-xs text-[#FFFFFF] outline-none placeholder:text-[#F5F5DC]/35 focus:border-[#C9A45C]/60"
+            />
+          </label>
+        </div>
       </header>
 
-        <main className="mx-auto w-full max-w-[1700px] px-3 pb-10 pt-6 sm:px-5 md:px-8 lg:px-10 lg:pt-8">
+        <main className="mx-auto w-full max-w-[1700px] px-3 pb-28 pt-6 sm:px-5 md:px-8 lg:px-10 lg:pt-8">
 
           {section === 'overview' && (
             <Overview
@@ -724,6 +716,30 @@ export default function Admin() {
             <SystemSection billing={billing} globalStats={globalStats} establishments={establishments} />
           )}
         </main>
+      
+      <nav className="fixed inset-x-0 bottom-0 z-[60] border-t border-[#242424] bg-[#050505]/95 px-2 pb-[max(8px,env(safe-area-inset-bottom))] pt-2 backdrop-blur-2xl">
+        <div className="mx-auto flex max-w-[900px] items-center justify-start gap-1 overflow-x-auto scrollbar-none">
+          {menuItems.map(({ id, label, icon: Icon }) => {
+            const active = section === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setSection(id)}
+                aria-label={label}
+                className={`group flex min-w-[68px] flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 transition-all ${
+                  active
+                    ? 'bg-[#111111] text-[#E1C27A] shadow-[0_0_24px_rgba(201,164,92,0.10)]'
+                    : 'text-[#F5F5DC]/40 hover:bg-[#111111] hover:text-[#F5F5DC]'
+                }`}
+              >
+                <Icon size={18} strokeWidth={active ? 2 : 1.7} />
+                <span className="max-w-[76px] truncate text-[8px] font-semibold tracking-[.02em]">{label.replace('💎 ', '')}</span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
     </div>
   );
 }
