@@ -9,6 +9,7 @@ type MenuPreviewProps = {
   itemsByCategory: Record<string, MenuItem[]>;
   draft?: MenuDesignDraft;
   compact?: boolean;
+  fullScreen?: boolean;
 };
 
 const theme = {
@@ -210,19 +211,19 @@ export default function MenuPreview({
   };
 
   return (
-    <aside className="min-w-0 overflow-hidden rounded-3xl border border-ink/5 bg-white shadow-sm lg:sticky lg:top-4 lg:self-start">
+    <aside className={`min-w-0 overflow-hidden border border-white/[.08] bg-[#111111] shadow-soft ${fullScreen ? "rounded-[32px]" : "rounded-3xl lg:sticky lg:top-24 lg:self-start"}`}>
       {!compact && <div className="border-b border-ink/5 bg-white p-5">
         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Aperçu en direct</p>
         <h3 className="mt-1 text-base font-semibold text-forest">
           {establishmentName || 'Menu public'}
         </h3>
         <p className="mt-1 text-[11px] text-ink/35">
-          Miroir du Draft · aucune sauvegarde automatique
+          Miroir KELYANI · synchronisé avec le Studio
         </p>
       </div>}
 
-      <div className={compact ? "p-0" : "p-3"}>
-        <div className={`relative max-h-[520px] min-h-[360px] overflow-y-auto rounded-[26px] ${colors.shell}`}>
+      <div className={compact ? "p-0" : fullScreen ? "p-3 sm:p-5" : "p-3"}>
+        <div className={`relative overflow-y-auto ${fullScreen ? "min-h-[calc(100vh-190px)] max-h-[calc(100vh-140px)] rounded-[28px]" : "max-h-[520px] min-h-[360px] rounded-[26px]"} ${colors.shell}`}>
           {activeDraft.wallpaperUrl && (
             <>
               <div
@@ -237,14 +238,14 @@ export default function MenuPreview({
           )}
 
           <div className="relative">
-            <header className={`p-6 text-center ${colors.header} `}>
+            <header className={`${fullScreen ? "px-6 py-14 sm:px-12 sm:py-20" : "p-6"} text-center ${colors.header}`}>
               <div className={`mx-auto mb-3 grid h-9 w-9 place-items-center rounded-full border border-current/10 ${colors.accent}`}>
                 <TemplateIcon size={15} />
               </div>
               <p className={`text-[9px] font-bold uppercase tracking-[0.32em] ${colors.accent}`}>
                 Menu
               </p>
-              <h4 className={`mt-2 ${compact ? 'text-xl' : 'text-3xl'} leading-tight ${colors.heading}`}>
+              <h4 className={`mt-2 ${fullScreen ? 'text-5xl sm:text-7xl' : compact ? 'text-xl' : 'text-3xl'} leading-tight ${colors.heading}`}>
                 {displayName}
               </h4>
               <p className={`mt-2 text-[10px] leading-4 ${colors.muted}`}>
