@@ -617,25 +617,25 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
 
   if (loading) {
     return (
-      <div className="grid min-h-[560px] place-items-center rounded-[30px] bg-[#111111]">
-        <Loader2 className="animate-spin text-gold" />
+      <div className="grid min-h-[560px] place-items-center rounded-3xl bg-[#111111]">
+        <Loader2 className="animate-spin text-[#C9A45C]" />
       </div>
     );
   }
 
   return (
-    <section className="rounded-[30px] border border-ink/5 bg-[#111111] p-4 shadow-soft md:p-6">
+    <section className="rounded-3xl border border-[#242424] bg-[#050505] p-4 shadow-soft md:p-6">
       <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[.22em] text-gold">Loyalty Studio</p>
+          <p className="text-[10px] font-bold uppercase tracking-[.22em] text-[#C9A45C]">Loyalty Studio</p>
           <h2 className="mt-1 font-display text-3xl text-[#E1C27A]">Carte fidélité</h2>
-          <p className="mt-1 max-w-xl text-sm text-ink/45">
+          <p className="mt-1 max-w-xl text-sm text-[#FFFFFF]/45">
             Un espace unique pour piloter le programme, l’acquisition et l’identité de la carte.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className={`hidden rounded-full px-3 py-1.5 text-[10px] font-semibold sm:inline-flex ${design.published ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
+          <span className={`hidden rounded-full px-3 py-1.5 text-[10px] font-semibold sm:inline-flex ${design.published ? 'bg-[#111111] text-[#E1C27A]' : 'bg-[#111111] text-[#E1C27A]'}`}>
             {design.published ? 'Publié' : 'Brouillon'}
           </span>
           <button
@@ -650,7 +650,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
             type="button"
             onClick={() => void saveAll(true)}
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-xl bg-gold-gradient px-4 py-2.5 text-xs font-semibold text-[#050505] shadow-sm transition hover:-translate-y-0.5 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#C9A45C]-gradient px-4 py-2.5 text-xs font-semibold text-[#050505] shadow-sm transition hover:-translate-y-0.5 disabled:opacity-50"
           >
             <Save size={14} />
             {saving ? '...' : 'Publier'}
@@ -661,7 +661,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       {message && (
         <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl bg-[#242424] px-4 py-3 text-xs text-[#E1C27A]">
           <span>{message}</span>
-          <button type="button" onClick={() => setMessage('')} className="text-ink/30 hover:text-ink/60">
+          <button type="button" onClick={() => setMessage('')} className="text-[#FFFFFF]/30 hover:text-[#FFFFFF]/60">
             <X size={14} />
           </button>
         </div>
@@ -669,7 +669,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
         <div className="min-w-0">
-          <div className="mb-5 overflow-x-auto rounded-2xl bg-[#f3f5f2] p-1.5">
+          <div className="mb-5 overflow-x-auto rounded-2xl bg-[#111111] p-1.5">
             <div className="grid min-w-[640px] grid-cols-4 gap-1">
               {TABS.map(item => {
                 const Icon = item.icon;
@@ -679,15 +679,15 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                     key={item.id}
                     type="button"
                     onClick={() => setTab(item.id)}
-                    className={`group rounded-xl px-3 py-3 text-left transition ${active ? 'bg-[#111111] shadow-sm' : 'text-ink/45 hover:bg-[#111111]/60'}`}
+                    className={`group rounded-xl px-3 py-3 text-left transition ${active ? 'bg-[#111111] shadow-sm' : 'text-[#FFFFFF]/45 hover:bg-[#111111]/60'}`}
                   >
                     <span className="flex items-center gap-2.5">
-                      <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ${active ? 'bg-gold-gradient text-[#050505]' : 'bg-[#111111] text-ink/40'}`}>
+                      <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ${active ? 'bg-[#C9A45C]-gradient text-[#050505]' : 'bg-[#111111] text-[#FFFFFF]/40'}`}>
                         <Icon size={15} />
                       </span>
                       <span className="min-w-0">
-                        <span className={`block truncate text-xs font-bold ${active ? 'text-[#E1C27A]' : 'text-ink/55'}`}>{item.label}</span>
-                        <span className="block truncate text-[9px] uppercase tracking-[.12em] text-ink/30">{item.caption}</span>
+                        <span className={`block truncate text-xs font-bold ${active ? 'text-[#E1C27A]' : 'text-[#FFFFFF]/55'}`}>{item.label}</span>
+                        <span className="block truncate text-[9px] uppercase tracking-[.12em] text-[#FFFFFF]/30">{item.caption}</span>
                       </span>
                     </span>
                   </button>
@@ -702,7 +702,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                 <div className="flex items-center justify-between gap-4 rounded-2xl bg-[#242424] p-4">
                   <div>
                     <p className="text-sm font-semibold text-[#E1C27A]">Programme fidélité</p>
-                    <p className="mt-1 text-[10px] leading-4 text-ink/40">
+                    <p className="mt-1 text-[10px] leading-4 text-[#FFFFFF]/40">
                       Les clients peuvent utiliser leur carte lorsque le programme est actif.
                     </p>
                   </div>
@@ -720,11 +720,11 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                         key={item.id}
                         type="button"
                         onClick={() => setProgram(current => ({ ...current, programType: item.id }))}
-                        className={`rounded-2xl border p-4 text-left transition ${active ? 'border-forest bg-gold-gradient/[.04] ring-2 ring-[#C9A45C]/15' : 'border-ink/10 hover:border-[#C9A45C]/30'}`}
+                        className={`rounded-2xl border p-4 text-left transition ${active ? 'border-[#242424] bg-[#C9A45C]-gradient/[.04] ring-2 ring-[#C9A45C]/15' : 'border-[#242424]/10 hover:border-[#C9A45C]/30'}`}
                       >
-                        <Icon size={18} className={active ? 'text-gold' : 'text-ink/35'} />
+                        <Icon size={18} className={active ? 'text-[#C9A45C]' : 'text-[#FFFFFF]/35'} />
                         <p className="mt-3 text-sm font-semibold text-[#E1C27A]">{item.label}</p>
-                        <p className="mt-1 text-[10px] leading-4 text-ink/45">{item.description}</p>
+                        <p className="mt-1 text-[10px] leading-4 text-[#FFFFFF]/45">{item.description}</p>
                       </button>
                     );
                   })}
@@ -747,10 +747,10 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                           pointsPerCurrency: Math.max(0.01, conversionPoints / mad),
                         }));
                       }}
-                      className="h-12 w-full rounded-xl border border-ink/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-ink/25"
+                      className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25"
                     />
                   </Field>
-                  <span className="hidden pb-3 text-xs font-bold text-ink/25 md:block">=</span>
+                  <span className="hidden pb-3 text-xs font-bold text-[#FFFFFF]/25 md:block">=</span>
                   <Field label="Points gagnés">
                     <input
                       type="number"
@@ -765,11 +765,11 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                           pointsPerCurrency: Math.max(0.01, points / conversionMad),
                         }));
                       }}
-                      className="h-12 w-full rounded-xl border border-ink/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-ink/25"
+                      className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25"
                     />
                   </Field>
                 </div>
-                <p className="mt-3 rounded-xl bg-[#242424] px-3 py-2.5 text-[10px] text-ink/45">
+                <p className="mt-3 rounded-xl bg-[#242424] px-3 py-2.5 text-[10px] text-[#FFFFFF]/45">
                   Chaque {conversionMad} MAD dépensé génère {conversionPoints} point(s).
                 </p>
               </StudioCard>
@@ -788,10 +788,10 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                             ...current,
                             stampGoal: Math.min(10, Math.max(1, Number(e.target.value) || 1)),
                           }))}
-                          className="h-12 w-full rounded-xl border border-ink/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-ink/25"
+                          className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25"
                         />
                       </Field>
-                      <p className="mt-3 rounded-xl bg-[#242424] px-3 py-2.5 text-[10px] leading-4 text-ink/45">
+                      <p className="mt-3 rounded-xl bg-[#242424] px-3 py-2.5 text-[10px] leading-4 text-[#FFFFFF]/45">
                         Le client reçoit sa récompense automatiquement lorsqu’il atteint cet objectif.
                       </p>
                     </div>
@@ -804,7 +804,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                           value={program.stampRewardName}
                           onChange={e => setProgram(current => ({ ...current, stampRewardName: e.target.value }))}
                           placeholder="Ex. Café offert, dessert offert..."
-                          className="h-12 w-full rounded-xl border border-ink/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-ink/25"
+                          className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25"
                         />
                       </Field>
                       <Field label="Description de la récompense">
@@ -812,13 +812,13 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                           value={program.stampRewardDescription}
                           onChange={e => setProgram(current => ({ ...current, stampRewardDescription: e.target.value }))}
                           placeholder="Ex. Un café ou un dessert au choix"
-                          className="h-12 w-full rounded-xl border border-ink/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-ink/25"
+                          className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25"
                         />
                       </Field>
                     </div>
-                    <div className="mt-4 rounded-xl border border-gold/20 bg-gold/5 px-4 py-3">
+                    <div className="mt-4 rounded-xl border border-[#C9A45C]/20 bg-[#C9A45C]/5 px-4 py-3">
                       <p className="text-[10px] font-semibold text-[#E1C27A]">Récompense dédiée aux tampons</p>
-                      <p className="mt-1 text-[10px] leading-4 text-ink/40">
+                      <p className="mt-1 text-[10px] leading-4 text-[#FFFFFF]/40">
                         Cette récompense est indépendante du catalogue des récompenses en points.
                       </p>
                     </div>
@@ -838,7 +838,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                           ...current,
                           discountPointsThreshold: Math.max(1, Number(e.target.value) || 1),
                         }))}
-                        className="h-12 w-full rounded-xl border border-ink/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-ink/25"
+                        className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25"
                       />
                     </Field>
                     <Field label="Réduction">
@@ -852,9 +852,9 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                             ...current,
                             discountPercent: Math.min(100, Math.max(1, Number(e.target.value) || 1)),
                           }))}
-                          className="h-12 w-full rounded-xl border border-ink/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-ink/25 pr-10"
+                          className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25 pr-10"
                         />
-                        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-ink/35">%</span>
+                        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-[#FFFFFF]/35">%</span>
                       </div>
                     </Field>
                     <Field label="Validité de la carte">
@@ -864,7 +864,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                           ...current,
                           discountValidDays: Number(e.target.value),
                         }))}
-                        className="h-12 w-full rounded-xl border border-ink/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-[#C9A45C]/15"
+                        className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15"
                       >
                         <option value={1}>24 heures</option>
                         <option value={7}>7 jours</option>
@@ -875,7 +875,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                         <option value={180}>6 mois</option>
                         <option value={365}>1 an</option>
                       </select>
-                      <p className="mt-2 text-[10px] leading-4 text-ink/40">
+                      <p className="mt-2 text-[10px] leading-4 text-[#FFFFFF]/40">
                         La durée démarre automatiquement lorsque le client atteint {program.discountPointsThreshold.toLocaleString('fr-FR')} points.
                         La date d’expiration sera affichée sur sa carte dès que la réduction est débloquée.
                       </p>
@@ -897,38 +897,38 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
 
                 <div className="space-y-2">
                   {rewards.length === 0 && (
-                    <div className="rounded-2xl border border-dashed border-ink/10 px-5 py-10 text-center">
-                      <Gift className="mx-auto text-ink/20" size={22} />
+                    <div className="rounded-2xl border border-dashed border-[#242424]/10 px-5 py-10 text-center">
+                      <Gift className="mx-auto text-[#FFFFFF]/20" size={22} />
                       <p className="mt-3 text-sm font-semibold text-[#E1C27A]">Votre catalogue est vide</p>
-                      <p className="mt-1 text-[10px] text-ink/40">Ajoutez votre première récompense ci-dessous.</p>
+                      <p className="mt-1 text-[10px] text-[#FFFFFF]/40">Ajoutez votre première récompense ci-dessous.</p>
                     </div>
                   )}
 
                   {rewards.map(reward => (
-                    <div key={reward.id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-ink/8 bg-[#fafaf8] p-3">
-                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#111111] text-gold shadow-sm">
+                    <div key={reward.id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-[#242424]/8 bg-[#111111] p-3">
+                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#111111] text-[#C9A45C] shadow-sm">
                         {reward.reward_type === 'DISCOUNT' ? <Percent size={16} /> : <Gift size={16} />}
                       </span>
                       <div className="min-w-[150px] flex-1">
                         <div className="flex flex-wrap items-center gap-2">
                           <p className="text-xs font-semibold text-[#E1C27A]">{reward.name}</p>
-                          <span className={`rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-[.12em] ${reward.active ? 'bg-emerald-50 text-emerald-700' : 'bg-ink/5 text-ink/35'}`}>
+                          <span className={`rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-[.12em] ${reward.active ? 'bg-[#111111] text-[#E1C27A]' : 'bg-[#111111]/5 text-[#FFFFFF]/35'}`}>
                             {reward.active ? 'Active' : 'Inactive'}
                           </span>
                         </div>
-                        <p className="mt-1 text-[10px] text-ink/40">
+                        <p className="mt-1 text-[10px] text-[#FFFFFF]/40">
                           {reward.points_required} points · {reward.reward_type === 'DISCOUNT' ? `${reward.discount_percent ?? 0}% de réduction` : 'Cadeau'}
                         </p>
-                        {reward.description && <p className="mt-1 truncate text-[10px] text-ink/30">{reward.description}</p>}
+                        {reward.description && <p className="mt-1 truncate text-[10px] text-[#FFFFFF]/30">{reward.description}</p>}
                       </div>
                       <div className="flex items-center gap-1">
-                        <button type="button" onClick={() => void toggleReward(reward)} className="rounded-lg px-2.5 py-2 text-[10px] font-semibold text-ink/45 hover:bg-[#111111] hover:text-[#E1C27A]">
+                        <button type="button" onClick={() => void toggleReward(reward)} className="rounded-lg px-2.5 py-2 text-[10px] font-semibold text-[#FFFFFF]/45 hover:bg-[#111111] hover:text-[#E1C27A]">
                           {reward.active ? 'Désactiver' : 'Activer'}
                         </button>
                         <button type="button" onClick={() => editReward(reward)} className="rounded-lg px-2.5 py-2 text-[10px] font-semibold text-[#E1C27A] hover:bg-[#111111]">
                           Modifier
                         </button>
-                        <button type="button" onClick={() => void deleteReward(reward.id)} className="rounded-lg p-2 text-ink/25 hover:bg-red-50 hover:text-red-500">
+                        <button type="button" onClick={() => void deleteReward(reward.id)} className="rounded-lg p-2 text-[#FFFFFF]/25 hover:bg-[#111111] hover:text-[#E1C27A]">
                           <Trash2 size={14} />
                         </button>
                       </div>
@@ -940,13 +940,13 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
               <StudioCard eyebrow={rewardDraft.id ? 'Édition' : 'Nouveau'} title={rewardDraft.id ? 'Modifier la récompense' : 'Ajouter une récompense'}>
                 <div className="grid gap-4 md:grid-cols-2">
                   <Field label="Nom">
-                    <input value={rewardDraft.name} onChange={e => setRewardDraft(current => ({ ...current, name: e.target.value }))} placeholder="Ex. Dessert offert" className="h-12 w-full rounded-xl border border-ink/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-ink/25" />
+                    <input value={rewardDraft.name} onChange={e => setRewardDraft(current => ({ ...current, name: e.target.value }))} placeholder="Ex. Dessert offert" className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25" />
                   </Field>
                   <Field label="Points requis">
-                    <input type="number" min="1" value={rewardDraft.pointsRequired} onChange={e => setRewardDraft(current => ({ ...current, pointsRequired: Math.max(1, Number(e.target.value) || 1) }))} className="h-12 w-full rounded-xl border border-ink/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-ink/25" />
+                    <input type="number" min="1" value={rewardDraft.pointsRequired} onChange={e => setRewardDraft(current => ({ ...current, pointsRequired: Math.max(1, Number(e.target.value) || 1) }))} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25" />
                   </Field>
                   <Field label="Type">
-                    <select value={rewardDraft.rewardType} onChange={e => setRewardDraft(current => ({ ...current, rewardType: e.target.value as RewardType }))} className="h-12 w-full rounded-xl border border-ink/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-ink/25">
+                    <select value={rewardDraft.rewardType} onChange={e => setRewardDraft(current => ({ ...current, rewardType: e.target.value as RewardType }))} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25">
                       <option value="GIFT">Cadeau</option>
                       <option value="DISCOUNT">Réduction</option>
                     </select>
@@ -954,26 +954,26 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   {rewardDraft.rewardType === 'DISCOUNT' && (
                     <>
                       <Field label="Pourcentage de réduction">
-                        <input type="number" min="1" max="20" value={rewardDraft.discountPercent} onChange={e => setRewardDraft(current => ({ ...current, discountPercent: Math.min(20, Math.max(1, Number(e.target.value) || 1)) }))} className="h-12 w-full rounded-xl border border-ink/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-ink/25" />
+                        <input type="number" min="1" max="20" value={rewardDraft.discountPercent} onChange={e => setRewardDraft(current => ({ ...current, discountPercent: Math.min(20, Math.max(1, Number(e.target.value) || 1)) }))} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25" />
                       </Field>
                       <Field label="Plafond de réduction (MAD)">
-                        <input type="number" min="0" value={rewardDraft.discountMaxAmount ?? ''} onChange={e => setRewardDraft(current => ({ ...current, discountMaxAmount: e.target.value === '' ? null : Math.max(0, Number(e.target.value)) }))} className="h-12 w-full rounded-xl border border-ink/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-ink/25" placeholder="Optionnel" />
+                        <input type="number" min="0" value={rewardDraft.discountMaxAmount ?? ''} onChange={e => setRewardDraft(current => ({ ...current, discountMaxAmount: e.target.value === '' ? null : Math.max(0, Number(e.target.value)) }))} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25" placeholder="Optionnel" />
                       </Field>
                     </>
                   )}
                   <div className="md:col-span-2">
                     <Field label="Description">
-                      <textarea value={rewardDraft.description} onChange={e => setRewardDraft(current => ({ ...current, description: e.target.value }))} rows={3} className="h-12 w-full rounded-xl border border-ink/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-ink/25 resize-none" placeholder="Ce que le client reçoit..." />
+                      <textarea value={rewardDraft.description} onChange={e => setRewardDraft(current => ({ ...current, description: e.target.value }))} rows={3} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25 resize-none" placeholder="Ce que le client reçoit..." />
                     </Field>
                   </div>
                 </div>
                 <div className="mt-4 flex justify-end gap-2">
                   {rewardDraft.id && (
-                    <button type="button" onClick={() => setRewardDraft(emptyReward)} className="rounded-xl border border-ink/10 px-4 py-2.5 text-xs font-semibold text-ink/50">
+                    <button type="button" onClick={() => setRewardDraft(emptyReward)} className="rounded-xl border border-[#242424]/10 px-4 py-2.5 text-xs font-semibold text-[#FFFFFF]/50">
                       Annuler
                     </button>
                   )}
-                  <button type="button" onClick={() => void saveReward()} disabled={rewardSaving} className="inline-flex items-center gap-2 rounded-xl bg-gold-gradient px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50">
+                  <button type="button" onClick={() => void saveReward()} disabled={rewardSaving} className="inline-flex items-center gap-2 rounded-xl bg-[#C9A45C]-gradient px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50">
                     <Gift size={14} />
                     {rewardSaving ? 'Enregistrement...' : rewardDraft.id ? 'Mettre à jour' : 'Ajouter'}
                   </button>
@@ -988,12 +988,12 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                 <div className="grid gap-4 md:grid-cols-[1fr_auto]">
                   <div className="rounded-2xl bg-[#242424] p-4">
                     <div className="flex items-start gap-3">
-                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#111111] text-gold shadow-sm">
+                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#111111] text-[#C9A45C] shadow-sm">
                         <UserPlus size={17} />
                       </span>
                       <div>
                         <p className="text-sm font-semibold text-[#E1C27A]">Programme de parrainage</p>
-                        <p className="mt-1 text-[10px] leading-4 text-ink/40">
+                        <p className="mt-1 text-[10px] leading-4 text-[#FFFFFF]/40">
                           Récompensez le parrain et le nouveau client après leur mise en relation.
                         </p>
                       </div>
@@ -1029,9 +1029,9 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                           max_referrals: e.target.value === '' ? null : Math.max(0, Math.floor(Number(e.target.value) || 0)),
                         }))}
                         placeholder="Illimité"
-                        className="h-12 w-full rounded-xl border border-ink/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-ink/25 pr-20"
+                        className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25 pr-20"
                       />
-                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-ink/30">par client</span>
+                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[#FFFFFF]/30">par client</span>
                     </div>
                   </Field>
                 </div>
@@ -1043,7 +1043,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                 </div>
               </StudioCard>
 
-              <div className="rounded-2xl border border-ink/8 bg-[#242424] p-4 text-[10px] leading-5 text-ink/45">
+              <div className="rounded-2xl border border-[#242424]/8 bg-[#242424] p-4 text-[10px] leading-5 text-[#FFFFFF]/45">
                 Les changements sont conservés avec le bouton <strong className="text-[#E1C27A]">Enregistrer</strong>. Le miroir de droite reflète immédiatement les paramètres qui modifient la carte.
               </div>
             </div>
@@ -1060,7 +1060,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                         key={item.id}
                         type="button"
                         onClick={() => selectTemplate(item.id)}
-                        className={`overflow-hidden rounded-2xl border text-left transition ${active ? 'border-forest ring-2 ring-[#C9A45C]/15' : 'border-ink/10 hover:border-[#C9A45C]/30'}`}
+                        className={`overflow-hidden rounded-2xl border text-left transition ${active ? 'border-[#242424] ring-2 ring-[#C9A45C]/15' : 'border-[#242424]/10 hover:border-[#C9A45C]/30'}`}
                       >
                         <div className="relative h-20 overflow-hidden" style={{ background: item.background }}>
                           <div className="absolute inset-x-3 bottom-3 h-1 rounded-full" style={{ background: item.accent }} />
@@ -1073,7 +1073,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   })}
                 </div>
                 {selectedTemplate && (
-                  <p className="mt-3 text-[10px] text-ink/35">
+                  <p className="mt-3 text-[10px] text-[#FFFFFF]/35">
                     Template actif : <span className="font-semibold text-[#E1C27A]">{selectedTemplate.name}</span>
                   </p>
                 )}
@@ -1083,7 +1083,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                 <div className="grid gap-4 md:grid-cols-[1fr_220px] md:items-center">
                   <div>
                     <p className="text-sm font-semibold text-[#E1C27A]">Image immersive</p>
-                    <p className="mt-1 text-[10px] leading-4 text-ink/40">
+                    <p className="mt-1 text-[10px] leading-4 text-[#FFFFFF]/40">
                       Le wallpaper est recadré automatiquement en cover pour rester élégant sur mobile et desktop.
                     </p>
                     <div className="mt-4 flex flex-wrap gap-2">
@@ -1092,15 +1092,15 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                         {design.wallpaperUrl ? 'Remplacer' : 'Choisir une image'}
                       </button>
                       {design.wallpaperUrl && (
-                        <button type="button" onClick={() => setDesign(current => ({ ...current, wallpaperUrl: null, published: false }))} className="rounded-xl border border-red-100 px-4 py-2.5 text-xs font-semibold text-red-600">
+                        <button type="button" onClick={() => setDesign(current => ({ ...current, wallpaperUrl: null, published: false }))} className="rounded-xl border border-[#242424] px-4 py-2.5 text-xs font-semibold text-[#E1C27A]">
                           Retirer
                         </button>
                       )}
                     </div>
                     <input ref={wallpaperInput} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={e => { const file = e.target.files?.[0]; if (file) void uploadWallpaper(file); e.currentTarget.value = ''; }} />
                   </div>
-                  <div className="h-28 overflow-hidden rounded-2xl bg-ink/5">
-                    {design.wallpaperUrl ? <img src={design.wallpaperUrl} alt="" className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-[10px] text-ink/25">Aucun wallpaper</div>}
+                  <div className="h-28 overflow-hidden rounded-2xl bg-[#111111]/5">
+                    {design.wallpaperUrl ? <img src={design.wallpaperUrl} alt="" className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-[10px] text-[#FFFFFF]/25">Aucun wallpaper</div>}
                   </div>
                 </div>
               </StudioCard>
@@ -1115,14 +1115,14 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                 </div>
                 <div className="mt-5">
                   <Field label={`Rayon des angles · ${design.borderRadius}px`}>
-                    <input type="range" min="8" max="40" value={design.borderRadius} onChange={e => setDesign(current => ({ ...current, templateId: 'custom', borderRadius: Number(e.target.value) }))} className="w-full accent-forest" />
+                    <input type="range" min="8" max="40" value={design.borderRadius} onChange={e => setDesign(current => ({ ...current, templateId: 'custom', borderRadius: Number(e.target.value) }))} className="w-full accent-[#C9A45C]" />
                   </Field>
                 </div>
                 <div className="mt-5">
                   <Field label="Style des tampons">
                     <div className="grid grid-cols-4 gap-2">
                       {(['circles', 'squares', 'stars', 'hearts'] as const).map(style => (
-                        <button key={style} type="button" onClick={() => setDesign(current => ({ ...current, stampStyle: style }))} className={`rounded-xl border px-2 py-2.5 text-[10px] font-semibold capitalize ${design.stampStyle === style ? 'border-forest bg-gold-gradient text-[#050505]' : 'border-ink/10 text-ink/45'}`}>
+                        <button key={style} type="button" onClick={() => setDesign(current => ({ ...current, stampStyle: style }))} className={`rounded-xl border px-2 py-2.5 text-[10px] font-semibold capitalize ${design.stampStyle === style ? 'border-[#242424] bg-[#C9A45C]-gradient text-[#050505]' : 'border-[#242424]/10 text-[#FFFFFF]/45'}`}>
                           {style === 'circles' ? 'Ronds' : style === 'squares' ? 'Carrés' : style === 'stars' ? 'Étoiles' : 'Cœurs'}
                         </button>
                       ))}
@@ -1134,11 +1134,11 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
           )}
         </div>
 
-        <aside className="sticky top-6 h-fit overflow-hidden rounded-[30px] bg-[#050505] p-4 sm:p-5">
+        <aside className="sticky top-6 h-fit overflow-hidden rounded-3xl bg-[#050505] p-4 sm:p-5">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[.24em] text-gold">Le Miroir</p>
-              <p className="mt-1 text-xs text-ink/40">Aperçu permanent et synchronisé</p>
+              <p className="text-[10px] font-bold uppercase tracking-[.24em] text-[#C9A45C]">Le Miroir</p>
+              <p className="mt-1 text-xs text-[#FFFFFF]/40">Aperçu permanent et synchronisé</p>
             </div>
             <span className="rounded-full bg-[#111111] px-3 py-1.5 text-[9px] font-bold uppercase tracking-[.12em] text-[#E1C27A]">
               {TABS.find(item => item.id === tab)?.label}
@@ -1152,12 +1152,12 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
           <div className="mt-4 rounded-2xl bg-[#111111] p-4">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-[9px] uppercase tracking-[.16em] text-gold">Carte actuelle</p>
+                <p className="text-[9px] uppercase tracking-[.16em] text-[#C9A45C]">Carte actuelle</p>
                 <p className="mt-1 text-sm font-semibold text-[#E1C27A]">{establishment.name}</p>
               </div>
-              <span className={`h-2.5 w-2.5 rounded-full ${previewChannelReady ? 'bg-emerald-500' : 'bg-amber-400'}`} title={previewChannelReady ? 'Synchronisation active' : 'Connexion en cours'} />
+              <span className={`h-2.5 w-2.5 rounded-full ${previewChannelReady ? 'bg-[#111111]0' : 'bg-[#C9A45C]'}`} title={previewChannelReady ? 'Synchronisation active' : 'Connexion en cours'} />
             </div>
-            <p className="mt-2 text-[10px] leading-4 text-ink/35">
+            <p className="mt-2 text-[10px] leading-4 text-[#FFFFFF]/35">
               {program.programType === 'STAMP'
                 ? `${program.stampGoal} tampons`
                 : program.programType === 'POINTS_DISCOUNT'
@@ -1173,9 +1173,9 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
 
 function StudioCard({ eyebrow, title, children }: { eyebrow: string; title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-[24px] border border-ink/8 bg-[#111111] p-5 shadow-[0_10px_35px_rgba(20,30,24,0.035)]">
+    <section className="rounded-[24px] border border-[#242424]/8 bg-[#111111] p-5 shadow-[0_10px_35px_rgba(20,30,24,0.035)]">
       <div className="mb-5">
-        <p className="text-[9px] font-bold uppercase tracking-[.2em] text-gold">{eyebrow}</p>
+        <p className="text-[9px] font-bold uppercase tracking-[.2em] text-[#C9A45C]">{eyebrow}</p>
         <h3 className="mt-1 text-lg font-semibold text-[#E1C27A]">{title}</h3>
       </div>
       {children}
@@ -1185,7 +1185,7 @@ function StudioCard({ eyebrow, title, children }: { eyebrow: string; title: stri
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="block text-[10px] font-bold uppercase tracking-[.1em] text-ink/45">
+    <label className="block text-[10px] font-bold uppercase tracking-[.1em] text-[#FFFFFF]/45">
       {label}
       {children}
     </label>
@@ -1194,8 +1194,8 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function Metric({ label, value, icon }: { label: string; value: string | number; icon?: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-ink/8 bg-[#111111] p-3.5">
-      <div className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[.12em] text-ink/35">
+    <div className="rounded-2xl border border-[#242424]/8 bg-[#111111] p-3.5">
+      <div className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[.12em] text-[#FFFFFF]/35">
         {icon}
         {label}
       </div>
@@ -1211,7 +1211,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (checked: b
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className={`relative h-7 w-12 shrink-0 rounded-full p-1 transition ${checked ? 'bg-gold-gradient' : 'bg-ink/15'}`}
+      className={`relative h-7 w-12 shrink-0 rounded-full p-1 transition ${checked ? 'bg-[#C9A45C]-gradient' : 'bg-[#111111]/15'}`}
     >
       <span className={`block h-5 w-5 rounded-full bg-[#111111] shadow-sm transition ${checked ? 'translate-x-5' : 'translate-x-0'}`} />
     </button>
@@ -1220,9 +1220,9 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (checked: b
 
 function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
   return (
-    <label className="block text-[10px] font-bold uppercase tracking-[.1em] text-ink/45">
+    <label className="block text-[10px] font-bold uppercase tracking-[.1em] text-[#FFFFFF]/45">
       {label}
-      <div className="mt-2 flex items-center gap-2 rounded-xl border border-ink/10 bg-[#111111] p-2">
+      <div className="mt-2 flex items-center gap-2 rounded-xl border border-[#242424]/10 bg-[#111111] p-2">
         <input type="color" value={value} onChange={e => onChange(e.target.value)} className="h-9 w-10 cursor-pointer rounded-lg border-0 bg-transparent p-0" />
         <input value={value} onChange={e => onChange(e.target.value)} className="min-w-0 flex-1 bg-transparent px-1 text-xs font-semibold uppercase text-[#E1C27A] outline-none" />
       </div>
@@ -1243,9 +1243,9 @@ function ReferralField({
 }) {
   return (
     <div>
-      <p className="text-xs font-semibold text-ink/55">{label}</p>
+      <p className="text-xs font-semibold text-[#FFFFFF]/55">{label}</p>
       <div className="mt-2 grid grid-cols-[1fr_110px] gap-2">
-        <select value={type} onChange={e => onChange(e.target.value as LoyaltyReferralBonusType, value)} className="h-12 w-full rounded-xl border border-ink/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-ink/25">
+        <select value={type} onChange={e => onChange(e.target.value as LoyaltyReferralBonusType, value)} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25">
           <option value="POINTS">Points</option>
           <option value="STAMP">Tampons</option>
           <option value="REDUCTION">Réduction</option>
@@ -1255,7 +1255,7 @@ function ReferralField({
           min="0"
           value={value}
           onChange={e => onChange(type, Math.max(0, Number(e.target.value) || 0))}
-          className="h-12 w-full rounded-xl border border-ink/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-forest/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-ink/25"
+          className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25"
         />
       </div>
     </div>
