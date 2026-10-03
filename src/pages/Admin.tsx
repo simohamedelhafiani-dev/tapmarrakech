@@ -535,8 +535,8 @@ export default function Admin() {
     'Vue d’ensemble';
 
   return (
-    <div className="min-h-screen bg-[#050505] text-[#EDE9DF] selection:bg-[#C9A45C]/30">
-      <header className="sticky top-0 z-50 border-b border-[#242424] bg-[#050505]/95 px-3 py-3 backdrop-blur-2xl sm:px-5">
+    <div className="admin-depth-shell min-h-screen bg-[#050505] text-[#EDE9DF] selection:bg-[#C9A45C]/30">
+      <header className="admin-depth-topbar sticky top-0 z-50 border-b border-[#242424] bg-[#050505]/95 px-3 py-3 backdrop-blur-2xl sm:px-5">
         <div className="mx-auto flex max-w-[1700px] items-center gap-3">
           <button type="button" onClick={() => setSection('overview')} className="flex shrink-0 items-center gap-3 text-left" aria-label="KELYANI">
             <KelyaniMark size={72} />
@@ -597,7 +597,7 @@ export default function Admin() {
         </div>
       </header>
 
-        <main className="mx-auto w-full max-w-[1700px] px-3 pb-28 pt-6 sm:px-5 md:px-8 lg:px-10 lg:pt-8">
+        <main className="admin-depth-main mx-auto w-full max-w-[1700px] px-3 pb-28 pt-6 sm:px-5 md:px-8 lg:px-10 lg:pt-8">
 
           {section === 'overview' && (
             <Overview
