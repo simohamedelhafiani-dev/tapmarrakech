@@ -242,7 +242,36 @@ export function LoyaltyCardVisual({
               <div style={{ marginTop: '5.33cqw', width: '100%', display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '2.33cqw' }}>
                 {Array.from({ length: goal }).map((_, index) => <StampMark key={index} filled={index < stamps} style={config.stamp_style} accent={design.secondary_color} />)}
               </div>
-              <div style={{ marginTop: '4.33cqw', fontSize: '3.67cqw', opacity: .65 }}>{card.stampRewardName || config.rewardName || 'Cadeau fidélité'}</div>
+              <div
+                style={{
+                  marginTop: '4cqw',
+                  width: '100%',
+                  padding: '3.33cqw',
+                  borderRadius: '5.33cqw',
+                  border: `1px solid ${design.secondary_color}66`,
+                  background: `linear-gradient(135deg, ${design.secondary_color}22, rgba(255,255,255,.07), ${design.primary_color}28)`,
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,.18), 0 12px 28px rgba(0,0,0,.14)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
+                  textAlign: 'left',
+                  boxSizing: 'border-box',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '2.67cqw' }}>
+                  <div style={{ width: '10.67cqw', height: '10.67cqw', flex: '0 0 10.67cqw', display: 'grid', placeItems: 'center', borderRadius: '3.33cqw', background: `${design.secondary_color}25`, border: `1px solid ${design.secondary_color}66`, color: design.secondary_color, fontSize: '5.33cqw' }}>🎁</div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: '2.33cqw', letterSpacing: '.17em', textTransform: 'uppercase', color: design.secondary_color, fontWeight: 900 }}>Votre cadeau</div>
+                    <div style={{ marginTop: '.67cqw', fontSize: '4.33cqw', fontWeight: 850 }}>{card.stampRewardName || config.rewardName || 'Cadeau fidélité'}</div>
+                  </div>
+                </div>
+                <div style={{ marginTop: '2.67cqw', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '2.67cqw', opacity: .68 }}>
+                  <span>{stamps >= goal ? '🎉 Objectif atteint' : 'Votre progression'}</span>
+                  <span style={{ fontWeight: 900, color: design.secondary_color }}>{stamps} / {goal}</span>
+                </div>
+                <div style={{ marginTop: '1.33cqw', width: '100%', height: '1.33cqw', borderRadius: '999px', background: 'rgba(255,255,255,.13)', overflow: 'hidden' }}>
+                  <div style={{ width: `${Math.max(4, (stamps / goal) * 100)}%`, height: '100%', borderRadius: '999px', background: `linear-gradient(90deg, ${design.secondary_color}99, ${design.secondary_color})`, boxShadow: `0 0 12px ${design.secondary_color}66` }} />
+                </div>
+              </div>
             </>
           ) : (
             <>
@@ -252,8 +281,30 @@ export function LoyaltyCardVisual({
               <div style={{ marginTop: '1cqw', fontSize: '3.33cqw', fontWeight: 800, letterSpacing: '.18em', textTransform: 'uppercase', color: design.secondary_color }}>points</div>
               {mode === 'DISCOUNT' && (
                 <>
-                  <div style={{ marginTop: '4.67cqw', padding: '3cqw 4.67cqw', borderRadius: '5cqw', border: `1px solid ${design.secondary_color}66`, background: `${design.secondary_color}18`, fontSize: '6.67cqw', fontWeight: 900 }}>
-                    -{discount}%
+                  <div
+                    style={{
+                      marginTop: '4cqw',
+                      width: '100%',
+                      padding: '3.33cqw',
+                      borderRadius: '5.33cqw',
+                      border: `1px solid ${design.secondary_color}66`,
+                      background: `linear-gradient(135deg, ${design.secondary_color}24, rgba(255,255,255,.07), ${design.primary_color}30)`,
+                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,.18), 0 12px 28px rgba(0,0,0,.14)',
+                      backdropFilter: 'blur(10px)',
+                      WebkitBackdropFilter: 'blur(10px)',
+                      boxSizing: 'border-box',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '3cqw' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '2.67cqw' }}>
+                        <div style={{ width: '10.67cqw', height: '10.67cqw', display: 'grid', placeItems: 'center', borderRadius: '3.33cqw', background: `${design.secondary_color}25`, border: `1px solid ${design.secondary_color}66`, color: design.secondary_color, fontSize: '5cqw' }}>%</div>
+                        <div>
+                          <div style={{ fontSize: '2.33cqw', letterSpacing: '.17em', textTransform: 'uppercase', color: design.secondary_color, fontWeight: 900 }}>Avantage fidélité</div>
+                          <div style={{ marginTop: '.67cqw', fontSize: '4cqw', fontWeight: 850 }}>Réduction</div>
+                        </div>
+                      </div>
+                      <div style={{ fontSize: '8cqw', lineHeight: 1, fontWeight: 950, color: design.secondary_color }}>-{discount}%</div>
+                    </div>
                   </div>
                   <div style={{ marginTop: '3cqw', width: '100%', padding: '2.67cqw 3.33cqw', borderRadius: '3.33cqw', background: 'rgba(255,255,255,.08)', fontSize: '3cqw', lineHeight: 1.45, opacity: .82 }}>
                     {points >= Number(config.discountPointsThreshold ?? 1000)
