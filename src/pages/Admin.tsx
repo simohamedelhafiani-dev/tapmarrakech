@@ -2098,6 +2098,8 @@ function EstablishmentWorkspace({
   </div>
       )}
     </div>
+    </div>
+    </div>
   );
 }
 
@@ -3616,6 +3618,7 @@ function ReviewAnalysisSection({
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }
