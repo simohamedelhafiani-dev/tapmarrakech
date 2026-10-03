@@ -1135,7 +1135,7 @@ function QuickStat({ label, value, alert = false }: { label: string; value: stri
   return (
     <div className="flex items-center justify-between rounded-3xl bg-[#111111] px-4 py-3">
       <span className="text-xs text-[#F5F5DC]">{label}</span>
-      <span className={`text-sm font-semibold ${alert ? 'text-[#E1C27A] : 'text-[#E1C27A]'}`}>{value}</span>
+      <span className={`text-sm font-semibold ${alert ? 'text-[#E1C27A]' : 'text-[#E1C27A]'}`}>{value}</span>
     </div>
   );
 }
@@ -4523,7 +4523,7 @@ function AIConfigurationSection({
       </div>
 
       <div className="mb-6 rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
-        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">Moteur IA global</p><h3 className="mt-1 text-xl font-semibold text-[#E1C27A]">Provider et modèle utilisés par l’analyse</h3></div><span className={`rounded-full px-3 py-1 text-[10px] font-semibold ${aiSettings.enabled ? 'bg-[#111111] text-[#E1C27A] : 'bg-[#111111] text-[#E1C27A] ? 'IA ACTIVE' : 'IA DÉSACTIVÉE'}</span></div>
+        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">Moteur IA global</p><h3 className="mt-1 text-xl font-semibold text-[#E1C27A]">Provider et modèle utilisés par l’analyse</h3></div><span className={`rounded-full px-3 py-1 text-[10px] font-semibold ${aiSettings.enabled ? 'bg-[#111111] text-[#E1C27A]' : 'bg-[#111111] text-[#F5F5DC]'}}</span></div>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <label className="block"><span className="mb-1 block text-xs font-semibold">Provider / moteur</span><input value={aiSettings.provider ?? ''} onChange={e=>setAISettings((v:any)=>({...v,provider:e.target.value}))} placeholder="openai" className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm"/></label>
           <label className="block"><span className="mb-1 block text-xs font-semibold">Modèle</span><input value={aiSettings.model ?? ''} onChange={e=>setAISettings((v:any)=>({...v,model:e.target.value}))} placeholder="gpt-5.6-luna" className="w-full rounded-3xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm"/></label>
@@ -5186,7 +5186,7 @@ function BillingSection({
               <div key={sub.id} className="grid min-w-[900px] grid-cols-[1.35fr_1fr_.8fr_1fr_1fr_auto] items-center gap-4 border-b border-[#242424] px-5 py-4 text-sm last:border-0">
                 <div><p className="font-semibold">{e?.name ?? 'Établissement supprimé'}</p><p className="text-xs text-[#F5F5DC]">{e?.city ?? 'Ville non définie'}</p></div>
                 <span>{sub.plan?.name ?? '—'}</span>
-                <span className={`w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold ${sub.status === 'active' ? 'bg-[#111111] text-[#E1C27A] : sub.status === 'trial' ? 'bg-[#111111] text-[#E1C27A] : 'bg-[#111111] text-[#E1C27A]
+                <span className={`w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold ${sub.status === 'active' ? 'bg-[#111111] text-[#E1C27A]' : sub.status === 'trial' ? 'bg-[#111111] text-[#E1C27A]' : 'bg-[#111111] text-[#F5F5DC]'}
                 <span className="font-semibold">{Number(sub.plan?.price_mad ?? 0).toLocaleString('fr-FR')} MAD</span>
                 <span className="text-[#F5F5DC]">{formatDate(sub.current_period_end)}</span>
                 <button type="button" onClick={() => openSubscriptionEditor(sub)} className="rounded-lg border border-[#242424] bg-[#111111] px-3 py-2 text-[11px] font-semibold text-[#E1C27A] transition hover:border-gold hover:bg-[#111111]">
@@ -5508,7 +5508,7 @@ function SystemSection({
             <div className="flex items-start justify-between gap-4">
               <div className="grid h-11 w-11 shrink-0 place-items-center rounded-3xl bg-[#111111] text-[#E1C27A]"><Icon size={20} /></div>
               <span className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${
-                status === 'ok' ? 'bg-[#111111] text-[#E1C27A] : status === 'error' ? 'bg-[#111111] text-[#E1C27A] : 'bg-[#111111] text-[#E1C27A]
+                status === 'ok' ? 'bg-[#C9A45C] text-[#050505]' : status === 'error' ? 'bg-[#111111] text-[#E1C27A]' : 'bg-[#242424] text-[#F5F5DC]'
               }`}>{status === 'ok' ? 'Opérationnel' : status === 'error' ? 'Erreur' : 'Vérification…'}</span>
             </div>
             <h3 className="mt-5 text-base font-semibold">{label}</h3>
