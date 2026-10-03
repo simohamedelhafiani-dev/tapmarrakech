@@ -1807,7 +1807,7 @@ function EstablishmentWorkspace({
   ];
 
   return (
-    <div>
+    <>
       <div className="relative mb-6 overflow-hidden rounded-[30px] border border-ink/5 bg-white p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] sm:p-8">
         <div className="absolute right-0 top-0 h-44 w-44 rounded-full bg-gold/10 blur-3xl" />
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
@@ -2098,8 +2098,7 @@ function EstablishmentWorkspace({
   </div>
       )}
     </div>
-    </div>
-    </div>
+  </>
   );
 }
 
