@@ -28,7 +28,7 @@ type ProfileFormProps = {
 };
 
 const inputClass = (error?: string) =>
-  `w-full rounded-xl border bg-[#111111] px-3 py-3 text-sm outline-none transition focus:border-[#C9A45C]/40 ${error ? 'border-red-300 focus:border-red-400' : 'border-[#242424]'}`;
+  `w-full rounded-xl border bg-[#111111] px-3 py-3 text-sm outline-none transition focus:border-[#C9A45C]/40 ${error ? 'border-[#242424] focus:border-[#C9A45C]/60' : 'border-[#242424]'}`;
 
 function Field({
   label,
@@ -74,7 +74,7 @@ function slugState(status: SlugStatus, message: string) {
     return { className: 'text-[#E1C27A]', text: message || 'Slug invalide.' };
   }
   if (status === 'available') {
-    return { className: 'text-forest', text: message || 'Slug disponible.' };
+    return { className: 'text-[#C9A45C]', text: message || 'Slug disponible.' };
   }
   return null;
 }
@@ -94,7 +94,7 @@ export default function ProfileForm({ engine, businessTypes, onSaved }: ProfileF
     return (
       <div className="rounded-3xl border border-[#242424] bg-[#111111] p-8 shadow-[0_12px_40px_rgba(15,23,42,0.045)]">
         <div className="flex items-center gap-3 text-sm text-[#FFFFFF]/45">
-          <Loader2 size={17} className="animate-spin text-forest" />
+          <Loader2 size={17} className="animate-spin text-[#C9A45C]" />
           Chargement du profil…
         </div>
       </div>
@@ -156,10 +156,10 @@ export default function ProfileForm({ engine, businessTypes, onSaved }: ProfileF
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Identité</p>
-            <h3 className="mt-1 text-lg font-semibold text-forest">Informations de l’établissement</h3>
+            <h3 className="mt-1 text-lg font-semibold text-[#C9A45C]">Informations de l’établissement</h3>
             <p className="mt-1 text-xs text-[#FFFFFF]/40">Ces informations alimentent la page publique et les modules de l’établissement.</p>
           </div>
-          <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-[#C9A45C]/5 px-3 py-1.5 text-[10px] font-semibold text-forest">
+          <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-[#C9A45C]/5 px-3 py-1.5 text-[10px] font-semibold text-[#C9A45C]">
             <ShieldCheck size={13} />
             Profil sécurisé
           </span>
@@ -255,14 +255,14 @@ export default function ProfileForm({ engine, businessTypes, onSaved }: ProfileF
       <div className="rounded-2xl border border-[#242424] bg-[#111111] p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs font-semibold text-forest">Enregistrement du profil</p>
+            <p className="text-xs font-semibold text-[#C9A45C]">Enregistrement du profil</p>
             <p className="mt-1 text-[11px] text-[#FFFFFF]/40">
               {engine.isDirty ? 'Des modifications non enregistrées sont présentes.' : 'Aucune modification en attente.'}
             </p>
           </div>
           <div className="flex items-center gap-3">
             {saveMessage && (
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-forest">
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#C9A45C]">
                 <CheckCircle2 size={14} />
                 {saveMessage}
               </span>
