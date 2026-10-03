@@ -65,6 +65,9 @@ export type LoyaltyVisualCard = {
   stampsBalance?: number;
   stampGoal?: number;
   stampRewardName?: string | null;
+  rewardName?: string | null;
+  rewardPointsRequired?: number;
+  rewardDescription?: string | null;
   discountPercent?: number;
   discountPointsThreshold?: number;
   discountExpiresAt?: string | null;
@@ -261,8 +264,15 @@ export function LoyaltyCardVisual({
                   </div>
                 </>
               )}
-              {mode === 'POINTS' && config.rewardName && (
-                <div style={{ marginTop: '4cqw', fontSize: '3.33cqw', opacity: .68 }}>{config.rewardName}</div>
+              {mode === 'POINTS' && (card.rewardName || config.rewardName) && (
+                <div style={{ marginTop: '4cqw', width: '100%', padding: '2.67cqw 3.33cqw', borderRadius: '3.33cqw', border: `1px solid ${design.secondary_color}55`, background: `${design.secondary_color}12`, textAlign: 'left' }}>
+                  <div style={{ fontSize: '2.67cqw', letterSpacing: '.16em', textTransform: 'uppercase', color: design.secondary_color, fontWeight: 800 }}>Prochaine récompense</div>
+                  <div style={{ marginTop: '1cqw', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '2cqw' }}>
+                    <span style={{ fontSize: '3.67cqw', fontWeight: 800 }}>{card.rewardName || config.rewardName}</span>
+                    {card.rewardPointsRequired != null && <span style={{ flex: '0 0 auto', fontSize: '2.67cqw', fontWeight: 800, color: design.secondary_color }}>{card.rewardPointsRequired.toLocaleString('fr-FR')} pts</span>}
+                  </div>
+                  {card.rewardDescription && <div style={{ marginTop: '1cqw', fontSize: '2.67cqw', opacity: .58 }}>{card.rewardDescription}</div>}
+                </div>
               )}
             </>
           )}
