@@ -23,6 +23,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useLanguage, type Language } from '@/contexts/LanguageContext';
 import { getMySubscriptionAccess, getSubscriptionTheme, type SubscriptionTheme } from '@/lib/subscriptionAccess';
+import { KELYANI_LOGO } from '@/assets/kelyaniLogoData';
 
 const links = [
   {
@@ -453,266 +454,175 @@ export function DashboardLayout() {
     displayName?.trim()?.[0]?.toUpperCase() || 'U';
 
   return (
-    <div className="min-h-screen bg-[#f7f7f3] text-ink" style={{ ["--app-primary" as string]: subscriptionTheme.primary, ["--app-primary-hover" as string]: subscriptionTheme.primaryHover, ["--app-accent" as string]: subscriptionTheme.accent }}>
+    <div
+      className="min-h-screen bg-[#050505] text-[#FFFFFF]"
+      style={{ ['--app-primary' as string]: subscriptionTheme.primary, ['--app-primary-hover' as string]: subscriptionTheme.primaryHover, ['--app-accent' as string]: subscriptionTheme.accent }}
+    >
       {open && (
         <button
           aria-label="Fermer le menu"
           onClick={() => setOpen(false)}
-          className="fixed inset-0 z-30 bg-ink/30 lg:hidden"
+          className="fixed inset-0 z-40 bg-[#050505]/70 backdrop-blur-sm lg:hidden"
         />
       )}
 
-      <aside
-        style={{ backgroundColor: subscriptionTheme.sidebar }}
-        className={`fixed inset-y-0 z-40 flex w-[248px] flex-col px-4 py-5 text-white shadow-xl transition-transform lg:translate-x-0 ${language === 'ar' ? 'right-0 left-auto' : 'left-0'} ${
-          open ? 'translate-x-0' : language === 'ar' ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        <div className="mb-9 flex items-center justify-between px-2">
-          <div className="flex min-h-[64px] flex-1 items-center justify-center">
-            <img
-              src="/tapmarrakech-logo.png"
-              alt="TapMarrakech"
-              className="h-[72px] w-[72px] object-contain"
-            />
-          </div>
+      <div className="min-h-screen">
+        <header className="sticky top-0 z-50 border-b border-[#242424] bg-[#050505]/95 px-3 py-3 backdrop-blur-2xl sm:px-5">
+          <div className="mx-auto flex max-w-[1700px] items-center gap-3">
+            <button type="button" onClick={() => navigate('/dashboard')} className="flex shrink-0 items-center gap-3" aria-label="KELYANI">
+              <img src={KELYANI_LOGO} alt="KELYANI" className="h-10 w-10 rounded-xl object-cover shadow-[0_0_24px_rgba(201,164,92,0.18)]" />
+              <div className="hidden sm:block">
+                <p className="font-display text-lg tracking-[.08em] text-[#E1C27A]">KELYANI</p>
+                <p className="text-[8px] font-semibold uppercase tracking-[.24em] text-[#F5F5DC]/35">Command Center</p>
+              </div>
+            </button>
 
-          <button
-            className="lg:hidden"
-            onClick={() => setOpen(false)}
-            aria-label="Fermer le menu"
-          >
-            <X size={20} />
-          </button>
-        </div>
-
-        <p className="mb-3 px-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/35">
-          Espace de gestion
-        </p>
-
-        <nav className="space-y-1">
-          {links.map(({ to, label, icon: Icon, end }) => (
-            <NavLink
-              key={to}
-              end={end}
-              onClick={() => setOpen(false)}
-              to={to}
-              className={({ isActive }) =>
-                `flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] transition ${
-                  isActive
-                    ? 'bg-white text-forest shadow-lg'
-                    : 'text-white/65 hover:bg-white/10 hover:text-white'
-                }`
-              }
-            >
-              <Icon size={18} strokeWidth={1.8} />
-              {localizedLabel(label)}
-            </NavLink>
-          ))}
-        </nav>
-
-        {role === 'responsible' && (
-          <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-3">
-            <div className="flex items-center gap-2 text-xs font-semibold text-white">
-              <QrCode size={16} />
-              Scanner fidélité
+            <div className="mx-auto hidden min-w-0 max-w-2xl flex-1 md:block">
+              <label className="relative block">
+                <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#C9A45C]">⌕</span>
+                <input
+                  type="search"
+                  placeholder="Rechercher un client, un avis, un établissement..."
+                  aria-label="Rechercher"
+                  className="h-11 w-full rounded-2xl border border-[#242424] bg-[#111111] pl-11 pr-16 text-sm text-[#FFFFFF] outline-none placeholder:text-[#F5F5DC]/30 focus:border-[#C9A45C]/60 focus:ring-1 focus:ring-[#C9A45C]/20"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg border border-[#242424] bg-[#050505] px-2 py-1 text-[9px] text-[#F5F5DC]/35">⌘ K</span>
+              </label>
             </div>
-            <p className="mt-1 text-[10px] leading-4 text-white/45">
-              Lien permanent de votre scanner pour valider les récompenses.
-            </p>
 
-            {scannerLoading ? (
-              <div className="mt-3 text-[10px] text-white/45">Génération du lien…</div>
-            ) : scannerUrl ? (
-              <>
-                <div className="mt-3 rounded-lg bg-black/20 px-2.5 py-2 text-[9px] leading-3 text-white/55 break-all">
-                  {scannerUrl}
+            <div className="ml-auto flex shrink-0 items-center gap-2">
+              {role === 'responsible' && scannerUrl && (
+                <button
+                  type="button"
+                  onClick={() => window.open(scannerUrl, '_blank', 'noopener,noreferrer')}
+                  className="hidden h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#F5F5DC]/70 transition hover:border-[#C9A45C]/60 hover:text-[#E1C27A] lg:flex"
+                >
+                  <QrCode size={14} /> Scanner
+                </button>
+              )}
+
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNotificationsOpen((value) => !value);
+                    if (!notificationsOpen) markNotificationsRead();
+                  }}
+                  className="relative grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#F5F5DC]/65 transition hover:border-[#C9A45C]/60 hover:text-[#E1C27A]"
+                  aria-label="Notifications"
+                  aria-expanded={notificationsOpen}
+                >
+                  <Bell size={17} />
+                  {unreadNotifications.length > 0 && (
+                    <span className="absolute -right-1 -top-1 grid min-h-4 min-w-4 place-items-center rounded-full bg-[#C9A45C] px-1 text-[8px] font-bold text-[#050505]">
+                      {unreadNotifications.length > 9 ? '9+' : unreadNotifications.length}
+                    </span>
+                  )}
+                </button>
+
+                {notificationsOpen && (
+                  <>
+                    <button className="fixed inset-0 z-40 cursor-default" aria-label="Fermer les notifications" onClick={() => setNotificationsOpen(false)} />
+                    <div className="absolute right-0 top-12 z-50 w-[360px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-3xl border border-[#242424] bg-[#111111] shadow-[0_24px_80px_rgba(0,0,0,.55)]">
+                      <div className="flex items-center justify-between border-b border-[#242424] px-4 py-3">
+                        <div>
+                          <p className="text-sm font-semibold text-[#FFFFFF]">Notifications</p>
+                          <p className="text-[10px] text-[#F5F5DC]/40">{notifications.length} activité{notifications.length > 1 ? 's' : ''} récente{notifications.length > 1 ? 's' : ''}</p>
+                        </div>
+                        {notifications.length > 0 && (
+                          <button type="button" onClick={markNotificationsRead} className="text-[10px] font-semibold text-[#C9A45C]">
+                            Tout marquer comme lu
+                          </button>
+                        )}
+                      </div>
+                      <div className="max-h-[520px] overflow-y-auto">
+                        {notifications.length === 0 ? (
+                          <div className="px-5 py-10 text-center">
+                            <Check size={22} className="mx-auto text-[#C9A45C]/50" />
+                            <p className="mt-2 text-sm font-medium text-[#FFFFFF]">Aucune notification</p>
+                            <p className="mt-1 text-[11px] text-[#F5F5DC]/35">Tout est à jour.</p>
+                          </div>
+                        ) : notifications.map((notification) => (
+                          <div key={notification.id} className="flex gap-3 border-b border-[#242424] px-4 py-3.5 last:border-0">
+                            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#C9A45C]/10 text-[#C9A45C]">
+                              {notification.tone === 'alert' ? <AlertTriangle size={16} /> : notification.tone === 'review' ? <MessageCircle size={16} /> : <Building2 size={16} />}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-xs font-semibold text-[#FFFFFF]">{notification.title}</p>
+                              <p className="mt-1 text-[11px] leading-4 text-[#F5F5DC]/50">{notification.description}</p>
+                              <p className="mt-1 text-[9px] text-[#F5F5DC]/30">{new Intl.DateTimeFormat(language === 'ar' ? 'ar-MA' : language === 'en' ? 'en-GB' : 'fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(notification.createdAt))}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <div className="hidden h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 sm:flex">
+                <div className="grid h-7 w-7 place-items-center rounded-full bg-[#C9A45C] text-xs font-semibold text-[#050505]">{avatarLetter}</div>
+                <div className="max-w-[130px] leading-tight">
+                  <p className="truncate text-xs font-semibold text-[#FFFFFF]">{displayName}</p>
+                  <p className="text-[9px] text-[#F5F5DC]/40">{roleLabel}</p>
                 </div>
-                <div className="mt-2 grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => window.open(scannerUrl, '_blank', 'noopener,noreferrer')}
-                    className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-gold px-2 py-2 text-[10px] font-semibold text-forest hover:bg-gold/90"
-                  >
-                    <ExternalLink size={12} />
-                    Ouvrir
-                  </button>
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      try {
-                        await navigator.clipboard.writeText(scannerUrl);
-                        alert('Lien scanner copié.');
-                      } catch {
-                        alert('Impossible de copier le lien.');
-                      }
-                    }}
-                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2 py-2 text-[10px] font-semibold text-white hover:bg-white/10"
-                  >
-                    <Copy size={12} />
-                    Copier
-                  </button>
-                </div>
-              </>
-            ) : (
-              <p className="mt-3 text-[10px] leading-4 text-red-200">
-                Impossible de charger le lien scanner.
-              </p>
-            )}
-          </div>
-        )}
+              </div>
 
-        <div className="mt-auto border-t border-white/10 pt-5">
-          <div className="mb-4 flex items-center gap-3 px-2">
-            <div style={{ backgroundColor: subscriptionTheme.accent, color: subscriptionTheme.primary }}
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-full font-semibold">
-              {avatarLetter}
-            </div>
+              <label className="hidden items-center rounded-full border border-[#242424] bg-[#111111] px-3 py-2 text-xs font-medium text-[#F5F5DC]/60 md:flex">
+                <select value={language} onChange={(event) => setLanguage(event.target.value as Language)} aria-label="Language" className="cursor-pointer bg-transparent text-[#F5F5DC] outline-none">
+                  <option className="bg-[#111111]" value="fr">FR</option>
+                  <option className="bg-[#111111]" value="en">EN</option>
+                  <option className="bg-[#111111]" value="ar">AR</option>
+                </select>
+              </label>
 
-            <div className="min-w-0">
-              <p className="truncate text-xs font-medium">
-                {displayName}
-              </p>
-
-              <p className="text-[10px] text-white/45">
-                {roleLabel}
-              </p>
-            </div>
-          </div>
-
-          <button
-            onClick={logout}
-            style={{ color: subscriptionTheme.accent }}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm transition hover:bg-white/10 hover:text-white"
-          >
-            <LogOut size={17} />
-            Se déconnecter
-          </button>
-        </div>
-      </aside>
-
-      <div className={language === 'ar' ? 'lg:pr-[270px]' : 'lg:pl-[270px]'}>
-        <header className="sticky top-0 z-20 flex min-h-[72px] items-center gap-4 border-b border-ink/5 bg-[#f7f7f3]/90 px-4 py-3 backdrop-blur-xl sm:px-6 md:px-8">
-          <button
-            onClick={() => setOpen(true)}
-            className="text-ink lg:hidden"
-            aria-label="Ouvrir le menu"
-          >
-            <MenuIcon />
-          </button>
-
-          <div className="hidden min-w-0 flex-1 max-w-[560px] lg:block">
-            <div className="flex h-11 items-center gap-3 rounded-xl border border-ink/5 bg-white px-4 shadow-sm">
-              <span className="text-ink/35">⌕</span>
-              <span className="text-xs text-ink/35">Rechercher un client, un avis, un établissement...</span>
-              <span className="ml-auto rounded-md border border-ink/10 bg-[#f7f7f3] px-2 py-1 text-[9px] text-ink/35">⌘ K</span>
-            </div>
-          </div>
-
-
-
-          <div className="ml-auto flex items-center gap-2">
-            <div className="relative">
               <button
                 type="button"
-                onClick={() => {
-                  setNotificationsOpen((value) => !value);
-                  if (!notificationsOpen) markNotificationsRead();
-                }}
-                className="relative grid h-10 w-10 place-items-center rounded-xl border border-ink/10 bg-white text-ink/60 shadow-sm"
-                aria-label="Notifications"
-                aria-expanded={notificationsOpen}
+                onClick={logout}
+                className="grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#F5F5DC]/60 transition hover:border-[#C9A45C]/60 hover:text-[#E1C27A]"
+                aria-label="Déconnexion"
               >
-                <Bell size={17} />
-                {unreadNotifications.length > 0 && (
-                  <span className="absolute -right-1 -top-1 grid min-h-4 min-w-4 place-items-center rounded-full bg-red-500 px-1 text-[8px] font-bold text-white">
-                    {unreadNotifications.length > 9 ? '9+' : unreadNotifications.length}
-                  </span>
-                )}
+                <LogOut size={15} />
               </button>
+            </div>
+          </div>
 
-              {notificationsOpen && (
-                <>
-                  <button className="fixed inset-0 z-40 cursor-default" aria-label="Fermer les notifications" onClick={() => setNotificationsOpen(false)} />
-                  <div className="absolute right-0 top-12 z-50 w-[360px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-ink/10 bg-white shadow-2xl">
-                    <div className="flex items-center justify-between border-b border-ink/5 px-4 py-3">
-                      <div>
-                        <p className="text-sm font-semibold text-ink">Notifications</p>
-                        <p className="text-[10px] text-ink/40">{notifications.length} activité{notifications.length > 1 ? 's' : ''} récente{notifications.length > 1 ? 's' : ''}</p>
-                      </div>
-                      {notifications.length > 0 && (
-                        <button type="button" onClick={markNotificationsRead} className="text-[10px] font-semibold text-forest">
-                          Tout marquer comme lu
-                        </button>
-                      )}
-                    </div>
-                    <div className="max-h-[520px] overflow-y-auto">
-                      {notifications.length === 0 ? (
-                        <div className="px-5 py-10 text-center">
-                          <Check size={22} className="mx-auto text-forest/40" />
-                          <p className="mt-2 text-sm font-medium text-ink">Aucune notification</p>
-                          <p className="mt-1 text-[11px] text-ink/35">Tout est à jour.</p>
-                        </div>
-                      ) : notifications.map((notification) => (
-                        <div key={notification.id} className="flex gap-3 border-b border-ink/5 px-4 py-3.5 last:border-0">
-                          <div className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${notification.tone === 'alert' ? 'bg-red-50 text-red-500' : notification.tone === 'review' ? 'bg-gold/10 text-gold' : 'bg-forest/10 text-forest'}`}>
-                            {notification.tone === 'alert' ? <AlertTriangle size={16} /> : notification.tone === 'review' ? <MessageCircle size={16} /> : <Building2 size={16} />}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-xs font-semibold text-ink">{notification.title}</p>
-                            <p className="mt-1 text-[11px] leading-4 text-ink/50">{notification.description}</p>
-                            <p className="mt-1 text-[9px] text-ink/30">{new Intl.DateTimeFormat(language === 'ar' ? 'ar-MA' : language === 'en' ? 'en-GB' : 'fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(notification.createdAt))}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-            <div className="hidden h-10 items-center gap-2 rounded-xl border border-ink/10 bg-white px-2.5 shadow-sm sm:flex">
-              <div className="grid h-7 w-7 place-items-center rounded-full bg-forest text-xs font-semibold text-white">{avatarLetter}</div>
-              <div className="max-w-[130px] leading-tight">
-                <p className="truncate text-xs font-semibold text-ink">{displayName}</p>
-                <p className="text-[9px] text-ink/40">{roleLabel}</p>
-              </div>
-            </div>
-            <label className="hidden items-center gap-2 rounded-xl border border-ink/10 bg-white px-3 py-2 text-xs font-medium text-ink/60 shadow-sm md:flex">
-              <select
-                value={language}
-                onChange={(event) => setLanguage(event.target.value as Language)}
-                aria-label="Language"
-                className="cursor-pointer bg-transparent outline-none"
-              >
-                <option value="fr">Français</option>
-                <option value="en">English</option>
-                <option value="ar">العربية</option>
-              </select>
+          <div className="mx-auto mt-3 md:hidden">
+            <label className="relative block">
+              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#C9A45C]">⌕</span>
+              <input
+                type="search"
+                placeholder="Rechercher..."
+                aria-label="Rechercher"
+                className="h-10 w-full rounded-2xl border border-[#242424] bg-[#111111] pl-11 pr-4 text-xs text-[#FFFFFF] outline-none placeholder:text-[#F5F5DC]/30 focus:border-[#C9A45C]/60"
+              />
             </label>
-            <button
-            onClick={() =>
-              navigate('/dashboard/establishments')
-            }
-            style={{ backgroundColor: subscriptionTheme.primary }}
-            className="flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold text-white transition sm:px-4"
-          >
-            <Building2 size={15} />
-            <span className="hidden sm:inline">Gérer mes établissements</span>
-            </button>
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-[1500px] p-4 sm:p-5 md:p-8 lg:p-10">
+        <main className="mx-auto w-full max-w-[1700px] px-3 pb-28 pt-6 sm:px-5 md:px-8 lg:px-10 lg:pt-8">
           <Outlet />
         </main>
 
-        <footer className="px-5 pb-6 text-center md:px-10">
-          <img
-            src="/tapmarrakech-logo.png"
-            alt="TapMarrakech"
-            className="mx-auto h-7 w-auto object-contain opacity-75"
-          />
-        </footer>
+        <nav className="fixed inset-x-0 bottom-0 z-[60] border-t border-[#242424] bg-[#050505]/96 px-2 pb-[max(8px,env(safe-area-inset-bottom))] pt-2 backdrop-blur-2xl">
+          <div className="mx-auto flex max-w-[1100px] items-center justify-start gap-1 overflow-x-auto scrollbar-none">
+            {links.map(({ to, label, icon: Icon, end }) => (
+              <NavLink
+                key={to}
+                to={to}
+                end={end}
+                className={({ isActive }) => `group flex min-w-[76px] flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 transition-all ${
+                  isActive
+                    ? 'bg-[#111111] text-[#E1C27A] shadow-[0_0_24px_rgba(201,164,92,0.10)]'
+                    : 'text-[#F5F5DC]/40 hover:bg-[#111111] hover:text-[#F5F5DC]'
+                }`}
+              >
+                <Icon size={18} strokeWidth={isActive => isActive ? 2 : 1.7} />
+                <span className="max-w-[90px] truncate text-[8px] font-semibold">{localizedLabel(label)}</span>
+              </NavLink>
+            ))}
+          </div>
+        </nav>
       </div>
     </div>
   );
