@@ -67,12 +67,12 @@ export default function RecentLoyaltyCustomers({
                 key={item}
                 className="flex items-center gap-3 rounded-2xl border border-[#242424] p-3"
               >
-                <div className="h-10 w-10 shrink-0 animate-pulse rounded-xl bg-ink/5" />
+                <div className="h-10 w-10 shrink-0 animate-pulse rounded-xl bg-[#242424]" />
                 <div className="min-w-0 flex-1 space-y-2">
-                  <div className="h-3 w-36 animate-pulse rounded bg-ink/5" />
-                  <div className="h-2.5 w-48 max-w-full animate-pulse rounded bg-ink/5" />
+                  <div className="h-3 w-36 animate-pulse rounded bg-[#242424]" />
+                  <div className="h-2.5 w-48 max-w-full animate-pulse rounded bg-[#242424]" />
                 </div>
-                <div className="h-6 w-20 animate-pulse rounded-full bg-ink/5" />
+                <div className="h-6 w-20 animate-pulse rounded-full bg-[#242424]" />
               </div>
             ))}
           </div>
@@ -91,7 +91,7 @@ export default function RecentLoyaltyCustomers({
             </button>
           </div>
         ) : customers.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-ink/10 bg-[#111111] p-8 text-center">
+          <div className="rounded-2xl border border-dashed border-[#242424] bg-[#111111] p-8 text-center">
             <div className="mx-auto grid h-11 w-11 place-items-center rounded-xl bg-[#C9A45C]/5 text-[#C9A45C]">
               <UserPlus size={18} />
             </div>
@@ -133,7 +133,7 @@ export default function RecentLoyaltyCustomers({
                     className={
                       customer.visit_count > 0
                         ? 'shrink-0 rounded-full bg-[#C9A45C]/10 px-2.5 py-1.5 text-[10px] font-semibold text-[#C9A45C]'
-                        : 'shrink-0 rounded-full bg-ink/5 px-2.5 py-1.5 text-[10px] font-medium text-[#FFFFFF]/40'
+                        : 'shrink-0 rounded-full bg-[#242424] px-2.5 py-1.5 text-[10px] font-medium text-[#FFFFFF]/40'
                     }
                   >
                     {visitLabel}
