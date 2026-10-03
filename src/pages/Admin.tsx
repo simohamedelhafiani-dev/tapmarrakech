@@ -549,7 +549,7 @@ export default function Admin() {
                 type="search"
                 placeholder="Rechercher dans KELYANI..."
                 aria-label="Rechercher dans KELYANI"
-                className="h-11 w-full rounded-2xl border border-[#242424] bg-[#111111] pl-11 pr-4 text-sm text-[#FFFFFF] outline-none placeholder:text-[#F5F5DC]/35 focus:border-[#C9A45C]/60 focus:ring-1 focus:ring-[#C9A45C]/20"
+                className="h-11 w-full rounded-3xl border border-[#242424] bg-[#111111] pl-11 pr-4 text-sm text-[#FFFFFF] outline-none placeholder:text-[#F5F5DC]/35 focus:border-[#C9A45C]/60 focus:ring-1 focus:ring-[#C9A45C]/20"
               />
             </label>
           </div>
@@ -587,7 +587,7 @@ export default function Admin() {
               type="search"
               placeholder="Rechercher..."
               aria-label="Rechercher"
-              className="h-10 w-full rounded-2xl border border-[#242424] bg-[#111111] pl-11 pr-4 text-xs text-[#FFFFFF] outline-none placeholder:text-[#F5F5DC]/35 focus:border-[#C9A45C]/60"
+              className="h-10 w-full rounded-3xl border border-[#242424] bg-[#111111] pl-11 pr-4 text-xs text-[#FFFFFF] outline-none placeholder:text-[#F5F5DC]/35 focus:border-[#C9A45C]/60"
             />
           </label>
         </div>
@@ -682,7 +682,7 @@ export default function Admin() {
             <section className="space-y-5">
               {establishments.length > 0 ? (
                 <>
-                  <div className="rounded-2xl border border-[#242424]/5 bg-[#111111] p-4 shadow-sm">
+                  <div className="rounded-3xl border border-[#242424] bg-[#111111] p-4 shadow-sm">
                     <label className="block max-w-md text-xs font-semibold text-[#C9A45C]">
                       Établissement
                       <select
@@ -703,7 +703,7 @@ export default function Admin() {
                   )}
                 </>
               ) : (
-                <div className="rounded-2xl border border-[#242424]/5 bg-[#111111] p-10 text-center shadow-sm">
+                <div className="rounded-3xl border border-[#242424] bg-[#111111] p-10 text-center shadow-sm">
                   <Gem className="mx-auto text-[#C9A45C]" size={28} />
                   <h2 className="mt-3 font-display text-2xl text-[#C9A45C]">Fidélité</h2>
                   <p className="mt-2 text-sm text-[#FFFFFF]/45">Créez d’abord un établissement pour configurer son programme de fidélité.</p>
@@ -1022,7 +1022,7 @@ function Overview({
       />
 
       <div className="grid gap-5 xl:grid-cols-[1.65fr_.85fr]">
-        <div className="rounded-3xl border border-[#242424]/5 bg-[#111111] p-6 shadow-soft">
+        <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-soft">
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A45C]/45">Pilotage</p>
@@ -1061,7 +1061,7 @@ function Overview({
           </div>
         </div>
 
-        <div className="rounded-3xl border border-[#242424]/5 bg-[#111111] p-6 shadow-soft">
+        <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-soft">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A45C]/45">Activité</p>
@@ -1087,7 +1087,7 @@ function Overview({
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[1.2fr_.8fr]">
-        <div className="rounded-3xl border border-[#242424]/5 bg-[#111111] p-6 shadow-soft">
+        <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-soft">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A45C]/45">Accès rapide</p>
@@ -1096,7 +1096,7 @@ function Overview({
           </div>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             {quickActions.map(({ id, label, icon: Icon }) => (
-              <button key={id} onClick={() => onNavigate(id)} className="group flex items-center gap-3 rounded-2xl border border-[#242424]/5 bg-[#111111] p-4 text-left transition hover:-translate-y-0.5 hover:border-[#242424]/15 hover:bg-[#111111] hover:shadow-sm">
+              <button key={id} onClick={() => onNavigate(id)} className="group flex items-center gap-3 rounded-3xl border border-[#242424] bg-[#111111] p-4 text-left transition hover:-translate-y-0.5 hover:border-[#242424]/15 hover:bg-[#111111] hover:shadow-sm">
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#111111] text-[#C9A45C] shadow-sm group-hover:bg-[#111111] group-hover:text-[#FFFFFF]"><Icon size={17} /></span>
                 <span className="text-xs font-semibold">{label}</span>
               </button>
@@ -1104,7 +1104,7 @@ function Overview({
           </div>
         </div>
 
-        <div className="rounded-3xl border border-[#242424]/5 bg-[#111111] p-6 shadow-soft">
+        <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-soft">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A45C]/45">Santé plateforme</p>
@@ -1135,7 +1135,7 @@ function AdminMetric({ icon: Icon, label, value, detail }: { icon: typeof Star; 
     <div
       data-kpi-label={label}
       data-kpi-value={String(value)}
-      className="rounded-2xl border border-[#242424]/5 bg-[#111111] p-4 shadow-soft"
+      className="rounded-3xl border border-[#242424] bg-[#111111] p-4 shadow-soft"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#111111]/10 text-[#C9A45C]"><Icon size={18} /></div>
@@ -1824,7 +1824,7 @@ function EstablishmentWorkspace({
 
   return (
     <div>
-      <div className="relative mb-6 overflow-hidden rounded-3xl border border-[#242424]/5 bg-[#111111] p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] sm:p-8">
+      <div className="relative mb-6 overflow-hidden rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] sm:p-8">
         <div className="absolute right-0 top-0 h-44 w-44 rounded-full bg-[#C9A45C]/10 blur-3xl" />
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
@@ -1879,7 +1879,7 @@ function EstablishmentWorkspace({
         </div>
       </div>
 
-      <div className="mb-6 flex gap-2 overflow-x-auto rounded-2xl border border-[#242424]/5 bg-[#111111] p-2 shadow-sm">
+      <div className="mb-6 flex gap-2 overflow-x-auto rounded-3xl border border-[#242424] bg-[#111111] p-2 shadow-sm">
         {tabs.map((x) => <button key={x.id} onClick={() => setTab(x.id)} className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-xs font-semibold ${tab === x.id ? 'bg-[#111111] text-[#FFFFFF]' : 'text-[#FFFFFF]/55 hover:bg-[#111111]'}`}>{x.label}</button>)}
       </div>
 
@@ -1910,9 +1910,9 @@ function EstablishmentWorkspace({
           </div>
         </div>
       )}
-      {tab === 'promotions' && <div className="space-y-5"><div className="rounded-2xl border border-[#242424]/5 bg-[#111111] p-5"><h3 className="font-semibold">Créer une promotion</h3><div className="mt-4 grid gap-3 md:grid-cols-4"><input value={promotion.name} onChange={(e) => setPromotion({ ...promotion, name: e.target.value })} placeholder="Nom" className="rounded-xl border border-[#242424]/10 px-3 py-2.5 text-sm" /><input value={promotion.description} onChange={(e) => setPromotion({ ...promotion, description: e.target.value })} placeholder="Description" className="rounded-xl border border-[#242424]/10 px-3 py-2.5 text-sm" /><input value={promotion.normal_price} onChange={(e) => setPromotion({ ...promotion, normal_price: e.target.value })} placeholder="Prix normal" type="number" className="rounded-xl border border-[#242424]/10 px-3 py-2.5 text-sm" /><input value={promotion.promo_price} onChange={(e) => setPromotion({ ...promotion, promo_price: e.target.value })} placeholder="Prix promo" type="number" className="rounded-xl border border-[#242424]/10 px-3 py-2.5 text-sm" /></div><button onClick={addPromotion} className="mt-3 rounded-xl bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#FFFFFF]">Ajouter</button></div><div className="grid gap-3 md:grid-cols-2">{promotions.map((p) => <div key={p.id} className="rounded-2xl border border-[#242424]/5 bg-[#111111] p-5"><div className="flex justify-between"><strong>{p.name}</strong><button onClick={async () => { const { error } = await supabase.from('promotions').update({ active: !p.active }).eq('id', p.id); if (error) alert(error.message); else loadTab(); }} className="text-xs text-[#FFFFFF]/45">{p.active ? 'Actif' : 'Inactif'}</button></div><p className="mt-2 text-sm text-[#FFFFFF]/55">{p.description || 'Sans description'}</p><p className="mt-3 text-sm font-semibold">{p.promo_price ?? '—'} MAD <span className="ml-2 text-xs text-[#FFFFFF]/35 line-through">{p.normal_price ?? ''}</span></p></div>)}</div></div>}
+      {tab === 'promotions' && <div className="space-y-5"><div className="rounded-3xl border border-[#242424] bg-[#111111] p-5"><h3 className="font-semibold">Créer une promotion</h3><div className="mt-4 grid gap-3 md:grid-cols-4"><input value={promotion.name} onChange={(e) => setPromotion({ ...promotion, name: e.target.value })} placeholder="Nom" className="rounded-xl border border-[#242424]/10 px-3 py-2.5 text-sm" /><input value={promotion.description} onChange={(e) => setPromotion({ ...promotion, description: e.target.value })} placeholder="Description" className="rounded-xl border border-[#242424]/10 px-3 py-2.5 text-sm" /><input value={promotion.normal_price} onChange={(e) => setPromotion({ ...promotion, normal_price: e.target.value })} placeholder="Prix normal" type="number" className="rounded-xl border border-[#242424]/10 px-3 py-2.5 text-sm" /><input value={promotion.promo_price} onChange={(e) => setPromotion({ ...promotion, promo_price: e.target.value })} placeholder="Prix promo" type="number" className="rounded-xl border border-[#242424]/10 px-3 py-2.5 text-sm" /></div><button onClick={addPromotion} className="mt-3 rounded-xl bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#FFFFFF]">Ajouter</button></div><div className="grid gap-3 md:grid-cols-2">{promotions.map((p) => <div key={p.id} className="rounded-3xl border border-[#242424] bg-[#111111] p-5"><div className="flex justify-between"><strong>{p.name}</strong><button onClick={async () => { const { error } = await supabase.from('promotions').update({ active: !p.active }).eq('id', p.id); if (error) alert(error.message); else loadTab(); }} className="text-xs text-[#FFFFFF]/45">{p.active ? 'Actif' : 'Inactif'}</button></div><p className="mt-2 text-sm text-[#FFFFFF]/55">{p.description || 'Sans description'}</p><p className="mt-3 text-sm font-semibold">{p.promo_price ?? '—'} MAD <span className="ml-2 text-xs text-[#FFFFFF]/35 line-through">{p.normal_price ?? ''}</span></p></div>)}</div></div>}
 
-      {tab === 'reviews' && <div className="space-y-4"><div className="grid gap-3 md:grid-cols-3"><StatCard label="Avis" value={reviews.length} /><StatCard label="Note moyenne" value={reviews.length ? (reviews.reduce((a, r) => a + Number(r.rating || 0), 0) / reviews.length).toFixed(1) : '—'} /><StatCard label="Dernier avis" value={reviews[0] ? new Date(reviews[0].created_at).toLocaleDateString('fr-FR') : '—'} /></div><div className="rounded-2xl border border-[#242424]/5 bg-[#111111] p-5">{reviews.length === 0 ? <p className="text-sm text-[#FFFFFF]/45">Aucun avis.</p> : <div className="space-y-3">{reviews.map((r) => <div key={r.id} className="rounded-xl bg-[#111111] p-4"><div className="flex justify-between"><strong>{r.rating}/5</strong><span className="text-xs text-[#FFFFFF]/35">{new Date(r.created_at).toLocaleDateString('fr-FR')}</span></div><p className="mt-2 text-sm text-[#FFFFFF]/60">{r.feedback || r.comment || 'Aucun commentaire'}</p></div>)}</div>}</div></div>}
+      {tab === 'reviews' && <div className="space-y-4"><div className="grid gap-3 md:grid-cols-3"><StatCard label="Avis" value={reviews.length} /><StatCard label="Note moyenne" value={reviews.length ? (reviews.reduce((a, r) => a + Number(r.rating || 0), 0) / reviews.length).toFixed(1) : '—'} /><StatCard label="Dernier avis" value={reviews[0] ? new Date(reviews[0].created_at).toLocaleDateString('fr-FR') : '—'} /></div><div className="rounded-3xl border border-[#242424] bg-[#111111] p-5">{reviews.length === 0 ? <p className="text-sm text-[#FFFFFF]/45">Aucun avis.</p> : <div className="space-y-3">{reviews.map((r) => <div key={r.id} className="rounded-xl bg-[#111111] p-4"><div className="flex justify-between"><strong>{r.rating}/5</strong><span className="text-xs text-[#FFFFFF]/35">{new Date(r.created_at).toLocaleDateString('fr-FR')}</span></div><p className="mt-2 text-sm text-[#FFFFFF]/60">{r.feedback || r.comment || 'Aucun commentaire'}</p></div>)}</div>}</div></div>}
 
       {tab === 'loyalty' && (
         <div className="space-y-5">
@@ -1924,7 +1924,7 @@ function EstablishmentWorkspace({
           </div>
 
           <div className="grid gap-5 md:grid-cols-2">
-            <div className="rounded-2xl border border-[#242424]/5 bg-[#111111] p-5">
+            <div className="rounded-3xl border border-[#242424] bg-[#111111] p-5">
               <h3 className="font-semibold">Paramètres</h3>
 
               <div className="mt-4 flex gap-3">
@@ -1985,7 +1985,7 @@ function EstablishmentWorkspace({
               </button>
             </div>
 
-            <div className="rounded-2xl border border-[#242424]/5 bg-[#111111] p-5">
+            <div className="rounded-3xl border border-[#242424] bg-[#111111] p-5">
               <h3 className="font-semibold">Nouvelle récompense</h3>
 
               <div className="mt-4 space-y-3">
@@ -2035,7 +2035,7 @@ function EstablishmentWorkspace({
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[#242424]/5 bg-[#111111] p-5">
+          <div className="rounded-3xl border border-[#242424] bg-[#111111] p-5">
             <h3 className="font-semibold">Récompenses</h3>
 
             <div className="mt-4 grid gap-2 md:grid-cols-2">
@@ -2074,7 +2074,7 @@ function EstablishmentWorkspace({
         </div>
       )}
 
-      {tab === 'team' && <div className="rounded-2xl border border-[#242424]/5 bg-[#111111] p-5"><h3 className="font-semibold">Équipe de l’établissement</h3><p className="mt-1 text-xs text-[#FFFFFF]/45">Les comptes sont gérés depuis les sections Responsables / Employés de l’Admin.</p><div className="mt-5 space-y-2">{team.length === 0 ? <p className="text-sm text-[#FFFFFF]/45">Aucun membre affecté.</p> : team.map((m) => <div key={m.id} className="flex justify-between rounded-xl bg-[#111111] p-3 text-sm"><span>{m.name}</span><span className="text-xs text-[#FFFFFF]/45">{m.role} · {m.active ? 'Actif' : 'Inactif'}</span></div>)}</div></div>}
+      {tab === 'team' && <div className="rounded-3xl border border-[#242424] bg-[#111111] p-5"><h3 className="font-semibold">Équipe de l’établissement</h3><p className="mt-1 text-xs text-[#FFFFFF]/45">Les comptes sont gérés depuis les sections Responsables / Employés de l’Admin.</p><div className="mt-5 space-y-2">{team.length === 0 ? <p className="text-sm text-[#FFFFFF]/45">Aucun membre affecté.</p> : team.map((m) => <div key={m.id} className="flex justify-between rounded-xl bg-[#111111] p-3 text-sm"><span>{m.name}</span><span className="text-xs text-[#FFFFFF]/45">{m.role} · {m.active ? 'Actif' : 'Inactif'}</span></div>)}</div></div>}
 
       {tab === 'analytics' && <div className="grid gap-4 md:grid-cols-3"><StatCard label="Événements enregistrés" value={eventsCount} /><StatCard label="Avis" value={reviews.length || '—'} /><StatCard label="Page publique" value={`/p/${establishment.slug}`} /></div>}
 
@@ -2091,7 +2091,7 @@ function EstablishmentWorkspace({
           { label: 'Menu digital', description: 'Accès direct au menu', url: window.location.origin + '/p/' + establishment.slug + '/menu' },
           { label: 'Avis Google', description: 'Accès direct à la section avis', url: window.location.origin + '/p/' + establishment.slug + '/reviews' },
         ].map((link) => (
-          <div key={link.label} className="rounded-2xl border border-[#242424]/5 bg-[#111111] p-4">
+          <div key={link.label} className="rounded-3xl border border-[#242424] bg-[#111111] p-4">
             <p className="text-sm font-semibold text-[#FFFFFF]">{link.label}</p>
             <p className="mt-1 text-xs text-[#FFFFFF]/45">{link.description}</p>
             <p className="mt-3 break-all rounded-lg bg-[#111111] p-2.5 text-[10px] text-[#FFFFFF]/45">{link.url}</p>
@@ -2103,7 +2103,7 @@ function EstablishmentWorkspace({
         ))}
       </div>
     </div>
-    <div className="rounded-2xl border border-[#242424]/5 bg-[#111111] p-6">
+    <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6">
       <h3 className="font-semibold">Templates</h3>
       <div className="mt-4 grid gap-3 md:grid-cols-2">
         <label className="text-xs text-[#FFFFFF]/50">Template page<select value={profile.page_template_id ?? ''} onChange={(e) => setProfile((v: any) => ({ ...v, page_template_id: e.target.value || null }))} className="mt-1 w-full rounded-xl border border-[#242424]/10 px-3 py-2.5 text-sm"><option value="">Automatique / défaut</option>{templates.filter((t) => t.kind === 'page' && t.active).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label>
@@ -2127,7 +2127,7 @@ function StatCard({
   value: string | number;
 }) {
   return (
-    <div className="rounded-2xl border border-[#242424]/5 bg-[#111111] p-5 shadow-sm">
+    <div className="rounded-3xl border border-[#242424] bg-[#111111] p-5 shadow-sm">
       <div className="flex items-center justify-between">
         {Icon ? (
           <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#111111]/10 text-[#C9A45C]">
@@ -2209,7 +2209,7 @@ function CreateEstablishmentForm({
   };
 
   return (
-    <div className="mb-6 rounded-2xl border border-[#242424]/5 bg-[#111111] p-6 shadow-sm">
+    <div className="mb-6 rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
       <div className="mb-5 flex items-center justify-between">
         <div>
           <h3 className="text-base font-semibold">
@@ -2366,7 +2366,7 @@ function ResponsiblesSection({
         </button>
       </div>
 
-      <div className="mb-5 max-w-xl rounded-2xl border border-[#242424]/5 bg-[#111111] p-4 shadow-sm">
+      <div className="mb-5 max-w-xl rounded-3xl border border-[#242424] bg-[#111111] p-4 shadow-sm">
         <label className="mb-2 block text-xs font-semibold">Établissement sélectionné</label>
         <select value={selectedEstablishment} onChange={(e) => setSelectedEstablishment(e.target.value)} className="w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#242424]">
           <option value="all">Tous les établissements</option>
@@ -2383,7 +2383,7 @@ function ResponsiblesSection({
         />
       )}
 
-      <div className="overflow-hidden rounded-2xl border border-[#242424]/5 bg-[#111111] shadow-sm">
+      <div className="overflow-hidden rounded-3xl border border-[#242424] bg-[#111111] shadow-sm">
         {loading ? (
           <div className="p-8 text-sm text-[#FFFFFF]/40">
             Chargement...
@@ -2477,7 +2477,7 @@ function EmployeesSection({
         </button>
       </div>
 
-      <div className="mb-5 max-w-xl rounded-2xl border border-[#242424]/5 bg-[#111111] p-4 shadow-sm">
+      <div className="mb-5 max-w-xl rounded-3xl border border-[#242424] bg-[#111111] p-4 shadow-sm">
         <label className="mb-2 block text-xs font-semibold">Établissement sélectionné</label>
         <select value={selectedEstablishment} onChange={(e) => setSelectedEstablishment(e.target.value)} className="w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#242424]">
           <option value="all">Tous les établissements</option>
@@ -2494,7 +2494,7 @@ function EmployeesSection({
         />
       )}
 
-      <div className="overflow-hidden rounded-2xl border border-[#242424]/5 bg-[#111111] shadow-sm">
+      <div className="overflow-hidden rounded-3xl border border-[#242424] bg-[#111111] shadow-sm">
         {loading ? (
           <div className="p-8 text-sm text-[#FFFFFF]/40">
             Chargement...
@@ -3112,7 +3112,7 @@ function RewardCodesSection({
               key={establishment.id}
               type="button"
               onClick={() => setSelectedEstablishment(establishment.id)}
-              className={`rounded-2xl border bg-[#111111] p-5 text-left shadow-sm transition ${isSelected ? 'border-[#C9A45C]/50 ring-2 ring-[#C9A45C]/10' : 'border-[#242424]/5 hover:border-[#242424]/15'}`}
+              className={`rounded-2xl border bg-[#111111] p-5 text-left shadow-sm transition ${isSelected ? 'border-[#C9A45C]/50 ring-2 ring-[#C9A45C]/10' : 'border-[#242424] hover:border-[#242424]/15'}`}
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -3141,7 +3141,7 @@ function RewardCodesSection({
         })}
       </div>
 
-      <div className="rounded-2xl border border-[#242424]/5 bg-[#111111] p-6 shadow-sm">
+      <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#C9A45C]">Configuration</p>
@@ -3364,7 +3364,7 @@ function ReviewAnalysisSection({
         </div>
       </div>
 
-      <div className="mb-6 rounded-2xl border border-[#242424]/5 bg-[#111111] p-5 shadow-sm">
+      <div className="mb-6 rounded-3xl border border-[#242424] bg-[#111111] p-5 shadow-sm">
         <div className="flex flex-col gap-4 md:flex-row md:items-end">
           <div className="flex-1">
             <label className="mb-2 block text-xs font-semibold">
@@ -3422,7 +3422,7 @@ function ReviewAnalysisSection({
       )}
 
       {loading && (
-        <div className="rounded-2xl border border-[#242424]/5 bg-[#111111] p-12 text-center shadow-sm">
+        <div className="rounded-3xl border border-[#242424] bg-[#111111] p-12 text-center shadow-sm">
           <div className="mx-auto h-9 w-9 animate-spin rounded-full border-2 border-[#242424] border-t-transparent" />
           <p className="mt-4 text-sm font-medium text-[#FFFFFF]/60">
             L’IA analyse les avis de {selectedName}...
@@ -3458,7 +3458,7 @@ function ReviewAnalysisSection({
             />
           </div>
 
-          <div className="rounded-2xl border border-[#242424]/5 bg-[#111111] p-6 shadow-sm">
+          <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
             <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#C9A45C]/45">
@@ -3506,7 +3506,7 @@ function ReviewAnalysisSection({
             />
           </div>
 
-          <div className="rounded-2xl border border-[#242424]/5 bg-[#111111] p-6 shadow-sm">
+          <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#C9A45C]/45">
                 Thèmes récurrents
@@ -3525,7 +3525,7 @@ function ReviewAnalysisSection({
                 {result.analysis.recurring_issues.map((issue, index) => (
                   <div
                     key={`${issue.topic}-${index}`}
-                    className="rounded-xl border border-[#242424]/5 bg-[#fdfdfb] p-4"
+                    className="rounded-xl border border-[#242424] bg-[#111111] p-4"
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <h4 className="font-semibold text-[#FFFFFF]">{issue.topic}</h4>
@@ -3545,7 +3545,7 @@ function ReviewAnalysisSection({
             )}
           </div>
 
-          <div className="rounded-2xl border border-[#242424]/5 bg-[#111111] p-6 shadow-sm">
+          <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#C9A45C]/45">
                 Plan d’action
@@ -3563,7 +3563,7 @@ function ReviewAnalysisSection({
               {result.analysis.actions_prioritaires.map((action, index) => (
                 <div
                   key={`${action.action}-${index}`}
-                  className="rounded-2xl border border-[#242424]/5 bg-[#fdfdfb] p-5"
+                  className="rounded-3xl border border-[#242424] bg-[#111111] p-5"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#111111] text-sm font-semibold text-[#FFFFFF]">
@@ -3593,7 +3593,7 @@ function ReviewAnalysisSection({
           </div>
 
           {result.analysis.recommendations.length > 0 && (
-            <div className="rounded-2xl border border-[#242424]/5 bg-[#111111] p-6 shadow-sm">
+            <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#C9A45C]/45">
                 Recommandations complémentaires
               </p>
@@ -3601,7 +3601,7 @@ function ReviewAnalysisSection({
                 {result.analysis.recommendations.map((recommendation, index) => (
                   <div
                     key={`${recommendation.action}-${index}`}
-                    className="rounded-xl border border-[#242424]/5 bg-[#fdfdfb] p-4"
+                    className="rounded-xl border border-[#242424] bg-[#111111] p-4"
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="rounded-full bg-[#111111]/10 px-2.5 py-1 text-[10px] font-semibold text-[#C9A45C]">
@@ -3646,7 +3646,7 @@ function AnalysisListCard({
   emptyText: string;
 }) {
   return (
-    <div className="rounded-2xl border border-[#242424]/5 bg-[#111111] p-6 shadow-sm">
+    <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#C9A45C]/45">
         {title}
       </p>
@@ -3658,7 +3658,7 @@ function AnalysisListCard({
           {items.map((item, index) => (
             <div
               key={`${item}-${index}`}
-              className="flex gap-3 rounded-xl bg-[#fdfdfb] p-4"
+              className="flex gap-3 rounded-xl bg-[#111111] p-4"
             >
               <span className="mt-0.5 text-sm font-semibold text-[#C9A45C]">
                 ✓
@@ -3824,7 +3824,7 @@ function ReviewsSection({
         />
       </div>
 
-      <div className="mb-6 rounded-2xl border border-[#242424]/5 bg-[#111111] p-5 shadow-sm">
+      <div className="mb-6 rounded-3xl border border-[#242424] bg-[#111111] p-5 shadow-sm">
         <div className="grid gap-4 md:grid-cols-2">
           <div>
             <label className="mb-2 block text-xs font-semibold">
@@ -3865,7 +3865,7 @@ function ReviewsSection({
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-[#242424]/5 bg-[#111111] shadow-sm">
+      <div className="overflow-hidden rounded-3xl border border-[#242424] bg-[#111111] shadow-sm">
         {loading ? (
           <div className="p-10 text-center text-sm text-[#FFFFFF]/40">
             Chargement des avis...
@@ -3892,7 +3892,7 @@ function ReviewsSection({
               return (
                 <div
                   key={review.id}
-                  className="p-5 transition hover:bg-[#fdfdfb]"
+                  className="p-5 transition hover:bg-[#111111]"
                 >
                   <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                     <div className="min-w-0 flex-1">
@@ -4206,7 +4206,7 @@ function AdminAnalyticsSection({
           ) : (
             <div className="space-y-3">
               {byEstablishment.map((item) => (
-                <div key={item.id} className="rounded-xl border border-[#242424]/5 bg-[#111111] p-4">
+                <div key={item.id} className="rounded-xl border border-[#242424] bg-[#111111] p-4">
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-[#FFFFFF]">{item.name}</p>
@@ -4538,7 +4538,7 @@ function AIConfigurationSection({
         </div>
       </div>
 
-      <div className="mb-6 rounded-2xl border border-[#242424]/5 bg-[#111111] p-6 shadow-sm">
+      <div className="mb-6 rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#C9A45C]">Moteur IA global</p><h3 className="mt-1 text-xl font-semibold text-[#C9A45C]">Provider et modèle utilisés par l’analyse</h3></div><span className={`rounded-full px-3 py-1 text-[10px] font-semibold ${aiSettings.enabled ? 'bg-[#111111] text-[#E1C27A]' : 'bg-[#111111] text-[#E1C27A]'}`}>{aiSettings.enabled ? 'IA ACTIVE' : 'IA DÉSACTIVÉE'}</span></div>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <label className="block"><span className="mb-1 block text-xs font-semibold">Provider / moteur</span><input value={aiSettings.provider ?? ''} onChange={e=>setAISettings((v:any)=>({...v,provider:e.target.value}))} placeholder="openai" className="w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 py-3 text-sm"/></label>
@@ -4656,7 +4656,7 @@ function AIConfigurationSection({
         {businessTypes.map((type) => (
           <div
             key={type.id}
-            className="rounded-2xl border border-[#242424]/5 bg-[#111111] p-5 shadow-sm"
+            className="rounded-3xl border border-[#242424] bg-[#111111] p-5 shadow-sm"
           >
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div className="min-w-0 flex-1">
@@ -4875,7 +4875,7 @@ ${body}
         <h2 className="font-display text-3xl text-[#C9A45C] md:text-4xl">Rapports PDF</h2>
         <p className="mt-2 max-w-2xl text-sm text-[#FFFFFF]/50">Générez des rapports structurés avec en-tête, indicateurs, tableaux et synthèse pour chaque établissement.</p>
       </div>
-      <div className="rounded-2xl border border-[#242424]/5 bg-[#111111] p-6 shadow-sm">
+      <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
         <div className="grid gap-4 md:grid-cols-2">
           <label className="block"><span className="mb-2 block text-xs font-semibold">Établissement</span><select value={selectedId} onChange={e=>setSelectedId(e.target.value)} className="w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 py-3 text-sm">{establishments.map(e=><option key={e.id} value={e.id}>{e.name}</option>)}</select></label>
           <label className="block"><span className="mb-2 block text-xs font-semibold">Période</span><select value={period} onChange={e=>setPeriod(Number(e.target.value))} className="w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 py-3 text-sm"><option value={7}>7 jours</option><option value={15}>15 jours</option><option value={30}>30 jours</option><option value={90}>90 jours</option><option value={180}>180 jours</option><option value={365}>365 jours</option></select></label>
@@ -4906,7 +4906,7 @@ function EmptyStaff({
   description: string;
 }) {
   return (
-    <div className="rounded-2xl border border-[#242424]/5 bg-[#111111] p-12 text-center shadow-sm">
+    <div className="rounded-3xl border border-[#242424] bg-[#111111] p-12 text-center shadow-sm">
       <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#111111]/10 text-[#C9A45C]">
         <Icon size={25} />
       </div>
@@ -5128,7 +5128,7 @@ function BillingSection({
       </div>
 
       {!billing.available ? (
-        <div className="mb-6 rounded-2xl border border-[#242424] bg-[#111111] p-5 text-sm text-[#E1C27A]">
+        <div className="mb-6 rounded-3xl border border-[#242424] bg-[#111111] p-5 text-sm text-[#E1C27A]">
           <strong>Module facturation non configuré.</strong> Les tables d’abonnement doivent être présentes dans Supabase pour activer le suivi réel.
         </div>
       ) : null}
@@ -5140,7 +5140,7 @@ function BillingSection({
         <StatCard icon={CalendarDays} label="Renouvellements < 30 j." value={billing.available ? billing.upcomingRenewals : '—'} />
       </div>
 
-      <div className="mt-6 rounded-2xl border border-[#242424]/5 bg-[#111111] p-5 shadow-sm">
+      <div className="mt-6 rounded-3xl border border-[#242424] bg-[#111111] p-5 shadow-sm">
         <div className="grid gap-3 md:grid-cols-[1.4fr_1fr_1fr]">
           <div className="relative">
             <Search size={16} className="absolute left-3 top-3 text-[#FFFFFF]/30" />
@@ -5189,8 +5189,8 @@ function BillingSection({
         </div>
       </div>
 
-      <div className="mt-6 overflow-x-auto rounded-2xl border border-[#242424]/5 bg-[#111111] shadow-sm">
-        <div className="grid min-w-[760px] grid-cols-[1.5fr_1fr_.8fr_1fr_1fr] gap-4 border-b border-[#242424]/5 px-5 py-4 text-[10px] font-semibold uppercase tracking-wider text-[#FFFFFF]/35">
+      <div className="mt-6 overflow-x-auto rounded-3xl border border-[#242424] bg-[#111111] shadow-sm">
+        <div className="grid min-w-[760px] grid-cols-[1.5fr_1fr_.8fr_1fr_1fr] gap-4 border-b border-[#242424] px-5 py-4 text-[10px] font-semibold uppercase tracking-wider text-[#FFFFFF]/35">
           <span>Commerce</span><span>Plan</span><span>Statut</span><span>MRR</span><span>Échéance</span>
         </div>
         {filtered.length === 0 ? (
@@ -5199,7 +5199,7 @@ function BillingSection({
           filtered.map((sub) => {
             const e = establishmentMap.get(sub.establishment_id);
             return (
-              <div key={sub.id} className="grid min-w-[900px] grid-cols-[1.35fr_1fr_.8fr_1fr_1fr_auto] items-center gap-4 border-b border-[#242424]/5 px-5 py-4 text-sm last:border-0">
+              <div key={sub.id} className="grid min-w-[900px] grid-cols-[1.35fr_1fr_.8fr_1fr_1fr_auto] items-center gap-4 border-b border-[#242424] px-5 py-4 text-sm last:border-0">
                 <div><p className="font-semibold">{e?.name ?? 'Établissement supprimé'}</p><p className="text-xs text-[#FFFFFF]/35">{e?.city ?? 'Ville non définie'}</p></div>
                 <span>{sub.plan?.name ?? '—'}</span>
                 <span className={`w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold ${sub.status === 'active' ? 'bg-[#111111] text-[#E1C27A]' : sub.status === 'trial' ? 'bg-[#111111] text-[#E1C27A]' : 'bg-[#111111] text-[#F5F5DC]'}`}>{sub.status}</span>
@@ -5336,7 +5336,7 @@ function BillingSection({
         </div>
       ) : null}
 
-      <div className="mt-8 rounded-2xl border border-[#242424]/5 bg-[#111111] p-6 shadow-sm">
+      <div className="mt-8 rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
         <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
           <div>
             <h3 className="text-sm font-semibold">Plans & fonctionnalités</h3>
@@ -5364,7 +5364,7 @@ function BillingSection({
 
         <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {billing.plans.map((p) => (
-            <div key={p.id} className="rounded-2xl border border-[#242424]/5 bg-[#fdfdfb] p-5">
+            <div key={p.id} className="rounded-3xl border border-[#242424] bg-[#111111] p-5">
               <div className="flex items-start justify-between gap-3"><div><strong className="text-[#C9A45C]">{p.name}</strong><p className="mt-1 text-xs text-[#FFFFFF]/40">{p.interval === 'year' ? 'Annuel' : 'Mensuel'} · {p.active ? 'Actif' : 'Inactif'}</p></div><span className="text-lg font-semibold">{Number(p.price_mad).toLocaleString('fr-FR')} MAD</span></div>
               <div className="mt-4 space-y-1.5">{(p.features ?? []).length ? (p.features ?? []).map((feature) => <div key={feature} className="flex gap-2 text-xs text-[#FFFFFF]/60"><span className="text-[#C9A45C]">✓</span>{feature}</div>) : <p className="text-xs text-[#FFFFFF]/35">Aucune fonctionnalité définie.</p>}</div>
               <div className="mt-5 flex gap-2">
@@ -5390,7 +5390,7 @@ function SystemSection({
   establishments: Establishment[];
 }) {
   const SystemMetric = ({ label, value }: { label: string; value: string | number }) => (
-    <div className="rounded-2xl border border-[#242424]/5 bg-[#111111] p-5 shadow-sm">
+    <div className="rounded-3xl border border-[#242424] bg-[#111111] p-5 shadow-sm">
       <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#FFFFFF]/35">{label}</p>
       <p className="mt-2 text-2xl font-semibold text-[#C9A45C]">{value}</p>
     </div>
@@ -5520,7 +5520,7 @@ function SystemSection({
 
       <div className="grid gap-4 md:grid-cols-2">
         {checks.map(({ label, status, detail, icon: Icon }) => (
-          <div key={label} className="rounded-2xl border border-[#242424]/5 bg-[#111111] p-6 shadow-sm">
+          <div key={label} className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
             <div className="flex items-start justify-between gap-4">
               <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#111111]/10 text-[#C9A45C]"><Icon size={20} /></div>
               <span className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${
@@ -5533,7 +5533,7 @@ function SystemSection({
         ))}
       </div>
 
-      <div className="mt-6 rounded-2xl border border-[#242424]/5 bg-[#111111] p-6 shadow-sm">
+      <div className="mt-6 rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
         <div className="flex items-center gap-3"><Filter size={17} className="text-[#C9A45C]" /><h3 className="font-semibold">État global</h3></div>
         <div className="mt-4 rounded-xl bg-[#111111] p-4 text-sm">
           {errorCount === 0 && checks.length > 0 ? <span className="font-semibold text-[#C9A45C]">Tous les contrôles exécutés sont opérationnels.</span> : <span className="font-semibold text-[#a15c50]">{errorCount} contrôle{errorCount > 1 ? 's' : ''} nécessite{errorCount > 1 ? 'nt' : ''} une vérification.</span>}
