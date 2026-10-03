@@ -617,7 +617,7 @@ export function DashboardLayout() {
                     : 'text-[#F5F5DC]/40 hover:bg-[#111111] hover:text-[#F5F5DC]'
                 }`}
               >
-                <Icon size={18} strokeWidth={isActive => isActive ? 2 : 1.7} />
+                <Icon size={18} strokeWidth={1.8} />
                 <span className="max-w-[90px] truncate text-[8px] font-semibold">{localizedLabel(label)}</span>
               </NavLink>
             ))}
