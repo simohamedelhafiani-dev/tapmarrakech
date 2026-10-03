@@ -7,7 +7,7 @@ type KelyaniMarkProps = Omit<ImgHTMLAttributes<HTMLImageElement>, 'src' | 'alt' 
 export default function KelyaniMark({ size = 48, className, ...props }: KelyaniMarkProps) {
   return (
     <img
-      src="/logo"
+      src="/Logo Kelyani doré sur fond noir (1).png"
       alt="KELYANI"
       width={Math.round(size * 1.18)}
       height={size}
