@@ -42,14 +42,14 @@ function EvolutionCard({
   stroke: string;
 }) {
   return (
-    <div className="rounded-3xl border border-ink/5 bg-white p-5 shadow-soft">
+    <div className="rounded-3xl border border-[#242424] bg-[#111111] p-5 shadow-soft">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-forest/45">
             Évolution · 30 jours
           </p>
-          <h3 className="mt-1 text-base font-semibold text-ink">{title}</h3>
-          <p className="mt-1 text-xs text-ink/50">{description}</p>
+          <h3 className="mt-1 text-base font-semibold text-[#FFFFFF]">{title}</h3>
+          <p className="mt-1 text-xs text-[#FFFFFF]/50">{description}</p>
         </div>
       </div>
 
@@ -63,12 +63,12 @@ function EvolutionCard({
               </linearGradient>
             </defs>
 
-            <CartesianGrid strokeDasharray="3 3" stroke="#E8ECE8" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#242424" vertical={false} />
 
             <XAxis
               dataKey="date"
               tickFormatter={formatDate}
-              tick={{ fontSize: 10, fill: '#7B827D' }}
+              tick={{ fontSize: 10, fill: '#F5F5DC' }}
               axisLine={false}
               tickLine={false}
               minTickGap={24}
@@ -76,7 +76,7 @@ function EvolutionCard({
 
             <YAxis
               allowDecimals={false}
-              tick={{ fontSize: 10, fill: '#7B827D' }}
+              tick={{ fontSize: 10, fill: '#F5F5DC' }}
               axisLine={false}
               tickLine={false}
               width={32}
@@ -114,7 +114,7 @@ function EvolutionSkeleton() {
       {[0, 1].map((item) => (
         <div
           key={item}
-          className="rounded-3xl border border-ink/5 bg-white p-5 shadow-soft"
+          className="rounded-3xl border border-[#242424] bg-[#111111] p-5 shadow-soft"
         >
           <div className="h-3 w-28 animate-pulse rounded bg-ink/5" />
           <div className="mt-2 h-5 w-36 animate-pulse rounded bg-ink/5" />
@@ -141,10 +141,10 @@ export default function EvolutionCharts({
         <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-forest/45">
           Tendances
         </p>
-        <h2 className="mt-1 text-lg font-semibold text-ink">
+        <h2 className="mt-1 text-lg font-semibold text-[#FFFFFF]">
           Évolution de la plateforme
         </h2>
-        <p className="mt-1 text-sm text-ink/50">
+        <p className="mt-1 text-sm text-[#FFFFFF]/50">
           Suivi quotidien des avis reçus et des scans sur les 30 derniers jours.
         </p>
       </div>
@@ -155,7 +155,7 @@ export default function EvolutionCharts({
           description="Nombre d’avis créés chaque jour."
           data={reviewsData}
           dataKey="reviews"
-          stroke="#6366F1"
+          stroke="#C9A45C"
         />
 
         <EvolutionCard
@@ -163,7 +163,7 @@ export default function EvolutionCharts({
           description="Nombre de pages établissement consultées chaque jour."
           data={scansData}
           dataKey="scans"
-          stroke="#10B981"
+          stroke="#E1C27A"
         />
       </div>
     </section>
