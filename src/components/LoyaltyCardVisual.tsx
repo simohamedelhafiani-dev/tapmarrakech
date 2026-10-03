@@ -309,9 +309,22 @@ export function LoyaltyCardVisual({
                   <div style={{ marginTop: '3cqw', width: '100%', padding: '2.67cqw 3.33cqw', borderRadius: '3.33cqw', background: 'rgba(255,255,255,.08)', fontSize: '3cqw', lineHeight: 1.45, opacity: .82 }}>
                     {points >= Number(config.discountPointsThreshold ?? 1000)
                       ? card.discountExpiresAt
-                        ? `Seuil atteint · profitez de votre réduction jusqu’au ${new Date(card.discountExpiresAt).toLocaleDateString('fr-FR')}`
+                        ? (
+                          <>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '2cqw' }}>
+                              <span style={{ color: design.secondary_color, fontWeight: 900 }}>Réduction activée</span>
+                              <span style={{ fontSize: '2.5cqw', fontWeight: 800, opacity: .62 }}>ACHATS MULTIPLES</span>
+                            </div>
+                            <div style={{ marginTop: '1.33cqw', fontSize: '3.33cqw', fontWeight: 800 }}>
+                              Valable jusqu’au {new Date(card.discountExpiresAt).toLocaleDateString('fr-FR')}
+                            </div>
+                            <div style={{ marginTop: '.67cqw', fontSize: '2.5cqw', opacity: .58 }}>
+                              Profitez de -{discount}% sur vos achats jusqu’à cette date.
+                            </div>
+                          </>
+                        )
                         : `Seuil de ${Number(config.discountPointsThreshold ?? 1000).toLocaleString('fr-FR')} points atteint · votre réduction est disponible`
-                      : `Atteignez ${Number(config.discountPointsThreshold ?? 1000).toLocaleString('fr-FR')} points pour bénéficier de -${discount}%`}
+                      : `Atteignez ${Number(config.discountPointsThreshold ?? 1000).toLocaleString('fr-FR')} points pour débloquer -${discount}%`}
                   </div>
                 </>
               )}
