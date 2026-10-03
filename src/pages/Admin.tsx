@@ -2097,7 +2097,6 @@ function EstablishmentWorkspace({
     </div>
   </div>
       )}
-    </div>
   </>
   );
 }
