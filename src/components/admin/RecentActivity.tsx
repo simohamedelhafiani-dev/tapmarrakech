@@ -41,8 +41,8 @@ function getActivityIcon(type: ActivityEventType) {
 
 function getActivityIconClass(type: ActivityEventType): string {
   if (type === 'review') return 'bg-gold/15 text-[#8b6a20]';
-  if (type === 'loyalty_customer') return 'bg-forest/10 text-forest';
-  return 'bg-ink/5 text-ink/50';
+  if (type === 'loyalty_customer') return 'bg-[#C9A45C]/10 text-[#C9A45C]';
+  return 'bg-ink/5 text-[#FFFFFF]/50';
 }
 
 export default function RecentActivity({
@@ -53,21 +53,21 @@ export default function RecentActivity({
 }: RecentActivityProps) {
   return (
     <section
-      className="rounded-3xl border border-ink/5 bg-white p-6 shadow-soft"
+      className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-soft"
       aria-labelledby="recent-activity-title"
     >
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-forest/45">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A45C]/45">
             Activité
           </p>
-          <h3 id="recent-activity-title" className="mt-1 text-lg font-semibold text-ink">
+          <h3 id="recent-activity-title" className="mt-1 text-lg font-semibold text-[#FFFFFF]">
             Activité récente
           </h3>
         </div>
 
         {!loading && !error && events.length > 0 && (
-          <span className="rounded-full bg-forest/5 px-3 py-1.5 text-[10px] font-semibold text-forest">
+          <span className="rounded-full bg-[#C9A45C]/5 px-3 py-1.5 text-[10px] font-semibold text-[#C9A45C]">
             {events.length} activité{events.length > 1 ? 's' : ''}
           </span>
         )}
@@ -79,7 +79,7 @@ export default function RecentActivity({
             {[1, 2, 3, 4, 5].map((item) => (
               <div
                 key={item}
-                className="flex items-center gap-3 rounded-2xl border border-ink/5 p-3"
+                className="flex items-center gap-3 rounded-2xl border border-[#242424] p-3"
               >
                 <div className="h-10 w-10 shrink-0 animate-pulse rounded-xl bg-ink/5" />
                 <div className="min-w-0 flex-1 space-y-2">
@@ -91,28 +91,28 @@ export default function RecentActivity({
             ))}
           </div>
         ) : error ? (
-          <div className="rounded-2xl border border-red-100 bg-red-50/60 p-6 text-center">
-            <p className="text-sm font-semibold text-ink">
+          <div className="rounded-2xl border border-[#242424] bg-[#111111] p-6 text-center">
+            <p className="text-sm font-semibold text-[#FFFFFF]">
               Impossible de charger l'activité récente.
             </p>
             <button
               type="button"
               onClick={() => void onRetry()}
-              className="mt-3 inline-flex items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-forest-light"
+              className="mt-3 inline-flex items-center gap-2 rounded-xl bg-[#C9A45C] px-4 py-2.5 text-xs font-semibold text-[#050505] transition hover:bg-[#C9A45C]-light"
             >
               <RefreshCw size={14} />
               Réessayer
             </button>
           </div>
         ) : events.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-ink/10 bg-[#fbfbf8] p-8 text-center">
-            <div className="mx-auto grid h-11 w-11 place-items-center rounded-xl bg-forest/5 text-forest">
+          <div className="rounded-2xl border border-dashed border-ink/10 bg-[#111111] p-8 text-center">
+            <div className="mx-auto grid h-11 w-11 place-items-center rounded-xl bg-[#C9A45C]/5 text-[#C9A45C]">
               <RefreshCw size={18} />
             </div>
-            <p className="mt-3 text-sm font-semibold text-ink">
+            <p className="mt-3 text-sm font-semibold text-[#FFFFFF]">
               Aucune activité récente
             </p>
-            <p className="mt-1 text-xs text-ink/40">
+            <p className="mt-1 text-xs text-[#FFFFFF]/40">
               Les nouvelles activités de votre plateforme apparaîtront ici.
             </p>
           </div>
@@ -124,7 +124,7 @@ export default function RecentActivity({
               return (
                 <div
                   key={`${event.type}-${event.id}`}
-                  className="flex items-center gap-3 rounded-2xl border border-ink/5 p-3 transition hover:border-forest/10 hover:bg-[#fbfbf8]"
+                  className="flex items-center gap-3 rounded-2xl border border-[#242424] p-3 transition hover:border-[#242424] hover:bg-[#111111]"
                 >
                   <div
                     className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${getActivityIconClass(event.type)}`}
@@ -133,11 +133,11 @@ export default function RecentActivity({
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-xs font-semibold text-ink">
+                    <p className="truncate text-xs font-semibold text-[#FFFFFF]">
                       {event.title}
                     </p>
                     {event.description && (
-                      <p className="mt-0.5 truncate text-[11px] text-ink/40">
+                      <p className="mt-0.5 truncate text-[11px] text-[#FFFFFF]/40">
                         {event.description}
                       </p>
                     )}
@@ -145,7 +145,7 @@ export default function RecentActivity({
 
                   <time
                     dateTime={event.created_at}
-                    className="shrink-0 text-[10px] font-medium text-ink/35"
+                    className="shrink-0 text-[10px] font-medium text-[#FFFFFF]/35"
                     title={new Intl.DateTimeFormat('fr-FR', {
                       dateStyle: 'medium',
                       timeStyle: 'short',
