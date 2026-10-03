@@ -3617,7 +3617,6 @@ function ReviewAnalysisSection({
         </div>
       )}
     </div>
-    </div>
   );
 }
 
