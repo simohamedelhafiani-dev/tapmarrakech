@@ -153,6 +153,7 @@ export default function Employee() {
 
   const [showNewCustomer, setShowNewCustomer] = useState(false);
   const [showPoints, setShowPoints] = useState<LoyaltyCustomer | null>(null);
+  const [showDiscount, setShowDiscount] = useState<LoyaltyCustomer | null>(null);
   const [showRewards, setShowRewards] = useState<LoyaltyCustomer | null>(null);
   const [showCard, setShowCard] = useState<LoyaltyCustomer | null>(null);
   const [showCardLink, setShowCardLink] = useState('');
@@ -176,6 +177,9 @@ export default function Employee() {
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [invoiceAmount, setInvoiceAmount] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'CARD' | 'OTHER'>('CASH');
+  const [discountInvoiceNumber, setDiscountInvoiceNumber] = useState('');
+  const [discountAmount, setDiscountAmount] = useState('');
+  const [discountPaymentMethod, setDiscountPaymentMethod] = useState<'CASH' | 'CARD' | 'TRANSFER' | 'OTHER'>('CASH');
 
   useEffect(() => {
     if (!session || !scannerToken) {
@@ -706,6 +710,41 @@ export default function Employee() {
     popup.document.close();
   }
 
+  async function redeemDiscount() {
+    if (!employeeSupabase || !showDiscount) return;
+
+    const amount = Number(discountAmount);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      alert('Veuillez saisir un montant de facture valide.');
+      return;
+    }
+
+    setSaving(true);
+    const { data, error } = await employeeSupabase.rpc('redeem_loyalty_discount_by_employee', {
+      p_session_token: session?.session_token,
+      p_customer_id: showDiscount.id,
+      p_invoice_amount: amount,
+      p_invoice_number: discountInvoiceNumber.trim() || null,
+      p_payment_method: discountPaymentMethod,
+    });
+    setSaving(false);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    const row = Array.isArray(data) ? data[0] : data;
+    alert(
+      `Réduction appliquée : -${Number(row?.discount_amount ?? 0).toFixed(2)} ${settings.currency}.\n\nÀ payer : ${Number(row?.amount_paid ?? 0).toFixed(2)} ${settings.currency}.\nValable jusqu’au : ${row?.expires_at ? new Date(row.expires_at).toLocaleDateString('fr-FR') : '—'}`
+    );
+
+    setDiscountAmount('');
+    setDiscountInvoiceNumber('');
+    setDiscountPaymentMethod('CASH');
+    setShowDiscount(null);
+  }
+
   async function addPoints() {
     if (!employeeSupabase) return;
     if (!showPoints || !establishmentId) return;
@@ -908,11 +947,18 @@ export default function Employee() {
     } as LoyaltyCustomer);
 
     setShowScanner(false);
-    if (isStampProgram) setShowCard(customer);
-    else setShowPoints(customer);
+    if (isStampProgram) {
+      setShowCard(customer);
+    } else if (loyaltyProgram.program_type === 'DISCOUNT') {
+      setShowDiscount(customer);
+    } else {
+      setShowPoints(customer);
+    }
     setPurchaseAmount('');
     setPointsResponsibleCode('');
     setPointsInvoiceNumber('');
+    setDiscountAmount('');
+    setDiscountInvoiceNumber('');
   };
 
   const manualMatches = useMemo(() => {
@@ -1414,8 +1460,13 @@ export default function Employee() {
                   type="button"
                   onClick={() => {
                     setShowScanner(false);
-                    if (isStampProgram) setShowCard(customer);
-                    else setShowPoints(customer);
+                    if (isStampProgram) {
+                      setShowCard(customer);
+                    } else if (loyaltyProgram.program_type === 'DISCOUNT') {
+                      setShowDiscount(customer);
+                    } else {
+                      setShowPoints(customer);
+                    }
                     setManualCustomerSearch('');
                   }}
                   className="flex w-full items-center justify-between border-b border-ink/5 bg-white px-4 py-3 text-left last:border-0 hover:bg-[#f7f7f3]"
@@ -1512,6 +1563,101 @@ export default function Employee() {
           >
             <CheckCircle2 size={17} />
             {saving ? 'Validation...' : 'Valider les points'}
+          </button>
+        </Modal>
+      )}
+
+      {showDiscount && (
+        <Modal
+          title="Appliquer la réduction"
+          onClose={() => {
+            if (!saving) {
+              setShowDiscount(null);
+              setDiscountAmount('');
+              setDiscountInvoiceNumber('');
+              setDiscountPaymentMethod('CASH');
+            }
+          }}
+        >
+          <div className="rounded-2xl bg-[#f7f7f3] p-4">
+            <p className="text-xs text-ink/40">Client</p>
+            <p className="mt-1 font-semibold text-forest">
+              {showDiscount.first_name} {showDiscount.last_name ?? ''}
+            </p>
+            <p className="mt-1 text-xs text-ink/45">{showDiscount.phone}</p>
+            <p className="mt-1 text-xs font-medium text-forest/60">N° fidélité : {showDiscount.loyalty_number}</p>
+          </div>
+
+          <div className="mt-5 rounded-2xl border border-gold/20 bg-gold/5 p-4 text-center">
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Réduction active</p>
+            <p className="mt-1 text-4xl font-bold text-forest">Avantage fidélité</p>
+            <p className="mt-2 text-xs text-ink/50">La réduction reste utilisable sur plusieurs achats jusqu’à sa date d’expiration.</p>
+          </div>
+
+          <div className="mt-5 space-y-4">
+            <Field
+              icon={<Receipt size={16} />}
+              label={`Montant de la facture (${settings.currency})`}
+              value={discountAmount}
+              onChange={setDiscountAmount}
+              placeholder="500"
+              type="number"
+            />
+            <Field
+              icon={<Receipt size={16} />}
+              label="Numéro de facture (optionnel)"
+              value={discountInvoiceNumber}
+              onChange={setDiscountInvoiceNumber}
+              placeholder="FAC-2026-001"
+            />
+
+            <div>
+              <label className="mb-2 block text-xs font-semibold text-ink/50">Paiement</label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  ['CASH', 'Espèces'],
+                  ['CARD', 'Carte'],
+                  ['TRANSFER', 'Virement'],
+                  ['OTHER', 'Autre'],
+                ].map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setDiscountPaymentMethod(value as 'CASH' | 'CARD' | 'TRANSFER' | 'OTHER')}
+                    className={`rounded-xl border px-3 py-2.5 text-xs font-semibold ${
+                      discountPaymentMethod === value
+                        ? 'border-forest bg-forest/5 text-forest'
+                        : 'border-ink/10 text-ink/50'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {discountAmount && Number(discountAmount) > 0 && (
+              <div className="rounded-xl border border-forest/10 bg-forest/5 p-4 text-sm text-forest">
+                <div className="flex items-center justify-between">
+                  <span>Montant facture</span>
+                  <strong>{Number(discountAmount).toFixed(2)} {settings.currency}</strong>
+                </div>
+                <div className="mt-2 flex items-center justify-between">
+                  <span>Réduction</span>
+                  <strong className="text-gold">Calculée automatiquement</strong>
+                </div>
+                <p className="mt-2 text-xs text-ink/45">La carte reste active après cet achat.</p>
+              </div>
+            )}
+          </div>
+
+          <button
+            disabled={saving}
+            onClick={() => void redeemDiscount()}
+            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white disabled:opacity-50"
+          >
+            <CheckCircle2 size={17} />
+            {saving ? 'Validation...' : 'Appliquer la réduction'}
           </button>
         </Modal>
       )}
