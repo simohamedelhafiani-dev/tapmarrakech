@@ -108,11 +108,14 @@ export default function Login() {
 
           <div className="relative z-10 flex h-full flex-col">
             <div className="flex items-center justify-between">
-              <button type="button" onClick={() => navigate('/')} className="flex items-center gap-3">
-                <KelyaniMark size={46} />
-                <div className="text-left">
-                  <p className="font-display text-lg tracking-[0.08em] text-[#E1C27A]">KELYANI</p>
-                  <p className="text-[8px] font-semibold uppercase tracking-[0.28em] text-[#F5F5DC]/35">Customer intelligence</p>
+              <button type="button" onClick={() => navigate('/')} className="group flex items-center gap-4 text-left" aria-label="KELYANI">
+                <div className="relative shrink-0">
+                  <div className="absolute inset-0 rounded-[18px] bg-[#C9A45C]/10 blur-xl transition group-hover:bg-[#C9A45C]/20" />
+                  <KelyaniMark size={72} className="relative" />
+                </div>
+                <div className="leading-none">
+                  <p className="font-display text-[22px] font-semibold tracking-[0.07em] text-[#E1C27A]">KELYANI</p>
+                  <p className="mt-2 text-[8px] font-semibold uppercase tracking-[0.28em] text-[#C9A45C]/65">CUSTOMER INTELLIGENCE</p>
                 </div>
               </button>
               <label className="inline-flex items-center rounded-full border border-[#242424] bg-[#111111]/80 px-3 py-2 text-[10px] font-semibold text-[#F5F5DC]/65 backdrop-blur">
@@ -144,19 +147,26 @@ export default function Login() {
                 KELYANI réunit vos avis, votre fidélité et votre expérience client dans un seul espace de pilotage.
               </p>
 
-              <div className="mt-8 grid max-w-2xl grid-cols-2 gap-2.5 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
-                {[
-                  { icon: Star, label: 'Avis', value: 'Centralisés' },
-                  { icon: Users, label: 'Fidélité', value: 'Activée' },
-                  { icon: Heart, label: 'Expérience', value: 'Mesurée' },
-                  { icon: BarChart3, label: 'Performance', value: 'Pilotée' },
-                ].map(({ icon: Icon, label, value }) => (
-                  <div key={label} className="rounded-2xl border border-[#242424] bg-[#111111]/75 p-3.5 backdrop-blur-xl">
-                    <Icon size={17} className="text-[#C9A45C]" />
-                    <p className="mt-4 text-[11px] font-semibold text-white">{label}</p>
-                    <p className="mt-0.5 text-[9px] uppercase tracking-[0.12em] text-[#F5F5DC]/30">{value}</p>
-                  </div>
-                ))}
+              <div className="mt-9 grid max-w-2xl grid-cols-3 gap-3">
+                <div className="group rounded-[22px] border border-white/[0.07] bg-white/[0.025] p-4 backdrop-blur-xl transition hover:-translate-y-1 hover:border-[#C9A45C]/25">
+                  <Star size={18} className="text-[#C9A45C]" />
+                  <p className="mt-8 text-sm font-semibold text-white">Réputation</p>
+                  <p className="mt-1 text-[9px] uppercase tracking-[0.18em] text-white/30">Avis & réponses</p>
+                </div>
+                <div className="group rounded-[22px] border border-[#C9A45C]/20 bg-[#C9A45C]/[0.055] p-4 backdrop-blur-xl transition hover:-translate-y-1">
+                  <Heart size={18} className="text-[#C9A45C]" />
+                  <p className="mt-8 text-sm font-semibold text-white">Fidélité</p>
+                  <p className="mt-1 text-[9px] uppercase tracking-[0.18em] text-white/30">Clients réguliers</p>
+                </div>
+                <div className="group rounded-[22px] border border-white/[0.07] bg-white/[0.025] p-4 backdrop-blur-xl transition hover:-translate-y-1 hover:border-[#C9A45C]/25">
+                  <BarChart3 size={18} className="text-[#C9A45C]" />
+                  <p className="mt-8 text-sm font-semibold text-white">Pilotage</p>
+                  <p className="mt-1 text-[9px] uppercase tracking-[0.18em] text-white/30">Une seule vision</p>
+                </div>
+              </div>
+              <div className="mt-6 flex max-w-2xl items-center gap-3 rounded-[22px] border border-white/[0.06] bg-white/[0.02] px-5 py-4">
+                <div className="h-2 w-2 rounded-full bg-[#C9A45C] shadow-[0_0_14px_rgba(201,164,92,.7)]" />
+                <p className="text-xs text-white/45">Une plateforme pensée pour transformer chaque interaction en relation durable.</p>
               </div>
 
               <div className="mt-8 hidden items-center gap-4 text-[10px] uppercase tracking-[0.16em] text-[#F5F5DC]/25 lg:flex">
@@ -167,8 +177,8 @@ export default function Login() {
         </section>
 
         <section className="flex flex-1 items-center justify-center px-4 py-8 sm:px-8 lg:px-12 xl:px-16">
-          <div className="w-full max-w-[480px]">
-            <div className="mb-7">
+          <div className="w-full max-w-[500px]">
+            <div className="mb-7 rounded-[28px] border border-white/[0.06] bg-white/[0.018] p-7 backdrop-blur-xl sm:p-8">
               <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-[#C9A45C]">Espace sécurisé</p>
               <h2 className="mt-2 font-display text-3xl tracking-[-0.035em] text-white sm:text-4xl">
                 {selectedRole ? 'Bienvenue dans KELYANI' : 'Accédez à votre espace'}
