@@ -264,16 +264,115 @@ export function LoyaltyCardVisual({
                   </div>
                 </>
               )}
-              {mode === 'POINTS' && (card.rewardName || config.rewardName) && (
-                <div style={{ marginTop: '4cqw', width: '100%', padding: '2.67cqw 3.33cqw', borderRadius: '3.33cqw', border: `1px solid ${design.secondary_color}55`, background: `${design.secondary_color}12`, textAlign: 'left' }}>
-                  <div style={{ fontSize: '2.67cqw', letterSpacing: '.16em', textTransform: 'uppercase', color: design.secondary_color, fontWeight: 800 }}>Prochaine récompense</div>
-                  <div style={{ marginTop: '1cqw', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '2cqw' }}>
-                    <span style={{ fontSize: '3.67cqw', fontWeight: 800 }}>{card.rewardName || config.rewardName}</span>
-                    {card.rewardPointsRequired != null && <span style={{ flex: '0 0 auto', fontSize: '2.67cqw', fontWeight: 800, color: design.secondary_color }}>{card.rewardPointsRequired.toLocaleString('fr-FR')} pts</span>}
+              {mode === 'POINTS' && (card.rewardName || config.rewardName) && (() => {
+                const rewardName = card.rewardName || config.rewardName || 'Récompense fidélité';
+                const rewardPoints = card.rewardPointsRequired ?? null;
+                const rewardAvailable = rewardPoints != null && points >= rewardPoints;
+                const rewardProgress = rewardPoints != null && rewardPoints > 0
+                  ? Math.min(1, points / rewardPoints)
+                  : 0;
+
+                return (
+                  <div
+                    style={{
+                      marginTop: '4cqw',
+                      width: '100%',
+                      padding: '3.33cqw',
+                      borderRadius: '5.33cqw',
+                      border: `1px solid ${design.secondary_color}66`,
+                      background: `linear-gradient(135deg, ${design.secondary_color}22 0%, rgba(255,255,255,.08) 52%, ${design.primary_color}28 100%)`,
+                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,.18), 0 12px 28px rgba(0,0,0,.14)',
+                      backdropFilter: 'blur(10px)',
+                      WebkitBackdropFilter: 'blur(10px)',
+                      textAlign: 'left',
+                      boxSizing: 'border-box',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '2.67cqw' }}>
+                      <div
+                        style={{
+                          width: '10.67cqw',
+                          height: '10.67cqw',
+                          flex: '0 0 10.67cqw',
+                          display: 'grid',
+                          placeItems: 'center',
+                          borderRadius: '3.33cqw',
+                          background: `linear-gradient(145deg, ${design.secondary_color}38, ${design.secondary_color}12)`,
+                          border: `1px solid ${design.secondary_color}66`,
+                          color: design.secondary_color,
+                          fontSize: '5.33cqw',
+                          boxShadow: `0 6px 16px ${design.primary_color}35`,
+                        }}
+                      >
+                        🎁
+                      </div>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ fontSize: '2.33cqw', letterSpacing: '.17em', textTransform: 'uppercase', color: design.secondary_color, fontWeight: 900 }}>
+                          {rewardAvailable ? 'Récompense disponible' : 'Prochaine récompense'}
+                        </div>
+                        <div style={{ marginTop: '.67cqw', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '4.33cqw', fontWeight: 850, letterSpacing: '-.02em' }}>
+                          {rewardName}
+                        </div>
+                      </div>
+                      {rewardPoints != null && (
+                        <div
+                          style={{
+                            flex: '0 0 auto',
+                            padding: '1.67cqw 2.33cqw',
+                            borderRadius: '999px',
+                            background: rewardAvailable ? `${design.secondary_color}30` : 'rgba(255,255,255,.10)',
+                            border: `1px solid ${design.secondary_color}55`,
+                            color: rewardAvailable ? design.secondary_color : design.text_color,
+                            fontSize: '2.33cqw',
+                            fontWeight: 900,
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {rewardPoints.toLocaleString('fr-FR')} pts
+                        </div>
+                      )}
+                    </div>
+
+                    {card.rewardDescription && (
+                      <div style={{ marginTop: '2.67cqw', fontSize: '2.67cqw', lineHeight: 1.45, opacity: .68 }}>
+                        {card.rewardDescription}
+                      </div>
+                    )}
+
+                    {rewardPoints != null && (
+                      <div style={{ marginTop: '2.67cqw' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.33cqw', fontSize: '2.33cqw', opacity: .62 }}>
+                          <span>{rewardAvailable ? 'Vous pouvez la réclamer' : 'Votre progression'}</span>
+                          <span style={{ fontWeight: 800 }}>{points.toLocaleString('fr-FR')} / {rewardPoints.toLocaleString('fr-FR')}</span>
+                        </div>
+                        <div style={{ width: '100%', height: '1.33cqw', borderRadius: '999px', background: 'rgba(255,255,255,.13)', overflow: 'hidden' }}>
+                          <div
+                            style={{
+                              width: `${Math.max(4, rewardProgress * 100)}%`,
+                              height: '100%',
+                              borderRadius: '999px',
+                              background: `linear-gradient(90deg, ${design.secondary_color}99, ${design.secondary_color})`,
+                              boxShadow: `0 0 12px ${design.secondary_color}66`,
+                              transition: 'width .3s ease',
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    <div style={{ marginTop: '2.67cqw', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '2cqw' }}>
+                      <span style={{ fontSize: '2.33cqw', opacity: .48 }}>
+                        {rewardAvailable ? '🎉 Félicitations !' : 'Continuez à cumuler vos points'}
+                      </span>
+                      {rewardAvailable && (
+                        <span style={{ fontSize: '2.33cqw', fontWeight: 900, color: design.secondary_color }}>
+                          DISPONIBLE
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  {card.rewardDescription && <div style={{ marginTop: '1cqw', fontSize: '2.67cqw', opacity: .58 }}>{card.rewardDescription}</div>}
-                </div>
-              )}
+                );
+              })()}
             </>
           )}
 
