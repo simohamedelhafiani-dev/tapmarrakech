@@ -862,7 +862,10 @@ export default function Dashboard() {
           : 'Compte';
 
   if (loading) {
-    return (
+    return <div className="h-72 animate-pulse rounded-[28px] border border-[#242424] bg-[#111111]" />;
+  }
+
+  return (
     <div className="min-h-screen space-y-5 pb-6">
       <section className="relative overflow-hidden rounded-[28px] border border-[#242424] bg-[#111111] p-5 sm:p-7">
         <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full border border-[#C9A45C]/10" />
@@ -870,11 +873,11 @@ export default function Dashboard() {
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full border border-[#C9A45C]/20 bg-[#C9A45C]/[0.06] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-[#E1C27A]">${roleLabel}</span>
+                <span className="rounded-full border border-[#C9A45C]/20 bg-[#C9A45C]/[0.06] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-[#E1C27A]">{roleLabel}</span>
                 {establishmentName && <span className="truncate rounded-full border border-[#242424] bg-[#050505] px-2.5 py-1 text-[9px] font-semibold text-[#F5F5DC]/45">{establishmentName}</span>}
               </div>
               <h1 className="mt-4 max-w-3xl font-display text-3xl leading-[1.02] tracking-[-0.035em] text-white sm:text-5xl">Faites de chaque client <span className="text-[#C9A45C]">un client régulier.</span></h1>
-              <p className="mt-3 max-w-xl text-sm leading-6 text-[#F5F5DC]/40">Bonjour ${profileName || "à vous"}. Votre activité, vos clients et vos avis — réunis dans une interface simple.</p>
+              <p className="mt-3 max-w-xl text-sm leading-6 text-[#F5F5DC]/40">Bonjour {profileName || 'à vous'}. Votre activité, vos clients et vos avis — réunis dans une interface simple.</p>
             </div>
             <div className="flex w-full flex-col gap-2 sm:w-auto">
               {places.length > 0 && <select value={selectedEstablishmentId ?? ''} onChange={(event) => changeEstablishment(event.target.value)} className="h-11 min-w-[210px] rounded-2xl border border-[#242424] bg-[#050505] px-3 text-xs font-semibold text-white outline-none focus:border-[#C9A45C]/55" aria-label="Établissement actif">{places.map((place) => <option className="bg-[#111111]" key={place.id} value={place.id}>{place.name}</option>)}</select>}
