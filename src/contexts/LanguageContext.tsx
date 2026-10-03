@@ -412,7 +412,6 @@ const expandedUiTranslations: Record<string, { en: string; ar: string }> = {
   'Prix': { en: 'Price', ar: 'السعر' },
   'Prix normal': { en: 'Regular price', ar: 'السعر العادي' },
   'Prix promo': { en: 'Promotional price', ar: 'السعر الترويجي' },
-  'Description': { en: 'Description', ar: 'الوصف' },
   'Catégorie': { en: 'Category', ar: 'الفئة' },
   'Catégories': { en: 'Categories', ar: 'الفئات' },
   'Produit': { en: 'Product', ar: 'المنتج' },
