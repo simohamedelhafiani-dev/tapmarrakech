@@ -455,7 +455,7 @@ export function DashboardLayout() {
 
   return (
     <div
-      className="min-h-screen bg-[#050505] text-[#FFFFFF]"
+      className="dashboard-depth-shell min-h-screen bg-[#050505] text-[#FFFFFF]"
       style={{ ['--app-primary' as string]: subscriptionTheme.primary, ['--app-primary-hover' as string]: subscriptionTheme.primaryHover, ['--app-accent' as string]: subscriptionTheme.accent }}
     >
       {open && (
@@ -467,7 +467,7 @@ export function DashboardLayout() {
       )}
 
       <div className="min-h-screen">
-        <header className="sticky top-0 z-50 border-b border-[#242424] bg-[#050505]/95 px-3 py-3 backdrop-blur-2xl sm:px-5">
+        <header className="dashboard-depth-topbar sticky top-0 z-50 border-b border-[#242424] bg-[#050505]/95 px-3 py-3 backdrop-blur-2xl sm:px-5">
           <div className="mx-auto flex max-w-[1700px] items-center gap-3">
             <button type="button" onClick={() => navigate('/dashboard')} className="flex shrink-0 items-center gap-3" aria-label="KELYANI">
               <KelyaniMark size={72} />
@@ -596,11 +596,11 @@ export function DashboardLayout() {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-[1700px] px-3 pb-28 pt-6 sm:px-5 md:px-8 lg:px-10 lg:pt-8">
+        <main className="dashboard-depth-main mx-auto w-full max-w-[1700px] px-3 pb-28 pt-6 sm:px-5 md:px-8 lg:px-10 lg:pt-8">
           <Outlet />
         </main>
 
-        <nav className="fixed inset-x-0 bottom-0 z-[60] border-t border-[#242424] bg-[#050505]/96 px-2 pb-[max(8px,env(safe-area-inset-bottom))] pt-2 backdrop-blur-2xl">
+        <nav className="dashboard-depth-nav fixed inset-x-0 bottom-0 z-[60] border-t border-[#242424] bg-[#050505]/96 px-2 pb-[max(8px,env(safe-area-inset-bottom))] pt-2 backdrop-blur-2xl">
           <div className="mx-auto flex max-w-[1100px] items-center justify-start gap-1 overflow-x-auto scrollbar-none">
             {links.map(({ to, label, icon: Icon, end }) => (
               <NavLink
