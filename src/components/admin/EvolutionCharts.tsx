@@ -45,7 +45,7 @@ function EvolutionCard({
     <div className="rounded-3xl border border-[#242424] bg-[#111111] p-5 shadow-soft">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-forest/45">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A45C]/70">
             Évolution · 30 jours
           </p>
           <h3 className="mt-1 text-base font-semibold text-[#FFFFFF]">{title}</h3>
@@ -116,10 +116,10 @@ function EvolutionSkeleton() {
           key={item}
           className="rounded-3xl border border-[#242424] bg-[#111111] p-5 shadow-soft"
         >
-          <div className="h-3 w-28 animate-pulse rounded bg-ink/5" />
-          <div className="mt-2 h-5 w-36 animate-pulse rounded bg-ink/5" />
-          <div className="mt-1 h-3 w-48 animate-pulse rounded bg-ink/5" />
-          <div className="mt-5 h-[250px] animate-pulse rounded-2xl bg-ink/[0.025]" />
+          <div className="h-3 w-28 animate-pulse rounded bg-[#242424]" />
+          <div className="mt-2 h-5 w-36 animate-pulse rounded bg-[#242424]" />
+          <div className="mt-1 h-3 w-48 animate-pulse rounded bg-[#242424]" />
+          <div className="mt-5 h-[250px] animate-pulse rounded-2xl bg-[#111111]" />
         </div>
       ))}
     </div>
@@ -138,7 +138,7 @@ export default function EvolutionCharts({
   return (
     <section aria-label="Évolution de la plateforme">
       <div className="mb-4">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-forest/45">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A45C]/70">
           Tendances
         </p>
         <h2 className="mt-1 text-lg font-semibold text-[#FFFFFF]">
