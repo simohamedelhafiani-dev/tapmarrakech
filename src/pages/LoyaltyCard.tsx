@@ -351,7 +351,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
       setLoading(false);
 
       if (standalone) {
-        document.body.style.background = '#f7f7f3';
+        document.body.style.background = '#050505';
       }
     };
 
@@ -554,7 +554,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
   if (!card) {
     return (
       <PageShell>
-        <div className="rounded-[2rem] bg-white p-8 text-center shadow-xl">
+        <div className="rounded-[2rem] border border-white/10 bg-[#111111] p-8 text-center shadow-luxury">
           <h1 className="font-display text-2xl text-forest">Carte indisponible</h1>
           <p className="mt-2 text-sm text-ink/50">{error}</p>
         </div>
@@ -587,11 +587,11 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
     rewardName?: string;
   };
   return (
-    <main className="min-h-screen bg-[#eef0ed] px-3 py-5 sm:px-6 sm:py-8">
+    <main className="min-h-screen bg-[#050505] px-3 py-5 text-[#EDE9DF] sm:px-6 sm:py-8">
       <div className="flex w-full flex-col items-center gap-4">
         <div className="w-full max-w-[430px]">
         {showWelcome && (
-          <div className="mb-4 flex items-center gap-3 rounded-2xl border border-[#D6B15A]/30 bg-white px-4 py-3 shadow-[0_10px_30px_rgba(23,61,50,0.08)]">
+          <div className="mb-4 flex items-center gap-3 rounded-2xl border border-[#C9A45C]/20 bg-[#111111] px-4 py-3 shadow-soft">
             <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#e7f1eb] text-[#173D32]">
               <Gift className="h-4 w-4" />
             </div>
@@ -643,6 +643,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                 cardUrl: cardUrl,
               }}
               programType={mode}
+              cardWidth="300px"
             />
           </div>
         </div>
@@ -672,14 +673,14 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
           <button
             type="button"
             onClick={() => void saveCardOnPhone()}
-            className="mt-4 flex w-full items-center justify-center gap-3 rounded-2xl bg-[#D6B15A] px-5 py-4 text-sm font-semibold text-[#17130f] shadow-lg transition hover:brightness-105"
+            className="mt-4 flex w-full items-center justify-center gap-3 rounded-2xl bg-gold-gradient px-5 py-4 text-sm font-semibold text-[#050505] shadow-gold transition hover:brightness-105"
           >
             <span className="text-lg">▣</span>
             Enregistrer ma carte sur mon téléphone
           </button>
         )}
 
-        <p className="mt-2 text-center text-[10px] text-ink/40">Ajoutez-la à votre écran d’accueil ou partagez votre carte.</p>
+        <p className="mt-2 text-center text-[10px] text-white/35">Ajoutez-la à votre écran d’accueil ou partagez votre carte.</p>
 
         {referralOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#10231d]/55 p-3 backdrop-blur-sm sm:p-6">
@@ -687,7 +688,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
               role="dialog"
               aria-modal="true"
               aria-labelledby="public-referral-title"
-              className="flex h-[40vh] max-h-[40vh] w-full max-w-[430px] flex-col overflow-hidden rounded-[2rem] bg-[#F7F7F3] shadow-2xl"
+              className="flex h-[40vh] max-h-[40vh] w-full max-w-[430px] flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-[#111111] shadow-luxury"
             >
               <div
                 className="relative shrink-0 px-6 pb-4 pt-4"
@@ -759,7 +760,7 @@ function withLiveVersion(url: string, version: number) {
 }
 
 function PageShell({ children }: { children: ReactNode }) {
-  return <main className="min-h-screen bg-[#f7f7f3] px-4 py-6 sm:py-10"><div className="mx-auto w-full max-w-md">{children}</div></main>;
+  return <main className="min-h-screen bg-[#050505] px-4 py-6 text-[#EDE9DF] sm:py-10"><div className="mx-auto w-full max-w-md">{children}</div></main>;
 }
 
 function Loader() {
