@@ -100,6 +100,7 @@ export default function PublicReview() {
     last_name: '',
     phone: '',
     birth_date: '',
+    email: '',
   });
 
   const [reviewError, setReviewError] = useState('');
