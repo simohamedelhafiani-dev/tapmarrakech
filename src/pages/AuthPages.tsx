@@ -7,4 +7,61 @@ function AuthShell({ children, title, eyebrow }: { children: React.ReactNode; ti
 function Field({ icon: Icon, ...props }: { icon: typeof Mail } & React.InputHTMLAttributes<HTMLInputElement>) { return <div className="relative"><Icon size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/30" /><input {...props} className="w-full rounded-xl border border-ink/10 bg-white py-3 pl-10 pr-3 text-sm outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/20" /></div>; }
 export function Login() { const navigate = useNavigate(); const location = useLocation(); const [email, setEmail] = useState(''); const [password, setPassword] = useState(''); const [error, setError] = useState(''); const [busy, setBusy] = useState(false); const submit = async (e: React.FormEvent) => { e.preventDefault(); setBusy(true); setError(''); const { error: authError } = await supabase.auth.signInWithPassword({ email: email.trim(), password }); if (authError) setError(authError.message.includes('Invalid login credentials') ? 'Email ou mot de passe incorrect.' : 'La connexion à Supabase a échoué. Vérifiez les variables Vercel et réessayez.'); else navigate(location.state?.from?.pathname || '/dashboard'); setBusy(false); }; return <AuthShell eyebrow="Espace professionnel" title="Bon retour."><form onSubmit={submit} className="mt-9 space-y-4"><Field icon={Mail} type="email" required placeholder="Adresse email" value={email} onChange={e => setEmail(e.target.value)} /><Field icon={LockKeyhole} type="password" required placeholder="Mot de passe" value={password} onChange={e => setPassword(e.target.value)} />{error && <p className="text-sm text-red-600">{error}</p>}<button disabled={busy} className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white transition hover:bg-forest-light disabled:opacity-50">{busy ? 'Connexion…' : 'Se connecter'} <ArrowRight size={16} /></button></form><div className="mt-5 flex justify-between text-xs"><Link to="/forgot-password" className="text-forest underline underline-offset-4">Mot de passe oublié ?</Link><Link to="/register" className="font-semibold text-gold">Créer un compte</Link></div></AuthShell>; }
 export function Register() { const navigate = useNavigate(); const [form, setForm] = useState({ name: '', email: '', password: '' }); const [error, setError] = useState(''); const submit = async (e: React.FormEvent) => { e.preventDefault(); setError(''); const { data, error: authError } = await supabase.auth.signUp({ email: form.email.trim(), password: form.password }); if (authError) { setError(authError.message.includes('already') ? 'Un compte existe déjà avec cet email.' : 'Impossible de créer le compte.'); return; } if (data.user && data.session) { const { error: profileError } = await supabase.from('profiles').insert({ id: data.user.id, email: form.email.trim(), name: form.name.trim() }); if (profileError) { setError('Le compte est créé mais le profil n’a pas pu être enregistré.'); return; } navigate('/dashboard'); } else { setError('Compte créé. Vérifiez votre email avant de vous connecter.'); } }; return <AuthShell eyebrow="Commencer simplement" title="Créez votre espace."><form onSubmit={submit} className="mt-9 space-y-4"><Field icon={UserRound} required placeholder="Votre nom" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /><Field icon={Mail} type="email" required placeholder="Adresse email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} /><Field icon={LockKeyhole} type="password" minLength={6} required placeholder="Mot de passe (6 caractères minimum)" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />{error && <p className="text-sm text-red-600">{error}</p>}<button className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white transition hover:bg-forest-light">Créer mon compte <ArrowRight size={16} /></button></form><p className="mt-5 text-center text-xs text-ink/50">Déjà inscrit ? <Link to="/login" className="font-semibold text-gold">Se connecter</Link></p></AuthShell>; }
-export function ForgotPassword() { const [email, setEmail] = useState(''); const [sent, setSent] = useState(false); const submit = async (e: React.FormEvent) => { e.preventDefault(); await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/login` }); setSent(true); }; return <AuthShell eyebrow="Accès sécurisé" title="Réinitialiser l’accès.">{sent ? <div className="mt-9 rounded-2xl bg-white p-5 text-sm text-ink/70"><Check className="mb-2 text-forest" />Si un compte correspond à cette adresse, vous recevrez un email avec les instructions.</div> : <form onSubmit={submit} className="mt-9 space-y-4"><Field icon={Mail} type="email" required placeholder="Adresse email" value={email} onChange={e => setEmail(e.target.value)} /><button className="w-full rounded-xl bg-forest py-3.5 text-sm font-semibold text-white transition hover:bg-forest-light">Recevoir le lien</button><Link to="/login" className="block text-center text-xs text-gold">Retour à la connexion</Link></form>}</AuthShell>; }
+export function ForgotPassword() { const [email, setEmail] = useState(''); const [sent, setSent] = useState(false); const submit = async (e: React.FormEvent) => { e.preventDefault(); await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` }); setSent(true); }; return <AuthShell eyebrow="Accès sécurisé" title="Réinitialiser l’accès.">{sent ? <div className="mt-9 rounded-2xl bg-white p-5 text-sm text-ink/70"><Check className="mb-2 text-forest" />Si un compte correspond à cette adresse, vous recevrez un email avec les instructions.</div> : <form onSubmit={submit} className="mt-9 space-y-4"><Field icon={Mail} type="email" required placeholder="Adresse email" value={email} onChange={e => setEmail(e.target.value)} /><button className="w-full rounded-xl bg-forest py-3.5 text-sm font-semibold text-white transition hover:bg-forest-light">Recevoir le lien</button><Link to="/login" className="block text-center text-xs text-gold">Retour à la connexion</Link></form>}</AuthShell>; }
+
+
+export function ResetPassword() {
+  const navigate = useNavigate();
+  const [password, setPassword] = useState('');
+  const [confirmation, setConfirmation] = useState('');
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [updated, setUpdated] = useState(false);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (password.length < 6) {
+      setError('Le mot de passe doit contenir au moins 6 caractères.');
+      return;
+    }
+
+    if (password !== confirmation) {
+      setError('Les deux mots de passe ne correspondent pas.');
+      return;
+    }
+
+    setSaving(true);
+    const { error: updateError } = await supabase.auth.updateUser({ password });
+    setSaving(false);
+
+    if (updateError) {
+      setError('Le lien de réinitialisation est invalide ou expiré. Demandez un nouveau lien.');
+      return;
+    }
+
+    setUpdated(true);
+    setTimeout(() => navigate('/login', { replace: true }), 1200);
+  };
+
+  return (
+    <AuthShell eyebrow="Accès sécurisé" title="Définir un nouveau mot de passe.">
+      {updated ? (
+        <div className="mt-9 rounded-2xl bg-white p-5 text-sm text-ink/70">
+          <Check className="mb-2 text-forest" />
+          Votre mot de passe a été mis à jour. Redirection vers la connexion…
+        </div>
+      ) : (
+        <form onSubmit={submit} className="mt-9 space-y-4">
+          <Field icon={LockKeyhole} type="password" minLength={6} required placeholder="Nouveau mot de passe" value={password} onChange={e => setPassword(e.target.value)} />
+          <Field icon={LockKeyhole} type="password" minLength={6} required placeholder="Confirmer le mot de passe" value={confirmation} onChange={e => setConfirmation(e.target.value)} />
+          {error && <p className="text-sm text-red-600">{error}</p>}
+          <button disabled={saving} className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white transition hover:bg-forest-light disabled:opacity-50">
+            {saving ? 'Mise à jour…' : 'Enregistrer le nouveau mot de passe'} <ArrowRight size={16} />
+          </button>
+        </form>
+      )}
+    </AuthShell>
+  );
+}
