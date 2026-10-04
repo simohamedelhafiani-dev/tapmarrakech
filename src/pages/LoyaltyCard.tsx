@@ -546,6 +546,16 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         },
         scheduleRefresh,
       )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'loyalty_card_notifications',
+          filter: `customer_id=eq.${card.customer_id}`,
+        },
+        scheduleRefresh,
+      )
       .subscribe();
 
     // Realtime is the primary path. This lightweight fallback only protects
