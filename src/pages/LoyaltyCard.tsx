@@ -669,31 +669,10 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                 cardUrl: cardUrl,
               }}
               programType={mode}
-              cardWidth="min(90vw, calc((100svh - 220px) * 0.666667))"
+              cardWidth="min(90vw, calc((100svh - 125px) * 0.666667))"
             />
           </div>
         </div>
-
-        {program.referral_enabled && cardSaved && (
-          <button
-            type="button"
-            onClick={() => void openReferral()}
-            className="mt-4 flex w-full items-center justify-center gap-3 rounded-2xl px-5 py-4 text-sm font-semibold shadow-[0_10px_30px_rgba(23,61,50,0.14)] transition hover:-translate-y-0.5 hover:shadow-lg"
-            style={{
-              backgroundColor: design.primary_color,
-              color: design.text_color,
-              border: `1px solid ${design.secondary_color}`,
-            }}
-          >
-            <span
-              className="grid h-9 w-9 place-items-center rounded-full"
-              style={{ backgroundColor: design.secondary_color, color: design.primary_color }}
-            >
-              <Gift className="h-4 w-4" />
-            </span>
-            <span>🎁 Inviter un ami</span>
-          </button>
-        )}
 
         {notifications.length > 0 && (
           <section className="mt-4 overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#111111] shadow-luxury">
@@ -761,27 +740,6 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
               ))}
             </div>
           </section>
-        )}
-
-        {program.referral_enabled && cardSaved && (
-          <button
-            type="button"
-            onClick={() => void openReferral()}
-            className="mt-4 flex w-full items-center justify-center gap-3 rounded-2xl px-5 py-4 text-sm font-semibold shadow-[0_10px_30px_rgba(23,61,50,0.14)] transition hover:-translate-y-0.5 hover:shadow-lg"
-            style={{
-              backgroundColor: design.primary_color,
-              color: design.text_color,
-              border: `1px solid ${design.secondary_color}`,
-            }}
-          >
-            <span
-              className="grid h-9 w-9 place-items-center rounded-full"
-              style={{ backgroundColor: design.secondary_color, color: design.primary_color }}
-            >
-              <Gift className="h-4 w-4" />
-            </span>
-            <span>🎁 Inviter un ami</span>
-          </button>
         )}
 
         {!isInstalled && (
