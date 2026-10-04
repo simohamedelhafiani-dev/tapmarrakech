@@ -199,30 +199,6 @@ export default function Admin() {
     });
   }, [establishmentListLoading, establishmentList, establishmentListError]);
 
-  useEffect(() => {
-    if (!establishments.length) {
-      setSelectedEstablishmentId(null);
-      return;
-    }
-
-    if (selectedEstablishmentId && establishments.some((establishment) => establishment.id === selectedEstablishmentId)) {
-      return;
-    }
-
-    // Quand aucun établissement n'est encore sélectionné, privilégier celui
-    // dont le programme fidélité est actif afin d'éviter de générer un QR
-    // d'inscription pour un établissement désactivé.
-    void (async () => {
-      const { data } = await supabase
-        .from('loyalty_settings')
-        .select('establishment_id,enabled')
-        .in('establishment_id', establishments.map((establishment) => establishment.id))
-        .eq('enabled', true)
-        .limit(1);
-
-      setSelectedEstablishmentId(data?.[0]?.establishment_id ?? establishments[0].id);
-    })();
-  }, [establishments, selectedEstablishmentId]);
 
   const [staffLoading, setStaffLoading] = useState(true);
 
