@@ -189,6 +189,9 @@ export default function Admin() {
 
   const [selectedEstablishmentId, setSelectedEstablishmentId] = useState<string | null>(null);
   const [showCreateEstablishmentForm, setShowCreateEstablishmentForm] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Array<{ id: string; type: 'establishment' | 'customer' | 'review'; title: string; subtitle: string; establishmentId?: string }>>([]);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   useEffect(() => {
     console.log('[Establishments] HOOK DATA:', {
@@ -199,30 +202,36 @@ export default function Admin() {
     });
   }, [establishmentListLoading, establishmentList, establishmentListError]);
 
+
   useEffect(() => {
-    if (!establishments.length) {
-      setSelectedEstablishmentId(null);
-      return;
-    }
+    let active = true;
+    const query = searchQuery.trim();
+    if (query.length < 2) { setSearchResults([]); return; }
+    const timer = window.setTimeout(async () => {
+      const safeQuery = query.replace(/[(),]/g, ' ').replace(/\\s+/g, ' ').trim();
+      const pattern = `%${safeQuery}%`;
+      const [establishmentResponse, customerResponse, reviewResponse] = await Promise.all([
+        supabase.from('establishments').select('id,name,slug,city').or(`name.ilike.${pattern},slug.ilike.${pattern},city.ilike.${pattern}`).order('created_at', { ascending: false }).limit(5),
+        supabase.from('loyalty_customers').select('id,first_name,last_name,phone,loyalty_number,establishment_id').or(`first_name.ilike.${pattern},last_name.ilike.${pattern},phone.ilike.${pattern},loyalty_number.ilike.${pattern}`).order('created_at', { ascending: false }).limit(5),
+        supabase.from('reviews').select('id,name,comment,rating,establishment_id').or(`name.ilike.${pattern},comment.ilike.${pattern}`).order('created_at', { ascending: false }).limit(5),
+      ]);
+      if (!active) return;
+      const establishmentResults = (establishmentResponse.data ?? []).map(item => ({ id: item.id, type: 'establishment' as const, title: item.name, subtitle: 'Établissement', establishmentId: item.id }));
+      const customerResults = (customerResponse.data ?? []).map(item => ({ id: item.id, type: 'customer' as const, title: [item.first_name, item.last_name].filter(Boolean).join(' ') || 'Client', subtitle: item.phone || item.loyalty_number || 'Client fidélité', establishmentId: item.establishment_id }));
+      const reviewResults = (reviewResponse.data ?? []).map(item => ({ id: item.id, type: 'review' as const, title: item.name || 'Avis client', subtitle: `Note ${item.rating}/5 · ${String(item.comment || '').slice(0, 55)}`, establishmentId: item.establishment_id }));
+      setSearchResults([...establishmentResults, ...customerResults, ...reviewResults].slice(0, 10));
+    }, 220);
+    return () => { active = false; window.clearTimeout(timer); };
+  }, [searchQuery]);
 
-    if (selectedEstablishmentId && establishments.some((establishment) => establishment.id === selectedEstablishmentId)) {
-      return;
-    }
-
-    // Quand aucun établissement n'est encore sélectionné, privilégier celui
-    // dont le programme fidélité est actif afin d'éviter de générer un QR
-    // d'inscription pour un établissement désactivé.
-    void (async () => {
-      const { data } = await supabase
-        .from('loyalty_settings')
-        .select('establishment_id,enabled')
-        .in('establishment_id', establishments.map((establishment) => establishment.id))
-        .eq('enabled', true)
-        .limit(1);
-
-      setSelectedEstablishmentId(data?.[0]?.establishment_id ?? establishments[0].id);
-    })();
-  }, [establishments, selectedEstablishmentId]);
+  const selectSearchResult = (result: { type: 'establishment' | 'customer' | 'review'; establishmentId?: string }) => {
+    if (result.establishmentId) setSelectedEstablishmentId(result.establishmentId);
+    if (result.type === 'establishment') setSection('establishments');
+    else if (result.type === 'customer') setSection('loyalty');
+    else setSection('reviews');
+    setSearchQuery('');
+    setSearchOpen(false);
+  };
 
   const [staffLoading, setStaffLoading] = useState(true);
 
@@ -546,16 +555,12 @@ export default function Admin() {
             </div>
           </button>
 
-          <div className="mx-auto hidden min-w-0 flex-1 max-w-2xl md:block">
+          <div className="relative mx-auto hidden min-w-0 flex-1 max-w-2xl md:block">
             <label className="relative block">
               <Search size={15} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#C9A45C]" />
-              <input
-                type="search"
-                placeholder="Rechercher dans KELYANI..."
-                aria-label="Rechercher dans KELYANI"
-                className="h-11 w-full rounded-3xl border border-[#242424] bg-[#111111] pl-11 pr-4 text-sm text-[#FFFFFF] outline-none placeholder:text-[#F5F5DC]/35 focus:border-[#C9A45C]/60 focus:ring-1 focus:ring-[#C9A45C]/20"
-              />
+              <input type="search" value={searchQuery} onFocus={() => setSearchOpen(true)} onChange={event => { setSearchQuery(event.target.value); setSearchOpen(true); }} placeholder="Rechercher un établissement, client, avis..." aria-label="Rechercher dans KELYANI" className="h-11 w-full rounded-3xl border border-[#242424] bg-[#111111] pl-11 pr-4 text-sm text-[#FFFFFF] outline-none placeholder:text-[#F5F5DC]/35 focus:border-[#C9A45C]/60 focus:ring-1 focus:ring-[#C9A45C]/20" />
             </label>
+            {searchOpen && searchQuery.trim().length >= 2 && <div className="absolute left-0 right-0 top-13 z-[70] overflow-hidden rounded-2xl border border-[#242424] bg-[#111111] shadow-[0_24px_70px_rgba(0,0,0,.55)]">{searchResults.length ? searchResults.map(result => <button key={`${result.type}-${result.id}`} type="button" onClick={() => selectSearchResult(result)} className="flex w-full items-start gap-3 border-b border-[#242424] px-4 py-3 text-left last:border-0 hover:bg-[#181818]"><span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#C9A45C]/10 text-[#C9A45C]">{result.type === 'customer' ? '◉' : result.type === 'review' ? '★' : <Building2 size={15} />}</span><span className="min-w-0"><span className="block truncate text-xs font-semibold text-white">{result.title}</span><span className="mt-0.5 block truncate text-[10px] text-white/40">{result.subtitle}</span></span></button>) : <p className="px-4 py-5 text-center text-xs text-white/35">Aucun résultat.</p>}</div>}
           </div>
 
           <div className="ml-auto flex shrink-0 items-center gap-2">
@@ -587,12 +592,7 @@ export default function Admin() {
         <div className="mx-auto mt-3 md:hidden">
           <label className="relative block">
             <Search size={15} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#C9A45C]" />
-            <input
-              type="search"
-              placeholder="Rechercher..."
-              aria-label="Rechercher"
-              className="h-10 w-full rounded-3xl border border-[#242424] bg-[#111111] pl-11 pr-4 text-xs text-[#FFFFFF] outline-none placeholder:text-[#F5F5DC]/35 focus:border-[#C9A45C]/60"
-            />
+            <input type="search" value={searchQuery} onFocus={() => setSearchOpen(true)} onChange={event => { setSearchQuery(event.target.value); setSearchOpen(true); }} placeholder="Rechercher..." aria-label="Rechercher" className="h-10 w-full rounded-3xl border border-[#242424] bg-[#111111] pl-11 pr-4 text-xs text-[#FFFFFF] outline-none placeholder:text-[#F5F5DC]/35 focus:border-[#C9A45C]/60" />
           </label>
         </div>
       </header>
@@ -729,7 +729,10 @@ export default function Admin() {
               <button
                 key={id}
                 type="button"
-                onClick={() => setSection(id)}
+                onClick={() => {
+                  setSection(id);
+                  if (id === 'loyalty' && !selectedEstablishmentId && establishments[0]) setSelectedEstablishmentId(establishments[0].id);
+                }}
                 aria-label={label}
                 className={`group flex min-w-[68px] flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 transition-all ${
                   active

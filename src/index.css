@@ -195,3 +195,48 @@ table {
     inset 0 2px 7px rgba(0,0,0,.26),
     0 8px 24px -16px rgba(0,0,0,.58) !important;
 }
+
+
+/* Responsible workspace: keep the authenticated SaaS surface consistently dark.
+   Legacy feature pages still contain light utility classes; scope this normalization
+   strictly to the responsible dashboard shell so public pages are unaffected. */
+.dashboard-depth-shell [class~="bg-white"],
+.dashboard-depth-shell [class~="bg-[#fffdf9]"],
+.dashboard-depth-shell [class~="bg-[#f7f7f3]"] {
+  background-color: #111111 !important;
+}
+
+.dashboard-depth-shell .text-forest {
+  color: #e1c27a !important;
+}
+
+.dashboard-depth-shell .bg-forest {
+  background-color: #173d32 !important;
+}
+
+.dashboard-depth-shell .text-ink {
+  color: #ffffff !important;
+}
+
+.dashboard-depth-shell [class*="border-ink/"] {
+  border-color: rgba(255,255,255,.08) !important;
+}
+
+.dashboard-depth-shell [class*="text-ink/"] {
+  color: rgba(245,245,220,.55) !important;
+}
+
+.dashboard-depth-shell [class*="shadow-soft"] {
+  box-shadow: 0 18px 48px -16px rgba(0,0,0,.64), inset 0 1px 0 rgba(255,255,255,.035) !important;
+}
+
+.dashboard-depth-shell input,
+.dashboard-depth-shell textarea,
+.dashboard-depth-shell select {
+  color: #ffffff;
+}
+
+.dashboard-depth-shell input::placeholder,
+.dashboard-depth-shell textarea::placeholder {
+  color: rgba(245,245,220,.3);
+}

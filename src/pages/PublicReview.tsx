@@ -389,13 +389,19 @@ export default function PublicReview() {
     setLoyaltyLoading(true);
 
     const { data, error } = await supabase.rpc(
-      'register_public_loyalty_customer',
+      'register_public_loyalty_customer_for_enrollment_v2',
       {
         p_establishment_id: place.id,
         p_first_name: loyaltyForm.first_name.trim(),
         p_last_name: loyaltyForm.last_name.trim(),
         p_phone: loyaltyForm.phone.trim(),
         p_birth_date: loyaltyForm.birth_date || null,
+        p_email: loyaltyForm.email.trim() || null,
+        p_interests: [],
+        p_marketing_consent: false,
+        p_notification_consent: false,
+        p_preferred_channel: 'NONE',
+        p_visit_frequency: null,
       }
     );
 

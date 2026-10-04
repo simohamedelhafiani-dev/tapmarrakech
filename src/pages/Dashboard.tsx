@@ -21,6 +21,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import QRCode from 'qrcode';
 import {
   Bar,
   BarChart,
@@ -35,7 +36,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import type { Establishment, Review } from '@/lib/types';
 import { Stars } from '@/components/Stars';
 import { getMySubscriptionAccess, type SubscriptionAccess } from '@/lib/subscriptionAccess';
-import KelyaniMark from '@/components/brand/KelyaniMark';
 
 type LoyaltyCustomer = {
   id: string;
@@ -173,6 +173,26 @@ export default function Dashboard() {
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
   const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
   const [dashboardStatsLoading, setDashboardStatsLoading] = useState(false);
+  const [showEnrollmentQr, setShowEnrollmentQr] = useState(false);
+  const [enrollmentQrDataUrl, setEnrollmentQrDataUrl] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    const generateEnrollmentQr = async () => {
+      if (!selectedEstablishmentId) { setEnrollmentQrDataUrl(''); return; }
+      try {
+        const url = new URL('/loyalty/join', window.location.origin);
+        url.searchParams.set('est', selectedEstablishmentId);
+        const dataUrl = await QRCode.toDataURL(url.toString(), { width: 640, margin: 2 });
+        if (active) setEnrollmentQrDataUrl(dataUrl);
+      } catch (error) {
+        console.error('Erreur génération QR inscription:', error);
+        if (active) setEnrollmentQrDataUrl('');
+      }
+    };
+    void generateEnrollmentQr();
+    return () => { active = false; };
+  }, [selectedEstablishmentId]);
 
   useEffect(() => {
     let active = true;
@@ -834,10 +854,10 @@ export default function Dashboard() {
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0">
               <div className="mb-4 flex items-center gap-3">
-                <KelyaniMark size={72} />
-                <div className="leading-none">
-                  <p className="font-display text-xl font-semibold tracking-[.08em] text-[#E1C27A]">KELYANI</p>
-                  <p className="mt-1 text-[7px] font-semibold uppercase tracking-[.22em] text-[#C9A45C]/70">CUSTOMER INTELLIGENCE</p>
+                {selectedEstablishment?.logo_url ? <img src={selectedEstablishment.logo_url} alt={selectedEstablishment.name} className="h-12 w-12 rounded-xl border border-[#242424] bg-white object-contain p-1" /> : <div className="grid h-12 w-12 place-items-center rounded-xl border border-[#242424] bg-[#050505] text-[#C9A45C]"><Building2 size={19} /></div>}
+                <div className="min-w-0 leading-none">
+                  <p className="max-w-[260px] truncate text-lg font-semibold text-white">{selectedEstablishment?.name || 'Votre établissement'}</p>
+                  <p className="mt-1 text-[7px] font-semibold uppercase tracking-[.22em] text-[#C9A45C]/60">ESPACE ÉTABLISSEMENT · KELYANI</p>
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -865,7 +885,11 @@ export default function Dashboard() {
 
       <section>
         <div className="mb-3 px-1"><p className="text-[9px] font-bold uppercase tracking-[0.22em] text-[#C9A45C]">Actions</p><h2 className="mt-1 text-lg font-semibold text-white">Piloter votre établissement</h2></div>
-        <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-5">
+          <button type="button" onClick={() => setShowEnrollmentQr(true)} disabled={!selectedEstablishmentId} className="group rounded-2xl border border-[#C9A45C]/30 bg-[#C9A45C]/[0.07] p-4 text-left transition hover:-translate-y-0.5 hover:border-[#C9A45C]/60 disabled:opacity-40">
+            <div className="flex items-start justify-between"><span className="grid h-10 w-10 place-items-center rounded-xl bg-[#C9A45C]/15 text-[#E1C27A]"><QrCode size={18} /></span><ExternalLink size={15} className="text-[#C9A45C]/50 group-hover:text-[#C9A45C]" /></div>
+            <p className="mt-5 text-sm font-semibold text-white">Ajouter un client</p><p className="mt-1 text-[10px] text-[#F5F5DC]/40">QR d'inscription instantanée</p>
+          </button>
           {[
             { label: 'Avis clients', detail: 'Répondre & analyser', to: '/dashboard/reviews', icon: MessageCircle },
             { label: 'Fidélité', detail: 'Clients & récompenses', to: '/dashboard/loyalty', icon: Heart },
@@ -874,6 +898,23 @@ export default function Dashboard() {
           ].map(({ label, detail, to, icon: Icon }) => <Link key={label} to={to} className="group rounded-2xl border border-[#242424] bg-[#111111] p-4 transition hover:-translate-y-0.5 hover:border-[#C9A45C]/40"><div className="flex items-start justify-between"><span className="grid h-10 w-10 place-items-center rounded-xl bg-[#C9A45C]/10 text-[#E1C27A]"><Icon size={18} /></span><ArrowUpRight size={15} className="text-[#F5F5DC]/20 group-hover:text-[#C9A45C]" /></div><p className="mt-5 text-sm font-semibold text-white">{label}</p><p className="mt-1 text-[10px] text-[#F5F5DC]/30">{detail}</p></Link>)}
         </div>
       </section>
+
+      {showEnrollmentQr && selectedEstablishmentId && (
+        <div className="fixed inset-0 z-[100] grid place-items-center bg-black/75 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-[28px] border border-[#242424] bg-[#111111] p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div><p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#C9A45C]">Nouveau client</p><h2 className="mt-1 text-2xl font-semibold text-white">Inscription par QR</h2><p className="mt-2 text-xs leading-5 text-white/40">Le client scanne ce QR, remplit son profil et reçoit immédiatement sa carte fidélité.</p></div>
+              <button type="button" onClick={() => setShowEnrollmentQr(false)} className="grid h-9 w-9 place-items-center rounded-full border border-[#242424] text-white/50">×</button>
+            </div>
+            <div className="mt-6 flex justify-center rounded-3xl bg-white p-5">{enrollmentQrDataUrl ? <img src={enrollmentQrDataUrl} alt="QR inscription fidélité" className="h-56 w-56" /> : <div className="grid h-56 w-56 place-items-center text-xs text-black/40">Génération…</div>}</div>
+            <div className="mt-5 grid grid-cols-2 gap-2">
+              <button type="button" onClick={async () => { const url = new URL('/loyalty/join', window.location.origin); url.searchParams.set('est', selectedEstablishmentId); await navigator.clipboard.writeText(url.toString()); }} className="rounded-xl border border-[#242424] px-4 py-3 text-xs font-semibold text-white/70 hover:border-[#C9A45C]/50">Copier le lien</button>
+              <a href={`/loyalty/join?est=${selectedEstablishmentId}`} target="_blank" rel="noreferrer" className="rounded-xl bg-[#C9A45C] px-4 py-3 text-center text-xs font-bold text-[#050505]">Ouvrir le formulaire</a>
+            </div>
+            <p className="mt-4 text-center text-[10px] text-white/25">Conseil : affichez ce QR au comptoir ou sur une plaque NFC.</p>
+          </div>
+        </div>
+      )}
 
       <div className="grid gap-5 xl:grid-cols-[1.45fr_.75fr]">
         <section className="rounded-[24px] border border-[#242424] bg-[#111111] p-5 sm:p-6">

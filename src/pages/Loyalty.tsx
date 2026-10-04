@@ -10,6 +10,7 @@ import {
   X,
   CheckCircle2,
   LockKeyhole,
+  Bell,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
@@ -63,6 +64,13 @@ export default function Loyalty() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [redeeming, setRedeeming] = useState(false);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [notificationTitle, setNotificationTitle] = useState('');
+  const [notificationMessage, setNotificationMessage] = useState('');
+  const [notificationType, setNotificationType] = useState<'INFO' | 'OFFER' | 'REWARD' | 'POINTS'>('INFO');
+  const [notificationCustomerId, setNotificationCustomerId] = useState('');
+  const [notificationExpiresAt, setNotificationExpiresAt] = useState('');
+  const [notificationSaving, setNotificationSaving] = useState(false);
 
   const [programSettings, setProgramSettings] =
     useState<LoyaltyProgramSettings>({
@@ -311,6 +319,36 @@ export default function Loyalty() {
     alert(`+${points} points ajoutés. Nouveau solde : ${newBalance} points.`);
   }
 
+  async function createNotification() {
+    if (!establishmentId || !notificationTitle.trim() || !notificationMessage.trim()) return;
+
+    setNotificationSaving(true);
+
+    const { error } = await supabase.rpc('create_loyalty_card_notification', {
+      p_establishment_id: establishmentId,
+      p_customer_id: notificationCustomerId || null,
+      p_title: notificationTitle.trim(),
+      p_message: notificationMessage.trim(),
+      p_type: notificationType,
+      p_expires_at: notificationExpiresAt ? new Date(notificationExpiresAt).toISOString() : null,
+    });
+
+    setNotificationSaving(false);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    setNotificationTitle('');
+    setNotificationMessage('');
+    setNotificationType('INFO');
+    setNotificationCustomerId('');
+    setNotificationExpiresAt('');
+    setShowNotificationModal(false);
+    alert('Notification publiée sur la carte fidélité.');
+  }
+
   function selectReward(
     customer: LoyaltyCustomer,
     reward: LoyaltyReward
@@ -458,14 +496,25 @@ export default function Loyalty() {
           </p>
         </div>
 
-        <button
-          onClick={() => setShowNewCustomer(true)}
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setShowNotificationModal(true)}
+            disabled={!establishmentId || !programSettings.enabled}
+            className="flex items-center gap-2 rounded-xl border border-gold/30 bg-white px-4 py-2.5 text-xs font-semibold text-forest transition hover:bg-[#fdf9ef] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <Bell size={16} />
+            Notification carte
+          </button>
+
+          <button
+            onClick={() => setShowNewCustomer(true)}
           disabled={!establishmentId || !programSettings.enabled}
           className="flex w-fit items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-forest-light disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Plus size={16} />
-          Nouveau client
-        </button>
+            Nouveau client
+          </button>
+        </div>
       </div>
 
       {/* PROGRAM STATUS */}
@@ -696,6 +745,102 @@ export default function Loyalty() {
           </table>
         </div>
       </section>
+
+      {/* CARD NOTIFICATION MODAL */}
+      {showNotificationModal && (
+        <Modal
+          title="Notification sur la carte"
+          onClose={() => setShowNotificationModal(false)}
+        >
+          <div className="space-y-4">
+            <div className="rounded-xl bg-[#f7f7f3] p-4">
+              <div className="flex items-start gap-3">
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#f4ead3] text-gold">
+                  <Bell size={18} />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-forest">Message client</p>
+                  <p className="mt-1 text-[11px] leading-5 text-ink/45">
+                    La notification apparaîtra directement dans la carte fidélité du client.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-medium text-ink/60">Destinataire</label>
+              <select
+                value={notificationCustomerId}
+                onChange={e => setNotificationCustomerId(e.target.value)}
+                className="mt-2 w-full rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm outline-none focus:border-gold"
+              >
+                <option value="">Tous les clients</option>
+                {customers.map(customer => (
+                  <option key={customer.id} value={customer.id}>
+                    {customer.first_name || 'Client'} · {customer.phone}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="text-xs font-medium text-ink/60">Type</label>
+              <select
+                value={notificationType}
+                onChange={e => setNotificationType(e.target.value as typeof notificationType)}
+                className="mt-2 w-full rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm outline-none focus:border-gold"
+              >
+                <option value="INFO">Information</option>
+                <option value="OFFER">Offre</option>
+                <option value="REWARD">Récompense</option>
+                <option value="POINTS">Points</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-xs font-medium text-ink/60">Titre</label>
+              <input
+                value={notificationTitle}
+                onChange={e => setNotificationTitle(e.target.value)}
+                maxLength={120}
+                placeholder="Ex. Nouvelle offre disponible"
+                className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-gold"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-medium text-ink/60">Message</label>
+              <textarea
+                value={notificationMessage}
+                onChange={e => setNotificationMessage(e.target.value)}
+                maxLength={1000}
+                rows={4}
+                placeholder="Écrivez le message qui apparaîtra sur la carte..."
+                className="mt-2 w-full resize-none rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-gold"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-medium text-ink/60">Expiration (facultative)</label>
+              <input
+                type="datetime-local"
+                value={notificationExpiresAt}
+                onChange={e => setNotificationExpiresAt(e.target.value)}
+                className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-gold"
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={() => void createNotification()}
+              disabled={notificationSaving || !notificationTitle.trim() || !notificationMessage.trim()}
+              className="w-full rounded-xl bg-forest px-4 py-3 text-xs font-semibold text-white disabled:opacity-40"
+            >
+              {notificationSaving ? 'Publication...' : 'Publier sur la carte'}
+            </button>
+          </div>
+        </Modal>
+      )}
 
       {/* NEW CUSTOMER MODAL */}
       {showNewCustomer && (
