@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   BarChart3,
+  Building2,
   Bell,
   Gift,
   LayoutDashboard,
@@ -73,6 +74,7 @@ const links = [
 type Establishment = {
   id: string;
   name: string;
+  slug: string;
   logo_url: string | null;
 };
 
