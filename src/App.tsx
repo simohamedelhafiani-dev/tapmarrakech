@@ -13,7 +13,7 @@ import PublicReview from '@/pages/PublicReview';
 import LoyaltyCard from '@/pages/LoyaltyCard';
 import LoyaltyJoin from '@/pages/LoyaltyJoin';
 import Login from '@/pages/Login';
-import { ForgotPassword, Register } from '@/pages/AuthPages';
+import { ForgotPassword, Register, ResetPassword } from '@/pages/AuthPages';
 
 import Dashboard from '@/pages/Dashboard';
 import Reviews from '@/pages/Reviews';
@@ -163,6 +163,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
             <Route path="/admin" element={<Admin />} />
