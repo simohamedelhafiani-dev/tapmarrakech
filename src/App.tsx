@@ -23,7 +23,6 @@ import Menu from '@/pages/Menu';
 import MenuDesign from '@/pages/MenuDesign';
 import Promotions from '@/pages/Promotions';
 import Admin from '@/pages/Admin';
-import Employee from '@/pages/Employee';
 import LoyaltyScanner from '@/pages/LoyaltyScanner';
 
 type EstablishmentRow = {
@@ -227,17 +226,8 @@ function App() {
             </Route>
           </Route>
 
-          {/* L'employé possède sa propre session par code. */}
-          <Route
-            path="/employee"
-            element={
-              new URLSearchParams(window.location.search).has('scanner') ? (
-                <LoyaltyScanner />
-              ) : (
-                <Employee />
-              )
-            }
-          />
+          {/* Scanner fidélité public lié à un établissement. */}
+          <Route path="/employee" element={<LoyaltyScanner />} />
 
           <Route path="*" element={<RoleRedirect />} />
           </Routes>
