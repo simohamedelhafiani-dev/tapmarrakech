@@ -149,13 +149,6 @@ function SubscriptionFeatureRoute({
 }
 
 function App() {
-  console.log('[App] RENDER');
-
-  useEffect(() => {
-    console.log('[App] MOUNT');
-    return () => console.log('[App] UNMOUNT');
-  }, []);
-
   return (
     <LanguageProvider>
       <BrowserRouter>
