@@ -404,7 +404,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   }, [establishmentId, design, establishment.logoUrl, program, rewards, previewChannelReady]);
 
   const selectTemplate = (id: string) => {
-    const template = WALLET_TEMPLATES[id];
+    const template = WALLET_TEMPLATES[id as keyof typeof WALLET_TEMPLATES];
     if (!template) return;
 
     setDesign(current => ({
@@ -623,7 +623,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   };
 
   const visibleTabs = isAdmin ? TABS : TABS.filter(item => item.id !== 'design');
-  const selectedTemplate = WALLET_TEMPLATES[design.templateId];
+  const selectedTemplate = WALLET_TEMPLATES[design.templateId as keyof typeof WALLET_TEMPLATES];
 
   if (loading) {
     return (
