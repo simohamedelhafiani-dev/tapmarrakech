@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, Coins, Search, Smartphone, X } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Coins, Gift, ReceiptText, Search, Smartphone, UserRound, X } from 'lucide-react';
 import QrScanner from '@/components/QrScanner';
 import { supabase } from '@/lib/supabase';
 
@@ -455,357 +455,80 @@ export default function LoyaltyScanner() {
 
   if (loading) {
     return (
-      <div className="min-h-screen grid place-items-center bg-[#f7f7f3]">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
+      <div className="min-h-[100dvh] grid place-items-center bg-[#070707]">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <div className="grid h-14 w-14 place-items-center rounded-2xl border border-[#C9A45C]/20 bg-[#111111]"><div className="h-6 w-6 animate-spin rounded-full border-2 border-[#C9A45C] border-t-transparent" /></div>
+          <p className="text-xs font-semibold text-white/45">Chargement du scanner…</p>
+        </div>
       </div>
     );
   }
 
   if (!context) {
     return (
-      <div className="min-h-screen grid place-items-center bg-[#f7f7f3] px-5">
-        <div className="w-full max-w-md rounded-3xl bg-white p-7 text-center shadow-xl">
-          <h1 className="font-display text-2xl text-forest">Scanner fidélité</h1>
-          <p className="mt-3 text-sm leading-6 text-red-700">{message}</p>
+      <div className="min-h-[100dvh] grid place-items-center bg-[#070707] px-5">
+        <div className="w-full max-w-md rounded-[28px] border border-[#242424] bg-[#111111] p-7 text-center shadow-2xl">
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#C9A45C]/10 text-[#C9A45C]"><Coins size={24} /></div>
+          <p className="mt-5 text-[9px] font-bold uppercase tracking-[.22em] text-[#C9A45C]">KELYANI · Scanner</p>
+          <h1 className="mt-2 font-display text-2xl text-white">Scanner indisponible</h1>
+          <p className="mt-3 text-sm leading-6 text-white/40">{message}</p>
         </div>
       </div>
     );
   }
 
+  const resetCustomer = () => {
+    setCustomer(null); setManualSearch(''); setManualMatches([]); setAmount(''); setInvoiceNumber(''); setMessage('');
+  };
+
   return (
-    <div className="min-h-screen w-screen bg-[#f7f7f3] px-4 py-5 flex justify-center">
-      <main className="w-full max-w-md">
-        <header className="rounded-[2rem] bg-forest p-6 text-white shadow-xl">
-          <div className="flex items-center gap-4">
-            {context.establishment_logo_url ? (
-              <img
-                src={context.establishment_logo_url}
-                alt={context.establishment_name}
-                className="h-14 w-14 rounded-2xl bg-white object-contain p-1.5"
-              />
-            ) : (
-              <div className="grid h-14 w-14 place-items-center rounded-2xl bg-white/10">
-                <Coins size={25} className="text-gold" />
-              </div>
-            )}
-            <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">
-                Fidélité
-              </p>
-              <h1 className="mt-1 truncate font-display text-2xl">
-                {context.establishment_name}
-              </h1>
-              <p className="mt-1 text-xs text-white/55">Scanner fidélité</p>
+    <div className="min-h-[100dvh] w-full bg-[#070707] text-white">
+      <div className="mx-auto min-h-[100dvh] w-full max-w-lg px-3 pb-6 pt-3 sm:px-5 sm:pt-5">
+        <header className="overflow-hidden rounded-[28px] border border-[#242424] bg-[#111111] shadow-2xl">
+          <div className="relative overflow-hidden bg-[#050505] p-5 sm:p-6">
+            <div className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full border border-[#C9A45C]/10" />
+            <div className="relative flex items-center gap-3.5">
+              {context.establishment_logo_url ? <img src={context.establishment_logo_url} alt={context.establishment_name} className="h-12 w-12 shrink-0 rounded-2xl border border-[#C9A45C]/20 bg-white object-contain p-1.5" /> : <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-[#C9A45C]/20 bg-[#C9A45C]/10 text-[#C9A45C]"><Coins size={21} /></div>}
+              <div className="min-w-0 flex-1"><p className="text-[9px] font-bold uppercase tracking-[.22em] text-[#C9A45C]">KELYANI · Fidélité</p><h1 className="mt-1 truncate text-base font-semibold text-white sm:text-lg">{context.establishment_name}</h1><p className="mt-1 text-[10px] text-white/35">Espace équipe · Scanner</p></div>
+              <span className="hidden shrink-0 items-center gap-1.5 rounded-full border border-[#C9A45C]/15 bg-[#C9A45C]/5 px-2.5 py-1.5 text-[9px] font-bold text-[#E1C27A] sm:flex"><span className="h-1.5 w-1.5 rounded-full bg-[#C9A45C]" /> Actif</span>
             </div>
+          </div>
+          <div className="grid grid-cols-2 border-t border-[#242424]">
+            <div className="px-4 py-3.5"><p className="text-[8px] font-bold uppercase tracking-[.18em] text-white/25">Programme</p><p className="mt-1 text-xs font-semibold text-white/70">{settings.program_type === 'STAMP' ? 'Tampons' : 'Points'}</p></div>
+            <div className="border-l border-[#242424] px-4 py-3.5"><p className="text-[8px] font-bold uppercase tracking-[.18em] text-white/25">Statut</p><p className="mt-1 text-xs font-semibold text-[#E1C27A]">{settings.enabled ? 'Programme actif' : 'Programme inactif'}</p></div>
           </div>
         </header>
-
-        {installPrompt && (
-          <button
-            onClick={installScanner}
-            className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-xs font-semibold text-forest shadow-soft"
-          >
-            <Smartphone size={16} />
-            Installer sur le téléphone
-          </button>
-        )}
-
-        <section className="mt-5 rounded-3xl bg-white p-5 shadow-soft">
+        {installPrompt && <button onClick={installScanner} className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border border-[#C9A45C]/20 bg-[#111111] px-4 py-3 text-[10px] font-bold uppercase tracking-[.12em] text-[#E1C27A]"><Smartphone size={15} /> Installer le scanner</button>}
+        {message && <div className="mt-3 flex items-start gap-3 rounded-2xl border border-[#C9A45C]/15 bg-[#C9A45C]/5 px-4 py-3 text-xs leading-5 text-white/65"><span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#C9A45C]" /><span>{message}</span></div>}
+        <main className="mt-3">
           {!customer ? (
-            <>
-              <button
-                onClick={() => {
-                  setShowScanner(true);
-                  setMessage('');
-                }}
-                className="flex w-full items-center justify-center gap-3 rounded-2xl bg-forest py-5 text-base font-semibold text-white"
-              >
-                <div className="grid h-11 w-11 place-items-center rounded-full bg-white/10">
-                  <Search size={22} />
-                </div>
-                Scanner la carte du client
+            <section className="rounded-[28px] border border-[#242424] bg-[#111111] p-4 shadow-2xl sm:p-5">
+              <p className="text-[9px] font-bold uppercase tracking-[.22em] text-[#C9A45C]">Point de vente</p><h2 className="mt-1 text-xl font-semibold text-white">Identifier un client</h2><p className="mt-1 text-xs leading-5 text-white/35">Scannez sa carte ou recherchez son numéro fidélité.</p>
+              <button type="button" onClick={() => { setShowScanner(true); setMessage(''); }} className="group relative mt-5 flex min-h-[170px] w-full flex-col items-center justify-center overflow-hidden rounded-[24px] border border-[#C9A45C]/25 bg-[#C9A45C]/[.06] text-center transition hover:border-[#C9A45C]/45 active:scale-[.99]">
+                <div className="pointer-events-none absolute inset-5 rounded-[20px] border border-dashed border-[#C9A45C]/20" /><div className="relative grid h-14 w-14 place-items-center rounded-2xl bg-[#C9A45C] text-[#050505]"><Search size={24} /></div><span className="relative mt-4 text-sm font-bold text-white">Scanner la carte</span><span className="relative mt-1 text-[10px] text-white/35">QR client ou QR récompense</span>
               </button>
-
-              <div className="my-5 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.15em] text-ink/30">
-                <span className="h-px flex-1 bg-ink/10" />
-                ou recherche
-                <span className="h-px flex-1 bg-ink/10" />
-              </div>
-
-              <div className="relative">
-                <Search
-                  size={16}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/30"
-                />
-                <input
-                  value={manualSearch}
-                  onChange={e => {
-                    setManualSearch(e.target.value);
-                    if (e.target.value.trim().length >= 2) void searchCustomer(e.target.value);
-                    else setManualMatches([]);
-                  }}
-                  placeholder="N° fidélité, téléphone ou nom"
-                  className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] py-3 pl-9 pr-3 text-sm outline-none focus:border-forest"
-                />
-              </div>
-
-              {manualMatches.length > 0 && (
-                <div className="mt-2 overflow-hidden rounded-xl border border-ink/5">
-                  {manualMatches.map(item => (
-                    <button
-                      key={item.customer_id}
-                      type="button"
-                      onClick={() => {
-                        setCustomer(item);
-                        setManualSearch('');
-                        setManualMatches([]);
-                      }}
-                      className="flex w-full items-center justify-between border-b border-ink/5 bg-white px-4 py-3 text-left last:border-0"
-                    >
-                      <span>
-                        <span className="block text-sm font-semibold text-forest">
-                          {item.first_name} {item.last_name ?? ''}
-                        </span>
-                        <span className="text-[11px] text-ink/40">
-                          {item.loyalty_number} · {item.phone}
-                        </span>
-                      </span>
-                      <span className="text-xs font-semibold text-gold">
-                        {item.points_balance} pts
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </>
+              <div className="my-5 flex items-center gap-3"><span className="h-px flex-1 bg-[#242424]" /><span className="text-[8px] font-bold uppercase tracking-[.18em] text-white/20">Recherche manuelle</span><span className="h-px flex-1 bg-[#242424]" /></div>
+              <div className="relative"><UserRound size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20" /><input value={manualSearch} onChange={e => { setManualSearch(e.target.value); if (e.target.value.trim().length >= 2) void searchCustomer(e.target.value); else setManualMatches([]); }} placeholder="Nom, téléphone ou N° fidélité" className="h-12 w-full rounded-2xl border border-[#242424] bg-[#050505] pl-10 pr-4 text-sm text-white outline-none placeholder:text-white/20 focus:border-[#C9A45C]/45" /></div>
+              {manualMatches.length > 0 && <div className="mt-2 overflow-hidden rounded-2xl border border-[#242424] bg-[#050505]">{manualMatches.map(item => <button key={item.customer_id} type="button" onClick={() => { setCustomer(item); setManualSearch(''); setManualMatches([]); }} className="flex w-full items-center gap-3 border-b border-[#242424] px-4 py-3.5 text-left last:border-0 hover:bg-[#111111]"><div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#C9A45C]/10 text-[#C9A45C]"><UserRound size={15} /></div><span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold text-white">{item.first_name} {item.last_name ?? ''}</span><span className="block truncate text-[10px] text-white/30">{item.loyalty_number} · {item.phone}</span></span><span className="text-[10px] font-bold text-[#E1C27A]">{item.points_balance} pts</span></button>)}</div>}
+            </section>
           ) : (
-            <>
-              <div className="rounded-2xl bg-[#f7f7f3] p-4">
-                <p className="text-xs text-ink/40">Client</p>
-                <p className="mt-1 text-lg font-bold text-forest">
-                  {customer.first_name} {customer.last_name ?? ''}
-                </p>
-                <p className="mt-1 text-xs text-ink/45">{customer.phone}</p>
-                <p className="mt-1 text-xs font-medium text-forest/60">
-                  N° fidélité : {customer.loyalty_number}
-                </p>
-                <div className="mt-4 flex items-center justify-between border-t border-ink/5 pt-3">
-                  <span className="text-xs text-ink/45">Solde actuel</span>
-                  <span className="font-bold text-forest">
-                    {customer.points_balance} points
-                  </span>
-                </div>
+            <section className="space-y-3">
+              <div className="rounded-[28px] border border-[#242424] bg-[#111111] p-5 shadow-2xl">
+                <div className="flex items-start gap-3"><div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#C9A45C]/10 text-[#C9A45C]"><UserRound size={21} /></div><div className="min-w-0 flex-1"><p className="text-[9px] font-bold uppercase tracking-[.18em] text-[#C9A45C]">Client identifié</p><h2 className="mt-1 truncate text-xl font-semibold text-white">{customer.first_name} {customer.last_name ?? ''}</h2><p className="mt-1 truncate text-[10px] text-white/35">{customer.phone || 'Téléphone non renseigné'} · {customer.loyalty_number}</p></div><button type="button" onClick={resetCustomer} className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-[#242424] text-white/35 hover:text-white"><X size={16} /></button></div>
+                <div className="mt-5 grid grid-cols-2 gap-2"><div className="rounded-2xl border border-[#242424] bg-[#050505] p-3.5"><p className="text-[8px] font-bold uppercase tracking-[.15em] text-white/25">Points</p><p className="mt-1 text-xl font-semibold text-[#E1C27A]">{customer.points_balance.toLocaleString('fr-FR')}</p></div><div className="rounded-2xl border border-[#242424] bg-[#050505] p-3.5"><p className="text-[8px] font-bold uppercase tracking-[.15em] text-white/25">Tampons</p><p className="mt-1 text-xl font-semibold text-white">{customer.stamps_balance ?? 0}{settings.program_type === 'STAMP' ? ' / ' + settings.stamp_goal : ''}</p></div></div>
               </div>
-
               {settings.program_type === 'STAMP' ? (
-                <div className="mt-5 space-y-4">
-                  <div className="rounded-2xl bg-forest/5 p-5 text-center">
-                    <p className="text-xs text-ink/40">Programme à tampons</p>
-                    <p className="mt-2 text-4xl font-bold text-forest">{customer.stamps_balance ?? 0} / {settings.stamp_goal}</p>
-                    <p className="mt-1 text-xs text-ink/45">Un tampon ajouté à chaque visite</p>
-                  </div>
-                  <button disabled={saving} onClick={() => void addStamp()} className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-4 text-sm font-semibold text-white disabled:opacity-50">
-                    <CheckCircle2 size={18} />
-                    {saving ? 'Enregistrement...' : 'Ajouter 1 tampon'}
-                  </button>
-                  <button disabled={saving} onClick={() => { setCustomer(null); setMessage(''); }} className="w-full py-2 text-xs font-semibold text-ink/40">Changer de client</button>
-                </div>
+                <div className="rounded-[28px] border border-[#242424] bg-[#111111] p-5 shadow-2xl"><p className="text-[9px] font-bold uppercase tracking-[.18em] text-[#C9A45C]">Programme à tampons</p><div className="mt-4 rounded-2xl bg-[#C9A45C]/[.06] p-5 text-center"><p className="font-display text-4xl text-[#E1C27A]">{customer.stamps_balance ?? 0}<span className="text-xl text-white/25"> / {settings.stamp_goal}</span></p><p className="mt-2 text-[10px] text-white/35">1 tampon sera ajouté à cette visite.</p></div><button disabled={saving} onClick={() => void addStamp()} className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#C9A45C] py-4 text-sm font-bold text-[#050505] disabled:opacity-50"><CheckCircle2 size={18} /> {saving ? 'Enregistrement…' : 'Ajouter 1 tampon'}</button><button disabled={saving} onClick={resetCustomer} className="mt-2 flex w-full items-center justify-center gap-2 py-3 text-[10px] font-bold uppercase tracking-[.12em] text-white/30"><ArrowLeft size={14} /> Changer de client</button></div>
               ) : (
-              <div className="mt-5 space-y-4">
-                <div>
-                  <label className="mb-2 block text-xs font-semibold text-ink/50">
-                    Montant de la facture ({settings.currency})
-                  </label>
-                  <input
-                    autoFocus
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={amount}
-                    onChange={e => setAmount(e.target.value)}
-                    placeholder="500"
-                    className="w-full rounded-xl border border-ink/10 bg-white px-4 py-3 text-lg outline-none focus:border-forest"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-xs font-semibold text-ink/50">
-                    Numéro de facture <span className="font-normal">(optionnel)</span>
-                  </label>
-                  <input
-                    value={invoiceNumber}
-                    onChange={e => setInvoiceNumber(e.target.value)}
-                    placeholder="FAC-2026-001"
-                    className="w-full rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm outline-none focus:border-forest"
-                  />
-                </div>
-
-                {amount && Number(amount) > 0 && (
-                  <div className="rounded-xl bg-forest/5 p-3 text-sm text-forest">
-                    <strong>
-                      +{Math.floor(Number(amount) * Number(settings.points_per_currency))}
-                    </strong>{' '}
-                    points seront ajoutés.
-                  </div>
-                )}
-
-                <button
-                  disabled={saving}
-                  onClick={addPoints}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-4 text-sm font-semibold text-white disabled:opacity-50"
-                >
-                  <CheckCircle2 size={18} />
-                  {saving ? 'Enregistrement...' : 'Ajouter les points'}
-                </button>
-
-                <button
-                  disabled={saving}
-                  onClick={() => {
-                    setCustomer(null);
-                    setAmount('');
-                    setInvoiceNumber('');
-                    setMessage('');
-                  }}
-                  className="w-full py-2 text-xs font-semibold text-ink/40"
-                >
-                  Changer de client
-                </button>
-              </div>
+                <div className="rounded-[28px] border border-[#242424] bg-[#111111] p-5 shadow-2xl"><div className="flex items-center gap-2"><ReceiptText size={16} className="text-[#C9A45C]" /><p className="text-[9px] font-bold uppercase tracking-[.18em] text-[#C9A45C]">Nouvelle visite</p></div><label className="mt-5 block text-[9px] font-bold uppercase tracking-[.12em] text-white/35">Montant de la facture · {settings.currency}<input autoFocus type="number" min="0" step="0.01" value={amount} onChange={e => setAmount(e.target.value)} placeholder="500" className="mt-2 h-14 w-full rounded-2xl border border-[#242424] bg-[#050505] px-4 text-lg font-semibold text-white outline-none placeholder:text-white/15 focus:border-[#C9A45C]/45" /></label><label className="mt-4 block text-[9px] font-bold uppercase tracking-[.12em] text-white/35">Numéro de facture <span className="font-normal normal-case tracking-normal text-white/20">(optionnel)</span><input value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} placeholder="FAC-2026-001" className="mt-2 h-12 w-full rounded-2xl border border-[#242424] bg-[#050505] px-4 text-sm text-white outline-none placeholder:text-white/15 focus:border-[#C9A45C]/45" /></label>{amount && Number(amount) > 0 && <div className="mt-4 flex items-center justify-between rounded-2xl border border-[#C9A45C]/15 bg-[#C9A45C]/[.05] px-4 py-3"><span className="text-[10px] text-white/40">Points générés</span><strong className="text-sm text-[#E1C27A]">+{Math.floor(Number(amount) * Number(settings.points_per_currency))} pts</strong></div>}<button disabled={saving} onClick={addPoints} className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#C9A45C] py-4 text-sm font-bold text-[#050505] disabled:opacity-50"><CheckCircle2 size={18} /> {saving ? 'Enregistrement…' : 'Ajouter les points'}</button><button disabled={saving} onClick={resetCustomer} className="mt-2 flex w-full items-center justify-center gap-2 py-3 text-[10px] font-bold uppercase tracking-[.12em] text-white/30"><ArrowLeft size={14} /> Changer de client</button></div>
               )}
-            </>
+            </section>
           )}
-        </section>
-
-        {showScanner && (
-          <div className="fixed inset-0 z-50 bg-black/50 p-4">
-            <div className="mx-auto flex h-full max-w-md items-center justify-center">
-              <div className="w-full rounded-3xl bg-white p-5">
-                <div className="mb-4 flex items-center justify-between">
-                  <h2 className="font-display text-xl text-forest">Scanner la carte</h2>
-                  <button
-                    onClick={() => setShowScanner(false)}
-                    className="rounded-xl px-3 py-2 text-sm text-ink/50"
-                  >
-                    Fermer
-                  </button>
-                </div>
-                <QrScanner
-                  onScan={loadCustomerFromCard}
-                  onClose={() => setShowScanner(false)}
-                />
-                {searching && (
-                  <p className="mt-3 text-center text-xs text-ink/45">
-                    Lecture de la carte…
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {pendingReward && (
-          <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4">
-            <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">Récompense</p>
-                  <h2 className="mt-1 font-display text-2xl text-forest">{pendingReward.reward_name}</h2>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setPendingReward(null)}
-                  disabled={redeemingReward}
-                  className="rounded-xl p-2 text-ink/40"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              <div className="mt-5 rounded-2xl bg-[#f7f7f3] p-4">
-                <p className="text-sm font-semibold text-forest">
-                  {pendingReward.reward_type === 'DISCOUNT'
-                    ? `Réduction de ${pendingReward.discount_percent}%`
-                    : 'Récompense à valider'}
-                </p>
-                <p className="mt-1 text-xs text-ink/45">
-                  {pendingReward.points_required > 0
-                    ? `${pendingReward.points_required} points seront déduits du compte client.`
-                    : 'Le cadeau sera validé et les tampons seront remis à zéro.'}
-                </p>
-                {pendingReward.discount_max_amount && (
-                  <p className="mt-2 text-xs font-medium text-forest">
-                    Plafond de réduction : {pendingReward.discount_max_amount} MAD
-                  </p>
-                )}
-              </div>
-
-              {pendingReward.reward_type === 'DISCOUNT' && (
-                <div className="mt-4">
-                  <label className="mb-2 block text-xs font-semibold text-ink/50">
-                    Montant de la facture (MAD)
-                  </label>
-                  <input
-                    autoFocus
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={rewardInvoiceAmount}
-                    onChange={e => setRewardInvoiceAmount(e.target.value)}
-                    placeholder="500"
-                    className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-lg outline-none focus:border-forest"
-                  />
-                  {rewardInvoiceAmount && Number(rewardInvoiceAmount) > 0 && (
-                    <div className="mt-2 rounded-xl bg-forest/5 p-3 text-xs text-forest">
-                      Réduction estimée : <strong>
-                        {Math.min(
-                          Number(rewardInvoiceAmount) * Number(pendingReward.discount_percent ?? 0) / 100,
-                          pendingReward.discount_max_amount ?? Number.POSITIVE_INFINITY
-                        ).toFixed(2)} MAD
-                      </strong>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {pendingReward.points_required > 0 && (
-              <div className="mt-4">
-                <label className="mb-2 block text-xs font-semibold text-ink/50">
-                  Numéro de facture <span className="font-normal">(optionnel)</span>
-                </label>
-                <input
-                  value={rewardInvoiceNumber}
-                  onChange={e => setRewardInvoiceNumber(e.target.value)}
-                  placeholder="FAC-2026-001"
-                  className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
-                />
-              </div>
-
-
-              )}
-
-              <button
-                type="button"
-                disabled={redeemingReward}
-                onClick={() => void redeemPendingReward()}
-                className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-4 text-sm font-semibold text-white disabled:opacity-50"
-              >
-                <CheckCircle2 size={18} />
-                {redeemingReward ? 'Validation...' : pendingReward.points_required > 0 ? 'Appliquer et déduire les points' : 'Valider le cadeau'}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {message && (
-          <p className="mt-4 rounded-2xl bg-white px-4 py-3 text-center text-xs leading-5 text-ink/55 shadow-soft">
-            {message}
-          </p>
-        )}
-
-        <p className="pb-5 pt-6 text-center text-[10px] font-medium text-ink/30">
-          Scanner fidélité · accès établissement
-        </p>
-      </main>
+        </main>
+        {showScanner && <div className="fixed inset-0 z-50 bg-[#050505]/90 p-3 backdrop-blur-md sm:p-5"><div className="mx-auto flex h-full w-full max-w-lg items-center justify-center"><div className="w-full overflow-hidden rounded-[28px] border border-[#242424] bg-[#111111] shadow-2xl"><div className="flex items-center justify-between border-b border-[#242424] px-4 py-4 sm:px-5"><div><p className="text-[9px] font-bold uppercase tracking-[.2em] text-[#C9A45C]">Lecture QR</p><h2 className="mt-1 text-lg font-semibold text-white">Scanner la carte</h2></div><button type="button" onClick={() => setShowScanner(false)} className="grid h-9 w-9 place-items-center rounded-xl border border-[#242424] text-white/40"><X size={17} /></button></div><div className="p-3 sm:p-5"><div className="overflow-hidden rounded-2xl bg-black"><QrScanner onScan={loadCustomerFromCard} onClose={() => setShowScanner(false)} /></div><p className="mt-3 text-center text-[10px] leading-5 text-white/30">Cadrez le QR de la carte client ou celui d’une récompense.</p>{searching && <p className="mt-2 text-center text-xs font-semibold text-[#E1C27A]">Lecture en cours…</p>}</div></div></div></div>}
+        {pendingReward && <div className="fixed inset-0 z-[60] grid place-items-center bg-[#050505]/90 p-3 backdrop-blur-md sm:p-5"><div className="w-full max-w-md rounded-[28px] border border-[#242424] bg-[#111111] p-5 shadow-2xl sm:p-6"><div className="flex items-start justify-between gap-4"><div><p className="text-[9px] font-bold uppercase tracking-[.2em] text-[#C9A45C]">Récompense</p><h2 className="mt-1 text-2xl font-semibold text-white">{pendingReward.reward_name}</h2></div><button type="button" onClick={() => setPendingReward(null)} disabled={redeemingReward} className="grid h-9 w-9 place-items-center rounded-xl border border-[#242424] text-white/35"><X size={16} /></button></div><div className="mt-5 rounded-2xl border border-[#C9A45C]/15 bg-[#C9A45C]/[.05] p-4"><div className="flex items-center gap-3"><div className="grid h-10 w-10 place-items-center rounded-xl bg-[#C9A45C]/10 text-[#C9A45C]"><Gift size={18} /></div><div><p className="text-sm font-semibold text-white">{pendingReward.reward_type === 'DISCOUNT' ? 'Réduction de ' + pendingReward.discount_percent + '%' : 'Récompense à valider'}</p><p className="mt-1 text-[10px] leading-5 text-white/35">{pendingReward.points_required > 0 ? pendingReward.points_required + ' points seront déduits du compte client.' : 'Le cadeau sera validé et les tampons seront remis à zéro.'}</p></div></div>{pendingReward.discount_max_amount && <p className="mt-3 text-[10px] font-semibold text-[#E1C27A]">Plafond de réduction : {pendingReward.discount_max_amount} MAD</p>}</div>{pendingReward.reward_type === 'DISCOUNT' && <label className="mt-4 block text-[9px] font-bold uppercase tracking-[.12em] text-white/35">Montant de la facture · MAD<input autoFocus type="number" min="0" step="0.01" value={rewardInvoiceAmount} onChange={e => setRewardInvoiceAmount(e.target.value)} placeholder="500" className="mt-2 h-13 w-full rounded-2xl border border-[#242424] bg-[#050505] px-4 text-lg font-semibold text-white outline-none placeholder:text-white/15 focus:border-[#C9A45C]/45" />{rewardInvoiceAmount && Number(rewardInvoiceAmount) > 0 && <span className="mt-2 block rounded-xl bg-[#C9A45C]/[.05] px-3 py-2 text-[10px] text-white/45">Réduction estimée : <strong className="text-[#E1C27A]">{Math.min(Number(rewardInvoiceAmount) * Number(pendingReward.discount_percent ?? 0) / 100, pendingReward.discount_max_amount ?? Number.POSITIVE_INFINITY).toFixed(2)} MAD</strong></span>}</label>}{pendingReward.points_required > 0 && <label className="mt-4 block text-[9px] font-bold uppercase tracking-[.12em] text-white/35">Numéro de facture <span className="font-normal normal-case tracking-normal text-white/20">(optionnel)</span><input value={rewardInvoiceNumber} onChange={e => setRewardInvoiceNumber(e.target.value)} placeholder="FAC-2026-001" className="mt-2 h-12 w-full rounded-2xl border border-[#242424] bg-[#050505] px-4 text-sm text-white outline-none placeholder:text-white/15 focus:border-[#C9A45C]/45" /></label>}<button type="button" disabled={redeemingReward} onClick={() => void redeemPendingReward()} className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#C9A45C] py-4 text-sm font-bold text-[#050505] disabled:opacity-50"><CheckCircle2 size={18} /> {redeemingReward ? 'Validation…' : pendingReward.points_required > 0 ? 'Appliquer et déduire les points' : 'Valider le cadeau'}</button></div></div>}
+        <p className="pb-2 pt-5 text-center text-[9px] font-semibold uppercase tracking-[.18em] text-white/15">KELYANI · Scanner fidélité</p>
+      </div>
     </div>
   );
 }
