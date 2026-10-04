@@ -2,7 +2,6 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   BarChart3,
   Bell,
-  Building2,
   Gift,
   LayoutDashboard,
   LogOut,
@@ -31,12 +30,6 @@ const links = [
     label: 'Vue d’ensemble',
     icon: LayoutDashboard,
     end: true,
-    feature: null,
-  },
-  {
-    to: '/dashboard/establishments',
-    label: 'Établissements',
-    icon: Building2,
     feature: null,
   },
   {
