@@ -36,7 +36,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import type { Establishment, Review } from '@/lib/types';
 import { Stars } from '@/components/Stars';
 import { getMySubscriptionAccess, type SubscriptionAccess } from '@/lib/subscriptionAccess';
-import KelyaniMark from '@/components/brand/KelyaniMark';
 
 type LoyaltyCustomer = {
   id: string;
@@ -855,10 +854,10 @@ export default function Dashboard() {
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0">
               <div className="mb-4 flex items-center gap-3">
-                <KelyaniMark size={72} />
-                <div className="leading-none">
-                  <p className="font-display text-xl font-semibold tracking-[.08em] text-[#E1C27A]">KELYANI</p>
-                  <p className="mt-1 text-[7px] font-semibold uppercase tracking-[.22em] text-[#C9A45C]/70">CUSTOMER INTELLIGENCE</p>
+                {selectedEstablishment?.logo_url ? <img src={selectedEstablishment.logo_url} alt={selectedEstablishment.name} className="h-12 w-12 rounded-xl border border-[#242424] bg-white object-contain p-1" /> : <div className="grid h-12 w-12 place-items-center rounded-xl border border-[#242424] bg-[#050505] text-[#C9A45C]"><Building2 size={19} /></div>}
+                <div className="min-w-0 leading-none">
+                  <p className="max-w-[260px] truncate text-lg font-semibold text-white">{selectedEstablishment?.name || 'Votre établissement'}</p>
+                  <p className="mt-1 text-[7px] font-semibold uppercase tracking-[.22em] text-[#C9A45C]/60">ESPACE ÉTABLISSEMENT · KELYANI</p>
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
