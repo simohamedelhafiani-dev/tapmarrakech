@@ -123,7 +123,6 @@ export function DashboardLayout() {
         return;
       }
 
-      const accesses = await getMySubscriptionAccess();
       const establishmentId = (() => {
         try {
           return user?.id ? window.localStorage.getItem(`tapmarrakech:selected-establishment:${user.id}`) : null;
@@ -131,9 +130,8 @@ export function DashboardLayout() {
           return null;
         }
       })();
-      const access = establishmentId
-        ? accesses.find((item) => item.establishment_id === establishmentId)
-        : accesses[0];
+      const accesses = await getMySubscriptionAccess(establishmentId ?? undefined);
+      const access = accesses[0];
 
       if (active) setSubscriptionTheme(getSubscriptionTheme(access));
     };
