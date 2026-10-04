@@ -17,13 +17,13 @@ import {
   MessageCircle,
   AlertTriangle,
   Check,
+  Search,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useLanguage, type Language } from '@/contexts/LanguageContext';
 import { getMySubscriptionAccess, getSubscriptionTheme, type SubscriptionTheme } from '@/lib/subscriptionAccess';
-import KelyaniMark from '@/components/brand/KelyaniMark';
 
 const links = [
   {
@@ -91,6 +91,14 @@ type AppNotification = {
   tone: 'review' | 'alert' | 'info';
 };
 
+type SearchResult = {
+  id: string;
+  type: 'establishment' | 'customer' | 'review';
+  title: string;
+  subtitle: string;
+  establishmentId?: string;
+};
+
 export function DashboardLayout() {
   const [open, setOpen] = useState(false);
   const [profileName, setProfileName] = useState<string | null>(null);
@@ -100,6 +108,10 @@ export function DashboardLayout() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [lastSeenNotificationsAt, setLastSeenNotificationsAt] = useState<string | null>(null);
   const [subscriptionTheme, setSubscriptionTheme] = useState<SubscriptionTheme>(() => getSubscriptionTheme(null));
+  const [activeEstablishment, setActiveEstablishment] = useState<Establishment | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const { signOut, user, role } = useAuth();
   const { language, setLanguage } = useLanguage();
@@ -344,34 +356,39 @@ export function DashboardLayout() {
     const loadEstablishment = async () => {
       if (role !== 'responsible' || !user?.id) {
         setScannerUrl(null);
+        setActiveEstablishment(null);
         return;
       }
 
       const { data, error } = await supabase.rpc('get_my_establishments');
 
       if (error) {
-        console.error(
-          'Erreur chargement de l’établissement du responsable:',
-          error
-        );
-
+        console.error('Erreur chargement des établissements du responsable:', error);
         if (active) {
           setScannerUrl(null);
+          setActiveEstablishment(null);
         }
-
         return;
       }
 
       const establishments = (data ?? []) as Establishment[];
-      const establishment = establishments[0];
-
-      if (active) {
-      }
+      const storageKey = `tapmarrakech:selected-establishment:${user.id}`;
+      const storedId = window.localStorage.getItem(storageKey);
+      const establishment = establishments.find((item) => item.id === storedId) ?? establishments[0] ?? null;
 
       if (!establishment?.id) {
-        if (active) setScannerUrl(null);
+        if (active) {
+          setScannerUrl(null);
+          setActiveEstablishment(null);
+        }
         return;
       }
+
+      if (storedId !== establishment.id) {
+        window.localStorage.setItem(storageKey, establishment.id);
+      }
+
+      if (active) setActiveEstablishment(establishment);
 
       setScannerLoading(true);
       const { data: scannerRow, error: scannerError } = await supabase
@@ -383,10 +400,6 @@ export function DashboardLayout() {
       if (!active) return;
 
       if (scannerError || !scannerRow?.access_token) {
-        console.error(
-          'Erreur lecture du lien scanner fidélité:',
-          scannerError ?? new Error('Aucun lien scanner pour cet établissement')
-        );
         setScannerUrl(null);
       } else {
         setScannerUrl(
@@ -399,12 +412,107 @@ export function DashboardLayout() {
       setScannerLoading(false);
     };
 
-    loadEstablishment();
+    void loadEstablishment();
+
+    const handleEstablishmentChanged = () => void loadEstablishment();
+    window.addEventListener('tapmarrakech:establishment-changed', handleEstablishmentChanged);
 
     return () => {
       active = false;
+      window.removeEventListener('tapmarrakech:establishment-changed', handleEstablishmentChanged);
     };
   }, [role, user?.id]);
+
+  useEffect(() => {
+    let active = true;
+    const query = searchQuery.trim();
+
+    if (!query || query.length < 2 || role !== 'responsible') {
+      setSearchResults([]);
+      return;
+    }
+
+    const timer = window.setTimeout(async () => {
+      const safeQuery = query.replace(/[(),]/g, ' ').replace(/\\s+/g, ' ').trim();
+      const { data: accessible, error: establishmentError } = await supabase.rpc('get_my_establishments');
+      if (!active || establishmentError) return;
+
+      const establishments = (accessible ?? []) as Establishment[];
+      const establishmentIds = establishments.map((item) => item.id);
+      const pattern = `%${safeQuery}%`;
+
+      const [customerResponse, reviewResponse] = await Promise.all([
+        establishmentIds.length
+          ? supabase
+              .from('loyalty_customers')
+              .select('id,first_name,last_name,phone,loyalty_number,establishment_id')
+              .in('establishment_id', establishmentIds)
+              .or(`first_name.ilike.${pattern},last_name.ilike.${pattern},phone.ilike.${pattern},loyalty_number.ilike.${pattern}`)
+              .order('created_at', { ascending: false })
+              .limit(5)
+          : Promise.resolve({ data: [], error: null }),
+        establishmentIds.length
+          ? supabase
+              .from('reviews')
+              .select('id,name,comment,rating,establishment_id')
+              .in('establishment_id', establishmentIds)
+              .or(`name.ilike.${pattern},comment.ilike.${pattern}`)
+              .order('created_at', { ascending: false })
+              .limit(5)
+          : Promise.resolve({ data: [], error: null }),
+      ]);
+
+      if (!active) return;
+
+      const establishmentResults: SearchResult[] = establishments
+        .filter((item) => [item.name, item.slug].some((value) => value.toLowerCase().includes(query.toLowerCase())))
+        .slice(0, 3)
+        .map((item) => ({
+          id: item.id,
+          type: 'establishment',
+          title: item.name,
+          subtitle: 'Établissement',
+          establishmentId: item.id,
+        }));
+
+      const customerResults: SearchResult[] = (customerResponse.data ?? []).map((item) => ({
+        id: item.id,
+        type: 'customer',
+        title: [item.first_name, item.last_name].filter(Boolean).join(' ') || 'Client',
+        subtitle: item.phone || item.loyalty_number || 'Client fidélité',
+        establishmentId: item.establishment_id,
+      }));
+
+      const reviewResults: SearchResult[] = (reviewResponse.data ?? []).map((item) => ({
+        id: item.id,
+        type: 'review',
+        title: item.name || 'Avis client',
+        subtitle: `Note ${item.rating}/5 · ${String(item.comment || '').slice(0, 55)}`,
+        establishmentId: item.establishment_id,
+      }));
+
+      setSearchResults([...establishmentResults, ...customerResults, ...reviewResults].slice(0, 8));
+    }, 220);
+
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [searchQuery, role]);
+
+  const selectSearchResult = (result: SearchResult) => {
+    if (result.establishmentId && user?.id) {
+      window.localStorage.setItem(`tapmarrakech:selected-establishment:${user.id}`, result.establishmentId);
+      window.dispatchEvent(new CustomEvent('tapmarrakech:establishment-changed', { detail: { establishmentId: result.establishmentId } }));
+    }
+
+    setSearchOpen(false);
+    setSearchQuery('');
+
+    if (result.type === 'customer') navigate('/dashboard/loyalty');
+    else if (result.type === 'review') navigate('/dashboard/reviews');
+    else navigate('/dashboard');
+  };
 
   const logout = async () => {
     await signOut();
@@ -469,21 +577,41 @@ export function DashboardLayout() {
       <div className="min-h-screen">
         <header className="dashboard-depth-topbar sticky top-0 z-50 border-b border-[#242424] bg-[#050505]/95 px-3 py-3 backdrop-blur-2xl sm:px-5">
           <div className="mx-auto flex max-w-[1700px] items-center gap-3">
-            <button type="button" onClick={() => navigate('/dashboard')} className="flex shrink-0 items-center gap-3" aria-label="KELYANI">
-              <KelyaniMark size={72} />
+            <button type="button" onClick={() => navigate('/dashboard')} className="flex min-w-0 shrink-0 items-center gap-3 text-left" aria-label="Établissement actif">
+              {activeEstablishment?.logo_url ? (
+                <img src={activeEstablishment.logo_url} alt={activeEstablishment.name} className="h-11 w-11 rounded-xl border border-[#242424] bg-white object-contain p-1" />
+              ) : (
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-[#242424] bg-[#111111] text-[#C9A45C]"><Building2 size={18} /></div>
+              )}
+              <div className="hidden min-w-0 sm:block">
+                <p className="max-w-[180px] truncate text-sm font-semibold text-white">{activeEstablishment?.name || 'Votre établissement'}</p>
+                <p className="mt-0.5 text-[8px] font-semibold uppercase tracking-[0.18em] text-[#C9A45C]/60">Espace établissement · KELYANI</p>
+              </div>
             </button>
 
-            <div className="mx-auto hidden min-w-0 max-w-2xl flex-1 md:block">
+            <div className="relative mx-auto hidden min-w-0 max-w-2xl flex-1 md:block">
               <label className="relative block">
-                <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#C9A45C]">⌕</span>
+                <Search size={15} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#C9A45C]" />
                 <input
                   type="search"
+                  value={searchQuery}
+                  onFocus={() => setSearchOpen(true)}
+                  onChange={(event) => { setSearchQuery(event.target.value); setSearchOpen(true); }}
                   placeholder="Rechercher un client, un avis, un établissement..."
                   aria-label="Rechercher"
                   className="h-11 w-full rounded-2xl border border-[#242424] bg-[#111111] pl-11 pr-16 text-sm text-[#FFFFFF] outline-none placeholder:text-[#F5F5DC]/30 focus:border-[#C9A45C]/60 focus:ring-1 focus:ring-[#C9A45C]/20"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg border border-[#242424] bg-[#050505] px-2 py-1 text-[9px] text-[#F5F5DC]/35">⌘ K</span>
               </label>
+              {searchOpen && searchQuery.trim().length >= 2 && (
+                <div className="absolute left-0 right-0 top-13 z-[70] overflow-hidden rounded-2xl border border-[#242424] bg-[#111111] shadow-[0_24px_70px_rgba(0,0,0,.55)]">
+                  {searchResults.length ? searchResults.map((result) => (
+                    <button key={`${result.type}-${result.id}`} type="button" onClick={() => selectSearchResult(result)} className="flex w-full items-start gap-3 border-b border-[#242424] px-4 py-3 text-left last:border-0 hover:bg-[#181818]">
+                      <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#C9A45C]/10 text-[#C9A45C]">{result.type === 'customer' ? '◉' : result.type === 'review' ? '★' : <Building2 size={15} />}</span>
+                      <span className="min-w-0"><span className="block truncate text-xs font-semibold text-white">{result.title}</span><span className="mt-0.5 block truncate text-[10px] text-white/40">{result.subtitle}</span></span>
+                    </button>
+                  )) : <p className="px-4 py-5 text-center text-xs text-white/35">Aucun résultat.</p>}
+                </div>
+              )}
             </div>
 
             <div className="ml-auto flex shrink-0 items-center gap-2">
@@ -583,16 +711,28 @@ export function DashboardLayout() {
             </div>
           </div>
 
-          <div className="mx-auto mt-3 md:hidden">
+          <div className="relative mx-auto mt-3 md:hidden">
             <label className="relative block">
-              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#C9A45C]">⌕</span>
+              <Search size={14} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#C9A45C]" />
               <input
                 type="search"
+                value={searchQuery}
+                onFocus={() => setSearchOpen(true)}
+                onChange={(event) => { setSearchQuery(event.target.value); setSearchOpen(true); }}
                 placeholder="Rechercher..."
                 aria-label="Rechercher"
-                className="h-10 w-full rounded-2xl border border-[#242424] bg-[#111111] pl-11 pr-4 text-xs text-[#FFFFFF] outline-none placeholder:text-[#F5F5DC]/30 focus:border-[#C9A45C]/60"
+                className="h-10 w-full rounded-2xl border border-[#242424] bg-[#111111] pl-10 pr-4 text-xs text-[#FFFFFF] outline-none placeholder:text-[#F5F5DC]/30 focus:border-[#C9A45C]/60"
               />
             </label>
+            {searchOpen && searchQuery.trim().length >= 2 && (
+              <div className="absolute left-0 right-0 top-12 z-[70] overflow-hidden rounded-2xl border border-[#242424] bg-[#111111] shadow-[0_24px_70px_rgba(0,0,0,.55)]">
+                {searchResults.length ? searchResults.map((result) => (
+                  <button key={`${result.type}-mobile-${result.id}`} type="button" onClick={() => selectSearchResult(result)} className="flex w-full items-start gap-3 border-b border-[#242424] px-4 py-3 text-left last:border-0 hover:bg-[#181818]">
+                    <span className="min-w-0"><span className="block truncate text-xs font-semibold text-white">{result.title}</span><span className="mt-0.5 block truncate text-[10px] text-white/40">{result.subtitle}</span></span>
+                  </button>
+                )) : <p className="px-4 py-5 text-center text-xs text-white/35">Aucun résultat.</p>}
+              </div>
+            )}
           </div>
         </header>
 
