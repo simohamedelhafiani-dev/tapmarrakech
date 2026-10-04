@@ -306,7 +306,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   }), [program, design, establishment, rewards]);
 
   useEffect(() => {
-    if (!establishmentId || !designHydratedRef.current) return;
+    if (!isAdmin || !establishmentId || !designHydratedRef.current) return;
 
     if (liveDesignTimerRef.current !== null) {
       window.clearTimeout(liveDesignTimerRef.current);
