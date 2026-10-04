@@ -659,7 +659,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                 cardUrl: cardUrl,
               }}
               programType={mode}
-              cardWidth="300px"
+              cardWidth="90vw"
             />
           </div>
         </div>
