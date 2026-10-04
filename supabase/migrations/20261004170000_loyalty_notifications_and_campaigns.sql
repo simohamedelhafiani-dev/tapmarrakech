@@ -300,6 +300,7 @@ end;
 $function$;
 
 revoke execute on function public.create_loyalty_card_notification(uuid,uuid,text,text,text,timestamptz) from public, anon;
+revoke execute on function public.create_loyalty_card_notification(uuid,uuid,text,text,text,timestamptz) from anon;
 grant execute on function public.create_loyalty_card_notification(uuid,uuid,text,text,text,timestamptz) to authenticated;
 revoke execute on function public.create_loyalty_notification_campaign(uuid,text,text,text,timestamptz,jsonb) from public, anon;
 grant execute on function public.create_loyalty_notification_campaign(uuid,text,text,text,timestamptz,jsonb) to authenticated;
