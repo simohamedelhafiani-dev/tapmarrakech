@@ -299,9 +299,11 @@ begin
 end;
 $function$;
 
-revoke execute on function public.create_loyalty_card_notification(uuid,uuid,text,text,text,timestamptz) from anon;
+revoke execute on function public.create_loyalty_card_notification(uuid,uuid,text,text,text,timestamptz) from public, anon;
 grant execute on function public.create_loyalty_card_notification(uuid,uuid,text,text,text,timestamptz) to authenticated;
-revoke execute on function public.create_loyalty_notification_campaign(uuid,text,text,text,timestamptz,jsonb) from anon;
+revoke execute on function public.create_loyalty_notification_campaign(uuid,text,text,text,timestamptz,jsonb) from public, anon;
 grant execute on function public.create_loyalty_notification_campaign(uuid,text,text,text,timestamptz,jsonb) to authenticated;
+revoke execute on function public.get_public_loyalty_notifications(uuid,integer) from public;
 grant execute on function public.get_public_loyalty_notifications(uuid,integer) to anon, authenticated;
+revoke execute on function public.mark_public_loyalty_notification_read(uuid,uuid) from public;
 grant execute on function public.mark_public_loyalty_notification_read(uuid,uuid) to anon, authenticated;
