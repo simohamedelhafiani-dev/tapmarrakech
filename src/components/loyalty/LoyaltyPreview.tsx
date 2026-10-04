@@ -25,7 +25,7 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
     >
       <LoyaltyCardVisual
         design={{
-          template_id: config.templateId,
+          template_id: config.templateId ?? undefined,
           primary_color: config.primaryColor || '#181818',
           secondary_color: config.secondaryColor || '#D7D7D7',
           background_color: config.backgroundColor || '#070707',
@@ -42,8 +42,8 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
                   ? 'POINTS_DISCOUNT'
                   : 'POINTS_REWARD',
             stamp_style: config.stampStyle || 'circles',
-            rewardName: config.rewardName,
-            rewardDescription: config.rewardDescription,
+            rewardName: config.rewardName ?? undefined,
+            rewardDescription: config.rewardDescription ?? undefined,
             discountPercent: config.discountPercent ?? undefined,
             show_qr: true,
             show_points: true,
@@ -56,7 +56,7 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
           stampsBalance: config.visits ?? 0,
           stampGoal: config.visitGoal ?? 10,
           stampRewardName: config.rewardName ?? undefined,
-          discountPercent: config.discountPercent,
+          discountPercent: config.discountPercent ?? undefined,
           customerName: config.customerName || 'Votre client',
           cardUrl: config.qrValue ?? undefined,
         }}
