@@ -473,8 +473,8 @@ export default function LoyaltyScanner() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f7f3] px-4 py-5">
-      <main className="mx-auto w-full max-w-md">
+    <div className="min-h-screen w-screen bg-[#f7f7f3] px-4 py-5 flex justify-center">
+      <main className="w-full max-w-md">
         <header className="rounded-[2rem] bg-forest p-6 text-white shadow-xl">
           <div className="flex items-center gap-4">
             {context.establishment_logo_url ? (
