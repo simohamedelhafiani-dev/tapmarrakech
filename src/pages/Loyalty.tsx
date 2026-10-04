@@ -26,6 +26,12 @@ type LoyaltyCustomer = {
   establishment_id: string;
   phone: string;
   first_name: string;
+  email?: string | null;
+  interests?: string[] | null;
+  marketing_consent?: boolean;
+  notification_consent?: boolean;
+  preferred_channel?: string | null;
+  visit_frequency?: string | null;
   points_balance: number;
   total_points_earned: number;
   total_points_redeemed: number;
@@ -68,6 +74,12 @@ export default function Loyalty() {
   const [notificationTitle, setNotificationTitle] = useState('');
   const [notificationMessage, setNotificationMessage] = useState('');
   const [notificationType, setNotificationType] = useState<'INFO' | 'OFFER' | 'REWARD' | 'POINTS'>('INFO');
+  const [notificationAudience, setNotificationAudience] = useState<'ALL' | 'INTEREST' | 'FREQUENCY' | 'POINTS' | 'VISITS' | 'CUSTOMER'>('ALL');
+  const [notificationInterest, setNotificationInterest] = useState('');
+  const [notificationFrequency, setNotificationFrequency] = useState('');
+  const [notificationMinPoints, setNotificationMinPoints] = useState('');
+  const [notificationMinVisits, setNotificationMinVisits] = useState('');
+  const [notificationLastVisitDays, setNotificationLastVisitDays] = useState('');
   const [notificationCustomerId, setNotificationCustomerId] = useState('');
   const [notificationExpiresAt, setNotificationExpiresAt] = useState('');
   const [notificationSaving, setNotificationSaving] = useState(false);
@@ -319,18 +331,98 @@ export default function Loyalty() {
     alert(`+${points} points ajoutés. Nouveau solde : ${newBalance} points.`);
   }
 
+  const notificationEligibleCustomers = useMemo(() => {
+    return customers.filter(customer => {
+      if (!customer.notification_consent) return false;
+
+      if (notificationAudience === 'INTEREST' && notificationInterest) {
+        if (!(customer.interests ?? []).includes(notificationInterest)) return false;
+      }
+
+      if (notificationAudience === 'FREQUENCY' && notificationFrequency) {
+        if (customer.visit_frequency !== notificationFrequency) return false;
+      }
+
+      if (notificationAudience === 'POINTS') {
+        if (customer.points_balance < Number(notificationMinPoints || 0)) return false;
+      }
+
+      if (notificationAudience === 'VISITS') {
+        if (customer.visit_count < Number(notificationMinVisits || 0)) return false;
+        const days = Number(notificationLastVisitDays || 0);
+        if (days > 0) {
+          if (!customer.last_visit_at) return false;
+          const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+          if (new Date(customer.last_visit_at).getTime() < cutoff) return false;
+        }
+      }
+
+      if (notificationAudience === 'CUSTOMER' && customer.id !== notificationCustomerId) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [
+    customers,
+    notificationAudience,
+    notificationInterest,
+    notificationFrequency,
+    notificationMinPoints,
+    notificationMinVisits,
+    notificationLastVisitDays,
+    notificationCustomerId,
+  ]);
+
+  const notificationInterests = useMemo(() => {
+    return Array.from(
+      new Set(customers.flatMap(customer => customer.interests ?? []))
+    ).sort();
+  }, [customers]);
+
   async function createNotification() {
     if (!establishmentId || !notificationTitle.trim() || !notificationMessage.trim()) return;
 
+    if (notificationAudience === 'CUSTOMER' && !notificationCustomerId) {
+      alert('Sélectionnez un client.');
+      return;
+    }
+
+    if (notificationEligibleCustomers.length === 0) {
+      alert('Aucun client avec consentement notification ne correspond à ce ciblage.');
+      return;
+    }
+
     setNotificationSaving(true);
 
-    const { error } = await supabase.rpc('create_loyalty_card_notification', {
+    const audience: Record<string, unknown> = {};
+
+    if (notificationAudience === 'INTEREST' && notificationInterest) {
+      audience.interests = [notificationInterest];
+    }
+    if (notificationAudience === 'FREQUENCY' && notificationFrequency) {
+      audience.visit_frequency = notificationFrequency;
+    }
+    if (notificationAudience === 'POINTS') {
+      audience.min_points = Math.max(0, Number(notificationMinPoints || 0));
+    }
+    if (notificationAudience === 'VISITS') {
+      audience.min_visits = Math.max(0, Number(notificationMinVisits || 0));
+      if (Number(notificationLastVisitDays || 0) > 0) {
+        audience.last_visit_days = Math.max(0, Number(notificationLastVisitDays));
+      }
+    }
+    if (notificationAudience === 'CUSTOMER') {
+      audience.customer_ids = [notificationCustomerId];
+    }
+
+    const { data, error } = await supabase.rpc('create_loyalty_notification_campaign', {
       p_establishment_id: establishmentId,
-      p_customer_id: notificationCustomerId || null,
       p_title: notificationTitle.trim(),
       p_message: notificationMessage.trim(),
       p_type: notificationType,
       p_expires_at: notificationExpiresAt ? new Date(notificationExpiresAt).toISOString() : null,
+      p_audience: audience,
     });
 
     setNotificationSaving(false);
@@ -340,13 +432,22 @@ export default function Loyalty() {
       return;
     }
 
+    const result = Array.isArray(data) ? data[0] : data;
+    const count = Number(result?.recipient_count ?? notificationEligibleCustomers.length);
+
     setNotificationTitle('');
     setNotificationMessage('');
     setNotificationType('INFO');
+    setNotificationAudience('ALL');
+    setNotificationInterest('');
+    setNotificationFrequency('');
+    setNotificationMinPoints('');
+    setNotificationMinVisits('');
+    setNotificationLastVisitDays('');
     setNotificationCustomerId('');
     setNotificationExpiresAt('');
     setShowNotificationModal(false);
-    alert('Notification publiée sur la carte fidélité.');
+    alert(`Notification publiée sur ${count} carte(s) fidélité.`);
   }
 
   function selectReward(
@@ -768,19 +869,115 @@ export default function Loyalty() {
             </div>
 
             <div>
-              <label className="text-xs font-medium text-ink/60">Destinataire</label>
+              <label className="text-xs font-medium text-ink/60">Ciblage</label>
               <select
-                value={notificationCustomerId}
-                onChange={e => setNotificationCustomerId(e.target.value)}
+                value={notificationAudience}
+                onChange={e => setNotificationAudience(e.target.value as typeof notificationAudience)}
                 className="mt-2 w-full rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm outline-none focus:border-gold"
               >
-                <option value="">Tous les clients</option>
-                {customers.map(customer => (
-                  <option key={customer.id} value={customer.id}>
-                    {customer.first_name || 'Client'} · {customer.phone}
-                  </option>
-                ))}
+                <option value="ALL">Tous les clients ayant accepté les notifications</option>
+                <option value="INTEREST">Par centre d’intérêt</option>
+                <option value="FREQUENCY">Par fréquence de visite</option>
+                <option value="POINTS">Par solde de points</option>
+                <option value="VISITS">Par visites / récence</option>
+                <option value="CUSTOMER">Un client précis</option>
               </select>
+            </div>
+
+            {notificationAudience === 'INTEREST' && (
+              <div>
+                <label className="text-xs font-medium text-ink/60">Centre d’intérêt</label>
+                <select
+                  value={notificationInterest}
+                  onChange={e => setNotificationInterest(e.target.value)}
+                  className="mt-2 w-full rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm outline-none focus:border-gold"
+                >
+                  <option value="">Sélectionner</option>
+                  {notificationInterests.map(interest => (
+                    <option key={interest} value={interest}>{interest}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {notificationAudience === 'FREQUENCY' && (
+              <div>
+                <label className="text-xs font-medium text-ink/60">Fréquence de visite</label>
+                <select
+                  value={notificationFrequency}
+                  onChange={e => setNotificationFrequency(e.target.value)}
+                  className="mt-2 w-full rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm outline-none focus:border-gold"
+                >
+                  <option value="">Sélectionner</option>
+                  <option value="WEEKLY">Hebdomadaire</option>
+                  <option value="MONTHLY">Mensuelle</option>
+                  <option value="OCCASIONAL">Occasionnelle</option>
+                </select>
+              </div>
+            )}
+
+            {notificationAudience === 'POINTS' && (
+              <div>
+                <label className="text-xs font-medium text-ink/60">Minimum de points</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={notificationMinPoints}
+                  onChange={e => setNotificationMinPoints(e.target.value)}
+                  placeholder="100"
+                  className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-gold"
+                />
+              </div>
+            )}
+
+            {notificationAudience === 'VISITS' && (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-medium text-ink/60">Minimum de visites</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={notificationMinVisits}
+                    onChange={e => setNotificationMinVisits(e.target.value)}
+                    placeholder="3"
+                    className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-gold"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-ink/60">Vu il y a moins de (jours)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={notificationLastVisitDays}
+                    onChange={e => setNotificationLastVisitDays(e.target.value)}
+                    placeholder="30"
+                    className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-gold"
+                  />
+                </div>
+              </div>
+            )}
+
+            {notificationAudience === 'CUSTOMER' && (
+              <div>
+                <label className="text-xs font-medium text-ink/60">Client</label>
+                <select
+                  value={notificationCustomerId}
+                  onChange={e => setNotificationCustomerId(e.target.value)}
+                  className="mt-2 w-full rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm outline-none focus:border-gold"
+                >
+                  <option value="">Sélectionner</option>
+                  {customers.filter(c => c.notification_consent).map(customer => (
+                    <option key={customer.id} value={customer.id}>
+                      {customer.first_name || 'Client'} · {customer.phone}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div className="rounded-xl border border-ink/5 bg-[#f7f7f3] px-4 py-3 text-xs text-ink/55">
+              <strong className="text-forest">{notificationEligibleCustomers.length}</strong> client(s) ciblé(s).
+              <span className="ml-1">Seuls les clients ayant accepté les notifications recevront le message.</span>
             </div>
 
             <div>
