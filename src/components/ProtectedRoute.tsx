@@ -9,13 +9,6 @@ type ProtectedRouteProps = {
 };
 
 export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
-  console.log('[ProtectedRoute] RENDER', { allowedRoles });
-
-  useEffect(() => {
-    console.log('[ProtectedRoute] MOUNT');
-    return () => console.log('[ProtectedRoute] UNMOUNT');
-  }, []);
-
   const { user, role, loading } = useAuth();
 
   if (loading) {
