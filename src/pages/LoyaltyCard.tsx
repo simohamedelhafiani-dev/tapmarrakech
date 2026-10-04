@@ -416,10 +416,12 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
 
     let refreshTimeout: number | null = null;
     let disposed = false;
+    let refreshSequence = 0;
 
     const refreshCard = async () => {
       if (disposed) return;
 
+      const sequence = ++refreshSequence;
       setIsLiveRefreshing(true);
 
       const [
@@ -440,7 +442,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         supabase.rpc('get_public_loyalty_notifications', { p_access_token: token, p_limit: 20 }),
       ]);
 
-      if (disposed) return;
+      if (disposed || sequence !== refreshSequence) return;
 
       if (cardData?.[0]) setCard(cardData[0] as Card);
       setHistory((historyData ?? []) as HistoryItem[]);
@@ -482,7 +484,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
       // otherwise remain cached on a phone/PWA after a published upload.
       setLiveVersion(Date.now());
       requestAnimationFrame(() => {
-        if (!disposed) setIsLiveRefreshing(false);
+        if (!disposed && sequence === refreshSequence) setIsLiveRefreshing(false);
       });
     };
 
@@ -556,7 +558,16 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         },
         scheduleRefresh,
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          scheduleRefresh();
+        }
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+          window.setTimeout(() => {
+            if (!disposed) scheduleRefresh();
+          }, 500);
+        }
+      });
 
     // Realtime is the primary path. This lightweight fallback only protects
     // installed PWAs/background tabs from missed websocket events.
