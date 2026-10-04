@@ -429,6 +429,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         { data: historyData },
         { data: rewardsData },
         { data: discountData },
+        { data: notificationsData },
       ] = await Promise.all([
         supabase.rpc('get_public_loyalty_card', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_card_config', { p_access_token: token }),
@@ -436,6 +437,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         supabase.rpc('get_public_loyalty_history', { p_access_token: token, p_limit: 20 }),
         supabase.rpc('get_public_loyalty_rewards', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_discount_status', { p_access_token: token }),
+        supabase.rpc('get_public_loyalty_notifications', { p_access_token: token, p_limit: 20 }),
       ]);
 
       if (disposed) return;
@@ -443,6 +445,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
       if (cardData?.[0]) setCard(cardData[0] as Card);
       setHistory((historyData ?? []) as HistoryItem[]);
       setRewards((rewardsData ?? []) as LoyaltyExperienceReward[]);
+      setNotifications((notificationsData ?? []) as CardNotification[]);
 
       const designRow = Array.isArray(designData) ? designData[0] : designData;
       if (designRow) {
