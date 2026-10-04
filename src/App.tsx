@@ -23,9 +23,6 @@ import Menu from '@/pages/Menu';
 import MenuDesign from '@/pages/MenuDesign';
 import Promotions from '@/pages/Promotions';
 import Admin from '@/pages/Admin';
-import AdminOverview from '@/pages/AdminOverview';
-import AdminOverviewV2 from '@/pages/AdminOverviewV2';
-import AdminStatCardTest from '@/pages/AdminStatCardTest';
 import Employee from '@/pages/Employee';
 import LoyaltyScanner from '@/pages/LoyaltyScanner';
 
@@ -176,9 +173,6 @@ function App() {
 
           <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
             <Route path="/admin" element={<Admin />} />
-            <Route path="/admin/overview-test" element={<AdminOverview />} />
-            <Route path="/admin/overview-v2" element={<AdminOverviewV2 />} />
-            <Route path="/admin/statcard-test" element={<AdminStatCardTest />} />
           </Route>
 
           <Route element={<ProtectedRoute allowedRoles={['responsible']} />}>
