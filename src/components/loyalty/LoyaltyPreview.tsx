@@ -34,7 +34,7 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
           config: {
             background_image_url: config.coverImageUrl || null,
             logo_url: config.logoUrl || null,
-            loyaltyType: config.type,
+            loyaltyType: mode,
             card_mode:
               config.type === 'STAMP'
                 ? 'STAMP'
@@ -44,21 +44,21 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
             stamp_style: config.stampStyle || 'circles',
             rewardName: config.rewardName,
             rewardDescription: config.rewardDescription,
-            discountPercent: config.discountPercent,
+            discountPercent: config.discountPercent ?? undefined,
             show_qr: true,
             show_points: true,
           },
         }}
         card={{
           establishmentName: config.establishmentName || 'Votre établissement',
-          logoUrl: config.logoUrl,
+          logoUrl: config.logoUrl ?? undefined,
           points: config.pointsBalance ?? 0,
           stampsBalance: config.visits ?? 0,
           stampGoal: config.visitGoal ?? 10,
-          stampRewardName: config.rewardName,
+          stampRewardName: config.rewardName ?? undefined,
           discountPercent: config.discountPercent,
           customerName: config.customerName || 'Votre client',
-          cardUrl: config.qrValue,
+          cardUrl: config.qrValue ?? undefined,
         }}
         programType={mode}
         cardWidth="300px"
