@@ -200,9 +200,9 @@ table {
 /* Responsible workspace: keep the authenticated SaaS surface consistently dark.
    Legacy feature pages still contain light utility classes; scope this normalization
    strictly to the responsible dashboard shell so public pages are unaffected. */
-.dashboard-depth-shell .bg-white,
-.dashboard-depth-shell .bg-[#fffdf9],
-.dashboard-depth-shell .bg-[#f7f7f3] {
+.dashboard-depth-shell [class~="bg-white"],
+.dashboard-depth-shell [class~="bg-[#fffdf9]"],
+.dashboard-depth-shell [class~="bg-[#f7f7f3]"] {
   background-color: #111111 !important;
 }
 
