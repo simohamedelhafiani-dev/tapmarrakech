@@ -183,7 +183,7 @@ const expandedUiTranslations: Record<string, { en: string; ar: string }> = {
   'Compte modifié avec succès.': { en: 'Account updated successfully.', ar: 'تم تعديل الحساب بنجاح.' },
   'Les deux codes ne correspondent pas.': { en: 'The two codes do not match.', ar: 'الرمزان غير متطابقين.' },
   'Erreur inconnue': { en: 'Unknown error', ar: 'خطأ غير معروف' },
-  'Aucun établissement': { en: 'No establishment', ar: 'لا توجد مؤسسة' },
+  'Aucun établissement': { en: 'No establishments', ar: 'لا توجد مؤسسات' },
   'Erreur analyse IA:': { en: 'AI analysis error:', ar: 'خطأ تحليل الذكاء الاصطناعي:' },
   'Impossible de lancer l’analyse des avis.': { en: 'Unable to start review analysis.', ar: 'تعذر بدء تحليل التقييمات.' },
   'La réponse de l’IA est invalide.': { en: 'The AI response is invalid.', ar: 'استجابة الذكاء الاصطناعي غير صالحة.' },
