@@ -24,6 +24,14 @@ export default function LoyaltyJoin() {
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
   const [birthDate, setBirthDate] = useState('');
+  const [email, setEmail] = useState('');
+  const [interests, setInterests] = useState<string[]>([]);
+  const [preferredChannel, setPreferredChannel] = useState<'WHATSAPP' | 'SMS' | 'EMAIL' | 'PUSH' | 'NONE'>('WHATSAPP');
+  const [visitFrequency, setVisitFrequency] = useState<'WEEKLY' | 'MONTHLY' | 'OCCASIONAL' | ''>('');
+  const [notificationConsent, setNotificationConsent] = useState(false);
+  const [marketingConsent, setMarketingConsent] = useState(false);
+
+  const interestOptions = ['Promotions', 'Nouveautés', 'Événements', 'Récompenses', 'Offres anniversaire', 'Menu & nouveautés', 'Bien-être', 'Sport', 'Beauté'];
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [accessToken, setAccessToken] = useState('');
@@ -84,7 +92,7 @@ export default function LoyaltyJoin() {
         phone.trim() &&
         (isGlobalEnrollment ? Boolean(establishmentName) : Boolean(referralCode)),
       ),
-    [loadingContext, firstName, lastName, phone, isGlobalEnrollment, referralCode],
+    [loadingContext, firstName, lastName, phone, isGlobalEnrollment, referralCode, establishmentName],
   );
 
   async function join() {
@@ -96,13 +104,19 @@ export default function LoyaltyJoin() {
     try {
       if (isGlobalEnrollment) {
         const { data, error: rpcError } = await supabase.rpc(
-          'register_public_loyalty_customer_for_enrollment',
+          'register_public_loyalty_customer_for_enrollment_v2',
           {
             p_establishment_id: establishmentId,
             p_first_name: firstName.trim(),
             p_last_name: lastName.trim(),
             p_phone: phone.trim(),
             p_birth_date: birthDate || null,
+            p_email: email.trim() || null,
+            p_interests: interests,
+            p_marketing_consent: marketingConsent,
+            p_notification_consent: notificationConsent,
+            p_preferred_channel: notificationConsent ? preferredChannel : 'NONE',
+            p_visit_frequency: visitFrequency || null,
           },
         );
 
@@ -222,77 +236,33 @@ export default function LoyaltyJoin() {
             <p className="mt-2 text-sm leading-6 text-white/65">{description}</p>
           </div>
 
-          <div className="space-y-4 p-5 sm:p-6">
-            <div className="grid grid-cols-2 gap-3">
-              <label className="block text-xs font-semibold text-white/55">
-                Prénom *
-                <input
-                  value={firstName}
-                  onChange={e => setFirstName(e.target.value)}
-                  autoComplete="given-name"
-                  autoFocus
-                  className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-4 py-3 text-sm outline-none transition focus:border-[#C9A45C] focus:ring-2 focus:ring-[#D3A84C]/10"
-                  placeholder="Prénom"
-                />
-              </label>
-              <label className="block text-xs font-semibold text-white/55">
-                Nom *
-                <input
-                  value={lastName}
-                  onChange={e => setLastName(e.target.value)}
-                  autoComplete="family-name"
-                  className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-4 py-3 text-sm outline-none transition focus:border-[#C9A45C] focus:ring-2 focus:ring-[#D3A84C]/10"
-                  placeholder="Nom"
-                />
-              </label>
+          <div className="space-y-5 p-5 sm:p-6">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/35">Vos coordonnées</p>
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                <label className="block text-xs font-semibold text-white/55">Prénom *<input value={firstName} onChange={e => setFirstName(e.target.value)} autoComplete="given-name" autoFocus className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-4 py-3 text-sm outline-none focus:border-[#C9A45C]" placeholder="Prénom" /></label>
+                <label className="block text-xs font-semibold text-white/55">Nom *<input value={lastName} onChange={e => setLastName(e.target.value)} autoComplete="family-name" className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-4 py-3 text-sm outline-none focus:border-[#C9A45C]" placeholder="Nom" /></label>
+              </div>
             </div>
-
-            <label className="block text-xs font-semibold text-white/55">
-              Téléphone *
-              <input
-                value={phone}
-                onChange={e => setPhone(e.target.value)}
-                autoComplete="tel"
-                inputMode="tel"
-                enterKeyHint="done"
-                className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-4 py-3 text-sm outline-none transition focus:border-[#C9A45C] focus:ring-2 focus:ring-[#D3A84C]/10"
-                placeholder="+212 6 12 34 56 78"
-              />
-            </label>
-
-            <details className="rounded-xl border border-white/10 bg-[#242424]">
-              <summary className="cursor-pointer px-4 py-3 text-xs font-semibold text-ink/55">
-                Ajouter ma date de naissance (facultatif)
-              </summary>
-              <div className="border-t border-white/10 px-4 pb-4 pt-3">
-                <input
-                  type="date"
-                  value={birthDate}
-                  onChange={e => setBirthDate(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#C9A45C]"
-                />
-              </div>
-            </details>
-
-            {error && (
-              <div className="rounded-xl bg-red-50 px-4 py-3 text-xs leading-5 text-red-700">
-                {error}
-              </div>
-            )}
-
-            <button
-              type="button"
-              onClick={() => void join()}
-              disabled={!canSubmit || loading}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#111111] px-5 py-4 text-sm font-semibold text-white shadow-lg transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              {loading ? 'Création de votre carte…' : 'Créer ma carte fidélité'}
-            </button>
-
-            <p className="text-center text-[10px] leading-4 text-white/30">
-              Inscription gratuite · Votre carte sera disponible immédiatement.
-            </p>
+            <label className="block text-xs font-semibold text-white/55">Téléphone *<input value={phone} onChange={e => setPhone(e.target.value)} autoComplete="tel" inputMode="tel" className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-4 py-3 text-sm outline-none focus:border-[#C9A45C]" placeholder="+212 6 12 34 56 78" /></label>
+            <label className="block text-xs font-semibold text-white/55">Email <span className="font-normal text-white/25">(facultatif)</span><input type="email" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-4 py-3 text-sm outline-none focus:border-[#C9A45C]" placeholder="vous@exemple.com" /></label>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="block text-xs font-semibold text-white/55">Date de naissance <span className="font-normal text-white/25">(facultatif)</span><input type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)} className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-3 py-3 text-sm outline-none focus:border-[#C9A45C]" /></label>
+              <label className="block text-xs font-semibold text-white/55">Fréquence de visite<select value={visitFrequency} onChange={e => setVisitFrequency(e.target.value as typeof visitFrequency)} className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-3 py-3 text-sm outline-none focus:border-[#C9A45C]"><option value="">Je ne sais pas</option><option value="WEEKLY">Chaque semaine</option><option value="MONTHLY">Chaque mois</option><option value="OCCASIONAL">Occasionnellement</option></select></label>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-[#171717] p-4">
+              <p className="text-xs font-semibold text-white">Ce qui vous intéresse</p><p className="mt-1 text-[10px] leading-4 text-white/35">Choisissez ce que vous souhaitez recevoir. Cela aide l’établissement à vous envoyer des offres plus pertinentes.</p>
+              <div className="mt-3 flex flex-wrap gap-2">{interestOptions.map((interest) => { const active = interests.includes(interest); return <button key={interest} type="button" onClick={() => setInterests(current => active ? current.filter(item => item !== interest) : [...current, interest])} className={`rounded-full border px-3 py-2 text-[10px] font-semibold transition ${active ? 'border-[#C9A45C] bg-[#C9A45C]/15 text-[#E1C27A]' : 'border-white/10 bg-[#242424] text-white/45 hover:border-[#C9A45C]/40'}`}>{interest}</button>; })}</div>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-[#171717] p-4">
+              <p className="text-xs font-semibold text-white">Notifications</p>
+              <label className="mt-3 flex cursor-pointer items-start gap-3 text-[11px] leading-5 text-white/55"><input type="checkbox" checked={notificationConsent} onChange={e => setNotificationConsent(e.target.checked)} className="mt-1 accent-[#C9A45C]" /><span>J’accepte de recevoir des notifications et offres personnalisées.</span></label>
+              {notificationConsent && <label className="mt-3 block text-[10px] font-semibold text-white/45">Canal préféré<select value={preferredChannel} onChange={e => setPreferredChannel(e.target.value as typeof preferredChannel)} className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-3 py-2.5 text-xs text-white outline-none focus:border-[#C9A45C]"><option value="WHATSAPP">WhatsApp</option><option value="SMS">SMS</option><option value="EMAIL">Email</option><option value="PUSH">Notifications téléphone</option></select></label>}
+              <label className="mt-3 flex cursor-pointer items-start gap-3 text-[11px] leading-5 text-white/55"><input type="checkbox" checked={marketingConsent} onChange={e => setMarketingConsent(e.target.checked)} className="mt-1 accent-[#C9A45C]" /><span>J’accepte les communications commerciales et offres promotionnelles.</span></label>
+            </div>
+            {error && <div className="rounded-xl bg-red-50 px-4 py-3 text-xs leading-5 text-red-700">{error}</div>}
+            <button type="button" onClick={() => void join()} disabled={!canSubmit || loading} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#C9A45C] px-5 py-4 text-sm font-bold text-[#050505] shadow-lg transition hover:bg-[#E1C27A] disabled:cursor-not-allowed disabled:opacity-40">{loading && <Loader2 className="h-4 w-4 animate-spin" />}{loading ? 'Création de votre carte…' : 'Créer ma carte fidélité'}</button>
+            <p className="text-center text-[10px] leading-4 text-white/25">Les préférences sont facultatives et servent à personnaliser les communications de l’établissement.</p>
           </div>
         </section>
       </div>
