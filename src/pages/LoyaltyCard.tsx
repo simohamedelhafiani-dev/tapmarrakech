@@ -49,11 +49,11 @@ export default function LoyaltyCard() {
   const [card, setCard] = useState<Card | null>(null);
   const [design, setDesign] = useState<Design>({
     template_id: 'custom',
-    primary_color: '#173D32',
-    secondary_color: '#D3A84C',
-    background_color: '#F7F7F3',
-    text_color: '#FFFFFF',
-    button_color: '#173D32',
+    primary_color: '#D4AF37',
+    secondary_color: '#E1C27A',
+    background_color: '#0D0D0D',
+    text_color: '#F5F5DC',
+    button_color: '#D4AF37',
     border_radius: 24,
   });
   const [designConfig, setDesignConfig] = useState(defaultLoyaltyDesignConfig);
@@ -146,7 +146,7 @@ export default function LoyaltyCard() {
       margin: 1,
       errorCorrectionLevel: 'M',
       color: {
-        dark: '#173D32',
+        dark: '#0D0D0D',
         light: '#FFFFFF',
       },
     }).then(dataUrl => {
@@ -608,11 +608,11 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         <div className="w-full max-w-[430px]">
         {showWelcome && (
           <div className="mb-4 flex items-center gap-3 rounded-2xl border border-[#C9A45C]/20 bg-[#111111] px-4 py-3 shadow-soft">
-            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#e7f1eb] text-[#173D32]">
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#D4AF37]/10 text-[#D4AF37]">
               <Gift className="h-4 w-4" />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-[#173D32]">Bienvenue dans votre programme fidélité 🎉</p>
+              <p className="text-sm font-semibold text-[#E1C27A]">Bienvenue dans votre programme fidélité 🎉</p>
               <p className="mt-0.5 text-[10px] leading-4 text-ink/45">Votre carte est maintenant active. Gardez-la sur votre téléphone.</p>
             </div>
             <button type="button" onClick={() => setShowWelcome(false)} className="ml-auto shrink-0 p-1 text-ink/30" aria-label="Fermer">
@@ -795,7 +795,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
               <div className="min-h-0 flex-1 overflow-hidden p-4">
                 {referralLoading ? (
                   <div className="flex h-full items-center justify-center">
-                    <div className="h-7 w-7 animate-spin rounded-full border-2 border-[#173D32] border-t-transparent" />
+                    <div className="h-7 w-7 animate-spin rounded-full border-2 border-[#D4AF37] border-t-transparent" />
                   </div>
                 ) : referralCode ? (
                   <div className="flex h-full flex-col items-center justify-center">
@@ -818,7 +818,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                     </div>
                   </div>
                 ) : (
-                  <div className="flex h-full items-center justify-center text-center text-sm text-[#173D32]/60">
+                  <div className="flex h-full items-center justify-center text-center text-sm text-[#F5F5DC]/45">
                     Votre code de parrainage n’est pas encore disponible.
                   </div>
                 )}
