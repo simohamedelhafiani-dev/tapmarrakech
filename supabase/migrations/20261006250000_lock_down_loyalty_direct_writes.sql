@@ -25,3 +25,7 @@ on public.loyalty_card_notifications from anon, authenticated;
 
 revoke insert, update, delete, truncate, references, trigger
 on public.loyalty_notification_campaigns from anon, authenticated;
+
+
+-- Legacy public Wi-Fi endpoint exposed the establishment password; no current app route uses it.
+revoke execute on function public.get_public_wifi(uuid) from public, anon, authenticated;
