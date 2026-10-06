@@ -1,17 +1,17 @@
 {
-  "name": "TapMarrakech",
-  "short_name": "TapMarrakech",
-  "description": "Carte fidélité et expérience client TapMarrakech",
+  "name": "KELYANI",
+  "short_name": "KELYANI",
+  "description": "Carte fidélité et expérience client KELYANI",
   "start_url": "/loyalty",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#f7f7f3",
-  "theme_color": "#17352a",
+  "background_color": "#0D0D0D",
+  "theme_color": "#0D0D0D",
   "icons": [
     {
-      "src": "/tapmarrakech-logo.png",
+      "src": "/kelyani-final.svg",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ]
