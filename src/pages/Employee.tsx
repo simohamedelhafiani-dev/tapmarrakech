@@ -131,11 +131,11 @@ export default function Employee() {
   const isStampProgram = loyaltyProgram.program_type === 'STAMP';
   const [loyaltyDesign, setLoyaltyDesign] = useState({
     template_id: 'luxury',
-    primary_color: '#173D32',
+    primary_color: '#D4AF37',
     secondary_color: '#D3A84C',
     background_color: '#F7F7F3',
-    text_color: '#173D32',
-    button_color: '#173D32',
+    text_color: '#0D0D0D',
+    button_color: '#D4AF37',
     border_radius: 24,
     design_config: defaultLoyaltyDesignConfig,
   });
