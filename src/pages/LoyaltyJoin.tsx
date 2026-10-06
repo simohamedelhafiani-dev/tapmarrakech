@@ -193,7 +193,7 @@ export default function LoyaltyJoin() {
     return (
       <main className="grid min-h-screen place-items-center bg-[#050505] px-4">
         <div className="text-center">
-          <div className="mx-auto h-9 w-9 animate-spin rounded-full border-2 border-[#173D32] border-t-transparent" />
+          <div className="mx-auto h-9 w-9 animate-spin rounded-full border-2 border-[#D4AF37] border-t-transparent" />
           <p className="mt-4 text-sm text-[#E1C27A]/55">Préparation de votre inscription…</p>
         </div>
       </main>
