@@ -34,19 +34,19 @@ export type SubscriptionTheme = {
 };
 
 export function getSubscriptionTheme(access: SubscriptionAccess | null | undefined): SubscriptionTheme {
-  // Trial keeps the standard TapMarrakech interface for every establishment.
+  // All plans use the KELYANI visual system; subscription status changes access, not brand identity.
   if (!access || access.subscription_status === 'trial') {
-    return { primary: '#17352a', primaryHover: '#214c40', accent: '#c8a96b', sidebar: '#17352a' };
+    return { primary: '#0D0D0D', primaryHover: '#1A1A1A', accent: '#D4AF37', sidebar: '#0D0D0D' };
   }
 
   const name = access.plan_name.trim().toLowerCase();
   if (name === 'basic') {
-    return { primary: '#2563eb', primaryHover: '#1d4ed8', accent: '#93c5fd', sidebar: '#1e3a8a' };
+    return { primary: '#0D0D0D', primaryHover: '#1A1A1A', accent: '#D4AF37', sidebar: '#0D0D0D' };
   }
   if (name === 'enterprise') {
-    return { primary: '#111827', primaryHover: '#1f2937', accent: '#d4af37', sidebar: '#0b1220' };
+    return { primary: '#0D0D0D', primaryHover: '#1A1A1A', accent: '#D4AF37', sidebar: '#0D0D0D' };
   }
-  return { primary: '#17352a', primaryHover: '#214c40', accent: '#c8a96b', sidebar: '#17352a' };
+  return { primary: '#0D0D0D', primaryHover: '#1A1A1A', accent: '#D4AF37', sidebar: '#0D0D0D' };
 }
 
 const FEATURE_ALIASES: Record<SubscriptionFeature, string[]> = {
