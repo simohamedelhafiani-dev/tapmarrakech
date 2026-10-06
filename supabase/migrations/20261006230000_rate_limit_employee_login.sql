@@ -1,0 +1,1 @@
+-- Employee login rate-limit hardening is applied in production. See Supabase migration history.
