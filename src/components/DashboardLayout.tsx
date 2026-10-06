@@ -18,6 +18,7 @@ import {
   AlertTriangle,
   Check,
   Search,
+  Download,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -107,6 +108,7 @@ export function DashboardLayout() {
   const [scannerLoading, setScannerLoading] = useState(false);
   const [joinQrOpen, setJoinQrOpen] = useState(false);
   const [joinQrUrl, setJoinQrUrl] = useState<string | null>(null);
+  const [joinLink, setJoinLink] = useState<string | null>(null);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [lastSeenNotificationsAt, setLastSeenNotificationsAt] = useState<string | null>(null);
@@ -624,7 +626,8 @@ export function DashboardLayout() {
                     type="button"
                     onClick={async () => {
                       const url = `${window.location.origin}/loyalty/join?est=${encodeURIComponent(activeEstablishment.id)}`;
-                      setJoinQrUrl(await QRCode.toDataURL(url, { width: 320, margin: 2 }));
+                      setJoinLink(url);
+                      setJoinQrUrl(await QRCode.toDataURL(url, { width: 800, margin: 3, errorCorrectionLevel: 'H' }));
                       setJoinQrOpen(true);
                     }}
                     className="flex h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#F5F5DC]/70 transition hover:border-[#C9A45C]/60 hover:text-[#E1C27A]"
@@ -769,7 +772,40 @@ export function DashboardLayout() {
               </div>
               <p className="mt-5 text-sm font-medium text-white">Scannez pour créer votre carte fidélité</p>
               <p className="mt-1 text-[11px] leading-5 text-white/40">Le client remplit directement son formulaire sur son téléphone.</p>
-              <button type="button" onClick={() => navigator.clipboard?.writeText(`${window.location.origin}/loyalty/join?est=${activeEstablishment?.id ?? ''}`)} className="mt-5 inline-flex items-center gap-2 rounded-xl border border-[#242424] px-4 py-2.5 text-xs font-semibold text-[#C9A45C] hover:border-[#C9A45C]/60"><Copy size={14} /> Copier le lien</button>
+
+              <div className="mt-5 rounded-2xl border border-[#242424] bg-[#0B0B0B] p-3 text-left">
+                <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-[#C9A45C]/70">Lien de création · NFC</p>
+                <p className="mt-1 break-all text-[10px] leading-4 text-white/55">{joinLink}</p>
+              </div>
+
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => joinLink && navigator.clipboard?.writeText(joinLink)}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#242424] px-3 py-2.5 text-xs font-semibold text-[#C9A45C] hover:border-[#C9A45C]/60"
+                >
+                  <Copy size={14} /> Copier le lien
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!joinQrUrl) return;
+                    const link = document.createElement('a');
+                    link.href = joinQrUrl;
+                    link.download = `kelyani-qr-creation-${activeEstablishment?.name?.replace(/[^a-z0-9]+/gi, '-').toLowerCase() || 'carte'}.png`;
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                  }}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#C9A45C] px-3 py-2.5 text-xs font-semibold text-[#050505] hover:bg-[#E1C27A]"
+                >
+                  <Download size={14} /> Télécharger le QR
+                </button>
+              </div>
+
+              <p className="mt-3 text-[9px] leading-4 text-white/30">
+                Le lien peut être écrit directement dans une puce NFC. Le QR PNG est prêt pour impression sur une plaque.
+              </p>
             </div>
           </div>
         )}
