@@ -1379,7 +1379,7 @@ function EstablishmentWorkspace({
             width: 320,
             margin: 2,
             errorCorrectionLevel: 'M',
-            color: { dark: '#173D32', light: '#FFFFFF' },
+            color: { dark: '#0D0D0D', light: '#FFFFFF' },
           });
           if (mounted) setScannerQr(qr);
         } catch (qrError) {
