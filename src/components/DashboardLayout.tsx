@@ -627,15 +627,15 @@ export function DashboardLayout() {
                       setJoinQrUrl(await QRCode.toDataURL(url, { width: 320, margin: 2 }));
                       setJoinQrOpen(true);
                     }}
-                    className="hidden h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#F5F5DC]/70 transition hover:border-[#C9A45C]/60 hover:text-[#E1C27A] lg:flex"
+                    className="flex h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#F5F5DC]/70 transition hover:border-[#C9A45C]/60 hover:text-[#E1C27A]"
                   >
-                    <QrCode size={14} /> Créer une carte
+                    <QrCode size={14} /> <span className="hidden sm:inline">Créer une carte</span>
                   </button>
                   {scannerUrl && (
                     <button
                       type="button"
                       onClick={() => window.open(scannerUrl, '_blank', 'noopener,noreferrer')}
-                      className="hidden h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#F5F5DC]/70 transition hover:border-[#C9A45C]/60 hover:text-[#E1C27A] lg:flex"
+                      className="hidden h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#F5F5DC]/70 transition hover:border-[#C9A45C]/60 hover:text-[#E1C27A] sm:flex"
                     >
                       <QrCode size={14} /> Scanner
                     </button>
