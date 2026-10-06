@@ -306,7 +306,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   }), [program, design, establishment, rewards]);
 
   useEffect(() => {
-    if (!establishmentId || !designHydratedRef.current) return;
+    if (!isAdmin || !establishmentId || !designHydratedRef.current) return;
 
     if (liveDesignTimerRef.current !== null) {
       window.clearTimeout(liveDesignTimerRef.current);
@@ -404,7 +404,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   }, [establishmentId, design, establishment.logoUrl, program, rewards, previewChannelReady]);
 
   const selectTemplate = (id: string) => {
-    const template = WALLET_TEMPLATES[id];
+    const template = WALLET_TEMPLATES[id as keyof typeof WALLET_TEMPLATES];
     if (!template) return;
 
     setDesign(current => ({
@@ -529,18 +529,16 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
 
     try {
       if (rewardDraft.id) {
-        const { error } = await supabase
-          .from('loyalty_rewards')
-          .update({
-            name: rewardDraft.name.trim(),
-            description: rewardDraft.description.trim() || null,
-            points_required: Math.floor(rewardDraft.pointsRequired),
-            reward_type: rewardDraft.rewardType,
-            discount_percent: rewardDraft.rewardType === 'DISCOUNT' ? rewardDraft.discountPercent : null,
-            discount_max_amount: rewardDraft.rewardType === 'DISCOUNT' ? rewardDraft.discountMaxAmount : null,
-          })
-          .eq('id', rewardDraft.id)
-          .eq('establishment_id', establishmentId);
+        const { error } = await supabase.rpc('update_loyalty_reward', {
+          p_reward_id: rewardDraft.id,
+          p_name: rewardDraft.name.trim(),
+          p_description: rewardDraft.description.trim() || null,
+          p_points_required: Math.floor(rewardDraft.pointsRequired),
+          p_reward_type: rewardDraft.rewardType,
+          p_discount_percent: rewardDraft.rewardType === 'DISCOUNT' ? rewardDraft.discountPercent : null,
+          p_discount_max_amount: rewardDraft.rewardType === 'DISCOUNT' ? rewardDraft.discountMaxAmount : null,
+          p_active: true,
+        });
 
         if (error) throw error;
         setMessage('Récompense mise à jour.');
@@ -589,11 +587,9 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   };
 
   const deleteReward = async (id: string) => {
-    const { error } = await supabase
-      .from('loyalty_rewards')
-      .delete()
-      .eq('id', id)
-      .eq('establishment_id', establishmentId);
+    const { error } = await supabase.rpc('delete_loyalty_reward', {
+      p_reward_id: id,
+    });
 
     if (error) {
       setMessage(error.message);
@@ -606,11 +602,16 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   };
 
   const toggleReward = async (reward: Reward) => {
-    const { error } = await supabase
-      .from('loyalty_rewards')
-      .update({ active: !reward.active })
-      .eq('id', reward.id)
-      .eq('establishment_id', establishmentId);
+    const { error } = await supabase.rpc('update_loyalty_reward', {
+      p_reward_id: reward.id,
+      p_name: reward.name,
+      p_description: reward.description || null,
+      p_points_required: reward.points_required,
+      p_reward_type: reward.reward_type,
+      p_discount_percent: reward.reward_type === 'DISCOUNT' ? reward.discount_percent : null,
+      p_discount_max_amount: reward.reward_type === 'DISCOUNT' ? reward.discount_max_amount : null,
+      p_active: !reward.active,
+    });
 
     if (error) {
       setMessage(error.message);
@@ -623,7 +624,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   };
 
   const visibleTabs = isAdmin ? TABS : TABS.filter(item => item.id !== 'design');
-  const selectedTemplate = WALLET_TEMPLATES[design.templateId];
+  const selectedTemplate = WALLET_TEMPLATES[design.templateId as keyof typeof WALLET_TEMPLATES];
 
   if (loading) {
     return (

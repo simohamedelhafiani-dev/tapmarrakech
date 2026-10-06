@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
-  ArrowLeft,
   Star,
-  Users,
   Heart,
   BarChart3,
   Globe2,

@@ -1,8 +1,8 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   BarChart3,
-  Bell,
   Building2,
+  Bell,
   Gift,
   LayoutDashboard,
   LogOut,
@@ -31,12 +31,6 @@ const links = [
     label: 'Vue d’ensemble',
     icon: LayoutDashboard,
     end: true,
-    feature: null,
-  },
-  {
-    to: '/dashboard/establishments',
-    label: 'Établissements',
-    icon: Building2,
     feature: null,
   },
   {
@@ -80,6 +74,7 @@ const links = [
 type Establishment = {
   id: string;
   name: string;
+  slug: string;
   logo_url: string | null;
 };
 
@@ -128,7 +123,6 @@ export function DashboardLayout() {
         return;
       }
 
-      const accesses = await getMySubscriptionAccess();
       const establishmentId = (() => {
         try {
           return user?.id ? window.localStorage.getItem(`tapmarrakech:selected-establishment:${user.id}`) : null;
@@ -136,9 +130,8 @@ export function DashboardLayout() {
           return null;
         }
       })();
-      const access = establishmentId
-        ? accesses.find((item) => item.establishment_id === establishmentId)
-        : accesses[0];
+      const accesses = await getMySubscriptionAccess(establishmentId ?? undefined);
+      const access = accesses[0];
 
       if (active) setSubscriptionTheme(getSubscriptionTheme(access));
     };

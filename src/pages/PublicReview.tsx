@@ -100,6 +100,7 @@ export default function PublicReview() {
     last_name: '',
     phone: '',
     birth_date: '',
+    email: '',
   });
 
   const [reviewError, setReviewError] = useState('');
@@ -1537,17 +1538,7 @@ function AIPremiumMenu({
             card: 'bg-[#fffdf7] border-gold/15',
             product: 'text-forest',
           }
-        : style === 'immersive'
-          ? {
-              page: 'bg-[#ebe5d8] text-forest',
-              body: 'bg-[#ebe5d8]',
-              muted: 'text-ink/55',
-              accent: 'text-gold',
-              line: 'border-forest/10',
-              card: 'bg-[#fffaf0] border-forest/10',
-              product: 'text-forest',
-            }
-          : {
+        : {
               page: 'bg-[#f0ece2] text-forest',
               body: 'bg-[#f0ece2]',
               muted: 'text-ink/55',

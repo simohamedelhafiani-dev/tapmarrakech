@@ -45,6 +45,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import KelyaniMark from '@/components/brand/KelyaniMark';
 import LoyaltyStudio from '@/components/loyalty/LoyaltyStudio';
+import LoyaltyProgramCustomization from '@/components/LoyaltyProgramCustomization';
 import RecentActivity from '@/components/admin/RecentActivity';
 import EvolutionCharts from '@/components/admin/EvolutionCharts';
 import RecentLoyaltyCustomers from '@/components/admin/RecentLoyaltyCustomers';
@@ -1063,7 +1064,7 @@ function Overview({
                 <h4 className="mt-1 text-lg font-semibold">Une expérience qui fait revenir les clients.</h4>
                 <p className="mt-1 text-xs text-[#FFFFFF]/55">CA fidélité sélectionné : {detail.loyaltyRevenue.toLocaleString('fr-FR')} DH</p>
               </div>
-              <button onClick={() => onNavigate('codes')} className="rounded-xl bg-[#C9A45C] px-4 py-2.5 text-xs font-bold text-[#C9A45C] transition hover:bg-[#C9A45C]/90">Gérer la fidélité →</button>
+              <button onClick={() => onNavigate('loyalty')} className="rounded-xl bg-[#C9A45C] px-4 py-2.5 text-xs font-bold text-[#C9A45C] transition hover:bg-[#C9A45C]/90">Gérer la fidélité →</button>
             </div>
           </div>
         </div>

@@ -139,19 +139,12 @@ export function useEstablishments() {
         };
       });
 
-      console.log('[Establishments] EstablishmentListItem[] final:', mapped);
-
       setEstablishments(mapped);
     } catch (caughtError) {
       const normalizedError =
         caughtError instanceof Error
           ? caughtError
           : new Error('Impossible de charger les établissements.');
-
-      console.error(
-        '[Establishments] Erreur chargement établissements:',
-        normalizedError
-      );
 
       setEstablishments([]);
       setError(normalizedError);

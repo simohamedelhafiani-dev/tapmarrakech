@@ -25,7 +25,7 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
     >
       <LoyaltyCardVisual
         design={{
-          template_id: config.templateId,
+          template_id: config.templateId ?? undefined,
           primary_color: config.primaryColor || '#181818',
           secondary_color: config.secondaryColor || '#D7D7D7',
           background_color: config.backgroundColor || '#070707',
@@ -34,7 +34,7 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
           config: {
             background_image_url: config.coverImageUrl || null,
             logo_url: config.logoUrl || null,
-            loyaltyType: config.type,
+            loyaltyType: mode,
             card_mode:
               config.type === 'STAMP'
                 ? 'STAMP'
@@ -42,23 +42,23 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
                   ? 'POINTS_DISCOUNT'
                   : 'POINTS_REWARD',
             stamp_style: config.stampStyle || 'circles',
-            rewardName: config.rewardName,
-            rewardDescription: config.rewardDescription,
-            discountPercent: config.discountPercent,
+            rewardName: config.rewardName ?? undefined,
+            rewardDescription: config.rewardDescription ?? undefined,
+            discountPercent: config.discountPercent ?? undefined,
             show_qr: true,
             show_points: true,
           },
         }}
         card={{
           establishmentName: config.establishmentName || 'Votre établissement',
-          logoUrl: config.logoUrl,
+          logoUrl: config.logoUrl ?? undefined,
           points: config.pointsBalance ?? 0,
           stampsBalance: config.visits ?? 0,
           stampGoal: config.visitGoal ?? 10,
-          stampRewardName: config.rewardName,
-          discountPercent: config.discountPercent,
+          stampRewardName: config.rewardName ?? undefined,
+          discountPercent: config.discountPercent ?? undefined,
           customerName: config.customerName || 'Votre client',
-          cardUrl: config.qrValue,
+          cardUrl: config.qrValue ?? undefined,
         }}
         programType={mode}
         cardWidth="300px"

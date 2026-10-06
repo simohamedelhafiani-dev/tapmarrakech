@@ -28,7 +28,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const hasSessionRef = useRef(false);
 
   const loadProfile = async (userId: string) => {
-    console.log('[Auth] LOAD PROFILE START', { userId });
     const { data, error } = await supabase
       .from('profiles')
       .select('role')
@@ -41,7 +40,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    console.log('[Auth] LOAD PROFILE COMPLETE', { role: data?.role ?? null });
     setRole((data?.role as UserRole) ?? null);
   };
 
@@ -49,24 +47,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let active = true;
 
     const loadSession = async () => {
-      console.log('[Auth] GET SESSION START');
-      const { data } = await supabase.auth.getSession();
-      console.log('[Auth] GET SESSION RESULT', { hasSession: Boolean(data.session) });
+      try {
+        const { data, error } = await supabase.auth.getSession();
 
-      if (!active) return;
+        if (!active) return;
 
-      setSession(data.session);
-      hasSessionRef.current = Boolean(data.session);
+        if (error) {
+          console.error('Erreur récupération de la session:', error);
+          setSession(null);
+          hasSessionRef.current = false;
+          setRole(null);
+          return;
+        }
 
-      if (data.session?.user) {
-        await loadProfile(data.session.user.id);
-      } else {
-        setRole(null);
-      }
+        setSession(data.session);
+        hasSessionRef.current = Boolean(data.session);
 
-      if (active) {
-        console.log('[Auth] SET LOADING FALSE (SESSION)');
-        setLoading(false);
+        if (data.session?.user) {
+          await loadProfile(data.session.user.id);
+        } else {
+          setRole(null);
+        }
+      } catch (error) {
+        console.error('Erreur inattendue lors de la récupération de la session:', error);
+        if (active) {
+          setSession(null);
+          hasSessionRef.current = false;
+          setRole(null);
+        }
+      } finally {
+        if (active) setLoading(false);
       }
     };
 

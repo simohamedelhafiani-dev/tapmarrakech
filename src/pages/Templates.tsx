@@ -3,6 +3,7 @@ import {
   Check,
   Copy,
   Eye,
+  ImagePlus,
   LayoutTemplate,
   Menu,
   Pencil,

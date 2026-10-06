@@ -605,7 +605,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
   const mode =
     configuredType === 'STAMP' || designConfig.card_mode === 'STAMP' || program.program_type === 'STAMP'
       ? 'STAMP'
-      : configuredType === 'POINTS_DISCOUNT' || designConfig.card_mode === 'POINTS_DISCOUNT' || program.program_type === 'POINTS_DISCOUNT'
+      : (configuredType as string) === 'POINTS_DISCOUNT' || (designConfig.card_mode as string) === 'POINTS_DISCOUNT' || (program.program_type as string) === 'POINTS_DISCOUNT'
         ? 'DISCOUNT'
         : 'POINTS';
 
