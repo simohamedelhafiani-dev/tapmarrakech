@@ -23,7 +23,8 @@ export default function LoyaltyJoin() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
-  const [birthDate, setBirthDate] = useState('');
+  const [birthMonth, setBirthMonth] = useState('');
+  const [birthDay, setBirthDay] = useState('');
   const [email, setEmail] = useState('');
   const [interests, setInterests] = useState<string[]>([]);
   const [preferredChannel, setPreferredChannel] = useState<'WHATSAPP' | 'SMS' | 'EMAIL' | 'PUSH' | 'NONE'>('WHATSAPP');
@@ -110,7 +111,7 @@ export default function LoyaltyJoin() {
             p_first_name: firstName.trim(),
             p_last_name: lastName.trim(),
             p_phone: phone.trim(),
-            p_birth_date: birthDate ? `2000-${birthDate}` : null,
+            p_birth_date: birthMonth && birthDay ? `2000-${birthMonth}-${birthDay}` : null,
             p_email: email.trim() || null,
             p_interests: interests,
             p_marketing_consent: marketingConsent,
@@ -137,7 +138,7 @@ export default function LoyaltyJoin() {
           p_first_name: firstName.trim(),
           p_last_name: lastName.trim(),
           p_phone: phone.trim(),
-          p_birth_date: birthDate ? `2000-${birthDate}` : null,
+          p_birth_date: birthMonth && birthDay ? `2000-${birthMonth}-${birthDay}` : null,
         },
       );
 
@@ -251,26 +252,27 @@ export default function LoyaltyJoin() {
                 Jour et mois de naissance <span className="font-normal text-white/25">(facultatif)</span>
                 <div className="mt-1.5 grid grid-cols-2 gap-2">
                   <select
-                    value={birthDate ? birthDate.slice(3) : ''}
-                    onChange={e => {
-                      const day = e.target.value;
-                      const month = birthDate ? birthDate.slice(0, 2) : '';
-                      setBirthDate(month && day ? `${month}-${day}` : day ? `-${day}` : month ? `${month}-` : '');
-                    }}
+                    value={birthDay}
+                    onChange={e => setBirthDay(e.target.value)}
                     className="w-full rounded-xl border border-white/10 bg-[#242424] px-3 py-3 text-sm outline-none focus:border-[#C9A45C]"
                   >
                     <option value="">Jour</option>
-                    {Array.from({ length: 31 }, (_, index) => {
-                      const day = String(index + 1).padStart(2, '0');
-                      return <option key={day} value={day}>{index + 1}</option>;
-                    })}
+                    {Array.from(
+                      { length: birthMonth ? new Date(2000, Number(birthMonth), 0).getDate() : 31 },
+                      (_, index) => {
+                        const day = String(index + 1).padStart(2, '0');
+                        return <option key={day} value={day}>{index + 1}</option>;
+                      },
+                    )}
                   </select>
                   <select
-                    value={birthDate ? birthDate.slice(0, 2) : ''}
+                    value={birthMonth}
                     onChange={e => {
                       const month = e.target.value;
-                      const day = birthDate ? birthDate.slice(3) : '';
-                      setBirthDate(month && day ? `${month}-${day}` : month ? `${month}-` : day ? `-${day}` : '');
+                      setBirthMonth(month);
+                      if (birthDay && month && Number(birthDay) > new Date(2000, Number(month), 0).getDate()) {
+                        setBirthDay('');
+                      }
                     }}
                     className="w-full rounded-xl border border-white/10 bg-[#242424] px-3 py-3 text-sm outline-none focus:border-[#C9A45C]"
                   >
