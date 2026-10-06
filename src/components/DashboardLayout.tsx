@@ -24,6 +24,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useLanguage, type Language } from '@/contexts/LanguageContext';
 import { getMySubscriptionAccess, getSubscriptionTheme, type SubscriptionTheme } from '@/lib/subscriptionAccess';
+import QRCode from 'qrcode';
 
 const links = [
   {
@@ -104,6 +105,8 @@ export function DashboardLayout() {
   const [profileName, setProfileName] = useState<string | null>(null);
   const [scannerUrl, setScannerUrl] = useState<string | null>(null);
   const [scannerLoading, setScannerLoading] = useState(false);
+  const [joinQrOpen, setJoinQrOpen] = useState(false);
+  const [joinQrUrl, setJoinQrUrl] = useState<string | null>(null);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [lastSeenNotificationsAt, setLastSeenNotificationsAt] = useState<string | null>(null);
@@ -615,14 +618,29 @@ export function DashboardLayout() {
             </div>
 
             <div className="ml-auto flex shrink-0 items-center gap-2">
-              {role === 'responsible' && scannerUrl && (
-                <button
-                  type="button"
-                  onClick={() => window.open(scannerUrl, '_blank', 'noopener,noreferrer')}
-                  className="hidden h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#F5F5DC]/70 transition hover:border-[#C9A45C]/60 hover:text-[#E1C27A] lg:flex"
-                >
-                  <QrCode size={14} /> Scanner
-                </button>
+              {role === 'responsible' && activeEstablishment && (
+                <>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const url = `${window.location.origin}/loyalty/join?est=${encodeURIComponent(activeEstablishment.id)}`;
+                      setJoinQrUrl(await QRCode.toDataURL(url, { width: 320, margin: 2 }));
+                      setJoinQrOpen(true);
+                    }}
+                    className="hidden h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#F5F5DC]/70 transition hover:border-[#C9A45C]/60 hover:text-[#E1C27A] lg:flex"
+                  >
+                    <QrCode size={14} /> Créer une carte
+                  </button>
+                  {scannerUrl && (
+                    <button
+                      type="button"
+                      onClick={() => window.open(scannerUrl, '_blank', 'noopener,noreferrer')}
+                      className="hidden h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#F5F5DC]/70 transition hover:border-[#C9A45C]/60 hover:text-[#E1C27A] lg:flex"
+                    >
+                      <QrCode size={14} /> Scanner
+                    </button>
+                  )}
+                </>
               )}
 
               <div className="relative">
@@ -736,7 +754,27 @@ export function DashboardLayout() {
           </div>
         </header>
 
-        <main className="dashboard-depth-main mx-auto w-full max-w-[1700px] px-3 pb-28 pt-6 sm:px-5 md:px-8 lg:px-10 lg:pt-8">
+                {joinQrOpen && joinQrUrl && (
+          <div className="fixed inset-0 z-[100] grid place-items-center bg-black/70 p-4 backdrop-blur-sm">
+            <div className="w-full max-w-sm rounded-3xl border border-[#242424] bg-[#111111] p-6 text-center shadow-[0_30px_100px_rgba(0,0,0,.65)]">
+              <div className="flex items-center justify-between">
+                <div className="text-left">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A45C]">KELYANI</p>
+                  <h2 className="mt-1 text-lg font-semibold text-white">Créer ma carte</h2>
+                </div>
+                <button type="button" onClick={() => setJoinQrOpen(false)} className="grid h-9 w-9 place-items-center rounded-full border border-[#242424] text-white/60 hover:text-white"><X size={16} /></button>
+              </div>
+              <div className="mx-auto mt-6 w-fit rounded-3xl bg-white p-4">
+                <img src={joinQrUrl} alt="QR code pour créer une carte fidélité" className="h-64 w-64" />
+              </div>
+              <p className="mt-5 text-sm font-medium text-white">Scannez pour créer votre carte fidélité</p>
+              <p className="mt-1 text-[11px] leading-5 text-white/40">Le client remplit directement son formulaire sur son téléphone.</p>
+              <button type="button" onClick={() => navigator.clipboard?.writeText(`${window.location.origin}/loyalty/join?est=${activeEstablishment?.id ?? ''}`)} className="mt-5 inline-flex items-center gap-2 rounded-xl border border-[#242424] px-4 py-2.5 text-xs font-semibold text-[#C9A45C] hover:border-[#C9A45C]/60"><Copy size={14} /> Copier le lien</button>
+            </div>
+          </div>
+        )}
+
+<main className="dashboard-depth-main mx-auto w-full max-w-[1700px] px-3 pb-28 pt-6 sm:px-5 md:px-8 lg:px-10 lg:pt-8">
           <Outlet />
         </main>
 
