@@ -132,12 +132,12 @@ revoke all on function public.process_due_loyalty_raffles() from public;
 grant execute on function public.process_due_loyalty_raffles() to postgres;
 
 
-revoke all on function public.get_loyalty_raffles(uuid) from anon;
+revoke all on function public.get_loyalty_raffles(uuid) from public;
 grant execute on function public.get_loyalty_raffles(uuid) to authenticated;
-revoke all on function public.create_loyalty_raffle(uuid,text,text,text,text,timestamptz,timestamptz,integer,text,timestamptz,timestamptz,integer,boolean,boolean,boolean) from anon;
+revoke all on function public.create_loyalty_raffle(uuid,text,text,text,text,timestamptz,timestamptz,integer,text,timestamptz,timestamptz,integer,boolean,boolean,boolean) from public;
 grant execute on function public.create_loyalty_raffle(uuid,text,text,text,text,timestamptz,timestamptz,integer,text,timestamptz,timestamptz,integer,boolean,boolean,boolean) to authenticated;
-revoke all on function public.cancel_loyalty_raffle(uuid) from anon;
+revoke all on function public.cancel_loyalty_raffle(uuid) from public;
 grant execute on function public.cancel_loyalty_raffle(uuid) to authenticated;
-revoke all on function public.redeem_loyalty_raffle_winner(uuid) from anon;
+revoke all on function public.redeem_loyalty_raffle_winner(uuid) from public;
 grant execute on function public.redeem_loyalty_raffle_winner(uuid) to authenticated;
 grant execute on function public.get_public_loyalty_raffle_winners(uuid) to anon, authenticated;
