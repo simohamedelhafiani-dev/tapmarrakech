@@ -10,4 +10,4 @@ $$;
 revoke all on function public.get_public_loyalty_customer_tier(uuid) from public;
 grant execute on function public.get_public_loyalty_customer_tier(uuid) to anon,authenticated;
 revoke all on function public.get_loyalty_customer_tier(uuid) from public;
-grant execute on function public.get_loyalty_customer_tier(uuid) to authenticated;
+grant execute on function public.get_loyalty_customer_tier(uuid) to authenticated;\nrevoke execute on function public.get_loyalty_customer_tier(uuid) from anon;\nrevoke execute on function public.update_loyalty_tier(uuid,text,integer,integer,text,integer,boolean) from anon;\n
