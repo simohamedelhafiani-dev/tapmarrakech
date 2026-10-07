@@ -191,7 +191,7 @@ function LoyaltyCard() {
   useEffect(() => {
     if (!card?.customer_id) return;
     void (async () => {
-      const { data, error } = await supabase.rpc('get_loyalty_customer_tier', { p_customer_id: card.customer_id });
+      const { data, error } = await supabase.rpc('get_public_loyalty_customer_tier', { p_access_token: token });
       if (!error) {
         const row = Array.isArray(data) ? data[0] : data;
         setCustomerTier((row ?? null) as CustomerTier | null);
