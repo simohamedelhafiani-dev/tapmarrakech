@@ -26,11 +26,12 @@ import {
 } from '@/hooks/useLoyaltyManager';
 import LoyaltyPreview from './LoyaltyPreview';
 import LoyaltyRaffleStudio from './LoyaltyRaffleStudio';
+import LoyaltyTierStudio from './LoyaltyTierStudio';
 import { WALLET_TEMPLATES } from '@/components/LoyaltyCardVisual';
 import type { LoyaltyExperienceConfig, LoyaltyExperienceReward } from './LoyaltyExperience';
 
 type Props = { establishmentId: string };
-type TabId = 'settings' | 'rewards' | 'referral' | 'raffle' | 'design';
+type TabId = 'settings' | 'rewards' | 'referral' | 'tiers' | 'raffle' | 'design';
 type RewardType = 'GIFT' | 'DISCOUNT';
 
 type Reward = {
@@ -86,6 +87,7 @@ const TABS: { id: TabId; label: string; caption: string; icon: typeof Settings2 
   { id: 'settings', label: 'Paramètres', caption: 'Programme', icon: Settings2 },
   { id: 'rewards', label: 'Récompenses', caption: 'Catalogue', icon: Gift },
   { id: 'referral', label: 'Parrainage', caption: 'Acquisition', icon: Rocket },
+  { id: 'tiers', label: 'Niveaux', caption: 'Clients', icon: Trophy },
   { id: 'raffle', label: 'Tombola', caption: 'Gagnants', icon: Trophy },
   { id: 'design', label: 'Design', caption: 'Visuels', icon: Palette },
 ];
@@ -684,7 +686,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
         <div className="min-w-0">
           <div className="mb-5 overflow-x-auto rounded-2xl bg-[#111111] p-1.5">
-            <div className={`grid gap-1 ${isAdmin ? 'min-w-[800px] grid-cols-5' : 'min-w-[640px] grid-cols-4'}`}>
+            <div className={`grid gap-1 ${isAdmin ? 'min-w-[960px] grid-cols-6' : 'min-w-[800px] grid-cols-5'}`}>
               {visibleTabs.map(item => {
                 const Icon = item.icon;
                 const active = tab === item.id;
@@ -1061,6 +1063,10 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                 Les changements sont conservés avec le bouton <strong className="text-[#E1C27A]">Enregistrer</strong>. Le miroir de droite reflète immédiatement les paramètres qui modifient la carte.
               </div>
             </div>
+          )}
+
+          {tab === 'tiers' && (
+            <LoyaltyTierStudio establishmentId={establishmentId} />
           )}
 
           {tab === 'raffle' && (
