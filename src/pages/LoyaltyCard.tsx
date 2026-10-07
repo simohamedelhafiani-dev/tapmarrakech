@@ -188,6 +188,17 @@ function LoyaltyCard() {
     void loadReferralCode();
   }, [cardSaved, program.referral_enabled]);
 
+  useEffect(() => {
+    if (!card?.customer_id) return;
+    void (async () => {
+      const { data, error } = await supabase.rpc('get_loyalty_customer_tier', { p_customer_id: card.customer_id });
+      if (!error) {
+        const row = Array.isArray(data) ? data[0] : data;
+        setCustomerTier((row ?? null) as CustomerTier | null);
+      }
+    })();
+  }, [card?.customer_id]);
+
   const referralMessage = referralCode
     ? `🎁 Je t’invite à rejoindre le programme fidélité de ${card?.establishment_name || 'cet établissement'}.
 
