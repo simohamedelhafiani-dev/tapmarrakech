@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Ban, CalendarDays, CheckCircle2, Clock3, Gift, Plus, Ticket, Trophy, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
@@ -317,7 +317,7 @@ export default function LoyaltyRaffleStudio({ establishmentId }: Props) {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children }: { label: string; children: ReactNode }) {
   return <div><label className={labelClass}>{label}</label>{children}</div>;
 }
 
