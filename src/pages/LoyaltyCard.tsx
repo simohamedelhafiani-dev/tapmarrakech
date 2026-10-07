@@ -632,7 +632,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
   const discountValidDays = Number((designConfig as typeof designConfig & { discountValidDays?: number }).discountValidDays ?? program.discount_valid_days ?? 7);
 
   const discountUnlockDate = program.discount_expires_at;
-
+  const hasPendingRaffleWin = raffleWins.some(win => win.status === 'PENDING');
 
   const raw = designConfig as typeof designConfig & {
     background_image_url?: string | null;
