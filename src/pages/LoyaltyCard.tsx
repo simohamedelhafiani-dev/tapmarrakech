@@ -24,6 +24,8 @@ type Card = {
 };
 
 type HistoryItem = { id: string; points: number; type: string; description: string | null; amount: number | null; created_at: string; };
+type CustomerTier = { tier_key:string;tier_name:string;sort_order:number;total_points:number;rewards_redeemed:number;ticket_multiplier:number;next_tier_key:string|null;next_tier_name:string|null;next_points:number|null;next_rewards:number|null };
+
 type RaffleWinner = {
   id: string;
   raffle_id: string;
@@ -95,6 +97,7 @@ function LoyaltyCard() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [notifications, setNotifications] = useState<CardNotification[]>([]);
   const [raffleWins, setRaffleWins] = useState<RaffleWinner[]>([]);
+  const [customerTier, setCustomerTier] = useState<CustomerTier | null>(null);
   const [rewards, setRewards] = useState<LoyaltyExperienceReward[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -658,6 +661,13 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
             <button type="button" onClick={() => setShowWelcome(false)} className="ml-auto shrink-0 p-1 text-ink/30" aria-label="Fermer">
               <X className="h-4 w-4" />
             </button>
+          </div>
+        )}
+
+        {customerTier && (
+          <div className="mb-3 flex items-center justify-between rounded-2xl border border-[#D4AF37]/20 bg-[#111111] px-4 py-3">
+            <div><p className="text-[9px] font-bold uppercase tracking-[.16em] text-[#D4AF37]">Niveau fidélité</p><p className="mt-1 text-sm font-semibold text-white">{customerTier.tier_name}</p></div>
+            <div className="text-right"><p className="text-[9px] text-white/35">{customerTier.total_points} points · {customerTier.rewards_redeemed} récompense(s)</p>{customerTier.next_tier_name&&<p className="mt-1 text-[9px] text-[#D4AF37]">Prochain : {customerTier.next_tier_name}</p>}</div>
           </div>
         )}
 
