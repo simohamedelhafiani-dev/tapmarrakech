@@ -25,6 +25,8 @@ type Raffle = {
   drawn_at: string | null;
   participant_count: number;
   winner_count: number;
+  minimum_tier_key: 'STANDARD'|'BRONZE'|'SILVER'|'GOLD'|'PLATINUM';
+  ticket_multiplier_mode: 'TIER'|'ONE';
 };
 
 type Winner = {
@@ -83,6 +85,8 @@ export default function LoyaltyRaffleStudio({ establishmentId }: Props) {
     prizeDescription: '',
     drawAt: tomorrow,
     winnersCount: 1,
+    minimumTier: 'STANDARD' as Raffle['minimum_tier_key'],
+    ticketMode: 'TIER' as Raffle['ticket_multiplier_mode'],
     validityMode: 'DATE_RANGE' as Raffle['reward_validity_mode'],
     validDay: defaultDay,
     validFrom: defaultDay + 'T09:00',
@@ -163,6 +167,8 @@ export default function LoyaltyRaffleStudio({ establishmentId }: Props) {
       p_starts_at: new Date().toISOString(),
       p_draw_at: drawAt.toISOString(),
       p_winners_count: Math.max(1, Math.min(100, Math.floor(form.winnersCount))),
+      p_minimum_tier_key: form.minimumTier,
+      p_ticket_multiplier_mode: form.ticketMode,
       p_reward_validity_mode: form.validityMode,
       p_reward_valid_from: validity.from,
       p_reward_valid_until: validity.until,
@@ -227,7 +233,16 @@ export default function LoyaltyRaffleStudio({ establishmentId }: Props) {
           <Field label="Nombre de gagnants"><input type="number" min="1" max="100" className={inputClass} value={form.winnersCount} onChange={e => setForm({ ...form, winnersCount: Math.max(1, Math.min(100, Number(e.target.value) || 1)) })} /></Field>
           <div className="md:col-span-2"><Field label="Description"><textarea className={inputClass + ' h-24 resize-none py-3'} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Tous les clients inscrits au programme fidélité participent automatiquement." /></Field></div>
           <Field label="Description du cadeau"><input className={inputClass} value={form.prizeDescription} onChange={e => setForm({ ...form, prizeDescription: e.target.value })} placeholder="Un dîner pour deux, menu au choix..." /></Field>
-          <Field label="Participation"><div className="flex h-12 items-center rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-xs text-[#E1C27A]">Tous les clients inscrits · 1 ticket / client</div></Field>
+          <Field label="Niveau minimum">
+            <select className={inputClass} value={form.minimumTier} onChange={e=>setForm({...form,minimumTier:e.target.value as Raffle['minimum_tier_key']})}>
+              <option value="STANDARD">⚪ Standard — tous les clients</option><option value="BRONZE">🥉 Bronze+</option><option value="SILVER">🥈 Silver+</option><option value="GOLD">🥇 Gold+</option><option value="PLATINUM">💎 Platinum uniquement</option>
+            </select>
+          </Field>
+          <Field label="Chances de tirage">
+            <select className={inputClass} value={form.ticketMode} onChange={e=>setForm({...form,ticketMode:e.target.value as Raffle['ticket_multiplier_mode']})}>
+              <option value="TIER">Selon le niveau du client</option><option value="ONE">1 chance par client</option>
+            </select>
+          </Field>
         </div>
 
         <div className="mt-5 rounded-2xl border border-[#C9A45C]/15 bg-[#C9A45C]/5 p-4">
@@ -277,7 +292,7 @@ export default function LoyaltyRaffleStudio({ establishmentId }: Props) {
                     <p className="text-sm font-semibold text-[#E1C27A]">{raffle.title}</p>
                     <span className="rounded-full bg-[#C9A45C]/10 px-2 py-1 text-[8px] font-bold uppercase tracking-[.12em] text-[#C9A45C]">{statusLabel(raffle.status)}</span>
                   </div>
-                  <p className="mt-1 text-[11px] text-[#FFFFFF]/40">🎁 {raffle.prize_name} · 🎟️ {raffle.participant_count} participants · 🏆 {raffle.winner_count}/{raffle.winners_count} gagnant(s)</p>
+                  <p className="mt-1 text-[11px] text-[#FFFFFF]/40">🎁 {raffle.prize_name} · 🎟️ {raffle.participant_count} · {raffle.minimum_tier_key} minimum · chances par niveau participants · 🏆 {raffle.winner_count}/{raffle.winners_count} gagnant(s)</p>
                   <p className="mt-1 text-[10px] text-[#FFFFFF]/30">Tirage : {formatDate(raffle.draw_at)}</p>
                 </div>
                 <div className="flex items-center gap-2">
