@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Bell, Gift, Link2, Share2, X } from 'lucide-react';
+import { Bell, Gift, Link2, Share2, Trophy, X } from 'lucide-react';
 import QRCode from 'qrcode';
 import type { ReactNode } from 'react';
 
@@ -24,6 +24,22 @@ type Card = {
 };
 
 type HistoryItem = { id: string; points: number; type: string; description: string | null; amount: number | null; created_at: string; };
+type RaffleWinner = {
+  id: string;
+  raffle_id: string;
+  title: string;
+  prize_name: string;
+  prize_description: string | null;
+  valid_from: string;
+  valid_until: string;
+  reservation_required: boolean;
+  single_use: boolean;
+  non_cumulative: boolean;
+  status: 'PENDING' | 'REDEEMED' | 'EXPIRED';
+  claim_token: string;
+  drawn_at: string;
+};
+
 type CardNotification = {
   id: string;
   title: string;
@@ -44,7 +60,9 @@ type Design = {
   border_radius: number;
 };
 
-export default function LoyaltyCard() {
+export default function TrophyIcon() { return <Trophy className="h-4 w-4" />; }
+
+function LoyaltyCard() {
   const token = window.location.pathname.split('/').filter(Boolean).pop() ?? '';
   const [card, setCard] = useState<Card | null>(null);
   const [design, setDesign] = useState<Design>({
@@ -76,6 +94,7 @@ export default function LoyaltyCard() {
   const [referralQrDataUrl, setReferralQrDataUrl] = useState('');
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [notifications, setNotifications] = useState<CardNotification[]>([]);
+  const [raffleWins, setRaffleWins] = useState<RaffleWinner[]>([]);
   const [rewards, setRewards] = useState<LoyaltyExperienceReward[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
