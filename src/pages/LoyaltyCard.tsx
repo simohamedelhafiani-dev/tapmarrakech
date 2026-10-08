@@ -87,9 +87,6 @@ export default function LoyaltyCard() {
   const [isLiveRefreshing, setIsLiveRefreshing] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const [engagement, setEngagement] = useState<EngagementContext | null>(null);
-  const [reviewConfirmPlatform, setReviewConfirmPlatform] = useState<'google' | 'tripadvisor' | null>(null);
-  const [reviewClaimSaving, setReviewClaimSaving] = useState(false);
-  const [reviewClaimMessage, setReviewClaimMessage] = useState('');
   const [feedbackRating, setFeedbackRating] = useState(0);
   const [feedbackComment, setFeedbackComment] = useState('');
   const [feedbackSaving, setFeedbackSaving] = useState(false);
@@ -423,35 +420,9 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
   }, [card?.establishment_id]);
 
   const openReview = (platform: 'google' | 'tripadvisor') => {
-    if (!engagement) return;
-    const url = platform === 'google' ? engagement.google_review_url : engagement.tripadvisor_review_url;
+    const url = platform === 'google' ? engagement?.google_review_url : engagement?.tripadvisor_review_url;
     if (!url) return;
-    setReviewClaimMessage('');
-    setReviewConfirmPlatform(platform);
     window.open(url, '_blank', 'noopener,noreferrer');
-  };
-
-  const claimReviewBonus = async () => {
-    if (!reviewConfirmPlatform || reviewClaimSaving) return;
-    setReviewClaimSaving(true);
-    setReviewClaimMessage('');
-    const { data, error: claimError } = await supabase.rpc('claim_public_loyalty_review_bonus', {
-      p_access_token: token,
-      p_platform: reviewConfirmPlatform,
-    });
-    setReviewClaimSaving(false);
-    if (claimError) {
-      setReviewClaimMessage('Impossible de valider le bonus pour le moment.');
-      return;
-    }
-    const result = Array.isArray(data) ? data[0] : data;
-    if (result?.already_claimed) {
-      setReviewClaimMessage('Le bonus pour cette plateforme a déjà été récupéré.');
-      return;
-    }
-    setReviewClaimMessage('+' + (result?.points_awarded ?? 20) + ' points ajoutés à votre carte.');
-    setCard(current => current ? { ...current, points_balance: Number(result?.points_balance ?? current.points_balance) } : current);
-    setEngagement(current => current ? { ...current, ...(reviewConfirmPlatform === 'google' ? { google_claimed: true } : { tripadvisor_claimed: true }) } : current);
   };
 
   const submitFeedback = async () => {
@@ -758,19 +729,19 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                 <div className="border-b border-white/8 px-5 py-4">
                   <p className="text-[9px] font-bold uppercase tracking-[0.24em]" style={{ color: design.secondary_color }}>Expérience client</p>
                   <h2 className="mt-1 text-base font-semibold text-white">Votre avis compte</h2>
-                  <p className="mt-1 text-[11px] leading-5 text-white/40">Partagez votre expérience et gagnez des points de fidélité.</p>
+                  <p className="mt-1 text-[11px] leading-5 text-white/40">Partagez librement votre expérience. Le questionnaire fidélité vous permet, lui, de gagner des points.</p>
                 </div>
                 <div className="grid gap-2 p-4 sm:grid-cols-2">
                   {engagement.google_review_url && (
-                    <button type="button" onClick={() => openReview('google')} disabled={engagement.google_claimed} className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-left transition hover:border-[#D4AF37]/50 disabled:opacity-60">
-                      <span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]"><Star size={17} /></span><span><span className="block text-sm font-semibold text-white">Avis Google</span><span className="block text-[10px] text-white/35">{engagement.google_claimed ? 'Bonus déjà récupéré' : 'Gagnez +20 points'}</span></span></span>
-                      {!engagement.google_claimed && <ExternalLink size={15} className="text-white/35" />}
+                    <button type="button" onClick={() => openReview('google')} className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-left transition hover:border-[#D4AF37]/50">
+                      <span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]"><Star size={17} /></span><span><span className="block text-sm font-semibold text-white">Avis Google</span><span className="block text-[10px] text-white/35">Partager mon expérience</span></span></span>
+                      <ExternalLink size={15} className="text-white/35" />
                     </button>
                   )}
                   {engagement.tripadvisor_review_url && (
-                    <button type="button" onClick={() => openReview('tripadvisor')} disabled={engagement.tripadvisor_claimed} className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-left transition hover:border-[#D4AF37]/50 disabled:opacity-60">
-                      <span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]"><Star size={17} /></span><span><span className="block text-sm font-semibold text-white">Avis TripAdvisor</span><span className="block text-[10px] text-white/35">{engagement.tripadvisor_claimed ? 'Bonus déjà récupéré' : 'Gagnez +20 points'}</span></span></span>
-                      {!engagement.tripadvisor_claimed && <ExternalLink size={15} className="text-white/35" />}
+                    <button type="button" onClick={() => openReview('tripadvisor')} className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-left transition hover:border-[#D4AF37]/50">
+                      <span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]"><Star size={17} /></span><span><span className="block text-sm font-semibold text-white">Avis TripAdvisor</span><span className="block text-[10px] text-white/35">Partager mon expérience</span></span></span>
+                      <ExternalLink size={15} className="text-white/35" />
                     </button>
                   )}
                   {engagement.whatsapp_number && (
@@ -892,19 +863,6 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
             </span>
             <span>🎁 Inviter un ami</span>
           </button>
-        )}
-
-        {reviewConfirmPlatform && (
-          <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 p-4 backdrop-blur-sm sm:items-center">
-            <div className="w-full max-w-sm rounded-[28px] border border-white/10 bg-[#111111] p-6 shadow-2xl">
-              <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-[#D4AF37]/10 text-[#D4AF37]"><CheckCircle2 size={24} /></div>
-              <h2 className="mt-4 text-center font-display text-2xl text-white">Avez-vous publié votre avis ?</h2>
-              <p className="mt-2 text-center text-xs leading-5 text-white/45">Après avoir laissé votre avis sur {reviewConfirmPlatform === 'google' ? 'Google' : 'TripAdvisor'}, confirmez pour récupérer votre bonus de 20 points.</p>
-              {reviewClaimMessage && <p className="mt-4 rounded-xl bg-[#D4AF37]/10 px-4 py-3 text-center text-xs text-[#D4AF37]">{reviewClaimMessage}</p>}
-              <button type="button" onClick={() => void claimReviewBonus()} disabled={reviewClaimSaving || Boolean(reviewClaimMessage)} className="mt-4 w-full rounded-2xl bg-[#D4AF37] px-4 py-3 text-xs font-semibold text-[#0D0D0D] disabled:opacity-50">{reviewClaimSaving ? 'Validation…' : "J'ai publié mon avis · +20 points"}</button>
-              <button type="button" onClick={() => setReviewConfirmPlatform(null)} className="mt-2 w-full rounded-2xl border border-white/10 px-4 py-3 text-xs font-semibold text-white/60">Fermer</button>
-            </div>
-          </div>
         )}
 
         {notifications.length > 0 && (
