@@ -206,6 +206,17 @@ export default function Admin() {
   } = useEstablishments();
 
   const [selectedEstablishmentId, setSelectedEstablishmentId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const parts = location.pathname.split('/').filter(Boolean);
+    const establishmentIndex = parts.indexOf('establishments');
+    const routeEstablishmentId = establishmentIndex >= 0 ? parts[establishmentIndex + 1] : null;
+    if (routeEstablishmentId && establishmentList.some((item) => item.id === routeEstablishmentId)) {
+      setSelectedEstablishmentId(routeEstablishmentId);
+    } else if (location.pathname === '/admin/establishments') {
+      setSelectedEstablishmentId(null);
+    }
+  }, [location.pathname, establishmentList]);
   const [showCreateEstablishmentForm, setShowCreateEstablishmentForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Array<{ id: string; type: 'establishment' | 'customer' | 'review'; title: string; subtitle: string; establishmentId?: string }>>([]);
@@ -638,7 +649,7 @@ export default function Admin() {
                 <EstablishmentWorkspace
                   establishment={workspaceEstablishment}
                   businessTypes={aiBusinessTypes}
-                  onBack={() => setSelectedEstablishmentId(null)}
+                  onBack={() => { setSelectedEstablishmentId(null); navigate('/admin/establishments'); }}
                   onReload={loadEstablishments}
                 />
               );
@@ -651,7 +662,7 @@ export default function Admin() {
                   loading={establishmentListLoading}
                   error={establishmentListError}
                   onAdd={() => setShowCreateEstablishmentForm(true)}
-                  onOpen={(establishment) => setSelectedEstablishmentId(establishment.id)}
+                  onOpen={(establishment) => { setSelectedEstablishmentId(establishment.id); navigate(`/admin/establishments/${establishment.id}/profile`); }}
                 />
                 {showCreateEstablishmentForm && (
                   <CreateEstablishmentForm
