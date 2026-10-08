@@ -1221,7 +1221,19 @@ function EstablishmentWorkspace({
   onBack: () => void;
   onReload: () => Promise<void>;
 }) {
-  const [tab, setTab] = useState<WorkspaceTab>('profile');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const workspaceTabFromPath = (pathname: string): WorkspaceTab => {
+    const parts = pathname.split('/').filter(Boolean);
+    const candidate = parts[3] as WorkspaceTab | undefined;
+    const validTabs: WorkspaceTab[] = ['profile', 'wifi', 'menu', 'promotions', 'reviews', 'loyalty', 'team', 'analytics', 'public'];
+    return candidate && validTabs.includes(candidate) ? candidate : 'profile';
+  };
+  const [tab, setTab] = useState<WorkspaceTab>(() => workspaceTabFromPath(window.location.pathname));
+
+  useEffect(() => {
+    setTab(workspaceTabFromPath(location.pathname));
+  }, [location.pathname]);
   const establishmentProfileEngine = useEstablishmentProfile(establishment.id);
 
   useEffect(() => {
@@ -1905,7 +1917,7 @@ function EstablishmentWorkspace({
       </div>
 
       <div className="mb-6 flex gap-2 overflow-x-auto rounded-3xl border border-[#242424] bg-[#111111] p-2 shadow-sm">
-        {tabs.map((x) => <button key={x.id} onClick={() => setTab(x.id)} className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-xs font-semibold ${tab === x.id ? 'bg-[#111111] text-[#FFFFFF]' : 'text-[#FFFFFF]/55 hover:bg-[#111111]'}`}>{x.label}</button>)}
+        {tabs.map((x) => <button key={x.id} onClick={() => navigate(`/admin/establishments/${establishment.id}/${x.id}`)} className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-xs font-semibold ${tab === x.id ? 'bg-[#111111] text-[#FFFFFF]' : 'text-[#FFFFFF]/55 hover:bg-[#111111]'}`}>{x.label}</button>)}
       </div>
 
       {tab === 'profile' && (
