@@ -446,7 +446,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
 
       if (error) throw error;
 
-      const { data } = supabase.storage.from('promotion-images').getPublicUrl(path);
+      const { data } = supabase.storage.from('loyalty-assets').getPublicUrl(path);
       setDesign(current => {
         const wallpaperUrl = data.publicUrl;
         const wallpaperUrls = current.wallpaperUrls.includes(wallpaperUrl)
