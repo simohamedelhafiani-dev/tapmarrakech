@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Bell, Gift, Link2, Share2, X } from 'lucide-react';
+import { Bell, CheckCircle2, ExternalLink, Gift, Link2, MessageCircle, Share2, Star, X } from 'lucide-react';
 import QRCode from 'qrcode';
 import type { ReactNode } from 'react';
 
@@ -24,6 +24,7 @@ type Card = {
 };
 
 type HistoryItem = { id: string; points: number; type: string; description: string | null; amount: number | null; created_at: string; };
+type EngagementContext = { google_review_url: string | null; tripadvisor_review_url: string | null; review_bonus_points: number; whatsapp_number: string | null; google_claimed: boolean; tripadvisor_claimed: boolean; feedback_submitted: boolean; };
 type CardNotification = {
   id: string;
   title: string;
@@ -85,6 +86,12 @@ export default function LoyaltyCard() {
   const [liveVersion, setLiveVersion] = useState(0);
   const [isLiveRefreshing, setIsLiveRefreshing] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
+  const [engagement, setEngagement] = useState<EngagementContext | null>(null);
+  const [feedbackRating, setFeedbackRating] = useState(0);
+  const [feedbackComment, setFeedbackComment] = useState('');
+  const [feedbackSaving, setFeedbackSaving] = useState(false);
+  const [feedbackMessage, setFeedbackMessage] = useState('');
+  const [reviewMessage, setReviewMessage] = useState('');
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -293,6 +300,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         { data: rewardsData },
         { data: discountData },
         { data: notificationsData },
+        { data: engagementData },
       ] = await Promise.all([
         supabase.rpc('get_public_loyalty_card', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_card_config', { p_access_token: token }),
@@ -301,6 +309,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         supabase.rpc('get_public_loyalty_rewards', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_discount_status', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_notifications', { p_access_token: token, p_limit: 20 }),
+        supabase.rpc('get_public_loyalty_engagement_context', { p_access_token: token }),
       ]);
 
       if (cardError || !cardData?.[0]) {
@@ -314,6 +323,18 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
       setHistory((historyData ?? []) as HistoryItem[]);
       setRewards((rewardsData ?? []) as LoyaltyExperienceReward[]);
       setNotifications((notificationsData ?? []) as CardNotification[]);
+      const engagementRow = Array.isArray(engagementData) ? engagementData[0] : engagementData;
+      if (engagementRow) {
+        setEngagement({
+          google_review_url: engagementRow.google_review_url ?? null,
+          tripadvisor_review_url: engagementRow.tripadvisor_review_url ?? null,
+          review_bonus_points: Math.max(0, Number(engagementRow.review_bonus_points ?? 0)),
+          whatsapp_number: engagementRow.whatsapp_number ?? null,
+          google_claimed: Boolean(engagementRow.google_claimed),
+          tripadvisor_claimed: Boolean(engagementRow.tripadvisor_claimed),
+          feedback_submitted: Boolean(engagementRow.feedback_submitted),
+        });
+      }
 
       const designRow = Array.isArray(designData) ? designData[0] : designData;
       if (designRow) {
@@ -411,6 +432,75 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
     };
   }, [card?.establishment_id]);
 
+  const openReview = async (platform: 'google' | 'tripadvisor') => {
+    const url = platform === 'google' ? engagement?.google_review_url : engagement?.tripadvisor_review_url;
+    if (!url) return;
+
+    // Open synchronously before awaiting Supabase so mobile browsers do not block the new tab.
+    window.open(url, '_blank', 'noopener,noreferrer');
+    setReviewMessage('');
+
+    const { data, error: reviewError } = await supabase.rpc('claim_public_loyalty_review_bonus', {
+      p_access_token: token,
+      p_platform: platform,
+    });
+
+    if (reviewError) {
+      console.error('Failed to claim review bonus:', reviewError);
+      setReviewMessage('L’avis a été ouvert, mais l’attribution des points n’a pas pu être confirmée.');
+      return;
+    }
+
+    const result = Array.isArray(data) ? data[0] : data;
+    const pointsAwarded = Math.max(0, Number(result?.points_awarded ?? 0));
+    const alreadyClaimed = Boolean(result?.already_claimed);
+
+    setCard(current => current
+      ? { ...current, points_balance: Number(result?.points_balance ?? current.points_balance) }
+      : current
+    );
+    setEngagement(current => current
+      ? {
+          ...current,
+          google_claimed: platform === 'google' ? true : current.google_claimed,
+          tripadvisor_claimed: platform === 'tripadvisor' ? true : current.tripadvisor_claimed,
+        }
+      : current
+    );
+
+    if (alreadyClaimed) {
+      setReviewMessage(`Votre bonus ${platform === 'google' ? 'Google' : 'TripAdvisor'} a déjà été attribué.`);
+      return;
+    }
+
+    setReviewMessage(
+      pointsAwarded > 0
+        ? `Merci ! +${pointsAwarded} points ont été ajoutés à votre carte fidélité.`
+        : 'Merci pour votre avis !'
+    );
+  };
+
+  const submitFeedback = async () => {
+    if (!feedbackRating || feedbackSaving) return;
+    setFeedbackSaving(true);
+    setFeedbackMessage('');
+    const { data, error: feedbackError } = await supabase.rpc('submit_public_loyalty_feedback', {
+      p_access_token: token,
+      p_rating: feedbackRating,
+      p_comment: feedbackComment.trim() || null,
+    });
+    setFeedbackSaving(false);
+    if (feedbackError) {
+      setFeedbackMessage('Impossible d’envoyer votre retour pour le moment.');
+      return;
+    }
+    const result = Array.isArray(data) ? data[0] : data;
+    setCard(current => current ? { ...current, points_balance: Number(result?.points_balance ?? current.points_balance) } : current);
+    setEngagement(current => current ? { ...current, feedback_submitted: true } : current);
+    setFeedbackMessage(result?.points_awarded ? 'Merci ! +' + result.points_awarded + ' points ont été ajoutés.' : 'Merci pour votre retour !');
+    setFeedbackComment('');
+  };
+
   useEffect(() => {
     if (!card?.customer_id || !card.establishment_id) return;
 
@@ -432,6 +522,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         { data: rewardsData },
         { data: discountData },
         { data: notificationsData },
+        { data: engagementData },
       ] = await Promise.all([
         supabase.rpc('get_public_loyalty_card', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_card_config', { p_access_token: token }),
@@ -440,6 +531,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         supabase.rpc('get_public_loyalty_rewards', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_discount_status', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_notifications', { p_access_token: token, p_limit: 20 }),
+        supabase.rpc('get_public_loyalty_engagement_context', { p_access_token: token }),
       ]);
 
       if (disposed || sequence !== refreshSequence) return;
@@ -448,6 +540,18 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
       setHistory((historyData ?? []) as HistoryItem[]);
       setRewards((rewardsData ?? []) as LoyaltyExperienceReward[]);
       setNotifications((notificationsData ?? []) as CardNotification[]);
+      const engagementRow = Array.isArray(engagementData) ? engagementData[0] : engagementData;
+      if (engagementRow) {
+        setEngagement({
+          google_review_url: engagementRow.google_review_url ?? null,
+          tripadvisor_review_url: engagementRow.tripadvisor_review_url ?? null,
+          review_bonus_points: Math.max(0, Number(engagementRow.review_bonus_points ?? 0)),
+          whatsapp_number: engagementRow.whatsapp_number ?? null,
+          google_claimed: Boolean(engagementRow.google_claimed),
+          tripadvisor_claimed: Boolean(engagementRow.tripadvisor_claimed),
+          feedback_submitted: Boolean(engagementRow.feedback_submitted),
+        });
+      }
 
       const designRow = Array.isArray(designData) ? designData[0] : designData;
       if (designRow) {
@@ -684,6 +788,65 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
             />
           </div>
         </div>
+
+        {engagement && (
+          <section className="mt-4 space-y-3">
+            {(engagement.google_review_url || engagement.tripadvisor_review_url || engagement.whatsapp_number) && (
+              <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#111111] shadow-luxury">
+                <div className="border-b border-white/8 px-5 py-4">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.24em]" style={{ color: design.secondary_color }}>Expérience client</p>
+                  <h2 className="mt-1 text-base font-semibold text-white">Votre avis compte</h2>
+                  <p className="mt-1 text-[11px] leading-5 text-white/40">Partagez librement votre expérience. Le questionnaire fidélité vous permet, lui, de gagner des points.</p>
+                </div>
+                <div className="grid gap-2 p-4 sm:grid-cols-2">
+                  {engagement.google_review_url && (
+                    <button type="button" onClick={() => openReview('google')} className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-left transition hover:border-[#D4AF37]/50">
+                      <span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]"><Star size={17} /></span><span><span className="block text-sm font-semibold text-white">Avis Google</span><span className="block text-[10px] text-white/35">{engagement.review_bonus_points > 0 ? `Laisser un avis & gagner ${engagement.review_bonus_points} pts` : 'Partager mon expérience'}</span></span></span>
+                      <ExternalLink size={15} className="text-white/35" />
+                    </button>
+                  )}
+                  {engagement.tripadvisor_review_url && (
+                    <button type="button" onClick={() => openReview('tripadvisor')} className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-left transition hover:border-[#D4AF37]/50">
+                      <span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]"><Star size={17} /></span><span><span className="block text-sm font-semibold text-white">Avis TripAdvisor</span><span className="block text-[10px] text-white/35">{engagement.review_bonus_points > 0 ? `Laisser un avis & gagner ${engagement.review_bonus_points} pts` : 'Partager mon expérience'}</span></span></span>
+                      <ExternalLink size={15} className="text-white/35" />
+                    </button>
+                  )}
+                  {engagement.whatsapp_number && (
+                    <a href={'https://wa.me/' + engagement.whatsapp_number.replace(/\D/g, '') + '?text=' + encodeURIComponent('Bonjour, je suis titulaire de la carte fidélité de ' + (card?.establishment_name ?? 'votre établissement') + ' (' + (card?.first_name ?? 'Client') + ') et je souhaite réserver une table.')} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 rounded-2xl bg-[#D4AF37] px-4 py-3 text-xs font-semibold text-[#0D0D0D] sm:col-span-2">
+                      <MessageCircle size={16} /> Réserver / contacter sur WhatsApp
+                    </a>
+                  )}
+                </div>
+                {reviewMessage && (
+                  <p className="px-5 pb-4 text-center text-xs font-medium text-[#D4AF37]" role="status" aria-live="polite">
+                    {reviewMessage}
+                  </p>
+                )}
+              </div>
+            )}
+            <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#111111] shadow-luxury">
+              <div className="px-5 py-4">
+                <p className="text-[9px] font-bold uppercase tracking-[0.24em]" style={{ color: design.secondary_color }}>Questionnaire</p>
+                <h2 className="mt-1 text-base font-semibold text-white">Comment était votre expérience ?</h2>
+                <div className="mt-4 flex gap-2">
+                  {[1,2,3,4,5].map(value => (
+                    <button key={value} type="button" onClick={() => setFeedbackRating(value)} disabled={engagement.feedback_submitted || feedbackSaving} aria-label={value + ' sur 5'} className="transition hover:scale-105 disabled:opacity-70">
+                      <Star size={28} fill={value <= feedbackRating ? design.secondary_color : 'transparent'} style={{ color: design.secondary_color }} />
+                    </button>
+                  ))}
+                </div>
+                {!engagement.feedback_submitted && feedbackRating > 0 && (
+                  <div className="mt-4 space-y-3">
+                    <textarea value={feedbackComment} onChange={e => setFeedbackComment(e.target.value)} maxLength={2000} rows={3} placeholder="Un commentaire à partager ? (facultatif)" className="w-full resize-none rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#D4AF37]" />
+                    <button type="button" onClick={() => void submitFeedback()} disabled={feedbackSaving} className="w-full rounded-2xl bg-[#D4AF37] px-4 py-3 text-xs font-semibold text-[#0D0D0D] disabled:opacity-50">{feedbackSaving ? 'Envoi…' : 'Envoyer mon retour · +10 points'}</button>
+                  </div>
+                )}
+                {engagement.feedback_submitted && <p className="mt-3 flex items-center gap-2 text-xs text-white/55"><CheckCircle2 size={15} className="text-[#D4AF37]" /> Retour déjà envoyé. Merci !</p>}
+                {feedbackMessage && <p className="mt-3 text-xs text-[#D4AF37]">{feedbackMessage}</p>}
+              </div>
+            </div>
+          </section>
+        )}
 
         {notifications.length > 0 && (
           <section className="mt-4 overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#111111] shadow-luxury">

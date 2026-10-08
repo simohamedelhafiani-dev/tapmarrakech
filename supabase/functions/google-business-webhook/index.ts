@@ -1,0 +1,28 @@
+// Google Business Profile Pub/Sub webhook.
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+const url=Deno.env.get('SUPABASE_URL')!,key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,secret=Deno.env.get('GOOGLE_BUSINESS_PUBSUB_SECRET')??'',cid=Deno.env.get('GOOGLE_BUSINESS_CLIENT_ID')??'',clientSecret=Deno.env.get('GOOGLE_BUSINESS_CLIENT_SECRET')??'',ai=Deno.env.get('OPENAI_API_KEY')??'';
+const db=createClient(url,key,{auth:{autoRefreshToken:false,persistSession:false}});
+const json=(d:unknown,s=200)=>new Response(JSON.stringify(d),{status:s,headers:{'Content-Type':'application/json'}});
+async function refresh(r:string){const b=new URLSearchParams({refresh_token:r,client_id:cid,client_secret:clientSecret,grant_type:'refresh_token'});const x=await fetch('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:b});const d=await x.json();if(!x.ok)throw new Error(d?.error_description??'Token refresh failed');return d}
+async function gen(comment:string,rating:string,lang:string,tone:string){if(!ai)return 'Merci pour votre retour. Nous sommes ravis de vous avoir accueilli et prenons votre commentaire en compte. Au plaisir de vous revoir !';const prompt=`Rédige une réponse courte à un avis Google. Langue: ${lang||'français'}. Ton: ${tone||'professionnel et chaleureux'}. Note: ${rating}. Avis: ${comment}. Réponds dans la langue de l'avis si elle est identifiable. Ne mentionne jamais une récompense, un point, une promotion ou une contrepartie. N'invente aucun fait. Maximum 70 mots.`;const r=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:`Bearer ${ai}`,'Content-Type':'application/json'},body:JSON.stringify({model:'gpt-5.6-luna',input:prompt,max_output_tokens:180})});const d=await r.json();if(!r.ok)throw new Error(d?.error?.message??'AI error');return String(d.output_text??'').trim()}
+Deno.serve(async req=>{try{
+ const u=new URL(req.url);if(secret&&u.searchParams.get('secret')!==secret)return json({error:'unauthorized'},401);
+ const body=await req.json().catch(()=>({}));const msg=body?.message;if(!msg)return json({ok:true});
+ let payload:any={};try{payload=msg.data?JSON.parse(atob(String(msg.data).replace(/-/g,'+').replace(/_/g,'/'))):{}}catch{}
+ const reviewName=String(payload?.review_name??'');if(!reviewName)return json({ok:true});
+ const parts=reviewName.split('/');const ai=parts.indexOf('accounts'),li=parts.indexOf('locations');const accountId=ai>=0?parts[ai+1]:'';const locationId=li>=0?parts[li+1]:'';
+ if(!accountId||!locationId)return json({ok:true});
+ const {data:loc}=await db.from('google_business_locations').select('id,connection_id').eq('google_account_id',accountId).eq('google_location_id',locationId).maybeSingle();if(!loc)return json({ok:true});
+ const {data:c}=await db.from('google_business_connections').select('*').eq('id',loc.connection_id).maybeSingle();if(!c)return json({ok:true});
+ let token=c.access_token;if(!token||!c.token_expires_at||new Date(c.token_expires_at).getTime()<Date.now()+120000){const t=await refresh(c.refresh_token);token=t.access_token;await db.from('google_business_connections').update({access_token:token,token_expires_at:new Date(Date.now()+Number(t.expires_in??3600)*1000).toISOString(),updated_at:new Date().toISOString()}).eq('id',c.id)}
+ const r=await fetch(`https://mybusiness.googleapis.com/v4/accounts/${accountId}/locations/${locationId}/reviews/${encodeURIComponent(parts[parts.length-1])}`,{headers:{Authorization:`Bearer ${token}`}});const review=await r.json();if(!r.ok)throw new Error(review?.error?.message??'Google review fetch failed');
+ const {data:stored}=await db.from('google_business_reviews').upsert({location_id:loc.id,google_review_name:review.name,reviewer_display_name:review.reviewer?.displayName??null,reviewer_is_anonymous:!!review.reviewer?.isAnonymous,star_rating:review.starRating??null,comment:review.comment??null,review_created_at:review.createTime??null,review_updated_at:review.updateTime??null,owner_reply:review.reviewReply?.comment??null,owner_reply_updated_at:review.reviewReply?.updateTime??null,raw_payload:review,last_synced_at:new Date().toISOString(),updated_at:new Date().toISOString()},{onConflict:'google_review_name'}).select('id').single();
+ const {data:s}=await db.from('google_business_settings').select('*').eq('establishment_id',c.establishment_id).maybeSingle();
+ let replyStatus:any={skipped:true};if(s?.auto_reply_enabled&&!s.require_approval&&!review.reviewReply?.comment&&review.comment&&stored?.id){
+  const reply=await gen(String(review.comment),String(review.starRating??''),s.auto_reply_language,s.auto_reply_tone);
+  const endpoint=`https://mybusiness.googleapis.com/v4/accounts/${accountId}/locations/${locationId}/reviews/${encodeURIComponent(parts[parts.length-1])}/reply`;
+  const rr=await fetch(endpoint,{method:'PUT',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({comment:reply})});const rd=await rr.json();if(!rr.ok)throw new Error(rd?.error?.message??'Google reply failed');
+  await db.from('google_business_reviews').update({owner_reply:reply,owner_reply_updated_at:new Date().toISOString(),last_synced_at:new Date().toISOString(),raw_payload:rd,updated_at:new Date().toISOString()}).eq('id',stored.id);replyStatus={success:true,reply};
+ }
+ return json({ok:true,review_id:stored?.id??null,reply:replyStatus});
+ }catch(e){console.error(e);return json({ok:false,error:e instanceof Error?e.message:'Webhook error'},200)}});

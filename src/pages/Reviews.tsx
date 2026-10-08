@@ -15,6 +15,8 @@ import { supabase } from '@/lib/supabase';
 import type { Review } from '@/lib/types';
 import { Stars } from '@/components/Stars';
 
+type SatisfactionFeedback = { id: string; customer_name: string | null; rating: number; comment: string | null; points_awarded: number; created_at: string; };
+type SatisfactionSummary = { average_rating: number; total_feedback: number; negative_count: number; };
 type AIRecurringIssue = {
   topic: string;
   frequency: string;
@@ -72,6 +74,8 @@ export default function Reviews() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('Tous');
   const [rating, setRating] = useState('Tous');
+  const [satisfactionSummary, setSatisfactionSummary] = useState<SatisfactionSummary>({ average_rating: 0, total_feedback: 0, negative_count: 0 });
+  const [satisfactionFeedback, setSatisfactionFeedback] = useState<SatisfactionFeedback[]>([]);
 
   const [loading, setLoading] = useState(true);
 
@@ -142,6 +146,37 @@ export default function Reviews() {
         }
 
         setReviews((data as Review[]) ?? []);
+
+        const feedbackResponses = await Promise.all(
+          ids.map((id: string) => supabase.rpc('get_admin_satisfaction_feedback', { p_establishment_id: id, p_limit: 20 }))
+        );
+        const feedbackRows: SatisfactionFeedback[] = [];
+        let totalFeedback = 0;
+        let negativeCount = 0;
+        let weightedTotal = 0;
+        feedbackResponses.forEach(response => {
+          const rows = (response.data ?? []) as Array<SatisfactionSummary & SatisfactionFeedback>;
+          const stats = rows[0];
+          if (stats) {
+            totalFeedback += Number(stats.total_feedback ?? 0);
+            negativeCount += Number(stats.negative_count ?? 0);
+            weightedTotal += Number(stats.average_rating ?? 0) * Number(stats.total_feedback ?? 0);
+          }
+          rows.filter(row => row.id).forEach(row => feedbackRows.push({
+            id: row.id,
+            customer_name: row.customer_name,
+            rating: Number(row.rating),
+            comment: row.comment,
+            points_awarded: Number(row.points_awarded ?? 0),
+            created_at: row.created_at,
+          }));
+        });
+        setSatisfactionSummary({
+          average_rating: totalFeedback ? Number((weightedTotal / totalFeedback).toFixed(2)) : 0,
+          total_feedback: totalFeedback,
+          negative_count: negativeCount,
+        });
+        setSatisfactionFeedback(feedbackRows.sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 20));
       } finally {
         setLoading(false);
       }
@@ -394,6 +429,19 @@ export default function Reviews() {
           </button>
         </div>
       </div>
+
+      <section className="mb-7 overflow-hidden rounded-3xl border border-[#242424] bg-[#111111] shadow-xl">
+        <div className="flex flex-col gap-4 border-b border-[#242424] p-6 md:flex-row md:items-center md:justify-between">
+          <div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D4AF37]">Feedback fidélité</p><h2 className="mt-1 font-display text-2xl text-white">Satisfaction client</h2><p className="mt-1 text-xs text-white/40">Retours laissés directement depuis les cartes fidélité.</p></div>
+          {satisfactionSummary.negative_count > 0 && <div className="flex items-center gap-2 rounded-xl border border-red-400/20 bg-red-400/5 px-4 py-3 text-xs font-semibold text-red-300"><AlertTriangle size={16} /> {satisfactionSummary.negative_count} retour(s) à ≤ 2/5</div>}
+        </div>
+        <div className="grid gap-px bg-[#242424] sm:grid-cols-3">
+          <div className="bg-[#111111] p-5"><p className="text-[10px] uppercase tracking-wider text-white/35">Note moyenne</p><p className="mt-1 text-2xl font-semibold text-[#D4AF37]">{satisfactionSummary.average_rating ? satisfactionSummary.average_rating + '/5' : '—'}</p></div>
+          <div className="bg-[#111111] p-5"><p className="text-[10px] uppercase tracking-wider text-white/35">Retours</p><p className="mt-1 text-2xl font-semibold text-white">{satisfactionSummary.total_feedback}</p></div>
+          <div className="bg-[#111111] p-5"><p className="text-[10px] uppercase tracking-wider text-white/35">Alertes ≤ 2</p><p className="mt-1 text-2xl font-semibold text-red-300">{satisfactionSummary.negative_count}</p></div>
+        </div>
+        {satisfactionFeedback.length > 0 ? <div className="divide-y divide-[#242424]">{satisfactionFeedback.slice(0, 8).map(item => <div key={item.id} className="flex flex-col gap-2 p-5 sm:flex-row sm:items-start sm:justify-between"><div><div className="flex items-center gap-2"><span className="font-semibold text-white">{item.customer_name || 'Client'}</span><span className="text-[#D4AF37]">{'★'.repeat(item.rating)}<span className="text-white/15">{'★'.repeat(5 - item.rating)}</span></span></div>{item.comment && <p className="mt-1 text-sm leading-6 text-white/55">{item.comment}</p>}</div><div className="shrink-0 text-[10px] text-white/30">{new Date(item.created_at).toLocaleDateString('fr-FR')}</div></div>)}</div> : <div className="p-8 text-center text-xs text-white/35">Aucun feedback fidélité pour le moment.</div>}
+      </section>
 
       {/* ERREUR IA */}
       {aiError && (

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
+  Bot,
   Building2,
   Copy,
   Gift,
@@ -22,6 +23,8 @@ const empty = {
   slug: '',
   logo_url: '',
   google_review_url: '',
+  tripadvisor_review_url: '',
+  whatsapp_number: '',
   redirect_threshold: 4,
 };
 
@@ -36,6 +39,10 @@ export default function Establishments() {
   const [qr, setQr] = useState<{ title: string; url: string; filename: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [scannerLinks, setScannerLinks] = useState<Record<string, string>>({});
+  const [googleAutoReply, setGoogleAutoReply] = useState(false);
+  const [googleReplyLanguage, setGoogleReplyLanguage] = useState('français');
+  const [googleReplyTone, setGoogleReplyTone] = useState('professionnel et chaleureux');
+  const [googleReplyApproval, setGoogleReplyApproval] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -180,6 +187,8 @@ export default function Establishments() {
         slug: normalizedSlug,
         logo_url: form.logo_url,
         google_review_url: form.google_review_url,
+        tripadvisor_review_url: form.tripadvisor_review_url,
+        whatsapp_number: form.whatsapp_number,
         redirect_threshold: form.redirect_threshold,
       };
 
@@ -215,7 +224,23 @@ export default function Establishments() {
 
       setShow(false);
       setEditing(null);
+      if (editing) {
+        await supabase.from('google_business_settings').upsert({
+          establishment_id: editing,
+          auto_reply_enabled: googleAutoReply,
+          auto_reply_language: googleReplyLanguage,
+          auto_reply_tone: googleReplyTone,
+          require_approval: googleReplyApproval,
+          updated_by: user.id,
+          updated_at: new Date().toISOString(),
+        });
+      }
+
+      setShow(false);
+      setEditing(null);
       setForm(empty);
+      setGoogleAutoReply(false);
+      setGoogleReplyApproval(false);
       setMessage('Établissement enregistré.');
 
       return;
@@ -274,9 +299,23 @@ export default function Establishments() {
         );
       }
 
+      if (result.data) {
+        await supabase.from('google_business_settings').upsert({
+          establishment_id: result.data.id,
+          auto_reply_enabled: googleAutoReply,
+          auto_reply_language: googleReplyLanguage,
+          auto_reply_tone: googleReplyTone,
+          require_approval: googleReplyApproval,
+          updated_by: user.id,
+          updated_at: new Date().toISOString(),
+        });
+      }
+
       setShow(false);
       setEditing(null);
       setForm(empty);
+      setGoogleAutoReply(false);
+      setGoogleReplyApproval(false);
       setMessage('Établissement enregistré.');
     }
   };
@@ -305,7 +344,7 @@ export default function Establishments() {
     a.click();
   };
 
-  const openEdit = (place: Establishment) => {
+  const openEdit = async (place: Establishment) => {
     setEditing(place.id);
 
     setForm({
@@ -313,9 +352,21 @@ export default function Establishments() {
       slug: place.slug,
       logo_url: place.logo_url ?? '',
       google_review_url: place.google_review_url,
+      tripadvisor_review_url: place.tripadvisor_review_url ?? '',
+      whatsapp_number: place.whatsapp_number ?? '',
       redirect_threshold: place.redirect_threshold,
     });
 
+    const { data: settings } = await supabase
+      .from('google_business_settings')
+      .select('auto_reply_enabled, auto_reply_language, auto_reply_tone, require_approval')
+      .eq('establishment_id', place.id)
+      .maybeSingle();
+
+    setGoogleAutoReply(Boolean(settings?.auto_reply_enabled));
+    setGoogleReplyLanguage(settings?.auto_reply_language ?? 'français');
+    setGoogleReplyTone(settings?.auto_reply_tone ?? 'professionnel et chaleureux');
+    setGoogleReplyApproval(Boolean(settings?.require_approval));
     setShow(true);
   };
 
@@ -351,6 +402,8 @@ export default function Establishments() {
             onClick={() => {
               setForm(empty);
               setEditing(null);
+              setGoogleAutoReply(false);
+              setGoogleReplyApproval(false);
               setShow(true);
             }}
             className="flex w-fit items-center gap-2 rounded-xl bg-forest px-4 py-3 text-xs font-semibold text-white transition hover:bg-forest-light"
@@ -411,6 +464,8 @@ export default function Establishments() {
             onClick={() => {
               setForm(empty);
               setEditing(null);
+              setGoogleAutoReply(false);
+              setGoogleReplyApproval(false);
               setShow(true);
             }}
             className="mt-6 rounded-xl bg-forest px-5 py-3 text-xs font-semibold text-white"
@@ -640,6 +695,79 @@ export default function Establishments() {
                   />
                 </label>
               ))}
+
+              <div className="rounded-2xl border border-gold/20 bg-[#111111] p-4 text-white">
+                <div className="flex items-start gap-3">
+                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]">
+                    <Bot size={18} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#D4AF37]">Google Business Profile</p>
+                    <p className="mt-1 text-[11px] text-white/50">Connectez le compte Google qui gère cette fiche pour synchroniser les avis et permettre à KELYANI de répondre automatiquement.</p>
+                    <button type="button" onClick={async () => {
+                      if (!editing) return;
+                      const { data, error } = await supabase.functions.invoke('google-business-oauth', { body: { action: 'start', establishment_id: editing } });
+                      if (error || !data?.authorization_url) {
+                        setMessage(error?.message || data?.error || 'Impossible de démarrer la connexion Google.');
+                        return;
+                      }
+                      window.open(data.authorization_url, '_blank', 'width=600,height=750');
+                    }} className="mt-3 rounded-xl bg-[#D4AF37] px-4 py-2.5 text-[11px] font-bold text-[#0D0D0D]">
+                      Connecter Google
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-gold/20 bg-[#f7f7f3] p-4">
+                <div className="flex items-start gap-3">
+                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-gold">
+                    <Bot size={18} />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.14em] text-forest">Réponse automatique Google</p>
+                        <p className="mt-1 text-[11px] text-ink/50">KELYANI analyse les nouveaux avis et peut publier une réponse IA automatiquement.</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setGoogleAutoReply((v) => !v)}
+                        className={`relative h-6 w-11 shrink-0 rounded-full transition ${googleAutoReply ? 'bg-gold' : 'bg-ink/15'}`}
+                        aria-label="Activer la réponse automatique Google"
+                      >
+                        <span className={`absolute top-1 h-4 w-4 rounded-full bg-white transition ${googleAutoReply ? 'left-6' : 'left-1'}`} />
+                      </button>
+                    </div>
+                    {googleAutoReply && (
+                      <div className="mt-4 space-y-3">
+                        <label className="block text-[11px] font-semibold text-ink/65">
+                          Langue
+                          <select value={googleReplyLanguage} onChange={(e) => setGoogleReplyLanguage(e.target.value)} className="mt-1.5 w-full rounded-xl border border-ink/10 bg-white p-2.5 text-xs outline-none focus:ring-2 focus:ring-gold">
+                            <option>français</option>
+                            <option>anglais</option>
+                            <option>arabe</option>
+                            <option>espagnol</option>
+                          </select>
+                        </label>
+                        <label className="block text-[11px] font-semibold text-ink/65">
+                          Ton
+                          <select value={googleReplyTone} onChange={(e) => setGoogleReplyTone(e.target.value)} className="mt-1.5 w-full rounded-xl border border-ink/10 bg-white p-2.5 text-xs outline-none focus:ring-2 focus:ring-gold">
+                            <option>professionnel et chaleureux</option>
+                            <option>premium et élégant</option>
+                            <option>amical et naturel</option>
+                            <option>sobre et professionnel</option>
+                          </select>
+                        </label>
+                        <label className="flex items-center gap-2 text-[11px] font-semibold text-ink/65">
+                          <input type="checkbox" checked={googleReplyApproval} onChange={(e) => setGoogleReplyApproval(e.target.checked)} />
+                          Valider chaque réponse avant publication
+                        </label>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
 
               <label className="block text-xs font-semibold text-ink/65">
                 Seuil de redirection vers Google

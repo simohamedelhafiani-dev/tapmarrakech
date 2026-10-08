@@ -8,7 +8,6 @@ import {
   LogOut,
   Menu as MenuIcon,
   MessageSquare,
-  Settings2,
   UtensilsCrossed,
   X,
   QrCode,
@@ -22,6 +21,7 @@ import {
   Ticket,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import QRCode from 'qrcode';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useLanguage, type Language } from '@/contexts/LanguageContext';
@@ -73,12 +73,6 @@ const links = [
     feature: 'loyalty' as const,
   },
   {
-    to: '/dashboard/loyalty/settings',
-    label: 'Programme fidélité',
-    icon: Settings2,
-    feature: 'loyalty' as const,
-  },
-  {
     to: '/dashboard/loyalty/raffles',
     label: 'Tombola & niveaux',
     icon: Ticket,
@@ -115,6 +109,8 @@ export function DashboardLayout() {
   const [scannerLoading, setScannerLoading] = useState(false);
   const [joinQrOpen, setJoinQrOpen] = useState(false);
   const [joinQrUrl, setJoinQrUrl] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [joinQrError, setJoinQrError] = useState<string | null>(null);
   const [joinLink, setJoinLink] = useState<string | null>(null);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -526,6 +522,12 @@ export function DashboardLayout() {
     else navigate('/dashboard');
   };
 
+  const refreshApp = () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    window.location.reload();
+  };
+
   const logout = async () => {
     await signOut();
     navigate('/login');
@@ -547,7 +549,6 @@ export function DashboardLayout() {
         Menu: 'Menu',
         Promotions: 'Promotions',
         Fidélité: 'Loyalty',
-        'Programme fidélité': 'Loyalty program',
       }
     : language === 'ar'
       ? {
@@ -558,7 +559,6 @@ export function DashboardLayout() {
           Menu: 'القائمة',
           Promotions: 'العروض',
           Fidélité: 'الولاء',
-          'Programme fidélité': 'برنامج الولاء',
         }
       : {};
 
@@ -591,9 +591,9 @@ export function DashboardLayout() {
           <div className="mx-auto flex max-w-[1700px] items-center gap-3">
             <button type="button" onClick={() => navigate('/dashboard')} className="flex min-w-0 shrink-0 items-center gap-3 text-left" aria-label="Établissement actif">
               {activeEstablishment?.logo_url ? (
-                <img src={activeEstablishment.logo_url} alt={activeEstablishment.name} className="h-11 w-11 rounded-xl border border-[#242424] bg-white object-contain p-1" />
+                <img src={activeEstablishment.logo_url} alt={activeEstablishment.name} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = '/kelyani-final.svg'; }} className="h-11 w-11 rounded-xl border border-[#242424] bg-[#050505] object-contain p-1" />
               ) : (
-                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-[#242424] bg-[#111111] text-[#C9A45C]"><Building2 size={18} /></div>
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-[#242424] bg-[#111111]"><KelyaniMark size={26} /></div>
               )}
               <div className="hidden min-w-0 sm:block">
                 <p className="max-w-[180px] truncate text-sm font-semibold text-white">{activeEstablishment?.name || 'Votre établissement'}</p>
@@ -627,15 +627,22 @@ export function DashboardLayout() {
             </div>
 
             <div className="ml-auto flex shrink-0 items-center gap-2">
-              {role === 'responsible' && activeEstablishment && (
+              {(role === 'responsible' || role === 'admin') && activeEstablishment && (
                 <>
                   <button
                     type="button"
                     onClick={async () => {
                       const url = `${window.location.origin}/loyalty/join?est=${encodeURIComponent(activeEstablishment.id)}`;
-                      setJoinLink(url);
-                      setJoinQrUrl(await QRCode.toDataURL(url, { width: 800, margin: 3, errorCorrectionLevel: 'H' }));
-                      setJoinQrOpen(true);
+                      try {
+                        setJoinQrError(null);
+                        setJoinLink(url);
+                        const qr = await QRCode.toDataURL(url, { width: 800, margin: 3, errorCorrectionLevel: 'H' });
+                        setJoinQrUrl(qr);
+                        setJoinQrOpen(true);
+                      } catch (error) {
+                        console.error('Erreur génération QR création carte:', error);
+                        setJoinQrError('Impossible de générer le QR code. Veuillez réessayer.');
+                      }
                     }}
                     className="flex h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#F5F5DC]/70 transition hover:border-[#C9A45C]/60 hover:text-[#E1C27A]"
                   >
@@ -652,6 +659,22 @@ export function DashboardLayout() {
                   )}
                 </>
               )}
+
+              <button
+                type="button"
+                onClick={refreshApp}
+                disabled={refreshing}
+                className="grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#F5F5DC]/65 transition hover:border-[#C9A45C]/60 hover:text-[#E1C27A] disabled:cursor-wait disabled:opacity-50"
+                aria-label="Actualiser l’application"
+                title="Actualiser"
+              >
+                <svg viewBox="0 0 24 24" className={`h-[17px] w-[17px] ${refreshing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M20 11a8.1 8.1 0 0 0-14.7-4.7L3 9" />
+                  <path d="M3 4v5h5" />
+                  <path d="M4 13a8.1 8.1 0 0 0 14.7 4.7L21 15" />
+                  <path d="M21 20v-5h-5" />
+                </svg>
+              </button>
 
               <div className="relative">
                 <button
@@ -779,6 +802,7 @@ export function DashboardLayout() {
               </div>
               <p className="mt-5 text-sm font-medium text-white">Scannez pour créer votre carte fidélité</p>
               <p className="mt-1 text-[11px] leading-5 text-white/40">Le client remplit directement son formulaire sur son téléphone.</p>
+              {joinQrError && <p className="mt-3 text-xs font-medium text-red-300">{joinQrError}</p>}
 
               <div className="mt-5 rounded-2xl border border-[#242424] bg-[#0B0B0B] p-3 text-left">
                 <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-[#C9A45C]/70">Lien de création · NFC</p>

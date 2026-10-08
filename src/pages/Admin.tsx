@@ -40,7 +40,7 @@ import {
   FileText,
   Gem,
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import KelyaniMark from '@/components/brand/KelyaniMark';
@@ -150,8 +150,26 @@ export default function Admin() {
   const { language, setLanguage } = useLanguage();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [section, setSection] = useState<AdminSection>('overview');
+  const sectionFromPath = (pathname: string): AdminSection => {
+    const slug = pathname.replace(/^\/admin\/?/, '').split('/')[0];
+    const validSections: AdminSection[] = [
+      'overview', 'establishments', 'responsibles', 'employees', 'reviews',
+      'analysis', 'ai', 'analytics', 'reports', 'billing', 'loyalty', 'system',
+    ];
+    return validSections.includes(slug as AdminSection) ? slug as AdminSection : 'overview';
+  };
+
+  const pathForSection = (nextSection: AdminSection) =>
+    nextSection === 'overview' ? '/admin' : `/admin/${nextSection}`;
+
+  const [section, setSection] = useState<AdminSection>(() => sectionFromPath(window.location.pathname));
+
+  useEffect(() => {
+    const nextSection = sectionFromPath(location.pathname);
+    setSection(nextSection);
+  }, [location.pathname]);
   const [open, setOpen] = useState(false);
 
   const [establishments, setEstablishments] = useState<Establishment[]>([]);
@@ -188,6 +206,17 @@ export default function Admin() {
   } = useEstablishments();
 
   const [selectedEstablishmentId, setSelectedEstablishmentId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const parts = location.pathname.split('/').filter(Boolean);
+    const establishmentIndex = parts.indexOf('establishments');
+    const routeEstablishmentId = establishmentIndex >= 0 ? parts[establishmentIndex + 1] : null;
+    if (routeEstablishmentId && establishmentList.some((item) => item.id === routeEstablishmentId)) {
+      setSelectedEstablishmentId(routeEstablishmentId);
+    } else if (location.pathname === '/admin/establishments') {
+      setSelectedEstablishmentId(null);
+    }
+  }, [location.pathname, establishmentList]);
   const [showCreateEstablishmentForm, setShowCreateEstablishmentForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Array<{ id: string; type: 'establishment' | 'customer' | 'review'; title: string; subtitle: string; establishmentId?: string }>>([]);
@@ -226,9 +255,9 @@ export default function Admin() {
 
   const selectSearchResult = (result: { type: 'establishment' | 'customer' | 'review'; establishmentId?: string }) => {
     if (result.establishmentId) setSelectedEstablishmentId(result.establishmentId);
-    if (result.type === 'establishment') setSection('establishments');
-    else if (result.type === 'customer') setSection('loyalty');
-    else setSection('reviews');
+    if (result.type === 'establishment') navigate('/admin/establishments');
+    else if (result.type === 'customer') navigate('/admin/loyalty');
+    else navigate('/admin/reviews');
     setSearchQuery('');
     setSearchOpen(false);
   };
@@ -547,7 +576,7 @@ export default function Admin() {
     <div className="admin-depth-shell min-h-screen bg-[#050505] text-[#EDE9DF] selection:bg-[#C9A45C]/30">
       <header className="admin-depth-topbar sticky top-0 z-50 border-b border-[#242424] bg-[#050505]/95 px-3 py-3 backdrop-blur-2xl sm:px-5">
         <div className="mx-auto flex max-w-[1700px] items-center gap-3">
-          <button type="button" onClick={() => setSection('overview')} className="flex shrink-0 items-center gap-3 text-left" aria-label="KELYANI">
+          <button type="button" onClick={() => navigate('/admin')} className="flex shrink-0 items-center gap-3 text-left" aria-label="KELYANI">
             <KelyaniMark size={72} />
             <div className="hidden sm:block leading-none">
               <p className="font-display text-xl font-semibold tracking-[.08em] text-[#E1C27A]">KELYANI</p>
@@ -620,7 +649,7 @@ export default function Admin() {
                 <EstablishmentWorkspace
                   establishment={workspaceEstablishment}
                   businessTypes={aiBusinessTypes}
-                  onBack={() => setSelectedEstablishmentId(null)}
+                  onBack={() => { setSelectedEstablishmentId(null); navigate('/admin/establishments'); }}
                   onReload={loadEstablishments}
                 />
               );
@@ -633,7 +662,7 @@ export default function Admin() {
                   loading={establishmentListLoading}
                   error={establishmentListError}
                   onAdd={() => setShowCreateEstablishmentForm(true)}
-                  onOpen={(establishment) => setSelectedEstablishmentId(establishment.id)}
+                  onOpen={(establishment) => { setSelectedEstablishmentId(establishment.id); navigate(`/admin/establishments/${establishment.id}/profile`); }}
                 />
                 {showCreateEstablishmentForm && (
                   <CreateEstablishmentForm
@@ -730,7 +759,7 @@ export default function Admin() {
                 key={id}
                 type="button"
                 onClick={() => {
-                  setSection(id);
+                  navigate(pathForSection(id));
                   if (id === 'loyalty' && !selectedEstablishmentId && establishments[0]) setSelectedEstablishmentId(establishments[0].id);
                 }}
                 aria-label={label}
@@ -1203,7 +1232,19 @@ function EstablishmentWorkspace({
   onBack: () => void;
   onReload: () => Promise<void>;
 }) {
-  const [tab, setTab] = useState<WorkspaceTab>('profile');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const workspaceTabFromPath = (pathname: string): WorkspaceTab => {
+    const parts = pathname.split('/').filter(Boolean);
+    const candidate = parts[3] as WorkspaceTab | undefined;
+    const validTabs: WorkspaceTab[] = ['profile', 'wifi', 'menu', 'promotions', 'reviews', 'loyalty', 'team', 'analytics', 'public'];
+    return candidate && validTabs.includes(candidate) ? candidate : 'profile';
+  };
+  const [tab, setTab] = useState<WorkspaceTab>(() => workspaceTabFromPath(window.location.pathname));
+
+  useEffect(() => {
+    setTab(workspaceTabFromPath(location.pathname));
+  }, [location.pathname]);
   const establishmentProfileEngine = useEstablishmentProfile(establishment.id);
 
   useEffect(() => {
@@ -1826,7 +1867,7 @@ function EstablishmentWorkspace({
 
   const tabs: { id: WorkspaceTab; label: string }[] = [
     { id: 'profile', label: 'Profil' }, { id: 'wifi', label: 'Wi-Fi' }, { id: 'menu', label: 'Menu' }, { id: 'promotions', label: 'Promotions' },
-    { id: 'reviews', label: 'Avis' }, { id: 'loyalty', label: 'Fidélité' }, { id: 'team', label: 'Équipe' }, { id: 'analytics', label: 'Analytics' }, { id: 'public', label: 'Liens publics' },
+    { id: 'reviews', label: 'Avis' }, { id: 'analytics', label: 'Analytics' }, { id: 'public', label: 'Liens publics' },
   ];
 
   return (
@@ -1848,7 +1889,7 @@ function EstablishmentWorkspace({
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            {scannerLink && <a href={scannerLink} target="_blank" rel="noreferrer" className="rounded-xl border border-[#C9A45C]/30 bg-[#fdf9ef] px-4 py-3 text-xs font-semibold text-[#C9A45C] transition hover:border-[#C9A45C] hover:bg-[#111111]">Scanner fidélité ↗</a>}
+            {scannerLink && <a href={scannerLink} target="_blank" rel="noreferrer" className="rounded-xl border border-[#C9A45C]/30 bg-[#111111] px-4 py-3 text-xs font-semibold text-[#C9A45C] transition hover:border-[#C9A45C] hover:bg-[#111111]">Scanner fidélité ↗</a>}
             <a href={publicLink} target="_blank" rel="noreferrer" className="rounded-xl bg-[#111111] px-4 py-3 text-center text-xs font-semibold text-[#FFFFFF] shadow-lg shadow-[0_10px_35px_rgba(201,164,92,0.10)] transition hover:bg-[#111111]">Ouvrir la page publique ↗</a>
           </div>
         </div>
@@ -1887,7 +1928,7 @@ function EstablishmentWorkspace({
       </div>
 
       <div className="mb-6 flex gap-2 overflow-x-auto rounded-3xl border border-[#242424] bg-[#111111] p-2 shadow-sm">
-        {tabs.map((x) => <button key={x.id} onClick={() => setTab(x.id)} className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-xs font-semibold ${tab === x.id ? 'bg-[#111111] text-[#FFFFFF]' : 'text-[#FFFFFF]/55 hover:bg-[#111111]'}`}>{x.label}</button>)}
+        {tabs.map((x) => <button key={x.id} onClick={() => navigate(`/admin/establishments/${establishment.id}/${x.id}`)} className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-xs font-semibold ${tab === x.id ? 'bg-[#111111] text-[#FFFFFF]' : 'text-[#FFFFFF]/55 hover:bg-[#111111]'}`}>{x.label}</button>)}
       </div>
 
       {tab === 'profile' && (
@@ -2087,7 +2128,7 @@ function EstablishmentWorkspace({
 
       {tab === 'public' && (
   <div className="space-y-5">
-    <div className="rounded-2xl border border-[#C9A45C]/20 bg-[#fbf8ee] p-6">
+    <div className="rounded-2xl border border-[#C9A45C]/20 bg-[#111111] p-6">
       <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#C9A45C]">Liens publics de l’établissement</p>
       <h3 className="mt-2 text-xl font-semibold text-[#FFFFFF]">Accès client</h3>
       <p className="mt-2 text-sm text-[#FFFFFF]/50">Tous les liens que l’Admin peut copier et ouvrir pour QR / NFC.</p>
@@ -3176,7 +3217,7 @@ function RewardCodesSection({
           </label>
         </div>
 
-        <div className="mt-5 flex items-center gap-3 rounded-xl border border-[#C9A45C]/20 bg-[#fdf9ef] p-4">
+        <div className="mt-5 flex items-center gap-3 rounded-xl border border-[#C9A45C]/20 bg-[#111111] p-4">
           <LockKeyhole size={18} className="shrink-0 text-[#C9A45C]" />
           <p className="text-xs leading-5 text-[#FFFFFF]/50">
             Le stockage du code reste protégé par le mécanisme existant. Cette interface ne tente pas de récupérer le code en clair.
@@ -5212,7 +5253,7 @@ function BillingSection({
                 <span className={`w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold ${sub.status === 'active' ? 'bg-[#111111] text-[#E1C27A]' : sub.status === 'trial' ? 'bg-[#111111] text-[#E1C27A]' : 'bg-[#111111] text-[#F5F5DC]'}`}>{sub.status}</span>
                 <span className="font-semibold">{Number(sub.plan?.price_mad ?? 0).toLocaleString('fr-FR')} MAD</span>
                 <span className="text-[#FFFFFF]/50">{formatDate(sub.current_period_end)}</span>
-                <button type="button" onClick={() => openSubscriptionEditor(sub)} className="rounded-lg border border-[#242424]/10 bg-[#111111] px-3 py-2 text-[11px] font-semibold text-[#C9A45C] transition hover:border-[#C9A45C] hover:bg-[#fdf9ef]">
+                <button type="button" onClick={() => openSubscriptionEditor(sub)} className="rounded-lg border border-[#242424]/10 bg-[#111111] px-3 py-2 text-[11px] font-semibold text-[#C9A45C] transition hover:border-[#C9A45C] hover:bg-[#111111]">
                   Modifier
                 </button>
               </div>
@@ -5315,7 +5356,7 @@ function BillingSection({
                             current.setDate(current.getDate() + days);
                             setSubscriptionForm((v) => ({ ...v, periodEnd: toLocalDateTimeInput(current.toISOString()) }));
                           }}
-                          className="rounded-lg border border-[#242424]/10 bg-[#111111] px-3 py-2 text-[11px] font-semibold text-[#C9A45C] hover:border-[#C9A45C] hover:bg-[#fdf9ef]"
+                          className="rounded-lg border border-[#242424]/10 bg-[#111111] px-3 py-2 text-[11px] font-semibold text-[#C9A45C] hover:border-[#C9A45C] hover:bg-[#111111]"
                         >
                           +{days} jours
                         </button>
@@ -5324,7 +5365,7 @@ function BillingSection({
                   </div>
                 </div>
 
-                <div className="mt-6 rounded-2xl border border-[#C9A45C]/20 bg-[#fdf9ef] p-4 text-xs text-[#FFFFFF]/60">
+                <div className="mt-6 rounded-2xl border border-[#C9A45C]/20 bg-[#111111] p-4 text-xs text-[#FFFFFF]/60">
                   <strong className="text-[#FFFFFF]">Modification immédiate :</strong> le responsable verra le nouveau pack et les nouvelles dates dès que son abonnement sera rechargé. Les fonctionnalités restent déterminées par le pack sélectionné.
                 </div>
 
