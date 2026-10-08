@@ -233,3 +233,10 @@ create trigger trg_prevent_responsible_menu_design_update
 before update on public.establishments
 for each row
 execute function public.prevent_responsible_menu_design_update();
+
+
+revoke execute on function public.update_establishment_menu_design(uuid,jsonb) from public, anon;
+revoke execute on function public.update_establishment_menu_template(uuid,text) from public, anon;
+revoke execute on function public.prevent_responsible_menu_design_update() from public, anon;
+grant execute on function public.update_establishment_menu_design(uuid,jsonb) to authenticated;
+grant execute on function public.update_establishment_menu_template(uuid,text) to authenticated;
