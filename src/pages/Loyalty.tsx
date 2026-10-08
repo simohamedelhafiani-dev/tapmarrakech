@@ -537,7 +537,7 @@ export default function Loyalty() {
           </Link>
 
           <button
-            onClick={() => setShowNotificationModal(true)
+            onClick={() => setShowNotificationModal(true)}
             disabled={!establishmentId || !programSettings.enabled}
             className="flex items-center gap-2 rounded-xl border border-gold/30 bg-white px-4 py-2.5 text-xs font-semibold text-forest transition hover:bg-[#fdf9ef] disabled:cursor-not-allowed disabled:opacity-40"
           >
