@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  CalendarClock,
   Check,
   ChevronDown,
   Crown,
@@ -200,6 +199,22 @@ export default function LoyaltyRaffles() {
       return;
     }
 
+    let validFrom: string | null = null;
+    let validUntil: string | null = null;
+
+    if (form.validityMode === 'DATE_RANGE' || form.validityMode === 'ONE_DAY') {
+      const from = new Date(form.validFrom);
+      const until = new Date(form.validUntil);
+
+      if (Number.isNaN(from.getTime()) || Number.isNaN(until.getTime()) || until < from) {
+        alert('La période de validité de la récompense est invalide.');
+        return;
+      }
+
+      validFrom = from.toISOString();
+      validUntil = until.toISOString();
+    }
+
     setSaving(true);
     const { error } = await supabase.rpc('create_loyalty_raffle', {
       p_establishment_id: establishmentId,
@@ -211,14 +226,8 @@ export default function LoyaltyRaffles() {
       p_draw_at: drawAt.toISOString(),
       p_winners_count: Math.min(100, Math.max(1, Number(form.winnersCount))),
       p_reward_validity_mode: form.validityMode,
-      p_reward_valid_from:
-        form.validityMode === 'DATE_RANGE' || form.validityMode === 'ONE_DAY'
-          ? new Date(form.validFrom).toISOString()
-          : null,
-      p_reward_valid_until:
-        form.validityMode === 'DATE_RANGE' || form.validityMode === 'ONE_DAY'
-          ? new Date(form.validUntil).toISOString()
-          : null,
+      p_reward_valid_from: validFrom,
+      p_reward_valid_until: validUntil,
       p_reward_valid_days: form.validityMode === 'DAYS_AFTER_DRAW' ? Math.min(365, Math.max(1, Number(form.validDays))) : null,
       p_reservation_required: form.reservationRequired,
       p_single_use: form.singleUse,
