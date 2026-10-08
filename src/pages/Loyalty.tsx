@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Gift,
   Plus,
@@ -12,6 +13,7 @@ import {
   LockKeyhole,
   Bell,
   QrCode,
+  Ticket,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
@@ -526,8 +528,16 @@ export default function Loyalty() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <Link
+            to="/dashboard/loyalty/raffles"
+            className="flex items-center gap-2 rounded-xl border border-gold/30 bg-white px-4 py-2.5 text-xs font-semibold text-forest transition hover:bg-[#fdf9ef]"
+          >
+            <Ticket size={16} />
+            Tombola & niveaux
+          </Link>
+
           <button
-            onClick={() => setShowNotificationModal(true)}
+            onClick={() => setShowNotificationModal(true)
             disabled={!establishmentId || !programSettings.enabled}
             className="flex items-center gap-2 rounded-xl border border-gold/30 bg-white px-4 py-2.5 text-xs font-semibold text-forest transition hover:bg-[#fdf9ef] disabled:cursor-not-allowed disabled:opacity-40"
           >
