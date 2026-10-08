@@ -150,25 +150,33 @@ export default function Reviews() {
         const feedbackResponses = await Promise.all(
           ids.map((id: string) => supabase.rpc('get_admin_satisfaction_feedback', { p_establishment_id: id, p_limit: 20 }))
         );
-        const feedbackRows = feedbackResponses.flatMap(response => (response.data ?? []) as Array<SatisfactionSummary & SatisfactionFeedback>);
-        const totalFeedback = feedbackRows.reduce((sum, row) => sum + Number(row.total_feedback ?? 0), 0);
-        const negativeCount = feedbackRows.reduce((sum, row) => sum + Number(row.negative_count ?? 0), 0);
-        const weightedTotal = feedbackRows.reduce((sum, row) => sum + Number(row.average_rating ?? 0) * Number(row.total_feedback ?? 0), 0);
-        setSatisfactionSummary({
-          average_rating: totalFeedback ? Number((weightedTotal / totalFeedback).toFixed(2)) : 0,
-          total_feedback: totalFeedback,
-          negative_count: negativeCount,
-        });
-        setSatisfactionFeedback(
-          feedbackRows.filter(row => row.id).map(row => ({
+        const feedbackRows: SatisfactionFeedback[] = [];
+        let totalFeedback = 0;
+        let negativeCount = 0;
+        let weightedTotal = 0;
+        feedbackResponses.forEach(response => {
+          const rows = (response.data ?? []) as Array<SatisfactionSummary & SatisfactionFeedback>;
+          const stats = rows[0];
+          if (stats) {
+            totalFeedback += Number(stats.total_feedback ?? 0);
+            negativeCount += Number(stats.negative_count ?? 0);
+            weightedTotal += Number(stats.average_rating ?? 0) * Number(stats.total_feedback ?? 0);
+          }
+          rows.filter(row => row.id).forEach(row => feedbackRows.push({
             id: row.id,
             customer_name: row.customer_name,
             rating: Number(row.rating),
             comment: row.comment,
             points_awarded: Number(row.points_awarded ?? 0),
             created_at: row.created_at,
-          })).slice(0, 20)
-        );
+          }));
+        });
+        setSatisfactionSummary({
+          average_rating: totalFeedback ? Number((weightedTotal / totalFeedback).toFixed(2)) : 0,
+          total_feedback: totalFeedback,
+          negative_count: negativeCount,
+        });
+        setSatisfactionFeedback(feedbackRows.sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 20));
       } finally {
         setLoading(false);
       }
