@@ -10,11 +10,25 @@ function urlBase64ToUint8Array(base64String: string) {
   return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
 }
 
+function subscriptionUsesCurrentVapidKey(subscription: PushSubscription) {
+  const key = subscription.options?.applicationServerKey;
+  if (!key) return false;
+  const bytes = new Uint8Array(key);
+  let binary = '';
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  const encoded = window.btoa(binary)
+    .replace(/\\+/g, '-')
+    .replace(/\\//g, '_')
+    .replace(/=+$/, '');
+  return encoded === LOYALTY_VAPID_PUBLIC_KEY;
+}
+
 export async function getLoyaltyPushSubscription() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return null;
 
   const registration = await navigator.serviceWorker.ready;
-  return registration.pushManager.getSubscription();
+  const subscription = await registration.pushManager.getSubscription();
+  return subscription && subscriptionUsesCurrentVapidKey(subscription) ? subscription : null;
 }
 
 export async function enableLoyaltyPush(token: string, cardUrl: string) {
@@ -36,6 +50,11 @@ export async function enableLoyaltyPush(token: string, cardUrl: string) {
 
   const registration = await navigator.serviceWorker.ready;
   let subscription = await registration.pushManager.getSubscription();
+
+  if (subscription && !subscriptionUsesCurrentVapidKey(subscription)) {
+    await subscription.unsubscribe().catch(() => false);
+    subscription = null;
+  }
 
   if (!subscription) {
     subscription = await registration.pushManager.subscribe({
