@@ -935,13 +935,19 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                   type="button"
                   onClick={() => {
                     if (notification.is_read) return;
-                    setNotifications(current =>
-                      current.filter(item => item.id !== notification.id)
-                    );
-                    void supabase.rpc('mark_public_loyalty_notification_read', {
-                      p_access_token: token,
-                      p_notification_id: notification.id,
-                    });
+                    void (async () => {
+                      const { data: markedRead, error: readError } = await supabase.rpc('mark_public_loyalty_notification_read', {
+                        p_access_token: token,
+                        p_notification_id: notification.id,
+                      });
+                      if (readError || markedRead !== true) {
+                        console.error('Failed to mark loyalty notification as read:', readError);
+                        return;
+                      }
+                      setNotifications(current =>
+                        current.filter(item => item.id !== notification.id)
+                      );
+                    })();
                   }}
                   className="w-full px-5 py-4 text-left transition hover:bg-white/[0.03]"
                 >
