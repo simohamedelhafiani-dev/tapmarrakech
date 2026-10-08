@@ -6,6 +6,7 @@ import {
   Bell,
   Building2,
   Gift,
+  Ticket,
   LogOut,
   Menu,
   Users,
@@ -55,6 +56,7 @@ import WifiForm from '@/components/admin/WifiForm';
 import GoogleReputationModule from '@/components/admin/GoogleReputationModule';
 import MenuStudio from '@/components/admin/menu/MenuStudio';
 import LoyaltyNotificationsPanel from '@/components/admin/LoyaltyNotificationsPanel';
+import LoyaltyRaffleStudio from '@/components/loyalty/LoyaltyRaffleStudio';
 import { useRecentActivity } from '@/hooks/useRecentActivity';
 import { useRecentLoyaltyCustomers } from '@/hooks/useRecentLoyaltyCustomers';
 import { useAdminOverviewStats } from '@/hooks/useAdminOverviewStats';
@@ -208,6 +210,7 @@ export default function Admin() {
   } = useEstablishments();
 
   const [selectedEstablishmentId, setSelectedEstablishmentId] = useState<string | null>(null);
+  const [loyaltyTab, setLoyaltyTab] = useState<'program' | 'notifications' | 'raffles'>('program');
 
   useEffect(() => {
     const parts = location.pathname.split('/').filter(Boolean);
@@ -740,23 +743,58 @@ export default function Admin() {
               {establishments.length > 0 ? (
                 <>
                   <div className="rounded-3xl border border-[#242424] bg-[#111111] p-4 shadow-sm">
-                    <label className="block max-w-md text-xs font-semibold text-[#C9A45C]">
-                      Établissement
-                      <select
-                        value={selectedEstablishmentId ?? ''}
-                        onChange={(event) => setSelectedEstablishmentId(event.target.value || null)}
-                        className="mt-2 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-3 py-3 text-sm font-normal text-[#FFFFFF] outline-none focus:border-[#242424]"
-                      >
-                        {establishments.map((establishment) => (
-                          <option key={establishment.id} value={establishment.id}>
-                            {establishment.name}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                      <label className="block max-w-md text-xs font-semibold text-[#C9A45C]">
+                        Établissement
+                        <select
+                          value={selectedEstablishmentId ?? ''}
+                          onChange={(event) => setSelectedEstablishmentId(event.target.value || null)}
+                          className="mt-2 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-3 py-3 text-sm font-normal text-[#FFFFFF] outline-none focus:border-[#242424]"
+                        >
+                          {establishments.map((establishment) => (
+                            <option key={establishment.id} value={establishment.id}>
+                              {establishment.name}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+
+                      <div className="flex flex-wrap gap-2 rounded-2xl border border-[#242424]/10 bg-[#0b0b0b] p-1">
+                        <button
+                          type="button"
+                          onClick={() => setLoyaltyTab('program')}
+                          className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${loyaltyTab === 'program' ? 'bg-[#C9A45C] text-[#050505]' : 'text-[#FFFFFF]/45 hover:text-[#E1C27A]'}`}
+                        >
+                          <Gem size={14} /> Programme
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setLoyaltyTab('notifications')}
+                          className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${loyaltyTab === 'notifications' ? 'bg-[#C9A45C] text-[#050505]' : 'text-[#FFFFFF]/45 hover:text-[#E1C27A]'}`}
+                        >
+                          <Bell size={14} /> Notifications
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setLoyaltyTab('raffles')}
+                          className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${loyaltyTab === 'raffles' ? 'bg-[#C9A45C] text-[#050505]' : 'text-[#FFFFFF]/45 hover:text-[#E1C27A]'}`}
+                        >
+                          <Ticket size={14} /> Tombola
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  {selectedEstablishmentId && (
+
+                  {selectedEstablishmentId && loyaltyTab === 'program' && (
                     <LoyaltyStudio establishmentId={selectedEstablishmentId} />
+                  )}
+
+                  {selectedEstablishmentId && loyaltyTab === 'notifications' && (
+                    <LoyaltyNotificationsPanel establishmentId={selectedEstablishmentId} />
+                  )}
+
+                  {selectedEstablishmentId && loyaltyTab === 'raffles' && (
+                    <LoyaltyRaffleStudio establishmentId={selectedEstablishmentId} />
                   )}
                 </>
               ) : (
