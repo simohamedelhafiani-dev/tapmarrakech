@@ -627,7 +627,7 @@ export function DashboardLayout() {
             </div>
 
             <div className="ml-auto flex shrink-0 items-center gap-2">
-              {role === 'responsible' && activeEstablishment && (
+              {(role === 'responsible' || role === 'admin') && activeEstablishment && (
                 <>
                   <button
                     type="button"
