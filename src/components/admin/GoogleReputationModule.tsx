@@ -154,7 +154,9 @@ export default function GoogleReputationModule({ establishmentId }: Props) {
     setConnecting(true);
     setError('');
     setMessage('');
-    const popup = window.open('about:blank', '_blank', 'noopener,noreferrer');
+    // Keep the opener reference so the OAuth URL can be assigned after the Edge Function responds.
+    // Using noopener here can leave the newly opened tab stuck on about:blank in some browsers.
+    const popup = window.open('about:blank', '_blank');
 
     try {
       const { data, error: invokeError } = await supabase.functions.invoke(
@@ -162,13 +164,27 @@ export default function GoogleReputationModule({ establishmentId }: Props) {
         { body: { establishment_id: establishmentId } },
       );
 
-      if (invokeError) throw invokeError;
+      if (invokeError) {
+        let detail = '';
+        const context = (invokeError as { context?: Response }).context;
+        if (context && typeof context.json === 'function') {
+          try {
+            const body = await context.json();
+            detail = body?.error || body?.message || '';
+          } catch {
+            // Keep the Supabase error message when the response body is not JSON.
+          }
+        }
+        throw new Error(detail || invokeError.message);
+      }
+
       if (!data?.success || !data.authorization_url) {
         throw new Error(data?.error || 'Impossible de démarrer Google OAuth.');
       }
 
       if (popup) {
         popup.location.href = data.authorization_url;
+        popup.focus();
       } else {
         window.location.href = data.authorization_url;
       }
