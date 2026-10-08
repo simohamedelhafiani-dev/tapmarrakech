@@ -52,6 +52,7 @@ import EstablishmentPerformanceTable from '@/components/admin/EstablishmentPerfo
 import EstablishmentsSection from '@/components/admin/EstablishmentsSection';
 import ProfileForm from '@/components/admin/ProfileForm';
 import WifiForm from '@/components/admin/WifiForm';
+import GoogleReputationModule from '@/components/admin/GoogleReputationModule';
 import MenuStudio from '@/components/admin/menu/MenuStudio';
 import { useRecentActivity } from '@/hooks/useRecentActivity';
 import { useRecentLoyaltyCustomers } from '@/hooks/useRecentLoyaltyCustomers';
@@ -1200,7 +1201,7 @@ function QuickStat({ label, value, alert = false }: { label: string; value: stri
    ESTABLISHMENTS
 ========================================================= */
 
-type WorkspaceTab = 'profile' | 'wifi' | 'menu' | 'promotions' | 'reviews' | 'loyalty' | 'team' | 'analytics' | 'public';
+type WorkspaceTab = 'profile' | 'wifi' | 'menu' | 'promotions' | 'reviews' | 'google' | 'loyalty' | 'team' | 'analytics' | 'public';
 
 type MenuCategory = { id: string; name: string; description: string | null; display_order: number; active: boolean };
 type MenuItem = { id: string; category_id: string; name: string; description: string | null; price: number; image_url: string | null; display_order: number; active: boolean };
@@ -1237,7 +1238,7 @@ function EstablishmentWorkspace({
   const workspaceTabFromPath = (pathname: string): WorkspaceTab => {
     const parts = pathname.split('/').filter(Boolean);
     const candidate = parts[3] as WorkspaceTab | undefined;
-    const validTabs: WorkspaceTab[] = ['profile', 'wifi', 'menu', 'promotions', 'reviews', 'loyalty', 'team', 'analytics', 'public'];
+    const validTabs: WorkspaceTab[] = ['profile', 'wifi', 'menu', 'promotions', 'reviews', 'google', 'loyalty', 'team', 'analytics', 'public'];
     return candidate && validTabs.includes(candidate) ? candidate : 'profile';
   };
   const [tab, setTab] = useState<WorkspaceTab>(() => workspaceTabFromPath(window.location.pathname));
@@ -1867,7 +1868,7 @@ function EstablishmentWorkspace({
 
   const tabs: { id: WorkspaceTab; label: string }[] = [
     { id: 'profile', label: 'Profil' }, { id: 'wifi', label: 'Wi-Fi' }, { id: 'menu', label: 'Menu' }, { id: 'promotions', label: 'Promotions' },
-    { id: 'reviews', label: 'Avis' }, { id: 'analytics', label: 'Analytics' }, { id: 'public', label: 'Liens publics' },
+    { id: 'reviews', label: 'Avis' }, { id: 'google', label: 'Google Business' }, { id: 'analytics', label: 'Analytics' }, { id: 'public', label: 'Liens publics' },
   ];
 
   return (
@@ -1941,6 +1942,7 @@ function EstablishmentWorkspace({
       {tab === 'wifi' && <WifiForm establishmentId={establishment.id} />}
 
       {tab === 'menu' && <MenuStudio establishmentId={establishment.id} />}
+      {tab === 'google' && <GoogleReputationModule establishmentId={establishment.id} />}
 
       {editingMenuItemId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#050505]/40 p-4 backdrop-blur-sm">

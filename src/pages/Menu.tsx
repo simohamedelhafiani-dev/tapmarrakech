@@ -87,7 +87,8 @@ const emptyItemForm: ItemForm = {
 };
 
 export default function Menu() {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
+  const isResponsible = role === 'responsible';
 
   const [establishments, setEstablishments] = useState<Establishment[]>([]);
   const [establishmentId, setEstablishmentId] = useState('');
@@ -176,6 +177,7 @@ export default function Menu() {
   }
 
   async function saveTemplate(templateId: string) {
+    if (isResponsible) return;
     setSelectedTemplateId(templateId);
     const { error } = await supabase
       .from('establishments')
@@ -372,6 +374,7 @@ export default function Menu() {
   }
 
   async function saveItem(event: FormEvent) {
+    if (isResponsible) return;
     event.preventDefault();
 
     const name = itemForm.name.trim();
@@ -425,6 +428,7 @@ export default function Menu() {
   }
 
   async function toggleItemActive(item: MenuItem) {
+    if (isResponsible) return;
     const { error } = await supabase
       .from('menu_items')
       .update({ active: !item.active })
@@ -440,6 +444,7 @@ export default function Menu() {
   }
 
   async function deleteItem(item: MenuItem) {
+    if (isResponsible) return;
     if (!window.confirm(`Supprimer « ${item.name} » du menu ?`)) {
       return;
     }
@@ -527,7 +532,7 @@ export default function Menu() {
 
   return (
     <div className="space-y-8">
-      {menuTemplates.length > 0 && (
+      {!isResponsible && menuTemplates.length > 0 && (
         <section className="rounded-2xl border border-[#242424]/10 bg-[#111111] p-5 shadow-sm">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
@@ -586,6 +591,7 @@ export default function Menu() {
               ))}
             </select>
 
+            {!isResponsible && (
             <a
               href="/dashboard/menu/design"
               className="flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-[#111111]/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#111111]/15"
@@ -593,6 +599,7 @@ export default function Menu() {
               <ImageIcon size={17} />
               Personnaliser le menu
             </a>
+            )}
 
             <button
               type="button"
@@ -724,6 +731,7 @@ export default function Menu() {
                       <Trash2 size={15} />
                     </button>
 
+                    {!isResponsible && (
                     <button
                       type="button"
                       onClick={() => openNewItem(category.id)}
@@ -732,6 +740,7 @@ export default function Menu() {
                       <Plus size={15} />
                       Produit
                     </button>
+                    )}
 
                     <button
                       type="button"
@@ -754,6 +763,7 @@ export default function Menu() {
                         <p className="text-sm text-[#F5F5DC]/45">
                           Aucun produit dans cette catégorie.
                         </p>
+                        {!isResponsible && (
                         <button
                           type="button"
                           onClick={() => openNewItem(category.id)}
@@ -762,6 +772,7 @@ export default function Menu() {
                           <Plus size={15} />
                           Ajouter un produit
                         </button>
+                        )}
                       </div>
                     ) : (
                       <div className="grid gap-3">
@@ -814,6 +825,7 @@ export default function Menu() {
                                 {item.price.toFixed(2)} MAD
                               </p>
 
+                              {!isResponsible && (
                               <div className="flex items-center gap-2">
                                 <button
                                   type="button"
@@ -846,6 +858,7 @@ export default function Menu() {
                                   <Trash2 size={15} />
                                 </button>
                               </div>
+                              )}
                             </div>
                           </div>
                         ))}
@@ -933,7 +946,7 @@ export default function Menu() {
         </div>
       )}
 
-      {showItemForm && (
+      {showItemForm && !isResponsible && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-4">
           <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-[#111111] p-6 shadow-2xl">
             <div className="mb-6 flex items-center justify-between">
