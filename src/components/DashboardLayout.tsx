@@ -1,7 +1,6 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   BarChart3,
-  Bell,
   Building2,
   Gift,
   LayoutDashboard,
@@ -10,15 +9,7 @@ import {
   MessageSquare,
   Settings2,
   UtensilsCrossed,
-  X,
-  QrCode,
-  Copy,
-  ExternalLink,
-  MessageCircle,
-  AlertTriangle,
-  Check,
   Search,
-  Download,
   Ticket,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -111,14 +102,6 @@ type SearchResult = {
 export function DashboardLayout() {
   const [open, setOpen] = useState(false);
   const [profileName, setProfileName] = useState<string | null>(null);
-  const [scannerUrl, setScannerUrl] = useState<string | null>(null);
-  const [scannerLoading, setScannerLoading] = useState(false);
-  const [joinQrOpen, setJoinQrOpen] = useState(false);
-  const [joinQrUrl, setJoinQrUrl] = useState<string | null>(null);
-  const [joinLink, setJoinLink] = useState<string | null>(null);
-  const [notifications, setNotifications] = useState<AppNotification[]>([]);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [lastSeenNotificationsAt, setLastSeenNotificationsAt] = useState<string | null>(null);
   const [subscriptionTheme, setSubscriptionTheme] = useState<SubscriptionTheme>(() => getSubscriptionTheme(null));
   const [activeEstablishment, setActiveEstablishment] = useState<Establishment | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -128,8 +111,6 @@ export function DashboardLayout() {
   const { signOut, user, role } = useAuth();
   const { language, setLanguage } = useLanguage();
   const navigate = useNavigate();
-
-  const notificationStorageKey = user?.id ? `tapmarrakech:notifications:last-seen:${user.id}` : null;
 
   useEffect(() => {
     let active = true;
@@ -165,165 +146,6 @@ export function DashboardLayout() {
       window.removeEventListener('tapmarrakech:establishment-changed', handleEstablishmentChanged);
     };
   }, [role, user?.id]);
-
-  useEffect(() => {
-    if (!notificationStorageKey) {
-      setLastSeenNotificationsAt(null);
-      return;
-    }
-    setLastSeenNotificationsAt(localStorage.getItem(notificationStorageKey));
-  }, [notificationStorageKey]);
-
-  useEffect(() => {
-    if (!user?.id || !role) return;
-    let active = true;
-
-    const loadNotifications = async () => {
-      const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-      try {
-        let establishmentIds: string[] = [];
-
-        if (role === 'responsible') {
-          const { data } = await supabase.rpc('get_my_establishments');
-          establishmentIds = (data ?? [])
-            .map((item: { id?: string }) => item.id)
-            .filter(Boolean) as string[];
-        }
-
-        const scope = <T extends { in: (column: string, values: string[]) => T }>(
-          query: T
-        ) => establishmentIds.length ? query.in('establishment_id', establishmentIds) : query;
-
-        const reviewQuery = scope(
-          supabase.from('reviews')
-            .select('id,rating,comment,created_at,establishment_id')
-            .gte('created_at', since)
-            .order('created_at', { ascending: false })
-            .limit(100)
-        );
-
-        const loyaltyCustomerQuery = scope(
-          supabase.from('loyalty_customers')
-            .select('id,first_name,last_name,created_at,establishment_id')
-            .gte('created_at', since)
-            .order('created_at', { ascending: false })
-            .limit(100)
-        );
-
-        const loyaltyTransactionQuery = scope(
-          supabase.from('loyalty_transactions')
-            .select('id,type,points,amount,description,created_at,establishment_id')
-            .gte('created_at', since)
-            .order('created_at', { ascending: false })
-            .limit(100)
-        );
-
-        const loyaltyRedemptionQuery = scope(
-          supabase.from('loyalty_redemptions')
-            .select('id,points_used,discount_amount,amount_paid,created_at,establishment_id')
-            .gte('created_at', since)
-            .order('created_at', { ascending: false })
-            .limit(100)
-        );
-
-        const [
-          { data: reviewRows, error: reviewError },
-          { data: customerRows, error: customerError },
-          { data: transactionRows, error: transactionError },
-          { data: redemptionRows, error: redemptionError },
-        ] = await Promise.all([
-          role === 'admin' || establishmentIds.length ? reviewQuery : Promise.resolve({ data: [], error: null }),
-          role === 'admin' || establishmentIds.length ? loyaltyCustomerQuery : Promise.resolve({ data: [], error: null }),
-          role === 'admin' || establishmentIds.length ? loyaltyTransactionQuery : Promise.resolve({ data: [], error: null }),
-          role === 'admin' || establishmentIds.length ? loyaltyRedemptionQuery : Promise.resolve({ data: [], error: null }),
-        ]);
-
-        if (!active) return;
-
-        if (reviewError) console.error('Erreur notifications avis:', reviewError);
-        if (customerError) console.error('Erreur notifications fidélité:', customerError);
-        if (transactionError) console.error('Erreur notifications transactions fidélité:', transactionError);
-        if (redemptionError) console.error('Erreur notifications récompenses:', redemptionError);
-
-        const reviewNotifications: AppNotification[] = (reviewRows ?? []).map((review) => ({
-          id: `review-${review.id}`,
-          title: 'Nouvel avis client',
-          description: `Note ${review.rating}/5${review.comment ? ` — ${String(review.comment).slice(0, 90)}` : ''}`,
-          createdAt: review.created_at,
-          tone: Number(review.rating) <= 3 ? 'alert' : 'review',
-        }));
-
-        const customerNotifications: AppNotification[] = (customerRows ?? []).map((customer) => ({
-          id: `loyalty-customer-${customer.id}`,
-          title: 'Nouveau client fidélité',
-          description: `${[customer.first_name, customer.last_name].filter(Boolean).join(' ') || 'Un client'} a rejoint le programme de fidélité.`,
-          createdAt: customer.created_at,
-          tone: 'info',
-        }));
-
-        const transactionNotifications: AppNotification[] = (transactionRows ?? []).map((transaction) => ({
-          id: `loyalty-transaction-${transaction.id}`,
-          title: transaction.type === 'EARN' ? 'Points fidélité ajoutés' : 'Mouvement fidélité',
-          description: `${transaction.points ?? 0} point${Math.abs(Number(transaction.points ?? 0)) > 1 ? 's' : ''} · ${transaction.description || 'Nouvelle transaction fidélité'}`,
-          createdAt: transaction.created_at,
-          tone: 'info',
-        }));
-
-        const redemptionNotifications: AppNotification[] = (redemptionRows ?? []).map((redemption) => ({
-          id: `loyalty-redemption-${redemption.id}`,
-          title: 'Récompense utilisée',
-          description: `${redemption.points_used ?? 0} points utilisés${redemption.discount_amount ? ` · remise ${redemption.discount_amount} DH` : ''}.`,
-          createdAt: redemption.created_at,
-          tone: 'review',
-        }));
-
-        let extraNotifications: AppNotification[] = [];
-
-        if (role === 'admin') {
-          const { data: establishmentsRows, error: establishmentsError } = await supabase
-            .from('establishments')
-            .select('id,name,created_at')
-            .gte('created_at', since)
-            .order('created_at', { ascending: false })
-            .limit(100);
-
-          if (establishmentsError) console.error('Erreur notifications établissements:', establishmentsError);
-
-          extraNotifications = (establishmentsRows ?? []).map((item) => ({
-            id: `establishment-${item.id}`,
-            title: 'Nouvel établissement',
-            description: `${item.name} a été ajouté à la plateforme.`,
-            createdAt: item.created_at,
-            tone: 'info' as const,
-          }));
-        }
-
-        setNotifications([
-          ...reviewNotifications,
-          ...customerNotifications,
-          ...transactionNotifications,
-          ...redemptionNotifications,
-          ...extraNotifications,
-        ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 100));
-      } catch (error) {
-        console.error('Erreur chargement notifications:', error);
-        if (active) setNotifications([]);
-      }
-    };
-
-    void loadNotifications();
-    return () => { active = false; };
-  }, [user?.id, role]);
-
-  const unreadNotifications = notifications.filter((item) =>
-    !lastSeenNotificationsAt || new Date(item.createdAt).getTime() > new Date(lastSeenNotificationsAt).getTime()
-  );
-
-  const markNotificationsRead = () => {
-    const now = new Date().toISOString();
-    if (notificationStorageKey) localStorage.setItem(notificationStorageKey, now);
-    setLastSeenNotificationsAt(now);
-  };
 
   useEffect(() => {
     let active = true;
@@ -365,9 +187,8 @@ export function DashboardLayout() {
   useEffect(() => {
     let active = true;
 
-    const loadEstablishment = async () => {
-      if (role !== 'responsible' || !user?.id) {
-        setScannerUrl(null);
+    const loadActiveEstablishment = async () => {
+      if (!user?.id) {
         setActiveEstablishment(null);
         return;
       }
@@ -375,11 +196,8 @@ export function DashboardLayout() {
       const { data, error } = await supabase.rpc('get_my_establishments');
 
       if (error) {
-        console.error('Erreur chargement des établissements du responsable:', error);
-        if (active) {
-          setScannerUrl(null);
-          setActiveEstablishment(null);
-        }
+        console.error('Erreur chargement de l’établissement actif:', error);
+        if (active) setActiveEstablishment(null);
         return;
       }
 
@@ -389,10 +207,7 @@ export function DashboardLayout() {
       const establishment = establishments.find((item) => item.id === storedId) ?? establishments[0] ?? null;
 
       if (!establishment?.id) {
-        if (active) {
-          setScannerUrl(null);
-          setActiveEstablishment(null);
-        }
+        if (active) setActiveEstablishment(null);
         return;
       }
 
@@ -401,40 +216,18 @@ export function DashboardLayout() {
       }
 
       if (active) setActiveEstablishment(establishment);
-
-      setScannerLoading(true);
-      const { data: scannerRow, error: scannerError } = await supabase
-        .from('establishment_scanner_links')
-        .select('access_token')
-        .eq('establishment_id', establishment.id)
-        .maybeSingle();
-
-      if (!active) return;
-
-      if (scannerError || !scannerRow?.access_token) {
-        setScannerUrl(null);
-      } else {
-        setScannerUrl(
-          window.location.origin +
-            '/employee?scanner=' +
-            encodeURIComponent(scannerRow.access_token)
-        );
-      }
-
-      setScannerLoading(false);
     };
 
-    void loadEstablishment();
+    void loadActiveEstablishment();
 
-    const handleEstablishmentChanged = () => void loadEstablishment();
+    const handleEstablishmentChanged = () => void loadActiveEstablishment();
     window.addEventListener('tapmarrakech:establishment-changed', handleEstablishmentChanged);
 
     return () => {
       active = false;
       window.removeEventListener('tapmarrakech:establishment-changed', handleEstablishmentChanged);
     };
-  }, [role, user?.id]);
-
+  }, [user?.id]);
   useEffect(() => {
     let active = true;
     const query = searchQuery.trim();
@@ -627,91 +420,6 @@ export function DashboardLayout() {
             </div>
 
             <div className="ml-auto flex shrink-0 items-center gap-2">
-              {role === 'responsible' && activeEstablishment && (
-                <>
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      const url = `${window.location.origin}/loyalty/join?est=${encodeURIComponent(activeEstablishment.id)}`;
-                      setJoinLink(url);
-                      setJoinQrUrl(await QRCode.toDataURL(url, { width: 800, margin: 3, errorCorrectionLevel: 'H' }));
-                      setJoinQrOpen(true);
-                    }}
-                    className="flex h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#F5F5DC]/70 transition hover:border-[#C9A45C]/60 hover:text-[#E1C27A]"
-                  >
-                    <QrCode size={14} /> <span className="hidden sm:inline">Créer une carte</span>
-                  </button>
-                  {scannerUrl && (
-                    <button
-                      type="button"
-                      onClick={() => window.open(scannerUrl, '_blank', 'noopener,noreferrer')}
-                      className="hidden h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#F5F5DC]/70 transition hover:border-[#C9A45C]/60 hover:text-[#E1C27A] sm:flex"
-                    >
-                      <QrCode size={14} /> Scanner
-                    </button>
-                  )}
-                </>
-              )}
-
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setNotificationsOpen((value) => !value);
-                    if (!notificationsOpen) markNotificationsRead();
-                  }}
-                  className="relative grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#F5F5DC]/65 transition hover:border-[#C9A45C]/60 hover:text-[#E1C27A]"
-                  aria-label="Notifications"
-                  aria-expanded={notificationsOpen}
-                >
-                  <Bell size={17} />
-                  {unreadNotifications.length > 0 && (
-                    <span className="absolute -right-1 -top-1 grid min-h-4 min-w-4 place-items-center rounded-full bg-[#C9A45C] px-1 text-[8px] font-bold text-[#050505]">
-                      {unreadNotifications.length > 9 ? '9+' : unreadNotifications.length}
-                    </span>
-                  )}
-                </button>
-
-                {notificationsOpen && (
-                  <>
-                    <button className="fixed inset-0 z-40 cursor-default" aria-label="Fermer les notifications" onClick={() => setNotificationsOpen(false)} />
-                    <div className="absolute right-0 top-12 z-50 w-[360px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-3xl border border-[#242424] bg-[#111111] shadow-[0_24px_80px_rgba(0,0,0,.55)]">
-                      <div className="flex items-center justify-between border-b border-[#242424] px-4 py-3">
-                        <div>
-                          <p className="text-sm font-semibold text-[#FFFFFF]">Notifications</p>
-                          <p className="text-[10px] text-[#F5F5DC]/40">{notifications.length} activité{notifications.length > 1 ? 's' : ''} récente{notifications.length > 1 ? 's' : ''}</p>
-                        </div>
-                        {notifications.length > 0 && (
-                          <button type="button" onClick={markNotificationsRead} className="text-[10px] font-semibold text-[#C9A45C]">
-                            Tout marquer comme lu
-                          </button>
-                        )}
-                      </div>
-                      <div className="max-h-[520px] overflow-y-auto">
-                        {notifications.length === 0 ? (
-                          <div className="px-5 py-10 text-center">
-                            <Check size={22} className="mx-auto text-[#C9A45C]/50" />
-                            <p className="mt-2 text-sm font-medium text-[#FFFFFF]">Aucune notification</p>
-                            <p className="mt-1 text-[11px] text-[#F5F5DC]/35">Tout est à jour.</p>
-                          </div>
-                        ) : notifications.map((notification) => (
-                          <div key={notification.id} className="flex gap-3 border-b border-[#242424] px-4 py-3.5 last:border-0">
-                            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#C9A45C]/10 text-[#C9A45C]">
-                              {notification.tone === 'alert' ? <AlertTriangle size={16} /> : notification.tone === 'review' ? <MessageCircle size={16} /> : <Building2 size={16} />}
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="text-xs font-semibold text-[#FFFFFF]">{notification.title}</p>
-                              <p className="mt-1 text-[11px] leading-4 text-[#F5F5DC]/50">{notification.description}</p>
-                              <p className="mt-1 text-[9px] text-[#F5F5DC]/30">{new Intl.DateTimeFormat(language === 'ar' ? 'ar-MA' : language === 'en' ? 'en-GB' : 'fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(notification.createdAt))}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-
               <div className="hidden h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 sm:flex">
                 <div className="grid h-7 w-7 place-items-center rounded-full bg-[#C9A45C] text-xs font-semibold text-[#050505]">{avatarLetter}</div>
                 <div className="max-w-[130px] leading-tight">
