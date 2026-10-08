@@ -83,14 +83,6 @@ type Establishment = {
   logo_url: string | null;
 };
 
-type AppNotification = {
-  id: string;
-  title: string;
-  description: string;
-  createdAt: string;
-  tone: 'review' | 'alert' | 'info';
-};
-
 type SearchResult = {
   id: string;
   type: 'establishment' | 'customer' | 'review';
@@ -472,60 +464,7 @@ export function DashboardLayout() {
           </div>
         </header>
 
-                {joinQrOpen && joinQrUrl && (
-          <div className="fixed inset-0 z-[100] grid place-items-center bg-black/70 p-4 backdrop-blur-sm">
-            <div className="w-full max-w-sm rounded-3xl border border-[#242424] bg-[#111111] p-6 text-center shadow-[0_30px_100px_rgba(0,0,0,.65)]">
-              <div className="flex items-center justify-between">
-                <div className="text-left">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A45C]">KELYANI</p>
-                  <h2 className="mt-1 text-lg font-semibold text-white">Créer ma carte</h2>
-                </div>
-                <button type="button" onClick={() => setJoinQrOpen(false)} className="grid h-9 w-9 place-items-center rounded-full border border-[#242424] text-white/60 hover:text-white"><X size={16} /></button>
-              </div>
-              <div className="mx-auto mt-6 w-fit rounded-3xl bg-white p-4">
-                <img src={joinQrUrl} alt="QR code pour créer une carte fidélité" className="h-64 w-64" />
-              </div>
-              <p className="mt-5 text-sm font-medium text-white">Scannez pour créer votre carte fidélité</p>
-              <p className="mt-1 text-[11px] leading-5 text-white/40">Le client remplit directement son formulaire sur son téléphone.</p>
-
-              <div className="mt-5 rounded-2xl border border-[#242424] bg-[#0B0B0B] p-3 text-left">
-                <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-[#C9A45C]/70">Lien de création · NFC</p>
-                <p className="mt-1 break-all text-[10px] leading-4 text-white/55">{joinLink}</p>
-              </div>
-
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => joinLink && navigator.clipboard?.writeText(joinLink)}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#242424] px-3 py-2.5 text-xs font-semibold text-[#C9A45C] hover:border-[#C9A45C]/60"
-                >
-                  <Copy size={14} /> Copier le lien
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!joinQrUrl) return;
-                    const link = document.createElement('a');
-                    link.href = joinQrUrl;
-                    link.download = `kelyani-qr-creation-${activeEstablishment?.name?.replace(/[^a-z0-9]+/gi, '-').toLowerCase() || 'carte'}.png`;
-                    document.body.appendChild(link);
-                    link.click();
-                    link.remove();
-                  }}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#C9A45C] px-3 py-2.5 text-xs font-semibold text-[#050505] hover:bg-[#E1C27A]"
-                >
-                  <Download size={14} /> Télécharger le QR
-                </button>
-              </div>
-
-              <p className="mt-3 text-[9px] leading-4 text-white/30">
-                Le lien peut être écrit directement dans une puce NFC. Le QR PNG est prêt pour impression sur une plaque.
-              </p>
-            </div>
-          </div>
-        )}
-
-<main className="dashboard-depth-main mx-auto w-full max-w-[1700px] px-3 pb-28 pt-6 sm:px-5 md:px-8 lg:px-10 lg:pt-8">
+                <main className="dashboard-depth-main mx-auto w-full max-w-[1700px] px-3 pb-28 pt-6 sm:px-5 md:px-8 lg:px-10 lg:pt-8">
           <Outlet />
         </main>
 
