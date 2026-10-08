@@ -173,3 +173,35 @@ begin
   return v_row;
 end;
 $function$;
+
+
+create or replace function public.update_establishment_menu_template(
+  p_establishment_id uuid,
+  p_menu_template_id text
+)
+returns public.establishments
+language plpgsql
+security definer
+set search_path = public
+as $function$
+declare
+  v_row public.establishments;
+begin
+  if not public.is_tapmarrakech_admin() then
+    raise exception 'Accès non autorisé';
+  end if;
+
+  update public.establishments
+  set menu_template_id = p_menu_template_id
+  where id = p_establishment_id
+  returning * into v_row;
+
+  if not found then
+    raise exception 'Établissement introuvable';
+  end if;
+
+  return v_row;
+end;
+$function$;
+
+revoke update (menu_template_id, menu_ai_design) on public.establishments from authenticated;
