@@ -443,7 +443,7 @@ export default function Reviews() {
         {satisfactionFeedback.length > 0 ? <div className="divide-y divide-[#242424]">{satisfactionFeedback.slice(0, 8).map(item => <div key={item.id} className="flex flex-col gap-2 p-5 sm:flex-row sm:items-start sm:justify-between"><div><div className="flex items-center gap-2"><span className="font-semibold text-white">{item.customer_name || 'Client'}</span><span className="text-[#D4AF37]">{'★'.repeat(item.rating)}<span className="text-white/15">{'★'.repeat(5 - item.rating)}</span></span></div>{item.comment && <p className="mt-1 text-sm leading-6 text-white/55">{item.comment}</p>}</div><div className="shrink-0 text-[10px] text-white/30">{new Date(item.created_at).toLocaleDateString('fr-FR')}</div></div>)}</div> : <div className="p-8 text-center text-xs text-white/35">Aucun feedback fidélité pour le moment.</div>}
       </section>
 
-      {/* ERREUR IA */
+      {/* ERREUR IA */}
       {aiError && (
         <div className="mb-5 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           <AlertTriangle
