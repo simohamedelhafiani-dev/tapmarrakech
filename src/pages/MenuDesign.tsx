@@ -272,13 +272,13 @@ export default function MenuDesign() {
           <select
             value={establishmentId}
             onChange={(event) => setEstablishmentId(event.target.value)}
-            className="rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white outline-none"
+            className="rounded-xl border border-white/15 bg-[#111111]/10 px-4 py-3 text-sm text-white outline-none"
           >
             {establishments.map((establishment) => (
               <option
                 key={establishment.id}
                 value={establishment.id}
-                className="text-ink"
+                className="text-[#F5F5DC]"
               >
                 {establishment.name}
               </option>
@@ -287,7 +287,7 @@ export default function MenuDesign() {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-ink/8 bg-white p-6 shadow-sm">
+      <section className="rounded-3xl border border-[#242424]/8 bg-[#111111] p-6 shadow-sm">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">
@@ -296,7 +296,7 @@ export default function MenuDesign() {
             <h2 className="mt-1 text-xl font-semibold text-forest">
               Wallpapers du menu
             </h2>
-            <p className="mt-1 text-sm text-ink/45">
+            <p className="mt-1 text-sm text-[#F5F5DC]/45">
               Le wallpaper actif est utilisé sur le menu public.
             </p>
           </div>
@@ -336,7 +336,7 @@ export default function MenuDesign() {
                 'group relative overflow-hidden rounded-2xl border-2 ' +
                 (design.background_image_url === url
                   ? 'border-gold ring-2 ring-gold/20'
-                  : 'border-ink/10')
+                  : 'border-[#242424]/10')
               }
             >
               <button
@@ -367,12 +367,12 @@ export default function MenuDesign() {
           ))}
 
           {!design.wallpaper_library?.length && (
-            <div className="col-span-full rounded-2xl border border-dashed border-ink/10 px-5 py-10 text-center">
+            <div className="col-span-full rounded-2xl border border-dashed border-[#242424]/10 px-5 py-10 text-center">
               <ImagePlus className="mx-auto text-gold" size={28} />
               <p className="mt-3 text-sm font-semibold text-forest">
                 Aucun wallpaper
               </p>
-              <p className="mt-1 text-xs text-ink/40">
+              <p className="mt-1 text-xs text-[#F5F5DC]/40">
                 Ajoute une image pour commencer.
               </p>
             </div>
@@ -380,14 +380,14 @@ export default function MenuDesign() {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-ink/8 bg-white p-6 shadow-sm">
+      <section className="rounded-3xl border border-[#242424]/8 bg-[#111111] p-6 shadow-sm">
         <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">
           Aperçu
         </p>
         <h2 className="mt-1 text-xl font-semibold text-forest">Fond actif</h2>
 
         {design.background_image_url ? (
-          <div className="mt-5 overflow-hidden rounded-[28px] border border-ink/10">
+          <div className="mt-5 overflow-hidden rounded-[28px] border border-[#242424]/10">
             <div
               className="relative min-h-[520px] bg-cover bg-center p-8"
               style={{
@@ -396,7 +396,7 @@ export default function MenuDesign() {
               }}
             >
               <div className="absolute inset-0 bg-black/35" />
-              <div className="relative rounded-3xl border border-white/15 bg-white/10 p-6 text-white">
+              <div className="relative rounded-3xl border border-white/15 bg-[#111111]/10 p-6 text-white">
                 <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold">
                   Menu
                 </p>
@@ -409,16 +409,16 @@ export default function MenuDesign() {
                   univers visuel.
                 </p>
                 <div className="mt-8 grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl bg-white/15 p-4">
+                  <div className="rounded-2xl bg-[#111111]/15 p-4">
                     Entrées
                   </div>
-                  <div className="rounded-2xl bg-white/15 p-4">
+                  <div className="rounded-2xl bg-[#111111]/15 p-4">
                     Plats
                   </div>
-                  <div className="rounded-2xl bg-white/15 p-4">
+                  <div className="rounded-2xl bg-[#111111]/15 p-4">
                     Desserts
                   </div>
-                  <div className="rounded-2xl bg-white/15 p-4">
+                  <div className="rounded-2xl bg-[#111111]/15 p-4">
                     Boissons
                   </div>
                 </div>
@@ -426,7 +426,7 @@ export default function MenuDesign() {
             </div>
           </div>
         ) : (
-          <p className="mt-4 text-sm text-ink/45">
+          <p className="mt-4 text-sm text-[#F5F5DC]/45">
             Aucun wallpaper actif.
           </p>
         )}
