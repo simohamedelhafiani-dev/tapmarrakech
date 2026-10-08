@@ -317,6 +317,8 @@ export default function Establishments() {
       slug: place.slug,
       logo_url: place.logo_url ?? '',
       google_review_url: place.google_review_url,
+      tripadvisor_review_url: place.tripadvisor_review_url ?? '',
+      whatsapp_number: place.whatsapp_number ?? '',
       redirect_threshold: place.redirect_threshold,
     });
 
