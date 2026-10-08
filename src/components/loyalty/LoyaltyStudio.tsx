@@ -323,6 +323,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       const designConfig = {
         background_image_url: design.wallpaperUrl,
         wallpaperUrl: design.wallpaperUrl,
+        wallpaper_urls: design.wallpaperUrls,
         logo_url: design.logoUrl || establishment.logoUrl,
         loyaltyType: program.programType,
         card_mode: program.programType,
