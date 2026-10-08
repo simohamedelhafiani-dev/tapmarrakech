@@ -302,6 +302,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         { data: rewardsData },
         { data: discountData },
         { data: notificationsData },
+        { data: engagementData },
       ] = await Promise.all([
         supabase.rpc('get_public_loyalty_card', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_card_config', { p_access_token: token }),
@@ -310,6 +311,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         supabase.rpc('get_public_loyalty_rewards', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_discount_status', { p_access_token: token }),
         supabase.rpc('get_public_loyalty_notifications', { p_access_token: token, p_limit: 20 }),
+        supabase.rpc('get_public_loyalty_engagement_context', { p_access_token: token }),
       ]);
 
       if (cardError || !cardData?.[0]) {
