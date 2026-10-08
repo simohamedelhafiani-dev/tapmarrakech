@@ -441,7 +441,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
       const path = `loyalty-cards/${establishmentId}/wallpaper-${Date.now()}.${ext}`;
       const { error } = await supabase.storage
-        .from('promotion-images')
+        .from('loyalty-assets')
         .upload(path, file, { upsert: true, contentType: file.type });
 
       if (error) throw error;
