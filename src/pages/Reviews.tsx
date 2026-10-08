@@ -202,7 +202,6 @@ export default function Reviews() {
         } else {
           setGoogleReviews([]);
         }
-
       } finally {
         setLoading(false);
       }
@@ -746,7 +745,6 @@ export default function Reviews() {
         </div>
       )}
 
-
       <section className="mb-7 overflow-hidden rounded-3xl border border-[#242424] bg-[#111111] shadow-xl">
         <div className="border-b border-[#242424] p-6">
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D4AF37]">Google Business</p>
@@ -797,7 +795,98 @@ export default function Reviews() {
           </div>
 
           <div className="flex gap-2 overflow-auto">
-            <span className="rounded-lg bg-[#f4ead3] px-3 py-2 text-xs font-semibold text-[#8b6b2c]">{review.status}</span>
+            <select
+              value={status}
+              onChange={(e) =>
+                setStatus(e.target.value)
+              }
+              className="rounded-xl border border-ink/10 bg-[#fbfaf7] px-3 py-3 text-xs outline-none"
+            >
+              <option>Tous</option>
+              <option>Nouveau</option>
+              <option>En cours</option>
+              <option>Traité</option>
+            </select>
+
+            <select
+              value={rating}
+              onChange={(e) =>
+                setRating(e.target.value)
+              }
+              className="rounded-xl border border-ink/10 bg-[#fbfaf7] px-3 py-3 text-xs outline-none"
+            >
+              <option value="Tous">
+                Toutes les notes
+              </option>
+
+              {[5, 4, 3, 2, 1].map((n) => (
+                <option
+                  key={n}
+                  value={n}
+                >
+                  ⭐ {n}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="mt-5 flex items-center gap-2 text-xs text-ink/40">
+          <SlidersHorizontal size={14} />
+
+          {filtered.length} avis affiché
+          {filtered.length > 1 ? 's' : ''}
+        </div>
+      </div>
+
+      {/* LISTE DES AVIS */}
+      <div className="mt-5 space-y-3">
+        {filtered.map((review) => (
+          <div
+            key={review.id}
+            className="rounded-2xl border border-ink/5 bg-white p-5 shadow-soft"
+          >
+            <div className="flex flex-col justify-between gap-3 sm:flex-row">
+              <div className="flex items-center gap-3">
+                <Stars rating={review.rating} />
+
+                <span className="text-xs font-semibold text-forest">
+                  {review.establishment?.name}
+                </span>
+              </div>
+
+              <span className="text-xs text-ink/35">
+                {new Date(
+                  review.created_at
+                ).toLocaleString('fr-FR', {
+                  dateStyle: 'medium',
+                })}
+              </span>
+            </div>
+
+            <p className="mt-4 text-sm leading-6 text-ink/70">
+              {review.comment ||
+                'Avis positif sans commentaire.'}
+            </p>
+
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-ink/5 pt-3">
+              <div className="text-xs text-ink/45">
+                {review.name || 'Client anonyme'}
+
+                {review.email &&
+                  ` · ${review.email}`}
+
+                {review.phone &&
+                  ` · ${review.phone}`}
+              </div>
+
+              <span className={`rounded-lg px-3 py-2 text-xs font-semibold ${
+                review.status === 'Nouveau'
+                  ? 'bg-[#f4e4e1] text-[#a15c50]'
+                  : review.status === 'En cours'
+                    ? 'bg-[#f4ead3] text-[#8b6b2c]'
+                    : 'bg-[#e5eee9] text-forest'
+              }`}>{review.status}</span>
             </div>
           </div>
         ))}
