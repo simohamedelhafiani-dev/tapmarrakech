@@ -213,12 +213,34 @@ export default function Admin() {
     const parts = location.pathname.split('/').filter(Boolean);
     const establishmentIndex = parts.indexOf('establishments');
     const routeEstablishmentId = establishmentIndex >= 0 ? parts[establishmentIndex + 1] : null;
+
     if (routeEstablishmentId && establishmentList.some((item) => item.id === routeEstablishmentId)) {
       setSelectedEstablishmentId(routeEstablishmentId);
-    } else if (location.pathname === '/admin/establishments') {
-      setSelectedEstablishmentId(null);
+      if (user?.id) {
+        window.localStorage.setItem(
+          `tapmarrakech:selected-establishment:${user.id}`,
+          routeEstablishmentId
+        );
+      }
+      return;
     }
-  }, [location.pathname, establishmentList]);
+
+    if (location.pathname === '/admin/establishments') {
+      setSelectedEstablishmentId(null);
+      return;
+    }
+
+    if (!establishmentList.length || !user?.id) return;
+
+    const storageKey = `tapmarrakech:selected-establishment:${user.id}`;
+    const storedId = window.localStorage.getItem(storageKey);
+    const selectedId = establishmentList.some((item) => item.id === storedId)
+      ? storedId
+      : establishmentList[0].id;
+
+    setSelectedEstablishmentId(selectedId);
+    window.localStorage.setItem(storageKey, selectedId);
+  }, [location.pathname, establishmentList, user?.id]);
   const [showCreateEstablishmentForm, setShowCreateEstablishmentForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Array<{ id: string; type: 'establishment' | 'customer' | 'review'; title: string; subtitle: string; establishmentId?: string }>>([]);
