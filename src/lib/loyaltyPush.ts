@@ -17,8 +17,8 @@ function subscriptionUsesCurrentVapidKey(subscription: PushSubscription) {
   let binary = '';
   for (const byte of bytes) binary += String.fromCharCode(byte);
   const encoded = window.btoa(binary)
-    .replace(/\\+/g, '-')
-    .replace(/\\//g, '_')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
     .replace(/=+$/, '');
   return encoded === LOYALTY_VAPID_PUBLIC_KEY;
 }
