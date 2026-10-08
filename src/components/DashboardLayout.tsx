@@ -19,6 +19,7 @@ import {
   Check,
   Search,
   Download,
+  Ticket,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -75,6 +76,12 @@ const links = [
     to: '/dashboard/loyalty/settings',
     label: 'Programme fidélité',
     icon: Settings2,
+    feature: 'loyalty' as const,
+  },
+  {
+    to: '/dashboard/loyalty/raffles',
+    label: 'Tombola & niveaux',
+    icon: Ticket,
     feature: 'loyalty' as const,
   },
 ];
