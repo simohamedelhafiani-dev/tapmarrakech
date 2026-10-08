@@ -53,6 +53,7 @@ import EstablishmentsSection from '@/components/admin/EstablishmentsSection';
 import ProfileForm from '@/components/admin/ProfileForm';
 import WifiForm from '@/components/admin/WifiForm';
 import MenuStudio from '@/components/admin/menu/MenuStudio';
+import GoogleReputationModule from '@/components/admin/GoogleReputationModule';
 import { useRecentActivity } from '@/hooks/useRecentActivity';
 import { useRecentLoyaltyCustomers } from '@/hooks/useRecentLoyaltyCustomers';
 import { useAdminOverviewStats } from '@/hooks/useAdminOverviewStats';
@@ -4038,6 +4039,9 @@ function ReviewsSection({
       )}
     </div>
   );
+
+  <GoogleReputationModule canManage />
+
 }
 
 /* =========================================================
