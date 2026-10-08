@@ -22,7 +22,6 @@ import Analytics from '@/pages/Analytics';
 import Loyalty from '@/pages/Loyalty';
 import LoyaltyRaffles from '@/pages/LoyaltyRaffles';
 import Menu from '@/pages/Menu';
-import MenuDesign from '@/pages/MenuDesign';
 import Promotions from '@/pages/Promotions';
 import Admin from '@/pages/Admin';
 import AdminOverview from '@/pages/AdminOverview';
@@ -205,11 +204,7 @@ function App() {
               />
               <Route
                 path="/dashboard/menu/design"
-                element={
-                  <SubscriptionFeatureRoute feature="menu">
-                    <MenuDesign />
-                  </SubscriptionFeatureRoute>
-                }
+                element={<Navigate to="/dashboard/menu" replace />}
               />
               <Route
                 path="/dashboard/menu"
