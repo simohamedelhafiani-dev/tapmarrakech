@@ -910,14 +910,14 @@ export default function Loyalty() {
           onClose={() => setShowNotificationModal(false)}
         >
           <div className="space-y-4">
-            <div className="rounded-xl bg-[#f7f7f3] p-4">
+            <div className="rounded-xl bg-[#111111] p-4">
               <div className="flex items-start gap-3">
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#f4ead3] text-gold">
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#1A1A1A] text-gold">
                   <Bell size={18} />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-forest">Message client</p>
-                  <p className="mt-1 text-[11px] leading-5 text-ink/45">
+                  <p className="text-sm font-semibold text-[#D4AF37]">Message client</p>
+                  <p className="mt-1 text-[11px] leading-5 text-[#F5F5DC]/45">
                     La notification apparaîtra directement dans la carte fidélité du client.
                   </p>
                 </div>
@@ -926,11 +926,11 @@ export default function Loyalty() {
 
             <div>
 
-              <label className="text-xs font-medium text-ink/60">Ciblage</label>
+              <label className="text-xs font-medium text-[#F5F5DC]/60">Ciblage</label>
               <select
                 value={notificationAudience}
                 onChange={e => setNotificationAudience(e.target.value as typeof notificationAudience)}
-                className="mt-2 w-full rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm outline-none focus:border-gold"
+                className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#F5F5DC] outline-none transition placeholder:text-[#F5F5DC]/30 focus:border-[#D4AF37] bg-[#111111] px-4 py-3 text-sm outline-none focus:border-gold"
               >
                 <option value="ALL">Tous les clients ayant accepté les notifications</option>
                 <option value="INTEREST">Par centre d’intérêt</option>
@@ -943,11 +943,11 @@ export default function Loyalty() {
 
             {notificationAudience === 'INTEREST' && (
               <div>
-                <label className="text-xs font-medium text-ink/60">Centre d’intérêt</label>
+                <label className="text-xs font-medium text-[#F5F5DC]/60">Centre d’intérêt</label>
                 <select
                   value={notificationInterest}
                   onChange={e => setNotificationInterest(e.target.value)}
-                  className="mt-2 w-full rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm outline-none focus:border-gold"
+                  className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#F5F5DC] outline-none transition placeholder:text-[#F5F5DC]/30 focus:border-[#D4AF37] bg-[#111111] px-4 py-3 text-sm outline-none focus:border-gold"
                 >
                   <option value="">Sélectionner</option>
                   {notificationInterests.map(interest => (
@@ -959,11 +959,11 @@ export default function Loyalty() {
 
             {notificationAudience === 'FREQUENCY' && (
               <div>
-                <label className="text-xs font-medium text-ink/60">Fréquence de visite</label>
+                <label className="text-xs font-medium text-[#F5F5DC]/60">Fréquence de visite</label>
                 <select
                   value={notificationFrequency}
                   onChange={e => setNotificationFrequency(e.target.value)}
-                  className="mt-2 w-full rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm outline-none focus:border-gold"
+                  className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#F5F5DC] outline-none transition placeholder:text-[#F5F5DC]/30 focus:border-[#D4AF37] bg-[#111111] px-4 py-3 text-sm outline-none focus:border-gold"
                 >
                   <option value="">Sélectionner</option>
                   <option value="WEEKLY">Hebdomadaire</option>
@@ -975,14 +975,14 @@ export default function Loyalty() {
 
             {notificationAudience === 'POINTS' && (
               <div>
-                <label className="text-xs font-medium text-ink/60">Minimum de points</label>
+                <label className="text-xs font-medium text-[#F5F5DC]/60">Minimum de points</label>
                 <input
                   type="number"
                   min="0"
                   value={notificationMinPoints}
                   onChange={e => setNotificationMinPoints(e.target.value)}
                   placeholder="100"
-                  className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-gold"
+                  className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#F5F5DC] outline-none transition placeholder:text-[#F5F5DC]/30 focus:border-[#D4AF37] px-4 py-3 text-sm outline-none focus:border-gold"
                 />
               </div>
             )}
@@ -990,25 +990,25 @@ export default function Loyalty() {
             {notificationAudience === 'VISITS' && (
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-ink/60">Minimum de visites</label>
+                  <label className="text-xs font-medium text-[#F5F5DC]/60">Minimum de visites</label>
                   <input
                     type="number"
                     min="0"
                     value={notificationMinVisits}
                     onChange={e => setNotificationMinVisits(e.target.value)}
                     placeholder="3"
-                    className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-gold"
+                    className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#F5F5DC] outline-none transition placeholder:text-[#F5F5DC]/30 focus:border-[#D4AF37] px-4 py-3 text-sm outline-none focus:border-gold"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-ink/60">Vu il y a moins de (jours)</label>
+                  <label className="text-xs font-medium text-[#F5F5DC]/60">Vu il y a moins de (jours)</label>
                   <input
                     type="number"
                     min="0"
                     value={notificationLastVisitDays}
                     onChange={e => setNotificationLastVisitDays(e.target.value)}
                     placeholder="30"
-                    className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-gold"
+                    className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#F5F5DC] outline-none transition placeholder:text-[#F5F5DC]/30 focus:border-[#D4AF37] px-4 py-3 text-sm outline-none focus:border-gold"
                   />
                 </div>
               </div>
@@ -1016,11 +1016,11 @@ export default function Loyalty() {
 
             {notificationAudience === 'CUSTOMER' && (
               <div>
-                <label className="text-xs font-medium text-ink/60">Client</label>
+                <label className="text-xs font-medium text-[#F5F5DC]/60">Client</label>
                 <select
                   value={notificationCustomerId}
                   onChange={e => setNotificationCustomerId(e.target.value)}
-                  className="mt-2 w-full rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm outline-none focus:border-gold"
+                  className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#F5F5DC] outline-none transition placeholder:text-[#F5F5DC]/30 focus:border-[#D4AF37] bg-[#111111] px-4 py-3 text-sm outline-none focus:border-gold"
                 >
                   <option value="">Sélectionner</option>
                   {customers.filter(c => c.notification_consent).map(customer => (
@@ -1032,18 +1032,18 @@ export default function Loyalty() {
               </div>
             )}
 
-            <div className="rounded-xl border border-ink/5 bg-[#f7f7f3] px-4 py-3 text-xs text-ink/55">
-              <strong className="text-forest">{notificationEligibleCustomers.length}</strong> client(s) ciblé(s).
+            <div className="rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-xs text-[#F5F5DC]/55">
+              <strong className="text-[#D4AF37]">{notificationEligibleCustomers.length}</strong> client(s) ciblé(s).
               <span className="ml-1">Seuls les clients ayant accepté les notifications recevront le message.</span>
             </div>
 
 
             <div>
-              <label className="text-xs font-medium text-ink/60">Type</label>
+              <label className="text-xs font-medium text-[#F5F5DC]/60">Type</label>
               <select
                 value={notificationType}
                 onChange={e => setNotificationType(e.target.value as typeof notificationType)}
-                className="mt-2 w-full rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm outline-none focus:border-gold"
+                className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#F5F5DC] outline-none transition placeholder:text-[#F5F5DC]/30 focus:border-[#D4AF37] bg-[#111111] px-4 py-3 text-sm outline-none focus:border-gold"
               >
                 <option value="INFO">Information</option>
                 <option value="OFFER">Offre</option>
@@ -1053,35 +1053,35 @@ export default function Loyalty() {
             </div>
 
             <div>
-              <label className="text-xs font-medium text-ink/60">Titre</label>
+              <label className="text-xs font-medium text-[#F5F5DC]/60">Titre</label>
               <input
                 value={notificationTitle}
                 onChange={e => setNotificationTitle(e.target.value)}
                 maxLength={120}
                 placeholder="Ex. Nouvelle offre disponible"
-                className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-gold"
+                className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#F5F5DC] outline-none transition placeholder:text-[#F5F5DC]/30 focus:border-[#D4AF37] px-4 py-3 text-sm outline-none focus:border-gold"
               />
             </div>
 
             <div>
-              <label className="text-xs font-medium text-ink/60">Message</label>
+              <label className="text-xs font-medium text-[#F5F5DC]/60">Message</label>
               <textarea
                 value={notificationMessage}
                 onChange={e => setNotificationMessage(e.target.value)}
                 maxLength={1000}
                 rows={4}
                 placeholder="Écrivez le message qui apparaîtra sur la carte..."
-                className="mt-2 w-full resize-none rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-gold"
+                className="mt-2 w-full resize-none rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#F5F5DC] outline-none transition placeholder:text-[#F5F5DC]/30 focus:border-[#D4AF37] px-4 py-3 text-sm outline-none focus:border-gold"
               />
             </div>
 
             <div>
-              <label className="text-xs font-medium text-ink/60">Expiration (facultative)</label>
+              <label className="text-xs font-medium text-[#F5F5DC]/60">Expiration (facultative)</label>
               <input
                 type="datetime-local"
                 value={notificationExpiresAt}
                 onChange={e => setNotificationExpiresAt(e.target.value)}
-                className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-gold"
+                className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#F5F5DC] outline-none transition placeholder:text-[#F5F5DC]/30 focus:border-[#D4AF37] px-4 py-3 text-sm outline-none focus:border-gold"
               />
             </div>
 
@@ -1100,19 +1100,19 @@ export default function Loyalty() {
 
       {recoveryQr && (
         <div className="fixed inset-0 z-[100] grid place-items-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-3xl border border-ink/10 bg-white p-6 text-center shadow-2xl">
+          <div className="w-full max-w-sm rounded-3xl border border-[#242424] bg-[#111111] p-6 text-center shadow-2xl">
             <div className="flex items-center justify-between">
               <div className="text-left">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">Récupération</p>
-                <h2 className="mt-1 font-display text-xl text-forest">Carte de {recoveryQr.name}</h2>
+                <h2 className="mt-1 font-display text-xl text-[#D4AF37]">Carte de {recoveryQr.name}</h2>
               </div>
-              <button type="button" onClick={() => setRecoveryQr(null)} className="rounded-full border border-ink/10 p-2 text-ink/50 hover:text-ink">×</button>
+              <button type="button" onClick={() => setRecoveryQr(null)} className="rounded-full border border-[#242424] p-2 text-ink/50 hover:text-ink">×</button>
             </div>
-            <div className="mx-auto mt-5 w-fit rounded-3xl bg-white p-3 shadow-sm ring-1 ring-ink/5">
+            <div className="mx-auto mt-5 w-fit rounded-3xl bg-[#111111] p-3 shadow-sm ring-1 ring-ink/5">
               <img src={recoveryQr.url} alt="QR code de récupération de carte" className="h-64 w-64" />
             </div>
-            <p className="mt-4 text-sm font-semibold text-forest">Le client scanne ce QR avec son téléphone</p>
-            <p className="mt-1 text-xs leading-5 text-ink/45">Ce QR est valable 5 minutes et ne peut être utilisé qu'une seule fois.</p>
+            <p className="mt-4 text-sm font-semibold text-[#D4AF37]">Le client scanne ce QR avec son téléphone</p>
+            <p className="mt-1 text-xs leading-5 text-[#F5F5DC]/45">Ce QR est valable 5 minutes et ne peut être utilisé qu'une seule fois.</p>
             <p className="mt-3 text-[10px] font-medium text-gold">Expiration : {new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' }).format(new Date(recoveryQr.expiresAt))}</p>
           </div>
         </div>
