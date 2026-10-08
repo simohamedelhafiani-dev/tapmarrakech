@@ -204,4 +204,32 @@ begin
 end;
 $function$;
 
-revoke update (menu_template_id, menu_ai_design) on public.establishments from authenticated;
+
+create or replace function public.prevent_responsible_menu_design_update()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $function$
+begin
+  if public.is_establishment_responsible(old.id)
+     and (
+       new.menu_template_id is distinct from old.menu_template_id
+       or new.menu_ai_design is distinct from old.menu_ai_design
+       or new.menu_display_mode is distinct from old.menu_display_mode
+       or new.menu_pdf_url is distinct from old.menu_pdf_url
+     )
+  then
+    raise exception 'Les paramètres de design du menu sont réservés à l’administrateur';
+  end if;
+
+  return new;
+end;
+$function$;
+
+drop trigger if exists trg_prevent_responsible_menu_design_update on public.establishments;
+
+create trigger trg_prevent_responsible_menu_design_update
+before update on public.establishments
+for each row
+execute function public.prevent_responsible_menu_design_update();
