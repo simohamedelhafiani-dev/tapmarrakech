@@ -24,7 +24,7 @@ type Card = {
 };
 
 type HistoryItem = { id: string; points: number; type: string; description: string | null; amount: number | null; created_at: string; };
-type EngagementContext = { google_review_url: string | null; tripadvisor_review_url: string | null; whatsapp_number: string | null; google_claimed: boolean; tripadvisor_claimed: boolean; feedback_submitted: boolean; };
+type EngagementContext = { google_review_url: string | null; tripadvisor_review_url: string | null; review_bonus_points: number; whatsapp_number: string | null; google_claimed: boolean; tripadvisor_claimed: boolean; feedback_submitted: boolean; };
 type CardNotification = {
   id: string;
   title: string;
@@ -91,6 +91,7 @@ export default function LoyaltyCard() {
   const [feedbackComment, setFeedbackComment] = useState('');
   const [feedbackSaving, setFeedbackSaving] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState('');
+  const [reviewMessage, setReviewMessage] = useState('');
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -322,6 +323,18 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
       setHistory((historyData ?? []) as HistoryItem[]);
       setRewards((rewardsData ?? []) as LoyaltyExperienceReward[]);
       setNotifications((notificationsData ?? []) as CardNotification[]);
+      const engagementRow = Array.isArray(engagementData) ? engagementData[0] : engagementData;
+      if (engagementRow) {
+        setEngagement({
+          google_review_url: engagementRow.google_review_url ?? null,
+          tripadvisor_review_url: engagementRow.tripadvisor_review_url ?? null,
+          review_bonus_points: Math.max(0, Number(engagementRow.review_bonus_points ?? 0)),
+          whatsapp_number: engagementRow.whatsapp_number ?? null,
+          google_claimed: Boolean(engagementRow.google_claimed),
+          tripadvisor_claimed: Boolean(engagementRow.tripadvisor_claimed),
+          feedback_submitted: Boolean(engagementRow.feedback_submitted),
+        });
+      }
 
       const designRow = Array.isArray(designData) ? designData[0] : designData;
       if (designRow) {
@@ -419,10 +432,52 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
     };
   }, [card?.establishment_id]);
 
-  const openReview = (platform: 'google' | 'tripadvisor') => {
+  const openReview = async (platform: 'google' | 'tripadvisor') => {
     const url = platform === 'google' ? engagement?.google_review_url : engagement?.tripadvisor_review_url;
     if (!url) return;
+
+    // Open synchronously before awaiting Supabase so mobile browsers do not block the new tab.
     window.open(url, '_blank', 'noopener,noreferrer');
+    setReviewMessage('');
+
+    const { data, error: reviewError } = await supabase.rpc('claim_public_loyalty_review_bonus', {
+      p_access_token: token,
+      p_platform: platform,
+    });
+
+    if (reviewError) {
+      console.error('Failed to claim review bonus:', reviewError);
+      setReviewMessage('L’avis a été ouvert, mais l’attribution des points n’a pas pu être confirmée.');
+      return;
+    }
+
+    const result = Array.isArray(data) ? data[0] : data;
+    const pointsAwarded = Math.max(0, Number(result?.points_awarded ?? 0));
+    const alreadyClaimed = Boolean(result?.already_claimed);
+
+    setCard(current => current
+      ? { ...current, points_balance: Number(result?.points_balance ?? current.points_balance) }
+      : current
+    );
+    setEngagement(current => current
+      ? {
+          ...current,
+          google_claimed: platform === 'google' ? true : current.google_claimed,
+          tripadvisor_claimed: platform === 'tripadvisor' ? true : current.tripadvisor_claimed,
+        }
+      : current
+    );
+
+    if (alreadyClaimed) {
+      setReviewMessage(`Votre bonus ${platform === 'google' ? 'Google' : 'TripAdvisor'} a déjà été attribué.`);
+      return;
+    }
+
+    setReviewMessage(
+      pointsAwarded > 0
+        ? `Merci ! +${pointsAwarded} points ont été ajoutés à votre carte fidélité.`
+        : 'Merci pour votre avis !'
+    );
   };
 
   const submitFeedback = async () => {
@@ -734,13 +789,13 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                 <div className="grid gap-2 p-4 sm:grid-cols-2">
                   {engagement.google_review_url && (
                     <button type="button" onClick={() => openReview('google')} className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-left transition hover:border-[#D4AF37]/50">
-                      <span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]"><Star size={17} /></span><span><span className="block text-sm font-semibold text-white">Avis Google</span><span className="block text-[10px] text-white/35">Partager mon expérience</span></span></span>
+                      <span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]"><Star size={17} /></span><span><span className="block text-sm font-semibold text-white">Avis Google</span><span className="block text-[10px] text-white/35">{engagement.review_bonus_points > 0 ? `Laisser un avis & gagner ${engagement.review_bonus_points} pts` : 'Partager mon expérience'}</span></span></span>
                       <ExternalLink size={15} className="text-white/35" />
                     </button>
                   )}
                   {engagement.tripadvisor_review_url && (
                     <button type="button" onClick={() => openReview('tripadvisor')} className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-left transition hover:border-[#D4AF37]/50">
-                      <span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]"><Star size={17} /></span><span><span className="block text-sm font-semibold text-white">Avis TripAdvisor</span><span className="block text-[10px] text-white/35">Partager mon expérience</span></span></span>
+                      <span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]"><Star size={17} /></span><span><span className="block text-sm font-semibold text-white">Avis TripAdvisor</span><span className="block text-[10px] text-white/35">{engagement.review_bonus_points > 0 ? `Laisser un avis & gagner ${engagement.review_bonus_points} pts` : 'Partager mon expérience'}</span></span></span>
                       <ExternalLink size={15} className="text-white/35" />
                     </button>
                   )}
@@ -750,6 +805,11 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                     </a>
                   )}
                 </div>
+                {reviewMessage && (
+                  <p className="px-5 pb-4 text-center text-xs font-medium text-[#D4AF37]" role="status" aria-live="polite">
+                    {reviewMessage}
+                  </p>
+                )}
               </div>
             )}
             <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#111111] shadow-luxury">
