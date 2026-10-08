@@ -71,6 +71,15 @@ export default function Reviews() {
   const { user } = useAuth();
 
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [googleReviews, setGoogleReviews] = useState<Array<{
+    id: string;
+    reviewer_display_name: string | null;
+    star_rating: string | null;
+    comment: string | null;
+    owner_reply: string | null;
+    review_created_at: string | null;
+    owner_reply_updated_at: string | null;
+  }>>([]);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('Tous');
   const [rating, setRating] = useState('Tous');
@@ -177,6 +186,23 @@ export default function Reviews() {
           negative_count: negativeCount,
         });
         setSatisfactionFeedback(feedbackRows.sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 20));
+        const { data: googleLocations } = await supabase
+          .from('google_business_locations')
+          .select('id,google_business_connections!inner(establishment_id)')
+          .in('google_business_connections.establishment_id', ids);
+        const googleLocationIds = (googleLocations ?? []).map((row: { id: string }) => row.id);
+        if (googleLocationIds.length) {
+          const { data: googleRows } = await supabase
+            .from('google_business_reviews')
+            .select('id,reviewer_display_name,star_rating,comment,owner_reply,review_created_at,owner_reply_updated_at')
+            .in('location_id', googleLocationIds)
+            .order('review_created_at', { ascending: false })
+            .limit(100);
+          setGoogleReviews(googleRows ?? []);
+        } else {
+          setGoogleReviews([]);
+        }
+
       } finally {
         setLoading(false);
       }
@@ -214,32 +240,6 @@ export default function Reviews() {
       );
     });
   }, [reviews, status, rating, search]);
-
-  const update = async (
-    id: string,
-    next: Review['status']
-  ) => {
-    const { error } = await supabase
-      .from('reviews')
-      .update({ status: next })
-      .eq('id', id);
-
-    if (error) {
-      console.error(
-        'Erreur mise à jour statut:',
-        error
-      );
-      return;
-    }
-
-    setReviews((current) =>
-      current.map((review) =>
-        review.id === id
-          ? { ...review, status: next }
-          : review
-      )
-    );
-  };
 
   const analyzeReviews = async () => {
     if (!reviews.length) {
@@ -746,6 +746,37 @@ export default function Reviews() {
         </div>
       )}
 
+
+      <section className="mb-7 overflow-hidden rounded-3xl border border-[#242424] bg-[#111111] shadow-xl">
+        <div className="border-b border-[#242424] p-6">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D4AF37]">Google Business</p>
+          <h2 className="mt-1 font-display text-2xl text-white">Avis Google & réponses générées</h2>
+          <p className="mt-1 text-xs text-white/40">Lecture seule pour le Responsable. Les paramètres et publications sont réservés à l’Admin.</p>
+        </div>
+        <div className="space-y-3 p-6">
+          {googleReviews.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-[#242424] p-8 text-center text-xs text-white/35">Aucun avis Google synchronisé.</div>
+          ) : googleReviews.map((review) => {
+            const ratingMap: Record<string, number> = { ONE: 1, TWO: 2, THREE: 3, FOUR: 4, FIVE: 5 };
+            const ratingValue = ratingMap[String(review.star_rating ?? '').toUpperCase()] ?? Number(review.star_rating ?? 0);
+            return (
+              <article key={review.id} className="rounded-2xl border border-[#242424] bg-[#0b0b0b] p-5">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="font-semibold text-white">{review.reviewer_display_name || 'Client Google'} <span className="ml-2 text-[#D4AF37]">{'★'.repeat(Math.max(0, ratingValue))}</span></div>
+                  {review.review_created_at && <span className="text-[10px] text-white/30">{new Date(review.review_created_at).toLocaleString('fr-FR')}</span>}
+                </div>
+                <p className="mt-3 text-sm leading-6 text-white/65">{review.comment || 'Avis sans commentaire.'}</p>
+                <div className="mt-4 rounded-2xl border border-[#C9A45C]/15 bg-[#C9A45C]/5 p-4">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#C9A45C]">Réponse générée</p>
+                  <p className="mt-2 text-sm leading-6 text-white/70">{review.owner_reply || 'Aucune réponse générée pour le moment.'}</p>
+                  {review.owner_reply_updated_at && <p className="mt-2 text-[10px] text-white/25">{new Date(review.owner_reply_updated_at).toLocaleString('fr-FR')}</p>}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
       {/* FILTRES */}
       <div className="rounded-2xl border border-ink/5 bg-white p-4 shadow-soft">
         <div className="flex flex-col gap-3 md:flex-row">
@@ -766,111 +797,7 @@ export default function Reviews() {
           </div>
 
           <div className="flex gap-2 overflow-auto">
-            <select
-              value={status}
-              onChange={(e) =>
-                setStatus(e.target.value)
-              }
-              className="rounded-xl border border-ink/10 bg-[#fbfaf7] px-3 py-3 text-xs outline-none"
-            >
-              <option>Tous</option>
-              <option>Nouveau</option>
-              <option>En cours</option>
-              <option>Traité</option>
-            </select>
-
-            <select
-              value={rating}
-              onChange={(e) =>
-                setRating(e.target.value)
-              }
-              className="rounded-xl border border-ink/10 bg-[#fbfaf7] px-3 py-3 text-xs outline-none"
-            >
-              <option value="Tous">
-                Toutes les notes
-              </option>
-
-              {[5, 4, 3, 2, 1].map((n) => (
-                <option
-                  key={n}
-                  value={n}
-                >
-                  ⭐ {n}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="mt-5 flex items-center gap-2 text-xs text-ink/40">
-          <SlidersHorizontal size={14} />
-
-          {filtered.length} avis affiché
-          {filtered.length > 1 ? 's' : ''}
-        </div>
-      </div>
-
-      {/* LISTE DES AVIS */}
-      <div className="mt-5 space-y-3">
-        {filtered.map((review) => (
-          <div
-            key={review.id}
-            className="rounded-2xl border border-ink/5 bg-white p-5 shadow-soft"
-          >
-            <div className="flex flex-col justify-between gap-3 sm:flex-row">
-              <div className="flex items-center gap-3">
-                <Stars rating={review.rating} />
-
-                <span className="text-xs font-semibold text-forest">
-                  {review.establishment?.name}
-                </span>
-              </div>
-
-              <span className="text-xs text-ink/35">
-                {new Date(
-                  review.created_at
-                ).toLocaleString('fr-FR', {
-                  dateStyle: 'medium',
-                })}
-              </span>
-            </div>
-
-            <p className="mt-4 text-sm leading-6 text-ink/70">
-              {review.comment ||
-                'Avis positif sans commentaire.'}
-            </p>
-
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-ink/5 pt-3">
-              <div className="text-xs text-ink/45">
-                {review.name || 'Client anonyme'}
-
-                {review.email &&
-                  ` · ${review.email}`}
-
-                {review.phone &&
-                  ` · ${review.phone}`}
-              </div>
-
-              <select
-                value={review.status}
-                onChange={(e) =>
-                  update(
-                    review.id,
-                    e.target.value as Review['status']
-                  )
-                }
-                className={`rounded-lg border-0 px-3 py-2 text-xs font-semibold outline-none ${
-                  review.status === 'Nouveau'
-                    ? 'bg-[#f4e4e1] text-[#a15c50]'
-                    : review.status === 'En cours'
-                      ? 'bg-[#f4ead3] text-[#8b6b2c]'
-                      : 'bg-[#e5eee9] text-forest'
-                }`}
-              >
-                <option>Nouveau</option>
-                <option>En cours</option>
-                <option>Traité</option>
-              </select>
+            <span className="rounded-lg bg-[#f4ead3] px-3 py-2 text-xs font-semibold text-[#8b6b2c]">{review.status}</span>
             </div>
           </div>
         ))}
