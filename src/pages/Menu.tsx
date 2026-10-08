@@ -5,7 +5,6 @@ import {
   Edit3,
   Eye,
   EyeOff,
-  Image as ImageIcon,
   Plus,
   Save,
   Trash2,
@@ -20,20 +19,6 @@ type Establishment = {
   name: string;
   ai_business_type_id: string | null;
 };
-
-type MenuTemplate = {
-  id: string;
-  name: string;
-  description: string;
-  key: string;
-};
-
-const LEGACY_MENU_TEMPLATES: MenuTemplate[] = [
-  { id: 'editorial', key: 'editorial', name: '01 — Editorial', description: 'Mise en page éditoriale premium, typographie élégante et espace négatif.' },
-  { id: 'luxury', key: 'luxury', name: '02 — Luxury', description: 'Présentation luxe avec visuels et cartes produits.' },
-  { id: 'cards', key: 'cards', name: '03 — Cards', description: 'Présentation moderne en cartes, claire et visuelle.' },
-  { id: 'dark', key: 'dark', name: '04 — Noir Signature', description: 'Univers sombre premium avec accents dorés.' },
-];
 
 type MenuCategory = {
   id: string;
@@ -94,8 +79,6 @@ export default function Menu() {
 
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
-  const [menuTemplates, setMenuTemplates] = useState<MenuTemplate[]>([]);
-  const [selectedTemplateId, setSelectedTemplateId] = useState('');
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -122,7 +105,6 @@ export default function Menu() {
   useEffect(() => {
     if (establishmentId) {
       loadMenu();
-      loadTemplates();
     }
   }, [establishmentId]);
 
@@ -158,34 +140,6 @@ export default function Menu() {
     }
 
     setLoading(false);
-  }
-
-  async function loadTemplates() {
-    const { data: establishment, error } = await supabase
-      .from('establishments')
-      .select('menu_template_id')
-      .eq('id', establishmentId)
-      .maybeSingle();
-
-    if (error) {
-      console.error('Erreur chargement template menu:', error);
-    }
-
-    setMenuTemplates(LEGACY_MENU_TEMPLATES);
-    setSelectedTemplateId(establishment?.menu_template_id || 'editorial');
-  }
-
-  async function saveTemplate(templateId: string) {
-    setSelectedTemplateId(templateId);
-    const { error } = await supabase
-      .from('establishments')
-      .update({ menu_template_id: templateId })
-      .eq('id', establishmentId);
-
-    if (error) {
-      setSelectedTemplateId((current) => current);
-      alert(error.message);
-    }
   }
 
   async function loadMenu() {
@@ -227,8 +181,6 @@ export default function Menu() {
 
     setLoading(false);
   }
-
-  const selectedTemplate = menuTemplates.find((template) => template.id === selectedTemplateId);
 
   const itemsByCategory = useMemo(() => {
     const map: Record<string, MenuItem[]> = {};
@@ -527,32 +479,6 @@ export default function Menu() {
 
   return (
     <div className="space-y-8">
-      {menuTemplates.length > 0 && (
-        <section className="rounded-2xl border border-[#242424]/10 bg-[#111111] p-5 shadow-sm">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">Design du menu</p>
-              <h2 className="mt-1 text-lg font-semibold text-forest">Choisir un template</h2>
-              <p className="mt-1 text-xs text-[#F5F5DC]/45">Les templates sont créés et publiés par l’Admin. Ici, tu choisis uniquement celui de ton établissement.</p>
-            </div>
-            <span className="rounded-full bg-forest/5 px-3 py-1.5 text-[10px] font-semibold text-forest">{selectedTemplate?.name ?? 'Automatique'}</span>
-          </div>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {menuTemplates.map((template) => (
-              <button key={template.id} type="button" onClick={() => void saveTemplate(template.id)} className={`rounded-2xl border p-4 text-left transition ${selectedTemplateId === template.id ? 'border-gold ring-2 ring-gold/15' : 'border-[#242424]/10 hover:border-gold/40'}`}>
-                <div className={`h-20 rounded-xl p-3 ${template.key === 'dark' ? 'bg-[#102B24]' : template.key === 'luxury' ? 'bg-[#F7F3EA]' : template.key === 'cards' ? 'bg-[#111111] border border-[#242424]/10' : 'bg-[#F3EEE2]'}`}>
-                  <div className={`h-2 w-16 rounded-full ${template.key === 'dark' ? 'bg-gold' : 'bg-[#C9A45C]'}`} />
-                  <div className={`mt-3 h-2 w-3/4 rounded-full ${template.key === 'dark' ? 'bg-[#111111]/20' : 'bg-ink/10'}`} />
-                  <div className={`mt-2 h-2 w-1/2 rounded-full ${template.key === 'dark' ? 'bg-[#111111]/10' : 'bg-ink/5'}`} />
-                </div>
-                <p className="mt-3 text-xs font-semibold text-forest">{template.name}</p>
-                <p className="mt-1 text-[10px] leading-4 text-[#F5F5DC]/40">{template.description}</p>
-              </button>
-            ))}
-          </div>
-        </section>
-      )}
-
       <section className="rounded-[28px] bg-forest p-6 text-white shadow-xl md:p-8">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
@@ -585,14 +511,6 @@ export default function Menu() {
                 </option>
               ))}
             </select>
-
-            <a
-              href="/dashboard/menu/design"
-              className="flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-[#111111]/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#111111]/15"
-            >
-              <ImageIcon size={17} />
-              Personnaliser le menu
-            </a>
 
             <button
               type="button"
