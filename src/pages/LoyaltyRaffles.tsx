@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 import {
   Check,
   ChevronDown,
@@ -75,7 +76,7 @@ function formatDate(value: string | null) {
   }).format(new Date(value));
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="block">
       <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.14em] text-[#F5F5DC]/40">
