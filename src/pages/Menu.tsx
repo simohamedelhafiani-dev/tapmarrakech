@@ -50,25 +50,9 @@ type CategoryForm = {
   description: string;
 };
 
-type ItemForm = {
-  categoryId: string;
-  name: string;
-  description: string;
-  price: string;
-  imageUrl: string;
-};
-
 const emptyCategoryForm: CategoryForm = {
   name: '',
   description: '',
-};
-
-const emptyItemForm: ItemForm = {
-  categoryId: '',
-  name: '',
-  description: '',
-  price: '',
-  imageUrl: '',
 };
 
 export default function Menu() {
@@ -85,14 +69,11 @@ export default function Menu() {
   const [errorMessage, setErrorMessage] = useState('');
 
   const [showCategoryForm, setShowCategoryForm] = useState(false);
-  const [showItemForm, setShowItemForm] = useState(false);
 
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
-  const [editingItemId, setEditingItemId] = useState<string | null>(null);
 
   const [categoryForm, setCategoryForm] =
     useState<CategoryForm>(emptyCategoryForm);
-  const [itemForm, setItemForm] = useState<ItemForm>(emptyItemForm);
 
   const [expandedCategoryIds, setExpandedCategoryIds] = useState<string[]>([]);
 
@@ -292,114 +273,6 @@ export default function Menu() {
       .from('menu_categories')
       .delete()
       .eq('id', category.id)
-      .eq('establishment_id', establishmentId);
-
-    if (error) {
-      alert(error.message);
-      return;
-    }
-
-    await loadMenu();
-  }
-
-  function openNewItem(categoryId?: string) {
-    setEditingItemId(null);
-    setItemForm({
-      ...emptyItemForm,
-      categoryId: categoryId ?? categories[0]?.id ?? '',
-    });
-    setShowItemForm(true);
-  }
-
-  function openEditItem(item: MenuItem) {
-    setEditingItemId(item.id);
-    setItemForm({
-      categoryId: item.category_id,
-      name: item.name,
-      description: item.description ?? '',
-      price: String(item.price),
-      imageUrl: item.image_url ?? '',
-    });
-    setShowItemForm(true);
-  }
-
-  async function saveItem(event: FormEvent) {
-    event.preventDefault();
-
-    const name = itemForm.name.trim();
-    const categoryId = itemForm.categoryId;
-    const price = Number(itemForm.price.replace(',', '.'));
-
-    if (!establishmentId || !categoryId || !name) {
-      alert('La catégorie et le nom du produit sont obligatoires.');
-      return;
-    }
-
-    if (!Number.isFinite(price) || price < 0) {
-      alert('Veuillez saisir un prix valide.');
-      return;
-    }
-
-    setSaving(true);
-
-    const payload = {
-      establishment_id: establishmentId,
-      category_id: categoryId,
-      name,
-      description: itemForm.description.trim() || null,
-      price,
-      image_url: itemForm.imageUrl.trim() || null,
-    };
-
-    const result = editingItemId
-      ? await supabase
-          .from('menu_items')
-          .update(payload)
-          .eq('id', editingItemId)
-          .eq('establishment_id', establishmentId)
-      : await supabase.from('menu_items').insert({
-          ...payload,
-          display_order: (itemsByCategory[categoryId] ?? []).length,
-        });
-
-    if (result.error) {
-      alert(result.error.message);
-      setSaving(false);
-      return;
-    }
-
-    setShowItemForm(false);
-    setItemForm(emptyItemForm);
-    setEditingItemId(null);
-
-    await loadMenu();
-    setSaving(false);
-  }
-
-  async function toggleItemActive(item: MenuItem) {
-    const { error } = await supabase
-      .from('menu_items')
-      .update({ active: !item.active })
-      .eq('id', item.id)
-      .eq('establishment_id', establishmentId);
-
-    if (error) {
-      alert(error.message);
-      return;
-    }
-
-    await loadMenu();
-  }
-
-  async function deleteItem(item: MenuItem) {
-    if (!window.confirm(`Supprimer « ${item.name} » du menu ?`)) {
-      return;
-    }
-
-    const { error } = await supabase
-      .from('menu_items')
-      .delete()
-      .eq('id', item.id)
       .eq('establishment_id', establishmentId);
 
     if (error) {
@@ -644,15 +517,6 @@ export default function Menu() {
 
                     <button
                       type="button"
-                      onClick={() => openNewItem(category.id)}
-                      className="flex items-center gap-2 rounded-xl bg-forest px-3 py-2 text-xs font-semibold text-white"
-                    >
-                      <Plus size={15} />
-                      Produit
-                    </button>
-
-                    <button
-                      type="button"
                       onClick={() => toggleCategory(category.id)}
                       className="grid h-9 w-9 place-items-center rounded-xl border border-[#242424]/10 text-[#F5F5DC]/50"
                     >
@@ -672,14 +536,6 @@ export default function Menu() {
                         <p className="text-sm text-[#F5F5DC]/45">
                           Aucun produit dans cette catégorie.
                         </p>
-                        <button
-                          type="button"
-                          onClick={() => openNewItem(category.id)}
-                          className="mt-4 inline-flex items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white"
-                        >
-                          <Plus size={15} />
-                          Ajouter un produit
-                        </button>
                       </div>
                     ) : (
                       <div className="grid gap-3">
@@ -732,38 +588,6 @@ export default function Menu() {
                                 {item.price.toFixed(2)} MAD
                               </p>
 
-                              <div className="flex items-center gap-2">
-                                <button
-                                  type="button"
-                                  onClick={() => toggleItemActive(item)}
-                                  className="grid h-9 w-9 place-items-center rounded-xl border border-[#242424]/10 text-[#F5F5DC]/50"
-                                  title={item.active ? 'Masquer' : 'Afficher'}
-                                >
-                                  {item.active ? (
-                                    <EyeOff size={15} />
-                                  ) : (
-                                    <Eye size={15} />
-                                  )}
-                                </button>
-
-                                <button
-                                  type="button"
-                                  onClick={() => openEditItem(item)}
-                                  className="grid h-9 w-9 place-items-center rounded-xl border border-[#242424]/10 text-[#F5F5DC]/50"
-                                  title="Modifier"
-                                >
-                                  <Edit3 size={15} />
-                                </button>
-
-                                <button
-                                  type="button"
-                                  onClick={() => deleteItem(item)}
-                                  className="grid h-9 w-9 place-items-center rounded-xl border border-red-100 text-red-500"
-                                  title="Supprimer"
-                                >
-                                  <Trash2 size={15} />
-                                </button>
-                              </div>
                             </div>
                           </div>
                         ))}
@@ -851,135 +675,7 @@ export default function Menu() {
         </div>
       )}
 
-      {showItemForm && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-4">
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-[#111111] p-6 shadow-2xl">
-            <div className="mb-6 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">
-                  Menu
-                </p>
-                <h2 className="mt-1 text-xl font-semibold text-forest">
-                  {editingItemId ? 'Modifier le produit' : 'Nouveau produit'}
-                </h2>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setShowItemForm(false)}
-                className="grid h-9 w-9 place-items-center rounded-full bg-ink/5 text-[#F5F5DC]/50"
-              >
-                <X size={17} />
-              </button>
-            </div>
-
-            <form onSubmit={saveItem} className="grid gap-4 md:grid-cols-2">
-              <label className="block md:col-span-2">
-                <span className="mb-2 block text-xs font-semibold text-[#F5F5DC]/60">
-                  Catégorie
-                </span>
-                <select
-                  value={itemForm.categoryId}
-                  onChange={(event) =>
-                    setItemForm((current) => ({
-                      ...current,
-                      categoryId: event.target.value,
-                    }))
-                  }
-                  className="w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-gold"
-                >
-                  <option value="">Choisir une catégorie</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="block md:col-span-2">
-                <span className="mb-2 block text-xs font-semibold text-[#F5F5DC]/60">
-                  Nom du produit
-                </span>
-                <input
-                  value={itemForm.name}
-                  onChange={(event) =>
-                    setItemForm((current) => ({
-                      ...current,
-                      name: event.target.value,
-                    }))
-                  }
-                  placeholder="Ex. Cheeseburger"
-                  className="w-full rounded-xl border border-[#242424]/10 px-4 py-3 text-sm outline-none focus:border-gold"
-                  autoFocus
-                />
-              </label>
-
-              <label className="block">
-                <span className="mb-2 block text-xs font-semibold text-[#F5F5DC]/60">
-                  Prix (MAD)
-                </span>
-                <input
-                  value={itemForm.price}
-                  onChange={(event) =>
-                    setItemForm((current) => ({
-                      ...current,
-                      price: event.target.value,
-                    }))
-                  }
-                  inputMode="decimal"
-                  placeholder="69"
-                  className="w-full rounded-xl border border-[#242424]/10 px-4 py-3 text-sm outline-none focus:border-gold"
-                />
-              </label>
-
-              <label className="block">
-                <span className="mb-2 block text-xs font-semibold text-[#F5F5DC]/60">
-                  URL de la photo <span className="font-normal">(optionnel)</span>
-                </span>
-                <input
-                  value={itemForm.imageUrl}
-                  onChange={(event) =>
-                    setItemForm((current) => ({
-                      ...current,
-                      imageUrl: event.target.value,
-                    }))
-                  }
-                  placeholder="https://…"
-                  className="w-full rounded-xl border border-[#242424]/10 px-4 py-3 text-sm outline-none focus:border-gold"
-                />
-              </label>
-
-              <label className="block md:col-span-2">
-                <span className="mb-2 block text-xs font-semibold text-[#F5F5DC]/60">
-                  Description <span className="font-normal">(optionnel)</span>
-                </span>
-                <textarea
-                  value={itemForm.description}
-                  onChange={(event) =>
-                    setItemForm((current) => ({
-                      ...current,
-                      description: event.target.value,
-                    }))
-                  }
-                  rows={4}
-                  placeholder="Décris le produit simplement. L’IA pourra aider à reformuler plus tard."
-                  className="w-full resize-none rounded-xl border border-[#242424]/10 px-4 py-3 text-sm outline-none focus:border-gold"
-                />
-              </label>
-
-              <button
-                type="submit"
-                disabled={saving}
-                className="flex items-center justify-center gap-2 rounded-xl bg-forest px-4 py-3 text-sm font-semibold text-white disabled:opacity-50 md:col-span-2"
-              >
-                <Save size={16} />
-                {saving ? 'Enregistrement…' : 'Enregistrer le produit'}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
+}
     </div>
   );
 }
