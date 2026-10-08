@@ -1889,7 +1889,7 @@ function EstablishmentWorkspace({
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            {scannerLink && <a href={scannerLink} target="_blank" rel="noreferrer" className="rounded-xl border border-[#C9A45C]/30 bg-[#fdf9ef] px-4 py-3 text-xs font-semibold text-[#C9A45C] transition hover:border-[#C9A45C] hover:bg-[#111111]">Scanner fidélité ↗</a>}
+            {scannerLink && <a href={scannerLink} target="_blank" rel="noreferrer" className="rounded-xl border border-[#C9A45C]/30 bg-[#111111] px-4 py-3 text-xs font-semibold text-[#C9A45C] transition hover:border-[#C9A45C] hover:bg-[#111111]">Scanner fidélité ↗</a>}
             <a href={publicLink} target="_blank" rel="noreferrer" className="rounded-xl bg-[#111111] px-4 py-3 text-center text-xs font-semibold text-[#FFFFFF] shadow-lg shadow-[0_10px_35px_rgba(201,164,92,0.10)] transition hover:bg-[#111111]">Ouvrir la page publique ↗</a>
           </div>
         </div>
@@ -2128,7 +2128,7 @@ function EstablishmentWorkspace({
 
       {tab === 'public' && (
   <div className="space-y-5">
-    <div className="rounded-2xl border border-[#C9A45C]/20 bg-[#fbf8ee] p-6">
+    <div className="rounded-2xl border border-[#C9A45C]/20 bg-[#111111] p-6">
       <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#C9A45C]">Liens publics de l’établissement</p>
       <h3 className="mt-2 text-xl font-semibold text-[#FFFFFF]">Accès client</h3>
       <p className="mt-2 text-sm text-[#FFFFFF]/50">Tous les liens que l’Admin peut copier et ouvrir pour QR / NFC.</p>
@@ -3217,7 +3217,7 @@ function RewardCodesSection({
           </label>
         </div>
 
-        <div className="mt-5 flex items-center gap-3 rounded-xl border border-[#C9A45C]/20 bg-[#fdf9ef] p-4">
+        <div className="mt-5 flex items-center gap-3 rounded-xl border border-[#C9A45C]/20 bg-[#111111] p-4">
           <LockKeyhole size={18} className="shrink-0 text-[#C9A45C]" />
           <p className="text-xs leading-5 text-[#FFFFFF]/50">
             Le stockage du code reste protégé par le mécanisme existant. Cette interface ne tente pas de récupérer le code en clair.
@@ -5253,7 +5253,7 @@ function BillingSection({
                 <span className={`w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold ${sub.status === 'active' ? 'bg-[#111111] text-[#E1C27A]' : sub.status === 'trial' ? 'bg-[#111111] text-[#E1C27A]' : 'bg-[#111111] text-[#F5F5DC]'}`}>{sub.status}</span>
                 <span className="font-semibold">{Number(sub.plan?.price_mad ?? 0).toLocaleString('fr-FR')} MAD</span>
                 <span className="text-[#FFFFFF]/50">{formatDate(sub.current_period_end)}</span>
-                <button type="button" onClick={() => openSubscriptionEditor(sub)} className="rounded-lg border border-[#242424]/10 bg-[#111111] px-3 py-2 text-[11px] font-semibold text-[#C9A45C] transition hover:border-[#C9A45C] hover:bg-[#fdf9ef]">
+                <button type="button" onClick={() => openSubscriptionEditor(sub)} className="rounded-lg border border-[#242424]/10 bg-[#111111] px-3 py-2 text-[11px] font-semibold text-[#C9A45C] transition hover:border-[#C9A45C] hover:bg-[#111111]">
                   Modifier
                 </button>
               </div>
@@ -5356,7 +5356,7 @@ function BillingSection({
                             current.setDate(current.getDate() + days);
                             setSubscriptionForm((v) => ({ ...v, periodEnd: toLocalDateTimeInput(current.toISOString()) }));
                           }}
-                          className="rounded-lg border border-[#242424]/10 bg-[#111111] px-3 py-2 text-[11px] font-semibold text-[#C9A45C] hover:border-[#C9A45C] hover:bg-[#fdf9ef]"
+                          className="rounded-lg border border-[#242424]/10 bg-[#111111] px-3 py-2 text-[11px] font-semibold text-[#C9A45C] hover:border-[#C9A45C] hover:bg-[#111111]"
                         >
                           +{days} jours
                         </button>
@@ -5365,7 +5365,7 @@ function BillingSection({
                   </div>
                 </div>
 
-                <div className="mt-6 rounded-2xl border border-[#C9A45C]/20 bg-[#fdf9ef] p-4 text-xs text-[#FFFFFF]/60">
+                <div className="mt-6 rounded-2xl border border-[#C9A45C]/20 bg-[#111111] p-4 text-xs text-[#FFFFFF]/60">
                   <strong className="text-[#FFFFFF]">Modification immédiate :</strong> le responsable verra le nouveau pack et les nouvelles dates dès que son abonnement sera rechargé. Les fonctionnalités restent déterminées par le pack sélectionné.
                 </div>
 
