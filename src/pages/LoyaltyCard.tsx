@@ -49,11 +49,11 @@ export default function LoyaltyCard() {
   const [card, setCard] = useState<Card | null>(null);
   const [design, setDesign] = useState<Design>({
     template_id: 'custom',
-    primary_color: '#173D32',
-    secondary_color: '#D3A84C',
-    background_color: '#F7F7F3',
-    text_color: '#FFFFFF',
-    button_color: '#173D32',
+    primary_color: '#D4AF37',
+    secondary_color: '#E1C27A',
+    background_color: '#0D0D0D',
+    text_color: '#F5F5DC',
+    button_color: '#D4AF37',
     border_radius: 24,
   });
   const [designConfig, setDesignConfig] = useState(defaultLoyaltyDesignConfig);
@@ -146,7 +146,7 @@ export default function LoyaltyCard() {
       margin: 1,
       errorCorrectionLevel: 'M',
       color: {
-        dark: '#173D32',
+        dark: '#0D0D0D',
         light: '#FFFFFF',
       },
     }).then(dataUrl => {
@@ -629,11 +629,11 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         <div className="w-full max-w-[430px]">
         {showWelcome && (
           <div className="mb-4 flex items-center gap-3 rounded-2xl border border-[#C9A45C]/20 bg-[#111111] px-4 py-3 shadow-soft">
-            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#e7f1eb] text-[#173D32]">
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#D4AF37]/10 text-[#D4AF37]">
               <Gift className="h-4 w-4" />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-[#173D32]">Bienvenue dans votre programme fidélité 🎉</p>
+              <p className="text-sm font-semibold text-[#E1C27A]">Bienvenue dans votre programme fidélité 🎉</p>
               <p className="mt-0.5 text-[10px] leading-4 text-ink/45">Votre carte est maintenant active. Gardez-la sur votre téléphone.</p>
             </div>
             <button type="button" onClick={() => setShowWelcome(false)} className="ml-auto shrink-0 p-1 text-ink/30" aria-label="Fermer">
@@ -684,6 +684,74 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
             />
           </div>
         </div>
+
+        {notifications.length > 0 && (
+          <section className="mt-4 overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#111111] shadow-luxury">
+            <div className="flex items-center justify-between border-b border-white/8 px-5 py-4">
+              <div className="flex items-center gap-3">
+                <div
+                  className="grid h-10 w-10 place-items-center rounded-xl"
+                  style={{ backgroundColor: `${design.secondary_color}22`, color: design.secondary_color }}
+                >
+                  <Bell className="h-4 w-4" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-semibold text-white">Notifications</h2>
+                  <p className="mt-0.5 text-[10px] text-white/35">
+                    {notifications.filter(notification => !notification.is_read).length} non lue(s)
+                  </p>
+                </div>
+              </div>
+              {notifications.some(notification => !notification.is_read) && (
+                <span
+                  className="rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.12em]"
+                  style={{ backgroundColor: `${design.secondary_color}18`, color: design.secondary_color }}
+                >
+                  Nouveau
+                </span>
+              )}
+            </div>
+            <div className="divide-y divide-white/6">
+              {notifications.map(notification => (
+                <button
+                  key={notification.id}
+                  type="button"
+                  onClick={() => {
+                    if (notification.is_read) return;
+                    setNotifications(current =>
+                      current.map(item =>
+                        item.id === notification.id ? { ...item, is_read: true } : item
+                      )
+                    );
+                    void supabase.rpc('mark_public_loyalty_notification_read', {
+                      p_access_token: token,
+                      p_notification_id: notification.id,
+                    });
+                  }}
+                  className="w-full px-5 py-4 text-left transition hover:bg-white/[0.03]"
+                >
+                  <div className="flex items-start gap-3">
+                    <span
+                      className="mt-0.5 h-2 w-2 shrink-0 rounded-full"
+                      style={{ backgroundColor: notification.is_read ? 'rgba(255,255,255,.15)' : design.secondary_color }}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-3">
+                        <p className={`text-sm font-semibold ${notification.is_read ? 'text-white/55' : 'text-white'}`}>
+                          {notification.title}
+                        </p>
+                        <span className="shrink-0 text-[9px] text-white/25">
+                          {new Date(notification.created_at).toLocaleDateString('fr-FR')}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-xs leading-5 text-white/45">{notification.message}</p>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
 
         {program.referral_enabled && cardSaved && (
           <button
@@ -816,7 +884,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
               <div className="min-h-0 flex-1 overflow-hidden p-4">
                 {referralLoading ? (
                   <div className="flex h-full items-center justify-center">
-                    <div className="h-7 w-7 animate-spin rounded-full border-2 border-[#173D32] border-t-transparent" />
+                    <div className="h-7 w-7 animate-spin rounded-full border-2 border-[#D4AF37] border-t-transparent" />
                   </div>
                 ) : referralCode ? (
                   <div className="flex h-full flex-col items-center justify-center">
@@ -839,7 +907,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                     </div>
                   </div>
                 ) : (
-                  <div className="flex h-full items-center justify-center text-center text-sm text-[#173D32]/60">
+                  <div className="flex h-full items-center justify-center text-center text-sm text-[#F5F5DC]/45">
                     Votre code de parrainage n’est pas encore disponible.
                   </div>
                 )}

@@ -12,6 +12,7 @@ import { LanguageProvider } from '@/contexts/LanguageContext';
 import PublicReview from '@/pages/PublicReview';
 import LoyaltyCard from '@/pages/LoyaltyCard';
 import LoyaltyJoin from '@/pages/LoyaltyJoin';
+import LoyaltyRecover from '@/pages/LoyaltyRecover';
 import Login from '@/pages/Login';
 import { ForgotPassword, Register } from '@/pages/AuthPages';
 
@@ -19,6 +20,7 @@ import Dashboard from '@/pages/Dashboard';
 import Reviews from '@/pages/Reviews';
 import Analytics from '@/pages/Analytics';
 import Loyalty from '@/pages/Loyalty';
+import LoyaltyRaffles from '@/pages/LoyaltyRaffles';
 import Menu from '@/pages/Menu';
 import MenuDesign from '@/pages/MenuDesign';
 import Promotions from '@/pages/Promotions';
@@ -169,6 +171,7 @@ function App() {
           <Route path="/p/:slug" element={<PublicReview />} />
           <Route path="/loyalty" element={<LoyaltyLaunch />} />
           <Route path="/loyalty/join" element={<LoyaltyJoin />} />
+          <Route path="/loyalty/recover" element={<LoyaltyRecover />} />
           <Route path="/loyalty/:token" element={<LoyaltyCard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -229,6 +232,14 @@ function App() {
                 element={
                   <SubscriptionFeatureRoute feature="loyalty">
                     <Loyalty />
+                  </SubscriptionFeatureRoute>
+                }
+              />
+              <Route
+                path="/dashboard/loyalty/raffles"
+                element={
+                  <SubscriptionFeatureRoute feature="loyalty">
+                    <LoyaltyRaffles />
                   </SubscriptionFeatureRoute>
                 }
               />

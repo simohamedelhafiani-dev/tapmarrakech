@@ -131,11 +131,11 @@ export default function Employee() {
   const isStampProgram = loyaltyProgram.program_type === 'STAMP';
   const [loyaltyDesign, setLoyaltyDesign] = useState({
     template_id: 'luxury',
-    primary_color: '#173D32',
+    primary_color: '#D4AF37',
     secondary_color: '#D3A84C',
     background_color: '#F7F7F3',
-    text_color: '#173D32',
-    button_color: '#173D32',
+    text_color: '#0D0D0D',
+    button_color: '#D4AF37',
     border_radius: 24,
     design_config: defaultLoyaltyDesignConfig,
   });
@@ -701,7 +701,7 @@ export default function Employee() {
             <div class="name">${fullName}</div>
             <div class="number-label">Numéro de fidélité</div>
             <div class="number">${customer.loyalty_number}</div>
-            <div class="footer"><span>Présentez cette carte à chaque visite</span><span>by Tap Marrakech</span></div>
+            <div class="footer"><span>Présentez cette carte à chaque visite</span><span>by KELYANI</span></div>
           </div>
           <script>window.onload = () => { window.print(); };</script>
         </body>
@@ -988,8 +988,8 @@ export default function Employee() {
             <div className="mb-8 text-center">
               <div className="mb-4 flex justify-center">
                 <img
-                  src="/tapmarrakech-logo.png"
-                  alt="TapMarrakech"
+                  src="/kelyani-final.svg"
+                  alt="KELYANI"
                   className="h-16 w-16 object-contain"
                 />
               </div>
@@ -1035,7 +1035,7 @@ export default function Employee() {
               }}
               className="mt-5 w-full text-center text-xs font-medium text-ink/40 hover:text-forest"
             >
-              ← Retour aux accès TapMarrakech
+              ← Retour aux accès KELYANI
             </button>
           </div>
         </div>
@@ -1824,7 +1824,7 @@ export default function Employee() {
           </div>
         </Modal>
       )}
-      <footer className="mt-10 pb-4 text-center text-xs font-medium text-ink/35">by Tap Marrakech</footer>
+      <footer className="mt-10 pb-4 text-center text-xs font-medium text-ink/35">by KELYANI</footer>
     </div>
   );
 }

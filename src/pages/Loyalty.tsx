@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Gift,
   Plus,
@@ -11,10 +12,13 @@ import {
   CheckCircle2,
   LockKeyhole,
   Bell,
+  QrCode,
+  Ticket,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import LoyaltyStudio from '@/components/loyalty/LoyaltyStudio';
+import QRCode from 'qrcode';
 
 type Establishment = {
   id: string;
@@ -74,6 +78,8 @@ export default function Loyalty() {
   const [notificationTitle, setNotificationTitle] = useState('');
   const [notificationMessage, setNotificationMessage] = useState('');
   const [notificationType, setNotificationType] = useState<'INFO' | 'OFFER' | 'REWARD' | 'POINTS'>('INFO');
+
+
   const [notificationAudience, setNotificationAudience] = useState<'ALL' | 'INTEREST' | 'FREQUENCY' | 'POINTS' | 'VISITS' | 'CUSTOMER'>('ALL');
   const [notificationInterest, setNotificationInterest] = useState('');
   const [notificationFrequency, setNotificationFrequency] = useState('');
@@ -96,6 +102,8 @@ export default function Loyalty() {
     useState<LoyaltyCustomer | null>(null);
   const [showRewards, setShowRewards] =
     useState<LoyaltyCustomer | null>(null);
+  const [recoveryQr, setRecoveryQr] = useState<{ url: string; name: string; expiresAt: string } | null>(null);
+  const [recoveryLoading, setRecoveryLoading] = useState(false);
 
   const [selectedReward, setSelectedReward] =
     useState<LoyaltyReward | null>(null);
@@ -226,6 +234,31 @@ export default function Loyalty() {
     0
   );
 
+  async function createRecoveryQr(customer: LoyaltyCustomer) {
+    setRecoveryLoading(true);
+
+    const { data, error } = await supabase.rpc('create_loyalty_card_recovery_session', {
+      p_customer_id: customer.id,
+    });
+
+    setRecoveryLoading(false);
+
+    if (error || !data?.[0]?.recovery_token) {
+      alert(error?.message ?? 'Impossible de générer le QR de récupération.');
+      return;
+    }
+
+    const recoveryToken = String(data[0].recovery_token);
+    const expiresAt = String(data[0].expires_at);
+    const url = `${window.location.origin}/loyalty/recover?token=${encodeURIComponent(recoveryToken)}`;
+
+    setRecoveryQr({
+      url: await QRCode.toDataURL(url, { width: 360, margin: 2 }),
+      name: customer.first_name || 'Client',
+      expiresAt,
+    });
+  }
+
   async function createCustomer() {
     if (!establishmentId || !phone.trim()) return;
 
@@ -331,6 +364,8 @@ export default function Loyalty() {
     alert(`+${points} points ajoutés. Nouveau solde : ${newBalance} points.`);
   }
 
+
+
   const notificationEligibleCustomers = useMemo(() => {
     return customers.filter(customer => {
       if (!customer.notification_consent) return false;
@@ -418,11 +453,12 @@ export default function Loyalty() {
 
     const { data, error } = await supabase.rpc('create_loyalty_notification_campaign', {
       p_establishment_id: establishmentId,
+
       p_title: notificationTitle.trim(),
       p_message: notificationMessage.trim(),
       p_type: notificationType,
       p_expires_at: notificationExpiresAt ? new Date(notificationExpiresAt).toISOString() : null,
-      p_audience: audience,
+  p_audience: audience,
     });
 
     setNotificationSaving(false);
@@ -431,6 +467,7 @@ export default function Loyalty() {
       alert(error.message);
       return;
     }
+
 
     const result = Array.isArray(data) ? data[0] : data;
     const count = Number(result?.recipient_count ?? notificationEligibleCustomers.length);
@@ -448,6 +485,7 @@ export default function Loyalty() {
     setNotificationExpiresAt('');
     setShowNotificationModal(false);
     alert(`Notification publiée sur ${count} carte(s) fidélité.`);
+
   }
 
   function selectReward(
@@ -598,6 +636,16 @@ export default function Loyalty() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <Link
+            to="/dashboard/loyalty/raffles"
+            className="flex items-center gap-2 rounded-xl border border-gold/30 bg-white px-4 py-2.5 text-xs font-semibold text-forest transition hover:bg-[#fdf9ef]"
+          >
+            <Ticket size={16} />
+            Tombola & niveaux
+          </Link>
+
+
+
           <button
             onClick={() => setShowNotificationModal(true)}
             disabled={!establishmentId || !programSettings.enabled}
@@ -825,6 +873,14 @@ export default function Loyalty() {
                       >
                         Récompenses
                       </button>
+                      <button
+                        type="button"
+                        onClick={() => void createRecoveryQr(customer)}
+                        disabled={recoveryLoading}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-ink/10 px-3 py-2 text-[11px] font-semibold text-ink/60 transition hover:border-gold/40 hover:text-gold disabled:opacity-40"
+                      >
+                        <QrCode size={13} /> Récupérer
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -869,6 +925,7 @@ export default function Loyalty() {
             </div>
 
             <div>
+
               <label className="text-xs font-medium text-ink/60">Ciblage</label>
               <select
                 value={notificationAudience}
@@ -980,6 +1037,7 @@ export default function Loyalty() {
               <span className="ml-1">Seuls les clients ayant accepté les notifications recevront le message.</span>
             </div>
 
+
             <div>
               <label className="text-xs font-medium text-ink/60">Type</label>
               <select
@@ -1038,6 +1096,29 @@ export default function Loyalty() {
           </div>
         </Modal>
       )}
+
+
+      {recoveryQr && (
+        <div className="fixed inset-0 z-[100] grid place-items-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-3xl border border-ink/10 bg-white p-6 text-center shadow-2xl">
+            <div className="flex items-center justify-between">
+              <div className="text-left">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">Récupération</p>
+                <h2 className="mt-1 font-display text-xl text-forest">Carte de {recoveryQr.name}</h2>
+              </div>
+              <button type="button" onClick={() => setRecoveryQr(null)} className="rounded-full border border-ink/10 p-2 text-ink/50 hover:text-ink">×</button>
+            </div>
+            <div className="mx-auto mt-5 w-fit rounded-3xl bg-white p-3 shadow-sm ring-1 ring-ink/5">
+              <img src={recoveryQr.url} alt="QR code de récupération de carte" className="h-64 w-64" />
+            </div>
+            <p className="mt-4 text-sm font-semibold text-forest">Le client scanne ce QR avec son téléphone</p>
+            <p className="mt-1 text-xs leading-5 text-ink/45">Ce QR est valable 5 minutes et ne peut être utilisé qu'une seule fois.</p>
+            <p className="mt-3 text-[10px] font-medium text-gold">Expiration : {new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' }).format(new Date(recoveryQr.expiresAt))}</p>
+          </div>
+        </div>
+      )}
+
+
 
       {/* NEW CUSTOMER MODAL */}
       {showNewCustomer && (

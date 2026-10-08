@@ -2,11 +2,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-:root { font-family: 'DM Sans', sans-serif; color: #17221d; background: #f7f7f3; font-synthesis: none; }
+:root { font-family: 'DM Sans', sans-serif; color: #F5F5DC; background: #0D0D0D; font-synthesis: none; }
 body { margin: 0; min-width: 320px; }
 button, input, textarea, select { font: inherit; }
 .font-display { font-family: 'Playfair Display', serif; }
-@layer utilities { .bg-cream { background-color: #f7f7f3; } .text-ink { color: #17221d; } .bg-forest { background-color: #17352a; } .text-forest { color: #17352a; } .bg-gold { background-color: #c8a96b; } .text-gold { color: #c8a96b; } .border-gold { border-color: #c8a96b; } .bg-forest-light { background-color: #285542; } }
+@layer utilities { .bg-cream { background-color: #f7f7f3; } .text-ink { color: #17221d; } .bg-forest { background-color: #0D0D0D; } .text-forest { color: #D4AF37; } .bg-gold { background-color: #D4AF37; } .text-gold { color: #D4AF37; } .border-gold { border-color: #D4AF37; } .bg-forest-light { background-color: #1A1A1A; } }
 
 
 html, body, #root {
@@ -211,7 +211,7 @@ table {
 }
 
 .dashboard-depth-shell .bg-forest {
-  background-color: #173d32 !important;
+  background-color: #0D0D0D !important;
 }
 
 .dashboard-depth-shell .text-ink {
