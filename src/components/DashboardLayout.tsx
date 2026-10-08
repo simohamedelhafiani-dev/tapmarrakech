@@ -591,9 +591,9 @@ export function DashboardLayout() {
           <div className="mx-auto flex max-w-[1700px] items-center gap-3">
             <button type="button" onClick={() => navigate('/dashboard')} className="flex min-w-0 shrink-0 items-center gap-3 text-left" aria-label="Établissement actif">
               {activeEstablishment?.logo_url ? (
-                <img src={activeEstablishment.logo_url} alt={activeEstablishment.name} className="h-11 w-11 rounded-xl border border-[#242424] bg-white object-contain p-1" />
+                <img src={activeEstablishment.logo_url} alt={activeEstablishment.name} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = '/kelyani-final.svg'; }} className="h-11 w-11 rounded-xl border border-[#242424] bg-[#050505] object-contain p-1" />
               ) : (
-                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-[#242424] bg-[#111111] text-[#C9A45C]"><Building2 size={18} /></div>
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-[#242424] bg-[#111111]"><KelyaniMark size={26} /></div>
               )}
               <div className="hidden min-w-0 sm:block">
                 <p className="max-w-[180px] truncate text-sm font-semibold text-white">{activeEstablishment?.name || 'Votre établissement'}</p>
