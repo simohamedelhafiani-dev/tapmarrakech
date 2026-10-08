@@ -305,9 +305,6 @@ function RoleRedirect() {
   }
 
   if (!user) {
-    const scannerToken = window.localStorage.getItem('tapmarrakech:scanner-token');
-    if (scannerToken) return <Navigate to={`/employee?scanner=${scannerToken}`} replace />;
-
     return <Navigate to="/login" replace />;
   }
 

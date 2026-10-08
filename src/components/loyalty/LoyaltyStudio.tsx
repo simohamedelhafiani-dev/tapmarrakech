@@ -16,6 +16,7 @@ import {
   X,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   useLoyaltyManager,
   type LoyaltyProgramType,
@@ -128,6 +129,8 @@ function normalizeReward(row: Record<string, unknown>): Reward {
 
 export default function LoyaltyStudio({ establishmentId }: Props) {
   const manager = useLoyaltyManager(establishmentId);
+  const { role } = useAuth();
+  const isAdmin = role === 'admin';
   const [tab, setTab] = useState<TabId>('settings');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -242,6 +245,10 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       designHydratedRef.current = true;
     }
   };
+
+  useEffect(() => {
+    if (!isAdmin && tab === 'design') setTab('settings');
+  }, [isAdmin, tab]);
 
   useEffect(() => {
     designHydratedRef.current = false;
@@ -462,8 +469,10 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       await manager.saveReferralDraft(referral);
       if (publish) await manager.publishReferral();
 
-      await saveDesign(publish);
-      setDesign(current => ({ ...current, published: publish }));
+      if (isAdmin) {
+        await saveDesign(publish);
+        setDesign(current => ({ ...current, published: publish }));
+      }
       setMessage(publish ? 'Configuration publiée.' : 'Brouillon enregistré.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Impossible d’enregistrer.');
@@ -613,6 +622,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     );
   };
 
+  const visibleTabs = isAdmin ? TABS : TABS.filter(item => item.id !== 'design');
   const selectedTemplate = WALLET_TEMPLATES[design.templateId];
 
   if (loading) {
@@ -670,8 +680,8 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
         <div className="min-w-0">
           <div className="mb-5 overflow-x-auto rounded-2xl bg-[#111111] p-1.5">
-            <div className="grid min-w-[640px] grid-cols-4 gap-1">
-              {TABS.map(item => {
+            <div className={`grid gap-1 ${isAdmin ? 'min-w-[640px] grid-cols-4' : 'grid-cols-3'}`}>
+              {visibleTabs.map(item => {
                 const Icon = item.icon;
                 const active = tab === item.id;
                 return (
@@ -1049,7 +1059,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
             </div>
           )}
 
-          {tab === 'design' && (
+          {tab === 'design' && isAdmin && (
             <div className="space-y-5">
               <StudioCard eyebrow="Wallet" title="Choisir une identité">
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -1141,7 +1151,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
               <p className="mt-1 text-xs text-[#FFFFFF]/40">Aperçu permanent et synchronisé</p>
             </div>
             <span className="rounded-full bg-[#111111] px-3 py-1.5 text-[9px] font-bold uppercase tracking-[.12em] text-[#E1C27A]">
-              {TABS.find(item => item.id === tab)?.label}
+              {visibleTabs.find(item => item.id === tab)?.label}
             </span>
           </div>
 

@@ -416,10 +416,12 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
 
     let refreshTimeout: number | null = null;
     let disposed = false;
+    let refreshSequence = 0;
 
     const refreshCard = async () => {
       if (disposed) return;
 
+      const sequence = ++refreshSequence;
       setIsLiveRefreshing(true);
 
       const [
@@ -440,7 +442,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         supabase.rpc('get_public_loyalty_notifications', { p_access_token: token, p_limit: 20 }),
       ]);
 
-      if (disposed) return;
+      if (disposed || sequence !== refreshSequence) return;
 
       if (cardData?.[0]) setCard(cardData[0] as Card);
       setHistory((historyData ?? []) as HistoryItem[]);
@@ -482,7 +484,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
       // otherwise remain cached on a phone/PWA after a published upload.
       setLiveVersion(Date.now());
       requestAnimationFrame(() => {
-        if (!disposed) setIsLiveRefreshing(false);
+        if (!disposed && sequence === refreshSequence) setIsLiveRefreshing(false);
       });
     };
 
@@ -546,7 +548,26 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         },
         scheduleRefresh,
       )
-      .subscribe();
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'loyalty_card_notifications',
+          filter: `customer_id=eq.${card.customer_id}`,
+        },
+        scheduleRefresh,
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          scheduleRefresh();
+        }
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+          window.setTimeout(() => {
+            if (!disposed) scheduleRefresh();
+          }, 500);
+        }
+      });
 
     // Realtime is the primary path. This lightweight fallback only protects
     // installed PWAs/background tabs from missed websocket events.
@@ -621,7 +642,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
           </div>
         )}
 
-        <div style={{ width: '100vw', height: '100vh', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', left: '50%', transform: 'translateX(-50%)' }}>
+        <div className="flex w-full justify-center">
           <div className={isLiveRefreshing ? 'opacity-90 transition-opacity duration-200' : 'opacity-100 transition-opacity duration-200'}>
             <LoyaltyCardVisual
               design={{
@@ -659,7 +680,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                 cardUrl: cardUrl,
               }}
               programType={mode}
-              cardWidth="300px"
+              cardWidth="min(90vw, calc((100svh - 125px) * 0.666667))"
             />
           </div>
         </div>
@@ -736,7 +757,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
           <button
             type="button"
             onClick={() => void openReferral()}
-            className="mt-4 flex w-full items-center justify-center gap-3 rounded-2xl px-5 py-4 text-sm font-semibold shadow-[0_10px_30px_rgba(23,61,50,0.14)] transition hover:-translate-y-0.5 hover:shadow-lg"
+            className="mt-3 flex w-full items-center justify-center gap-3 rounded-2xl px-5 py-3.5 text-sm font-semibold shadow-[0_10px_30px_rgba(23,61,50,0.14)] transition hover:-translate-y-0.5 hover:shadow-lg"
             style={{
               backgroundColor: design.primary_color,
               color: design.text_color,
@@ -744,13 +765,81 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
             }}
           >
             <span
-              className="grid h-9 w-9 place-items-center rounded-full"
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-full"
               style={{ backgroundColor: design.secondary_color, color: design.primary_color }}
             >
               <Gift className="h-4 w-4" />
             </span>
             <span>🎁 Inviter un ami</span>
           </button>
+        )}
+
+        {notifications.length > 0 && (
+          <section className="mt-4 overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#111111] shadow-luxury">
+            <div className="flex items-center justify-between border-b border-white/8 px-5 py-4">
+              <div className="flex items-center gap-3">
+                <div
+                  className="grid h-10 w-10 place-items-center rounded-xl"
+                  style={{ backgroundColor: `${design.secondary_color}22`, color: design.secondary_color }}
+                >
+                  <Bell className="h-4 w-4" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-semibold text-white">Notifications</h2>
+                  <p className="mt-0.5 text-[10px] text-white/35">
+                    {notifications.filter(notification => !notification.is_read).length} non lue(s)
+                  </p>
+                </div>
+              </div>
+              {notifications.some(notification => !notification.is_read) && (
+                <span
+                  className="rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.12em]"
+                  style={{ backgroundColor: `${design.secondary_color}18`, color: design.secondary_color }}
+                >
+                  Nouveau
+                </span>
+              )}
+            </div>
+            <div className="divide-y divide-white/6">
+              {notifications.map(notification => (
+                <button
+                  key={notification.id}
+                  type="button"
+                  onClick={() => {
+                    if (notification.is_read) return;
+                    setNotifications(current =>
+                      current.map(item =>
+                        item.id === notification.id ? { ...item, is_read: true } : item
+                      )
+                    );
+                    void supabase.rpc('mark_public_loyalty_notification_read', {
+                      p_access_token: token,
+                      p_notification_id: notification.id,
+                    });
+                  }}
+                  className="w-full px-5 py-4 text-left transition hover:bg-white/[0.03]"
+                >
+                  <div className="flex items-start gap-3">
+                    <span
+                      className="mt-0.5 h-2 w-2 shrink-0 rounded-full"
+                      style={{ backgroundColor: notification.is_read ? 'rgba(255,255,255,.15)' : design.secondary_color }}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-3">
+                        <p className={`text-sm font-semibold ${notification.is_read ? 'text-white/55' : 'text-white'}`}>
+                          {notification.title}
+                        </p>
+                        <span className="shrink-0 text-[9px] text-white/25">
+                          {new Date(notification.created_at).toLocaleDateString('fr-FR')}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-xs leading-5 text-white/45">{notification.message}</p>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </section>
         )}
 
         {!isInstalled && (

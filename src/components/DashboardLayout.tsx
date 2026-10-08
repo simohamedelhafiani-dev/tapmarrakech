@@ -26,7 +26,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useLanguage, type Language } from '@/contexts/LanguageContext';
 import { getMySubscriptionAccess, getSubscriptionTheme, type SubscriptionTheme } from '@/lib/subscriptionAccess';
-import QRCode from 'qrcode';
+import KelyaniMark from '@/components/brand/KelyaniMark';
 
 const links = [
   {

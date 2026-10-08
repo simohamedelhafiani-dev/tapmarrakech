@@ -23,8 +23,11 @@ export default function LoyaltyJoin() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
+
   const [birthDay, setBirthDay] = useState('');
   const [birthMonth, setBirthMonth] = useState('');
+
+
   const [email, setEmail] = useState('');
   const [interests, setInterests] = useState<string[]>([]);
   const [preferredChannel, setPreferredChannel] = useState<'WHATSAPP' | 'SMS' | 'EMAIL' | 'PUSH' | 'NONE'>('WHATSAPP');
@@ -116,7 +119,7 @@ export default function LoyaltyJoin() {
             p_first_name: firstName.trim(),
             p_last_name: lastName.trim(),
             p_phone: phone.trim(),
-            p_birth_date: birthDate,
+  p_birth_date: birthDate || null,
             p_email: email.trim() || null,
             p_interests: interests,
             p_marketing_consent: marketingConsent,
@@ -253,6 +256,7 @@ export default function LoyaltyJoin() {
             <label className="block text-xs font-semibold text-white/55">Téléphone *<input value={phone} onChange={e => setPhone(e.target.value)} autoComplete="tel" inputMode="tel" className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-4 py-3 text-sm outline-none focus:border-[#C9A45C]" placeholder="+212 6 12 34 56 78" /></label>
             <label className="block text-xs font-semibold text-white/55">Email <span className="font-normal text-white/25">(facultatif)</span><input type="email" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-4 py-3 text-sm outline-none focus:border-[#C9A45C]" placeholder="vous@exemple.com" /></label>
             <div className="grid grid-cols-2 gap-3">
+
               <div className="block text-xs font-semibold text-white/55">
                 Anniversaire <span className="font-normal text-white/25">(facultatif)</span>
                 <div className="mt-1.5 grid grid-cols-2 gap-2">
