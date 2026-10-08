@@ -544,7 +544,7 @@ export default function Menu() {
           </div>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {menuTemplates.map((template) => (
-              <button key={template.id} type="button" onClick={() => void saveTemplate(template.id)} className={`rounded-2xl border p-4 text-left transition ${selectedTemplateId === template.id ? 'border-gold ring-2 ring-gold/15' : 'border-[#242424]/10 hover:border-gold/40'}`}>
+              {!isResponsible && ({!isResponsible && ({!isResponsible && ({!isResponsible && (<button key={template.id} type="button" onClick={() => void saveTemplate(template.id)} className={`rounded-2xl border p-4 text-left transition ${selectedTemplateId === template.id ? 'border-gold ring-2 ring-gold/15' : 'border-[#242424]/10 hover:border-gold/40'}`}>
                 <div className={`h-20 rounded-xl p-3 ${template.key === 'dark' ? 'bg-[#102B24]' : template.key === 'luxury' ? 'bg-[#F7F3EA]' : template.key === 'cards' ? 'bg-[#111111] border border-[#242424]/10' : 'bg-[#F3EEE2]'}`}>
                   <div className={`h-2 w-16 rounded-full ${template.key === 'dark' ? 'bg-gold' : 'bg-[#C9A45C]'}`} />
                   <div className={`mt-3 h-2 w-3/4 rounded-full ${template.key === 'dark' ? 'bg-[#111111]/20' : 'bg-ink/10'}`} />
@@ -591,13 +591,13 @@ export default function Menu() {
               ))}
             </select>
 
-            <a
+            {!isResponsible && (<a
               href="/dashboard/menu/design"
               className="flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-[#111111]/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#111111]/15"
             >
               <ImageIcon size={17} />
               Personnaliser le menu
-            </a>
+            </a>)}
 
             <button
               type="button"
@@ -736,9 +736,9 @@ export default function Menu() {
                     >
                       <Plus size={15} />
                       Produit
-                    </button>
+                    </button>)}
 
-                    <button
+                    {!isResponsible && (<button
                       type="button"
                       onClick={() => toggleCategory(category.id)}
                       className="grid h-9 w-9 place-items-center rounded-xl border border-[#242424]/10 text-[#F5F5DC]/50"
@@ -766,7 +766,7 @@ export default function Menu() {
                         >
                           <Plus size={15} />
                           Ajouter un produit
-                        </button>
+                        </button>)}
                       </div>
                     ) : (
                       <div className="grid gap-3">
@@ -831,7 +831,7 @@ export default function Menu() {
                                   ) : (
                                     <Eye size={15} />
                                   )}
-                                </button>
+                                </button>)}
 
                                 <button
                                   type="button"
@@ -840,7 +840,7 @@ export default function Menu() {
                                   title="Modifier"
                                 >
                                   <Edit3 size={15} />
-                                </button>
+                                </button>)}
 
                                 <button
                                   type="button"
@@ -849,7 +849,7 @@ export default function Menu() {
                                   title="Supprimer"
                                 >
                                   <Trash2 size={15} />
-                                </button>
+                                </button>)}
                               </div>
                             </div>
                           </div>
