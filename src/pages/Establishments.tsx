@@ -696,6 +696,29 @@ export default function Establishments() {
                 </label>
               ))}
 
+              <div className="rounded-2xl border border-gold/20 bg-[#111111] p-4 text-white">
+                <div className="flex items-start gap-3">
+                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]">
+                    <Bot size={18} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#D4AF37]">Google Business Profile</p>
+                    <p className="mt-1 text-[11px] text-white/50">Connectez le compte Google qui gère cette fiche pour synchroniser les avis et permettre à KELYANI de répondre automatiquement.</p>
+                    <button type="button" onClick={async () => {
+                      if (!editing) return;
+                      const { data, error } = await supabase.functions.invoke('google-business-oauth', { body: { action: 'start', establishment_id: editing } });
+                      if (error || !data?.authorization_url) {
+                        setMessage(error?.message || data?.error || 'Impossible de démarrer la connexion Google.');
+                        return;
+                      }
+                      window.open(data.authorization_url, '_blank', 'width=600,height=750');
+                    }} className="mt-3 rounded-xl bg-[#D4AF37] px-4 py-2.5 text-[11px] font-bold text-[#0D0D0D]">
+                      Connecter Google
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               <div className="rounded-2xl border border-gold/20 bg-[#f7f7f3] p-4">
                 <div className="flex items-start gap-3">
                   <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-gold">
