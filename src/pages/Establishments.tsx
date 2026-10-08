@@ -22,6 +22,8 @@ const empty = {
   slug: '',
   logo_url: '',
   google_review_url: '',
+  tripadvisor_review_url: '',
+  whatsapp_number: '',
   redirect_threshold: 4,
 };
 
@@ -180,6 +182,8 @@ export default function Establishments() {
         slug: normalizedSlug,
         logo_url: form.logo_url,
         google_review_url: form.google_review_url,
+        tripadvisor_review_url: form.tripadvisor_review_url,
+        whatsapp_number: form.whatsapp_number,
         redirect_threshold: form.redirect_threshold,
       };
 
