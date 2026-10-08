@@ -499,7 +499,6 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       background_image_url: design.wallpaperUrl,
       wallpaperUrl: design.wallpaperUrl,
       wallpaper_urls: design.wallpaperUrls,
-      wallpaper_urls: design.wallpaperUrls,
       logo_url: design.logoUrl || establishment.logoUrl,
       loyaltyType: program.programType,
       card_mode: program.programType,
