@@ -429,6 +429,9 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
 
     return () => {
       void supabase.removeChannel(channel);
+      for (const broadcastChannel of broadcastChannels) {
+        void supabase.removeChannel(broadcastChannel);
+      }
     };
   }, [card?.establishment_id]);
 
@@ -665,6 +668,32 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
           }, 500);
         }
       });
+
+    // Database Broadcast is the authoritative refresh signal for the public
+    // card. It covers tables whose Postgres Changes delivery is intentionally
+    // blocked by RLS (customer data and private notifications) without
+    // exposing any customer data in the broadcast payload.
+    const broadcastChannels = [
+      supabase
+        .channel(`loyalty-card-customer:${card.customer_id}`)
+        .on('broadcast', { event: 'loyalty-card-refresh' }, scheduleRefresh),
+      supabase
+        .channel(`loyalty-card-establishment:${card.establishment_id}`)
+        .on('broadcast', { event: 'loyalty-card-refresh' }, scheduleRefresh),
+    ];
+
+    for (const broadcastChannel of broadcastChannels) {
+      broadcastChannel.subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          scheduleRefresh();
+        }
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+          window.setTimeout(() => {
+            if (!disposed) scheduleRefresh();
+          }, 500);
+        }
+      });
+    }
 
     // Realtime is the primary path. This lightweight fallback only protects
     // installed PWAs/background tabs from missed websocket events.
