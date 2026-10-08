@@ -19,6 +19,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import LoyaltyStudio from '@/components/loyalty/LoyaltyStudio';
 import QRCode from 'qrcode';
+import { sendLoyaltyNotificationPush } from '@/lib/loyaltyNotificationPush';
 
 type Establishment = {
   id: string;
@@ -472,6 +473,13 @@ export default function Loyalty() {
     const result = Array.isArray(data) ? data[0] : data;
     const count = Number(result?.recipient_count ?? notificationEligibleCustomers.length);
 
+    // The card feed is stored in the database immediately. The push delivery
+    // is separate so a temporary push-service issue never blocks the campaign.
+    const campaignId = result?.campaign_id ? String(result.campaign_id) : '';
+    const pushResult = campaignId
+      ? await sendLoyaltyNotificationPush(campaignId)
+      : { success: false, sent: 0, error: 'campaign_id manquant' };
+
     setNotificationTitle('');
     setNotificationMessage('');
     setNotificationType('INFO');
@@ -484,7 +492,11 @@ export default function Loyalty() {
     setNotificationCustomerId('');
     setNotificationExpiresAt('');
     setShowNotificationModal(false);
-    alert(`Notification publiée sur ${count} carte(s) fidélité.`);
+    alert(
+      pushResult.success && pushResult.sent > 0
+        ? `Notification publiée sur ${count} carte(s) fidélité. ${pushResult.sent} notification(s) système envoyée(s).`
+        : `Notification publiée sur ${count} carte(s) fidélité. Les notifications système seront disponibles pour les clients ayant activé les notifications.`
+    );
 
   }
 

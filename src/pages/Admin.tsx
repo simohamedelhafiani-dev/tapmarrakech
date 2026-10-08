@@ -54,6 +54,7 @@ import ProfileForm from '@/components/admin/ProfileForm';
 import WifiForm from '@/components/admin/WifiForm';
 import GoogleReputationModule from '@/components/admin/GoogleReputationModule';
 import MenuStudio from '@/components/admin/menu/MenuStudio';
+import LoyaltyNotificationsPanel from '@/components/admin/LoyaltyNotificationsPanel';
 import { useRecentActivity } from '@/hooks/useRecentActivity';
 import { useRecentLoyaltyCustomers } from '@/hooks/useRecentLoyaltyCustomers';
 import { useAdminOverviewStats } from '@/hooks/useAdminOverviewStats';
@@ -1972,6 +1973,8 @@ function EstablishmentWorkspace({
             <StatCard label="Récompenses" value={rewards.length} />
             <StatCard label="Programme" value={loyalty.enabled ? 'Actif' : 'Inactif'} />
           </div>
+
+          <LoyaltyNotificationsPanel establishmentId={establishment.id} />
 
           <div className="grid gap-5 md:grid-cols-2">
             <div className="rounded-3xl border border-[#242424] bg-[#111111] p-5">
