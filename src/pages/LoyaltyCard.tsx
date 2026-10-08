@@ -936,9 +936,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                   onClick={() => {
                     if (notification.is_read) return;
                     setNotifications(current =>
-                      current.map(item =>
-                        item.id === notification.id ? { ...item, is_read: true } : item
-                      )
+                      current.filter(item => item.id !== notification.id)
                     );
                     void supabase.rpc('mark_public_loyalty_notification_read', {
                       p_access_token: token,
@@ -1025,9 +1023,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                   onClick={() => {
                     if (notification.is_read) return;
                     setNotifications(current =>
-                      current.map(item =>
-                        item.id === notification.id ? { ...item, is_read: true } : item
-                      )
+                      current.filter(item => item.id !== notification.id)
                     );
                     void supabase.rpc('mark_public_loyalty_notification_read', {
                       p_access_token: token,
