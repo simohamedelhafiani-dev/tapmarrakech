@@ -829,7 +829,7 @@ export default function Reviews() {
               </div>
 
               <span className="rounded-lg border border-ink/5 bg-[#f7f7f3] px-3 py-2 text-xs font-semibold text-ink/50">
-                ${review.status}
+                {review.status}
               </span>
             </div>
           </div>
