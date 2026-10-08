@@ -14,6 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import type { Review } from '@/lib/types';
 import { Stars } from '@/components/Stars';
+import GoogleReputationModule from '@/components/admin/GoogleReputationModule';
 
 type SatisfactionFeedback = { id: string; customer_name: string | null; rating: number; comment: string | null; points_awarded: number; created_at: string; };
 type SatisfactionSummary = { average_rating: number; total_feedback: number; negative_count: number; };
@@ -214,32 +215,6 @@ export default function Reviews() {
       );
     });
   }, [reviews, status, rating, search]);
-
-  const update = async (
-    id: string,
-    next: Review['status']
-  ) => {
-    const { error } = await supabase
-      .from('reviews')
-      .update({ status: next })
-      .eq('id', id);
-
-    if (error) {
-      console.error(
-        'Erreur mise à jour statut:',
-        error
-      );
-      return;
-    }
-
-    setReviews((current) =>
-      current.map((review) =>
-        review.id === id
-          ? { ...review, status: next }
-          : review
-      )
-    );
-  };
 
   const analyzeReviews = async () => {
     if (!reviews.length) {
@@ -442,6 +417,8 @@ export default function Reviews() {
         </div>
         {satisfactionFeedback.length > 0 ? <div className="divide-y divide-[#242424]">{satisfactionFeedback.slice(0, 8).map(item => <div key={item.id} className="flex flex-col gap-2 p-5 sm:flex-row sm:items-start sm:justify-between"><div><div className="flex items-center gap-2"><span className="font-semibold text-white">{item.customer_name || 'Client'}</span><span className="text-[#D4AF37]">{'★'.repeat(item.rating)}<span className="text-white/15">{'★'.repeat(5 - item.rating)}</span></span></div>{item.comment && <p className="mt-1 text-sm leading-6 text-white/55">{item.comment}</p>}</div><div className="shrink-0 text-[10px] text-white/30">{new Date(item.created_at).toLocaleDateString('fr-FR')}</div></div>)}</div> : <div className="p-8 text-center text-xs text-white/35">Aucun feedback fidélité pour le moment.</div>}
       </section>
+
+      <GoogleReputationModule canManage={false} />
 
       {/* ERREUR IA */}
       {aiError && (
@@ -851,26 +828,9 @@ export default function Reviews() {
                   ` · ${review.phone}`}
               </div>
 
-              <select
-                value={review.status}
-                onChange={(e) =>
-                  update(
-                    review.id,
-                    e.target.value as Review['status']
-                  )
-                }
-                className={`rounded-lg border-0 px-3 py-2 text-xs font-semibold outline-none ${
-                  review.status === 'Nouveau'
-                    ? 'bg-[#f4e4e1] text-[#a15c50]'
-                    : review.status === 'En cours'
-                      ? 'bg-[#f4ead3] text-[#8b6b2c]'
-                      : 'bg-[#e5eee9] text-forest'
-                }`}
-              >
-                <option>Nouveau</option>
-                <option>En cours</option>
-                <option>Traité</option>
-              </select>
+              <span className="rounded-lg border border-ink/5 bg-[#f7f7f3] px-3 py-2 text-xs font-semibold text-ink/50">
+                ${review.status}
+              </span>
             </div>
           </div>
         ))}
