@@ -301,10 +301,10 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
         background_image_url: draft.wallpaperRemoved ? null : wallpaperUrl,
       };
 
-      const { error: templateError } = await supabase.rpc('update_establishment_menu_template', {
-        p_establishment_id: establishmentId,
-        p_menu_template_id: draft.template,
-      });
+      const { error: templateError } = await supabase
+        .from('establishments')
+        .update({ menu_template_id: draft.template })
+        .eq('id', establishmentId);
 
       if (templateError) throw templateError;
 
