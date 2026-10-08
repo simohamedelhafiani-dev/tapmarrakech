@@ -61,6 +61,7 @@ type DesignState = {
   buttonColor: string;
   borderRadius: number;
   wallpaperUrl: string | null;
+  wallpaperUrls: string[];
   logoUrl: string | null;
   stampStyle: 'circles' | 'squares' | 'stars' | 'hearts';
   published: boolean;
@@ -75,6 +76,7 @@ const DEFAULT_DESIGN: DesignState = {
   buttonColor: '#181818',
   borderRadius: 34,
   wallpaperUrl: null,
+  wallpaperUrls: [],
   logoUrl: null,
   stampStyle: 'circles',
   published: false,
@@ -233,6 +235,9 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
           buttonColor: row.button_color ?? DEFAULT_DESIGN.buttonColor,
           borderRadius: Number(row.border_radius ?? DEFAULT_DESIGN.borderRadius),
           wallpaperUrl: cfg.background_image_url ?? cfg.wallpaperUrl ?? null,
+          wallpaperUrls: Array.isArray(cfg.wallpaper_urls)
+            ? cfg.wallpaper_urls.filter((url: unknown): url is string => typeof url === 'string' && url.length > 0)
+            : (cfg.background_image_url ?? cfg.wallpaperUrl ? [cfg.background_image_url ?? cfg.wallpaperUrl] : []),
           logoUrl: cfg.logo_url ?? place?.logo_url ?? null,
           stampStyle: cfg.stamp_style ?? 'circles',
           published: Boolean(row.published),
@@ -318,6 +323,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       const designConfig = {
         background_image_url: design.wallpaperUrl,
         wallpaperUrl: design.wallpaperUrl,
+        wallpaper_urls: design.wallpaperUrls,
         logo_url: design.logoUrl || establishment.logoUrl,
         loyaltyType: program.programType,
         card_mode: program.programType,
@@ -388,6 +394,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
         designConfig: {
           background_image_url: design.wallpaperUrl,
           wallpaperUrl: design.wallpaperUrl,
+          wallpaper_urls: design.wallpaperUrls,
           logo_url: design.logoUrl || establishment.logoUrl,
           loyaltyType: program.programType,
           card_mode: program.programType,
@@ -440,8 +447,14 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       if (error) throw error;
 
       const { data } = supabase.storage.from('promotion-images').getPublicUrl(path);
-      setDesign(current => ({ ...current, wallpaperUrl: data.publicUrl, published: false }));
-      setMessage('Wallpaper prêt dans le miroir.');
+      setDesign(current => {
+        const wallpaperUrl = data.publicUrl;
+        const wallpaperUrls = current.wallpaperUrls.includes(wallpaperUrl)
+          ? current.wallpaperUrls
+          : [...current.wallpaperUrls, wallpaperUrl];
+        return { ...current, wallpaperUrl, wallpaperUrls, published: false };
+      });
+      setMessage('Wallpaper ajouté à la bibliothèque.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Upload impossible.');
     } finally {
@@ -485,6 +498,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     const designConfig = {
       background_image_url: design.wallpaperUrl,
       wallpaperUrl: design.wallpaperUrl,
+      wallpaper_urls: design.wallpaperUrls,
       logo_url: design.logoUrl || establishment.logoUrl,
       loyaltyType: program.programType,
       card_mode: program.programType,
@@ -1094,16 +1108,19 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   <div>
                     <p className="text-sm font-semibold text-[#E1C27A]">Image immersive</p>
                     <p className="mt-1 text-[10px] leading-4 text-[#FFFFFF]/40">
-                      Le wallpaper est recadré automatiquement en cover pour rester élégant sur mobile et desktop.
+                      Ajoutez plusieurs wallpapers et choisissez celui qui sera actif sur la carte.
                     </p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       <button type="button" onClick={() => wallpaperInput.current?.click()} className="inline-flex items-center gap-2 rounded-xl border border-[#C9A45C]/20 bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#E1C27A]">
                         <ImagePlus size={14} />
-                        {design.wallpaperUrl ? 'Remplacer' : 'Choisir une image'}
+                        Ajouter un wallpaper
                       </button>
                       {design.wallpaperUrl && (
-                        <button type="button" onClick={() => setDesign(current => ({ ...current, wallpaperUrl: null, published: false }))} className="rounded-xl border border-[#242424] px-4 py-2.5 text-xs font-semibold text-[#E1C27A]">
-                          Retirer
+                        <button type="button" onClick={() => setDesign(current => {
+                          const wallpaperUrls = current.wallpaperUrls.filter(url => url !== current.wallpaperUrl);
+                          return { ...current, wallpaperUrl: wallpaperUrls[0] ?? null, wallpaperUrls, published: false };
+                        })} className="rounded-xl border border-[#242424] px-4 py-2.5 text-xs font-semibold text-[#E1C27A]">
+                          Retirer l'actif
                         </button>
                       )}
                     </div>
@@ -1113,6 +1130,30 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                     {design.wallpaperUrl ? <img src={design.wallpaperUrl} alt="" className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-[10px] text-[#FFFFFF]/25">Aucun wallpaper</div>}
                   </div>
                 </div>
+                {design.wallpaperUrls.length > 0 && (
+                  <div className="mt-4 rounded-2xl border border-[#242424] bg-[#0B0B0B] p-3">
+                    <div className="mb-3 flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#FFFFFF]/45">Bibliothèque de wallpapers</p>
+                        <p className="mt-1 text-[10px] text-[#FFFFFF]/30">Cliquez sur une image pour la rendre active.</p>
+                      </div>
+                      <span className="rounded-full bg-[#C9A45C]/10 px-2.5 py-1 text-[9px] font-semibold text-[#E1C27A]">
+                        {design.wallpaperUrls.length}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                      {design.wallpaperUrls.map(url => {
+                        const active = url === design.wallpaperUrl;
+                        return (
+                          <button key={url} type="button" onClick={() => setDesign(current => ({ ...current, wallpaperUrl: url, published: false }))} className={`relative aspect-[3/4] overflow-hidden rounded-xl border ${active ? 'border-[#E1C27A] ring-2 ring-[#E1C27A]/20' : 'border-[#242424]'}`}>
+                            <img src={url} alt="" className="h-full w-full object-cover transition group-hover:scale-105" />
+                            {active && <span className="absolute bottom-1.5 left-1.5 rounded-full bg-[#E1C27A] px-2 py-0.5 text-[8px] font-bold text-[#111111]">ACTIF</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </StudioCard>
 
               <StudioCard eyebrow="Palette" title="Couleurs personnalisées">
