@@ -142,16 +142,39 @@ export default function LoyaltyNotificationsPanel({ establishmentId }: { establi
       const count = Number(result?.recipient_count ?? eligibleCustomers.length);
       const campaignId = result?.campaign_id ? String(result.campaign_id) : '';
 
+      let pushResult: Awaited<ReturnType<typeof sendLoyaltyNotificationPush>> | null = null;
+
       if (campaignId) {
-        const push = await sendLoyaltyNotificationPush(campaignId);
-        if (push.failed > 0) {
-          console.warn('Push delivery partiellement échouée:', push);
-        }
+        pushResult = await sendLoyaltyNotificationPush(campaignId);
+        console.log('Résultat Web Push KELYANI:', pushResult);
       }
 
       reset();
       setOpen(false);
-      alert(`Notification publiée sur ${count} carte(s) fidélité. Les clients ayant activé les notifications recevront également la notification système.`);
+
+      if (!pushResult) {
+        alert(`Notification publiée sur ${count} carte(s) fidélité. Le canal de notification système n'a pas pu être déclenché.`);
+      } else if (pushResult.success && pushResult.sent > 0) {
+        alert(
+          `Notification publiée sur ${count} carte(s) fidélité. 📱 Push système envoyé à ${pushResult.sent} appareil(s).`
+        );
+      } else if (pushResult.push_subscribers === 0) {
+        alert(
+          `Notification publiée sur ${count} carte(s) fidélité, mais aucun abonnement de notification système actif n'a été trouvé.`
+        );
+      } else if (pushResult.failed > 0) {
+        const detail =
+          pushResult.errors?.[0]?.message ||
+          pushResult.error ||
+          'Erreur Web Push inconnue.';
+        alert(
+          `Notification publiée sur ${count} carte(s), mais le Push système a échoué.\\n\\n${detail}`
+        );
+      } else {
+        alert(
+          `Notification publiée sur ${count} carte(s) fidélité. Aucun Push système n'a été confirmé.`
+        );
+      }
     } catch (error) {
       console.error('Erreur notification fidélité:', error);
       alert(error instanceof Error ? error.message : 'Impossible de publier la notification.');
