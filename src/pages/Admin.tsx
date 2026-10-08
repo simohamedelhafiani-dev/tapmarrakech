@@ -40,7 +40,7 @@ import {
   FileText,
   Gem,
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import KelyaniMark from '@/components/brand/KelyaniMark';
@@ -150,8 +150,26 @@ export default function Admin() {
   const { language, setLanguage } = useLanguage();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [section, setSection] = useState<AdminSection>('overview');
+  const sectionFromPath = (pathname: string): AdminSection => {
+    const slug = pathname.replace(/^\/admin\/?/, '').split('/')[0];
+    const validSections: AdminSection[] = [
+      'overview', 'establishments', 'responsibles', 'employees', 'reviews',
+      'analysis', 'ai', 'analytics', 'reports', 'billing', 'loyalty', 'system',
+    ];
+    return validSections.includes(slug as AdminSection) ? slug as AdminSection : 'overview';
+  };
+
+  const pathForSection = (nextSection: AdminSection) =>
+    nextSection === 'overview' ? '/admin' : `/admin/${nextSection}`;
+
+  const [section, setSection] = useState<AdminSection>(() => sectionFromPath(window.location.pathname));
+
+  useEffect(() => {
+    const nextSection = sectionFromPath(location.pathname);
+    setSection(nextSection);
+  }, [location.pathname]);
   const [open, setOpen] = useState(false);
 
   const [establishments, setEstablishments] = useState<Establishment[]>([]);
@@ -226,9 +244,9 @@ export default function Admin() {
 
   const selectSearchResult = (result: { type: 'establishment' | 'customer' | 'review'; establishmentId?: string }) => {
     if (result.establishmentId) setSelectedEstablishmentId(result.establishmentId);
-    if (result.type === 'establishment') setSection('establishments');
-    else if (result.type === 'customer') setSection('loyalty');
-    else setSection('reviews');
+    if (result.type === 'establishment') navigate('/admin/establishments');
+    else if (result.type === 'customer') navigate('/admin/loyalty');
+    else navigate('/admin/reviews');
     setSearchQuery('');
     setSearchOpen(false);
   };
@@ -547,7 +565,7 @@ export default function Admin() {
     <div className="admin-depth-shell min-h-screen bg-[#050505] text-[#EDE9DF] selection:bg-[#C9A45C]/30">
       <header className="admin-depth-topbar sticky top-0 z-50 border-b border-[#242424] bg-[#050505]/95 px-3 py-3 backdrop-blur-2xl sm:px-5">
         <div className="mx-auto flex max-w-[1700px] items-center gap-3">
-          <button type="button" onClick={() => setSection('overview')} className="flex shrink-0 items-center gap-3 text-left" aria-label="KELYANI">
+          <button type="button" onClick={() => navigate('/admin')} className="flex shrink-0 items-center gap-3 text-left" aria-label="KELYANI">
             <KelyaniMark size={72} />
             <div className="hidden sm:block leading-none">
               <p className="font-display text-xl font-semibold tracking-[.08em] text-[#E1C27A]">KELYANI</p>
@@ -730,7 +748,7 @@ export default function Admin() {
                 key={id}
                 type="button"
                 onClick={() => {
-                  setSection(id);
+                  navigate(pathForSection(id));
                   if (id === 'loyalty' && !selectedEstablishmentId && establishments[0]) setSelectedEstablishmentId(establishments[0].id);
                 }}
                 aria-label={label}
