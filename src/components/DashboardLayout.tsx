@@ -22,7 +22,6 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
-import KelyaniMark from '@/components/brand/KelyaniMark';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useLanguage, type Language } from '@/contexts/LanguageContext';
