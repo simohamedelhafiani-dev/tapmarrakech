@@ -122,8 +122,8 @@ Deno.serve(async (req) => {
         }, JSON.stringify({
           title: campaign.title,
           body: campaign.message,
-          icon: '/kelyani-logo.png',
-          badge: '/kelyani-logo.png',
+          icon: '/kelyani-final.svg',
+          badge: '/kelyani-final.svg',
           tag: 'loyalty-campaign-' + campaign.id,
           renotify: true,
           data: { url: sub.card_url || '/loyalty', campaignId: campaign.id },
