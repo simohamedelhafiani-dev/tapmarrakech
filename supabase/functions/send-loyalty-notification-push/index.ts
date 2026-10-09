@@ -36,7 +36,10 @@ Deno.serve(async (req) => {
     const campaignId = String(body.campaign_id ?? '').trim();
     if (!campaignId) return json({ success: false, error: 'campaign_id obligatoire.' }, 400);
 
-    const { data: campaign, error: campaignError } = await userClient
+    // Campaign tables are intentionally service-role-only under RLS, so load the row
+    // with the service client and independently authorize the caller before any delivery.
+    const admin = createClient(url, service, { auth: { persistSession: false, autoRefreshToken: false } });
+    const { data: campaign, error: campaignError } = await admin
       .from('loyalty_notification_campaigns')
       .select('id,establishment_id,title,message,type')
       .eq('id', campaignId)
@@ -48,8 +51,6 @@ Deno.serve(async (req) => {
       (item: Record<string, unknown>) => String(item.id ?? '') === String(campaign.establishment_id),
     );
     if (!allowed) return json({ success: false, error: 'Accès à cet établissement refusé.' }, 403);
-
-    const admin = createClient(url, service, { auth: { persistSession: false, autoRefreshToken: false } });
     // card_url belongs to the push-subscription table, not loyalty_card_notifications.
     const { data: recipients, error: recipientError } = await admin
       .from('loyalty_card_notifications')
