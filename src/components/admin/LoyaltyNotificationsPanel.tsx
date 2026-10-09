@@ -72,6 +72,7 @@ export default function LoyaltyNotificationsPanel({ establishmentId }: { establi
       alert(error instanceof Error ? error.message : 'Impossible de renvoyer la notification.');
     } finally {
       setResendingId(null);
+      void loadHistory();
     }
   };
 
