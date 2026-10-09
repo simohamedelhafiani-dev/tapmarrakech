@@ -32,5 +32,11 @@ jobs:
         run: npm ci
       - name: TypeScript typecheck
         run: npm run typecheck
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Check Web Push Edge Function
+        run: deno check supabase/functions/send-loyalty-notification-push/index.ts
       - name: Production build
         run: npm run build
