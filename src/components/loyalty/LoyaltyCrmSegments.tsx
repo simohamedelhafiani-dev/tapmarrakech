@@ -26,7 +26,7 @@ const SEGMENTS: { id: SegmentId; label: string; hint: string; icon: typeof Users
   { id: 'active', label: 'Actifs', hint: 'Visite dans les 30 jours', icon: UserCheck },
   { id: 'at_risk', label: 'À risque', hint: 'Dernière visite il y a 31 à 60 jours', icon: AlertTriangle },
   { id: 'inactive', label: 'Inactifs', hint: 'Aucune visite depuis plus de 60 jours', icon: UserX },
-  { id: 'birthdays', label: 'Anniversaires', hint: 'Anniversaire ce mois-ci', icon: Cake },
+  { id: 'birthdays', label: 'Anniversaires', hint: 'Anniversaire aujourd’hui', icon: Cake },
   { id: 'loyal', label: 'Clients fidèles', hint: '5 visites ou plus, ou 500 points', icon: Star },
 ];
 
@@ -84,7 +84,7 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
       if (segment === 'active') inSegment = days !== null && days <= 30;
       if (segment === 'at_risk') inSegment = days !== null && days >= 31 && days <= 60;
       if (segment === 'inactive') inSegment = days === null || days > 60;
-      if (segment === 'birthdays') inSegment = customer.birth_month === now.getMonth() + 1;
+      if (segment === 'birthdays') inSegment = customer.birth_day === now.getDate() && customer.birth_month === now.getMonth() + 1;
       if (segment === 'loyal') inSegment = customer.visit_count >= 5 || customer.points_balance >= 500;
       const fullName = [customer.first_name, customer.last_name ?? ''].join(' ').toLocaleLowerCase();
       const matchesSearch = !needle || fullName.includes(needle) || customer.phone.includes(needle) || (customer.email ?? '').toLocaleLowerCase().includes(needle);
@@ -126,7 +126,7 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
       active: customers.filter(c => { const d = daysSince(c.last_visit_at); return d !== null && d <= 30; }).length,
       atRisk: customers.filter(c => { const d = daysSince(c.last_visit_at); return d !== null && d >= 31 && d <= 60; }).length,
       inactive: customers.filter(c => { const d = daysSince(c.last_visit_at); return d === null || d > 60; }).length,
-      birthdays: customers.filter(c => c.birth_month === now.getMonth() + 1).length,
+      birthdays: customers.filter(c => c.birth_day === now.getDate() && c.birth_month === now.getMonth() + 1).length,
     };
   }, [customers]);
 
@@ -152,7 +152,7 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
           { label: 'Actifs · 30 j', value: counts.active, icon: UserCheck },
           { label: 'À risque · 31–60 j', value: counts.atRisk, icon: AlertTriangle },
           { label: 'Inactifs · +60 j', value: counts.inactive, icon: UserX },
-          { label: 'Anniversaires du mois', value: counts.birthdays, icon: Cake },
+          { label: 'Anniversaires aujourd’hui', value: counts.birthdays, icon: Cake },
         ].map(item => { const Icon = item.icon; return (
           <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[.025] p-4">
             <div className="flex items-center justify-between gap-2 text-white/45"><span className="text-xs">{item.label}</span><Icon size={15} className="text-[#D4AF37]" /></div>
