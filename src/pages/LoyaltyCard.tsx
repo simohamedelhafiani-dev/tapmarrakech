@@ -97,6 +97,7 @@ export default function LoyaltyCard() {
   const [notifications, setNotifications] = useState<CardNotification[]>([]);
   const [raffleWins, setRaffleWins] = useState<RaffleWinner[]>([]);
   const [activeRaffle, setActiveRaffle] = useState<ActiveRaffle | null>(null);
+  const [raffleLoadError, setRaffleLoadError] = useState('');
   const [raffleDetailsOpen, setRaffleDetailsOpen] = useState(false);
   const [customerTier, setCustomerTier] = useState<CustomerTier | null>(null);
   const [rewards, setRewards] = useState<LoyaltyExperienceReward[]>([]);
@@ -204,14 +205,23 @@ export default function LoyaltyCard() {
     if (!card?.customer_id || !token) return;
     let cancelled = false;
     void (async () => {
-      const { data, error } = await supabase.rpc('get_public_loyalty_raffles', { p_access_token: token });
-      if (cancelled || error) return;
+      setRaffleLoadError('');
+      const { data, error: raffleError } = await supabase.rpc('get_public_loyalty_raffles', { p_access_token: token });
+      if (cancelled) return;
+      if (raffleError) {
+        console.error('[KELYANI] Impossible de charger les tombolas de la carte:', raffleError);
+        setActiveRaffle(null);
+        setRaffleLoadError('Impossible de charger les tombolas pour cette carte. Réessayez dans un instant.');
+        return;
+      }
       const rows = Array.isArray(data) ? data : data ? [data] : [];
       const now = Date.now();
       const current = (rows as ActiveRaffle[])
         .filter(raffle => new Date(raffle.starts_at).getTime() <= now && new Date(raffle.draw_at).getTime() > now)
         .sort((a, b) => new Date(a.draw_at).getTime() - new Date(b.draw_at).getTime())[0] ?? null;
       setActiveRaffle(current);
+      setRaffleLoadError('');
+      console.info('[KELYANI] Tombolas reçues pour la carte:', { received: rows.length, active: Boolean(current) });
     })();
     return () => { cancelled = true; };
   }, [card?.customer_id, token]);
@@ -741,6 +751,12 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
             />
           </div>
         </div>
+
+        {raffleLoadError && (
+          <div role="status" className="mt-4 w-full rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-xs leading-5 text-amber-100">
+            {raffleLoadError}
+          </div>
+        )}
 
         {activeRaffle && (
           <section className="mt-4 overflow-hidden rounded-2xl border shadow-lg transition-colors duration-300" style={{ backgroundColor: design.background_color, color: readableTextColor(design.background_color), borderColor: design.secondary_color }}>
