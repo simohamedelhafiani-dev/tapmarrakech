@@ -69,6 +69,12 @@ begin
 end;
 $function$;
 
-revoke execute on function public.register_loyalty_push_subscription(uuid, jsonb) from public, anon, authenticated;
+do $
+begin
+  if to_regprocedure('public.register_loyalty_push_subscription(uuid,jsonb)') is not null then
+    execute 'revoke execute on function public.register_loyalty_push_subscription(uuid, jsonb) from public, anon, authenticated';
+  end if;
+end
+$;
 revoke execute on function public.register_loyalty_push_subscription(uuid, jsonb, text) from public, anon, authenticated;
 grant execute on function public.register_loyalty_push_subscription(uuid, jsonb, text) to anon, authenticated;
