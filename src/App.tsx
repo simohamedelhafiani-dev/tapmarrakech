@@ -28,7 +28,6 @@ import Admin from '@/pages/Admin';
 import AdminOverview from '@/pages/AdminOverview';
 import AdminOverviewV2 from '@/pages/AdminOverviewV2';
 import AdminStatCardTest from '@/pages/AdminStatCardTest';
-import Employee from '@/pages/Employee';
 import LoyaltyScanner from '@/pages/LoyaltyScanner';
 
 type EstablishmentRow = {
@@ -244,17 +243,8 @@ function App() {
             </Route>
           </Route>
 
-          {/* L'employé possède sa propre session par code. */}
-          <Route
-            path="/employee"
-            element={
-              new URLSearchParams(window.location.search).has('scanner') ? (
-                <LoyaltyScanner />
-              ) : (
-                <Employee />
-              )
-            }
-          />
+          {/* Parcours scanner fidélité conservé ; l'espace employé séparé n'est plus utilisé. */}
+          <Route path="/employee" element={<LoyaltyScanner />} />
 
           <Route path="*" element={<RoleRedirect />} />
           </Routes>
