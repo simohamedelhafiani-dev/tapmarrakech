@@ -20,10 +20,15 @@ import Dashboard from '@/pages/Dashboard';
 import Reviews from '@/pages/Reviews';
 import Analytics from '@/pages/Analytics';
 import Loyalty from '@/pages/Loyalty';
+import LoyaltyRaffles from '@/pages/LoyaltyRaffles';
 import Menu from '@/pages/Menu';
 import MenuDesign from '@/pages/MenuDesign';
 import Promotions from '@/pages/Promotions';
 import Admin from '@/pages/Admin';
+import AdminOverview from '@/pages/AdminOverview';
+import AdminOverviewV2 from '@/pages/AdminOverviewV2';
+import AdminStatCardTest from '@/pages/AdminStatCardTest';
+import Employee from '@/pages/Employee';
 import LoyaltyScanner from '@/pages/LoyaltyScanner';
 
 type EstablishmentRow = {
@@ -167,7 +172,10 @@ function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
 
           <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
-            <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/*" element={<Admin />} />
+            <Route path="/admin/overview-test" element={<AdminOverview />} />
+            <Route path="/admin/overview-v2" element={<AdminOverviewV2 />} />
+            <Route path="/admin/statcard-test" element={<AdminStatCardTest />} />
           </Route>
 
           <Route element={<ProtectedRoute allowedRoles={['responsible']} />}>
@@ -222,14 +230,31 @@ function App() {
                 }
               />
               <Route
+                path="/dashboard/loyalty/raffles"
+                element={
+                  <SubscriptionFeatureRoute feature="loyalty">
+                    <LoyaltyRaffles />
+                  </SubscriptionFeatureRoute>
+                }
+              />
+              <Route
                 path="/dashboard/loyalty/settings"
                 element={<Navigate to="/dashboard/loyalty" replace />}
               />
             </Route>
           </Route>
 
-          {/* Scanner fidélité public lié à un établissement. */}
-          <Route path="/employee" element={<LoyaltyScanner />} />
+          {/* L'employé possède sa propre session par code. */}
+          <Route
+            path="/employee"
+            element={
+              new URLSearchParams(window.location.search).has('scanner') ? (
+                <LoyaltyScanner />
+              ) : (
+                <Employee />
+              )
+            }
+          />
 
           <Route path="*" element={<RoleRedirect />} />
           </Routes>
