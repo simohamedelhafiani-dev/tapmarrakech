@@ -23,17 +23,22 @@ set search_path = public
 as $$
 declare
   v_establishment_id uuid;
+  v_campaign_status text;
   v_claimed integer := 0;
 begin
   if auth.uid() is null then
     raise exception 'Authentification requise';
   end if;
 
-  select c.establishment_id into v_establishment_id
+  select c.establishment_id, c.status
+    into v_establishment_id, v_campaign_status
   from public.loyalty_notification_campaigns c
   where c.id = p_campaign_id;
   if v_establishment_id is null then
     raise exception 'Campagne introuvable';
+  end if;
+  if v_campaign_status <> 'PUBLISHED' then
+    raise exception 'Campagne non publiable ou annulée';
   end if;
   if not public.user_has_establishment_access(v_establishment_id) then
     raise exception 'Accès à cet établissement refusé';
