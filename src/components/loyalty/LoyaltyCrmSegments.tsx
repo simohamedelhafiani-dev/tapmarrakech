@@ -74,13 +74,24 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
     setLoading(true);
     setError('');
     try {
-      const { data, error: requestError } = await supabase
-        .from('loyalty_customers')
-        .select('id,first_name,last_name,phone,email,points_balance,visit_count,last_visit_at,birth_day,birth_month,marketing_consent,notification_consent,preferred_channel,created_at')
-        .eq('establishment_id', establishmentId)
-        .order('last_visit_at', { ascending: false, nullsFirst: false });
-      if (requestError) throw requestError;
-      setCustomers((data ?? []) as Customer[]);
+      // Fetch in bounded pages so CRM counts, segments and CSV exports cover the
+      // entire establishment, not only Supabase's first response page.
+      const pageSize = 500;
+      const allCustomers: Customer[] = [];
+      for (let from = 0; ; from += pageSize) {
+        const { data, error: requestError } = await supabase
+          .from('loyalty_customers')
+          .select('id,first_name,last_name,phone,email,points_balance,visit_count,last_visit_at,birth_day,birth_month,marketing_consent,notification_consent,preferred_channel,created_at')
+          .eq('establishment_id', establishmentId)
+          .order('last_visit_at', { ascending: false, nullsFirst: false })
+          .order('id', { ascending: true })
+          .range(from, from + pageSize - 1);
+        if (requestError) throw requestError;
+        const page = (data ?? []) as Customer[];
+        allCustomers.push(...page);
+        if (page.length < pageSize) break;
+      }
+      setCustomers(allCustomers);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Impossible de charger les clients.');
     } finally {
