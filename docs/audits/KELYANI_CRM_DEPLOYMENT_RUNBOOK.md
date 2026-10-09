@@ -4,7 +4,7 @@
 
 - Branche de travail : `feat/kelyani-crm-segmentation-automation`.
 - PR de travail : #69, encore en brouillon. Ne pas fusionner dans `main` sans validation.
-- Aperçu Vercel du commit `a2c5743d33e1814e54d98d547a98bafe64941573` : `READY`.
+- Dernier commit applicatif audité : `78436ed3fac0ef719cf3172014aa3f3a2c12ad19` ; son aperçu Vercel est `READY`. Les changements plus récents attendent encore leur propre build.
 - Projet Supabase : `tehhhdtfbonneqbyvlwx`.
 - Dernière migration enregistrée dans Supabase : `20261008174745`. Les migrations CRM datées du 9 octobre ne sont donc pas appliquées à ce projet.
 - Edge Function `send-loyalty-notification-push` actuellement active en version 2 ; son empreinte diffère du code de la branche. Ne pas activer l'envoi depuis l'interface avant mise à niveau coordonnée.
@@ -39,7 +39,7 @@ Déployer ensuite `supabase/functions/send-loyalty-notification-push/index.ts` d
 
 ## Contrôles avant toute notification réelle
 
-- Vérifier que les trois migrations sont présentes dans l'historique et que les colonnes/RPC attendues existent.
+- Vérifier que les onze migrations listées ci-dessus sont présentes dans l'historique et que les colonnes/RPC attendues existent.
 - Vérifier les secrets de la fonction : `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `VAPID_PRIVATE_KEY` ; ne jamais exposer la clé service-role côté navigateur.
 - Utiliser un établissement et des comptes de test dédiés, sans abonnements Web Push de vrais clients.
 - Vérifier le refus d'accès à un établissement non autorisé.
