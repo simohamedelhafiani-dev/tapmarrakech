@@ -7,7 +7,13 @@ from public.loyalty_customer_links l
 cross join lateral public.get_loyalty_customer_tier(l.customer_id) t
 where l.access_token=p_access_token limit 1;
 $$;
+
 revoke all on function public.get_public_loyalty_customer_tier(uuid) from public;
-grant execute on function public.get_public_loyalty_customer_tier(uuid) to anon,authenticated;
-revoke all on function public.get_loyalty_customer_tier(uuid) from public;
-grant execute on function public.get_loyalty_customer_tier(uuid) to authenticated;\nrevoke execute on function public.get_loyalty_customer_tier(uuid) from anon;\nrevoke execute on function public.update_loyalty_tier(uuid,text,integer,integer,text,integer,boolean) from anon;\n
+grant execute on function public.get_public_loyalty_customer_tier(uuid) to anon, authenticated;
+
+-- This function accepts a raw customer UUID and returns private loyalty aggregates.
+-- Keep direct calls server-side; public cards must use the token-scoped wrapper above.
+revoke all on function public.get_loyalty_customer_tier(uuid) from public, anon, authenticated;
+grant execute on function public.get_loyalty_customer_tier(uuid) to service_role;
+
+revoke execute on function public.update_loyalty_tier(uuid,text,integer,integer,text,integer,boolean) from anon;
