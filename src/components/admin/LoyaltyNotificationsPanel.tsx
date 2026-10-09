@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Bell, X } from 'lucide-react';
+import { Bell, X, RotateCcw, History } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { sendLoyaltyNotificationPush } from '@/lib/loyaltyNotificationPush';
 
@@ -17,12 +17,16 @@ type Customer = {
 
 type Audience = 'ALL' | 'INTEREST' | 'FREQUENCY' | 'POINTS' | 'VISITS' | 'CUSTOMER';
 type NotificationType = 'INFO' | 'OFFER' | 'REWARD' | 'POINTS';
+type Campaign = { id: string; title: string; message: string; type: NotificationType; audience: Record<string, unknown>; expires_at: string | null; recipient_count: number; status: string; created_at: string };
 
 export default function LoyaltyNotificationsPanel({ establishmentId }: { establishmentId: string }) {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [history, setHistory] = useState<Campaign[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [resendingId, setResendingId] = useState<string | null>(null);
 
   const [audience, setAudience] = useState<Audience>('ALL');
   const [interest, setInterest] = useState('');
@@ -213,6 +217,45 @@ export default function LoyaltyNotificationsPanel({ establishmentId }: { establi
           <span className="rounded-full bg-white/[0.04] px-3 py-1.5 text-white/55">{customers.length} clients</span>
           <span className="rounded-full bg-[#C9A45C]/10 px-3 py-1.5 text-[#C9A45C]">{customers.filter(c => c.notification_consent).length} notifications activées</span>
         </div>
+      </div>
+
+      <div className="rounded-3xl border border-[#242424] bg-[#111111] p-5">
+        <div className="mb-4 flex items-center gap-3">
+          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-white/[0.04] text-[#C9A45C]"><History size={17} /></div>
+          <div>
+            <h3 className="text-base font-semibold text-white">Historique des notifications</h3>
+            <p className="text-xs text-white/45">Retrouvez les campagnes publiées et renvoyez un Push si nécessaire.</p>
+          </div>
+          <button type="button" onClick={() => void loadHistory()} className="ml-auto rounded-lg border border-white/10 px-3 py-2 text-xs text-white/65">Actualiser</button>
+        </div>
+        {historyLoading ? (
+          <p className="py-5 text-center text-xs text-white/40">Chargement de l’historique…</p>
+        ) : history.length === 0 ? (
+          <p className="rounded-xl border border-dashed border-white/10 px-4 py-6 text-center text-xs text-white/40">Aucune notification publiée pour le moment.</p>
+        ) : (
+          <div className="space-y-3">
+            {history.map(campaign => (
+              <div key={campaign.id} className="rounded-2xl border border-white/[0.08] bg-black/20 p-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-sm font-semibold text-white">{campaign.title}</p>
+                      <span className="rounded-full bg-[#C9A45C]/10 px-2 py-1 text-[10px] text-[#C9A45C]">{campaign.type}</span>
+                    </div>
+                    <p className="mt-1 whitespace-pre-wrap text-xs leading-5 text-white/55">{campaign.message}</p>
+                    <p className="mt-2 text-[10px] text-white/35">
+                      {new Date(campaign.created_at).toLocaleString('fr-FR')} · {campaign.recipient_count} destinataire(s) initial(aux)
+                      {campaign.expires_at ? ` · Expire le ${new Date(campaign.expires_at).toLocaleDateString('fr-FR')}` : ''}
+                    </p>
+                  </div>
+                  <button type="button" onClick={() => void resendNotification(campaign)} disabled={!!resendingId || campaign.status === 'CANCELLED'} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-[#C9A45C]/30 px-3 py-2 text-xs font-semibold text-[#C9A45C] disabled:opacity-40">
+                    <RotateCcw size={13} />{resendingId === campaign.id ? 'Renvoi…' : 'Renvoyer le Push'}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {open && (
