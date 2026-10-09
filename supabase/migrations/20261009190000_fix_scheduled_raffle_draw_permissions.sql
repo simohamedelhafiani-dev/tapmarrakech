@@ -61,7 +61,7 @@ begin
       vu := r.reward_valid_until;
     end if;
 
-    with scored_entries as (
+    with scored_entries as materialized (
       select
         e.customer_id,
         -ln(greatest(random(), 1e-12)) / greatest(e.tickets, 1) as draw_key
