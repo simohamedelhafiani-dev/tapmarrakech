@@ -47,21 +47,29 @@ begin
       vu := r.reward_valid_until;
     end if;
 
+    with scored_entries as (
+      select
+        e.customer_id,
+        -ln(greatest(random(), 1e-12)) / greatest(e.tickets, 1) as draw_key
+      from public.loyalty_raffle_entries e
+      where e.raffle_id = r.id
+    ),
+    ranked_entries as (
+      select
+        customer_id,
+        row_number() over (order by draw_key, customer_id) as winner_rank
+      from scored_entries
+    )
     insert into public.loyalty_raffle_winners(
       raffle_id, customer_id, rank, prize_name, prize_description,
       valid_from, valid_until, reservation_required, single_use, non_cumulative
     )
     select
-      r.id, e.customer_id,
-      row_number() over (
-        order by -ln(greatest(random(), 1e-12)) / greatest(e.tickets, 1)
-      ),
+      r.id, e.customer_id, e.winner_rank,
       r.prize_name, r.prize_description, vf, vu,
       r.reservation_required, r.single_use, r.non_cumulative
-    from public.loyalty_raffle_entries e
-    where e.raffle_id = r.id
-    order by -ln(greatest(random(), 1e-12)) / greatest(e.tickets, 1)
-    limit r.winners_count
+    from ranked_entries e
+    where e.winner_rank <= r.winners_count
     on conflict (raffle_id, customer_id) do nothing;
 
     insert into public.loyalty_card_notifications(
