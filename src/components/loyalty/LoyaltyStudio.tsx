@@ -14,6 +14,7 @@ import {
   Star,
   Trash2,
   UserPlus,
+  UsersRound,
   X,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
@@ -27,11 +28,12 @@ import {
 import LoyaltyPreview from './LoyaltyPreview';
 import LoyaltyRaffleStudio from './LoyaltyRaffleStudio';
 import LoyaltyTierStudio from './LoyaltyTierStudio';
+import LoyaltyCrmSegments from './LoyaltyCrmSegments';
 import { WALLET_TEMPLATES } from '@/components/LoyaltyCardVisual';
 import type { LoyaltyExperienceConfig, LoyaltyExperienceReward } from './LoyaltyExperience';
 
 type Props = { establishmentId: string };
-type TabId = 'settings' | 'rewards' | 'referral' | 'tiers' | 'raffle' | 'design';
+type TabId = 'settings' | 'rewards' | 'referral' | 'tiers' | 'raffle' | 'crm' | 'design';
 type RewardType = 'GIFT' | 'DISCOUNT';
 
 type Reward = {
@@ -89,6 +91,7 @@ const TABS: { id: TabId; label: string; caption: string; icon: typeof Settings2 
   { id: 'referral', label: 'Parrainage', caption: 'Acquisition', icon: Rocket },
   { id: 'tiers', label: 'Niveaux', caption: 'Clients', icon: Trophy },
   { id: 'raffle', label: 'Tombola', caption: 'Gagnants', icon: Trophy },
+  { id: 'crm', label: 'CRM', caption: 'Segments', icon: UsersRound },
   { id: 'design', label: 'Design', caption: 'Visuels', icon: Palette },
 ];
 
@@ -711,6 +714,8 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
               })}
             </div>
           </div>
+
+          {tab === 'crm' && <LoyaltyCrmSegments establishmentId={establishmentId} />}
 
           {tab === 'settings' && (
             <div className="space-y-5">
