@@ -83,6 +83,11 @@ Deno.serve(async (req) => {
     if (subscriptionError) return json({ success: false, error: 'Impossible de charger les abonnements push.' }, 500);
     if (!subscriptions?.length) return json({ success: true, sent: 0, failed: 0, removed: 0, skipped: recipients.length, total: recipients.length, message: 'Aucun abonnement Web Push actif.' });
 
+    // Atomic at-most-once campaign claim: concurrent/repeated invocations cannot resend this campaign.
+    const { data: claimed, error: claimError } = await userClient.rpc('claim_loyalty_campaign_push_delivery', { p_campaign_id: campaignId });
+    if (claimError) return json({ success: false, error: 'Impossible de réserver l’envoi. Vérifiez que la migration de protection anti-doublon est appliquée.' }, 503);
+    if (claimed !== true) return json({ success: false, duplicate: true, error: 'Cette campagne a déjà été réservée pour un envoi. Aucun doublon n’a été envoyé.' }, 409);
+
     webpush.setVapidDetails(Deno.env.get('VAPID_SUBJECT') || 'mailto:notifications@kelyani.com', publicKey, privateKey);
     let sent = 0, failed = 0, removed = 0;
     for (const sub of subscriptions) {
@@ -111,7 +116,14 @@ Deno.serve(async (req) => {
         }
       }
     }
-    return json({ success: sent > 0 && failed === 0, sent, failed, removed, skipped: Math.max(0, recipients.length - subscriptions.length), total: recipients.length });
+    const deliveryStatus = failed === 0 ? 'COMPLETED' : (sent > 0 ? 'PARTIAL' : 'FAILED');
+    const { error: finalizeError } = await admin
+      .from('loyalty_notification_campaigns')
+      .update({ push_delivery_status: deliveryStatus, push_delivery_finished_at: new Date().toISOString(), push_delivery_sent: sent, push_delivery_failed: failed, push_delivery_removed: removed })
+      .eq('id', campaignId)
+      .eq('push_delivery_status', 'PROCESSING');
+    if (finalizeError) console.error('Could not finalize campaign push delivery status', { campaignId });
+    return json({ success: sent > 0 && failed === 0, sent, failed, removed, skipped: Math.max(0, recipients.length - subscriptions.length), total: recipients.length, delivery_status: deliveryStatus });
   } catch (error) {
     console.error('Unexpected push function error:', error);
     return json({ success: false, error: error instanceof Error ? error.message : 'Erreur interne.' }, 500);
