@@ -55,6 +55,7 @@ begin
   from public.loyalty_customers lc
   where lc.establishment_id = p_establishment_id
     and coalesce(lc.notification_consent,false) = true
+    and (p_type <> 'OFFER' or coalesce(lc.marketing_consent,false) = true)
     and (v_customer_ids is null or cardinality(v_customer_ids)=0 or lc.id=any(v_customer_ids))
     and (v_interests is null or cardinality(v_interests)=0 or coalesce(lc.interests,'{}'::text[]) && v_interests)
     and (v_frequency is null or lc.visit_frequency=v_frequency)
