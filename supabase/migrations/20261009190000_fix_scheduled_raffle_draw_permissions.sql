@@ -33,7 +33,7 @@ begin
       (r.establishment_id, 'SILVER', 'Silver', 2, 750, 3, 'OR', 3),
       (r.establishment_id, 'GOLD', 'Gold', 3, 1500, 5, 'OR', 5),
       (r.establishment_id, 'PLATINUM', 'Platinum', 4, 3000, 8, 'OR', 10)
-    on conflict (establishment_id, tier_key) do nothing;
+    on conflict do nothing;
 
     insert into public.loyalty_raffle_entries(raffle_id, customer_id, tickets)
     select r.id, c.id,
