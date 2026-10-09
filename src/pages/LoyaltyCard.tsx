@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Bell, CheckCircle2, Gift, Link2, Share2, Trophy, X } from 'lucide-react';
+import { Bell, Gift, Link2, Share2, Trophy, X } from 'lucide-react';
 import QRCode from 'qrcode';
 import type { ReactNode } from 'react';
 
