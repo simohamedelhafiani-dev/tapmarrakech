@@ -11,14 +11,19 @@
 
 ## Dépendances à déployer ensemble
 
-Appliquer dans l'ordre, après revue et autorisation explicite de déploiement :
+Appliquer les migrations dans l'ordre chronologique ci-dessous, sur un environnement de test d'abord, après revue et autorisation explicite de déploiement :
 
-1. `20261009150000_create_consent_aware_loyalty_campaigns.sql` — RPC de création de campagne et notifications in-app avec consentement.
-2. `20261009170000_fix_birthday_campaign_segment.sql` — ciblage anniversaire par jour ET mois.
-3. `20261009180000_prevent_duplicate_loyalty_push_campaigns.sql` — réservation atomique d'une campagne Web Push pour éviter les doubles envois.
-4. Déployer ensuite `supabase/functions/send-loyalty-notification-push/index.ts` depuis la même branche.
+1. `20261007113000_create_loyalty_raffles.sql` — tables et fonctions de base des tombolas.
+2. `20261007113100_schedule_loyalty_raffle_draws.sql` — tâche cron des tirages.
+3. `20261007120000_loyalty_tiers_and_raffle_rules.sql` — niveaux, seuils et multiplicateurs de tickets.
+4. `20261007120100_secure_public_tier_lookup.sql` — accès public par jeton et restriction de la recherche par UUID client.
+5. `20261009100000_public_loyalty_raffles.sql` — lecture publique limitée aux tombolas actives et au jeton de la carte.
+6. `20261009150000_create_consent_aware_loyalty_campaigns.sql` — campagnes et notifications in-app avec consentement.
+7. `20261009170000_fix_birthday_campaign_segment.sql` — ciblage anniversaire par jour ET mois.
+8. `20261009180000_prevent_duplicate_loyalty_push_campaigns.sql` — réservation atomique anti-doublon des envois Web Push.
+9. `20261009190000_fix_scheduled_raffle_draw_permissions.sql` — tirage planifié sans JWT utilisateur et initialisation sûre des niveaux manquants.
 
-Ne pas déployer la fonction seule : elle dépend de la RPC `claim_loyalty_campaign_push_delivery` créée par la troisième migration.
+Déployer ensuite `supabase/functions/send-loyalty-notification-push/index.ts` depuis la même branche, uniquement après vérification des secrets et des tests d'autorisation. Ne pas déployer la fonction seule : elle dépend des colonnes `push_delivery_*` et de la RPC `claim_loyalty_campaign_push_delivery` créées par la migration 8.
 
 ## Contrôles avant toute notification réelle
 
