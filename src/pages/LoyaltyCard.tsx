@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Bell, Gift, Link2, Share2, Trophy, X } from 'lucide-react';
+import { Bell, CheckCircle2, Gift, Link2, Share2, Trophy, X } from 'lucide-react';
 import QRCode from 'qrcode';
 import type { ReactNode } from 'react';
 
@@ -8,6 +8,7 @@ import { defaultLoyaltyDesignConfig } from '@/components/LoyaltyCardVisual';
 import type { LoyaltyExperienceReward } from '@/components/loyalty/LoyaltyExperience';
 import { LoyaltyCardVisual, type LoyaltyDesignConfig } from '@/components/LoyaltyCardVisual';
 import { supabase } from '@/lib/supabase';
+import { enableLoyaltyPush, getLoyaltyPushSubscription } from '@/lib/loyaltyPush';
 
 type Card = {
   customer_id: string;
@@ -109,6 +110,9 @@ export default function LoyaltyCard() {
   const [liveVersion, setLiveVersion] = useState(0);
   const [isLiveRefreshing, setIsLiveRefreshing] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
+  const [pushEnabled, setPushEnabled] = useState(false);
+  const [pushLoading, setPushLoading] = useState(false);
+  const [pushMessage, setPushMessage] = useState('');
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -470,6 +474,37 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
       void supabase.removeChannel(channel);
     };
   }, [card?.establishment_id]);
+
+  useEffect(() => {
+    let active = true;
+    const checkPushSubscription = async () => {
+      try {
+        const subscription = await getLoyaltyPushSubscription();
+        if (active && subscription) setPushEnabled(true);
+      } catch {
+        // Push support is optional; the loyalty card must remain usable.
+      }
+    };
+    void checkPushSubscription();
+    return () => { active = false; };
+  }, [token]);
+
+  const cardUrl = window.location.href;
+  const activatePushNotifications = async () => {
+    if (pushLoading || pushEnabled) return;
+    setPushLoading(true);
+    setPushMessage('');
+    try {
+      await enableLoyaltyPush(token, cardUrl);
+      setPushEnabled(true);
+      setPushMessage('Notifications activées. Vous recevrez les nouveaux messages même lorsque votre téléphone est verrouillé.');
+    } catch (error) {
+      console.error('Failed to enable loyalty push:', error);
+      setPushMessage(error instanceof Error ? error.message : 'Impossible d’activer les notifications.');
+    } finally {
+      setPushLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!card?.customer_id || !card.establishment_id) return;
@@ -867,6 +902,41 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
               ))}
             </div>
           </section>
+        )}
+
+        {!pushEnabled && (
+          <section className="mt-4 overflow-hidden rounded-[1.75rem] border border-[#D4AF37]/20 bg-[#111111] p-5 shadow-luxury">
+            <div className="flex items-start gap-3">
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]">
+                <Bell className="h-4 w-4" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h2 className="text-sm font-semibold text-white">Recevoir les notifications</h2>
+                <p className="mt-1 text-[11px] leading-5 text-white/40">
+                  Recevez les offres et messages de votre établissement directement sur votre téléphone, même lorsque la carte est fermée ou que l’écran est verrouillé.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => void activatePushNotifications()}
+              disabled={pushLoading}
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#D4AF37] px-4 py-3 text-xs font-semibold text-[#0D0D0D] disabled:opacity-50"
+            >
+              <Bell size={15} />
+              {pushLoading ? 'Activation…' : 'Activer les notifications'}
+            </button>
+            {pushMessage && (
+              <p className="mt-3 text-center text-[10px] leading-4 text-[#D4AF37]" role="status">
+                {pushMessage}
+              </p>
+            )}
+          </section>
+        )}
+        {pushEnabled && pushMessage && (
+          <p className="mt-3 text-center text-[10px] leading-4 text-[#D4AF37]" role="status">
+            {pushMessage}
+          </p>
         )}
 
         {!isInstalled && (
