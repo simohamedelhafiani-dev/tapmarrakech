@@ -32,10 +32,10 @@ begin
   if length(trim(coalesce(p_message, ''))) not between 1 and 1000 then
     raise exception 'Le message doit contenir entre 1 et 1000 caractères';
   end if;
-  if p_type not in ('INFO','OFFER','REWARD','POINTS') then
+  if p_type is null or p_type not in ('INFO','OFFER','REWARD','POINTS') then
     raise exception 'Type de notification invalide';
   end if;
-  if p_segment not in ('all','active','at_risk','inactive','birthdays','loyal') then
+  if p_segment is null or p_segment not in ('all','active','at_risk','inactive','birthdays','loyal') then
     raise exception 'Segment invalide';
   end if;
 
