@@ -24,6 +24,7 @@ Appliquer les migrations dans l'ordre chronologique ci-dessous, sur un environne
 9. `20261009190000_fix_scheduled_raffle_draw_permissions.sql` — tirage planifié sans JWT utilisateur et initialisation sûre des niveaux manquants.
 10. `20261009200000_fix_expired_raffle_redemption.sql` — persistance du statut `EXPIRED` sans annulation transactionnelle, et réponse explicite au frontend.
 11. `20261009210000_validate_raffle_reward_window.sql` — interdit une récompense dont la validité se termine avant ou à l'heure du tirage.
+12. `20261009220000_secure_campaign_history_rpc.sql` — expose l’historique des campagnes via une RPC sécurisée, sans lecture directe des tables protégées.
 
 Déployer ensuite `supabase/functions/send-loyalty-notification-push/index.ts` depuis la même branche, uniquement après vérification des secrets et des tests d'autorisation. Ne pas déployer la fonction seule : elle dépend des colonnes `push_delivery_*` et de la RPC `claim_loyalty_campaign_push_delivery` créées par la migration 8.
 
@@ -39,7 +40,7 @@ Déployer ensuite `supabase/functions/send-loyalty-notification-push/index.ts` d
 
 ## Contrôles avant toute notification réelle
 
-- Vérifier que les onze migrations listées ci-dessus sont présentes dans l'historique et que les colonnes/RPC attendues existent.
+- Vérifier que les douze migrations listées ci-dessus sont présentes dans l'historique et que les colonnes/RPC attendues existent.
 - Vérifier les secrets de la fonction : `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `VAPID_PRIVATE_KEY` ; ne jamais exposer la clé service-role côté navigateur.
 - Utiliser un établissement et des comptes de test dédiés, sans abonnements Web Push de vrais clients.
 - Vérifier le refus d'accès à un établissement non autorisé.
