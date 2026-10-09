@@ -1,4 +1,4 @@
-const CACHE = 'kelyani-shell-v11';
+const CACHE = 'kelyani-shell-v12';
 const APP_SHELL = ['/', '/index.html', '/kelyani-final.svg', '/manifest.webmanifest'];
 
 self.addEventListener('message', (event) => {
@@ -38,8 +38,8 @@ self.addEventListener('push', (event) => {
   const title = payload.title || 'KELYANI';
   const options = {
     body: payload.body || 'Vous avez une nouvelle notification.',
-    icon: payload.icon || '/kelyani-logo.png',
-    badge: payload.badge || '/kelyani-logo.png',
+    icon: payload.icon || '/kelyani-final.svg',
+    badge: payload.badge || '/kelyani-final.svg',
     tag: payload.tag || 'kelyani-loyalty-notification',
     renotify: Boolean(payload.renotify ?? true),
     data: payload.data || { url: '/' },
