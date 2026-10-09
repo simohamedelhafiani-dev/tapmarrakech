@@ -40,6 +40,41 @@ export default function LoyaltyNotificationsPanel({ establishmentId }: { establi
   const [message, setMessage] = useState('');
   const [expiresAt, setExpiresAt] = useState('');
 
+  const loadHistory = async () => {
+    if (!establishmentId) { setHistory([]); setHistoryLoading(false); return; }
+    setHistoryLoading(true);
+    const { data, error } = await supabase.rpc('get_loyalty_notification_campaign_history', { p_establishment_id: establishmentId });
+    if (error) {
+      console.error('Erreur historique notifications:', error);
+      setHistory([]);
+    } else {
+      setHistory((data ?? []) as Campaign[]);
+    }
+    setHistoryLoading(false);
+  };
+
+  useEffect(() => { void loadHistory(); }, [establishmentId]);
+
+  const resendNotification = async (campaign: Campaign) => {
+    if (resendingId) return;
+    if (!window.confirm(`Renvoyer « ${campaign.title} » aux appareils ciblés lors de l’envoi initial ?`)) return;
+    setResendingId(campaign.id);
+    try {
+      const result = await sendLoyaltyNotificationPush(campaign.id);
+      if (result.success && result.sent > 0) {
+        alert(`Push renvoyé à ${result.sent} appareil(s).`);
+      } else if (result.push_subscribers === 0) {
+        alert('Aucun abonnement Push actif parmi les destinataires initiaux.');
+      } else {
+        alert(`Le renvoi n’a pas été confirmé. ${result.errors?.[0]?.message || result.error || `${result.failed} échec(s).`}`);
+      }
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Impossible de renvoyer la notification.');
+    } finally {
+      setResendingId(null);
+    }
+  };
+
   useEffect(() => {
     let active = true;
 
@@ -153,6 +188,7 @@ export default function LoyaltyNotificationsPanel({ establishmentId }: { establi
         console.log('Résultat Web Push KELYANI:', pushResult);
       }
 
+      await loadHistory();
       reset();
       setOpen(false);
 
