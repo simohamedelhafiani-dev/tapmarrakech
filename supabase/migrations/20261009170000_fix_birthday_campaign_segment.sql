@@ -52,6 +52,7 @@ begin
   from public.loyalty_customers c
   where c.establishment_id = p_establishment_id
     and c.notification_consent = true
+    and (p_type <> 'OFFER' or c.marketing_consent = true)
     and (
       p_segment = 'all'
       or (p_segment = 'active' and c.last_visit_at >= now() - interval '30 days')
