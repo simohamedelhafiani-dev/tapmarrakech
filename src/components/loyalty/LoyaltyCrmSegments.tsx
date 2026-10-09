@@ -107,7 +107,12 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
       const count = Number(result?.recipient_count ?? 0);
       setCampaignFeedback(count > 0 ? 'Campagne créée : ' + count + ' notification(s) ajoutée(s) aux cartes des clients ayant accepté les notifications.' : 'Campagne créée, mais aucun client éligible avec consentement notification dans ce segment.');
       setCampaignTitle(''); setCampaignMessage('');
-    } catch (e) { setCampaignFeedback(e instanceof Error ? e.message : 'Impossible de créer la campagne.'); }
+    } catch (e) {
+      const failure = e as { message?: string; details?: string; hint?: string; code?: string };
+      const message = [failure?.message, failure?.details, failure?.hint].filter(Boolean).join(' — ');
+      console.error('Échec création campagne fidélité', { code: failure?.code, message });
+      setCampaignFeedback(message || 'Impossible de créer la campagne. Consultez la console pour le détail technique.');
+    }
     finally { setCampaignSaving(false); }
   };
   const exportCsv = () => {
