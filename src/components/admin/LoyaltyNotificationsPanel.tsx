@@ -17,7 +17,7 @@ type Customer = {
 
 type Audience = 'ALL' | 'INTEREST' | 'FREQUENCY' | 'POINTS' | 'VISITS' | 'CUSTOMER';
 type NotificationType = 'INFO' | 'OFFER' | 'REWARD' | 'POINTS';
-type Campaign = { id: string; title: string; message: string; type: NotificationType; audience: Record<string, unknown>; expires_at: string | null; recipient_count: number; status: string; created_at: string };
+type Campaign = { id: string; title: string; message: string; type: NotificationType; audience: Record<string, unknown>; expires_at: string | null; recipient_count: number; status: string; created_at: string; last_push_status: string | null; last_push_at: string | null; last_push_sent: number | null; last_push_failed: number | null; last_push_skipped: number | null; last_push_total: number | null; last_push_error: string | null };
 
 export default function LoyaltyNotificationsPanel({ establishmentId }: { establishmentId: string }) {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -280,9 +280,21 @@ export default function LoyaltyNotificationsPanel({ establishmentId }: { establi
                     </div>
                     <p className="mt-1 whitespace-pre-wrap text-xs leading-5 text-white/55">{campaign.message}</p>
                     <p className="mt-2 text-[10px] text-white/35">
-                      {new Date(campaign.created_at).toLocaleString('fr-FR')} · {campaign.recipient_count} destinataire(s) initial(aux)
+                      Publiée le {new Date(campaign.created_at).toLocaleString('fr-FR')} · {campaign.recipient_count} destinataire(s) ciblé(s)
                       {campaign.expires_at ? ` · Expire le ${new Date(campaign.expires_at).toLocaleDateString('fr-FR')}` : ''}
                     </p>
+                    <div className="mt-3 rounded-xl border border-white/[0.07] bg-white/[0.02] px-3 py-2.5">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-white/40">Dernier résultat Web Push</span>
+                        <span className={`rounded-full px-2 py-1 text-[10px] ${campaign.last_push_status === 'ACCEPTED_BY_PUSH_SERVICE' ? 'bg-emerald-500/10 text-emerald-300' : campaign.last_push_status === 'PARTIAL' ? 'bg-amber-500/10 text-amber-300' : campaign.last_push_status === 'FAILED' ? 'bg-red-500/10 text-red-300' : 'bg-white/[0.06] text-white/50'}`}>
+                          {campaign.last_push_status === 'ACCEPTED_BY_PUSH_SERVICE' ? 'Accepté par le service Push' : campaign.last_push_status === 'PARTIAL' ? 'Partiellement accepté' : campaign.last_push_status === 'FAILED' ? 'Échec' : campaign.last_push_status === 'NO_SUBSCRIBERS' ? 'Aucun abonnement actif' : campaign.last_push_status === 'NO_RECIPIENTS' ? 'Aucun destinataire' : campaign.last_push_status === 'SENDING' ? 'En cours' : campaign.last_push_status === 'NO_DELIVERIES' ? 'Aucun envoi accepté' : campaign.last_push_status || 'Aucune tentative enregistrée'}
+                        </span>
+                      </div>
+                      {campaign.last_push_at && <p className="mt-1 text-[10px] text-white/35">Tentative : {new Date(campaign.last_push_at).toLocaleString('fr-FR')}</p>}
+                      {campaign.last_push_status && <p className="mt-1 text-[11px] text-white/55">Acceptés par le service : {campaign.last_push_sent ?? 0} · Échecs : {campaign.last_push_failed ?? 0} · Ignorés : {campaign.last_push_skipped ?? 0} · Abonnés ciblés : {campaign.last_push_total ?? campaign.recipient_count}</p>}
+                      {campaign.last_push_error && <p className="mt-1 break-words text-[10px] text-red-300/80">Détail : {campaign.last_push_error}</p>}
+                      <p className="mt-1 text-[10px] text-white/30">Ce résultat ne confirme pas la réception ni l’affichage sur le téléphone.</p>
+                    </div>
                   </div>
                   <button type="button" onClick={() => void resendNotification(campaign)} disabled={!!resendingId || campaign.status === 'CANCELLED'} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-[#C9A45C]/30 px-3 py-2 text-xs font-semibold text-[#C9A45C] disabled:opacity-40">
                     <RotateCcw size={13} />{resendingId === campaign.id ? 'Renvoi…' : 'Renvoyer le Push'}
