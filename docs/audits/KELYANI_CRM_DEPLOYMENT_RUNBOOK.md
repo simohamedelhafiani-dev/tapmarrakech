@@ -23,6 +23,7 @@ Appliquer les migrations dans l'ordre chronologique ci-dessous, sur un environne
 8. `20261009180000_prevent_duplicate_loyalty_push_campaigns.sql` — réservation atomique anti-doublon des envois Web Push.
 9. `20261009190000_fix_scheduled_raffle_draw_permissions.sql` — tirage planifié sans JWT utilisateur et initialisation sûre des niveaux manquants.
 10. `20261009200000_fix_expired_raffle_redemption.sql` — persistance du statut `EXPIRED` sans annulation transactionnelle, et réponse explicite au frontend.
+11. `20261009210000_validate_raffle_reward_window.sql` — interdit une récompense dont la validité se termine avant ou à l'heure du tirage.
 
 Déployer ensuite `supabase/functions/send-loyalty-notification-push/index.ts` depuis la même branche, uniquement après vérification des secrets et des tests d'autorisation. Ne pas déployer la fonction seule : elle dépend des colonnes `push_delivery_*` et de la RPC `claim_loyalty_campaign_push_delivery` créées par la migration 8.
 
@@ -33,7 +34,7 @@ Déployer ensuite `supabase/functions/send-loyalty-notification-push/index.ts` d
 - Vérifier les deux modes de tickets : un ticket par client, ou multiplicateur par niveau.
 - Exécuter le tirage arrivé à échéance sans JWT utilisateur ; vérifier que le cron ne s'arrête pas sur un contrôle d'authentification.
 - Vérifier que le nombre de gagnants ne dépasse pas `winners_count`, que chaque rang correspond au score de tirage calculé une seule fois, et qu'un second traitement ne crée ni gagnant ni notification en double.
-- Vérifier les trois modes de validité, l'expiration persistée (`EXPIRED`), la rédemption une seule fois, le retour explicite `EXPIRED`/`REDEEMED` et le refus pour un responsable d'un autre établissement.
+- Vérifier les trois modes de validité, le refus d'une récompense expirant avant le tirage, l'expiration persistée (`EXPIRED`), la rédemption une seule fois, le retour explicite `EXPIRED`/`REDEEMED` et le refus pour un responsable d'un autre établissement.
 - Tester un établissement historique sans niveaux : les niveaux par défaut doivent être créés sans écraser les niveaux déjà personnalisés.
 
 ## Contrôles avant toute notification réelle
