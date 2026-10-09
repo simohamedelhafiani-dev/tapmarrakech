@@ -29,8 +29,14 @@ as $$
     (
       select count(*)
       from public.loyalty_customers c
+      join lateral public.get_loyalty_customer_tier(c.id) t on true
+      join public.loyalty_tiers eligible
+        on eligible.establishment_id = r.establishment_id
+       and eligible.tier_key = r.minimum_tier_key
+       and eligible.active = true
       where c.establishment_id = r.establishment_id
         and c.created_at <= r.draw_at
+        and t.sort_order >= eligible.sort_order
     ) as participant_count
   from public.loyalty_raffles r
   join public.loyalty_customer_links l
