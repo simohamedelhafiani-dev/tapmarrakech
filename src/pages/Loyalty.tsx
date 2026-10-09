@@ -98,7 +98,7 @@ export default function Loyalty() {
     useState<LoyaltyCustomer | null>(null);
   const [showRewards, setShowRewards] =
     useState<LoyaltyCustomer | null>(null);
-  const [recoveryQr, setRecoveryQr] = useState<{ url: string; name: string; expiresAt: string } | null>(null);
+  const [recoveryQr, setRecoveryQr] = useState<{ url: string; name: string; expiresAt: string; customer: LoyaltyCustomer } | null>(null);
   const [recoveryLoading, setRecoveryLoading] = useState(false);
 
   const [selectedReward, setSelectedReward] =
@@ -250,6 +250,7 @@ export default function Loyalty() {
       url: await QRCode.toDataURL(url, { width: 360, margin: 2 }),
       name: customer.first_name || 'Client',
       expiresAt,
+      customer,
     });
   }
 
@@ -1090,6 +1091,16 @@ export default function Loyalty() {
             <p className="mt-4 text-sm font-semibold text-[#D4AF37]">Le client scanne ce QR avec son téléphone</p>
             <p className="mt-1 text-xs leading-5 text-[#F5F5DC]/45">Ce QR est valable 5 minutes et ne peut être utilisé qu'une seule fois.</p>
             <p className="mt-3 text-[10px] font-medium text-gold">Expiration : {new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' }).format(new Date(recoveryQr.expiresAt))}</p>
+            <button
+              type="button"
+              onClick={() => void createRecoveryQr(recoveryQr.customer)}
+              disabled={recoveryLoading}
+              className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4AF37] px-4 py-3 text-xs font-bold text-[#0D0D0D] transition hover:bg-[#E1C27A] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <QrCode size={15} />
+              {recoveryLoading ? 'Génération du nouveau lien…' : 'Régénérer le lien / QR code'}
+            </button>
+            <p className="mt-2 text-[10px] leading-4 text-[#F5F5DC]/35">L’ancien lien reste à usage unique. Générer un nouveau QR ne réutilise pas l’ancien jeton.</p>
           </div>
         </div>
       )}
