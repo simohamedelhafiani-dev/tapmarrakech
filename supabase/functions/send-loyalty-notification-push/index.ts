@@ -93,8 +93,28 @@ Deno.serve(async (req) => {
     if (claimError) return json({ success: false, error: 'Impossible de réserver l’envoi. Vérifiez que la migration de protection anti-doublon est appliquée.' }, 503);
     if (claimed !== true) return json({ success: false, duplicate: true, error: 'Cette campagne a déjà été réservée pour un envoi. Aucun doublon n’a été envoyé.' }, 409);
 
-    let sent = 0, failed = 0, removed = 0;
+    let sent = 0, failed = 0, removed = 0, skippedConsent = 0;
     for (const sub of subscriptions) {
+      // Re-check consent for each customer immediately before their push. A bulk
+      // preflight check alone leaves a window where consent can be withdrawn.
+      let currentConsentQuery = admin
+        .from('loyalty_customers')
+        .select('id')
+        .eq('id', sub.customer_id)
+        .eq('establishment_id', campaign.establishment_id)
+        .eq('notification_consent', true);
+      if (campaign.type === 'OFFER') currentConsentQuery = currentConsentQuery.eq('marketing_consent', true);
+      const { data: currentConsent, error: currentConsentError } = await currentConsentQuery.maybeSingle();
+      if (currentConsentError) {
+        failed++;
+        console.error('Could not re-check push consent', { customerId: sub.customer_id });
+        continue;
+      }
+      if (!currentConsent) {
+        skippedConsent++;
+        continue;
+      }
+
       try {
         await webpush.sendNotification({
           endpoint: sub.endpoint,
@@ -127,7 +147,7 @@ Deno.serve(async (req) => {
       .eq('id', campaignId)
       .eq('push_delivery_status', 'PROCESSING');
     if (finalizeError) console.error('Could not finalize campaign push delivery status', { campaignId });
-    return json({ success: sent > 0 && failed === 0, sent, failed, removed, skipped: Math.max(0, recipients.length - subscriptions.length), total: recipients.length, delivery_status: deliveryStatus });
+    return json({ success: sent > 0 && failed === 0, sent, failed, removed, skipped: Math.max(0, recipients.length - subscriptions.length) + skippedConsent, total: recipients.length, delivery_status: deliveryStatus });
   } catch (error) {
     console.error('Unexpected push function error:', error);
     return json({ success: false, error: error instanceof Error ? error.message : 'Erreur interne.' }, 500);
