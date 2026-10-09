@@ -25,6 +25,7 @@ type Card = {
 
 type HistoryItem = { id: string; points: number; type: string; description: string | null; amount: number | null; created_at: string; };
 type CustomerTier = { tier_key:string;tier_name:string;sort_order:number;total_points:number;rewards_redeemed:number;ticket_multiplier:number;next_tier_key:string|null;next_tier_name:string|null;next_points:number|null;next_rewards:number|null };
+type ActiveRaffle = { id:string; title:string; description:string|null; prize_name:string; prize_description:string|null; starts_at:string; draw_at:string; winners_count:number; participant_count:number };
 
 type RaffleWinner = {
   id: string;
@@ -62,9 +63,7 @@ type Design = {
   border_radius: number;
 };
 
-export default function TrophyIcon() { return <Trophy className="h-4 w-4" />; }
-
-function LoyaltyCard() {
+export default function LoyaltyCard() {
   const token = window.location.pathname.split('/').filter(Boolean).pop() ?? '';
   const [card, setCard] = useState<Card | null>(null);
   const [design, setDesign] = useState<Design>({
@@ -97,6 +96,8 @@ function LoyaltyCard() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [notifications, setNotifications] = useState<CardNotification[]>([]);
   const [raffleWins, setRaffleWins] = useState<RaffleWinner[]>([]);
+  const [activeRaffle, setActiveRaffle] = useState<ActiveRaffle | null>(null);
+  const [raffleDetailsOpen, setRaffleDetailsOpen] = useState(false);
   const [customerTier, setCustomerTier] = useState<CustomerTier | null>(null);
   const [rewards, setRewards] = useState<LoyaltyExperienceReward[]>([]);
   const [loading, setLoading] = useState(true);
@@ -198,6 +199,22 @@ function LoyaltyCard() {
       }
     })();
   }, [card?.customer_id]);
+
+  useEffect(() => {
+    if (!card?.customer_id || !token) return;
+    let cancelled = false;
+    void (async () => {
+      const { data, error } = await supabase.rpc('get_public_loyalty_raffles', { p_access_token: token });
+      if (cancelled || error) return;
+      const rows = Array.isArray(data) ? data : data ? [data] : [];
+      const now = Date.now();
+      const current = (rows as ActiveRaffle[])
+        .filter(raffle => new Date(raffle.starts_at).getTime() <= now && new Date(raffle.draw_at).getTime() > now)
+        .sort((a, b) => new Date(a.draw_at).getTime() - new Date(b.draw_at).getTime())[0] ?? null;
+      setActiveRaffle(current);
+    })();
+    return () => { cancelled = true; };
+  }, [card?.customer_id, token]);
 
   const referralMessage = referralCode
     ? `🎁 Je t’invite à rejoindre le programme fidélité de ${card?.establishment_name || 'cet établissement'}.
@@ -724,6 +741,28 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
             />
           </div>
         </div>
+
+        {activeRaffle && (
+          <section className="mt-4 overflow-hidden rounded-2xl border shadow-lg transition-colors duration-300" style={{ backgroundColor: design.background_color, color: design.text_color, borderColor: `${design.secondary_color}88` }}>
+            <button type="button" onClick={() => setRaffleDetailsOpen(open => !open)} aria-expanded={raffleDetailsOpen} className="flex w-full items-center gap-3 p-4 text-left transition-opacity hover:opacity-90">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl" style={{ backgroundColor: design.primary_color, color: design.secondary_color }}><Trophy className="h-5 w-5" /></span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[10px] font-bold uppercase tracking-[.15em]" style={{ color: design.secondary_color }}>Tombola en cours</span>
+                <span className="mt-1 block truncate text-sm font-semibold">{activeRaffle.title}</span>
+                <span className="mt-1 block text-xs opacity-75">À gagner : {activeRaffle.prize_name}</span>
+              </span>
+              <span className="shrink-0 rounded-full px-3 py-1.5 text-[10px] font-bold" style={{ backgroundColor: design.secondary_color, color: design.primary_color }}>{raffleDetailsOpen ? 'Fermer' : 'Voir'}</span>
+            </button>
+            {raffleDetailsOpen && (
+              <div className="border-t px-4 pb-4 pt-3" style={{ borderColor: `${design.secondary_color}55` }}>
+                {activeRaffle.description && <p className="mb-2 text-sm leading-5 opacity-85">{activeRaffle.description}</p>}
+                {activeRaffle.prize_description && <p className="mb-3 text-xs leading-5 opacity-75">{activeRaffle.prize_description}</p>}
+                <div className="flex items-center justify-between gap-3 text-xs"><span className="opacity-75">Tirage prévu</span><strong>{new Date(activeRaffle.draw_at).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' })}</strong></div>
+                <div className="mt-2 flex items-center justify-between gap-3 text-xs"><span className="opacity-75">Participants éligibles</span><strong>{activeRaffle.participant_count}</strong></div>
+              </div>
+            )}
+          </section>
+        )}
 
         {program.referral_enabled && cardSaved && (
           <button
