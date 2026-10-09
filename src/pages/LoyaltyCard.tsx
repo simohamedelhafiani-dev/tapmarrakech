@@ -489,7 +489,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
     return () => { active = false; };
   }, [token]);
 
-  const cardUrl = window.location.href;
+
   const activatePushNotifications = async () => {
     if (pushLoading || pushEnabled) return;
     setPushLoading(true);
