@@ -25,6 +25,16 @@ Appliquer les migrations dans l'ordre chronologique ci-dessous, sur un environne
 
 Déployer ensuite `supabase/functions/send-loyalty-notification-push/index.ts` depuis la même branche, uniquement après vérification des secrets et des tests d'autorisation. Ne pas déployer la fonction seule : elle dépend des colonnes `push_delivery_*` et de la RPC `claim_loyalty_campaign_push_delivery` créées par la migration 8.
 
+## Tests fonctionnels de la tombola (environnement de test)
+
+- Créer des niveaux Standard à Platinum et vérifier que les seuils/conditions OR et AND déterminent le niveau attendu.
+- Créer une tombola avec niveau minimum élevé : le compteur de participants ne doit inclure que les clients éligibles.
+- Vérifier les deux modes de tickets : un ticket par client, ou multiplicateur par niveau.
+- Exécuter le tirage arrivé à échéance sans JWT utilisateur ; vérifier que le cron ne s'arrête pas sur un contrôle d'authentification.
+- Vérifier que le nombre de gagnants ne dépasse pas `winners_count`, que chaque rang correspond au score de tirage calculé une seule fois, et qu'un second traitement ne crée ni gagnant ni notification en double.
+- Vérifier les trois modes de validité, l'expiration des récompenses, la rédemption une seule fois et le refus pour un responsable d'un autre établissement.
+- Tester un établissement historique sans niveaux : les niveaux par défaut doivent être créés sans écraser les niveaux déjà personnalisés.
+
 ## Contrôles avant toute notification réelle
 
 - Vérifier que les trois migrations sont présentes dans l'historique et que les colonnes/RPC attendues existent.
