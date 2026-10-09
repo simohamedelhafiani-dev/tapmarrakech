@@ -18,7 +18,7 @@ Deno.serve(async (req) => {
     const anon = Deno.env.get('SUPABASE_ANON_KEY');
     const service = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     const privateKey = Deno.env.get('VAPID_PRIVATE_KEY');
-    const publicKey = Deno.env.get('VAPID_PUBLIC_KEY');
+    const publicKey = Deno.env.get('VAPID_PUBLIC_KEY') || 'BP6npYG0iStFDilI-plhetrxJ6msUZGBVgMDP9u7ytndT4QzjD1A2q9taxeRX5bEHCoDBjRYjOUXtd1t2ZuXCWA';
     if (!url || !anon || !service || !privateKey || !publicKey) {
       return json({ success: false, error: 'Configuration Web Push incomplète.' }, 503);
     }
