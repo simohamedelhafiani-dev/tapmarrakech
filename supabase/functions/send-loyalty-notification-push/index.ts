@@ -57,14 +57,35 @@ Deno.serve(async (req) => {
 
     const adminClient = createClient(url, service, { auth: { persistSession: false, autoRefreshToken: false } });
 
+    const { data: attempt, error: attemptInsertError } = await adminClient
+      .from('loyalty_notification_push_attempts')
+      .insert({ campaign_id: campaignId, establishment_id: campaign.establishment_id, triggered_by: authData.user.id, status: 'SENDING' })
+      .select('id')
+      .single();
+    if (attemptInsertError || !attempt) {
+      console.error('Unable to create push attempt record:', attemptInsertError);
+      return json({ success: false, error: 'Impossible d’enregistrer la tentative Web Push.' }, 500);
+    }
+    const attemptId = attempt.id;
+    const finishAttempt = async (values: Record<string, unknown>) => {
+      const { error } = await adminClient.from('loyalty_notification_push_attempts').update({ ...values, completed_at: new Date().toISOString() }).eq('id', attemptId);
+      if (error) console.error('Unable to finalize push attempt:', error);
+    };
+
     const { data: recipients, error: recipientsError } = await adminClient
       .from('loyalty_card_notifications')
       .select('id,customer_id,card_url')
       .eq('campaign_id', campaignId)
       .eq('establishment_id', campaign.establishment_id);
 
-    if (recipientsError) return json({ success: false, error: 'Impossible de charger les destinataires.' }, 500);
-    if (!recipients?.length) return json({ success: true, sent: 0, failed: 0, removed: 0, skipped: 0, total: 0 });
+    if (recipientsError) {
+      await finishAttempt({ status: 'FAILED', error_summary: 'Impossible de charger les destinataires.' });
+      return json({ success: false, error: 'Impossible de charger les destinataires.' }, 500);
+    }
+    if (!recipients?.length) {
+      await finishAttempt({ status: 'NO_RECIPIENTS', sent: 0, failed: 0, removed: 0, skipped: 0, total: 0, push_subscribers: 0 });
+      return json({ success: true, sent: 0, failed: 0, removed: 0, skipped: 0, total: 0, push_subscribers: 0 });
+    }
 
     const customerIds = [...new Set(recipients.map((row) => row.customer_id).filter(Boolean))];
 
@@ -74,8 +95,14 @@ Deno.serve(async (req) => {
       .eq('establishment_id', campaign.establishment_id)
       .in('customer_id', customerIds);
 
-    if (subscriptionsError) return json({ success: false, error: 'Impossible de charger les abonnements push.' }, 500);
-    if (!subscriptions?.length) return json({ success: true, sent: 0, failed: 0, removed: 0, skipped: recipients.length, total: recipients.length, push_subscribers: 0 });
+    if (subscriptionsError) {
+      await finishAttempt({ status: 'FAILED', total: recipients.length, error_summary: 'Impossible de charger les abonnements Push.' });
+      return json({ success: false, error: 'Impossible de charger les abonnements push.' }, 500);
+    }
+    if (!subscriptions?.length) {
+      await finishAttempt({ status: 'NO_SUBSCRIBERS', sent: 0, failed: 0, removed: 0, skipped: recipients.length, total: recipients.length, push_subscribers: 0 });
+      return json({ success: true, sent: 0, failed: 0, removed: 0, skipped: recipients.length, total: recipients.length, push_subscribers: 0 });
+    }
 
     webpush.setVapidDetails(subject, publicKey, privateKey);
 
@@ -118,12 +145,16 @@ Deno.serve(async (req) => {
       }
     }
 
+    const skipped = Math.max(0, recipients.length - subscriptions.length);
+    const attemptStatus = sent > 0 && failed === 0 ? 'ACCEPTED_BY_PUSH_SERVICE' : sent > 0 ? 'PARTIAL' : failed > 0 ? 'FAILED' : 'NO_DELIVERIES';
+    await finishAttempt({ status: attemptStatus, sent, failed, removed, skipped, total: recipients.length, push_subscribers: subscriptions.length, error_summary: lastError || null });
+
     return json({
-      success: true,
+      success: sent > 0 && failed === 0,
       sent,
       failed,
       removed,
-      skipped: Math.max(0, recipients.length - subscriptions.length),
+      skipped,
       total: recipients.length,
       push_subscribers: subscriptions.length,
       ...(lastError ? { error: lastError } : {}),
