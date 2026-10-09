@@ -13,6 +13,7 @@ import {
   X,
   QrCode,
   Copy,
+  Download,
   ExternalLink,
   MessageCircle,
   AlertTriangle,
@@ -20,6 +21,7 @@ import {
   Search,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import QRCode from 'qrcode';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useLanguage, type Language } from '@/contexts/LanguageContext';
@@ -99,6 +101,10 @@ export function DashboardLayout() {
   const [profileName, setProfileName] = useState<string | null>(null);
   const [scannerUrl, setScannerUrl] = useState<string | null>(null);
   const [scannerLoading, setScannerLoading] = useState(false);
+  const [joinQrOpen, setJoinQrOpen] = useState(false);
+  const [joinQrUrl, setJoinQrUrl] = useState<string | null>(null);
+  const [joinQrError, setJoinQrError] = useState<string | null>(null);
+  const [joinLink, setJoinLink] = useState<string | null>(null);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [lastSeenNotificationsAt, setLastSeenNotificationsAt] = useState<string | null>(null);
@@ -608,6 +614,39 @@ export function DashboardLayout() {
             </div>
 
             <div className="ml-auto flex shrink-0 items-center gap-2">
+              {(role === 'responsible' || role === 'admin') && activeEstablishment && (
+                <>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const url = `${window.location.origin}/loyalty/join?est=${encodeURIComponent(activeEstablishment.id)}`;
+                      try {
+                        setJoinQrError(null);
+                        setJoinLink(url);
+                        const qr = await QRCode.toDataURL(url, { width: 800, margin: 3, errorCorrectionLevel: 'H' });
+                        setJoinQrUrl(qr);
+                        setJoinQrOpen(true);
+                      } catch (error) {
+                        console.error('Erreur génération QR création carte:', error);
+                        setJoinQrError('Impossible de générer le QR code. Veuillez réessayer.');
+                      }
+                    }}
+                    className="flex h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#F5F5DC]/70 transition hover:border-[#C9A45C]/60 hover:text-[#E1C27A]"
+                  >
+                    <QrCode size={14} /> <span className="hidden sm:inline">Créer une carte</span>
+                  </button>
+                  {scannerUrl && (
+                    <button
+                      type="button"
+                      onClick={() => window.open(scannerUrl, '_blank', 'noopener,noreferrer')}
+                      className="hidden h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#F5F5DC]/70 transition hover:border-[#C9A45C]/60 hover:text-[#E1C27A] sm:flex"
+                    >
+                      <QrCode size={14} /> Scanner
+                    </button>
+                  )}
+                </>
+              )}
+
               {role === 'responsible' && scannerUrl && (
                 <button
                   type="button"
@@ -728,6 +767,61 @@ export function DashboardLayout() {
             )}
           </div>
         </header>
+
+                {joinQrOpen && joinQrUrl && (
+          <div className="fixed inset-0 z-[100] grid place-items-center bg-black/70 p-4 backdrop-blur-sm">
+            <div className="w-full max-w-sm rounded-3xl border border-[#242424] bg-[#111111] p-6 text-center shadow-[0_30px_100px_rgba(0,0,0,.65)]">
+              <div className="flex items-center justify-between">
+                <div className="text-left">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A45C]">KELYANI</p>
+                  <h2 className="mt-1 text-lg font-semibold text-white">Créer ma carte</h2>
+                </div>
+                <button type="button" onClick={() => setJoinQrOpen(false)} className="grid h-9 w-9 place-items-center rounded-full border border-[#242424] text-white/60 hover:text-white"><X size={16} /></button>
+              </div>
+              <div className="mx-auto mt-6 w-fit rounded-3xl bg-white p-4">
+                <img src={joinQrUrl} alt="QR code pour créer une carte fidélité" className="h-64 w-64" />
+              </div>
+              <p className="mt-5 text-sm font-medium text-white">Scannez pour créer votre carte fidélité</p>
+              <p className="mt-1 text-[11px] leading-5 text-white/40">Le client remplit directement son formulaire sur son téléphone.</p>
+              {joinQrError && <p className="mt-3 text-xs font-medium text-red-300">{joinQrError}</p>}
+
+              <div className="mt-5 rounded-2xl border border-[#242424] bg-[#0B0B0B] p-3 text-left">
+                <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-[#C9A45C]/70">Lien de création · NFC</p>
+                <p className="mt-1 break-all text-[10px] leading-4 text-white/55">{joinLink}</p>
+              </div>
+
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => joinLink && navigator.clipboard?.writeText(joinLink)}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#242424] px-3 py-2.5 text-xs font-semibold text-[#C9A45C] hover:border-[#C9A45C]/60"
+                >
+                  <Copy size={14} /> Copier le lien
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!joinQrUrl) return;
+                    const link = document.createElement('a');
+                    link.href = joinQrUrl;
+                    link.download = `kelyani-qr-creation-${activeEstablishment?.name?.replace(/[^a-z0-9]+/gi, '-').toLowerCase() || 'carte'}.png`;
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                  }}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#C9A45C] px-3 py-2.5 text-xs font-semibold text-[#050505] hover:bg-[#E1C27A]"
+                >
+                  <Download size={14} /> Télécharger le QR
+                </button>
+              </div>
+
+              <p className="mt-3 text-[9px] leading-4 text-white/30">
+                Le lien peut être écrit directement dans une puce NFC. Le QR PNG est prêt pour impression sur une plaque.
+              </p>
+            </div>
+          </div>
+        )}
+
 
         <main className="dashboard-depth-main mx-auto w-full max-w-[1700px] px-3 pb-28 pt-6 sm:px-5 md:px-8 lg:px-10 lg:pt-8">
           <Outlet />

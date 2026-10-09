@@ -12,6 +12,7 @@ import { LanguageProvider } from '@/contexts/LanguageContext';
 import PublicReview from '@/pages/PublicReview';
 import LoyaltyCard from '@/pages/LoyaltyCard';
 import LoyaltyJoin from '@/pages/LoyaltyJoin';
+import LoyaltyRecover from '@/pages/LoyaltyRecover';
 import Login from '@/pages/Login';
 import { ForgotPassword, Register, ResetPassword } from '@/pages/AuthPages';
 
@@ -19,10 +20,14 @@ import Dashboard from '@/pages/Dashboard';
 import Reviews from '@/pages/Reviews';
 import Analytics from '@/pages/Analytics';
 import Loyalty from '@/pages/Loyalty';
+import LoyaltyRaffles from '@/pages/LoyaltyRaffles';
 import Menu from '@/pages/Menu';
 import MenuDesign from '@/pages/MenuDesign';
 import Promotions from '@/pages/Promotions';
 import Admin from '@/pages/Admin';
+import AdminOverview from '@/pages/AdminOverview';
+import AdminOverviewV2 from '@/pages/AdminOverviewV2';
+import AdminStatCardTest from '@/pages/AdminStatCardTest';
 import LoyaltyScanner from '@/pages/LoyaltyScanner';
 
 type EstablishmentRow = {
@@ -158,6 +163,7 @@ function App() {
           <Route path="/p/:slug" element={<PublicReview />} />
           <Route path="/loyalty" element={<LoyaltyLaunch />} />
           <Route path="/loyalty/join" element={<LoyaltyJoin />} />
+          <Route path="/loyalty/recover" element={<LoyaltyRecover />} />
           <Route path="/loyalty/:token" element={<LoyaltyCard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -165,7 +171,10 @@ function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
 
           <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
-            <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/*" element={<Admin />} />
+            <Route path="/admin/overview-test" element={<AdminOverview />} />
+            <Route path="/admin/overview-v2" element={<AdminOverviewV2 />} />
+            <Route path="/admin/statcard-test" element={<AdminStatCardTest />} />
           </Route>
 
           <Route element={<ProtectedRoute allowedRoles={['responsible']} />}>
@@ -220,13 +229,21 @@ function App() {
                 }
               />
               <Route
+                path="/dashboard/loyalty/raffles"
+                element={
+                  <SubscriptionFeatureRoute feature="loyalty">
+                    <LoyaltyRaffles />
+                  </SubscriptionFeatureRoute>
+                }
+              />
+              <Route
                 path="/dashboard/loyalty/settings"
                 element={<Navigate to="/dashboard/loyalty" replace />}
               />
             </Route>
           </Route>
 
-          {/* Scanner fidélité public lié à un établissement. */}
+          {/* Parcours scanner fidélité conservé ; l'espace employé séparé n'est plus utilisé. */}
           <Route path="/employee" element={<LoyaltyScanner />} />
 
           <Route path="*" element={<RoleRedirect />} />

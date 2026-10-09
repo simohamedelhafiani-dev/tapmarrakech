@@ -7,12 +7,14 @@ import {
   Percent,
   Rocket,
   Save,
+  Trophy,
   Settings2,
   Sparkles,
   Stamp,
   Star,
   Trash2,
   UserPlus,
+  UsersRound,
   X,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
@@ -24,11 +26,14 @@ import {
   type LoyaltyReferralConfig,
 } from '@/hooks/useLoyaltyManager';
 import LoyaltyPreview from './LoyaltyPreview';
+import LoyaltyRaffleStudio from './LoyaltyRaffleStudio';
+import LoyaltyTierStudio from './LoyaltyTierStudio';
+import LoyaltyCrmSegments from './LoyaltyCrmSegments';
 import { WALLET_TEMPLATES } from '@/components/LoyaltyCardVisual';
 import type { LoyaltyExperienceConfig, LoyaltyExperienceReward } from './LoyaltyExperience';
 
 type Props = { establishmentId: string };
-type TabId = 'settings' | 'rewards' | 'referral' | 'design';
+type TabId = 'settings' | 'rewards' | 'referral' | 'tiers' | 'raffle' | 'crm' | 'design';
 type RewardType = 'GIFT' | 'DISCOUNT';
 
 type Reward = {
@@ -84,6 +89,9 @@ const TABS: { id: TabId; label: string; caption: string; icon: typeof Settings2 
   { id: 'settings', label: 'Paramètres', caption: 'Programme', icon: Settings2 },
   { id: 'rewards', label: 'Récompenses', caption: 'Catalogue', icon: Gift },
   { id: 'referral', label: 'Parrainage', caption: 'Acquisition', icon: Rocket },
+  { id: 'tiers', label: 'Niveaux', caption: 'Clients', icon: Trophy },
+  { id: 'raffle', label: 'Tombola', caption: 'Gagnants', icon: Trophy },
+  { id: 'crm', label: 'CRM', caption: 'Segments', icon: UsersRound },
   { id: 'design', label: 'Design', caption: 'Visuels', icon: Palette },
 ];
 
@@ -681,7 +689,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
         <div className="min-w-0">
           <div className="mb-5 overflow-x-auto rounded-2xl bg-[#111111] p-1.5">
-            <div className={`grid gap-1 ${isAdmin ? 'min-w-[640px] grid-cols-4' : 'grid-cols-3'}`}>
+            <div className={`grid gap-1 ${isAdmin ? 'min-w-[1050px] grid-cols-7' : 'min-w-[900px] grid-cols-6'}`}>
               {visibleTabs.map(item => {
                 const Icon = item.icon;
                 const active = tab === item.id;
@@ -706,6 +714,8 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
               })}
             </div>
           </div>
+
+          {tab === 'crm' && <LoyaltyCrmSegments establishmentId={establishmentId} />}
 
           {tab === 'settings' && (
             <div className="space-y-5">
@@ -1058,6 +1068,14 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                 Les changements sont conservés avec le bouton <strong className="text-[#E1C27A]">Enregistrer</strong>. Le miroir de droite reflète immédiatement les paramètres qui modifient la carte.
               </div>
             </div>
+          )}
+
+          {tab === 'tiers' && (
+            <LoyaltyTierStudio establishmentId={establishmentId} />
+          )}
+
+          {tab === 'raffle' && (
+            <LoyaltyRaffleStudio establishmentId={establishmentId} />
           )}
 
           {tab === 'design' && isAdmin && (

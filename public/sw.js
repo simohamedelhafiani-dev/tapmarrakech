@@ -1,4 +1,4 @@
-const CACHE = 'kelyani-shell-v11';
+const CACHE = 'kelyani-shell-v12';
 const APP_SHELL = ['/', '/index.html', '/kelyani-final.svg', '/manifest.webmanifest'];
 
 self.addEventListener('message', (event) => {
@@ -25,6 +25,42 @@ self.addEventListener('activate', (event) => {
       clients.map((client) => client.navigate(client.url).catch(() => undefined))
     );
   });
+});
+
+self.addEventListener('push', (event) => {
+  let payload = {};
+  try {
+    payload = event.data ? event.data.json() : {};
+  } catch {
+    payload = { body: event.data?.text?.() || '' };
+  }
+
+  const title = payload.title || 'KELYANI';
+  const options = {
+    body: payload.body || 'Vous avez une nouvelle notification.',
+    icon: payload.icon || '/kelyani-final.svg',
+    badge: payload.badge || '/kelyani-final.svg',
+    tag: payload.tag || 'kelyani-loyalty-notification',
+    renotify: Boolean(payload.renotify ?? true),
+    data: payload.data || { url: '/' },
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const targetUrl = event.notification.data?.url || '/';
+  event.waitUntil((async () => {
+    const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const client of clients) {
+      if ('focus' in client) {
+        await client.focus();
+        if ('navigate' in client) await client.navigate(targetUrl);
+        return;
+      }
+    }
+    if (self.clients.openWindow) await self.clients.openWindow(targetUrl);
+  })());
 });
 
 self.addEventListener('fetch', (event) => {

@@ -880,20 +880,30 @@ function Overview({
       setDetailLoading(true);
 
       if (selectedEstablishment === 'all') {
-        if (mounted) {
-          console.log('[SET DETAIL]', reqId, {
-            reviews: globalStats.reviews,
-            loyaltyCustomers: globalStats.loyaltyCustomers,
-            analyticsEvents: globalStats.analyticsEvents,
-          });
-          setDetail({
-            reviews: globalStats.reviews,
-            averageRating: globalStats.averageRating,
-            loyaltyCustomers: globalStats.loyaltyCustomers,
-            analyticsEvents: globalStats.analyticsEvents,
-            loyaltyRevenue: 0,
-          });
-          setDetailLoading(false);
+        try {
+          const { data: transactionRows, error: transactionError } = await supabase
+            .from('loyalty_transactions')
+            .select('amount')
+            .eq('type', 'EARN');
+          if (transactionError) throw transactionError;
+          const loyaltyRevenue = (transactionRows ?? []).reduce(
+            (sum, row) => sum + Number(row.amount ?? 0),
+            0,
+          );
+          if (mounted) {
+            setDetail({
+              reviews: globalStats.reviews,
+              averageRating: globalStats.averageRating,
+              loyaltyCustomers: globalStats.loyaltyCustomers,
+              analyticsEvents: globalStats.analyticsEvents,
+              loyaltyRevenue,
+            });
+          }
+        } catch (error) {
+          console.error('Erreur CA fidélité global:', error);
+          if (mounted) setDetail(current => ({ ...current, loyaltyRevenue: 0 }));
+        } finally {
+          if (mounted) setDetailLoading(false);
         }
         return;
       }
@@ -903,14 +913,16 @@ function Overview({
           { data: reviewRows, error: reviewsError },
           { count: loyaltyCustomers, error: loyaltyError },
           { count: analyticsEvents, error: analyticsError },
+          { data: transactionRows, error: transactionError },
         ] = await Promise.all([
           supabase.from('reviews').select('rating').eq('establishment_id', selectedEstablishment),
           supabase.from('loyalty_customers').select('id', { count: 'exact', head: true }).eq('establishment_id', selectedEstablishment),
           supabase.from('analytics_events').select('id', { count: 'exact', head: true }).eq('establishment_id', selectedEstablishment),
+          supabase.from('loyalty_transactions').select('amount').eq('establishment_id', selectedEstablishment).eq('type', 'EARN'),
         ]);
 
-        if (reviewsError || loyaltyError || analyticsError) {
-          throw reviewsError ?? loyaltyError ?? analyticsError;
+        if (reviewsError || loyaltyError || analyticsError || transactionError) {
+          throw reviewsError ?? loyaltyError ?? analyticsError ?? transactionError;
         }
 
         if (!mounted) return;
@@ -929,7 +941,10 @@ function Overview({
           averageRating: ratings.length ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length : 0,
           loyaltyCustomers: loyaltyCustomers ?? 0,
           analyticsEvents: analyticsEvents ?? 0,
-          loyaltyRevenue: 0,
+          loyaltyRevenue: (transactionRows ?? []).reduce(
+            (sum, row) => sum + Number(row.amount ?? 0),
+            0,
+          ),
         });
       } catch (error) {
         console.error('Erreur statistiques établissement Admin:', error);
