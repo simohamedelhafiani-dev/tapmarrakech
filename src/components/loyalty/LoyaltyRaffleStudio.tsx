@@ -151,8 +151,14 @@ export default function LoyaltyRaffleStudio({ establishmentId }: Props) {
       return;
     }
     const validity = buildValidity();
-    if (new Date(validity.until).getTime() <= new Date(validity.from).getTime()) {
+    const validFrom = new Date(validity.from).getTime();
+    const validUntil = new Date(validity.until).getTime();
+    if (validUntil <= validFrom) {
       setMessage('La période de validité du cadeau est invalide.');
+      return;
+    }
+    if (form.validityMode !== 'DAYS_AFTER_DRAW' && validUntil <= drawAt.getTime()) {
+      setMessage('Le cadeau doit rester valable au moins après l’heure du tirage.');
       return;
     }
 
