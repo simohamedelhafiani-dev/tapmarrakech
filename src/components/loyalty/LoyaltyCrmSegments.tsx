@@ -68,6 +68,8 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
   const [campaignHistory, setCampaignHistory] = useState<CampaignHistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState('');
+  const [pushSendingId, setPushSendingId] = useState<string | null>(null);
+  const [pushFeedback, setPushFeedback] = useState<Record<string, string>>({});
 
   const load = async () => {
     if (!establishmentId) return;
@@ -161,6 +163,31 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
     }
     finally { setCampaignSaving(false); }
   };
+  const sendCampaignPush = async (campaignId: string) => {
+    setPushSendingId(campaignId);
+    setPushFeedback(current => ({ ...current, [campaignId]: '' }));
+    try {
+      const { data, error: pushError } = await supabase.functions.invoke('send-loyalty-notification-push', {
+        body: { campaign_id: campaignId },
+      });
+      if (pushError) throw pushError;
+      if (data?.duplicate) {
+        setPushFeedback(current => ({ ...current, [campaignId]: 'Un envoi a déjà été réservé pour cette campagne. Aucun nouvel envoi n’a été lancé.' }));
+      } else if (data?.success) {
+        setPushFeedback(current => ({ ...current, [campaignId]: 'Web Push terminé : ' + Number(data.sent ?? 0) + ' envoyé(s), ' + Number(data.failed ?? 0) + ' échec(s).' }));
+      } else if (data?.sent > 0) {
+        setPushFeedback(current => ({ ...current, [campaignId]: 'Envoi partiel : ' + Number(data.sent) + ' envoyé(s), ' + Number(data.failed ?? 0) + ' échec(s). Consulte le statut de livraison avant toute nouvelle action.' }));
+      } else {
+        setPushFeedback(current => ({ ...current, [campaignId]: data?.error || data?.message || 'Aucun Web Push envoyé. Vérifie la configuration et les abonnements.' }));
+      }
+    } catch (e) {
+      const failure = e as { message?: string };
+      setPushFeedback(current => ({ ...current, [campaignId]: failure.message || 'Impossible de contacter le service Web Push.' }));
+    } finally {
+      setPushSendingId(null);
+    }
+  };
+
   const exportCsv = () => {
     const rows = [
       ['Prénom', 'Nom', 'Téléphone', 'Email', 'Points', 'Visites', 'Dernière visite', 'Jour naissance', 'Mois naissance', 'Consentement marketing', 'Consentement notifications', 'Canal préféré'],
@@ -289,6 +316,14 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
                 </div>
               </div>
               <p className="mt-2 whitespace-pre-wrap text-xs leading-5 text-white/65">{item.message}</p>
+              <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-[10px] leading-4 text-white/40">La notification est déjà enregistrée sur les cartes. Le Web Push externe nécessite une action distincte.</p>
+                <button type="button" onClick={() => void sendCampaignPush(item.id)} disabled={pushSendingId !== null || item.recipient_count === 0} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-[#D4AF37]/30 px-3 py-2 text-xs font-semibold text-[#D4AF37] hover:bg-[#D4AF37]/10 disabled:opacity-40">
+                  {pushSendingId === item.id ? <Loader2 size={13} className="animate-spin" /> : <BellRing size={13} />}
+                  {pushSendingId === item.id ? 'Envoi…' : 'Envoyer Web Push'}
+                </button>
+              </div>
+              {pushFeedback[item.id] && <p role="status" className="mt-2 rounded-lg border border-white/10 bg-black/30 p-2 text-xs leading-5 text-white/70">{pushFeedback[item.id]}</p>}
             </article>)}
           </div>}
       </section>
