@@ -689,7 +689,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
         <div className="min-w-0">
           <div className="mb-5 overflow-x-auto rounded-2xl bg-[#111111] p-1.5">
-            <div className={`grid gap-1 ${isAdmin ? 'min-w-[960px] grid-cols-6' : 'min-w-[800px] grid-cols-5'}`}>
+            <div className={`grid gap-1 ${isAdmin ? 'min-w-[1050px] grid-cols-7' : 'min-w-[900px] grid-cols-6'}`}>
               {visibleTabs.map(item => {
                 const Icon = item.icon;
                 const active = tab === item.id;
