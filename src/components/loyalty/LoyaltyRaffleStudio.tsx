@@ -199,13 +199,19 @@ export default function LoyaltyRaffleStudio({ establishmentId }: Props) {
   };
 
   const redeemWinner = async (winnerId: string) => {
-    const { error } = await supabase.rpc('redeem_loyalty_raffle_winner', { p_winner_id: winnerId });
-    if (error) setMessage(error.message);
-    else {
-      setMessage('Récompense marquée comme utilisée.');
-      if (selectedId) await loadWinners(selectedId);
-      await load();
+    const { data, error } = await supabase.rpc('redeem_loyalty_raffle_winner', { p_winner_id: winnerId });
+    if (error) {
+      setMessage(error.message);
+      return;
     }
+
+    if (data === 'EXPIRED') {
+      setMessage('Cette récompense a expiré. Son statut a été mis à jour.');
+    } else {
+      setMessage('Récompense marquée comme utilisée.');
+    }
+    if (selectedId) await loadWinners(selectedId);
+    await load();
   };
 
   return (
