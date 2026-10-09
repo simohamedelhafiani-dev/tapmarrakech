@@ -4,7 +4,7 @@
 
 - Branche de travail : `feat/kelyani-crm-segmentation-automation`.
 - PR de travail : #69, encore en brouillon. Ne pas fusionner dans `main` sans validation.
-- Dernier commit applicatif audité : `78436ed3fac0ef719cf3172014aa3f3a2c12ad19` ; son aperçu Vercel est `READY`. Les changements plus récents attendent encore leur propre build.
+- Les builds Vercel des changements applicatifs récents ont abouti à `READY`. Ce contrôle ne valide pas les migrations SQL ni l'exécution de l'Edge Function.
 - Projet Supabase : `tehhhdtfbonneqbyvlwx`.
 - Dernière migration enregistrée dans Supabase : `20261008174745`. Les migrations CRM datées du 9 octobre ne sont donc pas appliquées à ce projet.
 - Edge Function `send-loyalty-notification-push` actuellement active en version 2 ; son empreinte diffère du code de la branche. Ne pas activer l'envoi depuis l'interface avant mise à niveau coordonnée.
