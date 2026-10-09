@@ -743,18 +743,18 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         </div>
 
         {activeRaffle && (
-          <section className="mt-4 overflow-hidden rounded-2xl border shadow-lg transition-colors duration-300" style={{ backgroundColor: design.background_color, color: design.text_color, borderColor: `${design.secondary_color}88` }}>
+          <section className="mt-4 overflow-hidden rounded-2xl border shadow-lg transition-colors duration-300" style={{ backgroundColor: design.background_color, color: readableTextColor(design.background_color), borderColor: design.secondary_color }}>
             <button type="button" onClick={() => setRaffleDetailsOpen(open => !open)} aria-expanded={raffleDetailsOpen} className="flex w-full items-center gap-3 p-4 text-left transition-opacity hover:opacity-90">
-              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl" style={{ backgroundColor: design.primary_color, color: design.secondary_color }}><Trophy className="h-5 w-5" /></span>
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl" style={{ backgroundColor: design.primary_color, color: readableTextColor(design.primary_color) }}><Trophy className="h-5 w-5" /></span>
               <span className="min-w-0 flex-1">
                 <span className="block text-[10px] font-bold uppercase tracking-[.15em]" style={{ color: design.secondary_color }}>Tombola en cours</span>
                 <span className="mt-1 block truncate text-sm font-semibold">{activeRaffle.title}</span>
                 <span className="mt-1 block text-xs opacity-75">À gagner : {activeRaffle.prize_name}</span>
               </span>
-              <span className="shrink-0 rounded-full px-3 py-1.5 text-[10px] font-bold" style={{ backgroundColor: design.secondary_color, color: design.primary_color }}>{raffleDetailsOpen ? 'Fermer' : 'Voir'}</span>
+              <span className="shrink-0 rounded-full px-3 py-1.5 text-[10px] font-bold" style={{ backgroundColor: design.secondary_color, color: readableTextColor(design.secondary_color) }}>{raffleDetailsOpen ? 'Fermer' : 'Voir'}</span>
             </button>
             {raffleDetailsOpen && (
-              <div className="border-t px-4 pb-4 pt-3" style={{ borderColor: `${design.secondary_color}55` }}>
+              <div className="border-t px-4 pb-4 pt-3" style={{ borderColor: design.secondary_color }}>
                 {activeRaffle.description && <p className="mb-2 text-sm leading-5 opacity-85">{activeRaffle.description}</p>}
                 {activeRaffle.prize_description && <p className="mb-3 text-xs leading-5 opacity-75">{activeRaffle.prize_description}</p>}
                 <div className="flex items-center justify-between gap-3 text-xs"><span className="opacity-75">Tirage prévu</span><strong>{new Date(activeRaffle.draw_at).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' })}</strong></div>
@@ -930,6 +930,17 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
       </div>
     </main>
   );
+}
+
+function readableTextColor(hexColor: string): string {
+  const normalized = hexColor.replace('#', '').trim();
+  if (!/^[0-9a-fA-F]{6}$/.test(normalized)) return '#FFFFFF';
+  const channels = [0, 2, 4].map(offset => {
+    const value = parseInt(normalized.slice(offset, offset + 2), 16) / 255;
+    return value <= 0.04045 ? value / 12.92 : Math.pow((value + 0.055) / 1.055, 2.4);
+  });
+  const luminance = 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+  return luminance > 0.42 ? '#111111' : '#FFFFFF';
 }
 
 function withLiveVersion(url: string, version: number) {
