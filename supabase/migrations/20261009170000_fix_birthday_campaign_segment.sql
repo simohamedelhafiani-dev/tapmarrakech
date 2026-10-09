@@ -59,8 +59,8 @@ begin
       or (p_segment = 'inactive' and (c.last_visit_at is null or c.last_visit_at < now() - interval '60 days'))
       or (
         p_segment = 'birthdays'
-        and c.birth_day = extract(day from current_date)::integer
-        and c.birth_month = extract(month from current_date)::integer
+        and c.birth_day = extract(day from (now() at time zone 'Africa/Casablanca'))::integer
+        and c.birth_month = extract(month from (now() at time zone 'Africa/Casablanca'))::integer
       )
       or (p_segment = 'loyal' and (c.visit_count >= 5 or c.points_balance >= 500))
     );
