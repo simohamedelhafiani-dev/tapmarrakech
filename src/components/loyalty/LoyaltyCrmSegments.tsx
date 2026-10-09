@@ -21,6 +21,18 @@ type Customer = {
 
 type SegmentId = 'all' | 'active' | 'at_risk' | 'inactive' | 'birthdays' | 'loyal';
 
+type CampaignHistoryItem = {
+  id: string;
+  title: string;
+  message: string;
+  type: 'INFO' | 'OFFER' | 'REWARD' | 'POINTS';
+  audience: { segment?: string } | null;
+  recipient_count: number;
+  status: string;
+  created_at: string;
+  expires_at: string | null;
+};
+
 const SEGMENTS: { id: SegmentId; label: string; hint: string; icon: typeof Users }[] = [
   { id: 'all', label: 'Tous les clients', hint: 'Base complète', icon: Users },
   { id: 'active', label: 'Actifs', hint: 'Visite dans les 30 jours', icon: UserCheck },
@@ -53,6 +65,9 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
   const [campaignType, setCampaignType] = useState<'INFO' | 'OFFER' | 'REWARD' | 'POINTS'>('OFFER');
   const [campaignSaving, setCampaignSaving] = useState(false);
   const [campaignFeedback, setCampaignFeedback] = useState('');
+  const [campaignHistory, setCampaignHistory] = useState<CampaignHistoryItem[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState('');
 
   const load = async () => {
     if (!establishmentId) return;
@@ -73,7 +88,26 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
     }
   };
 
-  useEffect(() => { void load(); }, [establishmentId]);
+  const loadCampaignHistory = async () => {
+    if (!establishmentId) return;
+    setHistoryLoading(true);
+    setHistoryError('');
+    try {
+      const { data, error: historyRequestError } = await supabase.rpc('get_loyalty_notification_campaign_history', {
+        p_establishment_id: establishmentId,
+        p_limit: 30,
+      });
+      if (historyRequestError) throw historyRequestError;
+      setCampaignHistory((data ?? []) as CampaignHistoryItem[]);
+    } catch (e) {
+      const failure = e as { message?: string; details?: string; hint?: string };
+      setHistoryError([failure.message, failure.details, failure.hint].filter(Boolean).join(' — ') || 'Historique indisponible. La migration dédiée doit être installée.');
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  useEffect(() => { void load(); void loadCampaignHistory(); }, [establishmentId]);
 
   const filtered = useMemo(() => {
     const now = new Date();
@@ -107,6 +141,7 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
       const count = Number(result?.recipient_count ?? 0);
       setCampaignFeedback(count > 0 ? 'Campagne créée : ' + count + ' notification(s) ajoutée(s) aux cartes des clients ayant accepté les notifications.' : 'Campagne créée, mais aucun client éligible avec consentement notification dans ce segment.');
       setCampaignTitle(''); setCampaignMessage('');
+      await loadCampaignHistory();
     } catch (e) {
       const failure = e as { message?: string; details?: string; hint?: string; code?: string };
       const message = [failure?.message, failure?.details, failure?.hint].filter(Boolean).join(' — ');
@@ -218,6 +253,33 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
         </div>
         {campaignFeedback && <p role="status" className="mt-3 rounded-xl border border-white/10 bg-black/20 p-3 text-xs leading-5 text-white/75">{campaignFeedback}</p>}
         <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"><p className="text-[10px] text-white/35">Segment choisi : {SEGMENTS.find(item => item.id === segment)?.label}. L’envoi Web Push externe n’est pas déclenché automatiquement par cette action.</p><button type="button" onClick={() => void createCampaign()} disabled={campaignSaving || loading} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#D4AF37] px-4 py-2.5 text-xs font-bold text-black hover:brightness-110 disabled:opacity-40">{campaignSaving ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}Créer la campagne</button></div>
+      </section>
+      <section className="rounded-2xl border border-white/10 bg-white/[.02] p-4 sm:p-5">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h4 className="font-semibold text-white">Historique des notifications</h4>
+            <p className="mt-1 text-xs text-white/45">Les campagnes créées pour cet établissement, les segments ciblés et le nombre de cartes destinataires.</p>
+          </div>
+          <button type="button" onClick={() => void loadCampaignHistory()} disabled={historyLoading} className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs text-white/75 disabled:opacity-40"><RefreshCw size={13} className={historyLoading ? 'animate-spin' : ''}/> Actualiser</button>
+        </div>
+        {historyError && <p role="alert" className="mt-3 rounded-xl border border-amber-400/20 bg-amber-400/5 p-3 text-xs leading-5 text-amber-100/80">Historique non chargé : {historyError}. Vérifie que la migration de l’historique est installée sur Supabase.</p>}
+        {historyLoading ? <p className="py-6 text-center text-xs text-white/40">Chargement de l’historique…</p> :
+          campaignHistory.length === 0 ? <p className="py-6 text-center text-xs text-white/40">Aucune campagne dans l’historique pour le moment.</p> :
+          <div className="mt-4 space-y-2">
+            {campaignHistory.map(item => <article key={item.id} className="rounded-xl border border-white/[.08] bg-black/20 p-3">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-white">{item.title}</p>
+                  <p className="mt-1 text-xs text-white/45">{new Date(item.created_at).toLocaleString('fr-FR')} · {SEGMENTS.find(s => s.id === item.audience?.segment)?.label ?? item.audience?.segment ?? 'Segment non précisé'}</p>
+                </div>
+                <div className="flex items-center gap-2 text-[10px]">
+                  <span className="rounded-full border border-white/10 px-2 py-1 text-white/65">{item.type === 'OFFER' ? 'Offre' : item.type === 'REWARD' ? 'Récompense' : item.type === 'POINTS' ? 'Points' : 'Information'}</span>
+                  <span className="rounded-full bg-[#D4AF37]/10 px-2 py-1 text-[#D4AF37]">{item.recipient_count} destinataire(s)</span>
+                </div>
+              </div>
+              <p className="mt-2 whitespace-pre-wrap text-xs leading-5 text-white/65">{item.message}</p>
+            </article>)}
+          </div>}
       </section>
       <p className="text-[11px] leading-5 text-white/35">Les segments sont calculés à partir de la dernière visite enregistrée. Les clients sans date de visite sont classés « Inactifs ». Les anniversaires utilisent uniquement le jour et le mois, sans année de naissance. L’export respecte le segment et la recherche affichés.</p>
     </div>
