@@ -50,6 +50,8 @@ Déployer ensuite `supabase/functions/send-loyalty-notification-push/index.ts` d
 
 ## Point de vigilance sécurité
 
+- Après migration, vérifier que `get_loyalty_customer_tier(uuid)` n'est pas exécutable par `anon` ni `authenticated`, et que l'accès public passe uniquement par `get_public_loyalty_customer_tier(access_token)`. L'audit en lecture seule du projet de production a relevé un droit `EXECUTE` direct pour `authenticated` sur la fonction UUID ; la migration de sécurisation doit corriger ce point avant activation des nouvelles cartes/tombolas.
+
 L'audit Supabase du 9 octobre signale plusieurs tables avec RLS activé mais sans policy, notamment des tables de notifications, abonnements push et campagnes, ainsi qu'une alerte de protection contre les mots de passe compromis désactivée. Ces constats doivent être triés table par table : l'absence de policy peut être intentionnelle si l'accès est strictement réservé aux fonctions privilégiées, mais il faut confirmer les privilèges SQL et l'absence d'accès direct avant commercialisation. Ne pas ajouter de policies génériques sans vérifier le modèle d'accès attendu.
 
 ## Décision de mise en service
