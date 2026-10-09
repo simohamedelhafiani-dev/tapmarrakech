@@ -1,3 +1,23 @@
+-- Store browser push endpoints. The public customer never receives direct table access;
+-- registration and delivery are performed through token-scoped RPC / service role.
+create table if not exists public.loyalty_push_subscriptions (
+  id uuid primary key default gen_random_uuid(),
+  customer_id uuid not null references public.loyalty_customers(id) on delete cascade,
+  establishment_id uuid not null references public.establishments(id) on delete cascade,
+  endpoint text not null unique,
+  p256dh text not null,
+  auth text not null,
+  user_agent text,
+  card_url text,
+  last_seen_at timestamptz not null default now(),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists loyalty_push_subscriptions_establishment_customer_idx
+  on public.loyalty_push_subscriptions(establishment_id, customer_id);
+alter table public.loyalty_push_subscriptions enable row level security;
+revoke all on public.loyalty_push_subscriptions from anon, authenticated;
+
 create or replace function public.register_loyalty_push_subscription(
   p_access_token uuid,
   p_subscription jsonb,
