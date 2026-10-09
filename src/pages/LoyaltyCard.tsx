@@ -902,77 +902,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
           </section>
         )}
 
-        {notifications.length > 0 && (
-          <section className="mt-4 overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#111111] shadow-luxury">
-            <div className="flex items-center justify-between border-b border-white/8 px-5 py-4">
-              <div className="flex items-center gap-3">
-                <div
-                  className="grid h-10 w-10 place-items-center rounded-xl"
-                  style={{ backgroundColor: `${design.secondary_color}22`, color: design.secondary_color }}
-                >
-                  <Bell className="h-4 w-4" />
-                </div>
-                <div>
-                  <h2 className="text-sm font-semibold text-white">Notifications</h2>
-                  <p className="mt-0.5 text-[10px] text-white/35">
-                    {notifications.filter(notification => !notification.is_read).length} non lue(s)
-                  </p>
-                </div>
-              </div>
-              {notifications.some(notification => !notification.is_read) && (
-                <span
-                  className="rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.12em]"
-                  style={{ backgroundColor: `${design.secondary_color}18`, color: design.secondary_color }}
-                >
-                  Nouveau
-                </span>
-              )}
-            </div>
-            <div className="divide-y divide-white/6">
-              {notifications.map(notification => (
-                <button
-                  key={notification.id}
-                  type="button"
-                  onClick={() => {
-                    if (notification.is_read) return;
-                    void (async () => {
-                      const { data: markedRead, error: readError } = await supabase.rpc('mark_public_loyalty_notification_read', {
-                        p_access_token: token,
-                        p_notification_id: notification.id,
-                      });
-                      if (readError || markedRead !== true) {
-                        console.error('Failed to mark loyalty notification as read:', readError);
-                        return;
-                      }
-                      setNotifications(current =>
-                        current.filter(item => item.id !== notification.id)
-                      );
-                    })();
-                  }}
-                  className="w-full px-5 py-4 text-left transition hover:bg-white/[0.03]"
-                >
-                  <div className="flex items-start gap-3">
-                    <span
-                      className="mt-0.5 h-2 w-2 shrink-0 rounded-full"
-                      style={{ backgroundColor: notification.is_read ? 'rgba(255,255,255,.15)' : design.secondary_color }}
-                    />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-3">
-                        <p className={`text-sm font-semibold ${notification.is_read ? 'text-white/55' : 'text-white'}`}>
-                          {notification.title}
-                        </p>
-                        <span className="shrink-0 text-[9px] text-white/25">
-                          {new Date(notification.created_at).toLocaleDateString('fr-FR')}
-                        </span>
-                      </div>
-                      <p className="mt-1 text-xs leading-5 text-white/45">{notification.message}</p>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </section>
-        )}
+        {/* Les campagnes sont envoyées par Web Push. On ne les affiche pas dans la carte fidélité. */}
 
         {program.referral_enabled && cardSaved && (
           <button
