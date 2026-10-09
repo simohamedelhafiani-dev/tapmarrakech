@@ -86,7 +86,10 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
       if (segment === 'active') inSegment = Number.isFinite(lastVisit) && lastVisit >= cutoff30;
       if (segment === 'at_risk') inSegment = Number.isFinite(lastVisit) && lastVisit < cutoff30 && lastVisit >= cutoff60;
       if (segment === 'inactive') inSegment = !Number.isFinite(lastVisit) || lastVisit < cutoff60;
-      if (segment === 'birthdays') inSegment = customer.birth_day === now.getDate() && customer.birth_month === now.getMonth() + 1;
+      if (segment === 'birthdays') {
+        const moroccoDate = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Casablanca' }));
+        inSegment = customer.birth_day === moroccoDate.getDate() && customer.birth_month === moroccoDate.getMonth() + 1;
+      }
       if (segment === 'loyal') inSegment = customer.visit_count >= 5 || customer.points_balance >= 500;
       const fullName = [customer.first_name, customer.last_name ?? ''].join(' ').toLocaleLowerCase();
       const matchesSearch = !needle || fullName.includes(needle) || customer.phone.includes(needle) || (customer.email ?? '').toLocaleLowerCase().includes(needle);
@@ -128,7 +131,10 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
       active: customers.filter(c => { const t = c.last_visit_at ? new Date(c.last_visit_at).getTime() : Number.NaN; return Number.isFinite(t) && t >= Date.now() - 30 * 86_400_000; }).length,
       atRisk: customers.filter(c => { const t = c.last_visit_at ? new Date(c.last_visit_at).getTime() : Number.NaN; return Number.isFinite(t) && t < Date.now() - 30 * 86_400_000 && t >= Date.now() - 60 * 86_400_000; }).length,
       inactive: customers.filter(c => { const t = c.last_visit_at ? new Date(c.last_visit_at).getTime() : Number.NaN; return !Number.isFinite(t) || t < Date.now() - 60 * 86_400_000; }).length,
-      birthdays: customers.filter(c => c.birth_day === now.getDate() && c.birth_month === now.getMonth() + 1).length,
+      birthdays: customers.filter(c => {
+        const moroccoDate = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Casablanca' }));
+        return c.birth_day === moroccoDate.getDate() && c.birth_month === moroccoDate.getMonth() + 1;
+      }).length,
     };
   }, [customers]);
 
