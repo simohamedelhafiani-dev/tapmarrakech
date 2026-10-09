@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Download, Loader2, RefreshCw, Users, UserCheck, AlertTriangle, UserX, Cake, Star } from 'lucide-react';
+import { Download, Loader2, RefreshCw, Users, UserCheck, AlertTriangle, UserX, Cake, Star, Send, BellRing } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 type Customer = {
@@ -48,6 +48,11 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
   const [error, setError] = useState('');
   const [segment, setSegment] = useState<SegmentId>('all');
   const [query, setQuery] = useState('');
+  const [campaignTitle, setCampaignTitle] = useState('');
+  const [campaignMessage, setCampaignMessage] = useState('');
+  const [campaignType, setCampaignType] = useState<'INFO' | 'OFFER' | 'REWARD' | 'POINTS'>('OFFER');
+  const [campaignSaving, setCampaignSaving] = useState(false);
+  const [campaignFeedback, setCampaignFeedback] = useState('');
 
   const load = async () => {
     if (!establishmentId) return;
@@ -87,6 +92,19 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
     });
   }, [customers, segment, query]);
 
+  const createCampaign = async () => {
+    if (!campaignTitle.trim() || !campaignMessage.trim()) { setCampaignFeedback('Ajoute un titre et un message avant de préparer la campagne.'); return; }
+    setCampaignSaving(true); setCampaignFeedback('');
+    try {
+      const { data, error: campaignError } = await supabase.rpc('create_loyalty_notification_campaign', { p_establishment_id: establishmentId, p_title: campaignTitle.trim(), p_message: campaignMessage.trim(), p_type: campaignType, p_segment: segment, p_expires_at: null });
+      if (campaignError) throw campaignError;
+      const result = Array.isArray(data) ? data[0] : data;
+      const count = Number(result?.recipient_count ?? 0);
+      setCampaignFeedback(count > 0 ? 'Campagne créée : ' + count + ' notification(s) ajoutée(s) aux cartes des clients ayant accepté les notifications.' : 'Campagne créée, mais aucun client éligible avec consentement notification dans ce segment.');
+      setCampaignTitle(''); setCampaignMessage('');
+    } catch (e) { setCampaignFeedback(e instanceof Error ? e.message : 'Impossible de créer la campagne.'); }
+    finally { setCampaignSaving(false); }
+  };
   const exportCsv = () => {
     const rows = [
       ['Prénom', 'Nom', 'Téléphone', 'Email', 'Points', 'Visites', 'Dernière visite', 'Jour naissance', 'Mois naissance', 'Consentement marketing', 'Consentement notifications', 'Canal préféré'],
@@ -178,6 +196,16 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
         </div>
         {!loading && filtered.length > 100 && <p className="border-t border-white/10 px-4 py-3 text-xs text-white/40">Affichage des 100 premiers clients. L’export CSV inclut tout le segment filtré.</p>}
       </div>
+      <section className="rounded-2xl border border-[#D4AF37]/20 bg-[#D4AF37]/[.035] p-4 sm:p-5">
+        <div className="flex items-start gap-3"><div className="rounded-xl bg-[#D4AF37]/10 p-2.5 text-[#D4AF37]"><BellRing size={18} /></div><div className="min-w-0 flex-1"><h4 className="font-semibold text-white">Campagne ciblée</h4><p className="mt-1 text-xs leading-5 text-white/45">Prépare une notification sur les cartes des clients du segment sélectionné. Seuls les clients ayant accepté les notifications sont inclus.</p></div></div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <label className="block text-xs text-white/55">Titre de la notification<input maxLength={120} value={campaignTitle} onChange={e => setCampaignTitle(e.target.value)} placeholder="Ex. Une offre vous attend" className="mt-1.5 w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50" /></label>
+          <label className="block text-xs text-white/55">Type<select value={campaignType} onChange={e => setCampaignType(e.target.value as typeof campaignType)} className="mt-1.5 w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50"><option value="OFFER">Offre</option><option value="INFO">Information</option><option value="REWARD">Récompense</option><option value="POINTS">Points</option></select></label>
+          <label className="block text-xs text-white/55 sm:col-span-2">Message<textarea maxLength={1000} rows={3} value={campaignMessage} onChange={e => setCampaignMessage(e.target.value)} placeholder="Écris le message qui apparaîtra sur la carte fidélité…" className="mt-1.5 w-full resize-y rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50" /><span className="mt-1 block text-right text-[10px] text-white/30">{campaignMessage.length}/1000</span></label>
+        </div>
+        {campaignFeedback && <p role="status" className="mt-3 rounded-xl border border-white/10 bg-black/20 p-3 text-xs leading-5 text-white/75">{campaignFeedback}</p>}
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"><p className="text-[10px] text-white/35">Segment choisi : {SEGMENTS.find(item => item.id === segment)?.label}. L’envoi Web Push externe n’est pas déclenché automatiquement par cette action.</p><button type="button" onClick={() => void createCampaign()} disabled={campaignSaving || loading} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#D4AF37] px-4 py-2.5 text-xs font-bold text-black hover:brightness-110 disabled:opacity-40">{campaignSaving ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}Créer la campagne</button></div>
+      </section>
       <p className="text-[11px] leading-5 text-white/35">Les segments sont calculés à partir de la dernière visite enregistrée. Les clients sans date de visite sont classés « Inactifs ». Les anniversaires utilisent uniquement le jour et le mois, sans année de naissance. L’export respecte le segment et la recherche affichés.</p>
     </div>
   );
