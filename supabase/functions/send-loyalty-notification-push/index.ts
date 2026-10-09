@@ -71,7 +71,6 @@ Deno.serve(async (req) => {
       .in('id', customerIds);
     if (consentError) return json({ success: false, error: 'Impossible de vérifier le consentement des destinataires.' }, 500);
     const optedInIds = (optedInCustomers ?? []).map((row) => row.id);
-    const skippedConsent = customerIds.length - optedInIds.length;
     if (!optedInIds.length) {
       return json({ success: true, sent: 0, failed: 0, removed: 0, skipped: recipients.length, total: recipients.length, message: 'Aucun destinataire avec consentement actif.' });
     }
@@ -112,7 +111,7 @@ Deno.serve(async (req) => {
         }
       }
     }
-    return json({ success: sent > 0 && failed === 0, sent, failed, removed, skipped: Math.max(0, recipients.length - subscriptions.length) + skippedConsent, total: recipients.length });
+    return json({ success: sent > 0 && failed === 0, sent, failed, removed, skipped: Math.max(0, recipients.length - subscriptions.length), total: recipients.length });
   } catch (error) {
     console.error('Unexpected push function error:', error);
     return json({ success: false, error: error instanceof Error ? error.message : 'Erreur interne.' }, 500);
