@@ -64,12 +64,14 @@ Deno.serve(async (req) => {
     if (!customerIds.length) return json({ success: true, sent: 0, failed: 0, removed: 0, skipped: recipients.length, total: recipients.length });
 
     // Consent can be revoked after campaign creation, so re-check it immediately before delivery.
-    const { data: optedInCustomers, error: consentError } = await admin
+    let consentQuery = admin
       .from('loyalty_customers')
       .select('id')
       .eq('establishment_id', campaign.establishment_id)
-      .eq('notification_consent', true)
-      .in('id', customerIds);
+      .eq('notification_consent', true);
+    // Promotional offers require both notification and marketing consent.
+    if (campaign.type === 'OFFER') consentQuery = consentQuery.eq('marketing_consent', true);
+    const { data: optedInCustomers, error: consentError } = await consentQuery.in('id', customerIds);
     if (consentError) return json({ success: false, error: 'Impossible de vérifier le consentement des destinataires.' }, 500);
     const optedInIds = (optedInCustomers ?? []).map((row) => row.id);
     if (!optedInIds.length) {
