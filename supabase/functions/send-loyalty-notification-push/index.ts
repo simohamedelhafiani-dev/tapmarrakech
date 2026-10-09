@@ -60,11 +60,27 @@ Deno.serve(async (req) => {
     if (!recipients?.length) return json({ success: true, sent: 0, failed: 0, removed: 0, skipped: 0, total: 0 });
 
     const customerIds = [...new Set(recipients.map((row) => row.customer_id).filter(Boolean))];
+    if (!customerIds.length) return json({ success: true, sent: 0, failed: 0, removed: 0, skipped: recipients.length, total: recipients.length });
+
+    // Consent can be revoked after campaign creation, so re-check it immediately before delivery.
+    const { data: optedInCustomers, error: consentError } = await admin
+      .from('loyalty_customers')
+      .select('id')
+      .eq('establishment_id', campaign.establishment_id)
+      .eq('notification_consent', true)
+      .in('id', customerIds);
+    if (consentError) return json({ success: false, error: 'Impossible de vérifier le consentement des destinataires.' }, 500);
+    const optedInIds = (optedInCustomers ?? []).map((row) => row.id);
+    const skippedConsent = customerIds.length - optedInIds.length;
+    if (!optedInIds.length) {
+      return json({ success: true, sent: 0, failed: 0, removed: 0, skipped: recipients.length, total: recipients.length, message: 'Aucun destinataire avec consentement actif.' });
+    }
+
     const { data: subscriptions, error: subscriptionError } = await admin
       .from('loyalty_push_subscriptions')
       .select('id,customer_id,endpoint,p256dh,auth,card_url')
       .eq('establishment_id', campaign.establishment_id)
-      .in('customer_id', customerIds);
+      .in('customer_id', optedInIds);
     if (subscriptionError) return json({ success: false, error: 'Impossible de charger les abonnements push.' }, 500);
     if (!subscriptions?.length) return json({ success: true, sent: 0, failed: 0, removed: 0, skipped: recipients.length, total: recipients.length, message: 'Aucun abonnement Web Push actif.' });
 
@@ -96,7 +112,7 @@ Deno.serve(async (req) => {
         }
       }
     }
-    return json({ success: sent > 0 && failed === 0, sent, failed, removed, skipped: Math.max(0, recipients.length - subscriptions.length), total: recipients.length });
+    return json({ success: sent > 0 && failed === 0, sent, failed, removed, skipped: Math.max(0, recipients.length - subscriptions.length) + skippedConsent, total: recipients.length });
   } catch (error) {
     console.error('Unexpected push function error:', error);
     return json({ success: false, error: error instanceof Error ? error.message : 'Erreur interne.' }, 500);
