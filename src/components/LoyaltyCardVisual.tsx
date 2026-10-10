@@ -75,6 +75,11 @@ export type LoyaltyVisualCard = {
   customerName?: string;
   loyaltyNumber?: string;
   cardUrl?: string;
+  raffleTitle?: string | null;
+  rafflePrize?: string | null;
+  raffleDrawAt?: string | null;
+  customerTierName?: string | null;
+  customerRankLabel?: string | null;
 };
 
 type VisualDesign = {
@@ -149,7 +154,7 @@ export function LoyaltyCardVisual({
     }
     let active = true;
     void QRCode.toDataURL(card.cardUrl, {
-      width: 180,
+      width: 234,
       margin: 1,
       errorCorrectionLevel: 'M',
       color: { dark: design.primary_color, light: '#FFFFFF' },
@@ -174,7 +179,7 @@ export function LoyaltyCardVisual({
 
   if (side === 'back') {
     return (
-      <div style={{ width: cardWidth ?? 'min(90vw, 400px)', height: 'auto', aspectRatio: '2 / 3', position: 'relative', overflow: 'hidden', borderRadius: '6%', background, color: design.text_color, boxSizing: 'border-box', boxShadow: '0 28px 70px rgba(0,0,0,.38)', containerType: 'inline-size' }}>
+      <div style={{ width: cardWidth ?? 'min(90vw, 400px)', height: 'auto', aspectRatio: '0.62 / 1', position: 'relative', overflow: 'hidden', borderRadius: '6%', background, color: design.text_color, boxSizing: 'border-box', boxShadow: '0 28px 70px rgba(0,0,0,.38)', containerType: 'inline-size' }}>
         <div style={{ position: 'absolute', inset: 0, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backgroundImage: background }} />
         <div style={{ position: 'relative', zIndex: 1, height: '100%', display: 'grid', placeItems: 'center', padding: '9.33cqw', textAlign: 'center', boxSizing: 'border-box' }}>
           <div>
@@ -443,9 +448,34 @@ export function LoyaltyCardVisual({
           <div style={{ marginTop: '5.67cqw', width: '18cqw', height: '0.33cqw', background: design.secondary_color, opacity: .55 }} />
         </div>
 
+        {(card.raffleTitle || card.customerTierName || card.customerRankLabel) && (
+          <div style={{ marginTop: '2.5cqw', marginBottom: '2.5cqw', width: '100%', display: 'grid', gap: '1.5cqw', gridTemplateColumns: card.raffleTitle ? '1fr' : '1fr 1fr' }}>
+            {card.raffleTitle && (
+              <div style={{ width: '100%', padding: '2.2cqw 3cqw', borderRadius: '3.5cqw', border: `1px solid ${design.secondary_color}77`, background: 'rgba(0,0,0,.20)', boxSizing: 'border-box' }}>
+                <div style={{ color: design.secondary_color, fontSize: '2.4cqw', fontWeight: 900, letterSpacing: '.12em', textTransform: 'uppercase' }}>🎟 Tombola en cours</div>
+                <div style={{ marginTop: '1cqw', fontSize: '3.4cqw', fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{card.raffleTitle}</div>
+                {card.rafflePrize && <div style={{ marginTop: '.8cqw', fontSize: '2.8cqw', opacity: .8 }}>À gagner : {card.rafflePrize}</div>}
+                {card.raffleDrawAt && <div style={{ marginTop: '.8cqw', fontSize: '2.4cqw', opacity: .6 }}>Tirage : {new Date(card.raffleDrawAt).toLocaleDateString('fr-FR')}</div>}
+              </div>
+            )}
+            {card.customerTierName && (
+              <div style={{ minWidth: 0, padding: '2cqw 2.5cqw', borderRadius: '3.5cqw', border: `1px solid ${design.secondary_color}55`, background: 'rgba(0,0,0,.16)', boxSizing: 'border-box' }}>
+                <div style={{ color: design.secondary_color, fontSize: '2.2cqw', fontWeight: 900, letterSpacing: '.08em', textTransform: 'uppercase' }}>Niveau</div>
+                <div style={{ marginTop: '.7cqw', fontSize: '3.4cqw', fontWeight: 850 }}>{card.customerTierName}</div>
+              </div>
+            )}
+            {card.customerRankLabel && (
+              <div style={{ minWidth: 0, padding: '2cqw 2.5cqw', borderRadius: '3.5cqw', border: `1px solid ${design.secondary_color}55`, background: 'rgba(0,0,0,.16)', boxSizing: 'border-box' }}>
+                <div style={{ color: design.secondary_color, fontSize: '2.2cqw', fontWeight: 900, letterSpacing: '.08em', textTransform: 'uppercase' }}>Classement</div>
+                <div style={{ marginTop: '.7cqw', fontSize: '3.1cqw', fontWeight: 850 }}>{card.customerRankLabel}</div>
+              </div>
+            )}
+          </div>
+        )}
+
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <div style={{ width: '23.33cqw', height: '23.33cqw', padding: '2cqw', boxSizing: 'border-box', borderRadius: '4.33cqw', background: '#fff', display: 'grid', placeItems: 'center', boxShadow: '0 12px 28px rgba(0,0,0,.28)' }}>
-            {showQr && qr ? <img src={qr} alt="QR Code fidélité" style={{ width: '19.33cqw', height: '19.33cqw', display: 'block' }} /> : <div style={{ width: '19.33cqw', height: '19.33cqw' }} />}
+          <div style={{ width: '30.33cqw', height: '30.33cqw', padding: '2cqw', boxSizing: 'border-box', borderRadius: '4.33cqw', background: '#fff', display: 'grid', placeItems: 'center', boxShadow: '0 12px 28px rgba(0,0,0,.28)' }}>
+            {showQr && qr ? <img src={qr} alt="QR Code fidélité" style={{ width: '25.33cqw', height: '25.33cqw', display: 'block' }} /> : <div style={{ width: '19.33cqw', height: '19.33cqw' }} />}
           </div>
           <div style={{ marginTop: '2.67cqw', fontSize: '2.67cqw', letterSpacing: '.16em', textTransform: 'uppercase', opacity: .5 }}>{card.customerName || 'Client'}</div>
         </div>
