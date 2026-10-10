@@ -737,13 +737,6 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
           </div>
         )}
 
-        {customerTier && (
-          <div className="mb-3 flex items-center justify-between rounded-2xl border border-[#D4AF37]/20 bg-[#111111] px-4 py-3">
-            <div><p className="text-[9px] font-bold uppercase tracking-[.16em] text-[#D4AF37]">Niveau fidélité</p><p className="mt-1 text-sm font-semibold text-white">{customerTier.tier_name}</p></div>
-            <div className="text-right"><p className="text-[9px] text-white/35">{customerTier.total_points} points · {customerTier.rewards_redeemed} récompense(s)</p>{customerTier.next_tier_name&&<p className="mt-1 text-[9px] text-[#D4AF37]">Prochain : {customerTier.next_tier_name}</p>}</div>
-          </div>
-        )}
-
         <div className="flex w-full justify-center">
           <div className={isLiveRefreshing ? 'opacity-90 transition-opacity duration-200' : 'opacity-100 transition-opacity duration-200'}>
             <LoyaltyCardVisual
