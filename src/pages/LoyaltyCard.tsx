@@ -780,9 +780,14 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                 customerName: fullName,
                 loyaltyNumber: card.loyalty_number,
                 cardUrl: cardUrl,
+                raffleTitle: activeRaffle?.title ?? null,
+                rafflePrize: activeRaffle?.prize_name ?? null,
+                raffleDrawAt: activeRaffle?.draw_at ?? null,
+                customerTierName: customerTier?.tier_name ?? null,
+                customerRankLabel: customerTier ? `${customerTier.total_points.toLocaleString("fr-FR")} points · ${customerTier.rewards_redeemed} récompenses` : null,
               }}
               programType={mode}
-              cardWidth="min(90vw, calc((100svh - 125px) * 0.666667))"
+              cardWidth="min(94vw, 460px)"
             />
           </div>
         </div>
@@ -793,27 +798,6 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
           </div>
         )}
 
-        {activeRaffle && (
-          <section className="mt-4 overflow-hidden rounded-2xl border shadow-lg transition-colors duration-300" style={{ backgroundColor: design.background_color, color: readableTextColor(design.background_color), borderColor: design.secondary_color }}>
-            <button type="button" onClick={() => setRaffleDetailsOpen(open => !open)} aria-expanded={raffleDetailsOpen} className="flex w-full items-center gap-3 p-4 text-left transition-opacity hover:opacity-90">
-              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl" style={{ backgroundColor: design.primary_color, color: readableTextColor(design.primary_color) }}><Trophy className="h-5 w-5" /></span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-[10px] font-bold uppercase tracking-[.15em]" style={{ color: design.secondary_color }}>Tombola en cours</span>
-                <span className="mt-1 block truncate text-sm font-semibold">{activeRaffle.title}</span>
-                <span className="mt-1 block text-xs opacity-75">À gagner : {activeRaffle.prize_name}</span>
-              </span>
-              <span className="shrink-0 rounded-full px-3 py-1.5 text-[10px] font-bold" style={{ backgroundColor: design.secondary_color, color: readableTextColor(design.secondary_color) }}>{raffleDetailsOpen ? 'Fermer' : 'Voir'}</span>
-            </button>
-            {raffleDetailsOpen && (
-              <div className="border-t px-4 pb-4 pt-3" style={{ borderColor: design.secondary_color }}>
-                {activeRaffle.description && <p className="mb-2 text-sm leading-5 opacity-85">{activeRaffle.description}</p>}
-                {activeRaffle.prize_description && <p className="mb-3 text-xs leading-5 opacity-75">{activeRaffle.prize_description}</p>}
-                <div className="flex items-center justify-between gap-3 text-xs"><span className="opacity-75">Tirage prévu</span><strong>{new Date(activeRaffle.draw_at).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' })}</strong></div>
-                <div className="mt-2 flex items-center justify-between gap-3 text-xs"><span className="opacity-75">Participants éligibles</span><strong>{activeRaffle.participant_count}</strong></div>
-              </div>
-            )}
-          </section>
-        )}
 
         {program.referral_enabled && cardSaved && (
           <button
