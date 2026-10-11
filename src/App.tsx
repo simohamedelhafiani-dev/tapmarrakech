@@ -17,6 +17,7 @@ import Login from '@/pages/Login';
 import { ForgotPassword, Register } from '@/pages/AuthPages';
 
 import Dashboard from '@/pages/Dashboard';
+import Establishments from '@/pages/Establishments';
 import Reviews from '@/pages/Reviews';
 import Analytics from '@/pages/Analytics';
 import Loyalty from '@/pages/Loyalty';
@@ -186,6 +187,7 @@ function App() {
           <Route element={<ProtectedRoute allowedRoles={['responsible']} />}>
             <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard/establishments" element={<Establishments />} />
               <Route
                 path="/dashboard/reviews"
                 element={
