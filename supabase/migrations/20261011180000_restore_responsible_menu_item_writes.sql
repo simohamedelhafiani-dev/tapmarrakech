@@ -16,7 +16,6 @@ create policy "menu_items_responsible_insert"
       from public.menu_categories c
       where c.id = category_id
         and c.establishment_id = establishment_id
-        and c.active = true
     )
   );
 
