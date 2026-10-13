@@ -2,8 +2,9 @@ import { useRef, useState } from 'react';
 import { Check, ChevronDown, ImagePlus, Upload, X } from 'lucide-react';
 import MenuPreview from '@/components/admin/menu/MenuPreview';
 import type { MenuCategory, MenuItem } from '@/hooks/useMenuManager';
+import { MENU_TEMPLATES } from '@/components/admin/menu/menuTemplates';
 
-export type MenuTemplate = 'editorial' | 'luxury' | 'cards' | 'dark' | 'onyx' | 'royal-gold' | 'deep-ocean' | 'pearl';
+export type MenuTemplate = string;
 export type MenuNavigationMode = 'scroll' | 'book' | 'app';
 
 export type MenuDesignDraft = {
@@ -34,16 +35,7 @@ const navigationModes: Array<{ id: MenuNavigationMode; label: string; descriptio
   { id: 'app', label: 'Catégories en haut', description: 'Cliquez sur une catégorie pour afficher ses plats' },
 ];
 
-const templates: Array<{ id: MenuTemplate; label: string; description: string }> = [
-  { id: 'editorial', label: 'Editorial', description: 'Élégant, lumineux, typographique' },
-  { id: 'luxury', label: 'Luxury', description: 'Premium, sombre, doré' },
-  { id: 'cards', label: 'Cards', description: 'Moderne, structuré, convivial' },
-  { id: 'dark', label: 'Dark', description: 'Immersif, contrasté, impactant' },
-  { id: 'onyx', label: 'Onyx', description: 'Noir minéral, glassmorphism' },
-  { id: 'royal-gold', label: 'Royal Gold', description: 'Or royal, lignes éditoriales' },
-  { id: 'deep-ocean', label: 'Deep Ocean', description: 'Bleu profond, premium contemporain' },
-  { id: 'pearl', label: 'Pearl', description: 'Ivoire, minimalisme couture' },
-];
+const templates = MENU_TEMPLATES;
 
 export default function MenuConfigurator({
   draft,
@@ -105,7 +97,7 @@ export default function MenuConfigurator({
 
       <div>
         <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.15em] text-ink/35">Template</p>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
           {templates.map((template) => {
             const active = draft.template === template.id;
             return (
