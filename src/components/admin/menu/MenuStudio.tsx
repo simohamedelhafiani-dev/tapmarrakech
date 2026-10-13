@@ -26,18 +26,6 @@ const normalizeObject = (value: unknown): RawDesign =>
 
 const stable = (value: unknown) => JSON.stringify(value ?? null);
 
-const mapAiStyleToTemplate = (style: unknown): MenuTemplate | null => {
-  if (style === 'editorial') return 'editorial';
-  if (style === 'luxury') return 'luxury';
-  if (style === 'immersive') return 'dark';
-  if (style === 'minimal') return 'cards';
-  if (style === 'onyx') return 'onyx';
-  if (style === 'gold' || style === 'royal-gold') return 'royal-gold';
-  if (style === 'ocean' || style === 'deep-ocean') return 'deep-ocean';
-  if (style === 'pearl') return 'pearl';
-  return null;
-};
-
 const extractAiDesign = (value: unknown): Record<string, unknown> | null => {
   const raw = normalizeObject(value);
   return Object.keys(raw).length ? raw : null;
@@ -52,9 +40,6 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
   const [establishmentName, setEstablishmentName] = useState('');
   const [loadingDesign, setLoadingDesign] = useState(true);
   const [publishing, setPublishing] = useState(false);
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiPhotoMode, setAiPhotoMode] = useState<'with_photos' | 'without_photos'>('without_photos');
-  const [aiCandidates, setAiCandidates] = useState<Array<{ id: string; design: Record<string, unknown>; template: MenuTemplate; photoMode: 'with_photos' | 'without_photos' }>>([]);
   const [designError, setDesignError] = useState<string | null>(null);
   const [publishedSnapshot, setPublishedSnapshot] = useState<{
     template: MenuTemplate;
@@ -167,87 +152,6 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
 
   const changeDraft = (patch: Partial<MenuDesignDraft>) => {
     setDraft(current => ({ ...current, ...patch }));
-  };
-
-  const buildMenuForAi = () => ({
-    categories: menu.categories
-      .filter(category => category.active)
-      .map(category => ({
-        id: category.id,
-        name: category.name,
-        description: category.description,
-        items: (menu.itemsByCategory[category.id] ?? [])
-          .filter(item => item.active)
-          .map(item => ({
-            id: item.id,
-            name: item.name,
-            description: item.description,
-            price: item.price,
-            image_url: item.image_url,
-          })),
-      })),
-  });
-
-  const generateAiDesign = async () => {
-    if (!establishmentId || aiLoading) return;
-
-    setAiLoading(true);
-    setDesignError(null);
-    setAiCandidates([]);
-
-    try {
-      const variants = [
-        { id: 'variant-1', label: 'Éditorial' },
-        { id: 'variant-2', label: 'Premium' },
-        { id: 'variant-3', label: 'Créatif' },
-      ];
-
-      const results = await Promise.all(
-        variants.map(async variant => {
-          const { data, error } = await supabase.functions.invoke('design-menu', {
-            body: {
-              establishment_id: establishmentId,
-              menu: buildMenuForAi(),
-              variant: variant.label,
-              photo_mode: aiPhotoMode,
-            },
-          });
-
-          if (error) throw error;
-
-          const ai = extractAiDesign(data?.design);
-          if (!ai) throw new Error('Une variante IA est vide ou inexploitable.');
-
-          const mappedTemplate = mapAiStyleToTemplate(ai.style) ?? 'editorial';
-
-          return {
-            id: variant.id,
-            design: { ...ai, photo_mode: aiPhotoMode },
-            template: mappedTemplate,
-            photoMode: aiPhotoMode,
-          };
-        }),
-      );
-
-      setAiCandidates(results);
-    } catch (cause) {
-      setDesignError(
-        cause instanceof Error
-          ? cause.message
-          : 'Impossible de générer les variantes IA.',
-      );
-    } finally {
-      setAiLoading(false);
-    }
-  };
-
-  const applyAiCandidate = (candidate: { design: Record<string, unknown>; template: MenuTemplate; photoMode: 'with_photos' | 'without_photos' }) => {
-    setDraft(current => ({
-      ...current,
-      aiDesign: { ...candidate.design, photo_mode: candidate.photoMode },
-      template: candidate.template,
-    }));
-    setAiCandidates([]);
   };
 
   const publish = async () => {
@@ -436,17 +340,11 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
                 draft={draft}
                 hasChanges={hasChanges}
                 publishing={publishing}
-                aiLoading={aiLoading}
-                aiPhotoMode={aiPhotoMode}
-                onAiPhotoModeChange={setAiPhotoMode}
                 onChange={changeDraft}
                 onPublish={() => void publish()}
-                onGenerateAi={() => void generateAiDesign()}
-                aiCandidates={aiCandidates}
                 categories={menu.categories}
                 itemsByCategory={menu.itemsByCategory}
                 establishmentName={establishmentName}
-                onApplyAiCandidate={applyAiCandidate}
               />
             </div>
           ) : null}
