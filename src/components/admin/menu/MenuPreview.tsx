@@ -40,6 +40,7 @@ export default function MenuPreview({
     wallpaperObjectUrl: null,
     wallpaperRemoved: false,
     overlayOpacity: 0.35,
+    themeColors: { background: '#F5F1E8', surface: '#FFFDFA', text: '#26362B', accent: '#D4AF37' },
     aiDesign: null,
   };
   const family = getMenuTemplateFamily(activeDraft.template);
@@ -92,7 +93,7 @@ export default function MenuPreview({
     if (isStacked) {
       return <article key={item.id} className={`overflow-hidden ${designVariant === 0 ? 'rounded-2xl' : designVariant === 1 ? 'rounded-none' : designVariant === 2 ? 'rounded-[28px]' : designVariant === 3 ? 'rounded-t-[32px]' : 'rounded-lg'} ${palette.card} shadow-md`}>
         {photo ? <img src={item.image_url!} alt="" className="h-36 w-full object-cover"/> : <div className="grid h-16 place-items-center bg-black/5"><UtensilsCrossed size={20}/></div>}
-        <div className="flex items-start justify-between gap-3 p-3"><div className="min-w-0"><h4 className="text-sm font-bold">{item.name}</h4>{item.description && <p className={`mt-1 text-xs leading-5 ${palette.muted}`}>{item.description}</p>}</div><span className={`shrink-0 text-sm font-bold ${palette.accent}`}>{Number(item.price).toLocaleString('fr-FR')} DH</span></div>
+        <div className="flex items-start justify-between gap-3 p-3"><div className="min-w-0"><h4 className="text-sm font-bold">{item.name}</h4>{item.description && <p className={`mt-1 text-xs leading-5 ${palette.muted}`}>{item.description}</p>}</div><span className="shrink-0 text-sm font-bold" style={{ color: activeDraft.themeColors.accent }}>{Number(item.price).toLocaleString('fr-FR')} DH</span></div>
       </article>;
     }
     if (isSplit) {
@@ -102,16 +103,16 @@ export default function MenuPreview({
       </article>;
     }
     if (isService) {
-      return <article key={item.id} className={`flex items-center justify-between gap-3 border-b py-3 ${palette.line}`}><div className="min-w-0"><h4 className="text-xs font-semibold">{item.name}</h4>{item.description && <p className={`mt-1 text-[10px] leading-4 ${palette.muted}`}>{item.description}</p>}</div><span className={`shrink-0 rounded-lg px-2.5 py-1.5 text-xs font-bold ${palette.accent} ${palette.panel}`}>{Number(item.price).toLocaleString('fr-FR')} DH</span></article>;
+      return <article key={item.id} className={`flex items-center justify-between gap-3 border-b py-3 ${palette.line}`}><div className="min-w-0"><h4 className="text-xs font-semibold">{item.name}</h4>{item.description && <p className={`mt-1 text-[10px] leading-4 ${palette.muted}`}>{item.description}</p>}</div><span className="shrink-0 rounded-lg px-2.5 py-1.5 text-xs font-bold" style={{ color: activeDraft.themeColors.accent, backgroundColor: activeDraft.themeColors.surface }}>{Number(item.price).toLocaleString('fr-FR')} DH</span></article>;
     }
     if (isPriceList) {
       return <article key={item.id} className="py-3"><div className="flex items-baseline gap-2"><h4 className="text-sm font-medium">{item.name}</h4><span className={`min-w-[12px] flex-1 border-b border-dotted ${palette.line}`}/><span className={`shrink-0 text-sm font-bold ${palette.accent}`}>{Number(item.price).toLocaleString('fr-FR')} DH</span></div>{item.description && <p className={`mt-1 pr-12 text-[10px] leading-4 ${palette.muted}`}>{item.description}</p>}</article>;
     }
     if (isMinimal) {
-      return <article key={item.id} className={`border-l-2 py-2 pl-3 ${palette.line}`}><div className="flex items-start justify-between gap-3"><h4 className="text-sm font-medium">{item.name}</h4><span className={`shrink-0 text-xs font-semibold ${palette.accent}`}>{Number(item.price).toLocaleString('fr-FR')} DH</span></div>{item.description && <p className={`mt-1 text-[10px] leading-4 ${palette.muted}`}>{item.description}</p>}</article>;
+      return <article key={item.id} className={`border-l-2 py-2 pl-3 ${palette.line}`}><div className="flex items-start justify-between gap-3"><h4 className="text-sm font-medium">{item.name}</h4><span className="shrink-0 text-xs font-semibold" style={{ color: activeDraft.themeColors.accent }}>{Number(item.price).toLocaleString('fr-FR')} DH</span></div>{item.description && <p className={`mt-1 text-[10px] leading-4 ${palette.muted}`}>{item.description}</p>}</article>;
     }
     if (isCompact) {
-      return <article key={item.id} className={`flex items-center gap-2 border-b py-2 ${palette.line}`}><span className="min-w-0 flex-1 text-xs font-semibold">{item.name}</span>{item.description && <span className={`hidden min-w-0 flex-1 truncate text-[9px] sm:block ${palette.muted}`}>{item.description}</span>}<span className={`shrink-0 text-xs font-bold ${palette.accent}`}>{Number(item.price).toLocaleString('fr-FR')} DH</span></article>;
+      return <article key={item.id} className={`flex items-center gap-2 border-b py-2 ${palette.line}`}><span className="min-w-0 flex-1 text-xs font-semibold">{item.name}</span>{item.description && <span className={`hidden min-w-0 flex-1 truncate text-[9px] sm:block ${palette.muted}`}>{item.description}</span>}<span className="shrink-0 text-xs font-bold" style={{ color: activeDraft.themeColors.accent }}>{Number(item.price).toLocaleString('fr-FR')} DH</span></article>;
     }
     return <article key={item.id} className={`overflow-hidden rounded-xl ${palette.card} ring-1 ring-black/5`}>
       {photo && <img src={item.image_url!} alt="" className="h-28 w-full object-cover"/>}
@@ -122,9 +123,9 @@ export default function MenuPreview({
   return <aside className={`min-w-0 overflow-hidden border border-white/10 bg-[#111] shadow-soft ${fullScreen ? 'rounded-[32px]' : 'rounded-3xl lg:sticky lg:top-24 lg:self-start'}`}>
     {!compact && <div className="border-b border-ink/5 bg-white p-5"><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Aperçu en direct</p><h3 className="mt-1 text-base font-semibold text-forest">{establishmentName || 'Menu public'}</h3><p className="mt-1 text-[11px] text-ink/35">Miroir KELYANI · synchronisé avec le Studio</p></div>}
     <div className={compact ? 'p-0' : 'p-3 sm:p-4'}>
-      <div className={`relative mx-auto h-[min(680px,78vh)] min-h-[480px] w-full max-w-[360px] overflow-hidden rounded-[28px] border-[5px] border-[#202020] shadow-xl ${palette.page}`}>
+      <div className={`relative mx-auto h-[min(680px,78vh)] min-h-[480px] w-full max-w-[360px] overflow-hidden rounded-[28px] border-[5px] border-[#202020] shadow-xl ${palette.page}`} style={{ backgroundColor: activeDraft.themeColors.background, color: activeDraft.themeColors.text, backgroundImage: activeDraft.wallpaperUrl ? `linear-gradient(rgba(0,0,0,${activeDraft.overlayOpacity}), rgba(0,0,0,${activeDraft.overlayOpacity})), url("${activeDraft.wallpaperUrl}")` : undefined, backgroundSize: 'cover', backgroundPosition: 'center' }}>
         <div className="absolute inset-0 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" style={{ paddingBottom: activeDraft.navigation === 'app' ? 76 : 20 }}>
-          <header className={`relative overflow-hidden ${isEditorial ? (designVariant % 2 === 0 ? 'px-5 pb-5 pt-8 text-center' : 'px-4 pb-5 pt-8 text-left border-b') : isPriceList ? (designVariant % 2 === 0 ? 'px-4 pb-4 pt-7' : 'px-5 pb-6 pt-5') : isStacked ? 'p-3' : 'px-4 pb-4 pt-5'} ${palette.panel}`}>
+          <header className={`relative overflow-hidden ${isEditorial ? (designVariant % 2 === 0 ? 'px-5 pb-5 pt-8 text-center' : 'px-4 pb-5 pt-8 text-left border-b') : isPriceList ? (designVariant % 2 === 0 ? 'px-4 pb-4 pt-7' : 'px-5 pb-6 pt-5') : isStacked ? 'p-3' : 'px-4 pb-4 pt-5'} ${palette.panel}`} style={{ backgroundColor: activeDraft.themeColors.surface, color: activeDraft.themeColors.text, borderColor: activeDraft.themeColors.accent + '55' }}>
             {isStacked && showPhotos && heroImage && <img src={heroImage} alt="" className="mb-3 h-32 w-full rounded-xl object-cover"/>}
             <div className={`flex gap-3 ${isEditorial || isPriceList ? 'flex-col items-center text-center' : 'items-center justify-between'}`}>
               {!(isEditorial || isPriceList) && <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl border ${palette.line} ${palette.accent}`}><TemplateIcon size={17}/></div>}
