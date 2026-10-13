@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, BookOpen, LayoutGrid, ScrollText, Sparkle, Waves } from 'lucide-react';
 import type { MenuCategory, MenuItem } from '@/hooks/useMenuManager';
 import type { MenuDesignDraft } from '@/components/admin/menu/MenuConfigurator';
+import { getMenuTemplateFamily } from '@/components/admin/menu/menuTemplates';
 
 type MenuPreviewProps = {
   establishmentName?: string;
@@ -114,7 +115,7 @@ export default function MenuPreview({
     aiDesign: null,
   };
 
-  const colors = theme[activeDraft.template];
+  const colors = theme[getMenuTemplateFamily(activeDraft.template)];
 
   const aiDesign = activeDraft.aiDesign;
   const showPhotos = aiDesign?.photo_mode !== 'without_photos';
