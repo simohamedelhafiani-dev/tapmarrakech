@@ -1889,7 +1889,7 @@ function MenuTemplate({
   const navigationControls = navigation !== 'scroll' ? (
     <div className="mt-5 mb-7">
       {navigation === 'app' ? (
-        <div className="menu-category-strip sticky top-0 z-30 -mx-2 flex gap-2 overflow-x-auto bg-[#fffdf9]/95 px-3 py-2.5 pb-3 backdrop-blur-md">
+        <div className="menu-category-strip sticky top-0 z-30 -mx-2 flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden bg-[#fffdf9]/95 px-3 py-2.5 pb-3 backdrop-blur-md">
           {visible.map(category => (
             <button
               key={category.id}
