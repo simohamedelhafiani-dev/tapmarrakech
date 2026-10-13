@@ -111,21 +111,26 @@ export default function MenuConfigurator({
                   active ? 'border-gold bg-gold/10 ring-1 ring-gold/20' : 'border-ink/8 bg-[#fafaf7] hover:border-forest/20',
                 ].join(' ')}
               >
-                <div className={"mb-3 overflow-hidden rounded-xl border p-2.5 " + (["dark", "onyx", "royal-gold", "deep-ocean"].includes(template.family) ? "border-white/10 bg-[#101b18]" : "border-black/5 bg-[#f7f3ea"])}>
-                  {template.layout === "product-grid" || template.layout === "magazine-grid" ? (
-                    <div className={template.layout === "magazine-grid" ? "grid grid-cols-2 gap-1.5" : "grid grid-cols-3 gap-1.5"}>
-                      {Array.from({ length: template.layout === "magazine-grid" ? 2 : 3 }).map((_, index) => <div key={index} className="overflow-hidden rounded-md bg-black/5"><div className={"h-8 " + (index === 0 ? "bg-gold/35" : "bg-forest/10")} /><div className="space-y-1 p-1.5"><div className="h-1 w-full rounded bg-current/15" /><div className="h-1 w-1/2 rounded bg-gold/60" /></div></div>)}
+                <div className={`mb-3 min-h-[86px] overflow-hidden rounded-xl border p-2.5 ${['dark', 'onyx', 'royal-gold', 'deep-ocean'].includes(template.family) ? 'border-white/10 bg-[#101b18] text-white' : 'border-black/5 bg-[#f7f3ea] text-forest'}`}>
+                  {template.layout === 'product-grid' || template.layout === 'magazine-grid' ? (
+                    <div className={template.layout === 'magazine-grid' ? 'grid grid-cols-2 gap-2' : 'grid grid-cols-3 gap-2'}>
+                      {[0, 1, 2].slice(0, template.layout === 'magazine-grid' ? 2 : 3).map(index => (
+                        <div key={index} className="overflow-hidden rounded-md bg-black/5">
+                          <div className={`h-8 ${index === 0 ? 'bg-gold/40' : 'bg-forest/10'}`} />
+                          <div className="space-y-1 p-1.5"><div className="h-1 w-full rounded bg-current/20" /><div className="h-1 w-1/2 rounded bg-gold/70" /></div>
+                        </div>
+                      ))}
                     </div>
-                  ) : template.layout === "stacked-photo" ? (
-                    <div className="space-y-1.5"><div className="h-12 rounded-md bg-gold/25" /><div className="flex items-center justify-between"><div className="h-1.5 w-2/5 rounded bg-current/20" /><div className="h-1.5 w-1/5 rounded bg-gold/70" /></div><div className="h-1 w-3/4 rounded bg-current/10" /></div>
-                  ) : template.layout === "split-catalog" ? (
-                    <div className="space-y-1.5">{[0, 1].map(index => <div key={index} className="flex gap-2 rounded-md bg-black/5 p-1.5"><div className={"h-9 w-10 rounded " + (index ? "bg-forest/15" : "bg-gold/30")} /><div className="flex-1 space-y-1.5 py-1"><div className="h-1.5 w-3/4 rounded bg-current/20" /><div className="h-1 w-1/2 rounded bg-current/10" /></div><div className="h-1.5 w-1/6 rounded bg-gold/70" /></div>)}</div>
-                  ) : template.layout === "service-table" ? (
-                    <div className="space-y-2 rounded-md border border-current/10 p-2">{[0, 1, 2].map(index => <div key={index} className="flex items-center justify-between border-b border-current/10 pb-1.5"><div className="h-1.5 w-2/5 rounded bg-current/20" /><div className="h-1.5 w-1/5 rounded bg-gold/70" /></div>)}</div>
-                  ) : template.layout === "price-list" ? (
-                    <div className="space-y-3 px-2 py-1"><div className="mx-auto h-1.5 w-1/3 rounded bg-gold/70" /><div className="h-px bg-gold/40" />{[0, 1, 2].map(index => <div key={index} className="flex items-center gap-2"><div className="h-1.5 w-2/5 rounded bg-current/20" /><div className="flex-1 border-b border-dotted border-current/20" /><div className="h-1.5 w-1/6 rounded bg-gold/60" /></div>)}</div>
+                  ) : template.layout === 'stacked-photo' ? (
+                    <div className="space-y-2"><div className="h-10 rounded-md bg-gold/30" /><div className="h-1.5 w-2/3 rounded bg-current/20" /><div className="h-1 w-1/2 rounded bg-current/10" /></div>
+                  ) : template.layout === 'split-catalog' ? (
+                    <div className="space-y-2">{[0, 1].map(index => <div key={index} className="flex gap-2"><div className="h-8 w-10 rounded bg-gold/25" /><div className="flex-1 space-y-2 py-1"><div className="h-1 w-3/4 rounded bg-current/20" /><div className="h-1 w-1/2 rounded bg-current/10" /></div></div>)}</div>
+                  ) : template.layout === 'service-table' ? (
+                    <div className="space-y-2 rounded-md border border-current/10 p-2">{[0, 1, 2].map(index => <div key={index} className="flex justify-between border-b border-current/10 pb-1"><div className="h-1 w-2/5 rounded bg-current/20" /><div className="h-1 w-1/5 rounded bg-gold/70" /></div>)}</div>
+                  ) : template.layout === 'price-list' ? (
+                    <div className="space-y-3 px-2 py-1"><div className="mx-auto h-1.5 w-1/3 rounded bg-gold/70" />{[0, 1, 2].map(index => <div key={index} className="flex items-center gap-2"><div className="h-1 w-2/5 rounded bg-current/20" /><div className="flex-1 border-b border-dotted border-current/20" /><div className="h-1 w-1/6 rounded bg-gold/60" /></div>)}</div>
                   ) : (
-                    <div className={template.layout === "compact-list" ? "space-y-1" : "space-y-2.5 px-1 py-1"}>{[0, 1, 2].map(index => <div key={index} className={"flex items-center justify-between gap-3 " + (template.layout === "compact-list" ? "border-b border-current/10 pb-1" : "")}><div className="h-1.5 w-2/5 rounded bg-current/20" /><div className="h-1.5 w-1/6 rounded bg-gold/70" /></div>)}</div>
+                    <div className="space-y-2 px-1 py-1">{[0, 1, 2].map(index => <div key={index} className="flex items-center justify-between"><div className="h-1.5 w-2/5 rounded bg-current/20" /><div className="h-1.5 w-1/6 rounded bg-gold/70" /></div>)}</div>
                   )}
                 </div>
                 <div className="flex items-center justify-between gap-2">
