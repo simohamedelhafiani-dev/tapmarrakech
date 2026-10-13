@@ -838,17 +838,6 @@ export default function PublicReview() {
                     <ExternalLink size={15} />
                   </a>
                 </section>
-              ) : menuAiDesign?.sections?.length ? (
-                <AIPremiumMenu
-                  design={menuAiDesign}
-                  place={p}
-                  categories={categories}
-                  items={items}
-                  itemsByCategory={itemsByCategory}
-                  template={menuTemplate}
-                  navigation={menuNavigation}
-                  photoMode={(p as any).menu_ai_photo_mode === 'without_photos' ? 'without_photos' : 'with_photos'}
-                />
               ) : (
                 <MenuTemplate
                   template={menuTemplate}
