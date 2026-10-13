@@ -67,23 +67,30 @@ export default function MenuImportAssistant({ establishmentId, categories, items
     setSaving(true); setError(''); setNotice('');
     let categoryCount = 0; let itemCount = 0;
     try {
+      const knownCategories = new Map(categories.map(category => [category.name.trim().toLocaleLowerCase(), category]));
+      const knownItems = new Set(items.map(item => `${item.category_id}::${item.name.trim().toLocaleLowerCase()}`));
       for (const importedCategory of draft.categories) {
         const name = importedCategory.name.trim();
         if (!name) continue;
-        const existing = categories.find(category => category.name.trim().toLocaleLowerCase() === name.toLocaleLowerCase());
+        const key = name.toLocaleLowerCase();
+        const existing = knownCategories.get(key);
         const category = existing ?? await onAddCategory({ name, description: importedCategory.description });
-        categoryCount += existing ? 0 : 1;
+        if (!existing) {
+          categoryCount++;
+          knownCategories.set(key, category);
+        }
         for (const importedItem of importedCategory.items) {
           const itemName = importedItem.name.trim();
           if (!itemName) continue;
-          const duplicate = items.some(item => item.category_id === category.id && item.name.trim().toLocaleLowerCase() === itemName.toLocaleLowerCase());
-          if (duplicate) continue;
+          const itemKey = `${category.id}::${itemName.toLocaleLowerCase()}`;
+          if (knownItems.has(itemKey)) continue;
           await onAddItem({
             category_id: category.id,
             name: itemName,
             description: importedItem.description,
             price: Number.isFinite(importedItem.price) && importedItem.price >= 0 ? importedItem.price : 0,
           });
+          knownItems.add(itemKey);
           itemCount++;
         }
       }
