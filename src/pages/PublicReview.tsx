@@ -1889,14 +1889,14 @@ function MenuTemplate({
   const navigationControls = navigation !== 'scroll' ? (
     <div className="mt-5 mb-7">
       {navigation === 'app' ? (
-        <div className="sticky top-0 z-30 -mx-2 flex gap-2 overflow-x-auto bg-[#fffdf9]/95 px-2 py-2 pb-3 backdrop-blur-md">
+        <div className="menu-category-strip sticky top-0 z-30 -mx-2 flex gap-2 overflow-x-auto bg-[#fffdf9]/95 px-3 py-2.5 pb-3 backdrop-blur-md">
           {visible.map(category => (
             <button
               key={category.id}
               type="button"
               onClick={() => setAppCategoryId(category.id)}
               className={[
-                'shrink-0 rounded-full border px-3.5 py-2 text-[10px] font-semibold transition',
+                'shrink-0 rounded-full border px-3.5 py-2.5 text-xs font-semibold transition',
                 category.id === appCategoryId
                   ? 'border-gold bg-gold text-forest'
                   : 'border-ink/10 bg-white text-ink/55',
@@ -1937,7 +1937,7 @@ function MenuTemplate({
       <div className={`mt-7 ${templateLayout === 'magazine-grid' ? 'space-y-10' : ''}`}>
         <header className={templateLayout === 'magazine-grid' ? 'mb-8 border-l-4 border-gold pl-4' : 'mb-7 text-center'}>
           <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold">{templateLayout === 'magazine-grid' ? 'À découvrir' : 'La collection'}</p>
-          <h1 className={`mt-2 font-display ${templateLayout === 'magazine-grid' ? 'text-4xl' : 'text-4xl'} text-forest`}>{place.name || 'Notre catalogue'}</h1>
+          <h1 className={`mt-2 font-display text-[clamp(1.8rem,8vw,2.75rem)] leading-tight ${templateLayout === 'magazine-grid' ? '' : ''} text-forest`}>{place.name || 'Notre catalogue'}</h1>
           <p className="mt-2 text-sm text-ink/45">{templateLayout === 'magazine-grid' ? 'Une sélection à parcourir.' : 'Découvrez notre sélection.'}</p>
         </header>
         {navigationControls}
@@ -1953,8 +1953,8 @@ function MenuTemplate({
                   <article key={item.id} className="overflow-hidden rounded-[22px] bg-white shadow-sm ring-1 ring-ink/5">
                     {photoMode === 'with_photos' && item.image_url && <img src={item.image_url} alt="" className={templateLayout === 'magazine-grid' ? 'h-48 w-full object-cover' : 'aspect-[4/3] w-full object-cover'} />}
                     <div className="p-3.5">
-                      <h3 className="text-sm font-bold text-forest">{item.name}</h3>
-                      {item.description && <p className="mt-1.5 text-[10px] leading-4 text-ink/40">{item.description}</p>}
+                      <h3 className="text-sm font-bold leading-snug text-forest">{item.name}</h3>
+                      {item.description && <p className="mt-1.5 text-xs leading-5 text-ink/65">{item.description}</p>}
                       <p className="mt-3 text-sm font-bold text-gold">{Number(item.price).toLocaleString('fr-FR')} MAD</p>
                     </div>
                   </article>
@@ -1972,7 +1972,7 @@ function MenuTemplate({
       <div className="mt-7">
         <header className={templateLayout === 'stacked-photo' ? 'mb-7 rounded-[28px] bg-forest p-6 text-white' : 'mb-7 border-b border-gold/25 pb-5'}>
           <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold">{templateLayout === 'stacked-photo' ? 'Les incontournables' : 'Catalogue'}</p>
-          <h1 className={`mt-2 font-display text-4xl ${templateLayout === 'stacked-photo' ? 'text-white' : 'text-forest'}`}>{place.name || 'Notre sélection'}</h1>
+          <h1 className={`mt-2 font-display text-[clamp(1.8rem,8vw,2.75rem)] leading-tight ${templateLayout === 'stacked-photo' ? 'text-white' : 'text-forest'}`}>{place.name || 'Notre sélection'}</h1>
           <p className={`mt-2 text-sm ${templateLayout === 'stacked-photo' ? 'text-white/60' : 'text-ink/45'}`}>{templateLayout === 'stacked-photo' ? 'Nos produits à découvrir.' : 'Tous les produits et leurs détails.'}</p>
         </header>
         {navigationControls}
@@ -1987,7 +1987,7 @@ function MenuTemplate({
                     <div className={templateLayout === 'stacked-photo' ? 'flex items-start justify-between gap-3 p-4' : 'flex min-w-0 flex-1 items-start justify-between gap-3 py-2 pr-2'}>
                       <div className="min-w-0">
                         <h3 className="text-sm font-bold text-forest">{item.name}</h3>
-                        {item.description && <p className="mt-1 text-[10px] leading-4 text-ink/45">{item.description}</p>}
+                        {item.description && <p className="mt-1 text-xs leading-5 text-ink/65">{item.description}</p>}
                       </div>
                       <span className="shrink-0 text-sm font-bold text-gold">{Number(item.price).toLocaleString('fr-FR')} MAD</span>
                     </div>
@@ -2006,7 +2006,7 @@ function MenuTemplate({
       <div className="mt-7">
         <header className={templateLayout === 'editorial-center' ? 'mb-8 border-y border-gold/30 py-7 text-center' : 'mb-7'}>
           <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold">{templateLayout === 'service-table' ? 'Prestations & tarifs' : templateLayout === 'price-list' ? 'La carte' : 'Notre sélection'}</p>
-          <h1 className="mt-2 font-display text-4xl text-forest">{place.name || 'Notre carte'}</h1>
+          <h1 className="mt-2 font-display text-[clamp(1.8rem,8vw,2.75rem)] leading-tight text-forest">{place.name || 'Notre carte'}</h1>
           {templateLayout === 'service-table' && <p className="mt-2 text-sm text-ink/45">Services, durées et tarifs.</p>}
         </header>
         {navigationControls}
@@ -2022,7 +2022,7 @@ function MenuTemplate({
                   <article key={item.id} className={`flex items-baseline justify-between gap-4 ${templateLayout === 'service-table' ? 'border-b border-ink/5 p-4 last:border-b-0' : templateLayout === 'compact-list' ? 'border-b border-ink/10 py-3 last:border-b-0' : 'py-1'}`}>
                     <div className="min-w-0">
                       <h3 className="text-sm font-semibold text-forest">{item.name}</h3>
-                      {item.description && <p className="mt-1 text-[10px] leading-4 text-ink/45">{item.description}</p>}
+                      {item.description && <p className="mt-1 text-xs leading-5 text-ink/65">{item.description}</p>}
                     </div>
                     {templateLayout === 'price-list' && <span className="min-w-4 flex-1 border-b border-dotted border-ink/20" />}
                     <span className="shrink-0 text-sm font-bold text-gold">{Number(item.price).toLocaleString('fr-FR')} MAD</span>
