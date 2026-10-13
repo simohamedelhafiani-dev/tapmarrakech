@@ -1854,6 +1854,8 @@ function MenuTemplate({
 }) {
   const templateFamily = getMenuTemplateFamily(template);
   const templateLayout = getMenuTemplateLayout(template);
+  const templateNumber = Number(template.match(/^\\d+/)?.[0] ?? 1);
+  const designVariant = (templateNumber - 1) % 5;
   const visible = categories.filter((category) => (itemsByCategory[category.id] ?? []).length > 0);
   const [bookPage, setBookPage] = useState(0);
   const [appCategoryId, setAppCategoryId] = useState(visible[0]?.id ?? '');
@@ -1946,7 +1948,7 @@ function MenuTemplate({
   if (templateLayout === 'product-grid' || templateLayout === 'magazine-grid') {
     return (
       <div className={`mt-7 ${templateLayout === 'magazine-grid' ? 'space-y-10' : ''}`}>
-        <header className={templateLayout === 'magazine-grid' ? 'mb-8 border-l-4 border-gold pl-4' : 'mb-7 text-center'}>
+        <header className={templateLayout === 'magazine-grid' || designVariant === 1 ? 'mb-8 border-l-4 border-gold pl-4 text-left' : designVariant === 2 ? 'mb-7 border-y border-gold/25 py-5 text-center' : designVariant === 3 ? 'mb-7 border-b border-ink/10 pb-4 text-left' : 'mb-7 text-center'}>
           <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold">{templateLayout === 'magazine-grid' ? 'À découvrir' : 'La collection'}</p>
           <h1 className={`mt-2 font-display text-[clamp(1.8rem,8vw,2.75rem)] leading-tight ${templateLayout === 'magazine-grid' ? '' : ''} text-forest`}>{place.name || 'Notre catalogue'}</h1>
           <p className="mt-2 text-sm text-ink/45">{templateLayout === 'magazine-grid' ? 'Une sélection à parcourir.' : 'Découvrez notre sélection.'}</p>
@@ -1961,7 +1963,7 @@ function MenuTemplate({
               </div>
               <div className={templateLayout === 'magazine-grid' ? 'grid grid-cols-1 gap-4 sm:grid-cols-2' : 'grid grid-cols-2 gap-3'}>
                 {(itemsByCategory[category.id] ?? []).map(item => (
-                  <article key={item.id} className="overflow-hidden rounded-[22px] bg-white shadow-sm ring-1 ring-ink/5">
+                  <article key={item.id} className={`overflow-hidden ${designVariant === 0 ? 'rounded-[22px]' : designVariant === 1 ? 'rounded-none border-y' : designVariant === 2 ? 'rounded-[28px]' : designVariant === 3 ? 'rounded-lg' : 'rounded-t-[28px]'} bg-white shadow-sm ring-1 ring-ink/5`}>
                     {photoMode === 'with_photos' && item.image_url && <img src={item.image_url} alt="" className={templateLayout === 'magazine-grid' ? 'h-48 w-full object-cover' : 'aspect-[4/3] w-full object-cover'} />}
                     <div className="p-3.5">
                       <h3 className="text-sm font-bold leading-snug text-forest">{item.name}</h3>
@@ -2015,7 +2017,7 @@ function MenuTemplate({
   if (templateLayout === 'service-table' || templateLayout === 'compact-list' || templateLayout === 'minimal-list' || templateLayout === 'price-list' || templateLayout === 'editorial-center') {
     return (
       <div className="mt-7">
-        <header className={templateLayout === 'editorial-center' ? 'mb-8 border-y border-gold/30 py-7 text-center' : 'mb-7'}>
+        <header className={templateLayout === 'editorial-center' ? (designVariant % 2 === 0 ? 'mb-8 border-y border-gold/30 py-7 text-center' : 'mb-8 border-l-4 border-gold/30 py-5 pl-4 text-left') : designVariant === 3 ? 'mb-7 border-b border-ink/10 pb-4' : 'mb-7'}>
           <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold">{templateLayout === 'service-table' ? 'Prestations & tarifs' : templateLayout === 'price-list' ? 'La carte' : 'Notre sélection'}</p>
           <h1 className="mt-2 font-display text-[clamp(1.8rem,8vw,2.75rem)] leading-tight text-forest">{place.name || 'Notre carte'}</h1>
           {templateLayout === 'service-table' && <p className="mt-2 text-sm text-ink/45">Services, durées et tarifs.</p>}
