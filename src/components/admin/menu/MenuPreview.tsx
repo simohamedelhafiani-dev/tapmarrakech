@@ -44,6 +44,8 @@ export default function MenuPreview({
   };
   const family = getMenuTemplateFamily(activeDraft.template);
   const layout = getMenuTemplateLayout(activeDraft.template);
+  const templateNumber = Number(activeDraft.template.match(/^\\d+/)?.[0] ?? 1);
+  const designVariant = (templateNumber - 1) % 5;
   const palette = palettes[family];
   const TemplateIcon = family === 'deep-ocean' ? Waves : family === 'cards' ? LayoutGrid : family === 'pearl' ? Sparkle : family === 'editorial' ? ScrollText : BookOpen;
   const aiDesign = activeDraft.aiDesign;
@@ -82,19 +84,19 @@ export default function MenuPreview({
   const renderItem = (item: typeof items[number], index: number) => {
     const photo = showPhotos && item.image_url;
     if (isGrid) {
-      return <article key={item.id} className={`overflow-hidden rounded-xl ${palette.card} shadow-sm ring-1 ring-black/5`}>
-        {photo ? <img src={item.image_url!} alt="" className={`w-full object-cover ${layout === 'magazine-grid' && index === 0 ? 'aspect-[4/5]' : 'aspect-square'}`} /> : <div className="grid aspect-square place-items-center bg-black/5"><UtensilsCrossed size={22} className={palette.muted}/></div>}
+      return <article key={item.id} className={`overflow-hidden ${designVariant === 0 ? 'rounded-xl' : designVariant === 1 ? 'rounded-[28px] rounded-t-md' : designVariant === 2 ? 'rounded-none border-y' : designVariant === 3 ? 'rounded-3xl' : 'rounded-lg'} ${palette.card} shadow-sm ring-1 ring-black/5`}>
+        {photo ? <img src={item.image_url!} alt="" className={`w-full object-cover ${layout === 'magazine-grid' && index === 0 ? 'aspect-[4/5]' : designVariant === 0 ? 'aspect-square' : designVariant === 1 ? 'aspect-[3/4]' : designVariant === 2 ? 'aspect-[5/4]' : designVariant === 3 ? 'aspect-[4/3]' : 'aspect-[2/3]'}`} /> : <div className="grid aspect-square place-items-center bg-black/5"><UtensilsCrossed size={22} className={palette.muted}/></div>}
         <div className="p-2.5"><h4 className="text-xs font-bold leading-snug">{item.name}</h4>{item.description && <p className={`mt-1 line-clamp-2 text-[10px] leading-4 ${palette.muted}`}>{item.description}</p>}<p className={`mt-2 text-sm font-extrabold ${palette.accent}`}>{Number(item.price).toLocaleString('fr-FR')} DH</p></div>
       </article>;
     }
     if (isStacked) {
-      return <article key={item.id} className={`overflow-hidden rounded-2xl ${palette.card} shadow-md`}>
+      return <article key={item.id} className={`overflow-hidden ${designVariant === 0 ? 'rounded-2xl' : designVariant === 1 ? 'rounded-none' : designVariant === 2 ? 'rounded-[28px]' : designVariant === 3 ? 'rounded-t-[32px]' : 'rounded-lg'} ${palette.card} shadow-md`}>
         {photo ? <img src={item.image_url!} alt="" className="h-36 w-full object-cover"/> : <div className="grid h-16 place-items-center bg-black/5"><UtensilsCrossed size={20}/></div>}
         <div className="flex items-start justify-between gap-3 p-3"><div className="min-w-0"><h4 className="text-sm font-bold">{item.name}</h4>{item.description && <p className={`mt-1 text-xs leading-5 ${palette.muted}`}>{item.description}</p>}</div><span className={`shrink-0 text-sm font-bold ${palette.accent}`}>{Number(item.price).toLocaleString('fr-FR')} DH</span></div>
       </article>;
     }
     if (isSplit) {
-      return <article key={item.id} className={`flex gap-3 rounded-2xl p-2.5 ${palette.card} ring-1 ring-black/5`}>
+      return <article key={item.id} className={`flex gap-3 ${designVariant === 0 ? 'rounded-2xl p-2.5' : designVariant === 1 ? 'rounded-none border-b py-3' : designVariant === 2 ? 'rounded-[28px] p-3' : designVariant === 3 ? 'rounded-lg p-2' : 'rounded-3xl p-3'} ${palette.card} ring-1 ring-black/5`}>
         {photo ? <img src={item.image_url!} alt="" className="h-24 w-24 shrink-0 rounded-xl object-cover"/> : <div className="grid h-24 w-16 shrink-0 place-items-center rounded-xl bg-black/5"><UtensilsCrossed size={18}/></div>}
         <div className="flex min-w-0 flex-1 flex-col justify-center"><h4 className="text-sm font-bold leading-snug">{item.name}</h4>{item.description && <p className={`mt-1 line-clamp-3 text-[11px] leading-4 ${palette.muted}`}>{item.description}</p>}<p className={`mt-2 text-sm font-bold ${palette.accent}`}>{Number(item.price).toLocaleString('fr-FR')} DH</p></div>
       </article>;
@@ -122,7 +124,7 @@ export default function MenuPreview({
     <div className={compact ? 'p-0' : 'p-3 sm:p-4'}>
       <div className={`relative mx-auto h-[min(680px,78vh)] min-h-[480px] w-full max-w-[360px] overflow-hidden rounded-[28px] border-[5px] border-[#202020] shadow-xl ${palette.page}`}>
         <div className="absolute inset-0 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" style={{ paddingBottom: activeDraft.navigation === 'app' ? 76 : 20 }}>
-          <header className={`relative overflow-hidden ${isEditorial ? 'px-5 pb-5 pt-8 text-center' : isPriceList ? 'px-4 pb-4 pt-7' : isStacked ? 'p-3' : 'px-4 pb-4 pt-5'} ${palette.panel}`}>
+          <header className={`relative overflow-hidden ${isEditorial ? (designVariant % 2 === 0 ? 'px-5 pb-5 pt-8 text-center' : 'px-4 pb-5 pt-8 text-left border-b') : isPriceList ? (designVariant % 2 === 0 ? 'px-4 pb-4 pt-7' : 'px-5 pb-6 pt-5') : isStacked ? 'p-3' : 'px-4 pb-4 pt-5'} ${palette.panel}`}>
             {isStacked && showPhotos && heroImage && <img src={heroImage} alt="" className="mb-3 h-32 w-full rounded-xl object-cover"/>}
             <div className={`flex gap-3 ${isEditorial || isPriceList ? 'flex-col items-center text-center' : 'items-center justify-between'}`}>
               {!(isEditorial || isPriceList) && <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl border ${palette.line} ${palette.accent}`}><TemplateIcon size={17}/></div>}
@@ -135,7 +137,7 @@ export default function MenuPreview({
             {showPhotos && heroImage && !isStacked && !isGrid && !isMinimal && <div className={`relative mt-3 overflow-hidden ${isEditorial ? 'h-28 rounded-none' : 'h-24 rounded-xl'}`}><img src={heroImage} alt="" className="h-full w-full object-cover"/><div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent"/></div>}
             <label className={`mt-3 flex h-10 items-center gap-2 rounded-xl px-3 ${palette.page}`}><Search size={15}/><input value={search} onChange={event => setSearch(event.target.value)} placeholder="Rechercher un article…" className="min-w-0 flex-1 bg-transparent text-xs outline-none placeholder:opacity-60"/>{search && <button type="button" onClick={() => setSearch('')} className="text-xs">✕</button>}</label>
           </header>
-          <section className={`px-3 pb-4 pt-3 ${isEditorial ? 'pt-5' : ''}`}>
+          <section className={`px-3 pb-4 pt-3 ${isEditorial ? 'pt-5' : ''} ${designVariant === 2 ? 'border-t border-current/10' : ''}`}>
             <div className={`mb-2 flex items-center justify-between ${isEditorial || isPriceList ? 'justify-center' : ''}`}><h3 className={`font-bold ${isEditorial || isPriceList ? 'font-serif text-lg' : isService ? 'text-[10px] uppercase tracking-[0.18em]' : 'text-sm'}`}>{categoryId === 'all' ? (isService ? 'Prestations' : isGrid ? 'À découvrir' : 'Nos articles') : activeCategories.find(category => category.id === categoryId)?.name}</h3><span className={`text-[9px] ${palette.muted}`}>{items.length} articles</span></div>
             <div className={` ${isGrid ? 'grid grid-cols-2 gap-2' : isStacked ? 'space-y-3' : isService || isPriceList || isMinimal || isCompact ? 'space-y-0' : 'space-y-2.5'}`}>
               {items.map(renderItem)}
