@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Eye, Palette, Wrench } from 'lucide-react';
+import { ArrowLeft, Check, Eye, Palette, Wrench } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useMenuManager } from '@/hooks/useMenuManager';
 import CategorySidebar from '@/components/admin/menu/CategorySidebar';
@@ -352,7 +352,41 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
         </div>
 
         {activeTab === 'preview' ? (
-          <div className="xl:col-span-2">
+          <div className="xl:col-span-2 space-y-4">
+            <section className="flex flex-col gap-4 rounded-3xl border border-gold/20 bg-[#111111] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Vérification avant publication</p>
+                <h3 className="mt-1 text-lg font-semibold text-white">Voici le menu tel que tes clients le verront</h3>
+                <p className="mt-1 text-xs leading-5 text-white/45">
+                  Vérifie les catégories, les prix, les photos et le rendu sur mobile avant de publier le design.
+                </p>
+                <p className="mt-2 text-[10px] font-medium text-white/60">
+                  {hasChanges ? 'Des modifications de design sont encore en attente.' : 'Le design affiché correspond à la dernière version publiée.'}
+                </p>
+              </div>
+              <div className="flex shrink-0 flex-col gap-2 sm:min-w-[190px]">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('design')}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 px-4 py-3 text-xs font-semibold text-white transition hover:bg-white/[.06]"
+                >
+                  <ArrowLeft size={14} /> Retour au design
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void publish()}
+                  disabled={!hasChanges || publishing || loadingDesign}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gold-gradient px-4 py-3 text-xs font-bold text-[#090909] shadow-gold transition disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  {publishing ? (
+                    <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-black/25 border-t-black" />
+                  ) : (
+                    <Check size={14} />
+                  )}
+                  {publishing ? 'Publication…' : hasChanges ? 'Valider et publier' : 'Design déjà publié'}
+                </button>
+              </div>
+            </section>
             <MenuPreview
               establishmentName={establishmentName}
               categories={menu.categories}
