@@ -5,6 +5,7 @@ import { useMenuManager } from '@/hooks/useMenuManager';
 import CategorySidebar from '@/components/admin/menu/CategorySidebar';
 import ItemEditor from '@/components/admin/menu/ItemEditor';
 import MenuPreview from '@/components/admin/menu/MenuPreview';
+import MenuImportAssistant from '@/components/admin/menu/MenuImportAssistant';
 import MenuConfigurator, {
   type MenuDesignDraft,
   type MenuNavigationMode,
@@ -397,7 +398,15 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
         <div className="min-w-0">
           {activeTab === 'structure' ? (
-            <div className="grid gap-4 xl:grid-cols-[220px_minmax(0,1fr)] xl:items-start">
+            <div className="space-y-4">
+              <MenuImportAssistant
+                establishmentId={establishmentId}
+                categories={menu.categories}
+                items={menu.items}
+                onAddCategory={menu.addCategory}
+                onAddItem={menu.addItem}
+              />
+              <div className="grid gap-4 xl:grid-cols-[220px_minmax(0,1fr)] xl:items-start">
               <CategorySidebar
                 categories={menu.categories}
                 selectedCategoryId={selectedCategoryId}
@@ -419,6 +428,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
                 onToggleActive={menu.toggleItemActive}
                 onDelete={menu.deleteItem}
               />
+              </div>
             </div>
           ) : activeTab === 'design' ? (
             <div className="min-h-[620px] rounded-[28px] border border-white/[.08] bg-[#111111] p-2 shadow-soft sm:p-4">
