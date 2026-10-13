@@ -1460,11 +1460,11 @@ function AIPremiumMenu({
   photoMode: 'with_photos' | 'without_photos';
 }) {
   const style =
-    templateFamily === 'dark'
+    template === 'dark'
       ? 'dark'
-      : templateFamily === 'cards'
+      : template === 'cards'
         ? 'minimal'
-        : templateFamily === 'luxury'
+        : template === 'luxury'
           ? 'luxury'
           : 'editorial';
   const sections = Array.isArray(design?.sections) ? design.sections : [];
@@ -2001,7 +2001,7 @@ function MenuTemplate({
     );
   }
 
-  if (templateLayout === 'service-table' || templateLayout === 'compact-list' || templateLayout === 'minimal-list' || templateLayout === 'price-list') {
+  if (templateLayout === 'service-table' || templateLayout === 'compact-list' || templateLayout === 'minimal-list' || templateLayout === 'price-list' || templateLayout === 'editorial-center') {
     return (
       <div className="mt-7">
         <header className={templateLayout === 'editorial-center' ? 'mb-8 border-y border-gold/30 py-7 text-center' : 'mb-7'}>
@@ -2068,7 +2068,7 @@ function MenuTemplate({
     );
   }
 
-  if (templateFamily === 'cards') {
+  if (template === 'cards') {
     return (
       <div className="mt-7">
         <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold">Découvrez</p>
