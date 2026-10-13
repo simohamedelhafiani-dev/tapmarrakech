@@ -44,7 +44,7 @@ export default function MenuPreview({
   };
   const family = getMenuTemplateFamily(activeDraft.template);
   const layout = getMenuTemplateLayout(activeDraft.template);
-  const templateNumber = Number(activeDraft.template.match(/^\\d+/)?.[0] ?? 1);
+  const templateNumber = Number(activeDraft.template.match(/^\d+/)?.[0] ?? 1);
   const designVariant = (templateNumber - 1) % 5;
   const palette = palettes[family];
   const TemplateIcon = family === 'deep-ocean' ? Waves : family === 'cards' ? LayoutGrid : family === 'pearl' ? Sparkle : family === 'editorial' ? ScrollText : BookOpen;
