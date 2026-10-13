@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Check, ChevronDown, ImagePlus, Loader2, Sparkles, Upload, X, Wand2 } from 'lucide-react';
+import { Check, ChevronDown, ImagePlus, Upload, X } from 'lucide-react';
 import MenuPreview from '@/components/admin/menu/MenuPreview';
 import type { MenuCategory, MenuItem } from '@/hooks/useMenuManager';
 
@@ -21,17 +21,11 @@ type MenuConfiguratorProps = {
   draft: MenuDesignDraft;
   hasChanges: boolean;
   publishing: boolean;
-  aiLoading: boolean;
-  aiPhotoMode: 'with_photos' | 'without_photos';
-  onAiPhotoModeChange: (mode: 'with_photos' | 'without_photos') => void;
   onChange: (patch: Partial<MenuDesignDraft>) => void;
   onPublish: () => void;
-  onGenerateAi: () => void;
-  aiCandidates: Array<{ id: string; design: Record<string, unknown>; template: MenuTemplate; photoMode: 'with_photos' | 'without_photos' }>;
   categories: MenuCategory[];
   itemsByCategory: Record<string, MenuItem[]>;
   establishmentName?: string;
-  onApplyAiCandidate: (candidate: { design: Record<string, unknown>; template: MenuTemplate; photoMode: 'with_photos' | 'without_photos' }) => void;
 };
 
 const navigationModes: Array<{ id: MenuNavigationMode; label: string; description: string }> = [
@@ -55,17 +49,11 @@ export default function MenuConfigurator({
   draft,
   hasChanges,
   publishing,
-  aiLoading,
-  aiPhotoMode,
-  onAiPhotoModeChange,
   onChange,
   onPublish,
-  onGenerateAi,
-  aiCandidates,
   categories,
   itemsByCategory,
   establishmentName,
-  onApplyAiCandidate,
 }: MenuConfiguratorProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
@@ -113,113 +101,6 @@ export default function MenuConfigurator({
         </div>
 
 
-      </div>
-
-      <div className="rounded-2xl border border-forest/10 bg-forest/[0.03] p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-gold">Assistant IA</p>
-            <h4 className="mt-1 text-sm font-semibold text-forest">Générer plusieurs directions</h4>
-            <p className="mt-1 max-w-xl text-[10px] leading-4 text-ink/40">
-              L’IA prépare 3 propositions à partir de ton menu. Rien n’est appliqué ni publié tant que tu n’as pas choisi une proposition.
-            </p>
-          </div>
-          <Wand2 size={18} className="shrink-0 text-gold" />
-        </div>
-
-<div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {([
-            { id: 'with_photos' as const, label: 'Avec photos', description: 'Utilise les photos disponibles' },
-            { id: 'without_photos' as const, label: 'Sans photos', description: 'Design 100% texte' },
-          ]).map((mode) => {
-            const active = aiPhotoMode === mode.id;
-            return (
-              <button
-                key={mode.id}
-                type="button"
-                onClick={() => onAiPhotoModeChange(mode.id)}
-                disabled={aiLoading || publishing}
-                className={[
-                  'rounded-xl border px-3 py-2.5 text-left transition',
-                  active ? 'border-gold bg-gold/10 ring-1 ring-gold/20' : 'border-ink/8 bg-white hover:border-forest/20',
-                ].join(' ')}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[10px] font-semibold text-forest">{mode.label}</span>
-                  {active && <Check size={12} className="text-gold" />}
-                </div>
-                <p className="mt-1 text-[9px] leading-4 text-ink/35">{mode.description}</p>
-              </button>
-            );
-          })}
-        </div>
-
-        <button
-          type="button"
-          onClick={onGenerateAi}
-          disabled={aiLoading || publishing}
-          className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-forest px-4 py-3 text-[11px] font-semibold text-white transition hover:bg-forest/90 disabled:opacity-50"
-        >
-          {aiLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-          {aiLoading ? 'Génération de 3 propositions…' : 'Générer 3 propositions IA'}
-        </button>
-
-        {aiCandidates.length > 0 && (
-          <div className="mt-4 grid gap-4 xl:grid-cols-3">
-            {aiCandidates.map((candidate, index) => {
-              const previewDraft: MenuDesignDraft = {
-                ...draft,
-                template: candidate.template,
-                aiDesign: { ...candidate.design, photo_mode: candidate.photoMode },
-                wallpaperFile: null,
-                wallpaperObjectUrl: null,
-                wallpaperRemoved: false,
-              };
-
-              const hero = candidate.design.hero as { title?: string; subtitle?: string | null } | undefined;
-              const sections = Array.isArray(candidate.design.sections) ? candidate.design.sections : [];
-
-              return (
-                <article key={candidate.id} className="overflow-hidden rounded-2xl border border-ink/8 bg-white shadow-sm">
-                  <div className="flex items-center justify-between gap-2 border-b border-ink/5 px-3 py-2.5">
-                    <span className="rounded-full bg-gold/10 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-gold">
-                      Proposition {index + 1}
-                    </span>
-                    <span className="text-[9px] font-semibold uppercase text-ink/35">{candidate.template}</span>
-                  </div>
-
-                  <div className="p-2">
-                    <MenuPreview
-                      establishmentName={establishmentName}
-                      categories={categories}
-                      itemsByCategory={itemsByCategory}
-                      draft={previewDraft}
-                      compact
-                    />
-                  </div>
-
-                  <div className="border-t border-ink/5 p-3">
-                    <h5 className="text-xs font-semibold text-forest">{hero?.title || 'Direction créative'}</h5>
-                    <p className="mt-1 min-h-8 text-[9px] leading-4 text-ink/40">{hero?.subtitle || 'Proposition générée par l’IA.'}</p>
-                    <div className="mt-2 flex items-center justify-between gap-2 text-[9px] text-ink/35">
-                      <span>{sections.length} section{sections.length > 1 ? 's' : ''}</span>
-                      <span>{candidate.photoMode === 'without_photos' ? 'Sans photos' : 'Avec photos'}</span>
-                    </div>
-                    <button
-                      type="button"
-                      disabled={publishing}
-                      onClick={() => onApplyAiCandidate(candidate)}
-                      className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-forest px-3 py-2.5 text-[10px] font-semibold text-white transition hover:bg-forest/90 disabled:opacity-50"
-                    >
-                      <Check size={13} />
-                      Utiliser cette proposition
-                    </button>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        )}
       </div>
 
       <div>
