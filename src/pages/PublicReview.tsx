@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getMenuTemplateFamily } from '@/components/admin/menu/menuTemplates';
+import { getMenuTemplateFamily, getMenuTemplateLayout } from '@/components/admin/menu/menuTemplates';
 import {
   ArrowLeft,
   ArrowRight,
@@ -1852,6 +1852,7 @@ function MenuTemplate({
   photoMode?: 'with_photos' | 'without_photos';
 }) {
   const templateFamily = getMenuTemplateFamily(template);
+  const templateLayout = getMenuTemplateLayout(template);
   const visible = categories.filter((category) => (itemsByCategory[category.id] ?? []).length > 0);
   const [bookPage, setBookPage] = useState(0);
   const [appCategoryId, setAppCategoryId] = useState(visible[0]?.id ?? '');
@@ -1930,6 +1931,110 @@ function MenuTemplate({
       )}
     </div>
   ) : null;
+
+  if (templateLayout === 'product-grid' || templateLayout === 'magazine-grid') {
+    return (
+      <div className={`mt-7 ${templateLayout === 'magazine-grid' ? 'space-y-10' : ''}`}>
+        <header className={templateLayout === 'magazine-grid' ? 'mb-8 border-l-4 border-gold pl-4' : 'mb-7 text-center'}>
+          <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold">{templateLayout === 'magazine-grid' ? 'À découvrir' : 'La collection'}</p>
+          <h1 className={`mt-2 font-display ${templateLayout === 'magazine-grid' ? 'text-4xl' : 'text-4xl'} text-forest`}>{place.name || 'Notre catalogue'}</h1>
+          <p className="mt-2 text-sm text-ink/45">{templateLayout === 'magazine-grid' ? 'Une sélection à parcourir.' : 'Découvrez notre sélection.'}</p>
+        </header>
+        {navigationControls}
+        <div className="space-y-9">
+          {displayCategories.map(category => (
+            <section key={category.id}>
+              <div className="mb-4 flex items-end justify-between gap-3">
+                <h2 className="font-display text-2xl text-forest">{category.name}</h2>
+                {category.description && <p className="max-w-[45%] text-right text-[10px] leading-4 text-ink/40">{category.description}</p>}
+              </div>
+              <div className={templateLayout === 'magazine-grid' ? 'grid grid-cols-1 gap-4 sm:grid-cols-2' : 'grid grid-cols-2 gap-3'}>
+                {(itemsByCategory[category.id] ?? []).map(item => (
+                  <article key={item.id} className="overflow-hidden rounded-[22px] bg-white shadow-sm ring-1 ring-ink/5">
+                    {photoMode === 'with_photos' && item.image_url && <img src={item.image_url} alt="" className={templateLayout === 'magazine-grid' ? 'h-48 w-full object-cover' : 'aspect-[4/3] w-full object-cover'} />}
+                    <div className="p-3.5">
+                      <h3 className="text-sm font-bold text-forest">{item.name}</h3>
+                      {item.description && <p className="mt-1.5 text-[10px] leading-4 text-ink/40">{item.description}</p>}
+                      <p className="mt-3 text-sm font-bold text-gold">{Number(item.price).toLocaleString('fr-FR')} MAD</p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (templateLayout === 'stacked-photo' || templateLayout === 'split-catalog') {
+    return (
+      <div className="mt-7">
+        <header className={templateLayout === 'stacked-photo' ? 'mb-7 rounded-[28px] bg-forest p-6 text-white' : 'mb-7 border-b border-gold/25 pb-5'}>
+          <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold">{templateLayout === 'stacked-photo' ? 'Les incontournables' : 'Catalogue'}</p>
+          <h1 className={`mt-2 font-display text-4xl ${templateLayout === 'stacked-photo' ? 'text-white' : 'text-forest'}`}>{place.name || 'Notre sélection'}</h1>
+          <p className={`mt-2 text-sm ${templateLayout === 'stacked-photo' ? 'text-white/60' : 'text-ink/45'}`}>{templateLayout === 'stacked-photo' ? 'Nos produits à découvrir.' : 'Tous les produits et leurs détails.'}</p>
+        </header>
+        {navigationControls}
+        <div className="space-y-8">
+          {displayCategories.map(category => (
+            <section key={category.id}>
+              <h2 className="mb-4 font-display text-2xl text-forest">{category.name}</h2>
+              <div className="space-y-3">
+                {(itemsByCategory[category.id] ?? []).map(item => (
+                  <article key={item.id} className={templateLayout === 'stacked-photo' ? 'overflow-hidden rounded-[24px] bg-white shadow-sm ring-1 ring-ink/5' : 'flex gap-3 overflow-hidden rounded-2xl bg-white p-2 shadow-sm ring-1 ring-ink/5'}>
+                    {photoMode === 'with_photos' && item.image_url && <img src={item.image_url} alt="" className={templateLayout === 'stacked-photo' ? 'h-44 w-full object-cover' : 'h-24 w-24 shrink-0 rounded-xl object-cover'} />}
+                    <div className={templateLayout === 'stacked-photo' ? 'flex items-start justify-between gap-3 p-4' : 'flex min-w-0 flex-1 items-start justify-between gap-3 py-2 pr-2'}>
+                      <div className="min-w-0">
+                        <h3 className="text-sm font-bold text-forest">{item.name}</h3>
+                        {item.description && <p className="mt-1 text-[10px] leading-4 text-ink/45">{item.description}</p>}
+                      </div>
+                      <span className="shrink-0 text-sm font-bold text-gold">{Number(item.price).toLocaleString('fr-FR')} MAD</span>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (templateLayout === 'service-table' || templateLayout === 'compact-list' || templateLayout === 'minimal-list' || templateLayout === 'price-list') {
+    return (
+      <div className="mt-7">
+        <header className={templateLayout === 'editorial-center' ? 'mb-8 border-y border-gold/30 py-7 text-center' : 'mb-7'}>
+          <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold">{templateLayout === 'service-table' ? 'Prestations & tarifs' : templateLayout === 'price-list' ? 'La carte' : 'Notre sélection'}</p>
+          <h1 className="mt-2 font-display text-4xl text-forest">{place.name || 'Notre carte'}</h1>
+          {templateLayout === 'service-table' && <p className="mt-2 text-sm text-ink/45">Services, durées et tarifs.</p>}
+        </header>
+        {navigationControls}
+        <div className="space-y-8">
+          {displayCategories.map(category => (
+            <section key={category.id}>
+              <div className={templateLayout === 'price-list' ? 'mb-4 text-center' : 'mb-4'}>
+                <h2 className={`font-display text-2xl text-forest ${templateLayout === 'price-list' ? 'inline-block border-b border-gold/40 pb-2' : ''}`}>{category.name}</h2>
+                {category.description && <p className="mt-1 text-xs text-ink/40">{category.description}</p>}
+              </div>
+              <div className={templateLayout === 'service-table' ? 'overflow-hidden rounded-2xl border border-ink/10 bg-white' : templateLayout === 'compact-list' ? 'space-y-0' : 'space-y-4'}>
+                {(itemsByCategory[category.id] ?? []).map((item,index) => (
+                  <article key={item.id} className={`flex items-baseline justify-between gap-4 ${templateLayout === 'service-table' ? 'border-b border-ink/5 p-4 last:border-b-0' : templateLayout === 'compact-list' ? 'border-b border-ink/10 py-3 last:border-b-0' : 'py-1'}`}>
+                    <div className="min-w-0">
+                      <h3 className="text-sm font-semibold text-forest">{item.name}</h3>
+                      {item.description && <p className="mt-1 text-[10px] leading-4 text-ink/45">{item.description}</p>}
+                    </div>
+                    {templateLayout === 'price-list' && <span className="min-w-4 flex-1 border-b border-dotted border-ink/20" />}
+                    <span className="shrink-0 text-sm font-bold text-gold">{Number(item.price).toLocaleString('fr-FR')} MAD</span>
+                  </article>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   if (['dark', 'onyx', 'royal-gold', 'deep-ocean'].includes(templateFamily)) {
     return (
