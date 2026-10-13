@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { MENU_TEMPLATES } from '@/components/admin/menu/menuTemplates';
 
 type Establishment = {
   id: string;
@@ -28,12 +29,12 @@ type MenuTemplate = {
   key: string;
 };
 
-const LEGACY_MENU_TEMPLATES: MenuTemplate[] = [
-  { id: 'editorial', key: 'editorial', name: '01 — Editorial', description: 'Mise en page éditoriale premium, typographie élégante et espace négatif.' },
-  { id: 'luxury', key: 'luxury', name: '02 — Luxury', description: 'Présentation luxe avec visuels et cartes produits.' },
-  { id: 'cards', key: 'cards', name: '03 — Cards', description: 'Présentation moderne en cartes, claire et visuelle.' },
-  { id: 'dark', key: 'dark', name: '04 — Noir Signature', description: 'Univers sombre premium avec accents dorés.' },
-];
+const MENU_TEMPLATE_OPTIONS: MenuTemplate[] = MENU_TEMPLATES.map(template => ({
+  id: template.id,
+  key: template.family,
+  name: template.label,
+  description: template.description,
+}));
 
 type MenuCategory = {
   id: string;
@@ -172,8 +173,8 @@ export default function Menu() {
       console.error('Erreur chargement template menu:', error);
     }
 
-    setMenuTemplates(LEGACY_MENU_TEMPLATES);
-    setSelectedTemplateId(establishment?.menu_template_id || 'editorial');
+    setMenuTemplates(MENU_TEMPLATE_OPTIONS);
+    setSelectedTemplateId(establishment?.menu_template_id && MENU_TEMPLATE_OPTIONS.some(template => template.id === establishment.menu_template_id) ? establishment.menu_template_id : '01_cafe_classic');
   }
 
   async function saveTemplate(templateId: string) {
@@ -534,15 +535,15 @@ export default function Menu() {
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">Design du menu</p>
-              <h2 className="mt-1 text-lg font-semibold text-forest">Choisir un template</h2>
-              <p className="mt-1 text-xs text-[#F5F5DC]/45">Les templates sont créés et publiés par l’Admin. Ici, tu choisis uniquement celui de ton établissement.</p>
+              <h2 className="mt-1 text-lg font-semibold text-forest">Choisir un modèle</h2>
+              <p className="mt-1 text-xs text-[#F5F5DC]/45">40 modèles adaptés au téléphone, selon le secteur de ton commerce.</p>
             </div>
             <span className="rounded-full bg-forest/5 px-3 py-1.5 text-[10px] font-semibold text-forest">{selectedTemplate?.name ?? 'Automatique'}</span>
           </div>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {menuTemplates.map((template) => (
               <button key={template.id} type="button" onClick={() => void saveTemplate(template.id)} className={`rounded-2xl border p-4 text-left transition ${selectedTemplateId === template.id ? 'border-gold ring-2 ring-gold/15' : 'border-[#242424]/10 hover:border-gold/40'}`}>
-                <div className={`h-20 rounded-xl p-3 ${template.key === 'dark' ? 'bg-[#102B24]' : template.key === 'luxury' ? 'bg-[#F7F3EA]' : template.key === 'cards' ? 'bg-[#111111] border border-[#242424]/10' : 'bg-[#F3EEE2]'}`}>
+                <div className={`h-20 rounded-xl p-3 ${['dark', 'onyx', 'royal-gold'].includes(template.key) ? 'bg-[#102B24]' : ['luxury', 'pearl'].includes(template.key) ? 'bg-[#F7F3EA]' : template.key === 'cards' ? 'bg-[#111111] border border-[#242424]/10' : 'bg-[#F3EEE2]'}`}>
                   <div className={`h-2 w-16 rounded-full ${template.key === 'dark' ? 'bg-gold' : 'bg-[#C9A45C]'}`} />
                   <div className={`mt-3 h-2 w-3/4 rounded-full ${template.key === 'dark' ? 'bg-[#111111]/20' : 'bg-ink/10'}`} />
                   <div className={`mt-2 h-2 w-1/2 rounded-full ${template.key === 'dark' ? 'bg-[#111111]/10' : 'bg-ink/5'}`} />
