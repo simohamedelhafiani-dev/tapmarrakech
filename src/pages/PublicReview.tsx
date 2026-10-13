@@ -990,7 +990,7 @@ export default function PublicReview() {
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <input
                         value={reviewForm.name}
                         onChange={(e) =>
@@ -1931,9 +1931,9 @@ function MenuTemplate({
     </div>
   ) : null;
 
-  if (['dark', 'onyx', 'royal-gold'].includes(templateFamily)) {
+  if (['dark', 'onyx', 'royal-gold', 'deep-ocean'].includes(templateFamily)) {
     return (
-      <div className="mt-6 -mx-5 overflow-hidden bg-[#102b24] px-5 pb-10 pt-7 text-white">
+      <div className={`mt-6 -mx-5 overflow-hidden ${templateFamily === 'deep-ocean' ? 'bg-[#06151B]' : 'bg-[#102b24]'} px-5 pb-10 pt-7 text-white`}>
         <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold">Menu</p>
         <h1 className="mt-2 font-display text-5xl leading-none">{place.name || 'Notre carte'}</h1>
         <p className="mt-3 text-sm text-white/45">Une carte pensée pour être consultée simplement.</p>
