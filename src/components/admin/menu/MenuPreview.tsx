@@ -369,7 +369,7 @@ export default function MenuPreview({
             </header>
 
             {activeDraft.navigation === 'app' && activeCategories.length > 0 && (
-              <nav className="absolute bottom-0 left-0 right-0 z-30 border-t border-current/15 bg-black/85 px-3 pt-2 pb-3 backdrop-blur-xl">
+              <nav className="sticky bottom-0 z-30 -mt-20 border-t border-current/15 bg-black/85 px-3 pt-2 pb-3 backdrop-blur-xl">
                 <div className="flex gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   {activeCategories.map(category => {
                     const active = category.id === appCategoryId;
