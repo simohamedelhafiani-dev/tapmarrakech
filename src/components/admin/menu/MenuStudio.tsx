@@ -6,6 +6,7 @@ import CategorySidebar from '@/components/admin/menu/CategorySidebar';
 import ItemEditor from '@/components/admin/menu/ItemEditor';
 import MenuPreview from '@/components/admin/menu/MenuPreview';
 import MenuImportAssistant from '@/components/admin/menu/MenuImportAssistant';
+import { MENU_TEMPLATES } from '@/components/admin/menu/menuTemplates';
 import MenuConfigurator, {
   type MenuDesignDraft,
   type MenuNavigationMode,
@@ -18,7 +19,7 @@ type MenuStudioProps = {
 
 type RawDesign = Record<string, unknown>;
 
-const TEMPLATE_VALUES: MenuTemplate[] = ['editorial', 'luxury', 'cards', 'dark', 'onyx', 'royal-gold', 'deep-ocean', 'pearl'];
+const TEMPLATE_VALUES: MenuTemplate[] = MENU_TEMPLATES.map(template => template.id);
 const NAVIGATION_VALUES: MenuNavigationMode[] = ['scroll', 'book', 'app'];
 
 const normalizeObject = (value: unknown): RawDesign =>
@@ -50,7 +51,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
   } | null>(null);
 
   const [draft, setDraft] = useState<MenuDesignDraft>({
-    template: 'editorial',
+    template: '01_cafe_classic',
     navigation: 'scroll',
     wallpaperUrl: null,
     wallpaperFile: null,
@@ -80,7 +81,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
     const rawTemplate = data?.menu_template_id;
     const template: MenuTemplate = TEMPLATE_VALUES.includes(rawTemplate as MenuTemplate)
       ? (rawTemplate as MenuTemplate)
-      : 'editorial';
+      : '01_cafe_classic';
     const rawNavigation = raw.navigation_mode;
     const navigation: MenuNavigationMode = NAVIGATION_VALUES.includes(rawNavigation as MenuNavigationMode)
       ? (rawNavigation as MenuNavigationMode)
