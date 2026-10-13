@@ -115,7 +115,8 @@ export default function MenuPreview({
     aiDesign: null,
   };
 
-  const colors = theme[getMenuTemplateFamily(activeDraft.template)];
+  const templateFamily = getMenuTemplateFamily(activeDraft.template);
+  const colors = theme[templateFamily];
 
   const aiDesign = activeDraft.aiDesign;
   const showPhotos = aiDesign?.photo_mode !== 'without_photos';
@@ -194,7 +195,7 @@ export default function MenuPreview({
       return <p className={`text-[10px] ${colors.muted}`}>Aucun article actif.</p>;
     }
 
-    if (activeDraft.template === 'cards') {
+    if (templateFamily === 'cards') {
       return (
         <div className="grid gap-3">
           {items.map(item => (
@@ -239,7 +240,7 @@ export default function MenuPreview({
               </span>
             </div>
 
-            {showPhotos && activeDraft.template === 'luxury' && item.image_url && (
+            {showPhotos && templateFamily === 'luxury' && item.image_url && (
               <img
                 src={item.image_url}
                 alt=""
