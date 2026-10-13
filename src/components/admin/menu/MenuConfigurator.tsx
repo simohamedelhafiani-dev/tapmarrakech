@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Check, ChevronDown, ImagePlus, Upload, X } from 'lucide-react';
+import { Check, ChevronDown, ImagePlus, Loader2, Upload, X } from 'lucide-react';
 import MenuPreview from '@/components/admin/menu/MenuPreview';
 import type { MenuCategory, MenuItem } from '@/hooks/useMenuManager';
 import { MENU_TEMPLATES } from '@/components/admin/menu/menuTemplates';
