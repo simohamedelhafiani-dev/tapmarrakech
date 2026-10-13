@@ -47,6 +47,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
     navigation: MenuNavigationMode;
     wallpaperUrl: string | null;
     overlayOpacity: number;
+    themeColors: MenuDesignDraft['themeColors'];
     aiDesign: Record<string, unknown> | null;
   } | null>(null);
 
@@ -58,6 +59,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
     wallpaperObjectUrl: null,
     wallpaperRemoved: false,
     overlayOpacity: 0.35,
+    themeColors: { background: '#F5F1E8', surface: '#FFFDFA', text: '#26362B', accent: '#D4AF37' },
     aiDesign: null,
   });
 
@@ -92,6 +94,14 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
         ? Math.min(0.7, Math.max(0, raw.overlay_opacity))
         : 0.35;
     const aiDesign = extractAiDesign(raw.ai_design);
+    const rawColors = normalizeObject(raw.theme_colors);
+    const validHex = (value: unknown, fallback: string) => typeof value === 'string' && /^#[0-9a-fA-F]{6}$/.test(value) ? value : fallback;
+    const themeColors = {
+      background: validHex(rawColors.background, '#F5F1E8'),
+      surface: validHex(rawColors.surface, '#FFFDFA'),
+      text: validHex(rawColors.text, '#26362B'),
+      accent: validHex(rawColors.accent, '#D4AF37'),
+    };
 
     setEstablishmentName(data?.name ?? '');
     setDraft({
@@ -102,9 +112,10 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
       wallpaperObjectUrl: null,
       wallpaperRemoved: false,
       overlayOpacity,
+      themeColors,
       aiDesign,
     });
-    setPublishedSnapshot({ template, navigation, wallpaperUrl, overlayOpacity, aiDesign });
+    setPublishedSnapshot({ template, navigation, wallpaperUrl, overlayOpacity, themeColors, aiDesign });
     setLoadingDesign(false);
   }, [establishmentId]);
 
@@ -147,6 +158,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
       draft.navigation !== publishedSnapshot.navigation ||
       draft.wallpaperUrl !== publishedSnapshot.wallpaperUrl ||
       draft.overlayOpacity !== publishedSnapshot.overlayOpacity ||
+      stable(draft.themeColors) !== stable(publishedSnapshot.themeColors) ||
       stable(draft.aiDesign) !== stable(publishedSnapshot.aiDesign)
     );
   }, [draft, publishedSnapshot]);
@@ -203,6 +215,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
         ...currentDesign,
         ...(draft.aiDesign ? { ai_design: draft.aiDesign } : {}),
         overlay_opacity: draft.overlayOpacity,
+        theme_colors: draft.themeColors,
         navigation_mode: draft.navigation,
         background_image_url: draft.wallpaperRemoved ? null : wallpaperUrl,
       };
@@ -227,6 +240,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
         navigation: draft.navigation,
         wallpaperUrl: publishedWallpaper,
         overlayOpacity: draft.overlayOpacity,
+        themeColors: draft.themeColors,
         aiDesign: draft.aiDesign,
       };
 
