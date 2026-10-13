@@ -162,6 +162,11 @@ export default function MenuConfigurator({
         <button type="button" disabled={publishing} onClick={() => onChange({themeColors:{background:'#F5F1E8',surface:'#FFFDFA',text:'#26362B',accent:'#D4AF37'}})} className="mt-3 rounded-full border border-ink/10 bg-white px-3 py-2 text-[10px] font-semibold text-forest disabled:opacity-50">Réinitialiser les couleurs</button>
       </div>
 
+      <div className="rounded-2xl border border-ink/10 bg-white p-4">
+        <div className="flex items-center justify-between gap-3"><div><p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-gold">Wallpaper</p><p className="mt-1 text-xs text-ink/50">Règle l’intensité du voile sur l’image de fond.</p></div><span className="text-xs font-bold text-forest">{Math.round(draft.overlayOpacity * 100)}%</span></div>
+        <input aria-label="Intensité du voile du wallpaper" type="range" min="0" max="70" step="5" value={Math.round(draft.overlayOpacity * 100)} onChange={event => onChange({overlayOpacity:Number(event.target.value)/100})} disabled={publishing} className="mt-3 w-full accent-[#D4AF37]"/>
+      </div>
+
       <div className="rounded-2xl border border-gold/15 bg-gold/5 p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
