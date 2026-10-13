@@ -15,6 +15,7 @@ export type MenuDesignDraft = {
   wallpaperObjectUrl: string | null;
   wallpaperRemoved: boolean;
   overlayOpacity: number;
+  themeColors: { background: string; surface: string; text: string; accent: string };
   aiDesign: Record<string, unknown> | null;
 };
 
@@ -88,7 +89,7 @@ export default function MenuConfigurator({
           <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Design</p>
           <h3 className="mt-1 text-xl font-semibold text-forest">Studio visuel</h3>
           <p className="mt-1 text-xs leading-5 text-ink/40">
-            Toutes les modifications restent locales jusqu’à la publication.
+            La structure du modèle reste verrouillée. Tu peux personnaliser les couleurs et le fond, puis publier.
           </p>
         </div>
 
@@ -143,6 +144,22 @@ export default function MenuConfigurator({
             );
           })}
         </div>
+      </div>
+
+      <div className="rounded-2xl border border-ink/10 bg-[#fafaf7] p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div><p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-gold">Personnalisation</p><h4 className="mt-1 text-sm font-semibold text-forest">Couleurs du modèle</h4><p className="mt-1 text-[10px] leading-4 text-ink/45">Le layout reste verrouillé ; seules les couleurs et le fond changent.</p></div>
+          <span className="rounded-full border border-ink/10 bg-white px-2.5 py-1 text-[9px] font-semibold text-forest">Structure verrouillée</span>
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {([{key:'background',label:'Arrière-plan'},{key:'surface',label:'Blocs / cartes'},{key:'text',label:'Texte'},{key:'accent',label:'Accent / prix'}] as const).map(color => (
+            <label key={color.key} className="flex min-w-0 items-center gap-2 rounded-xl border border-ink/5 bg-white p-2.5">
+              <input type="color" value={draft.themeColors[color.key]} onChange={event => onChange({themeColors:{...draft.themeColors,[color.key]:event.target.value}})} className="h-9 w-10 shrink-0 cursor-pointer rounded-lg border-0 bg-transparent p-0" aria-label={color.label}/>
+              <span className="text-[10px] font-medium text-forest">{color.label}</span>
+            </label>
+          ))}
+        </div>
+        <button type="button" disabled={publishing} onClick={() => onChange({themeColors:{background:'#F5F1E8',surface:'#FFFDFA',text:'#26362B',accent:'#D4AF37'}})} className="mt-3 rounded-full border border-ink/10 bg-white px-3 py-2 text-[10px] font-semibold text-forest disabled:opacity-50">Réinitialiser les couleurs</button>
       </div>
 
       <div className="rounded-2xl border border-gold/15 bg-gold/5 p-4">
