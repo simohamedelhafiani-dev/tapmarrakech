@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, BookOpen, LayoutGrid, ScrollText, Sparkle, Waves } from 'lucide-react';
 import type { MenuCategory, MenuItem } from '@/hooks/useMenuManager';
 import type { MenuDesignDraft } from '@/components/admin/menu/MenuConfigurator';
-import { getMenuTemplateFamily } from '@/components/admin/menu/menuTemplates';
+import { getMenuTemplateFamily, getMenuTemplateLayout } from '@/components/admin/menu/menuTemplates';
 
 type MenuPreviewProps = {
   establishmentName?: string;
@@ -116,6 +116,7 @@ export default function MenuPreview({
   };
 
   const templateFamily = getMenuTemplateFamily(activeDraft.template);
+  const templateLayout = getMenuTemplateLayout(activeDraft.template);
   const colors = theme[templateFamily];
 
   const aiDesign = activeDraft.aiDesign;
@@ -195,28 +196,18 @@ export default function MenuPreview({
       return <p className={`text-[10px] ${colors.muted}`}>Aucun article actif.</p>;
     }
 
-    if (templateFamily === 'cards') {
+    if (['product-grid', 'magazine-grid'].includes(templateLayout)) {
       return (
-        <div className="grid gap-3">
+        <div className={templateLayout === 'magazine-grid' ? 'grid grid-cols-1 gap-4 sm:grid-cols-2' : 'grid grid-cols-2 gap-3'}>
           {items.map(item => (
-            <article key={item.id} className={colors.card}>
+            <article key={item.id} className={`${colors.card} overflow-hidden ${templateLayout === 'magazine-grid' ? 'rounded-[22px]' : ''}`}>
               {showPhotos && item.image_url && (
-                <img
-                  src={item.image_url}
-                  alt=""
-                  className="mb-3 h-32 w-full rounded-xl object-cover"
-                />
+                <img src={item.image_url} alt="" className={templateLayout === 'magazine-grid' ? 'h-44 w-full object-cover' : 'aspect-[4/3] w-full object-cover'} />
               )}
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-xs font-bold">{item.name}</p>
-                  {item.description && (
-                    <p className={`mt-1 text-[10px] leading-4 ${colors.muted}`}>{item.description}</p>
-                  )}
-                </div>
-                <span className={`shrink-0 text-[11px] font-bold ${colors.accent}`}>
-                  {item.price} DH
-                </span>
+              <div className={templateLayout === 'magazine-grid' ? 'p-4' : 'p-3'}>
+                <p className="text-xs font-bold">{item.name}</p>
+                {item.description && <p className={`mt-1 text-[10px] leading-4 ${colors.muted}`}>{item.description}</p>}
+                <p className={`mt-3 text-sm font-bold ${colors.accent}`}>{item.price} DH</p>
               </div>
             </article>
           ))}
@@ -224,6 +215,75 @@ export default function MenuPreview({
       );
     }
 
+    if (templateLayout === 'stacked-photo') {
+      return (
+        <div className="space-y-4">
+          {items.map(item => (
+            <article key={item.id} className={`${colors.card} overflow-hidden rounded-2xl`}>
+              {showPhotos && item.image_url && <img src={item.image_url} alt="" className="h-44 w-full object-cover" />}
+              <div className="flex items-start justify-between gap-3 p-4">
+                <div className="min-w-0">
+                  <p className="text-sm font-bold">{item.name}</p>
+                  {item.description && <p className={`mt-1 text-[10px] leading-4 ${colors.muted}`}>{item.description}</p>}
+                </div>
+                <span className={`shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold ${colors.accent}`}>{item.price} DH</span>
+              </div>
+            </article>
+          ))}
+        </div>
+      );
+    }
+
+    if (templateLayout === 'split-catalog') {
+      return (
+        <div className="space-y-3">
+          {items.map(item => (
+            <article key={item.id} className={`flex gap-3 overflow-hidden rounded-xl ${colors.card}`}>
+              {showPhotos && item.image_url && <img src={item.image_url} alt="" className="h-24 w-24 shrink-0 object-cover sm:h-28 sm:w-28" />}
+              <div className="flex min-w-0 flex-1 items-start justify-between gap-2 py-3 pr-3">
+                <div className="min-w-0">
+                  <p className="text-xs font-bold">{item.name}</p>
+                  {item.description && <p className={`mt-1 text-[10px] leading-4 ${colors.muted}`}>{item.description}</p>}
+                </div>
+                <span className={`shrink-0 text-[11px] font-bold ${colors.accent}`}>{item.price} DH</span>
+              </div>
+            </article>
+          ))}
+        </div>
+      );
+    }
+
+    if (templateLayout === 'service-table') {
+      return (
+        <div className={`overflow-hidden rounded-xl border ${colors.category}`}>
+          {items.map((item, index) => (
+            <article key={item.id} className={`flex items-start justify-between gap-4 px-3 py-3 ${index ? 'border-t border-current/10' : ''}`}>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold">{item.name}</p>
+                {item.description && <p className={`mt-1 text-[10px] leading-4 ${colors.muted}`}>{item.description}</p>}
+              </div>
+              <span className={`shrink-0 text-xs font-bold ${colors.accent}`}>{item.price} DH</span>
+            </article>
+          ))}
+        </div>
+      );
+    }
+
+    if (templateLayout === 'compact-list' || templateLayout === 'minimal-list' || templateLayout === 'price-list') {
+      return (
+        <div className={templateLayout === 'compact-list' ? 'space-y-1' : 'space-y-3'}>
+          {items.map(item => (
+            <article key={item.id} className={`flex items-baseline gap-2 ${templateLayout === 'compact-list' ? 'border-b border-current/10 py-2' : 'py-1'}`}>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold">{item.name}</p>
+                {item.description && <p className={`mt-1 text-[10px] leading-4 ${colors.muted}`}>{item.description}</p>}
+              </div>
+              <span className={`shrink-0 text-[11px] font-bold ${colors.accent}`}>{item.price} DH</span>
+            </article>
+          ))}
+        </div>
+      );
+    }
     return (
       <div className="space-y-1">
         {items.map(item => (
@@ -282,11 +342,17 @@ export default function MenuPreview({
 
           <div className="relative">
             <header className={`${fullScreen ? "px-6 py-14 sm:px-12 sm:py-20" : "p-6"} text-center ${colors.header}`}>
-              <div className={`mx-auto mb-3 grid h-9 w-9 place-items-center rounded-full border border-current/10 ${colors.accent}`}>
-                <TemplateIcon size={15} />
-              </div>
+              {templateLayout === 'editorial-center' ? (
+                <div className={`mx-auto mb-5 h-px w-20 ${colors.accent} bg-current/60`} />
+              ) : templateLayout === 'service-table' ? (
+                <div className={`mx-auto mb-3 grid h-11 w-11 place-items-center rounded-xl border border-current/15 ${colors.accent}`}><TemplateIcon size={18} /></div>
+              ) : templateLayout === 'product-grid' || templateLayout === 'magazine-grid' ? (
+                <div className="mb-4 flex items-center justify-center gap-2"><span className={`h-1.5 w-1.5 rounded-full ${colors.accent} bg-current`} /><span className={`h-px w-8 ${colors.accent} bg-current/60`} /><span className={`h-1.5 w-1.5 rounded-full ${colors.accent} bg-current`} /></div>
+              ) : (
+                <div className={`mx-auto mb-3 grid h-9 w-9 place-items-center rounded-full border border-current/10 ${colors.accent}`}><TemplateIcon size={15} /></div>
+              )}
               <p className={`text-[9px] font-bold uppercase tracking-[0.32em] ${colors.accent}`}>
-                Menu
+                {templateLayout === 'service-table' ? 'Prestations & tarifs' : templateLayout === 'product-grid' || templateLayout === 'magazine-grid' ? 'Collection' : 'Menu'}
               </p>
               <h4 className={`mt-2 ${fullScreen ? 'text-5xl sm:text-7xl' : compact ? 'text-xl' : 'text-3xl'} leading-tight ${colors.heading}`}>
                 {displayName}
