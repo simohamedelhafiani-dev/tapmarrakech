@@ -1845,6 +1845,18 @@ function MenuTemplate({
   const templateLayout = getMenuTemplateLayout(template);
   const templateNumber = Number(template.match(/^\d+/)?.[0] ?? 1);
   const designVariant = (templateNumber - 1) % 5;
+  const storedMenuDesign = place?.menu_ai_design && typeof place.menu_ai_design === 'object' ? place.menu_ai_design as Record<string, unknown> : {};
+  const storedColors = storedMenuDesign.theme_colors && typeof storedMenuDesign.theme_colors === 'object' ? storedMenuDesign.theme_colors as Record<string, unknown> : {};
+  const themeColors = {
+    background: typeof storedColors.background === 'string' && /^#[0-9a-fA-F]{6}$/.test(storedColors.background) ? storedColors.background : '#F5F1E8',
+    surface: typeof storedColors.surface === 'string' && /^#[0-9a-fA-F]{6}$/.test(storedColors.surface) ? storedColors.surface : '#FFFDFA',
+    text: typeof storedColors.text === 'string' && /^#[0-9a-fA-F]{6}$/.test(storedColors.text) ? storedColors.text : '#26362B',
+    accent: typeof storedColors.accent === 'string' && /^#[0-9a-fA-F]{6}$/.test(storedColors.accent) ? storedColors.accent : '#D4AF37',
+  };
+  const wallpaperUrl = typeof storedMenuDesign.background_image_url === 'string' ? storedMenuDesign.background_image_url : null;
+  const wallpaperOpacity = typeof storedMenuDesign.overlay_opacity === 'number' ? Math.min(0.7, Math.max(0, storedMenuDesign.overlay_opacity)) : 0.35;
+  const menuSurfaceStyle = { backgroundColor: themeColors.surface, color: themeColors.text, borderColor: themeColors.accent + '55' };
+
   const visible = categories.filter((category) => (itemsByCategory[category.id] ?? []).length > 0);
   const [bookPage, setBookPage] = useState(0);
   const [appCategoryId, setAppCategoryId] = useState(visible[0]?.id ?? '');
@@ -1936,10 +1948,10 @@ function MenuTemplate({
 
   if (templateLayout === 'product-grid' || templateLayout === 'magazine-grid') {
     return (
-      <div className={`mt-7 ${templateLayout === 'magazine-grid' ? 'space-y-10' : ''}`}>
+      <div className={`mt-7 ${templateLayout === 'magazine-grid' ? 'space-y-10' : ''}`} style={{ backgroundColor: themeColors.background, color: themeColors.text, backgroundImage: wallpaperUrl ? `linear-gradient(rgba(0,0,0,${wallpaperOpacity}),rgba(0,0,0,${wallpaperOpacity})),url("${wallpaperUrl}")` : undefined, backgroundSize: 'cover', backgroundPosition: 'center' }}>
         <header className={templateLayout === 'magazine-grid' || designVariant === 1 ? 'mb-8 border-l-4 border-gold pl-4 text-left' : designVariant === 2 ? 'mb-7 border-y border-gold/25 py-5 text-center' : designVariant === 3 ? 'mb-7 border-b border-ink/10 pb-4 text-left' : 'mb-7 text-center'}>
           <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold">{templateLayout === 'magazine-grid' ? 'À découvrir' : 'La collection'}</p>
-          <h1 className={`mt-2 font-display text-[clamp(1.8rem,8vw,2.75rem)] leading-tight ${templateLayout === 'magazine-grid' ? '' : ''} text-forest`}>{place.name || 'Notre catalogue'}</h1>
+          <h1 className="mt-2 font-display text-[clamp(1.8rem,8vw,2.75rem)] leading-tight" style={{ color: themeColors.text }}>{place.name || 'Notre catalogue'}</h1>
           <p className="mt-2 text-sm text-ink/45">{templateLayout === 'magazine-grid' ? 'Une sélection à parcourir.' : 'Découvrez notre sélection.'}</p>
         </header>
         {navigationControls}
@@ -1952,7 +1964,7 @@ function MenuTemplate({
               </div>
               <div className={templateLayout === 'magazine-grid' ? 'grid grid-cols-1 gap-4 sm:grid-cols-2' : 'grid grid-cols-2 gap-3'}>
                 {(itemsByCategory[category.id] ?? []).map(item => (
-                  <article key={item.id} className={`overflow-hidden ${designVariant === 0 ? 'rounded-[22px]' : designVariant === 1 ? 'rounded-none border-y' : designVariant === 2 ? 'rounded-[28px]' : designVariant === 3 ? 'rounded-lg' : 'rounded-t-[28px]'} bg-white shadow-sm ring-1 ring-ink/5`}>
+                  <article key={item.id} className={`overflow-hidden ${designVariant === 0 ? 'rounded-[22px]' : designVariant === 1 ? 'rounded-none border-y' : designVariant === 2 ? 'rounded-[28px]' : designVariant === 3 ? 'rounded-lg' : 'rounded-t-[28px]'} shadow-sm ring-1 ring-ink/5`} style={menuSurfaceStyle}>
                     {photoMode === 'with_photos' && item.image_url && <img src={item.image_url} alt="" className={templateLayout === 'magazine-grid' ? 'h-48 w-full object-cover' : 'aspect-[4/3] w-full object-cover'} />}
                     <div className="p-3.5">
                       <h3 className="text-sm font-bold leading-snug text-forest">{item.name}</h3>
