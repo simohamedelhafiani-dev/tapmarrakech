@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { getMenuTemplateFamily } from '@/components/admin/menu/menuTemplates';
 import {
   ArrowLeft,
   ArrowRight,
@@ -1850,6 +1851,7 @@ function MenuTemplate({
   navigation?: 'scroll' | 'book' | 'app';
   photoMode?: 'with_photos' | 'without_photos';
 }) {
+  const templateFamily = getMenuTemplateFamily(template);
   const visible = categories.filter((category) => (itemsByCategory[category.id] ?? []).length > 0);
   const [bookPage, setBookPage] = useState(0);
   const [appCategoryId, setAppCategoryId] = useState(visible[0]?.id ?? '');
@@ -1929,7 +1931,7 @@ function MenuTemplate({
     </div>
   ) : null;
 
-  if (template === 'dark') {
+  if (['dark', 'onyx', 'royal-gold'].includes(templateFamily)) {
     return (
       <div className="mt-6 -mx-5 overflow-hidden bg-[#102b24] px-5 pb-10 pt-7 text-white">
         <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold">Menu</p>
@@ -1961,7 +1963,7 @@ function MenuTemplate({
     );
   }
 
-  if (template === 'cards') {
+  if (templateFamily === 'cards') {
     return (
       <div className="mt-7">
         <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold">Découvrez</p>
@@ -1996,7 +1998,7 @@ function MenuTemplate({
     );
   }
 
-  if (template === 'luxury') {
+  if (['luxury', 'pearl'].includes(templateFamily)) {
     return (
       <div className="mt-7">
         <div className="border-y border-gold/30 py-7 text-center">
