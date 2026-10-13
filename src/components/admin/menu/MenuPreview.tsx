@@ -371,36 +371,37 @@ export default function MenuPreview({
               </label>
             </header>
 
-            <nav className={`sticky top-0 z-10 flex gap-1.5 overflow-x-auto px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${mobileDark ? 'bg-[#10130f]/95' : 'bg-[#fffdf8]/95'} backdrop-blur-md`}>
-              <button type="button" onClick={() => setMobileCategoryId('all')} className={`shrink-0 rounded-full px-3 py-2 text-[10px] font-semibold ${mobileCategoryId === 'all' ? 'bg-[#1f513c] text-white' : mobileDark ? 'border border-white/15 text-white/75' : 'border border-black/10 text-[#4c554c]'}`}>Tout</button>
-              {activeCategories.map(category => (
-                <button key={category.id} type="button" onClick={() => setMobileCategoryId(category.id)} className={`shrink-0 rounded-full px-3 py-2 text-[10px] font-semibold ${mobileCategoryId === category.id ? 'bg-[#1f513c] text-white' : mobileDark ? 'border border-white/15 text-white/75' : 'border border-black/10 text-[#4c554c]'}`}>
-                  {category.name}
-                </button>
-              ))}
-            </nav>
+      </nav>
 
             <section className="px-3 pb-4 pt-2">
               <div className="mb-2 flex items-center justify-between px-1">
                 <h5 className="text-sm font-bold">{mobileCategoryId === 'all' ? 'Nos plats' : activeCategories.find(category => category.id === mobileCategoryId)?.name}</h5>
                 <span className={`text-[9px] ${mobileDark ? 'text-white/45' : 'text-[#85877f]'}`}>{filteredMobileItems.length} articles</span>
               </div>
-              <div className="space-y-2">
-                {filteredMobileItems.map(item => (
-                  <article key={item.id} className={`flex min-h-[82px] gap-2.5 rounded-2xl p-2 shadow-sm ring-1 ${mobileDark ? 'bg-white/[0.05] ring-white/10' : 'bg-white ring-black/[0.06]'}`}>
-                    {showPhotos && item.image_url ? (
-                      <img src={item.image_url} alt="" className="h-[72px] w-[76px] shrink-0 rounded-xl object-cover"/>
-                    ) : (
-                      <div className={`grid h-[72px] w-[76px] shrink-0 place-items-center rounded-xl ${mobileDark ? 'bg-white/5 text-white/25' : 'bg-[#f1eee7] text-[#b0a99a]'}`}><TemplateIcon size={18}/></div>
-                    )}
-                    <div className="flex min-w-0 flex-1 flex-col justify-center py-0.5">
-                      <p className={`text-[8px] font-semibold uppercase tracking-wide ${mobileDark ? 'text-[#d4af37]' : 'text-[#8b8f84]'}`}>{item.categoryName}</p>
-                      <p className="mt-0.5 text-[11px] font-bold leading-snug">{item.name}</p>
-                      {item.description && <p className={`mt-1 line-clamp-2 text-[9px] leading-3.5 ${mobileDark ? 'text-white/55' : 'text-[#7c8179]'}`}>{item.description}</p>}
-                      <p className="mt-1 text-[11px] font-extrabold text-[#bd7d28]">{Number(item.price).toLocaleString('fr-FR')} DH</p>
-                    </div>
-                  </article>
-                ))}
+              <div className={`${['product-grid', 'magazine-grid'].includes(templateLayout) ? 'grid grid-cols-2 gap-2' : 'space-y-2'}`}>
+                {filteredMobileItems.map(item => {
+                  const image = showPhotos && item.image_url;
+                  const grid = ['product-grid', 'magazine-grid'].includes(templateLayout);
+                  const stacked = templateLayout === 'stacked-photo';
+                  const service = ['service-table', 'minimal-list', 'compact-list', 'price-list'].includes(templateLayout);
+                  const split = templateLayout === 'split-catalog';
+                  return (
+                    <article key={item.id} className={`overflow-hidden ${grid ? 'rounded-xl' : service ? 'rounded-none border-b py-2' : 'rounded-2xl'} ${mobileDark ? (grid ? 'bg-white/[0.06] ring-1 ring-white/10' : service ? 'border-white/10' : 'bg-white/[0.05] ring-1 ring-white/10') : (grid ? 'bg-white shadow-sm ring-1 ring-black/[0.06]' : service ? 'border-black/10' : 'bg-white shadow-sm ring-1 ring-black/[0.06]')}`}>
+                      {stacked && image && <img src={item.image_url!} alt="" className="h-28 w-full object-cover"/>}
+                      {grid && image && <img src={item.image_url!} alt="" className="aspect-square w-full object-cover"/>}
+                      <div className={`${grid ? 'p-2' : 'p-2.5'} ${split ? 'flex gap-2' : ''}`}>
+                        {split && image && <img src={item.image_url!} alt="" className="h-16 w-16 shrink-0 rounded-lg object-cover"/>}
+                        {!grid && !stacked && !split && image && <img src={item.image_url!} alt="" className="mb-2 h-16 w-full rounded-lg object-cover"/>}
+                        {!grid && !service && <p className={`text-[8px] font-semibold uppercase tracking-wide ${mobileDark ? 'text-[#d4af37]' : 'text-[#8b8f84]'}`}>{item.categoryName}</p>}
+                        <div className="min-w-0 flex-1">
+                          <p className={`${grid ? 'text-[10px]' : 'text-[11px]'} font-bold leading-snug`}>{item.name}</p>
+                          {item.description && <p className={`mt-1 ${grid ? 'line-clamp-2 text-[8px]' : 'line-clamp-2 text-[9px]'} leading-3.5 ${mobileDark ? 'text-white/55' : 'text-[#7c8179]'}`}>{item.description}</p>}
+                          <p className="mt-1.5 text-[11px] font-extrabold text-[#bd7d28]">{Number(item.price).toLocaleString('fr-FR')} DH</p>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
                 {!filteredMobileItems.length && <p className="p-5 text-center text-xs opacity-60">Aucun article trouvé.</p>}
               </div>
             </section>
