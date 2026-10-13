@@ -773,7 +773,7 @@ export default function PublicReview() {
         ===================================================== */}
         {section === 'menu' && (
           <main
-            className="relative -mx-5 min-h-screen overflow-hidden px-5 pb-16 pt-4 text-white"
+            className="relative mx-auto min-h-screen w-full max-w-[430px] overflow-hidden px-4 pb-28 pt-3 text-white sm:px-5"
             style={{
               backgroundImage:
                 menuAiDesign?.background_image_url
@@ -784,7 +784,7 @@ export default function PublicReview() {
               backgroundSize: 'cover',
               backgroundPosition: 'center top',
               backgroundRepeat: 'no-repeat',
-              backgroundAttachment: 'fixed',
+              backgroundAttachment: 'scroll',
             }}
           >
             <div
@@ -1889,14 +1889,14 @@ function MenuTemplate({
   const navigationControls = navigation !== 'scroll' ? (
     <div className="mt-5 mb-7">
       {navigation === 'app' ? (
-        <div className="menu-category-strip sticky top-0 z-30 -mx-2 flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden bg-[#fffdf9]/95 px-3 py-2.5 pb-3 backdrop-blur-md">
+        <div className="menu-category-strip fixed bottom-0 left-1/2 z-40 flex w-[min(100vw,430px)] -translate-x-1/2 gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden border-t border-black/10 bg-[#fffdf9]/95 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-8px_24px_rgba(0,0,0,0.12)] backdrop-blur-xl">
           {visible.map(category => (
             <button
               key={category.id}
               type="button"
               onClick={() => setAppCategoryId(category.id)}
               className={[
-                'shrink-0 rounded-full border px-3.5 py-2.5 text-xs font-semibold transition',
+                'shrink-0 rounded-full border px-4 py-3 text-xs font-semibold transition',
                 category.id === appCategoryId
                   ? 'border-gold bg-gold text-forest'
                   : 'border-ink/10 bg-white text-ink/55',
