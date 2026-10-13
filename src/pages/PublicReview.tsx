@@ -1854,7 +1854,7 @@ function MenuTemplate({
 }) {
   const templateFamily = getMenuTemplateFamily(template);
   const templateLayout = getMenuTemplateLayout(template);
-  const templateNumber = Number(template.match(/^\\d+/)?.[0] ?? 1);
+  const templateNumber = Number(template.match(/^\d+/)?.[0] ?? 1);
   const designVariant = (templateNumber - 1) % 5;
   const visible = categories.filter((category) => (itemsByCategory[category.id] ?? []).length > 0);
   const [bookPage, setBookPage] = useState(0);
