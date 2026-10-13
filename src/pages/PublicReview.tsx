@@ -15,6 +15,7 @@ import {
   MessageCircle,
   Phone,
   Send,
+  Search,
   Sparkles,
   Star,
   UtensilsCrossed,
@@ -1856,6 +1857,8 @@ function MenuTemplate({
   const visible = categories.filter((category) => (itemsByCategory[category.id] ?? []).length > 0);
   const [bookPage, setBookPage] = useState(0);
   const [appCategoryId, setAppCategoryId] = useState(visible[0]?.id ?? '');
+  const [menuSearch, setMenuSearch] = useState('');
+  const [mobileCategoryId, setMobileCategoryId] = useState(visible[0]?.id ?? 'all');
 
   useEffect(() => {
     if (!visible.length) {
@@ -1885,6 +1888,73 @@ function MenuTemplate({
       </div>
     );
   }
+
+  const allMobileItems = visible.flatMap(category =>
+    (itemsByCategory[category.id] ?? []).map(item => ({ ...item, categoryName: category.name, categoryId: category.id }))
+  );
+  const filteredMobileItems = allMobileItems.filter(item =>
+    (mobileCategoryId === 'all' || item.categoryId === mobileCategoryId) &&
+    (item.name + ' ' + (item.description || '') + ' ' + item.categoryName).toLowerCase().includes(menuSearch.toLowerCase())
+  );
+  const heroPhoto = allMobileItems.find(item => item.image_url)?.image_url;
+  const mobileDark = ['dark', 'onyx', 'royal-gold', 'deep-ocean'].includes(templateFamily);
+
+  // Public menu is deliberately rendered as a phone-first catalogue, independent of desktop template previews.
+  return (
+    <div className={`-mx-4 -mt-1 overflow-hidden rounded-t-[26px] pb-5 ${mobileDark ? 'bg-[#10130f] text-white' : 'bg-[#fffdf8] text-[#26362b]'}`}>
+      <header className={`relative overflow-hidden px-4 pb-5 pt-5 ${mobileDark ? 'bg-[#171b16]' : 'bg-[#fffdf8]'}`}>
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className={`text-[9px] font-bold uppercase tracking-[0.22em] ${mobileDark ? 'text-[#d4af37]' : 'text-[#9c7a32]'}`}>Menu</p>
+            <h1 className="mt-1 truncate text-xl font-bold leading-tight">{place.name || 'Notre carte'}</h1>
+          </div>
+          {place.logo_url ? <img src={place.logo_url} alt={place.name || 'Logo'} className="h-11 w-11 shrink-0 rounded-xl bg-white object-contain p-1" /> : <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-full border ${mobileDark ? 'border-white/10 text-[#d4af37]' : 'border-black/10 text-[#9c7a32]'}`}><UtensilsCrossed size={18}/></div>}
+        </div>
+        {heroPhoto && photoMode === 'with_photos' && (
+          <div className="relative mt-4 h-36 overflow-hidden rounded-2xl bg-[#e8e0d1]">
+            <img src={heroPhoto} alt="" className="h-full w-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/20 to-transparent" />
+            <div className="absolute inset-x-3 bottom-3 max-w-[75%] text-white">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/75">À découvrir</p>
+              <p className="mt-1 text-lg font-bold leading-tight">Les incontournables</p>
+            </div>
+          </div>
+        )}
+        <label className={`mt-3 flex h-11 items-center gap-2 rounded-xl px-3 ${mobileDark ? 'bg-white/10 text-white/65' : 'bg-[#f0eee8] text-[#6b7068]'}`}>
+          <Search size={16} />
+          <input value={menuSearch} onChange={event => setMenuSearch(event.target.value)} placeholder="Rechercher un plat…" className={`min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:opacity-70 ${mobileDark ? 'text-white' : 'text-[#26362b]'}`} />
+          {menuSearch && <button type="button" onClick={() => setMenuSearch('')} aria-label="Effacer la recherche" className="px-1 text-xs">✕</button>}
+        </label>
+      </header>
+
+      <nav className={`sticky top-0 z-20 flex gap-2 overflow-x-auto px-3 py-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${mobileDark ? 'bg-[#10130f]/95' : 'bg-[#fffdf8]/95'} backdrop-blur-md`}>
+        <button type="button" onClick={() => setMobileCategoryId('all')} className={`shrink-0 rounded-full px-4 py-2.5 text-xs font-semibold ${mobileCategoryId === 'all' ? 'bg-[#1f513c] text-white' : mobileDark ? 'border border-white/15 text-white/75' : 'border border-black/10 text-[#4c554c]'}`}>Tout</button>
+        {visible.map(category => <button key={category.id} type="button" onClick={() => setMobileCategoryId(category.id)} className={`shrink-0 rounded-full px-4 py-2.5 text-xs font-semibold ${mobileCategoryId === category.id ? 'bg-[#1f513c] text-white' : mobileDark ? 'border border-white/15 text-white/75' : 'border border-black/10 text-[#4c554c]'}`}>{category.name}</button>)}
+      </nav>
+
+      <section className="px-3 pt-3">
+        <div className="mb-3 flex items-center justify-between gap-3 px-1">
+          <h2 className="text-lg font-bold">{mobileCategoryId === 'all' ? 'Nos plats' : visible.find(category => category.id === mobileCategoryId)?.name}</h2>
+          <span className={`text-[10px] ${mobileDark ? 'text-white/45' : 'text-[#85877f]'}`}>{filteredMobileItems.length} articles</span>
+        </div>
+        <div className="space-y-2.5">
+          {filteredMobileItems.map((item, index) => (
+            <article key={item.id} className={`flex min-h-[104px] items-stretch gap-3 rounded-2xl p-2.5 shadow-sm ring-1 ${mobileDark ? 'bg-white/[0.05] ring-white/10' : 'bg-white ring-black/[0.06]'}`}>
+              {photoMode === 'with_photos' && item.image_url ? <img src={item.image_url} alt="" className="h-[88px] w-[94px] shrink-0 rounded-xl object-cover" /> : <div className={`grid h-[88px] w-[94px] shrink-0 place-items-center rounded-xl ${mobileDark ? 'bg-white/5 text-white/25' : 'bg-[#f1eee7] text-[#b0a99a]'}`}><UtensilsCrossed size={22}/></div>}
+              <div className="flex min-w-0 flex-1 flex-col justify-center py-1">
+                <p className={`text-[9px] font-semibold uppercase tracking-wide ${mobileDark ? 'text-[#d4af37]' : 'text-[#8b8f84]'}`}>{item.categoryName}</p>
+                <h3 className="mt-0.5 text-sm font-bold leading-snug">{item.name}</h3>
+                {item.description && <p className={`mt-1 line-clamp-2 text-[10px] leading-4 ${mobileDark ? 'text-white/55' : 'text-[#7c8179]'}`}>{item.description}</p>}
+                <p className="mt-1.5 text-sm font-extrabold text-[#bd7d28]">{Number(item.price).toLocaleString('fr-FR')} DH</p>
+              </div>
+            </article>
+          ))}
+          {!filteredMobileItems.length && <div className={`rounded-2xl p-6 text-center text-sm ${mobileDark ? 'text-white/55' : 'text-[#7c8179]'}`}>Aucun article trouvé.</div>}
+        </div>
+      </section>
+      <div className={`mt-5 px-4 pb-2 text-center text-[9px] ${mobileDark ? 'text-white/30' : 'text-[#9a9b94]'}`}>Menu digital · {place.name || 'Notre établissement'}</div>
+    </div>
+  );
 
   const navigationControls = navigation !== 'scroll' ? (
     <div className="mt-5 mb-7">
