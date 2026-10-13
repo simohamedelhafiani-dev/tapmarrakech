@@ -1,0 +1,12 @@
+.kelyani-menu-template-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:14px}
+.kelyani-menu-template-card{display:block;width:100%;padding:10px;text-align:left;border:1px solid rgba(212,175,55,.18);border-radius:18px;background:#111;transition:transform .18s ease,border-color .18s ease}
+.kelyani-menu-template-card:hover{transform:translateY(-2px);border-color:rgba(212,175,55,.65)}
+.kelyani-menu-template-card[aria-pressed="true"]{border-color:#D4AF37;box-shadow:0 0 0 2px rgba(212,175,55,.18)}
+.kelyani-menu-template-swatch{height:116px;padding:13px;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between}
+.kelyani-menu-template-swatch-top{display:flex;align-items:center;gap:7px}
+.kelyani-menu-template-dot{width:25px;height:25px;border-radius:8px;flex:none}
+.kelyani-menu-template-line{height:6px;border-radius:8px;opacity:.8}
+.kelyani-menu-template-products{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.kelyani-menu-template-products span{height:27px;border-radius:6px;opacity:.72}
+.kelyani-menu-template-name{margin-top:10px;font-size:12px;font-weight:700;color:#F5F5DC}
+.kelyani-menu-template-description{margin-top:4px;font-size:10px;line-height:1.5;color:rgba(245,245,220,.56)}
