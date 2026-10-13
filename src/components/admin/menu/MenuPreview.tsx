@@ -313,161 +313,108 @@ export default function MenuPreview({
     );
   };
 
+  const [menuSearch, setMenuSearch] = useState('');
+  const [mobileCategoryId, setMobileCategoryId] = useState('all');
+  const allMobileItems = activeCategories.flatMap(category =>
+    (itemsByCategory[category.id] ?? []).filter(item => item.active).map(item => ({
+      ...item,
+      categoryId: category.id,
+      categoryName: category.name,
+    })),
+  );
+  const filteredMobileItems = allMobileItems.filter(item =>
+    (mobileCategoryId === 'all' || item.categoryId === mobileCategoryId) &&
+    (item.name + ' ' + (item.description || '') + ' ' + item.categoryName)
+      .toLowerCase().includes(menuSearch.toLowerCase()),
+  );
+  const heroPhoto = allMobileItems.find(item => item.image_url)?.image_url;
+  const mobileDark = ['dark', 'onyx', 'royal-gold', 'deep-ocean'].includes(templateFamily);
+
   return (
-    <aside className={`min-w-0 overflow-hidden border border-white/[.08] bg-[#111111] shadow-soft ${fullScreen ? "rounded-[32px]" : "rounded-3xl lg:sticky lg:top-24 lg:self-start"}`}>
-      {!compact && <div className="border-b border-ink/5 bg-white p-5">
-        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Aperçu en direct</p>
-        <h3 className="mt-1 text-base font-semibold text-forest">
-          {establishmentName || 'Menu public'}
-        </h3>
-        <p className="mt-1 text-[11px] text-ink/35">
-          Miroir KELYANI · synchronisé avec le Studio
-        </p>
-      </div>}
+    <aside className={`min-w-0 overflow-hidden border border-white/[.08] bg-[#111111] shadow-soft ${fullScreen ? 'rounded-[32px]' : 'rounded-3xl lg:sticky lg:top-24 lg:self-start'}`}>
+      {!compact && (
+        <div className="border-b border-ink/5 bg-white p-5">
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Aperçu en direct</p>
+          <h3 className="mt-1 text-base font-semibold text-forest">{establishmentName || 'Menu public'}</h3>
+          <p className="mt-1 text-[11px] text-ink/35">Miroir KELYANI · synchronisé avec le Studio</p>
+        </div>
+      )}
 
-      <div className={compact ? "p-0" : fullScreen ? "p-3 sm:p-5" : "p-3"}>
-        <div className={`relative overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${fullScreen ? "min-h-[calc(100vh-190px)] max-h-[calc(100vh-140px)] rounded-[28px]" : "h-[520px] max-h-[520px] min-h-[360px] rounded-[26px]"} ${colors.shell}`}>
-          {activeDraft.wallpaperUrl && (
-            <>
-              <div
-                className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: `url("${activeDraft.wallpaperUrl}")` }}
-              />
-              <div
-                className="absolute inset-0 bg-black"
-                style={{ opacity: activeDraft.overlayOpacity }}
-              />
-            </>
-          )}
-
-          <div className="relative">
-            <header className={`${fullScreen ? "px-5 py-8" : "px-4 py-5"} text-center ${colors.header}`}>
-              {templateLayout === 'editorial-center' ? (
-                <div className={`mx-auto mb-5 h-px w-20 ${colors.accent} bg-current/60`} />
-              ) : templateLayout === 'service-table' ? (
-                <div className={`mx-auto mb-3 grid h-11 w-11 place-items-center rounded-xl border border-current/15 ${colors.accent}`}><TemplateIcon size={18} /></div>
-              ) : templateLayout === 'product-grid' || templateLayout === 'magazine-grid' ? (
-                <div className="mb-4 flex items-center justify-center gap-2"><span className={`h-1.5 w-1.5 rounded-full ${colors.accent} bg-current`} /><span className={`h-px w-8 ${colors.accent} bg-current/60`} /><span className={`h-1.5 w-1.5 rounded-full ${colors.accent} bg-current`} /></div>
-              ) : (
-                <div className={`mx-auto mb-3 grid h-9 w-9 place-items-center rounded-full border border-current/10 ${colors.accent}`}><TemplateIcon size={15} /></div>
-              )}
-              <p className={`text-[9px] font-bold uppercase tracking-[0.32em] ${colors.accent}`}>
-                {templateLayout === 'service-table' ? 'Prestations & tarifs' : templateLayout === 'product-grid' || templateLayout === 'magazine-grid' ? 'Collection' : 'Menu'}
-              </p>
-              <h4 className={`mt-2 ${fullScreen ? 'text-[clamp(1.8rem,8vw,2.5rem)]' : compact ? 'text-xl' : 'text-[clamp(1.65rem,7vw,2rem)]'} leading-tight ${colors.heading}`}>
-                {displayName}
-              </h4>
-              <p className={`mt-2 text-[10px] leading-4 ${colors.muted}`}>
-                {displaySubtitle}
-              </p>
-
-              <div className="mt-4 flex justify-center">
-                <span className={`rounded-full border border-current/10 px-2.5 py-1 text-[8px] font-semibold uppercase tracking-[0.12em] ${colors.muted}`}>
-                  {activeDraft.template}
-                </span>
+      <div className={compact ? 'p-0' : fullScreen ? 'p-3 sm:p-5' : 'p-3'}>
+        <div className={`relative mx-auto h-[520px] w-full max-w-[360px] overflow-hidden rounded-[28px] border-[5px] border-[#202020] shadow-xl ${mobileDark ? 'bg-[#10130f] text-white' : 'bg-[#fffdf8] text-[#26362b]'}`}>
+          <div className="absolute inset-0 overflow-y-auto pb-20 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <header className={`px-4 pb-3 pt-5 ${mobileDark ? 'bg-[#171b16]' : 'bg-[#fffdf8]'}`}>
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className={`text-[9px] font-bold uppercase tracking-[0.22em] ${mobileDark ? 'text-[#d4af37]' : 'text-[#9c7a32]'}`}>Menu</p>
+                  <h4 className="mt-1 truncate text-xl font-bold leading-tight">{displayName}</h4>
+                  <p className={`mt-1 text-[10px] leading-4 ${mobileDark ? 'text-white/45' : 'text-[#8b8f84]'}`}>{displaySubtitle}</p>
+                </div>
+                <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-full border ${mobileDark ? 'border-white/10 text-[#d4af37]' : 'border-black/10 text-[#9c7a32]'}`}>
+                  <TemplateIcon size={17}/>
+                </div>
               </div>
+              {showPhotos && heroPhoto && (
+                <div className="relative mt-3 h-28 overflow-hidden rounded-2xl bg-[#e8e0d1]">
+                  <img src={heroPhoto} alt="" className="h-full w-full object-cover"/>
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/20 to-transparent"/>
+                  <div className="absolute bottom-3 left-3 text-white">
+                    <p className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/75">À découvrir</p>
+                    <p className="mt-1 text-base font-bold">Nos incontournables</p>
+                  </div>
+                </div>
+              )}
+              <label className={`mt-3 flex h-10 items-center gap-2 rounded-xl px-3 ${mobileDark ? 'bg-white/10 text-white/65' : 'bg-[#f0eee8] text-[#6b7068]'}`}>
+                <span className="text-sm">⌕</span>
+                <input value={menuSearch} onChange={event => setMenuSearch(event.target.value)} placeholder="Rechercher un plat…" className={`min-w-0 flex-1 bg-transparent text-xs outline-none placeholder:opacity-70 ${mobileDark ? 'text-white' : 'text-[#26362b]'}`}/>
+                {menuSearch && <button type="button" onClick={() => setMenuSearch('')} className="text-xs">✕</button>}
+              </label>
             </header>
 
-            {activeDraft.navigation === 'app' && activeCategories.length > 0 && (
-              <nav className="sticky bottom-0 z-30 -mt-20 border-t border-current/15 bg-black/85 px-3 pt-2 pb-3 backdrop-blur-xl">
-                <div className="flex gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                  {activeCategories.map(category => {
-                    const active = category.id === appCategoryId;
+            <nav className={`sticky top-0 z-10 flex gap-1.5 overflow-x-auto px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${mobileDark ? 'bg-[#10130f]/95' : 'bg-[#fffdf8]/95'} backdrop-blur-md`}>
+              <button type="button" onClick={() => setMobileCategoryId('all')} className={`shrink-0 rounded-full px-3 py-2 text-[10px] font-semibold ${mobileCategoryId === 'all' ? 'bg-[#1f513c] text-white' : mobileDark ? 'border border-white/15 text-white/75' : 'border border-black/10 text-[#4c554c]'}`}>Tout</button>
+              {activeCategories.map(category => (
+                <button key={category.id} type="button" onClick={() => setMobileCategoryId(category.id)} className={`shrink-0 rounded-full px-3 py-2 text-[10px] font-semibold ${mobileCategoryId === category.id ? 'bg-[#1f513c] text-white' : mobileDark ? 'border border-white/15 text-white/75' : 'border border-black/10 text-[#4c554c]'}`}>
+                  {category.name}
+                </button>
+              ))}
+            </nav>
 
-                    return (
-                      <button
-                        key={category.id}
-                        type="button"
-                        onClick={() => setAppCategoryId(category.id)}
-                        className={[
-                          'shrink-0 rounded-full border px-3 py-1.5 text-[9px] font-semibold transition-all',
-                          active
-                            ? 'border-gold bg-gold text-white shadow-sm'
-                            : 'border-current/10 bg-black/5 text-current/60 hover:border-gold/40',
-                        ].join(' ')}
-                      >
-                        {category.name}
-                      </button>
-                    );
-                  })}
-                </div>
-              </nav>
-            )}
-
-            <div className={compact ? (activeDraft.navigation === "app" ? "px-3 pt-3 pb-24" : "p-3") : (activeDraft.navigation === "app" ? "px-4 pt-4 pb-24" : "p-4")}>
-              {activeDraft.navigation === 'book' && (
-                <div className="mb-5 flex items-center justify-between rounded-xl border border-current/10 bg-black/5 px-3 py-2">
-                  <span className={`text-[9px] font-semibold ${colors.muted}`}>Mode livre</span>
-                  <span className={`text-[10px] font-bold ${colors.accent}`}>
-                    Page {currentBookPage}/{activeCategories.length || 1}
-                  </span>
-                </div>
-              )}
-
-              <div className={compact ? 'space-y-4' : 'space-y-7'}>
-                {visibleCategories.map(category => (
-                  <section key={category.id}>
-                    <div className={compact ? `mb-2 ${colors.category}` : `mb-3 ${colors.category}`}>
-                      <h5 className={`${compact ? 'text-sm' : 'text-lg'} font-semibold ${colors.heading}`}>
-                        {category.name}
-                      </h5>
-                      {category.description && (
-                        <p className={`mt-1 text-[9px] leading-4 ${colors.muted}`}>
-                          {category.description}
-                        </p>
-                      )}
-                    </div>
-
-                    {renderItems(category)}
-                  </section>
-                ))}
-
-                {!visibleCategories.length && (
-                  <div className={`rounded-2xl border border-current/10 p-5 text-center text-[10px] ${colors.muted}`}>
-                    Aucune catégorie active.
-                  </div>
-                )}
+            <section className="px-3 pb-4 pt-2">
+              <div className="mb-2 flex items-center justify-between px-1">
+                <h5 className="text-sm font-bold">{mobileCategoryId === 'all' ? 'Nos plats' : activeCategories.find(category => category.id === mobileCategoryId)?.name}</h5>
+                <span className={`text-[9px] ${mobileDark ? 'text-white/45' : 'text-[#85877f]'}`}>{filteredMobileItems.length} articles</span>
               </div>
-
-              {activeDraft.navigation === 'book' && activeCategories.length > 0 && (
-                <div className="mt-7 border-t border-current/10 pt-4">
-                  <div className="flex items-center justify-between gap-2">
-                    <button
-                      type="button"
-                      disabled={bookPage === 0}
-                      onClick={() => setBookPage(page => Math.max(0, page - 1))}
-                      className="inline-flex items-center gap-1 rounded-full border border-current/10 px-3 py-2 text-[9px] font-semibold transition hover:border-gold/50 disabled:cursor-not-allowed disabled:opacity-30"
-                    >
-                      <ChevronLeft size={12} />
-                      Précédent
-                    </button>
-
-                    <span className={`text-[9px] font-semibold ${colors.muted}`}>
-                      {bookPage + 1} / {activeCategories.length}
-                    </span>
-
-                    <button
-                      type="button"
-                      disabled={bookPage >= activeCategories.length - 1}
-                      onClick={() =>
-                        setBookPage(page => Math.min(activeCategories.length - 1, page + 1))
-                      }
-                      className="inline-flex items-center gap-1 rounded-full border border-current/10 px-3 py-2 text-[9px] font-semibold transition hover:border-gold/50 disabled:cursor-not-allowed disabled:opacity-30"
-                    >
-                      Suivant
-                      <ChevronRight size={12} />
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {activeDraft.navigation === 'app' && activeCategories.length > 0 && (
-                <div className={`mt-6 text-center text-[9px] ${colors.muted}`}>
-                  Catégorie {Math.max(1, activeCategories.findIndex(c => c.id === appCategoryId) + 1)} / {activeCategories.length}
-                </div>
-              )}
-            </div>
+              <div className="space-y-2">
+                {filteredMobileItems.map(item => (
+                  <article key={item.id} className={`flex min-h-[82px] gap-2.5 rounded-2xl p-2 shadow-sm ring-1 ${mobileDark ? 'bg-white/[0.05] ring-white/10' : 'bg-white ring-black/[0.06]'}`}>
+                    {showPhotos && item.image_url ? (
+                      <img src={item.image_url} alt="" className="h-[72px] w-[76px] shrink-0 rounded-xl object-cover"/>
+                    ) : (
+                      <div className={`grid h-[72px] w-[76px] shrink-0 place-items-center rounded-xl ${mobileDark ? 'bg-white/5 text-white/25' : 'bg-[#f1eee7] text-[#b0a99a]'}`}><TemplateIcon size={18}/></div>
+                    )}
+                    <div className="flex min-w-0 flex-1 flex-col justify-center py-0.5">
+                      <p className={`text-[8px] font-semibold uppercase tracking-wide ${mobileDark ? 'text-[#d4af37]' : 'text-[#8b8f84]'}`}>{item.categoryName}</p>
+                      <p className="mt-0.5 text-[11px] font-bold leading-snug">{item.name}</p>
+                      {item.description && <p className={`mt-1 line-clamp-2 text-[9px] leading-3.5 ${mobileDark ? 'text-white/55' : 'text-[#7c8179]'}`}>{item.description}</p>}
+                      <p className="mt-1 text-[11px] font-extrabold text-[#bd7d28]">{Number(item.price).toLocaleString('fr-FR')} DH</p>
+                    </div>
+                  </article>
+                ))}
+                {!filteredMobileItems.length && <p className="p-5 text-center text-xs opacity-60">Aucun article trouvé.</p>}
+              </div>
+            </section>
           </div>
+
+          {activeDraft.navigation === 'app' && (
+            <nav className={`absolute bottom-0 left-0 right-0 z-20 flex gap-1.5 overflow-x-auto border-t px-2 pt-2 pb-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${mobileDark ? 'border-white/10 bg-[#10130f]/95' : 'border-black/10 bg-[#fffdf8]/95'} backdrop-blur-xl`}>
+              {activeCategories.map(category => (
+                <button key={category.id} type="button" onClick={() => setMobileCategoryId(category.id)} className={`shrink-0 rounded-full px-3 py-2 text-[9px] font-semibold ${mobileCategoryId === category.id ? 'bg-[#d4af37] text-[#1f3025]' : mobileDark ? 'border border-white/15 text-white/70' : 'border border-black/10 text-[#4c554c]'}`}>
+                  {category.name}
+                </button>
+              ))}
+            </nav>
+          )}
         </div>
       </div>
     </aside>
