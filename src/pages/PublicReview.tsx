@@ -506,8 +506,8 @@ export default function PublicReview() {
   const googleReviewCount =
     p.google_review_count ?? p.review_count ?? null;
   const menuTemplate =
-    p.menu_template_id === 'dark' || p.menu_template_id === 'cards' || p.menu_template_id === 'luxury'
-      ? p.menu_template_id
+    ['dark', 'cards', 'luxury'].includes(getMenuTemplateFamily(p.menu_template_id ?? ''))
+      ? getMenuTemplateFamily(p.menu_template_id ?? '')
       : menuTemplateConfig?.layout === 'dark' || menuTemplateConfig?.layout === 'cards' || menuTemplateConfig?.layout === 'luxury'
         ? menuTemplateConfig.layout
         : 'editorial';
@@ -1460,11 +1460,11 @@ function AIPremiumMenu({
   photoMode: 'with_photos' | 'without_photos';
 }) {
   const style =
-    template === 'dark'
+    templateFamily === 'dark'
       ? 'dark'
-      : template === 'cards'
+      : templateFamily === 'cards'
         ? 'minimal'
-        : template === 'luxury'
+        : templateFamily === 'luxury'
           ? 'luxury'
           : 'editorial';
   const sections = Array.isArray(design?.sections) ? design.sections : [];
