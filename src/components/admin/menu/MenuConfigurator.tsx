@@ -32,7 +32,7 @@ type MenuConfiguratorProps = {
 const navigationModes: Array<{ id: MenuNavigationMode; label: string; description: string }> = [
   { id: 'scroll', label: 'Page unique', description: 'Défilement classique' },
   { id: 'book', label: 'Mode livre', description: 'Pagination par catégorie' },
-  { id: 'app', label: 'Catégories en haut', description: 'Cliquez sur une catégorie pour afficher ses plats' },
+  { id: 'app', label: 'Barre en bas', description: 'Catégories accessibles au pouce en bas du menu' },
 ];
 
 const templates = MENU_TEMPLATES;
