@@ -371,8 +371,6 @@ export default function MenuPreview({
               </label>
             </header>
 
-      </nav>
-
             <section className="px-3 pb-4 pt-2">
               <div className="mb-2 flex items-center justify-between px-1">
                 <h5 className="text-sm font-bold">{mobileCategoryId === 'all' ? 'Nos plats' : activeCategories.find(category => category.id === mobileCategoryId)?.name}</h5>
