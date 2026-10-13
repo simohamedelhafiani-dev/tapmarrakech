@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
-import { Check, ChevronDown, ImagePlus, Loader2, Upload, X } from 'lucide-react';
+import { Check, ChevronDown, ImagePlus, Loader2, Upload, X, Sparkles } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 import MenuPreview from '@/components/admin/menu/MenuPreview';
 import type { MenuCategory, MenuItem } from '@/hooks/useMenuManager';
 import { MENU_TEMPLATES } from '@/components/admin/menu/menuTemplates';
@@ -28,6 +29,8 @@ type MenuConfiguratorProps = {
   categories: MenuCategory[];
   itemsByCategory: Record<string, MenuItem[]>;
   establishmentName?: string;
+  establishmentId: string;
+  logoUrl: string | null;
 };
 
 const navigationModes: Array<{ id: MenuNavigationMode; label: string; description: string }> = [
@@ -47,9 +50,13 @@ export default function MenuConfigurator({
   categories,
   itemsByCategory,
   establishmentName,
+  establishmentId,
+  logoUrl,
 }: MenuConfiguratorProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
+  const [paletteBusy, setPaletteBusy] = useState(false);
+  const [paletteNotice, setPaletteNotice] = useState<string | null>(null);
 
   const chooseWallpaper = (file: File) => {
     setError(null);
@@ -150,6 +157,33 @@ export default function MenuConfigurator({
         <div className="flex items-start justify-between gap-3">
           <div><p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-gold">Personnalisation</p><h4 className="mt-1 text-sm font-semibold text-forest">Couleurs du modèle</h4><p className="mt-1 text-[10px] leading-4 text-ink/45">Le layout reste verrouillé ; seules les couleurs et le fond changent.</p></div>
           <span className="rounded-full border border-ink/10 bg-white px-2.5 py-1 text-[9px] font-semibold text-forest">Structure verrouillée</span>
+        </div>
+        <div className="mt-4 rounded-xl border border-gold/20 bg-gradient-to-r from-gold/10 to-transparent p-3">
+          <div className="flex items-center gap-3">
+            {logoUrl ? <img src={logoUrl} alt="Logo de l’établissement" className="h-11 w-11 rounded-lg border border-ink/10 bg-white object-contain p-1" /> : <div className="grid h-11 w-11 place-items-center rounded-lg border border-dashed border-ink/15 bg-white text-ink/30"><ImagePlus size={18}/></div>}
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-semibold text-forest">Palette de marque par IA</p>
+              <p className="mt-1 text-[10px] leading-4 text-ink/45">{logoUrl ? 'Analyse le logo et propose 4 couleurs harmonisées, avec un contraste lisible.' : 'Ajoute d’abord le logo dans les informations de ton établissement.'}</p>
+            </div>
+            <button type="button" disabled={publishing || paletteBusy || !logoUrl} onClick={async () => {
+              setPaletteBusy(true); setPaletteNotice(null); setError(null);
+              try {
+                const { data, error: invokeError } = await supabase.functions.invoke('generate-brand-palette', { body: { establishment_id: establishmentId } });
+                if (invokeError) throw new Error(invokeError.message);
+                if (!data?.success || !data?.colors) throw new Error(data?.error || 'La palette n’a pas pu être générée.');
+                const valid = (value: unknown) => typeof value === 'string' && /^#[0-9a-fA-F]{6}$/.test(value);
+                const next = data.colors;
+                if (!valid(next.background) || !valid(next.surface) || !valid(next.text) || !valid(next.accent)) throw new Error('La palette reçue est incomplète. Relance la génération.');
+                onChange({ themeColors: { background: next.background, surface: next.surface, text: next.text, accent: next.accent } });
+                setPaletteNotice('Palette de marque générée. Vérifie l’aperçu puis publie pour l’appliquer au menu.');
+              } catch (cause) { setError(cause instanceof Error ? cause.message : 'Erreur lors de la génération de la palette.'); }
+              finally { setPaletteBusy(false); }
+            }} className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-forest px-3 py-2.5 text-[10px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40">
+              {paletteBusy ? <Loader2 size={13} className="animate-spin"/> : <Sparkles size={13}/>}
+              {paletteBusy ? 'Analyse…' : 'Générer'}
+            </button>
+          </div>
+          {paletteNotice && <p className="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-[10px] leading-4 text-emerald-800">{paletteNotice}</p>}
         </div>
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {([{key:'background',label:'Arrière-plan'},{key:'surface',label:'Blocs / cartes'},{key:'text',label:'Texte'},{key:'accent',label:'Accent / prix'}] as const).map(color => (
