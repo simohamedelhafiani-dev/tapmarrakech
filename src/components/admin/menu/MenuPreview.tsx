@@ -326,7 +326,7 @@ export default function MenuPreview({
       </div>}
 
       <div className={compact ? "p-0" : fullScreen ? "p-3 sm:p-5" : "p-3"}>
-        <div className={`relative overflow-y-auto ${fullScreen ? "min-h-[calc(100vh-190px)] max-h-[calc(100vh-140px)] rounded-[28px]" : "max-h-[520px] min-h-[360px] rounded-[26px]"} ${colors.shell}`}>
+        <div className={`relative overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${fullScreen ? "min-h-[calc(100vh-190px)] max-h-[calc(100vh-140px)] rounded-[28px]" : "h-[520px] max-h-[520px] min-h-[360px] rounded-[26px]"} ${colors.shell}`}>
           {activeDraft.wallpaperUrl && (
             <>
               <div
@@ -341,7 +341,7 @@ export default function MenuPreview({
           )}
 
           <div className="relative">
-            <header className={`${fullScreen ? "px-6 py-14 sm:px-12 sm:py-20" : "p-6"} text-center ${colors.header}`}>
+            <header className={`${fullScreen ? "px-5 py-8" : "px-4 py-5"} text-center ${colors.header}`}>
               {templateLayout === 'editorial-center' ? (
                 <div className={`mx-auto mb-5 h-px w-20 ${colors.accent} bg-current/60`} />
               ) : templateLayout === 'service-table' ? (
@@ -354,7 +354,7 @@ export default function MenuPreview({
               <p className={`text-[9px] font-bold uppercase tracking-[0.32em] ${colors.accent}`}>
                 {templateLayout === 'service-table' ? 'Prestations & tarifs' : templateLayout === 'product-grid' || templateLayout === 'magazine-grid' ? 'Collection' : 'Menu'}
               </p>
-              <h4 className={`mt-2 ${fullScreen ? 'text-5xl sm:text-7xl' : compact ? 'text-xl' : 'text-3xl'} leading-tight ${colors.heading}`}>
+              <h4 className={`mt-2 ${fullScreen ? 'text-[clamp(1.8rem,8vw,2.5rem)]' : compact ? 'text-xl' : 'text-[clamp(1.65rem,7vw,2rem)]'} leading-tight ${colors.heading}`}>
                 {displayName}
               </h4>
               <p className={`mt-2 text-[10px] leading-4 ${colors.muted}`}>
@@ -369,8 +369,8 @@ export default function MenuPreview({
             </header>
 
             {activeDraft.navigation === 'app' && activeCategories.length > 0 && (
-              <nav className="sticky top-0 z-20 border-y border-current/10 bg-black/10 px-3 py-2 backdrop-blur-md">
-                <div className="flex gap-1.5 overflow-x-auto">
+              <nav className="absolute bottom-0 left-0 right-0 z-30 border-t border-current/15 bg-black/85 px-3 pt-2 pb-3 backdrop-blur-xl">
+                <div className="flex gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   {activeCategories.map(category => {
                     const active = category.id === appCategoryId;
 
@@ -394,7 +394,7 @@ export default function MenuPreview({
               </nav>
             )}
 
-            <div className={compact ? "p-3" : "p-5 sm:p-6"}>
+            <div className={compact ? (activeDraft.navigation === "app" ? "px-3 pt-3 pb-24" : "p-3") : (activeDraft.navigation === "app" ? "px-4 pt-4 pb-24" : "p-4")}>
               {activeDraft.navigation === 'book' && (
                 <div className="mb-5 flex items-center justify-between rounded-xl border border-current/10 bg-black/5 px-3 py-2">
                   <span className={`text-[9px] font-semibold ${colors.muted}`}>Mode livre</span>
