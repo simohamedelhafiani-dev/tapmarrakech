@@ -39,6 +39,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
   const [activeTab, setActiveTab] = useState<StudioTab>('structure');
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [establishmentName, setEstablishmentName] = useState('');
+  const [establishmentLogoUrl, setEstablishmentLogoUrl] = useState<string | null>(null);
   const [loadingDesign, setLoadingDesign] = useState(true);
   const [publishing, setPublishing] = useState(false);
   const [designError, setDesignError] = useState<string | null>(null);
@@ -69,7 +70,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
 
     const { data, error } = await supabase
       .from('establishments')
-      .select('name, menu_template_id, menu_ai_design')
+      .select('name, logo_url, menu_template_id, menu_ai_design')
       .eq('id', establishmentId)
       .maybeSingle();
 
@@ -104,6 +105,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
     };
 
     setEstablishmentName(data?.name ?? '');
+    setEstablishmentLogoUrl(typeof data?.logo_url === 'string' && data.logo_url.trim() ? data.logo_url : null);
     setDraft({
       template,
       navigation,
@@ -360,6 +362,8 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
                 categories={menu.categories}
                 itemsByCategory={menu.itemsByCategory}
                 establishmentName={establishmentName}
+                establishmentId={establishmentId}
+                logoUrl={establishmentLogoUrl}
               />
             </div>
           ) : null}
