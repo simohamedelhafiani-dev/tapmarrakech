@@ -53,7 +53,15 @@ function stars(value: string | null) {
     FOUR: 4,
     FIVE: 5,
   };
-  return map[String(value ?? '').toUpperCase()] ?? Number(value ?? 0) ?? 0;
+ const normalizedValue = String(value ?? '').toUpperCase();
+const mappedValue = map[normalizedValue];
+
+if (mappedValue !== undefined) {
+  return mappedValue;
+}
+
+const numericValue = Number(value ?? 0);
+return Number.isFinite(numericValue) ? numericValue : 0;
 }
 
 export default function GoogleReputationModule({ establishmentId }: Props) {

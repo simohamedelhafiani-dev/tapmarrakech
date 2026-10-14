@@ -16,10 +16,7 @@ function subscriptionUsesCurrentVapidKey(subscription: PushSubscription) {
   const bytes = new Uint8Array(key);
   let binary = '';
   for (const byte of bytes) binary += String.fromCharCode(byte);
-  const encoded = window.btoa(binary)
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
+  const encoded = window.btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   return encoded === LOYALTY_VAPID_PUBLIC_KEY;
 }
 
@@ -44,18 +41,17 @@ export async function enableLoyaltyPush(token: string, cardUrl: string) {
     ? 'granted'
     : await Notification.requestPermission();
 
+
   if (permission !== 'granted') {
     throw new Error('Autorisez les notifications pour recevoir les messages même lorsque votre téléphone est verrouillé.');
   }
 
   const registration = await navigator.serviceWorker.ready;
   let subscription = await registration.pushManager.getSubscription();
-
   if (subscription && !subscriptionUsesCurrentVapidKey(subscription)) {
     await subscription.unsubscribe().catch(() => false);
     subscription = null;
   }
-
   if (!subscription) {
     subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
@@ -68,8 +64,6 @@ export async function enableLoyaltyPush(token: string, cardUrl: string) {
     p_subscription: subscription.toJSON(),
     p_card_url: cardUrl,
   });
-
   if (error) throw error;
-
   return subscription;
 }

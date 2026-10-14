@@ -14,7 +14,7 @@ import LoyaltyCard from '@/pages/LoyaltyCard';
 import LoyaltyJoin from '@/pages/LoyaltyJoin';
 import LoyaltyRecover from '@/pages/LoyaltyRecover';
 import Login from '@/pages/Login';
-import { ForgotPassword, Register } from '@/pages/AuthPages';
+import { ForgotPassword, Register, ResetPassword } from '@/pages/AuthPages';
 
 import Dashboard from '@/pages/Dashboard';
 import Reviews from '@/pages/Reviews';
@@ -27,7 +27,6 @@ import Admin from '@/pages/Admin';
 import AdminOverview from '@/pages/AdminOverview';
 import AdminOverviewV2 from '@/pages/AdminOverviewV2';
 import AdminStatCardTest from '@/pages/AdminStatCardTest';
-import Employee from '@/pages/Employee';
 import LoyaltyScanner from '@/pages/LoyaltyScanner';
 
 type EstablishmentRow = {
@@ -153,13 +152,6 @@ function SubscriptionFeatureRoute({
 }
 
 function App() {
-  console.log('[App] RENDER');
-
-  useEffect(() => {
-    console.log('[App] MOUNT');
-    return () => console.log('[App] UNMOUNT');
-  }, []);
-
   return (
     <LanguageProvider>
       <BrowserRouter>
@@ -175,6 +167,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
             <Route path="/admin/*" element={<Admin />} />
@@ -245,17 +238,8 @@ function App() {
             </Route>
           </Route>
 
-          {/* L'employé possède sa propre session par code. */}
-          <Route
-            path="/employee"
-            element={
-              new URLSearchParams(window.location.search).has('scanner') ? (
-                <LoyaltyScanner />
-              ) : (
-                <Employee />
-              )
-            }
-          />
+          {/* Parcours scanner fidélité conservé ; l'espace employé séparé n'est plus utilisé. */}
+          <Route path="/employee" element={<LoyaltyScanner />} />
 
           <Route path="*" element={<RoleRedirect />} />
           </Routes>

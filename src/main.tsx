@@ -4,38 +4,16 @@ import App from './App.tsx';
 import './index.css';
 
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
-  console.log('[ServiceWorker] PROD bootstrap', {
-    url: window.location.href,
-  });
   window.addEventListener('load', async () => {
     try {
       const registration = await navigator.serviceWorker.register('/sw.js', {
         updateViaCache: 'none',
       });
 
-      console.log('[ServiceWorker] REGISTERED', {
-        scope: registration.scope,
-        active: Boolean(registration.active),
-        waiting: Boolean(registration.waiting),
-        installing: Boolean(registration.installing),
-      });
-
       // Force a check whenever the installed app opens.
-      console.log('[ServiceWorker] UPDATE START');
       await registration.update();
-      console.log('[ServiceWorker] UPDATE COMPLETE', {
-        active: Boolean(registration.active),
-        waiting: Boolean(registration.waiting),
-        installing: Boolean(registration.installing),
-      });
-
       const reloadWhenUpdated = () => {
-        console.log('[ServiceWorker] CHECK WAITING', {
-          waiting: Boolean(registration.waiting),
-        });
-
         if (registration.waiting) {
-          console.log('[ServiceWorker] SKIP_WAITING');
           registration.waiting.postMessage({ type: 'SKIP_WAITING' });
         }
       };
@@ -43,7 +21,6 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
       reloadWhenUpdated();
 
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        console.log('[ServiceWorker] CONTROLLER CHANGE -> RELOAD');
         window.location.reload();
       });
 
@@ -51,8 +28,6 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
       // service-worker version with the version currently controlling the app.
       // This bypasses browser HTTP caches with a cache-busting query string.
       const checkForNewAppVersion = async () => {
-        console.log('[ServiceWorker] VERSION CHECK START');
-
         try {
           const response = await fetch(`/sw.js?tm-version-check=${Date.now()}`, {
             cache: 'no-store',
@@ -78,13 +53,7 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
               })())
             : undefined;
 
-          console.log('[ServiceWorker] VERSION CHECK RESULT', {
-            liveVersion,
-            controllerVersion,
-          });
-
           if (liveVersion && liveVersion !== controllerVersion) {
-            console.log('[ServiceWorker] VERSION MISMATCH -> UPDATE');
             await registration.update();
             reloadWhenUpdated();
           }

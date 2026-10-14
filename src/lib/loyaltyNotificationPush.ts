@@ -7,16 +7,7 @@ export async function sendLoyaltyNotificationPush(campaignId: string) {
 
   if (error) {
     console.error('Failed to send loyalty notification push:', error);
-    return {
-      success: false,
-      sent: 0,
-      failed: 0,
-      skipped: 0,
-      removed: 0,
-      total: 0,
-      push_subscribers: 0,
-      error: error.message,
-    };
+    return { success: false, sent: 0, failed: 0, skipped: 0, removed: 0, total: 0, push_subscribers: 0, error: error.message };
   }
 
   return {
