@@ -119,6 +119,14 @@ Deno.serve(async (request) => {
       return json({ success: false, error: 'L’IA OpenAI doit être activée et configurée dans Admin → Configuration IA.' }, 503);
     }
 
+    const allowedMimeTypes = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp']);
+    const extension = file.name.split('.').pop()?.toLowerCase() ?? '';
+    const inferredMime = extension === 'pdf' ? 'application/pdf' : ['jpg', 'jpeg'].includes(extension) ? 'image/jpeg' : extension === 'png' ? 'image/png' : extension === 'webp' ? 'image/webp' : '';
+    const mimeType = file.type || inferredMime;
+    if (!allowedMimeTypes.has(mimeType)) {
+      return json({ success: false, error: 'Format non pris en charge. Utilise un PDF, JPG, PNG ou WebP.' }, 415);
+    }
+
     const uploadForm = new FormData();
     uploadForm.append('purpose', 'user_data');
     uploadForm.append('file', file, file.name);
@@ -176,7 +184,9 @@ Deno.serve(async (request) => {
               role: 'user',
               content: [
                 { type: 'input_text', text: `Établissement : ${accessible.name}. Analyse ce menu et prépare un brouillon structuré.` },
-                { type: 'input_file', file_id: fileId },
+                mimeType === 'application/pdf'
+                  ? { type: 'input_file', file_id: fileId }
+                  : { type: 'input_image', file_id: fileId, detail: 'high' },
               ],
             },
           ],
