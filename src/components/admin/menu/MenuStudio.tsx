@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Eye, Palette, Wrench } from 'lucide-react';
+import { ArrowLeft, Check, Eye, Palette, Wrench } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useMenuManager } from '@/hooks/useMenuManager';
 import CategorySidebar from '@/components/admin/menu/CategorySidebar';
 import ItemEditor from '@/components/admin/menu/ItemEditor';
 import MenuPreview from '@/components/admin/menu/MenuPreview';
+import MenuImportAssistant from '@/components/admin/menu/MenuImportAssistant';
+import { MENU_TEMPLATES } from '@/components/admin/menu/menuTemplates';
 import MenuConfigurator, {
   type MenuDesignDraft,
   type MenuNavigationMode,
@@ -17,25 +19,13 @@ type MenuStudioProps = {
 
 type RawDesign = Record<string, unknown>;
 
-const TEMPLATE_VALUES: MenuTemplate[] = ['editorial', 'luxury', 'cards', 'dark', 'onyx', 'royal-gold', 'deep-ocean', 'pearl'];
+const TEMPLATE_VALUES: MenuTemplate[] = MENU_TEMPLATES.map(template => template.id);
 const NAVIGATION_VALUES: MenuNavigationMode[] = ['scroll', 'book', 'app'];
 
 const normalizeObject = (value: unknown): RawDesign =>
   value && typeof value === 'object' && !Array.isArray(value) ? (value as RawDesign) : {};
 
 const stable = (value: unknown) => JSON.stringify(value ?? null);
-
-const mapAiStyleToTemplate = (style: unknown): MenuTemplate | null => {
-  if (style === 'editorial') return 'editorial';
-  if (style === 'luxury') return 'luxury';
-  if (style === 'immersive') return 'dark';
-  if (style === 'minimal') return 'cards';
-  if (style === 'onyx') return 'onyx';
-  if (style === 'gold' || style === 'royal-gold') return 'royal-gold';
-  if (style === 'ocean' || style === 'deep-ocean') return 'deep-ocean';
-  if (style === 'pearl') return 'pearl';
-  return null;
-};
 
 const extractAiDesign = (value: unknown): Record<string, unknown> | null => {
   const raw = normalizeObject(value);
@@ -49,28 +39,28 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
   const [activeTab, setActiveTab] = useState<StudioTab>('structure');
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [establishmentName, setEstablishmentName] = useState('');
+  const [establishmentLogoUrl, setEstablishmentLogoUrl] = useState<string | null>(null);
   const [loadingDesign, setLoadingDesign] = useState(true);
   const [publishing, setPublishing] = useState(false);
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiPhotoMode, setAiPhotoMode] = useState<'with_photos' | 'without_photos'>('without_photos');
-  const [aiCandidates, setAiCandidates] = useState<Array<{ id: string; design: Record<string, unknown>; template: MenuTemplate; photoMode: 'with_photos' | 'without_photos' }>>([]);
   const [designError, setDesignError] = useState<string | null>(null);
   const [publishedSnapshot, setPublishedSnapshot] = useState<{
     template: MenuTemplate;
     navigation: MenuNavigationMode;
     wallpaperUrl: string | null;
     overlayOpacity: number;
+    themeColors: MenuDesignDraft['themeColors'];
     aiDesign: Record<string, unknown> | null;
   } | null>(null);
 
   const [draft, setDraft] = useState<MenuDesignDraft>({
-    template: 'editorial',
+    template: '01_cafe_classic',
     navigation: 'scroll',
     wallpaperUrl: null,
     wallpaperFile: null,
     wallpaperObjectUrl: null,
     wallpaperRemoved: false,
     overlayOpacity: 0.35,
+    themeColors: { background: '#F5F1E8', surface: '#FFFDFA', text: '#24211C', accent: '#D4AF37' },
     aiDesign: null,
   });
 
@@ -80,7 +70,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
 
     const { data, error } = await supabase
       .from('establishments')
-      .select('name, menu_template_id, menu_ai_design')
+      .select('name, logo_url, menu_template_id, menu_ai_design')
       .eq('id', establishmentId)
       .maybeSingle();
 
@@ -94,7 +84,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
     const rawTemplate = data?.menu_template_id;
     const template: MenuTemplate = TEMPLATE_VALUES.includes(rawTemplate as MenuTemplate)
       ? (rawTemplate as MenuTemplate)
-      : 'editorial';
+      : '01_cafe_classic';
     const rawNavigation = raw.navigation_mode;
     const navigation: MenuNavigationMode = NAVIGATION_VALUES.includes(rawNavigation as MenuNavigationMode)
       ? (rawNavigation as MenuNavigationMode)
@@ -105,8 +95,17 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
         ? Math.min(0.7, Math.max(0, raw.overlay_opacity))
         : 0.35;
     const aiDesign = extractAiDesign(raw.ai_design);
+    const rawColors = normalizeObject(raw.theme_colors);
+    const validHex = (value: unknown, fallback: string) => typeof value === 'string' && /^#[0-9a-fA-F]{6}$/.test(value) ? value : fallback;
+    const themeColors = {
+      background: validHex(rawColors.background, '#F5F1E8'),
+      surface: validHex(rawColors.surface, '#FFFDFA'),
+      text: validHex(rawColors.text, '#24211C'),
+      accent: validHex(rawColors.accent, '#D4AF37'),
+    };
 
     setEstablishmentName(data?.name ?? '');
+    setEstablishmentLogoUrl(typeof data?.logo_url === 'string' && data.logo_url.trim() ? data.logo_url : null);
     setDraft({
       template,
       navigation,
@@ -115,9 +114,10 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
       wallpaperObjectUrl: null,
       wallpaperRemoved: false,
       overlayOpacity,
+      themeColors,
       aiDesign,
     });
-    setPublishedSnapshot({ template, navigation, wallpaperUrl, overlayOpacity, aiDesign });
+    setPublishedSnapshot({ template, navigation, wallpaperUrl, overlayOpacity, themeColors, aiDesign });
     setLoadingDesign(false);
   }, [establishmentId]);
 
@@ -160,93 +160,13 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
       draft.navigation !== publishedSnapshot.navigation ||
       draft.wallpaperUrl !== publishedSnapshot.wallpaperUrl ||
       draft.overlayOpacity !== publishedSnapshot.overlayOpacity ||
+      stable(draft.themeColors) !== stable(publishedSnapshot.themeColors) ||
       stable(draft.aiDesign) !== stable(publishedSnapshot.aiDesign)
     );
   }, [draft, publishedSnapshot]);
 
   const changeDraft = (patch: Partial<MenuDesignDraft>) => {
     setDraft(current => ({ ...current, ...patch }));
-  };
-
-  const buildMenuForAi = () => ({
-    categories: menu.categories
-      .filter(category => category.active)
-      .map(category => ({
-        id: category.id,
-        name: category.name,
-        description: category.description,
-        items: (menu.itemsByCategory[category.id] ?? [])
-          .filter(item => item.active)
-          .map(item => ({
-            id: item.id,
-            name: item.name,
-            description: item.description,
-            price: item.price,
-            image_url: item.image_url,
-          })),
-      })),
-  });
-
-  const generateAiDesign = async () => {
-    if (!establishmentId || aiLoading) return;
-
-    setAiLoading(true);
-    setDesignError(null);
-    setAiCandidates([]);
-
-    try {
-      const variants = [
-        { id: 'variant-1', label: 'Éditorial' },
-        { id: 'variant-2', label: 'Premium' },
-        { id: 'variant-3', label: 'Créatif' },
-      ];
-
-      const results = await Promise.all(
-        variants.map(async variant => {
-          const { data, error } = await supabase.functions.invoke('design-menu', {
-            body: {
-              establishment_id: establishmentId,
-              menu: buildMenuForAi(),
-              variant: variant.label,
-              photo_mode: aiPhotoMode,
-            },
-          });
-
-          if (error) throw error;
-
-          const ai = extractAiDesign(data?.design);
-          if (!ai) throw new Error('Une variante IA est vide ou inexploitable.');
-
-          const mappedTemplate = mapAiStyleToTemplate(ai.style) ?? 'editorial';
-
-          return {
-            id: variant.id,
-            design: { ...ai, photo_mode: aiPhotoMode },
-            template: mappedTemplate,
-            photoMode: aiPhotoMode,
-          };
-        }),
-      );
-
-      setAiCandidates(results);
-    } catch (cause) {
-      setDesignError(
-        cause instanceof Error
-          ? cause.message
-          : 'Impossible de générer les variantes IA.',
-      );
-    } finally {
-      setAiLoading(false);
-    }
-  };
-
-  const applyAiCandidate = (candidate: { design: Record<string, unknown>; template: MenuTemplate; photoMode: 'with_photos' | 'without_photos' }) => {
-    setDraft(current => ({
-      ...current,
-      aiDesign: { ...candidate.design, photo_mode: candidate.photoMode },
-      template: candidate.template,
-    }));
-    setAiCandidates([]);
   };
 
   const publish = async () => {
@@ -297,6 +217,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
         ...currentDesign,
         ...(draft.aiDesign ? { ai_design: draft.aiDesign } : {}),
         overlay_opacity: draft.overlayOpacity,
+        theme_colors: draft.themeColors,
         navigation_mode: draft.navigation,
         background_image_url: draft.wallpaperRemoved ? null : wallpaperUrl,
       };
@@ -321,6 +242,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
         navigation: draft.navigation,
         wallpaperUrl: publishedWallpaper,
         overlayOpacity: draft.overlayOpacity,
+        themeColors: draft.themeColors,
         aiDesign: draft.aiDesign,
       };
 
@@ -357,7 +279,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
         </div>
 
         <div className="inline-flex items-center gap-2 self-start rounded-full border border-white/10 bg-white/[.04] px-3 py-2 text-[10px] font-semibold text-white/70 shadow-soft md:self-auto">
-          <span className={menu.loading || loadingDesign ? 'h-2 w-2 animate-pulse rounded-full bg-amber-400' : 'h-2 w-2 rounded-full bg-green-500'} />
+          <span className={menu.loading || loadingDesign ? 'h-2 w-2 animate-pulse rounded-full bg-amber-400' : 'h-2 w-2 rounded-full bg-[#D4AF37]'} />
           {menu.loading || loadingDesign ? 'Synchronisation…' : hasChanges ? 'Modifications locales' : 'Design publié'}
         </div>
       </div>
@@ -397,7 +319,15 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
         <div className="min-w-0">
           {activeTab === 'structure' ? (
-            <div className="grid gap-4 xl:grid-cols-[220px_minmax(0,1fr)] xl:items-start">
+            <div className="space-y-4">
+              <MenuImportAssistant
+                establishmentId={establishmentId}
+                categories={menu.categories}
+                items={menu.items}
+                onAddCategory={menu.addCategory}
+                onAddItem={menu.addItem}
+              />
+              <div className="grid gap-4 xl:grid-cols-[220px_minmax(0,1fr)] xl:items-start">
               <CategorySidebar
                 categories={menu.categories}
                 selectedCategoryId={selectedCategoryId}
@@ -419,6 +349,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
                 onToggleActive={menu.toggleItemActive}
                 onDelete={menu.deleteItem}
               />
+              </div>
             </div>
           ) : activeTab === 'design' ? (
             <div className="min-h-[620px] rounded-[28px] border border-white/[.08] bg-[#111111] p-2 shadow-soft sm:p-4">
@@ -426,26 +357,57 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
                 draft={draft}
                 hasChanges={hasChanges}
                 publishing={publishing}
-                aiLoading={aiLoading}
-                aiPhotoMode={aiPhotoMode}
-                onAiPhotoModeChange={setAiPhotoMode}
                 onChange={changeDraft}
                 onPublish={() => void publish()}
-                onGenerateAi={() => void generateAiDesign()}
-                aiCandidates={aiCandidates}
                 categories={menu.categories}
                 itemsByCategory={menu.itemsByCategory}
                 establishmentName={establishmentName}
-                onApplyAiCandidate={applyAiCandidate}
+                establishmentId={establishmentId}
+                logoUrl={establishmentLogoUrl}
               />
             </div>
           ) : null}
         </div>
 
         {activeTab === 'preview' ? (
-          <div className="xl:col-span-2">
+          <div className="xl:col-span-2 space-y-4">
+            <section className="flex flex-col gap-4 rounded-3xl border border-gold/20 bg-[#111111] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Vérification avant publication</p>
+                <h3 className="mt-1 text-lg font-semibold text-white">Voici le menu tel que tes clients le verront</h3>
+                <p className="mt-1 text-xs leading-5 text-white/45">
+                  Vérifie les catégories, les prix, les photos et le rendu sur mobile avant de publier le design.
+                </p>
+                <p className="mt-2 text-[10px] font-medium text-white/60">
+                  {hasChanges ? 'Des modifications de design sont encore en attente.' : 'Le design affiché correspond à la dernière version publiée.'}
+                </p>
+              </div>
+              <div className="flex shrink-0 flex-col gap-2 sm:min-w-[190px]">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('design')}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 px-4 py-3 text-xs font-semibold text-white transition hover:bg-white/[.06]"
+                >
+                  <ArrowLeft size={14} /> Retour au design
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void publish()}
+                  disabled={!hasChanges || publishing || loadingDesign}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gold-gradient px-4 py-3 text-xs font-bold text-[#090909] shadow-gold transition disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  {publishing ? (
+                    <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-black/25 border-t-black" />
+                  ) : (
+                    <Check size={14} />
+                  )}
+                  {publishing ? 'Publication…' : hasChanges ? 'Valider et publier' : 'Design déjà publié'}
+                </button>
+              </div>
+            </section>
             <MenuPreview
               establishmentName={establishmentName}
+              logoUrl={establishmentLogoUrl}
               categories={menu.categories}
               itemsByCategory={menu.itemsByCategory}
               draft={draft}
@@ -455,6 +417,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
         ) : (
           <MenuPreview
             establishmentName={establishmentName}
+            logoUrl={establishmentLogoUrl}
             categories={menu.categories}
             itemsByCategory={menu.itemsByCategory}
             draft={draft}
