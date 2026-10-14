@@ -180,7 +180,7 @@ export default function MenuImportAssistant({ establishmentId, categories, items
       </div>
 
       {error && <div className="mt-3 flex gap-2 rounded-xl border border-red-400/20 bg-red-500/10 p-3 text-xs text-red-200"><AlertCircle size={15} className="shrink-0" />{error}</div>}
-      {notice && <div className="mt-3 flex gap-2 rounded-xl border border-emerald-400/20 bg-emerald-500/10 p-3 text-xs text-emerald-200"><CheckCircle2 size={15} className="shrink-0" />{notice}</div>}
+      {notice && <div className="mt-3 flex gap-2 rounded-xl border border-gold/20 bg-gold/10 p-3 text-xs text-gold"><CheckCircle2 size={15} className="shrink-0" />{notice}</div>}
 
       {draft && (
         <div className="mt-5 space-y-4">
