@@ -4,6 +4,7 @@ import {
   Copy,
   Eye,
   LayoutTemplate,
+  ImagePlus,
   Menu,
   Pencil,
   Plus,
