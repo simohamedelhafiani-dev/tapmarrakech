@@ -132,22 +132,22 @@ export default function Analytics() {
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">
           Comprendre votre audience
         </p>
-        <h1 className="mt-2 font-display text-4xl text-forest">Analytics</h1>
-        <p className="mt-2 text-sm text-ink/50">
+        <h1 className="mt-2 font-display text-4xl text-[#D4AF37]">Analytics</h1>
+        <p className="mt-2 text-sm text-white/55">
           Les signaux clés de l’expérience client.
         </p>
       </div>
 
       {establishments.length > 1 && (
-        <div className="mb-6 rounded-2xl border border-ink/5 bg-white p-5 shadow-soft">
-          <label className="text-xs font-medium text-ink/50">
+        <div className="mb-6 rounded-2xl border border-white/10 bg-[#111111] p-5 shadow-soft">
+          <label className="text-xs font-medium text-white/55">
             Établissement
           </label>
 
           <select
             value={establishmentId}
             onChange={e => setEstablishmentId(e.target.value)}
-            className="mt-2 w-full max-w-md rounded-xl border border-ink/10 bg-[#fafaf7] px-4 py-3 text-sm text-ink outline-none"
+            className="mt-2 w-full max-w-md rounded-xl border border-white/10 bg-[#171717] px-4 py-3 text-sm text-[#F5F5DC] outline-none"
           >
             {establishments.map(establishment => (
               <option key={establishment.id} value={establishment.id}>
@@ -192,9 +192,9 @@ export default function Analytics() {
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-        <section className="rounded-2xl border border-ink/5 bg-white p-6 shadow-soft">
-          <h2 className="font-display text-xl text-forest">Volume d’avis</h2>
-          <p className="mt-1 text-xs text-ink/45">
+        <section className="rounded-2xl border border-white/10 bg-[#111111] p-6 shadow-soft">
+          <h2 className="font-display text-xl text-[#D4AF37]">Volume d’avis</h2>
+          <p className="mt-1 text-xs text-white/45">
             Évolution sur les 8 dernières semaines
           </p>
 
@@ -203,24 +203,24 @@ export default function Analytics() {
               <BarChart data={weekly}>
                 <CartesianGrid
                   vertical={false}
-                  stroke="#edf0eb"
+                  stroke="rgba(255,255,255,0.08)"
                 />
                 <XAxis
                   dataKey="name"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: '#9ca89f', fontSize: 11 }}
+                  tick={{ fill: '#9CA3AF', fontSize: 11 }}
                 />
                 <YAxis
                   allowDecimals={false}
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: '#9ca89f', fontSize: 11 }}
+                  tick={{ fill: '#9CA3AF', fontSize: 11 }}
                 />
                 <Tooltip
                   contentStyle={{
                     borderRadius: 12,
-                    border: '1px solid #edf0eb',
+                    border: '1px solid #333333', background: '#111111', color: '#F5F5DC',
                     fontSize: 12,
                   }}
                 />
@@ -235,11 +235,11 @@ export default function Analytics() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-ink/5 bg-white p-6 shadow-soft">
-          <h2 className="font-display text-xl text-forest">
+        <section className="rounded-2xl border border-white/10 bg-[#111111] p-6 shadow-soft">
+          <h2 className="font-display text-xl text-[#D4AF37]">
             Répartition des notes
           </h2>
-          <p className="mt-1 text-xs text-ink/45">
+          <p className="mt-1 text-xs text-white/45">
             Toutes les évaluations reçues
           </p>
 
@@ -258,7 +258,7 @@ export default function Analytics() {
                     <Cell
                       key={i}
                       fill={
-                        ['#c8a96b', '#a9b987', '#6f9581', '#4d7865', '#17352a'][i]
+                        ['#D4AF37', '#E1C27A', '#B8952E', '#8C742A', '#5A4A1A'][i]
                       }
                     />
                   ))}
@@ -274,17 +274,17 @@ export default function Analytics() {
                 key={item.name}
                 className="flex items-center justify-between text-xs"
               >
-                <span className="flex items-center gap-2 text-ink/60">
+                <span className="flex items-center gap-2 text-white/65">
                   <i
                     className="h-2 w-2 rounded-full"
                     style={{
                       background:
-                        ['#c8a96b', '#a9b987', '#6f9581', '#4d7865', '#17352a'][i],
+                        ['#D4AF37', '#E1C27A', '#B8952E', '#8C742A', '#5A4A1A'][i],
                     }}
                   />
                   {item.name}
                 </span>
-                <span className="font-semibold text-forest">
+                <span className="font-semibold text-[#D4AF37]">
                   {item.value}
                 </span>
               </div>
@@ -333,11 +333,11 @@ function Metric({
   detail: string;
 }) {
   return (
-    <div className="rounded-2xl border border-ink/5 bg-white p-5 shadow-soft">
+    <div className="rounded-2xl border border-white/10 bg-[#111111] p-5 shadow-soft">
       <Icon size={18} className="text-gold" />
-      <p className="mt-5 text-xs text-ink/45">{label}</p>
-      <p className="mt-1 font-display text-3xl text-forest">{value}</p>
-      <p className="mt-1 text-[11px] text-ink/40">{detail}</p>
+      <p className="mt-5 text-xs text-white/45">{label}</p>
+      <p className="mt-1 font-display text-3xl text-[#D4AF37]">{value}</p>
+      <p className="mt-1 text-[11px] text-white/40">{detail}</p>
     </div>
   );
 }
@@ -354,14 +354,14 @@ function InfoCard({
   detail: string;
 }) {
   return (
-    <div className="flex items-center gap-4 rounded-2xl border border-ink/5 bg-white p-5 shadow-soft">
-      <div className="grid h-11 w-11 place-items-center rounded-xl bg-[#e5eee9] text-forest">
+    <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-[#111111] p-5 shadow-soft">
+      <div className="grid h-11 w-11 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]">
         <Icon size={19} />
       </div>
       <div>
-        <p className="text-xs text-ink/45">{title}</p>
-        <p className="mt-1 font-display text-2xl text-forest">{value}</p>
-        <p className="text-[11px] text-ink/40">{detail}</p>
+        <p className="text-xs text-white/45">{title}</p>
+        <p className="mt-1 font-display text-2xl text-[#D4AF37]">{value}</p>
+        <p className="text-[11px] text-white/40">{detail}</p>
       </div>
     </div>
   );
