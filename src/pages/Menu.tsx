@@ -518,7 +518,7 @@ export default function Menu() {
     return (
       <div className="rounded-3xl border border-[#242424]/10 bg-[#111111] p-10 text-center">
         <UtensilsCrossed className="mx-auto mb-4 text-gold" size={34} />
-        <h1 className="text-2xl font-semibold text-forest">
+        <h1 className="text-2xl font-semibold text-[#D4AF37]">
           Aucun établissement
         </h1>
         <p className="mt-2 text-sm text-[#F5F5DC]/50">
@@ -535,10 +535,10 @@ export default function Menu() {
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">Design du menu</p>
-              <h2 className="mt-1 text-lg font-semibold text-forest">Choisir un modèle</h2>
+              <h2 className="mt-1 text-lg font-semibold text-[#D4AF37]">Choisir un modèle</h2>
               <p className="mt-1 text-xs text-[#F5F5DC]/45">40 modèles adaptés au téléphone, selon le secteur de ton commerce.</p>
             </div>
-            <span className="rounded-full bg-forest/5 px-3 py-1.5 text-[10px] font-semibold text-forest">{selectedTemplate?.name ?? 'Automatique'}</span>
+            <span className="rounded-full bg-forest/5 px-3 py-1.5 text-[10px] font-semibold text-[#D4AF37]">{selectedTemplate?.name ?? 'Automatique'}</span>
           </div>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {menuTemplates.map((template) => (
@@ -548,7 +548,7 @@ export default function Menu() {
                   <div className={`mt-3 h-2 w-3/4 rounded-full ${template.key === 'dark' ? 'bg-[#111111]/20' : 'bg-ink/10'}`} />
                   <div className={`mt-2 h-2 w-1/2 rounded-full ${template.key === 'dark' ? 'bg-[#111111]/10' : 'bg-ink/5'}`} />
                 </div>
-                <p className="mt-3 text-xs font-semibold text-forest">{template.name}</p>
+                <p className="mt-3 text-xs font-semibold text-[#D4AF37]">{template.name}</p>
                 <p className="mt-1 text-[10px] leading-4 text-[#F5F5DC]/40">{template.description}</p>
               </button>
             ))}
@@ -602,7 +602,7 @@ export default function Menu() {
             <button
               type="button"
               onClick={openNewCategory}
-              className="flex items-center justify-center gap-2 rounded-xl bg-gold px-4 py-3 text-sm font-semibold text-forest transition hover:brightness-105"
+              className="flex items-center justify-center gap-2 rounded-xl bg-gold px-4 py-3 text-sm font-semibold text-[#D4AF37] transition hover:brightness-105"
             >
               <Plus size={17} />
               Nouvelle catégorie
@@ -621,7 +621,7 @@ export default function Menu() {
         {categories.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-[#242424]/15 bg-[#111111] p-12 text-center">
             <UtensilsCrossed className="mx-auto mb-4 text-gold" size={36} />
-            <h2 className="text-xl font-semibold text-forest">
+            <h2 className="text-xl font-semibold text-[#D4AF37]">
               Ton menu est vide
             </h2>
             <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#F5F5DC]/50">
@@ -657,13 +657,13 @@ export default function Menu() {
                     onClick={() => toggleCategory(category.id)}
                     className="flex min-w-0 items-center gap-4 text-left"
                   >
-                    <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#1A1A1A] text-forest">
+                    <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#1A1A1A] text-[#D4AF37]">
                       <UtensilsCrossed size={19} />
                     </div>
 
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <h2 className="truncate text-lg font-semibold text-forest">
+                        <h2 className="truncate text-lg font-semibold text-[#D4AF37]">
                           {category.name}
                         </h2>
                         {!category.active && (
@@ -753,7 +753,7 @@ export default function Menu() {
                 </div>
 
                 {expanded && (
-                  <div className="border-t border-[#242424]/5 bg-[#fbfbf8] p-4 md:p-6">
+                  <div className="border-t border-[#242424] bg-[#111111] p-4 md:p-6">
                     {categoryItems.length === 0 ? (
                       <div className="rounded-2xl border border-dashed border-[#242424]/10 bg-[#111111] p-8 text-center">
                         <p className="text-sm text-[#F5F5DC]/45">
@@ -796,7 +796,7 @@ export default function Menu() {
 
                               <div className="min-w-0">
                                 <div className="flex items-center gap-2">
-                                  <h3 className="truncate font-semibold text-forest">
+                                  <h3 className="truncate font-semibold text-[#D4AF37]">
                                     {item.name}
                                   </h3>
                                   {!item.active && (
@@ -872,7 +872,7 @@ export default function Menu() {
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">
                   Menu
                 </p>
-                <h2 className="mt-1 text-xl font-semibold text-forest">
+                <h2 className="mt-1 text-xl font-semibold text-[#D4AF37]">
                   {editingCategoryId
                     ? 'Modifier la catégorie'
                     : 'Nouvelle catégorie'}
@@ -946,7 +946,7 @@ export default function Menu() {
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">
                   Menu
                 </p>
-                <h2 className="mt-1 text-xl font-semibold text-forest">
+                <h2 className="mt-1 text-xl font-semibold text-[#D4AF37]">
                   {editingItemId ? 'Modifier le produit' : 'Nouveau produit'}
                 </h2>
               </div>
