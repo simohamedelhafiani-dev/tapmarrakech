@@ -671,7 +671,7 @@ export default function Establishments() {
               ].map(([key, label, placeholder]) => (
                 <label
                   key={key}
-                  className="block text-xs font-semibold text-ink/65"
+                  className="block text-xs font-semibold text-white/65"
                 >
                   {label}
 
@@ -691,7 +691,7 @@ export default function Establishments() {
                       })
                     }
                     placeholder={placeholder}
-                    className="mt-2 w-full rounded-xl border border-ink/10 bg-[#fbfaf7] p-3 text-sm font-normal outline-none focus:ring-2 focus:ring-gold"
+                    className="mt-2 w-full rounded-xl border border-white/10 bg-[#171717] p-3 text-sm font-normal outline-none focus:ring-2 focus:ring-gold"
                   />
                 </label>
               ))}
@@ -741,25 +741,25 @@ export default function Establishments() {
                     </div>
                     {googleAutoReply && (
                       <div className="mt-4 space-y-3">
-                        <label className="block text-[11px] font-semibold text-ink/65">
+                        <label className="block text-[11px] font-semibold text-white/65">
                           Langue
-                          <select value={googleReplyLanguage} onChange={(e) => setGoogleReplyLanguage(e.target.value)} className="mt-1.5 w-full rounded-xl border border-ink/10 bg-[#111111] p-2.5 text-xs outline-none focus:ring-2 focus:ring-gold">
+                          <select value={googleReplyLanguage} onChange={(e) => setGoogleReplyLanguage(e.target.value)} className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#111111] p-2.5 text-xs outline-none focus:ring-2 focus:ring-gold">
                             <option>français</option>
                             <option>anglais</option>
                             <option>arabe</option>
                             <option>espagnol</option>
                           </select>
                         </label>
-                        <label className="block text-[11px] font-semibold text-ink/65">
+                        <label className="block text-[11px] font-semibold text-white/65">
                           Ton
-                          <select value={googleReplyTone} onChange={(e) => setGoogleReplyTone(e.target.value)} className="mt-1.5 w-full rounded-xl border border-ink/10 bg-[#111111] p-2.5 text-xs outline-none focus:ring-2 focus:ring-gold">
+                          <select value={googleReplyTone} onChange={(e) => setGoogleReplyTone(e.target.value)} className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#111111] p-2.5 text-xs outline-none focus:ring-2 focus:ring-gold">
                             <option>professionnel et chaleureux</option>
                             <option>premium et élégant</option>
                             <option>amical et naturel</option>
                             <option>sobre et professionnel</option>
                           </select>
                         </label>
-                        <label className="flex items-center gap-2 text-[11px] font-semibold text-ink/65">
+                        <label className="flex items-center gap-2 text-[11px] font-semibold text-white/65">
                           <input type="checkbox" checked={googleReplyApproval} onChange={(e) => setGoogleReplyApproval(e.target.checked)} />
                           Valider chaque réponse avant publication
                         </label>
@@ -769,7 +769,7 @@ export default function Establishments() {
                 </div>
               </div>
 
-              <label className="block text-xs font-semibold text-ink/65">
+              <label className="block text-xs font-semibold text-white/65">
                 Seuil de redirection vers Google
 
                 <select
@@ -782,7 +782,7 @@ export default function Establishments() {
                       ),
                     })
                   }
-                  className="mt-2 w-full rounded-xl border border-ink/10 bg-[#fbfaf7] p-3 text-sm font-normal outline-none focus:ring-2 focus:ring-gold"
+                  className="mt-2 w-full rounded-xl border border-white/10 bg-[#171717] p-3 text-sm font-normal outline-none focus:ring-2 focus:ring-gold"
                 >
                   {[1, 2, 3, 4, 5].map((n) => (
                     <option key={n} value={n}>
