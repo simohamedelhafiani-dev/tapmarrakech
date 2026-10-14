@@ -784,13 +784,14 @@ export default function PublicReview() {
                     : undefined,
               backgroundSize: 'cover',
               backgroundPosition: 'center top',
+              backgroundColor: typeof (menuAiDesign as any)?.theme_colors?.background === 'string' && /^#[0-9a-fA-F]{6}$/.test((menuAiDesign as any).theme_colors.background) ? (menuAiDesign as any).theme_colors.background : '#0D0D0D',
               backgroundRepeat: 'no-repeat',
               backgroundAttachment: 'scroll',
             }}
           >
             <div
               className="pointer-events-none absolute inset-0 bg-black"
-              style={{ opacity: menuOverlayOpacity }}
+              style={{ opacity: menuAiDesign?.background_image_url || (Array.isArray(menuAiDesign?.wallpaper_library) && menuAiDesign.wallpaper_library[0]) ? menuOverlayOpacity : 0 }}
             />
 
             <div className="relative z-10">
@@ -1850,7 +1851,7 @@ function MenuTemplate({
   const themeColors = {
     background: typeof storedColors.background === 'string' && /^#[0-9a-fA-F]{6}$/.test(storedColors.background) ? storedColors.background : '#F5F1E8',
     surface: typeof storedColors.surface === 'string' && /^#[0-9a-fA-F]{6}$/.test(storedColors.surface) ? storedColors.surface : '#FFFDFA',
-    text: typeof storedColors.text === 'string' && /^#[0-9a-fA-F]{6}$/.test(storedColors.text) ? storedColors.text : '#26362B',
+    text: typeof storedColors.text === 'string' && /^#[0-9a-fA-F]{6}$/.test(storedColors.text) ? storedColors.text : '#24211C',
     accent: typeof storedColors.accent === 'string' && /^#[0-9a-fA-F]{6}$/.test(storedColors.accent) ? storedColors.accent : '#D4AF37',
   };
   const wallpaperUrl = typeof storedMenuDesign.background_image_url === 'string' ? storedMenuDesign.background_image_url : null;
@@ -1890,14 +1891,6 @@ function MenuTemplate({
     );
   }
 
-  const allMobileItems = visible.flatMap(category =>
-    (itemsByCategory[category.id] ?? []).map(item => ({ ...item, categoryName: category.name, categoryId: category.id }))
-  );
-  const filteredMobileItems = allMobileItems.filter(item =>
-    (mobileCategoryId === 'all' || item.categoryId === mobileCategoryId) &&
-    (item.name + ' ' + (item.description || '') + ' ' + item.categoryName).toLowerCase().includes(menuSearch.toLowerCase())
-  );
-  const heroPhoto = allMobileItems.find(item => item.image_url)?.image_url;
   const mobileDark = ['dark', 'onyx', 'royal-gold', 'deep-ocean'].includes(templateFamily);
 
   const navigationControls = navigation !== 'scroll' ? (
@@ -2052,7 +2045,7 @@ function MenuTemplate({
 
   if (['dark', 'onyx', 'royal-gold', 'deep-ocean'].includes(templateFamily)) {
     return (
-      <div className={`mt-6 -mx-5 overflow-hidden ${templateFamily === 'deep-ocean' ? 'bg-[#06151B]' : 'bg-[#102b24]'} px-5 pb-10 pt-7 text-white`}>
+      <div className={`mt-6 -mx-5 overflow-hidden ${templateFamily === 'deep-ocean' ? 'bg-[#06151B]' : 'bg-[#0D0D0D]'} px-5 pb-10 pt-7 text-white`}>
         <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold">Menu</p>
         <h1 className="mt-2 font-display text-5xl leading-none">{place.name || 'Notre carte'}</h1>
         <p className="mt-3 text-sm text-white/45">Une carte pensée pour être consultée simplement.</p>
