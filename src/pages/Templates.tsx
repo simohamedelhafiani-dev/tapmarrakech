@@ -847,20 +847,20 @@ export default function Templates() {
                   </div>
                 </div>
 
-                <div className="border-t border-ink/10 p-5">
-                  <div className="mb-4 flex rounded-xl bg-[#f7f7f3] p-1">
-                    <button onClick={() => setEditorTab('preview')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab === 'preview' ? 'bg-white text-forest shadow-sm' : 'text-ink/45'}`}>Aperçu</button>
-                    <button onClick={() => setEditorTab('design')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab === 'design' ? 'bg-white text-forest shadow-sm' : 'text-ink/45'}`}>Modifier</button>
+                <div className="border-t border-white/10 p-5">
+                  <div className="mb-4 flex rounded-xl bg-[#171717] p-1">
+                    <button onClick={() => setEditorTab('preview')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab === 'preview' ? 'bg-[#111111] text-[#D4AF37] shadow-sm' : 'text-white/45'}`}>Aperçu</button>
+                    <button onClick={() => setEditorTab('design')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab === 'design' ? 'bg-[#111111] text-[#D4AF37] shadow-sm' : 'text-white/45'}`}>Modifier</button>
                   </div>
 
                   {editorTab === 'design' ? (
                     <div className="space-y-4">
                       <div className="grid gap-3 sm:grid-cols-2">
-                        <label className="text-xs font-semibold text-ink/55">Nom
-                          <input value={selectedTemplate.name} onChange={e => { const next={...selectedTemplate,name:e.target.value}; setSelectedTemplate(next); setName(e.target.value); }} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm"/>
+                        <label className="text-xs font-semibold text-white/55">Nom
+                          <input value={selectedTemplate.name} onChange={e => { const next={...selectedTemplate,name:e.target.value}; setSelectedTemplate(next); setName(e.target.value); }} className="mt-1 w-full rounded-xl border border-white/10 bg-[#111111] px-3 py-2.5 text-sm"/>
                         </label>
-                        <label className="text-xs font-semibold text-ink/55">Rayon
-                          <input type="number" min="0" max="40" value={Number(selectedTemplate.config?.radius || 24)} onChange={e => { const config={...selectedTemplate.config,radius:Number(e.target.value)}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm"/>
+                        <label className="text-xs font-semibold text-white/55">Rayon
+                          <input type="number" min="0" max="40" value={Number(selectedTemplate.config?.radius || 24)} onChange={e => { const config={...selectedTemplate.config,radius:Number(e.target.value)}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 w-full rounded-xl border border-white/10 bg-[#111111] px-3 py-2.5 text-sm"/>
                         </label>
                       </div>
 
@@ -868,16 +868,16 @@ export default function Templates() {
                         <>
                           <div className="grid grid-cols-2 gap-3">
                             {['primary','secondary','background','text'].map(key => (
-                              <label key={key} className="text-xs font-semibold text-ink/55">{key}
-                                <input type="color" value={String(selectedTemplate.config?.[key] || '#173D32')} onChange={e => { const config={...selectedTemplate.config,[key]:e.target.value}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 h-10 w-full cursor-pointer rounded-lg border border-ink/10"/>
+                              <label key={key} className="text-xs font-semibold text-white/55">{key}
+                                <input type="color" value={String(selectedTemplate.config?.[key] || '#173D32')} onChange={e => { const config={...selectedTemplate.config,[key]:e.target.value}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 h-10 w-full cursor-pointer rounded-lg border border-white/10"/>
                               </label>
                             ))}
                           </div>
-                          <label className="text-xs font-semibold text-ink/55">Titre
-                            <input value={String(selectedTemplate.config?.title || '')} onChange={e => { const config={...selectedTemplate.config,title:e.target.value}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"/>
+                          <label className="text-xs font-semibold text-white/55">Titre
+                            <input value={String(selectedTemplate.config?.title || '')} onChange={e => { const config={...selectedTemplate.config,title:e.target.value}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 w-full rounded-xl border border-white/10 px-3 py-2.5 text-sm"/>
                           </label>
-                          <label className="text-xs font-semibold text-ink/55">Sous-titre
-                            <textarea rows={2} value={String(selectedTemplate.config?.subtitle || '')} onChange={e => { const config={...selectedTemplate.config,subtitle:e.target.value}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"/>
+                          <label className="text-xs font-semibold text-white/55">Sous-titre
+                            <textarea rows={2} value={String(selectedTemplate.config?.subtitle || '')} onChange={e => { const config={...selectedTemplate.config,subtitle:e.target.value}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 w-full rounded-xl border border-white/10 px-3 py-2.5 text-sm"/>
                           </label>
                         </>
                       )}
@@ -885,28 +885,28 @@ export default function Templates() {
                       {selectedTemplate.kind === 'menu' && (
                         <div className="grid grid-cols-2 gap-3">
                           {['primary','accent','background'].map(key => (
-                            <label key={key} className="text-xs font-semibold text-ink/55">{key}
-                              <input type="color" value={String(selectedTemplate.config?.theme?.[key] || (key === 'primary' ? '#173F35' : key === 'accent' ? '#C9A45C' : '#F7F3EA'))} onChange={e => { const config={...selectedTemplate.config,theme:{...(selectedTemplate.config?.theme || {}),[key]:e.target.value}}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 h-10 w-full cursor-pointer rounded-lg border border-ink/10"/>
+                            <label key={key} className="text-xs font-semibold text-white/55">{key}
+                              <input type="color" value={String(selectedTemplate.config?.theme?.[key] || (key === 'primary' ? '#173F35' : key === 'accent' ? '#C9A45C' : '#F7F3EA'))} onChange={e => { const config={...selectedTemplate.config,theme:{...(selectedTemplate.config?.theme || {}),[key]:e.target.value}}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 h-10 w-full cursor-pointer rounded-lg border border-white/10"/>
                             </label>
                           ))}
                         </div>
                       )}
 
-                      <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-gold/40 bg-gold/5 px-4 py-4 text-xs font-semibold text-forest">
+                      <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-gold/40 bg-gold/5 px-4 py-4 text-xs font-semibold text-[#D4AF37]">
                         <span>{uploadingWallpaper ? 'Upload...' : 'Ajouter un wallpaper / photo'}</span>
                         <input type="file" accept="image/*" className="hidden" disabled={uploadingWallpaper} onChange={e => { const file=e.target.files?.[0]; if(file) void uploadTemplateWallpaper(file); e.currentTarget.value=''; }}/>
                       </label>
 
                       <div className="flex gap-2">
                         <button onClick={() => void saveVisualEditor()} className="flex-1 rounded-xl bg-forest px-4 py-3 text-sm font-semibold text-white">Enregistrer les modifications</button>
-                        <button onClick={() => void startEdit(selectedTemplate)} className="rounded-xl border border-ink/10 px-4 py-3 text-sm font-semibold text-ink/55">Ouvrir l'éditeur complet</button>
+                        <button onClick={() => void startEdit(selectedTemplate)} className="rounded-xl border border-white/10 px-4 py-3 text-sm font-semibold text-white/55">Ouvrir l'éditeur complet</button>
                       </div>
                     </div>
                   ) : (
                     <div className="flex flex-wrap gap-2">
                       <button onClick={() => setEditorTab('design')} className="rounded-xl bg-forest px-4 py-3 text-xs font-semibold text-white"><Pencil size={14} className="mr-1 inline"/> Modifier le template</button>
-                      <button onClick={() => void startEdit(selectedTemplate)} className="rounded-xl border border-ink/10 px-4 py-3 text-xs font-semibold text-ink/55">Éditeur avancé</button>
-                      <button onClick={() => void duplicate(selectedTemplate)} className="rounded-xl border border-ink/10 px-4 py-3 text-xs font-semibold text-ink/55"><Copy size={14} className="mr-1 inline"/> Dupliquer</button>
+                      <button onClick={() => void startEdit(selectedTemplate)} className="rounded-xl border border-white/10 px-4 py-3 text-xs font-semibold text-white/55">Éditeur avancé</button>
+                      <button onClick={() => void duplicate(selectedTemplate)} className="rounded-xl border border-white/10 px-4 py-3 text-xs font-semibold text-white/55"><Copy size={14} className="mr-1 inline"/> Dupliquer</button>
                     </div>
                   )}
                 </div>
@@ -918,16 +918,16 @@ export default function Templates() {
 
       {previewing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/70 p-4">
-          <div className="max-h-[94vh] w-full max-w-6xl overflow-hidden rounded-[28px] bg-[#f7f7f3] shadow-2xl">
-            <div className="flex items-center justify-between border-b border-ink/10 bg-white px-6 py-4">
+          <div className="max-h-[94vh] w-full max-w-6xl overflow-hidden rounded-[28px] bg-[#171717] shadow-2xl">
+            <div className="flex items-center justify-between border-b border-white/10 bg-[#111111] px-6 py-4">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">Studio template</p>
-                <h3 className="font-display text-2xl text-forest">{previewing.name}</h3>
+                <h3 className="font-display text-2xl text-[#D4AF37]">{previewing.name}</h3>
               </div>
-              <button onClick={() => setPreviewing(null)} className="rounded-xl border border-ink/10 p-2"><X size={18}/></button>
+              <button onClick={() => setPreviewing(null)} className="rounded-xl border border-white/10 p-2"><X size={18}/></button>
             </div>
             <div className="grid max-h-[calc(94vh-80px)] overflow-auto lg:grid-cols-[minmax(0,1fr)_380px]">
-              <div className="flex min-h-[620px] items-center justify-center bg-[#ebe7de] p-6 md:p-10">
+              <div className="flex min-h-[620px] items-center justify-center bg-[#0D0D0D] p-6 md:p-10">
                 {previewing.kind === 'loyalty' ? (
                   <div className="w-full max-w-[360px]">
                     <LoyaltyCardVisual
@@ -952,38 +952,38 @@ export default function Templates() {
                     />
                   </div>
                 ) : (
-                  <div className="w-full max-w-[520px] overflow-hidden rounded-[28px] bg-white shadow-xl">
+                  <div className="w-full max-w-[520px] overflow-hidden rounded-[28px] bg-[#111111] shadow-xl">
                     <div className="h-40 p-7" style={{ background: previewing.config?.background_image_url ? `linear-gradient(#173d32aa,#173d32aa),url(${previewing.config.background_image_url}) center/cover` : String(previewing.config?.theme?.background || '#F3EEE2') }}>
                       <p className="text-xs uppercase tracking-[.25em]" style={{ color: String(previewing.config?.theme?.accent || '#C9A45C') }}>La carte</p>
                       <h4 className="mt-3 text-3xl font-semibold" style={{ color: String(previewing.config?.theme?.primary || '#173D35') }}>Maison & saveurs</h4>
                     </div>
                     <div className="grid gap-3 p-6 sm:grid-cols-2">
-                      {['Entrées','Plats','Desserts','Boissons'].map((x) => <div key={x} className="rounded-2xl border border-ink/10 p-4"><p className="font-semibold text-forest">{x}</p><p className="mt-2 text-xs text-ink/40">Sélection de la maison</p><p className="mt-3 text-sm font-semibold">À partir de 85 MAD</p></div>)}
+                      {['Entrées','Plats','Desserts','Boissons'].map((x) => <div key={x} className="rounded-2xl border border-white/10 p-4"><p className="font-semibold text-[#D4AF37]">{x}</p><p className="mt-2 text-xs text-white/40">Sélection de la maison</p><p className="mt-3 text-sm font-semibold">À partir de 85 MAD</p></div>)}
                     </div>
                   </div>
                 )}
               </div>
-              <aside className="border-l border-ink/10 bg-white p-6">
-                <div className="mb-5 flex rounded-xl bg-[#f7f7f3] p-1">
-                  <button onClick={() => setEditorTab('preview')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab==='preview'?'bg-white text-forest shadow-sm':'text-ink/45'}`}>Aperçu</button>
-                  <button onClick={() => setEditorTab('design')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab==='design'?'bg-white text-forest shadow-sm':'text-ink/45'}`}>Modifier</button>
+              <aside className="border-l border-white/10 bg-[#111111] p-6">
+                <div className="mb-5 flex rounded-xl bg-[#171717] p-1">
+                  <button onClick={() => setEditorTab('preview')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab==='preview'?'bg-[#111111] text-[#D4AF37] shadow-sm':'text-white/45'}`}>Aperçu</button>
+                  <button onClick={() => setEditorTab('design')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab==='design'?'bg-[#111111] text-[#D4AF37] shadow-sm':'text-white/45'}`}>Modifier</button>
                 </div>
                 {editorTab === 'design' ? (
                   <div className="space-y-5">
                     <div>
                       <label className="mb-2 block text-xs font-semibold">Titre</label>
-                      <input value={String(previewing.config?.title || '')} onChange={e => { const config={...previewing.config,title:e.target.value}; setPreviewing({...previewing,config}); setConfigText(prettyJson(config)); }} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"/>
+                      <input value={String(previewing.config?.title || '')} onChange={e => { const config={...previewing.config,title:e.target.value}; setPreviewing({...previewing,config}); setConfigText(prettyJson(config)); }} className="w-full rounded-xl border border-white/10 px-3 py-2.5 text-sm"/>
                     </div>
                     <div>
                       <label className="mb-2 block text-xs font-semibold">Sous-titre</label>
-                      <textarea value={String(previewing.config?.subtitle || '')} onChange={e => { const config={...previewing.config,subtitle:e.target.value}; setPreviewing({...previewing,config}); setConfigText(prettyJson(config)); }} rows={3} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"/>
+                      <textarea value={String(previewing.config?.subtitle || '')} onChange={e => { const config={...previewing.config,subtitle:e.target.value}; setPreviewing({...previewing,config}); setConfigText(prettyJson(config)); }} rows={3} className="w-full rounded-xl border border-white/10 px-3 py-2.5 text-sm"/>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                      {['primary','secondary','background','text'].map(key => <label key={key} className="text-xs font-semibold">{key}<input type="color" value={String(previewing.config?.[key] || '#173D32')} onChange={e=>{const config={...previewing.config,[key]:e.target.value};setPreviewing({...previewing,config});setConfigText(prettyJson(config));}} className="mt-2 h-10 w-full cursor-pointer rounded-lg border border-ink/10"/></label>)}
+                      {['primary','secondary','background','text'].map(key => <label key={key} className="text-xs font-semibold">{key}<input type="color" value={String(previewing.config?.[key] || '#173D32')} onChange={e=>{const config={...previewing.config,[key]:e.target.value};setPreviewing({...previewing,config});setConfigText(prettyJson(config));}} className="mt-2 h-10 w-full cursor-pointer rounded-lg border border-white/10"/></label>)}
                     </div>
                     <div>
                       <label className="mb-2 block text-xs font-semibold">Wallpaper</label>
-                      <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-gold/40 bg-gold/5 px-4 py-4 text-xs font-semibold text-forest">
+                      <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-gold/40 bg-gold/5 px-4 py-4 text-xs font-semibold text-[#D4AF37]">
                         <ImagePlus size={17}/>{uploadingWallpaper ? 'Upload...' : 'Ajouter un wallpaper'}
                         <input type="file" accept="image/*" className="hidden" disabled={uploadingWallpaper} onChange={e=>{const f=e.target.files?.[0]; if(f) void uploadTemplateWallpaper(f); e.currentTarget.value='';}}/>
                       </label>
@@ -992,9 +992,9 @@ export default function Templates() {
                     <button onClick={()=>void saveVisualEditor()} className="w-full rounded-xl bg-forest px-4 py-3 text-sm font-semibold text-white">Enregistrer les modifications</button>
                   </div>
                 ) : (
-                  <div className="space-y-4 text-sm text-ink/55">
+                  <div className="space-y-4 text-sm text-white/55">
                     <p>Tu peux sélectionner ce template, voir son rendu réel, modifier ses couleurs, son texte et ajouter un wallpaper.</p>
-                    <div className="rounded-2xl bg-[#f7f7f3] p-4"><p className="text-xs font-semibold text-forest">Template global</p><p className="mt-1 text-xs">Les modifications faites ici deviennent disponibles pour les établissements qui utilisent ce template.</p></div>
+                    <div className="rounded-2xl bg-[#171717] p-4"><p className="text-xs font-semibold text-[#D4AF37]">Template global</p><p className="mt-1 text-xs">Les modifications faites ici deviennent disponibles pour les établissements qui utilisent ce template.</p></div>
                     <button onClick={()=>setEditorTab('design')} className="w-full rounded-xl bg-forest px-4 py-3 text-sm font-semibold text-white">Modifier le design</button>
                   </div>
                 )}
