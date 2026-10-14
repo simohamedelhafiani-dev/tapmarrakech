@@ -407,6 +407,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
             </section>
             <MenuPreview
               establishmentName={establishmentName}
+              logoUrl={establishmentLogoUrl}
               categories={menu.categories}
               itemsByCategory={menu.itemsByCategory}
               draft={draft}
@@ -416,6 +417,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
         ) : (
           <MenuPreview
             establishmentName={establishmentName}
+            logoUrl={establishmentLogoUrl}
             categories={menu.categories}
             itemsByCategory={menu.itemsByCategory}
             draft={draft}
