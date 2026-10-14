@@ -29,7 +29,52 @@ export default function AdminOverview() {
     url: window.location.href,
   });
 
-  const { stats, loading, error } = useAdminOverviewStats();
+  const { data: loadedStats, status, error } = useAdminOverviewStats();
+  const loading = status === 'loading';
+  const stats = loadedStats ?? {
+    periodDays: 30,
+    reviewsCount: 0,
+    averageRating: 0,
+    positiveReviewsCount: 0,
+    negativeReviewsCount: 0,
+    pendingReviewsCount: 0,
+    loyaltyCustomersCount: 0,
+    returningCustomersCount: 0,
+    activeCustomersCount: 0,
+    visitsTotal: 0,
+    pointsBalanceTotal: 0,
+    pointsEarnedTotal: 0,
+    pointsRedeemedTotal: 0,
+    analyticsEventsCount: 0,
+    currentAnalyticsEventsCount: 0,
+    currentReviewsCount: 0,
+    previousReviewsCount: 0,
+    reviewGrowth: 0,
+    currentRegistrationsCount: 0,
+    previousRegistrationsCount: 0,
+    registrationGrowth: 0,
+    returningRate: 0,
+    activeRate: 0,
+    redemptionRate: 0,
+    currentRevenue: 0,
+    previousRevenue: 0,
+    totalRevenue: 0,
+    currentTransactionsCount: 0,
+    averageBasket: 0,
+    currentRedemptionsCount: 0,
+    previousRedemptionsCount: 0,
+    redemptionGrowth: 0,
+    pointsRedeemedOnPeriod: 0,
+    rewardValueOnPeriod: 0,
+    redemptionRevenue: 0,
+    rewardCostOnPeriod: 0,
+    netContribution: 0,
+    realRoi: 0,
+    rewardEfficiency: 0,
+    pointsPerCurrency: 1,
+    reviewsEvolution: [],
+    scansEvolution: [],
+  };
 
   console.log('[AdminOverview] HOOK INPUTS', {
     periodDays: 30,

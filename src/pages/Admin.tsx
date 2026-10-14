@@ -46,6 +46,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import KelyaniMark from '@/components/brand/KelyaniMark';
 import LoyaltyStudio from '@/components/loyalty/LoyaltyStudio';
+import LoyaltyProgramCustomization from '@/components/LoyaltyProgramCustomization';
 import RecentActivity from '@/components/admin/RecentActivity';
 import EvolutionCharts from '@/components/admin/EvolutionCharts';
 import RecentLoyaltyCustomers from '@/components/admin/RecentLoyaltyCustomers';
@@ -242,7 +243,9 @@ export default function Admin() {
       : establishmentList[0].id;
 
     setSelectedEstablishmentId(selectedId);
-    window.localStorage.setItem(storageKey, selectedId);
+    if (selectedId) {
+  window.localStorage.setItem(storageKey, selectedId);
+}
   }, [location.pathname, establishmentList, user?.id]);
   const [showCreateEstablishmentForm, setShowCreateEstablishmentForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -970,20 +973,30 @@ function Overview({
       setDetailLoading(true);
 
       if (selectedEstablishment === 'all') {
-        if (mounted) {
-          console.log('[SET DETAIL]', reqId, {
-            reviews: globalStats.reviews,
-            loyaltyCustomers: globalStats.loyaltyCustomers,
-            analyticsEvents: globalStats.analyticsEvents,
-          });
-          setDetail({
-            reviews: globalStats.reviews,
-            averageRating: globalStats.averageRating,
-            loyaltyCustomers: globalStats.loyaltyCustomers,
-            analyticsEvents: globalStats.analyticsEvents,
-            loyaltyRevenue: 0,
-          });
-          setDetailLoading(false);
+        try {
+          const { data: transactionRows, error: transactionError } = await supabase
+            .from('loyalty_transactions')
+            .select('amount')
+            .eq('type', 'EARN');
+          if (transactionError) throw transactionError;
+          const loyaltyRevenue = (transactionRows ?? []).reduce(
+            (sum, row) => sum + Number(row.amount ?? 0),
+            0,
+          );
+          if (mounted) {
+            setDetail({
+              reviews: globalStats.reviews,
+              averageRating: globalStats.averageRating,
+              loyaltyCustomers: globalStats.loyaltyCustomers,
+              analyticsEvents: globalStats.analyticsEvents,
+              loyaltyRevenue,
+            });
+          }
+        } catch (error) {
+          console.error('Erreur CA fidélité global:', error);
+          if (mounted) setDetail(current => ({ ...current, loyaltyRevenue: 0 }));
+        } finally {
+          if (mounted) setDetailLoading(false);
         }
         return;
       }
@@ -993,14 +1006,16 @@ function Overview({
           { data: reviewRows, error: reviewsError },
           { count: loyaltyCustomers, error: loyaltyError },
           { count: analyticsEvents, error: analyticsError },
+          { data: transactionRows, error: transactionError },
         ] = await Promise.all([
           supabase.from('reviews').select('rating').eq('establishment_id', selectedEstablishment),
           supabase.from('loyalty_customers').select('id', { count: 'exact', head: true }).eq('establishment_id', selectedEstablishment),
           supabase.from('analytics_events').select('id', { count: 'exact', head: true }).eq('establishment_id', selectedEstablishment),
+          supabase.from('loyalty_transactions').select('amount').eq('establishment_id', selectedEstablishment).eq('type', 'EARN'),
         ]);
 
-        if (reviewsError || loyaltyError || analyticsError) {
-          throw reviewsError ?? loyaltyError ?? analyticsError;
+        if (reviewsError || loyaltyError || analyticsError || transactionError) {
+          throw reviewsError ?? loyaltyError ?? analyticsError ?? transactionError;
         }
 
         if (!mounted) return;
@@ -1019,7 +1034,10 @@ function Overview({
           averageRating: ratings.length ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length : 0,
           loyaltyCustomers: loyaltyCustomers ?? 0,
           analyticsEvents: analyticsEvents ?? 0,
-          loyaltyRevenue: 0,
+          loyaltyRevenue: (transactionRows ?? []).reduce(
+            (sum, row) => sum + Number(row.amount ?? 0),
+            0,
+          ),
         });
       } catch (error) {
         console.error('Erreur statistiques établissement Admin:', error);
@@ -1154,7 +1172,7 @@ function Overview({
                 <h4 className="mt-1 text-lg font-semibold">Une expérience qui fait revenir les clients.</h4>
                 <p className="mt-1 text-xs text-[#FFFFFF]/55">CA fidélité sélectionné : {detail.loyaltyRevenue.toLocaleString('fr-FR')} DH</p>
               </div>
-              <button onClick={() => onNavigate('codes')} className="rounded-xl bg-[#C9A45C] px-4 py-2.5 text-xs font-bold text-[#C9A45C] transition hover:bg-[#C9A45C]/90">Gérer la fidélité →</button>
+              <button onClick={() => onNavigate('loyalty')} className="rounded-xl bg-[#C9A45C] px-4 py-2.5 text-xs font-bold text-[#C9A45C] transition hover:bg-[#C9A45C]/90">Gérer la fidélité →</button>
             </div>
           </div>
         </div>

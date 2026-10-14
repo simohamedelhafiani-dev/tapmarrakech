@@ -119,7 +119,7 @@ export default function LoyaltyJoin() {
             p_first_name: firstName.trim(),
             p_last_name: lastName.trim(),
             p_phone: phone.trim(),
-  p_birth_date: birthDate || null,
+            p_birth_date: birthMonth && birthDay ? `2000-${birthMonth}-${birthDay}` : null,
             p_email: email.trim() || null,
             p_interests: interests,
             p_marketing_consent: marketingConsent,
@@ -146,7 +146,7 @@ export default function LoyaltyJoin() {
           p_first_name: firstName.trim(),
           p_last_name: lastName.trim(),
           p_phone: phone.trim(),
-          p_birth_date: birthDate,
+          p_birth_date: birthMonth && birthDay ? `2000-${birthMonth}-${birthDay}` : null,
         },
       );
 
@@ -256,18 +256,45 @@ export default function LoyaltyJoin() {
             <label className="block text-xs font-semibold text-white/55">Téléphone *<input value={phone} onChange={e => setPhone(e.target.value)} autoComplete="tel" inputMode="tel" className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-4 py-3 text-sm outline-none focus:border-[#C9A45C]" placeholder="+212 6 12 34 56 78" /></label>
             <label className="block text-xs font-semibold text-white/55">Email <span className="font-normal text-white/25">(facultatif)</span><input type="email" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-4 py-3 text-sm outline-none focus:border-[#C9A45C]" placeholder="vous@exemple.com" /></label>
             <div className="grid grid-cols-2 gap-3">
-
-              <div className="block text-xs font-semibold text-white/55">
-                Anniversaire <span className="font-normal text-white/25">(facultatif)</span>
+              <label className="block text-xs font-semibold text-white/55">
+                Jour et mois de naissance <span className="font-normal text-white/25">(facultatif)</span>
                 <div className="mt-1.5 grid grid-cols-2 gap-2">
-                  <select value={birthDay} onChange={e => setBirthDay(e.target.value)} aria-label="Jour de naissance" className="w-full rounded-xl border border-white/10 bg-[#242424] px-3 py-3 text-sm capitalize outline-none focus:border-[#C9A45C]">
-                    <option value="">Jour</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option>
+                  <select
+                    value={birthDay}
+                    onChange={e => setBirthDay(e.target.value)}
+                    className="w-full rounded-xl border border-white/10 bg-[#242424] px-3 py-3 text-sm outline-none focus:border-[#C9A45C]"
+                  >
+                    <option value="">Jour</option>
+                    {Array.from(
+                      { length: birthMonth ? new Date(2000, Number(birthMonth), 0).getDate() : 31 },
+                      (_, index) => {
+                        const day = String(index + 1).padStart(2, '0');
+                        return <option key={day} value={day}>{index + 1}</option>;
+                      },
+                    )}
                   </select>
-                  <select value={birthMonth} onChange={e => setBirthMonth(e.target.value)} aria-label="Mois de naissance" className="w-full rounded-xl border border-white/10 bg-[#242424] px-3 py-3 text-sm capitalize outline-none focus:border-[#C9A45C]">
-                    <option value="">Mois</option><option value="01">janvier</option><option value="02">février</option><option value="03">mars</option><option value="04">avril</option><option value="05">mai</option><option value="06">juin</option><option value="07">juillet</option><option value="08">août</option><option value="09">septembre</option><option value="10">octobre</option><option value="11">novembre</option><option value="12">décembre</option>
+                  <select
+                    value={birthMonth}
+                    onChange={e => {
+                      const month = e.target.value;
+                      setBirthMonth(month);
+                      if (birthDay && month && Number(birthDay) > new Date(2000, Number(month), 0).getDate()) {
+                        setBirthDay('');
+                      }
+                    }}
+                    className="w-full rounded-xl border border-white/10 bg-[#242424] px-3 py-3 text-sm outline-none focus:border-[#C9A45C]"
+                  >
+                    <option value="">Mois</option>
+                    {[
+                      ['01', 'Janvier'], ['02', 'Février'], ['03', 'Mars'], ['04', 'Avril'],
+                      ['05', 'Mai'], ['06', 'Juin'], ['07', 'Juillet'], ['08', 'Août'],
+                      ['09', 'Septembre'], ['10', 'Octobre'], ['11', 'Novembre'], ['12', 'Décembre'],
+                    ].map(([value, label]) => (
+                      <option key={value} value={value}>{label}</option>
+                    ))}
                   </select>
                 </div>
-              </div>
+              </label>
               <label className="block text-xs font-semibold text-white/55">Fréquence de visite<select value={visitFrequency} onChange={e => setVisitFrequency(e.target.value as typeof visitFrequency)} className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-3 py-3 text-sm outline-none focus:border-[#C9A45C]"><option value="">Je ne sais pas</option><option value="WEEKLY">Chaque semaine</option><option value="MONTHLY">Chaque mois</option><option value="OCCASIONAL">Occasionnellement</option></select></label>
             </div>
             <div className="rounded-2xl border border-white/10 bg-[#171717] p-4">

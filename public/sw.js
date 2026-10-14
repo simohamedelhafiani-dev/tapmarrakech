@@ -1,5 +1,5 @@
-const CACHE = 'tapmarrakech-shell-v12';
-const APP_SHELL = ['/', '/index.html', '/tapmarrakech-logo.png', '/manifest.webmanifest'];
+const CACHE = 'kelyani-shell-v12';
+const APP_SHELL = ['/', '/index.html', '/kelyani-final.svg', '/manifest.webmanifest'];
 
 self.addEventListener('message', (event) => {
   if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
@@ -27,7 +27,6 @@ self.addEventListener('activate', (event) => {
   });
 });
 
-
 self.addEventListener('push', (event) => {
   let payload = {};
   try {
@@ -39,19 +38,17 @@ self.addEventListener('push', (event) => {
   const title = payload.title || 'KELYANI';
   const options = {
     body: payload.body || 'Vous avez une nouvelle notification.',
-    icon: payload.icon || '/tapmarrakech-logo.png',
-    badge: payload.badge || '/tapmarrakech-logo.png',
+    icon: payload.icon || '/kelyani-final.svg',
+    badge: payload.badge || '/kelyani-final.svg',
     tag: payload.tag || 'kelyani-loyalty-notification',
     renotify: Boolean(payload.renotify ?? true),
     data: payload.data || { url: '/' },
   };
-
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-
   const targetUrl = event.notification.data?.url || '/';
   event.waitUntil((async () => {
     const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });

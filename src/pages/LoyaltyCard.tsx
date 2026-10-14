@@ -1,5 +1,16 @@
 import { useEffect, useState } from 'react';
-import { Bell, CheckCircle2, ExternalLink, Gift, Link2, MessageCircle, Share2, Star, X } from 'lucide-react';
+import {
+  Bell,
+  CheckCircle2,
+  ExternalLink,
+  Gift,
+  Link2,
+  MessageCircle,
+  Share2,
+  Star,
+  Trophy,
+  X,
+} from 'lucide-react';
 import QRCode from 'qrcode';
 import type { ReactNode } from 'react';
 
@@ -25,7 +36,25 @@ type Card = {
 };
 
 type HistoryItem = { id: string; points: number; type: string; description: string | null; amount: number | null; created_at: string; };
-type EngagementContext = { google_review_url: string | null; tripadvisor_review_url: string | null; review_bonus_points: number; whatsapp_number: string | null; google_claimed: boolean; tripadvisor_claimed: boolean; feedback_submitted: boolean; };
+type CustomerTier = { tier_key:string;tier_name:string;sort_order:number;total_points:number;rewards_redeemed:number;ticket_multiplier:number;next_tier_key:string|null;next_tier_name:string|null;next_points:number|null;next_rewards:number|null };
+type ActiveRaffle = { id:string; title:string; description:string|null; prize_name:string; prize_description:string|null; starts_at:string; draw_at:string; winners_count:number; participant_count:number };
+
+type RaffleWinner = {
+  id: string;
+  raffle_id: string;
+  title: string;
+  prize_name: string;
+  prize_description: string | null;
+  valid_from: string;
+  valid_until: string;
+  reservation_required: boolean;
+  single_use: boolean;
+  non_cumulative: boolean;
+  status: 'PENDING' | 'REDEEMED' | 'EXPIRED';
+  claim_token: string;
+  drawn_at: string;
+};
+
 type CardNotification = {
   id: string;
   title: string;
@@ -44,6 +73,16 @@ type Design = {
   text_color: string;
   button_color: string;
   border_radius: number;
+};
+
+type EngagementContext = {
+  google_review_url: string | null;
+  tripadvisor_review_url: string | null;
+  review_bonus_points: number;
+  whatsapp_number: string | null;
+  google_claimed: boolean;
+  tripadvisor_claimed: boolean;
+  feedback_submitted: boolean;
 };
 
 export default function LoyaltyCard() {
@@ -78,6 +117,11 @@ export default function LoyaltyCard() {
   const [referralQrDataUrl, setReferralQrDataUrl] = useState('');
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [notifications, setNotifications] = useState<CardNotification[]>([]);
+  const [raffleWins, setRaffleWins] = useState<RaffleWinner[]>([]);
+  const [activeRaffle, setActiveRaffle] = useState<ActiveRaffle | null>(null);
+  const [raffleLoadError, setRaffleLoadError] = useState('');
+  const [raffleDetailsOpen, setRaffleDetailsOpen] = useState(false);
+  const [customerTier, setCustomerTier] = useState<CustomerTier | null>(null);
   const [rewards, setRewards] = useState<LoyaltyExperienceReward[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -176,6 +220,42 @@ export default function LoyaltyCard() {
     if (!cardSaved || !program.referral_enabled) return;
     void loadReferralCode();
   }, [cardSaved, program.referral_enabled]);
+
+  useEffect(() => {
+    if (!card?.customer_id) return;
+    void (async () => {
+      const { data, error } = await supabase.rpc('get_public_loyalty_customer_tier', { p_access_token: token });
+      if (!error) {
+        const row = Array.isArray(data) ? data[0] : data;
+        setCustomerTier((row ?? null) as CustomerTier | null);
+      }
+    })();
+  }, [card?.customer_id]);
+
+  useEffect(() => {
+    if (!card?.customer_id || !token) return;
+    let cancelled = false;
+    void (async () => {
+      setRaffleLoadError('');
+      const { data, error: raffleError } = await supabase.rpc('get_public_loyalty_raffles', { p_access_token: token });
+      if (cancelled) return;
+      if (raffleError) {
+        console.error('[KELYANI] Impossible de charger les tombolas de la carte:', raffleError);
+        setActiveRaffle(null);
+        setRaffleLoadError('Impossible de charger les tombolas pour cette carte. Réessayez dans un instant.');
+        return;
+      }
+      const rows = Array.isArray(data) ? data : data ? [data] : [];
+      const now = Date.now();
+      const current = (rows as ActiveRaffle[])
+        .filter(raffle => new Date(raffle.starts_at).getTime() <= now && new Date(raffle.draw_at).getTime() > now)
+        .sort((a, b) => new Date(a.draw_at).getTime() - new Date(b.draw_at).getTime())[0] ?? null;
+      setActiveRaffle(current);
+      setRaffleLoadError('');
+      console.info('[KELYANI] Tombolas reçues pour la carte:', { received: rows.length, active: Boolean(current) });
+    })();
+    return () => { cancelled = true; };
+  }, [card?.customer_id, token]);
 
   const referralMessage = referralCode
     ? `🎁 Je t’invite à rejoindre le programme fidélité de ${card?.establishment_name || 'cet établissement'}.
@@ -430,13 +510,9 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         }
       })
       .subscribe();
-
     return () => {
-      void supabase.removeChannel(channel);
-      for (const broadcastChannel of broadcastChannels) {
-        void supabase.removeChannel(broadcastChannel);
-      }
-    };
+  void supabase.removeChannel(channel);
+};
   }, [card?.establishment_id]);
 
   const openGoogleReview = async () => {
@@ -534,6 +610,10 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
       setPushLoading(false);
     }
   };
+
+
+
+
 
   useEffect(() => {
     if (!card?.customer_id || !card.establishment_id) return;
@@ -769,7 +849,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
   const mode =
     configuredType === 'STAMP' || designConfig.card_mode === 'STAMP' || program.program_type === 'STAMP'
       ? 'STAMP'
-      : configuredType === 'POINTS_DISCOUNT' || designConfig.card_mode === 'POINTS_DISCOUNT' || program.program_type === 'POINTS_DISCOUNT'
+      : (configuredType as string) === 'POINTS_DISCOUNT' || (designConfig.card_mode as string) === 'POINTS_DISCOUNT' || (program.program_type as string) === 'POINTS_DISCOUNT'
         ? 'DISCOUNT'
         : 'POINTS';
 
@@ -777,7 +857,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
   const discountValidDays = Number((designConfig as typeof designConfig & { discountValidDays?: number }).discountValidDays ?? program.discount_valid_days ?? 7);
 
   const discountUnlockDate = program.discount_expires_at;
-
+  const hasPendingRaffleWin = raffleWins.some(win => win.status === 'PENDING');
 
   const raw = designConfig as typeof designConfig & {
     background_image_url?: string | null;
@@ -842,9 +922,15 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                 customerName: fullName,
                 loyaltyNumber: card.loyalty_number,
                 cardUrl: cardUrl,
+                raffleTitle: activeRaffle?.title ?? null,
+                rafflePrize: activeRaffle?.prize_name ?? null,
+                raffleDrawAt: activeRaffle?.draw_at ?? null,
+                customerTierName: customerTier?.tier_name ?? null,
+                customerRankLabel: customerTier ? `${customerTier.total_points.toLocaleString("fr-FR")} points · ${customerTier.rewards_redeemed} récompenses` : null,
               }}
               programType={mode}
-              cardWidth="min(90vw, calc((100svh - 125px) * 0.666667))"
+              cardWidth="min(94vw, 460px)"
+              onInviteFriend={program.referral_enabled && cardSaved ? () => { void openReferral(); } : undefined}
             />
           </div>
         </div>
@@ -903,29 +989,13 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         )}
 
         {/* Les campagnes sont envoyées par Web Push. On ne les affiche pas dans la carte fidélité. */}
-
-        {program.referral_enabled && cardSaved && (
-          <button
-            type="button"
-            onClick={() => void openReferral()}
-            className="mt-3 flex w-full items-center justify-center gap-3 rounded-2xl px-5 py-3.5 text-sm font-semibold shadow-[0_10px_30px_rgba(23,61,50,0.14)] transition hover:-translate-y-0.5 hover:shadow-lg"
-            style={{
-              backgroundColor: design.primary_color,
-              color: design.text_color,
-              border: `1px solid ${design.secondary_color}`,
-            }}
-          >
-            <span
-              className="grid h-8 w-8 shrink-0 place-items-center rounded-full"
-              style={{ backgroundColor: design.secondary_color, color: design.primary_color }}
-            >
-              <Gift className="h-4 w-4" />
-            </span>
-            <span>🎁 Inviter un ami</span>
-          </button>
+        {raffleLoadError && (
+          <div role="status" className="mt-4 w-full rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-xs leading-5 text-amber-100">
+            {raffleLoadError}
+          </div>
         )}
 
-        
+
         {!pushEnabled && (
           <section className="mt-4 overflow-hidden rounded-[1.75rem] border border-[#D4AF37]/20 bg-[#111111] p-5 shadow-luxury">
             <div className="flex items-start gap-3">
@@ -956,6 +1026,35 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
           </section>
         )}
 
+        {!pushEnabled && (
+          <section className="mt-4 overflow-hidden rounded-[1.75rem] border border-[#D4AF37]/20 bg-[#111111] p-5 shadow-luxury">
+            <div className="flex items-start gap-3">
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]">
+                <Bell className="h-4 w-4" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h2 className="text-sm font-semibold text-white">Recevoir les notifications</h2>
+                <p className="mt-1 text-[11px] leading-5 text-white/40">
+                  Recevez les offres et messages de votre établissement directement sur votre téléphone, même lorsque la carte est fermée ou que l’écran est verrouillé.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => void activatePushNotifications()}
+              disabled={pushLoading}
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#D4AF37] px-4 py-3 text-xs font-semibold text-[#0D0D0D] disabled:opacity-50"
+            >
+              <Bell size={15} />
+              {pushLoading ? 'Activation…' : 'Activer les notifications'}
+            </button>
+            {pushMessage && (
+              <p className="mt-3 text-center text-[10px] leading-4 text-[#D4AF37]" role="status">
+                {pushMessage}
+              </p>
+            )}
+          </section>
+        )}
         {pushEnabled && pushMessage && (
           <p className="mt-3 text-center text-[10px] leading-4 text-[#D4AF37]" role="status">
             {pushMessage}
@@ -1039,6 +1138,17 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
       </div>
     </main>
   );
+}
+
+function readableTextColor(hexColor: string): string {
+  const normalized = hexColor.replace('#', '').trim();
+  if (!/^[0-9a-fA-F]{6}$/.test(normalized)) return '#FFFFFF';
+  const channels = [0, 2, 4].map(offset => {
+    const value = parseInt(normalized.slice(offset, offset + 2), 16) / 255;
+    return value <= 0.04045 ? value / 12.92 : Math.pow((value + 0.055) / 1.055, 2.4);
+  });
+  const luminance = 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+  return luminance > 0.42 ? '#111111' : '#FFFFFF';
 }
 
 function withLiveVersion(url: string, version: number) {

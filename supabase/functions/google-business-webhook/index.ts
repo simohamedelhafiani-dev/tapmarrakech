@@ -8,7 +8,7 @@ async function gen(comment:string,rating:string,lang:string,tone:string){if(!ai)
 Deno.serve(async req=>{try{
  const u=new URL(req.url);if(secret&&u.searchParams.get('secret')!==secret)return json({error:'unauthorized'},401);
  const body=await req.json().catch(()=>({}));const msg=body?.message;if(!msg)return json({ok:true});
- let payload:any={};try{payload=msg.data?JSON.parse(atob(String(msg.data).replace(/-/g,'+').replace(/_/g,'/'))):{}}catch{}
+ let payload:any={};try{payload=msg.data?JSON.parse(atob(String(msg.data).replace(/-/g,'+').replace(/_/g,'/'))):{}}catch (error) { console.warn('Ignoring invalid Pub/Sub message payload:', error); }
  const reviewName=String(payload?.review_name??'');if(!reviewName)return json({ok:true});
  const parts=reviewName.split('/');const ai=parts.indexOf('accounts'),li=parts.indexOf('locations');const accountId=ai>=0?parts[ai+1]:'';const locationId=li>=0?parts[li+1]:'';
  if(!accountId||!locationId)return json({ok:true});

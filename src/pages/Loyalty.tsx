@@ -90,6 +90,12 @@ export default function Loyalty() {
   const [notificationCustomerId, setNotificationCustomerId] = useState('');
   const [notificationExpiresAt, setNotificationExpiresAt] = useState('');
   const [notificationSaving, setNotificationSaving] = useState(false);
+  const [notificationHistory, setNotificationHistory] = useState<Array<{
+    id: string; title: string; message: string; type: string; audience: Record<string, unknown> | null;
+    recipient_count: number; status: string; created_at: string; expires_at: string | null;
+  }>>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [showNotificationHistory, setShowNotificationHistory] = useState(false);
 
   const [programSettings, setProgramSettings] =
     useState<LoyaltyProgramSettings>({
@@ -103,7 +109,7 @@ export default function Loyalty() {
     useState<LoyaltyCustomer | null>(null);
   const [showRewards, setShowRewards] =
     useState<LoyaltyCustomer | null>(null);
-  const [recoveryQr, setRecoveryQr] = useState<{ url: string; name: string; expiresAt: string } | null>(null);
+  const [recoveryQr, setRecoveryQr] = useState<{ url: string; name: string; expiresAt: string; customer: LoyaltyCustomer } | null>(null);
   const [recoveryLoading, setRecoveryLoading] = useState(false);
 
   const [selectedReward, setSelectedReward] =
@@ -129,6 +135,7 @@ export default function Loyalty() {
       loadCustomers();
       loadProgramSettings();
       loadRewards();
+      loadNotificationHistory();
     }
   }, [establishmentId]);
 
@@ -218,6 +225,46 @@ export default function Loyalty() {
     }
   }
 
+  async function loadNotificationHistory() {
+    if (!establishmentId) {
+      setNotificationHistory([]);
+      return;
+    }
+    setHistoryLoading(true);
+    const { data, error } = await supabase.rpc('get_loyalty_notification_campaign_history', {
+      p_establishment_id: establishmentId,
+      p_limit: 50,
+    });
+    setHistoryLoading(false);
+    if (error) {
+      console.error('Erreur historique notifications:', error);
+      setNotificationHistory([]);
+      return;
+    }
+    setNotificationHistory((data ?? []) as typeof notificationHistory);
+  }
+
+  function reuseNotification(campaign: (typeof notificationHistory)[number]) {
+    setNotificationTitle(campaign.title);
+    setNotificationMessage(campaign.message);
+    setNotificationType(
+      ['INFO', 'OFFER', 'REWARD', 'POINTS'].includes(campaign.type)
+        ? campaign.type as 'INFO' | 'OFFER' | 'REWARD' | 'POINTS'
+        : 'INFO'
+    );
+    // A re-publication is a new campaign; recipients and consent are recalculated.
+    setNotificationAudience('ALL');
+    setNotificationInterest('');
+    setNotificationFrequency('');
+    setNotificationMinPoints('');
+    setNotificationMinVisits('');
+    setNotificationLastVisitDays('');
+    setNotificationCustomerId('');
+    setNotificationExpiresAt('');
+    setShowNotificationHistory(false);
+    setShowNotificationModal(true);
+  }
+
   const filteredCustomers = useMemo(() => {
     const value = search.trim().toLowerCase();
 
@@ -257,6 +304,7 @@ export default function Loyalty() {
       url: await QRCode.toDataURL(url, { width: 360, margin: 2 }),
       name: customer.first_name || 'Client',
       expiresAt,
+      customer,
     });
   }
 
@@ -473,8 +521,8 @@ export default function Loyalty() {
     const result = Array.isArray(data) ? data[0] : data;
     const count = Number(result?.recipient_count ?? notificationEligibleCustomers.length);
 
-    // The card feed is stored in the database immediately. The push delivery
-    // is separate so a temporary push-service issue never blocks the campaign.
+    // Keep in-card notifications and deliver phone-level Web Push as a separate
+    // best-effort step, so a push failure never rolls back the saved campaign.
     const campaignId = result?.campaign_id ? String(result.campaign_id) : '';
     const pushResult = campaignId
       ? await sendLoyaltyNotificationPush(campaignId)
@@ -492,12 +540,12 @@ export default function Loyalty() {
     setNotificationCustomerId('');
     setNotificationExpiresAt('');
     setShowNotificationModal(false);
+    await loadNotificationHistory();
     alert(
       pushResult.success && pushResult.sent > 0
         ? `Notification publiée sur ${count} carte(s) fidélité. ${pushResult.sent} notification(s) système envoyée(s).`
         : `Notification publiée sur ${count} carte(s) fidélité. Les notifications système seront disponibles pour les clients ayant activé les notifications.`
     );
-
   }
 
   function selectReward(
@@ -659,6 +707,14 @@ export default function Loyalty() {
 
 
           <button
+            onClick={() => setShowNotificationHistory(value => !value)}
+            disabled={!establishmentId}
+            className="flex items-center gap-2 rounded-xl border border-gold/30 bg-[#0D0D0D] px-4 py-2.5 text-xs font-semibold text-[#D4AF37] transition hover:bg-[#1b1b1b] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <Bell size={16} />
+            Historique notifications
+          </button>
+          <button
             onClick={() => setShowNotificationModal(true)}
             disabled={!establishmentId || !programSettings.enabled}
             className="flex items-center gap-2 rounded-xl border border-gold/30 bg-white px-4 py-2.5 text-xs font-semibold text-forest transition hover:bg-[#fdf9ef] disabled:cursor-not-allowed disabled:opacity-40"
@@ -718,6 +774,48 @@ export default function Loyalty() {
       </div>
 
       <LoyaltyStudio establishmentId={establishmentId} />
+
+      {showNotificationHistory && (
+        <section className="mb-6 rounded-2xl border border-[#D4AF37]/20 bg-[#0D0D0D] p-5 text-[#F5F5DC] shadow-soft">
+          <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#D4AF37]">Centre de notifications</p>
+              <h2 className="mt-1 font-display text-2xl text-[#D4AF37]">Historique</h2>
+              <p className="mt-1 text-xs text-[#F5F5DC]/55">Retrouvez vos campagnes et réutilisez un ancien message.</p>
+            </div>
+            <button type="button" onClick={() => setShowNotificationModal(true)} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#D4AF37] px-4 py-2.5 text-xs font-bold text-[#0D0D0D] hover:bg-[#E1C27A]">
+              <Plus size={15} /> Nouvelle notification
+            </button>
+          </div>
+          {historyLoading ? (
+            <div className="rounded-xl border border-white/10 p-6 text-sm text-[#F5F5DC]/60">Chargement de l’historique…</div>
+          ) : notificationHistory.length === 0 ? (
+            <div className="rounded-xl border border-white/10 p-6 text-sm text-[#F5F5DC]/60">Aucune notification publiée pour le moment.</div>
+          ) : (
+            <div className="space-y-3">
+              {notificationHistory.map(campaign => (
+                <article key={campaign.id} className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                  <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="font-semibold text-[#F5F5DC]">{campaign.title}</h3>
+                        <span className="rounded-full border border-[#D4AF37]/30 px-2 py-0.5 text-[10px] uppercase tracking-wide text-[#D4AF37]">{campaign.type}</span>
+                      </div>
+                      <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[#F5F5DC]/70">{campaign.message}</p>
+                      <p className="mt-3 text-[11px] text-[#F5F5DC]/45">
+                        Publiée le {new Date(campaign.created_at).toLocaleString('fr-FR')} · {campaign.recipient_count} destinataire(s) · {campaign.status}
+                      </p>
+                    </div>
+                    <button type="button" onClick={() => reuseNotification(campaign)} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-[#D4AF37]/40 px-3 py-2 text-xs font-semibold text-[#D4AF37] transition hover:bg-[#D4AF37]/10">
+                      <Bell size={14} /> Réutiliser / republier
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
 
       {/* ESTABLISHMENT */}
       {establishments.length > 1 && (
@@ -1109,7 +1207,6 @@ export default function Loyalty() {
         </Modal>
       )}
 
-
       {recoveryQr && (
         <div className="fixed inset-0 z-[100] grid place-items-center bg-black/60 p-4 backdrop-blur-sm">
           <div className="w-full max-w-sm rounded-3xl border border-[#242424] bg-[#111111] p-6 text-center shadow-2xl">
@@ -1118,9 +1215,9 @@ export default function Loyalty() {
                 <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">Récupération</p>
                 <h2 className="mt-1 font-display text-xl text-[#D4AF37]">Carte de {recoveryQr.name}</h2>
               </div>
-              <button type="button" onClick={() => setRecoveryQr(null)} className="rounded-full border border-[#242424] p-2 text-ink/50 hover:text-ink">×</button>
+              <button type="button" onClick={() => setRecoveryQr(null)} className="rounded-full border border-[#242424] p-2 text-ink/50 hover:text-ink" aria-label="Fermer">×</button>
             </div>
-            <div className="mx-auto mt-5 w-fit rounded-3xl bg-[#111111] p-3 shadow-sm ring-1 ring-ink/5">
+            <div className="mx-auto mt-5 w-fit rounded-3xl bg-white p-3 shadow-sm">
               <img src={recoveryQr.url} alt="QR code de récupération de carte" className="h-64 w-64" />
             </div>
             <p className="mt-4 text-sm font-semibold text-[#D4AF37]">Le client scanne ce QR avec son téléphone</p>
@@ -1129,8 +1226,6 @@ export default function Loyalty() {
           </div>
         </div>
       )}
-
-
 
       {/* NEW CUSTOMER MODAL */}
       {showNewCustomer && (

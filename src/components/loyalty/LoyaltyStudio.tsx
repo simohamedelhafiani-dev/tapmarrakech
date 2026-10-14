@@ -7,12 +7,14 @@ import {
   Percent,
   Rocket,
   Save,
+  Trophy,
   Settings2,
   Sparkles,
   Stamp,
   Star,
   Trash2,
   UserPlus,
+  UsersRound,
   X,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
@@ -24,11 +26,14 @@ import {
   type LoyaltyReferralConfig,
 } from '@/hooks/useLoyaltyManager';
 import LoyaltyPreview from './LoyaltyPreview';
+import LoyaltyRaffleStudio from './LoyaltyRaffleStudio';
+import LoyaltyTierStudio from './LoyaltyTierStudio';
+import LoyaltyCrmSegments from './LoyaltyCrmSegments';
 import { WALLET_TEMPLATES } from '@/components/LoyaltyCardVisual';
 import type { LoyaltyExperienceConfig, LoyaltyExperienceReward } from './LoyaltyExperience';
 
 type Props = { establishmentId: string };
-type TabId = 'settings' | 'rewards' | 'referral' | 'design';
+type TabId = 'settings' | 'rewards' | 'referral' | 'tiers' | 'raffle' | 'crm' | 'design';
 type RewardType = 'GIFT' | 'DISCOUNT';
 
 type Reward = {
@@ -86,6 +91,9 @@ const TABS: { id: TabId; label: string; caption: string; icon: typeof Settings2 
   { id: 'settings', label: 'Paramètres', caption: 'Programme', icon: Settings2 },
   { id: 'rewards', label: 'Récompenses', caption: 'Catalogue', icon: Gift },
   { id: 'referral', label: 'Parrainage', caption: 'Acquisition', icon: Rocket },
+  { id: 'tiers', label: 'Niveaux', caption: 'Clients', icon: Trophy },
+  { id: 'raffle', label: 'Tombola', caption: 'Gagnants', icon: Trophy },
+  { id: 'crm', label: 'CRM', caption: 'Segments', icon: UsersRound },
   { id: 'design', label: 'Design', caption: 'Visuels', icon: Palette },
 ];
 
@@ -311,7 +319,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   }), [program, design, establishment, rewards]);
 
   useEffect(() => {
-    if (!establishmentId || !designHydratedRef.current) return;
+    if (!isAdmin || !establishmentId || !designHydratedRef.current) return;
 
     if (liveDesignTimerRef.current !== null) {
       window.clearTimeout(liveDesignTimerRef.current);
@@ -411,7 +419,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   }, [establishmentId, design, establishment.logoUrl, program, rewards, previewChannelReady]);
 
   const selectTemplate = (id: string) => {
-    const template = WALLET_TEMPLATES[id];
+    const template = WALLET_TEMPLATES[id as keyof typeof WALLET_TEMPLATES];
     if (!template) return;
 
     setDesign(current => ({
@@ -543,18 +551,16 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
 
     try {
       if (rewardDraft.id) {
-        const { error } = await supabase
-          .from('loyalty_rewards')
-          .update({
-            name: rewardDraft.name.trim(),
-            description: rewardDraft.description.trim() || null,
-            points_required: Math.floor(rewardDraft.pointsRequired),
-            reward_type: rewardDraft.rewardType,
-            discount_percent: rewardDraft.rewardType === 'DISCOUNT' ? rewardDraft.discountPercent : null,
-            discount_max_amount: rewardDraft.rewardType === 'DISCOUNT' ? rewardDraft.discountMaxAmount : null,
-          })
-          .eq('id', rewardDraft.id)
-          .eq('establishment_id', establishmentId);
+        const { error } = await supabase.rpc('update_loyalty_reward', {
+          p_reward_id: rewardDraft.id,
+          p_name: rewardDraft.name.trim(),
+          p_description: rewardDraft.description.trim() || null,
+          p_points_required: Math.floor(rewardDraft.pointsRequired),
+          p_reward_type: rewardDraft.rewardType,
+          p_discount_percent: rewardDraft.rewardType === 'DISCOUNT' ? rewardDraft.discountPercent : null,
+          p_discount_max_amount: rewardDraft.rewardType === 'DISCOUNT' ? rewardDraft.discountMaxAmount : null,
+          p_active: true,
+        });
 
         if (error) throw error;
         setMessage('Récompense mise à jour.');
@@ -603,11 +609,9 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   };
 
   const deleteReward = async (id: string) => {
-    const { error } = await supabase
-      .from('loyalty_rewards')
-      .delete()
-      .eq('id', id)
-      .eq('establishment_id', establishmentId);
+    const { error } = await supabase.rpc('delete_loyalty_reward', {
+      p_reward_id: id,
+    });
 
     if (error) {
       setMessage(error.message);
@@ -620,11 +624,16 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   };
 
   const toggleReward = async (reward: Reward) => {
-    const { error } = await supabase
-      .from('loyalty_rewards')
-      .update({ active: !reward.active })
-      .eq('id', reward.id)
-      .eq('establishment_id', establishmentId);
+    const { error } = await supabase.rpc('update_loyalty_reward', {
+      p_reward_id: reward.id,
+      p_name: reward.name,
+      p_description: reward.description || null,
+      p_points_required: reward.points_required,
+      p_reward_type: reward.reward_type,
+      p_discount_percent: reward.reward_type === 'DISCOUNT' ? reward.discount_percent : null,
+      p_discount_max_amount: reward.reward_type === 'DISCOUNT' ? reward.discount_max_amount : null,
+      p_active: !reward.active,
+    });
 
     if (error) {
       setMessage(error.message);
@@ -637,7 +646,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   };
 
   const visibleTabs = isAdmin ? TABS : TABS.filter(item => item.id !== 'design');
-  const selectedTemplate = WALLET_TEMPLATES[design.templateId];
+  const selectedTemplate = WALLET_TEMPLATES[design.templateId as keyof typeof WALLET_TEMPLATES];
 
   if (loading) {
     return (
@@ -694,7 +703,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
         <div className="min-w-0">
           <div className="mb-5 overflow-x-auto rounded-2xl bg-[#111111] p-1.5">
-            <div className={`grid gap-1 ${isAdmin ? 'min-w-[640px] grid-cols-4' : 'grid-cols-3'}`}>
+            <div className={`grid gap-1 ${isAdmin ? 'min-w-[1050px] grid-cols-7' : 'min-w-[900px] grid-cols-6'}`}>
               {visibleTabs.map(item => {
                 const Icon = item.icon;
                 const active = tab === item.id;
@@ -719,6 +728,8 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
               })}
             </div>
           </div>
+
+          {tab === 'crm' && <LoyaltyCrmSegments establishmentId={establishmentId} />}
 
           {tab === 'settings' && (
             <div className="space-y-5">
@@ -1009,21 +1020,33 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
           {tab === 'referral' && (
             <div className="space-y-5">
               <StudioCard eyebrow="Acquisition" title="Transformer les clients en ambassadeurs">
-                <div className="grid gap-4 md:grid-cols-[1fr_auto]">
-                  <div className="rounded-2xl bg-[#242424] p-4">
-                    <div className="flex items-start gap-3">
-                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#111111] text-[#C9A45C] shadow-sm">
-                        <UserPlus size={17} />
-                      </span>
-                      <div>
-                        <p className="text-sm font-semibold text-[#E1C27A]">Programme de parrainage</p>
-                        <p className="mt-1 text-[10px] leading-4 text-[#FFFFFF]/40">
-                          Récompensez le parrain et le nouveau client après leur mise en relation.
-                        </p>
-                      </div>
+                <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+                  <div className="flex min-w-0 items-center gap-3 rounded-2xl bg-[#242424] p-4">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#111111] text-[#C9A45C] shadow-sm">
+                      <UserPlus size={17} />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-[#E1C27A]">Programme de parrainage</p>
+                      <p className="mt-1 text-[10px] leading-4 text-[#FFFFFF]/50">
+                        Récompensez le parrain et le nouveau client après leur mise en relation.
+                      </p>
                     </div>
                   </div>
-                  <Toggle checked={referral.enabled} onChange={enabled => setReferral(current => ({ ...current, enabled }))} />
+
+                  <div className="flex items-center justify-between gap-3 rounded-2xl border border-[#C9A45C]/20 bg-[#111111] px-4 py-3 sm:min-w-[190px]">
+                    <div>
+                      <p className="text-xs font-semibold text-[#E1C27A]">
+                        {referral.enabled ? 'Parrainage activé' : 'Parrainage désactivé'}
+                      </p>
+                      <p className="mt-1 text-[10px] text-[#FFFFFF]/45">
+                        {referral.enabled ? 'Programme actif' : 'Programme en pause'}
+                      </p>
+                    </div>
+                    <Toggle
+                      checked={referral.enabled}
+                      onChange={enabled => setReferral(current => ({ ...current, enabled }))}
+                    />
+                  </div>
                 </div>
 
                 <div className="mt-5 grid gap-4 md:grid-cols-2">
@@ -1071,6 +1094,14 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                 Les changements sont conservés avec le bouton <strong className="text-[#E1C27A]">Enregistrer</strong>. Le miroir de droite reflète immédiatement les paramètres qui modifient la carte.
               </div>
             </div>
+          )}
+
+          {tab === 'tiers' && (
+            <LoyaltyTierStudio establishmentId={establishmentId} />
+          )}
+
+          {tab === 'raffle' && (
+            <LoyaltyRaffleStudio establishmentId={establishmentId} />
           )}
 
           {tab === 'design' && isAdmin && (
