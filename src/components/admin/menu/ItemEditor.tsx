@@ -141,7 +141,7 @@ export default function ItemEditor({
   if (!category) {
     return (
       <section className="min-w-0 rounded-3xl border border-dashed border-white/10 bg-white/[.03] p-8 text-center">
-        <p className="text-sm font-semibold text-forest">Sélectionne une catégorie</p>
+        <p className="text-sm font-semibold text-white">Sélectionne une catégorie</p>
         <p className="mt-1 text-xs text-white/40">Les articles apparaîtront ici.</p>
       </section>
     );
@@ -153,7 +153,7 @@ export default function ItemEditor({
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Édition</p>
-            <h3 className="mt-1 text-xl font-semibold text-forest">{category.name}</h3>
+            <h3 className="mt-1 text-xl font-semibold text-white">{category.name}</h3>
             <p className="mt-1 text-xs text-white/40">
               {items.length} article{items.length > 1 ? 's' : ''}
             </p>
@@ -170,7 +170,7 @@ export default function ItemEditor({
       </div>
 
       {error && (
-        <div className="mx-5 mt-4 rounded-xl bg-red-50 px-4 py-3 text-xs text-red-700">{error}</div>
+        <div className="mx-5 mt-4 rounded-xl border border-red-400/20 bg-red-950/40 px-4 py-3 text-xs text-red-200">{error}</div>
       )}
 
       {(adding || editingId) && (
@@ -185,7 +185,7 @@ export default function ItemEditor({
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Nom de l’article" className="rounded-xl border border-white/10 bg-[#171717] px-4 py-3 text-sm text-white placeholder:text-white/30" />
             <input value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="Prix (DH)" type="number" min="0" className="rounded-xl border border-white/10 bg-[#171717] px-4 py-3 text-sm text-white placeholder:text-white/30" />
-            <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Description" className="min-h-24 rounded-xl border border-white/10 px-4 py-3 text-sm md:col-span-2" />
+            <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Description" className="min-h-24 rounded-xl border border-white/10 bg-[#171717] px-4 py-3 text-sm text-white placeholder:text-white/30 focus:border-[#D4AF37] focus:outline-none md:col-span-2" />
             <select value={formCategoryId} onChange={e => setFormCategoryId(e.target.value)} className="rounded-xl border border-white/10 bg-[#171717] px-4 py-3 text-sm text-white placeholder:text-white/30">
               {activeCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
