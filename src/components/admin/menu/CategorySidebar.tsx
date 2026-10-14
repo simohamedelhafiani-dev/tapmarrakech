@@ -51,7 +51,7 @@ export default function CategorySidebar({
             type="button"
             onClick={() => void addCategory()}
             disabled={saving}
-            className="grid h-8 w-8 place-items-center rounded-xl bg-forest text-white disabled:opacity-40"
+            className="grid h-8 w-8 place-items-center rounded-xl bg-gold text-[#0D0D0D] disabled:opacity-40"
             title="Ajouter une catégorie"
           >
             <Plus size={15} />
@@ -79,7 +79,7 @@ export default function CategorySidebar({
                 className={[
                   'flex w-full items-center gap-2 rounded-2xl px-2 py-2 transition',
                   selected
-                    ? 'bg-forest text-white shadow-sm'
+                    ? 'bg-gold text-[#0D0D0D] shadow-sm'
                     : 'text-forest hover:bg-white/[.04]',
                   !category.active ? 'opacity-60' : '',
                 ].join(' ')}
@@ -92,13 +92,13 @@ export default function CategorySidebar({
                 >
                   <span className={[
                     'grid h-7 w-7 shrink-0 place-items-center rounded-lg text-[10px] font-bold',
-                    selected ? 'bg-white/15 text-white' : 'bg-white/[.04] text-forest',
+                    selected ? 'bg-black/10 text-[#0D0D0D]' : 'bg-white/[.04] text-forest',
                   ].join(' ')}>
                     {index + 1}
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-xs font-semibold">{category.name}</span>
-                    <span className={selected ? 'text-[10px] text-white/60' : 'text-[10px] text-white/35'}>
+                    <span className={selected ? 'text-[10px] text-[#0D0D0D]/60' : 'text-[10px] text-white/35'}>
                       {category.active ? 'Actif' : 'Inactif'}
                     </span>
                   </span>
