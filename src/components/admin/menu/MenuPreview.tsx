@@ -15,10 +15,10 @@ type MenuPreviewProps = {
 };
 
 const palettes = {
-  editorial: { page: 'bg-[#f5f1e8] text-[#26362b]', panel: 'bg-[#fffdf8]', accent: 'text-[#9c7a32]', muted: 'text-[#74776e]', line: 'border-[#26362b]/15', card: 'bg-white' },
+  editorial: { page: 'bg-[#f5f1e8] text-[#24211c]', panel: 'bg-[#fffdf8]', accent: 'text-[#9c7a32]', muted: 'text-[#74776e]', line: 'border-[#24211c]/15', card: 'bg-white' },
   luxury: { page: 'bg-[#11100d] text-[#f7f0df]', panel: 'bg-[#171510]', accent: 'text-[#d2b46a]', muted: 'text-white/60', line: 'border-[#c8a75d]/30', card: 'bg-[#1b1914]' },
-  cards: { page: 'bg-[#f7f7f3] text-[#24352a]', panel: 'bg-white', accent: 'text-[#a17d31]', muted: 'text-[#777b73]', line: 'border-black/10', card: 'bg-white' },
-  dark: { page: 'bg-[#080c09] text-white', panel: 'bg-[#101510]', accent: 'text-[#d6b86b]', muted: 'text-white/60', line: 'border-white/15', card: 'bg-white/[0.06]' },
+  cards: { page: 'bg-[#f7f7f3] text-[#24211c]', panel: 'bg-white', accent: 'text-[#a17d31]', muted: 'text-[#777b73]', line: 'border-black/10', card: 'bg-white' },
+  dark: { page: 'bg-[#0D0D0D] text-white', panel: 'bg-[#111111]', accent: 'text-[#d6b86b]', muted: 'text-white/60', line: 'border-white/15', card: 'bg-white/[0.06]' },
   onyx: { page: 'bg-[#050505] text-white', panel: 'bg-[#101010]', accent: 'text-[#E1C27A]', muted: 'text-white/60', line: 'border-white/15', card: 'bg-white/[0.05]' },
   'royal-gold': { page: 'bg-[#0B0906] text-[#FFF9E8]', panel: 'bg-[#17110A]', accent: 'text-[#E1C27A]', muted: 'text-[#FFF9E8]/60', line: 'border-[#E1C27A]/30', card: 'bg-[#17110A]' },
   'deep-ocean': { page: 'bg-[#06151B] text-[#F2FCFF]', panel: 'bg-[#0A222B]', accent: 'text-[#8ED9E8]', muted: 'text-white/60', line: 'border-[#8ED9E8]/25', card: 'bg-[#0A222B]' },
