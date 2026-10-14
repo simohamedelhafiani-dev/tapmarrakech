@@ -183,7 +183,7 @@ export default function MenuPreview({
   };
 
   return <aside className={`min-w-0 overflow-hidden border border-white/10 bg-[#111] shadow-soft ${fullScreen ? 'rounded-[32px]' : 'rounded-3xl lg:sticky lg:top-24 lg:self-start'}`}>
-    {!compact && <div className="border-b border-ink/5 bg-white p-5"><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Aperçu en direct</p><h3 className="mt-1 text-base font-semibold text-forest">{establishmentName || 'Menu public'}</h3><p className="mt-1 text-[11px] text-ink/35">Miroir KELYANI · synchronisé avec le Studio</p></div>}
+    {!compact && <div className="border-b border-white/10 bg-[#111111] p-5"><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Aperçu en direct</p><h3 className="mt-1 text-base font-semibold text-white">{establishmentName || 'Menu public'}</h3><p className="mt-1 text-[11px] text-white/35">Miroir KELYANI · synchronisé avec le Studio</p></div>}
     <div className={compact ? 'p-0' : 'p-3 sm:p-4'}>
       <div className={`relative mx-auto h-[min(680px,78vh)] min-h-[480px] w-full max-w-[360px] overflow-hidden rounded-[28px] border-[5px] border-[#202020] shadow-xl ${palette.page}`} style={{ backgroundColor: activeDraft.themeColors.background, color: activeDraft.themeColors.text, backgroundImage: activeDraft.wallpaperUrl ? `linear-gradient(rgba(0,0,0,${activeDraft.overlayOpacity}), rgba(0,0,0,${activeDraft.overlayOpacity})), url("${activeDraft.wallpaperUrl}")` : undefined, backgroundSize: 'cover', backgroundPosition: 'center' }}>
         <div className="absolute inset-0 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" style={{ paddingBottom: activeDraft.navigation === 'app' ? 76 : 20 }}>
