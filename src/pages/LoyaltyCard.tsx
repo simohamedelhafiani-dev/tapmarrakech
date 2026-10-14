@@ -433,9 +433,6 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
 
     return () => {
       void supabase.removeChannel(channel);
-      for (const broadcastChannel of broadcastChannels) {
-        void supabase.removeChannel(broadcastChannel);
-      }
     };
   }, [card?.establishment_id]);
 
