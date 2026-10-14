@@ -214,17 +214,17 @@ export default function Promotions() {
   if (loading && establishments.length === 0) {
     return (
       <div className="grid min-h-[400px] place-items-center">
-        <Loader2 className="animate-spin text-forest" size={28} />
+        <Loader2 className="animate-spin text-[#D4AF37]" size={28} />
       </div>
     );
   }
 
   if (establishments.length === 0) {
     return (
-      <div className="rounded-3xl border border-ink/10 bg-white p-10 text-center">
+      <div className="rounded-3xl border border-white/10 bg-[#111111] p-10 text-center">
         <Gift className="mx-auto mb-4 text-gold" size={36} />
-        <h1 className="text-2xl font-semibold text-forest">Aucun établissement</h1>
-        <p className="mt-2 text-sm text-ink/50">
+        <h1 className="text-2xl font-semibold text-[#D4AF37]">Aucun établissement</h1>
+        <p className="mt-2 text-sm text-white/55">
           Crée d’abord ton établissement pour gérer ses promotions.
         </p>
       </div>
@@ -252,10 +252,10 @@ export default function Promotions() {
           <select
             value={establishmentId}
             onChange={(event) => setEstablishmentId(event.target.value)}
-            className="rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white outline-none"
+            className="rounded-xl border border-white/15 bg-[#111111]/10 px-4 py-3 text-sm text-white outline-none"
           >
             {establishments.map((establishment) => (
-              <option key={establishment.id} value={establishment.id} className="text-ink">
+              <option key={establishment.id} value={establishment.id} className="text-[#F5F5DC]">
                 {establishment.name}
               </option>
             ))}
@@ -269,14 +269,14 @@ export default function Promotions() {
         </div>
       )}
 
-      <section className="rounded-3xl border border-ink/10 bg-white p-6 shadow-sm md:p-8">
+      <section className="rounded-3xl border border-white/10 bg-[#111111] p-6 shadow-sm md:p-8">
         <div className="flex items-start gap-4">
           <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gold/10 text-gold">
             <ImageIcon size={19} />
           </div>
           <div>
-            <h2 className="text-xl font-semibold text-forest">Nouvelle promotion</h2>
-            <p className="mt-1 text-sm text-ink/45">
+            <h2 className="text-xl font-semibold text-[#D4AF37]">Nouvelle promotion</h2>
+            <p className="mt-1 text-sm text-white/45">
               Renseigne le contenu commercial. Le visuel est toujours généré par l’IA.
             </p>
           </div>
@@ -284,46 +284,46 @@ export default function Promotions() {
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <label className="block">
-            <span className="mb-1.5 block text-xs font-semibold text-ink/60">Nom</span>
+            <span className="mb-1.5 block text-xs font-semibold text-white/65">Nom</span>
             <input
               value={form.name}
               onChange={(event) => updateForm('name', event.target.value)}
               placeholder="Ex. Menu déjeuner -20%"
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-white/10 bg-[#171717] px-4 py-3 text-sm outline-none focus:border-forest"
             />
           </label>
 
           <label className="block">
-            <span className="mb-1.5 block text-xs font-semibold text-ink/60">Description</span>
+            <span className="mb-1.5 block text-xs font-semibold text-white/65">Description</span>
             <input
               value={form.description}
               onChange={(event) => updateForm('description', event.target.value)}
               placeholder="Ex. Du lundi au vendredi, midi uniquement"
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-white/10 bg-[#171717] px-4 py-3 text-sm outline-none focus:border-forest"
             />
           </label>
 
           <label className="block">
-            <span className="mb-1.5 block text-xs font-semibold text-ink/60">Prix normal (MAD)</span>
+            <span className="mb-1.5 block text-xs font-semibold text-white/65">Prix normal (MAD)</span>
             <input
               value={form.normal_price}
               onChange={(event) => updateForm('normal_price', event.target.value)}
               type="number"
               min="0"
               placeholder="250"
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-white/10 bg-[#171717] px-4 py-3 text-sm outline-none focus:border-forest"
             />
           </label>
 
           <label className="block">
-            <span className="mb-1.5 block text-xs font-semibold text-ink/60">Prix promo (MAD)</span>
+            <span className="mb-1.5 block text-xs font-semibold text-white/65">Prix promo (MAD)</span>
             <input
               value={form.promo_price}
               onChange={(event) => updateForm('promo_price', event.target.value)}
               type="number"
               min="0"
               placeholder="199"
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-white/10 bg-[#171717] px-4 py-3 text-sm outline-none focus:border-forest"
             />
           </label>
         </div>
@@ -345,18 +345,18 @@ export default function Promotions() {
         <div className="mb-4 flex items-end justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">Publication</p>
-            <h2 className="mt-1 text-2xl font-semibold text-forest">Tes promotions</h2>
+            <h2 className="mt-1 text-2xl font-semibold text-[#D4AF37]">Tes promotions</h2>
           </div>
-          <span className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-ink/45 ring-1 ring-ink/5">
+          <span className="rounded-full bg-[#111111] px-3 py-1.5 text-xs font-semibold text-white/45 ring-1 ring-ink/5">
             {promotions.length} promotion{promotions.length > 1 ? 's' : ''}
           </span>
         </div>
 
         {promotions.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-ink/15 bg-white p-10 text-center">
+          <div className="rounded-3xl border border-dashed border-white/15 bg-[#111111] p-10 text-center">
             <Plus className="mx-auto mb-3 text-gold" size={28} />
-            <p className="text-sm font-semibold text-forest">Aucune promotion publiée</p>
-            <p className="mt-1 text-xs text-ink/45">
+            <p className="text-sm font-semibold text-[#D4AF37]">Aucune promotion publiée</p>
+            <p className="mt-1 text-xs text-white/45">
               La première promotion générée apparaîtra automatiquement sur la page publique.
             </p>
           </div>
@@ -365,7 +365,7 @@ export default function Promotions() {
             {promotions.map((promotion) => (
               <article
                 key={promotion.id}
-                className="overflow-hidden rounded-3xl border border-ink/10 bg-white shadow-sm"
+                className="overflow-hidden rounded-3xl border border-white/10 bg-[#111111] shadow-sm"
               >
                 {promotion.image_url ? (
                   <img
@@ -374,7 +374,7 @@ export default function Promotions() {
                     className="aspect-[16/9] w-full object-cover"
                   />
                 ) : (
-                  <div className="grid aspect-[16/9] place-items-center bg-[#f7f7f3] text-ink/20">
+                  <div className="grid aspect-[16/9] place-items-center bg-[#171717] text-white/20">
                     <ImageIcon size={32} />
                   </div>
                 )}
@@ -382,13 +382,13 @@ export default function Promotions() {
                 <div className="p-5">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h3 className="font-semibold text-forest">{promotion.name}</h3>
-                      <p className="mt-1 text-xs leading-5 text-ink/45">
+                      <h3 className="font-semibold text-[#D4AF37]">{promotion.name}</h3>
+                      <p className="mt-1 text-xs leading-5 text-white/45">
                         {promotion.description || 'Sans description'}
                       </p>
                     </div>
                     <span
-                      className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold ${promotion.active ? 'bg-green-100 text-green-700' : 'bg-ink/5 text-ink/40'}`}
+                      className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold ${promotion.active ? 'bg-[#D4AF37]/15 text-[#E1C27A]' : 'bg-white/5 text-white/40'}`}
                     >
                       {promotion.active ? 'Publiée' : 'Masquée'}
                     </span>
@@ -400,7 +400,7 @@ export default function Promotions() {
                         {promotion.promo_price ?? '—'} MAD
                       </span>
                       {promotion.normal_price != null && (
-                        <span className="ml-2 text-xs text-ink/30 line-through">
+                        <span className="ml-2 text-xs text-white/35 line-through">
                           {promotion.normal_price} MAD
                         </span>
                       )}
@@ -419,7 +419,7 @@ export default function Promotions() {
                       <button
                         type="button"
                         onClick={() => void togglePromotion(promotion)}
-                        className="inline-flex items-center gap-1.5 rounded-xl border border-ink/10 px-3 py-2 text-xs font-semibold text-ink/60"
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 px-3 py-2 text-xs font-semibold text-white/65"
                       >
                         {promotion.active ? <EyeOff size={14} /> : <Eye size={14} />}
                         {promotion.active ? 'Masquer' : 'Publier'}
