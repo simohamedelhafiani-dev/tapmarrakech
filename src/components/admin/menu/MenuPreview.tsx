@@ -42,7 +42,7 @@ export default function MenuPreview({
     wallpaperObjectUrl: null,
     wallpaperRemoved: false,
     overlayOpacity: 0.35,
-    themeColors: { background: '#F5F1E8', surface: '#FFFDFA', text: '#26362B', accent: '#D4AF37' },
+    themeColors: { background: '#F5F1E8', surface: '#FFFDFA', text: '#24211C', accent: '#D4AF37' },
     aiDesign: null,
   };
   const family = getMenuTemplateFamily(activeDraft.template);
