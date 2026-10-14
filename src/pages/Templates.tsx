@@ -594,8 +594,8 @@ export default function Templates() {
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
             Personnalisation
           </p>
-          <h1 className="mt-1 font-display text-3xl text-forest">Templates</h1>
-          <p className="mt-2 max-w-3xl text-sm text-ink/50">
+          <h1 className="mt-1 font-display text-3xl text-[#D4AF37]">Templates</h1>
+          <p className="mt-2 max-w-3xl text-sm text-white/55">
             Crée et gère les présentations publiques de TapMarrakech sans modifier le code.
           </p>
         </div>
@@ -609,11 +609,11 @@ export default function Templates() {
         </button>
       </div>
 
-      <div className="flex gap-2 rounded-2xl border border-ink/10 bg-white p-2 shadow-sm">
+      <div className="flex gap-2 rounded-2xl border border-white/10 bg-[#111111] p-2 shadow-sm">
         <button
           onClick={() => setKind('page')}
           className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold ${
-            kind === 'page' ? 'bg-forest text-white' : 'text-ink/50 hover:bg-[#f7f7f3]'
+            kind === 'page' ? 'bg-[#D4AF37] text-[#0D0D0D]' : 'text-white/55 hover:bg-[#202020]'
           }`}
         >
           <LayoutTemplate size={17} />
@@ -622,32 +622,32 @@ export default function Templates() {
         <button
           onClick={() => setKind('menu')}
           className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold ${
-            kind === 'menu' ? 'bg-forest text-white' : 'text-ink/50 hover:bg-[#f7f7f3]'
+            kind === 'menu' ? 'bg-[#D4AF37] text-[#0D0D0D]' : 'text-white/55 hover:bg-[#202020]'
           }`}
         >
           <Menu size={17} />
           Menus
         </button>
-        <button onClick={() => setKind('loyalty')} className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold ${kind === 'loyalty' ? 'bg-forest text-white' : 'text-ink/50 hover:bg-[#f7f7f3]'}`}>
+        <button onClick={() => setKind('loyalty')} className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold ${kind === 'loyalty' ? 'bg-[#D4AF37] text-[#0D0D0D]' : 'text-white/55 hover:bg-[#202020]'}`}>
           <Star size={17} />
           Fidélité
         </button>
       </div>
 
       {(editing || name) && (
-        <section className="rounded-2xl border border-gold/20 bg-white p-6 shadow-sm">
+        <section className="rounded-2xl border border-gold/20 bg-[#111111] p-6 shadow-sm">
           <div className="mb-6 flex items-start justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
                 {editing ? 'Modification' : 'Création'}
               </p>
-              <h2 className="mt-1 font-display text-2xl text-forest">
+              <h2 className="mt-1 font-display text-2xl text-[#D4AF37]">
                 {editing ? editing.name : 'Nouveau template'}
               </h2>
             </div>
             <button
               onClick={resetForm}
-              className="rounded-xl border border-ink/10 p-2 text-ink/45 hover:bg-[#f7f7f3]"
+              className="rounded-xl border border-white/10 p-2 text-white/45 hover:bg-[#202020]"
             >
               <X size={17} />
             </button>
@@ -659,7 +659,7 @@ export default function Templates() {
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+                className="w-full rounded-xl border border-white/10 bg-[#171717] px-4 py-3 text-sm outline-none focus:border-[#D4AF37]"
               />
             </div>
 
@@ -674,7 +674,7 @@ export default function Templates() {
                   const preset = nextKind === 'page' ? PAGE_PRESETS[0] : nextKind === 'menu' ? MENU_PRESETS[0] : LOYALTY_PRESETS[0];
                   setConfigText(prettyJson(preset.config));
                 }}
-                className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none"
+                className="w-full rounded-xl border border-white/10 bg-[#171717] px-4 py-3 text-sm outline-none"
               >
                 <option value="page">Page publique</option>
                 <option value="menu">Menu</option>
@@ -687,7 +687,7 @@ export default function Templates() {
                 rows={3}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+                className="w-full rounded-xl border border-white/10 bg-[#171717] px-4 py-3 text-sm outline-none focus:border-[#D4AF37]"
               />
             </div>
 
@@ -697,7 +697,7 @@ export default function Templates() {
                 value={thumbnailUrl}
                 onChange={(e) => setThumbnailUrl(e.target.value)}
                 placeholder="https://..."
-                className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+                className="w-full rounded-xl border border-white/10 bg-[#171717] px-4 py-3 text-sm outline-none focus:border-[#D4AF37]"
               />
             </div>
 
@@ -709,7 +709,7 @@ export default function Templates() {
                     <button
                       key={preset.label}
                       onClick={() => setConfigText(prettyJson(preset.config))}
-                      className="rounded-lg border border-ink/10 px-3 py-1.5 text-[11px] font-semibold text-ink/60 hover:bg-[#f7f7f3]"
+                      className="rounded-lg border border-white/10 px-3 py-1.5 text-[11px] font-semibold text-white/60 hover:bg-[#202020]"
                     >
                       Preset {preset.label}
                     </button>
@@ -720,36 +720,36 @@ export default function Templates() {
                 rows={18}
                 value={configText}
                 onChange={(e) => setConfigText(e.target.value)}
-                className="w-full rounded-xl border border-ink/10 bg-[#171c19] px-4 py-3 font-mono text-xs leading-5 text-white outline-none focus:border-gold"
+                className="w-full rounded-xl border border-white/10 bg-[#171c19] px-4 py-3 font-mono text-xs leading-5 text-white outline-none focus:border-gold"
               />
-              <p className="mt-2 text-[11px] text-ink/35">
+              <p className="mt-2 text-[11px] text-white/35">
                 Cette configuration définit la présentation. Le contenu de chaque établissement reste indépendant du template.
               </p>
             </div>
 
-            <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-[#f7f7f3] p-4">
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-[#171717] p-4">
               <input
                 type="checkbox"
                 checked={active}
                 onChange={(e) => setActive(e.target.checked)}
-                className="h-4 w-4 accent-[#173d32]"
+                className="h-4 w-4 accent-[#D4AF37]"
               />
               <span>
-                <span className="block text-sm font-semibold text-forest">Template actif</span>
-                <span className="mt-1 block text-xs text-ink/40">Disponible pour les établissements.</span>
+                <span className="block text-sm font-semibold text-[#D4AF37]">Template actif</span>
+                <span className="mt-1 block text-xs text-white/40">Disponible pour les établissements.</span>
               </span>
             </label>
 
-            <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-[#f7f7f3] p-4">
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-[#171717] p-4">
               <input
                 type="checkbox"
                 checked={isDefault}
                 onChange={(e) => setIsDefault(e.target.checked)}
-                className="h-4 w-4 accent-[#173d32]"
+                className="h-4 w-4 accent-[#D4AF37]"
               />
               <span>
-                <span className="block text-sm font-semibold text-forest">Template par défaut</span>
-                <span className="mt-1 block text-xs text-ink/40">Un seul défaut par type.</span>
+                <span className="block text-sm font-semibold text-[#D4AF37]">Template par défaut</span>
+                <span className="mt-1 block text-xs text-white/40">Un seul défaut par type.</span>
               </span>
             </label>
           </div>
@@ -757,7 +757,7 @@ export default function Templates() {
           <div className="mt-6 flex justify-end gap-3">
             <button
               onClick={resetForm}
-              className="rounded-xl border border-ink/10 px-5 py-3 text-sm font-semibold text-ink/55 hover:bg-[#f7f7f3]"
+              className="rounded-xl border border-white/10 px-5 py-3 text-sm font-semibold text-white/55 hover:bg-[#202020]"
             >
               Annuler
             </button>
@@ -776,26 +776,26 @@ export default function Templates() {
       <section>
         <div className="mb-4">
           <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">Bibliothèque</p>
-          <h2 className="mt-1 font-display text-2xl text-forest">
+          <h2 className="mt-1 font-display text-2xl text-[#D4AF37]">
             {kind === 'page' ? 'Templates de page' : kind === 'menu' ? 'Templates de menu' : 'Templates fidélité'}
           </h2>
-          <p className="mt-1 text-xs text-ink/40">Choisis un modèle pour voir son rendu, le personnaliser et l'utiliser comme base.</p>
+          <p className="mt-1 text-xs text-white/40">Choisis un modèle pour voir son rendu, le personnaliser et l'utiliser comme base.</p>
         </div>
 
         {loading ? (
-          <div className="rounded-2xl border border-ink/10 bg-white p-8 text-center text-sm text-ink/40">Chargement...</div>
+          <div className="rounded-2xl border border-white/10 bg-[#111111] p-8 text-center text-sm text-white/40">Chargement...</div>
         ) : filteredTemplates.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-ink/15 bg-white p-10 text-center">
-            <p className="text-sm font-semibold text-forest">Aucun template</p>
-            <p className="mt-1 text-xs text-ink/40">Crée ton premier template.</p>
+          <div className="rounded-2xl border border-dashed border-white/15 bg-[#111111] p-10 text-center">
+            <p className="text-sm font-semibold text-[#D4AF37]">Aucun template</p>
+            <p className="mt-1 text-xs text-white/40">Crée ton premier template.</p>
           </div>
         ) : (
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(430px,.95fr)]">
-            <div className="rounded-[24px] border border-ink/10 bg-white p-5 shadow-sm">
+            <div className="rounded-[24px] border border-white/10 bg-[#111111] p-5 shadow-sm">
               <div className="mb-4 flex items-center justify-between">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">Modèles</p>
-                  <p className="mt-1 text-xs text-ink/40">{filteredTemplates.length} modèles disponibles</p>
+                  <p className="mt-1 text-xs text-white/40">{filteredTemplates.length} modèles disponibles</p>
                 </div>
                 <button onClick={startCreate} className="inline-flex items-center gap-2 rounded-xl bg-forest px-3 py-2 text-xs font-semibold text-white">
                   <Plus size={14}/> Nouveau
@@ -810,14 +810,14 @@ export default function Templates() {
                       key={template.id}
                       type="button"
                       onClick={() => { setSelectedTemplate(template); setEditorTab('preview'); }}
-                      className={`overflow-hidden rounded-2xl border text-left transition ${selected ? 'border-forest ring-2 ring-forest/10' : 'border-ink/10 hover:border-forest/30'}`}
+                      className={`overflow-hidden rounded-2xl border text-left transition ${selected ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/10' : 'border-white/10 hover:border-[#D4AF37]/30'}`}
                     >
                       <TemplateVisualPreview template={template} compact />
-                      <div className="border-t border-ink/10 bg-white p-3">
+                      <div className="border-t border-white/10 bg-[#111111] p-3">
                         <div className="flex items-start justify-between gap-2">
                           <div>
-                            <p className="text-sm font-semibold text-forest">{template.name}</p>
-                            <p className="mt-1 line-clamp-2 text-[10px] leading-4 text-ink/40">{template.description || 'Aucune description.'}</p>
+                            <p className="text-sm font-semibold text-[#D4AF37]">{template.name}</p>
+                            <p className="mt-1 line-clamp-2 text-[10px] leading-4 text-white/40">{template.description || 'Aucune description.'}</p>
                           </div>
                           {selected && <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-forest text-white"><Check size={13}/></span>}
                         </div>
@@ -829,19 +829,19 @@ export default function Templates() {
             </div>
 
             {selectedTemplate && (
-              <div className="overflow-hidden rounded-[24px] border border-ink/10 bg-white shadow-sm">
-                <div className="flex items-center justify-between border-b border-ink/10 px-5 py-4">
+              <div className="overflow-hidden rounded-[24px] border border-white/10 bg-[#111111] shadow-sm">
+                <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
                   <div>
                     <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">Aperçu en temps réel</p>
-                    <h3 className="mt-1 font-display text-xl text-forest">{selectedTemplate.name}</h3>
-                    <p className="mt-1 text-xs text-ink/40">Voici le rendu de base du template.</p>
+                    <h3 className="mt-1 font-display text-xl text-[#D4AF37]">{selectedTemplate.name}</h3>
+                    <p className="mt-1 text-xs text-white/40">Voici le rendu de base du template.</p>
                   </div>
-                  <span className="rounded-full bg-forest/5 px-3 py-1.5 text-[10px] font-semibold text-forest">
+                  <span className="rounded-full bg-[#D4AF37]/10 px-3 py-1.5 text-[10px] font-semibold text-[#D4AF37]">
                     {selectedTemplate.kind === 'loyalty' ? 'Fidélité' : selectedTemplate.kind === 'menu' ? 'Menu' : 'Page'}
                   </span>
                 </div>
 
-                <div className="min-h-[500px] bg-[#f7f7f3] p-5">
+                <div className="min-h-[500px] bg-[#171717] p-5">
                   <div className="mx-auto max-w-[470px]">
                     <TemplateVisualPreview template={selectedTemplate} />
                   </div>
