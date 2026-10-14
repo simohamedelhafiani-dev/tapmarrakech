@@ -256,8 +256,8 @@ export default function MenuConfigurator({
                 className={[
                   'rounded-xl border px-3 py-3 text-left transition-all duration-200',
                   active
-                    ? 'border-forest/20 bg-white shadow-sm ring-1 ring-gold/20'
-                    : 'border-ink/5 bg-white/60 hover:border-forest/15 hover:bg-white',
+                    ? 'border-gold/40 bg-gold/10 shadow-sm ring-1 ring-gold/20'
+                    : 'border-white/10 bg-white/[.03] hover:border-gold/30 hover:bg-white/[.06]',
                 ].join(' ')}
               >
                 <div className="flex items-center justify-between gap-2">
@@ -265,7 +265,7 @@ export default function MenuConfigurator({
                   <span
                     className={[
                       'grid h-5 w-5 place-items-center rounded-full border',
-                      active ? 'border-gold bg-gold text-white' : 'border-ink/10 bg-white',
+                      active ? 'border-gold bg-gold text-[#0D0D0D]' : 'border-white/10 bg-[#111111]',
                     ].join(' ')}
                   >
                     {active && <Check size={11} />}
