@@ -60,7 +60,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
     wallpaperObjectUrl: null,
     wallpaperRemoved: false,
     overlayOpacity: 0.35,
-    themeColors: { background: '#F5F1E8', surface: '#FFFDFA', text: '#26362B', accent: '#D4AF37' },
+    themeColors: { background: '#F5F1E8', surface: '#FFFDFA', text: '#24211C', accent: '#D4AF37' },
     aiDesign: null,
   });
 
@@ -100,7 +100,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
     const themeColors = {
       background: validHex(rawColors.background, '#F5F1E8'),
       surface: validHex(rawColors.surface, '#FFFDFA'),
-      text: validHex(rawColors.text, '#26362B'),
+      text: validHex(rawColors.text, '#24211C'),
       accent: validHex(rawColors.accent, '#D4AF37'),
     };
 
@@ -279,7 +279,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
         </div>
 
         <div className="inline-flex items-center gap-2 self-start rounded-full border border-white/10 bg-white/[.04] px-3 py-2 text-[10px] font-semibold text-white/70 shadow-soft md:self-auto">
-          <span className={menu.loading || loadingDesign ? 'h-2 w-2 animate-pulse rounded-full bg-amber-400' : 'h-2 w-2 rounded-full bg-green-500'} />
+          <span className={menu.loading || loadingDesign ? 'h-2 w-2 animate-pulse rounded-full bg-amber-400' : 'h-2 w-2 rounded-full bg-[#D4AF37]'} />
           {menu.loading || loadingDesign ? 'Synchronisation…' : hasChanges ? 'Modifications locales' : 'Design publié'}
         </div>
       </div>
