@@ -183,14 +183,14 @@ export default function ItemEditor({
           </div>
 
           <div className="mt-4 grid gap-3 md:grid-cols-2">
-            <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Nom de l’article" className="rounded-xl border border-white/10 px-4 py-3 text-sm" />
-            <input value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="Prix (DH)" type="number" min="0" className="rounded-xl border border-white/10 px-4 py-3 text-sm" />
+            <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Nom de l’article" className="rounded-xl border border-white/10 bg-[#171717] px-4 py-3 text-sm text-white placeholder:text-white/30" />
+            <input value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="Prix (DH)" type="number" min="0" className="rounded-xl border border-white/10 bg-[#171717] px-4 py-3 text-sm text-white placeholder:text-white/30" />
             <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Description" className="min-h-24 rounded-xl border border-white/10 px-4 py-3 text-sm md:col-span-2" />
-            <select value={formCategoryId} onChange={e => setFormCategoryId(e.target.value)} className="rounded-xl border border-white/10 px-4 py-3 text-sm">
+            <select value={formCategoryId} onChange={e => setFormCategoryId(e.target.value)} className="rounded-xl border border-white/10 bg-[#171717] px-4 py-3 text-sm text-white placeholder:text-white/30">
               {activeCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
             {editingId && (
-              <input type="file" accept="image/png,image/jpeg,image/webp" onChange={e => e.target.files?.[0] && void upload(e.target.files[0])} disabled={uploading} className="rounded-xl border border-white/10 bg-white px-3 py-2 text-xs" />
+              <input type="file" accept="image/png,image/jpeg,image/webp" onChange={e => e.target.files?.[0] && void upload(e.target.files[0])} disabled={uploading} className="rounded-xl border border-white/10 bg-[#171717] px-3 py-2 text-xs text-white" />
             )}
           </div>
 
@@ -232,7 +232,7 @@ export default function ItemEditor({
               <button type="button" onClick={() => void onToggleActive(item.id)} disabled={saving} className={item.active ? 'rounded-full bg-gold/10 px-3 py-1.5 text-[10px] font-semibold text-gold' : 'rounded-full bg-ink/10 px-3 py-1.5 text-[10px] font-semibold text-white/45'}>
                 {item.active ? 'Actif' : 'Inactif'}
               </button>
-              <button type="button" onClick={() => void onDelete(item.id)} disabled={saving} className="grid h-8 w-8 place-items-center rounded-lg bg-white text-white/35 hover:text-red-600 disabled:opacity-40">
+              <button type="button" onClick={() => void onDelete(item.id)} disabled={saving} className="grid h-8 w-8 place-items-center rounded-lg bg-[#242424] text-white/45 hover:text-red-300 disabled:opacity-40">
                 <Trash2 size={14} />
               </button>
             </div>
