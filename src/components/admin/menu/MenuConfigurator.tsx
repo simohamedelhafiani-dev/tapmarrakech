@@ -90,12 +90,12 @@ export default function MenuConfigurator({
   };
 
   return (
-    <section className="space-y-4 rounded-3xl border border-ink/5 bg-white p-5 shadow-sm">
+    <section className="space-y-4 rounded-3xl border border-white/10 bg-[#111111] p-5 shadow-sm">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Design</p>
           <h3 className="mt-1 text-xl font-semibold text-forest">Studio visuel</h3>
-          <p className="mt-1 text-xs leading-5 text-ink/40">
+          <p className="mt-1 text-xs leading-5 text-white/40">
             La structure du modèle reste verrouillée. Tu peux personnaliser les couleurs et le fond, puis publier.
           </p>
         </div>
@@ -104,7 +104,7 @@ export default function MenuConfigurator({
       </div>
 
       <div>
-        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.15em] text-ink/35">Template</p>
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.15em] text-white/35">Template</p>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
           {templates.map((template) => {
             const active = draft.template === template.id;
@@ -157,7 +157,7 @@ export default function MenuConfigurator({
                   <span className="text-xs font-semibold text-forest">{template.label}</span>
                   {active && <Check size={14} className="text-gold" />}
                 </div>
-                <p className="mt-1 text-[10px] leading-4 text-ink/40">{template.description}</p>
+                <p className="mt-1 text-[10px] leading-4 text-white/40">{template.description}</p>
                 <p className="mt-2 text-[9px] font-semibold uppercase tracking-wider text-gold">{template.sector}</p>
               </button>
             );
@@ -165,10 +165,10 @@ export default function MenuConfigurator({
         </div>
       </div>
 
-      <div className="rounded-2xl border border-ink/10 bg-white p-4">
+      <div className="rounded-2xl border border-white/10 bg-[#171717] p-4">
         <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-gold">Textes du menu</p>
         <h4 className="mt-1 text-sm font-semibold text-forest">Personnaliser les titres</h4>
-        <p className="mt-1 text-[10px] leading-4 text-ink/45">Modifie le titre et le sous-titre affichés en haut du menu. Les modifications apparaissent directement dans l’aperçu et seront enregistrées avec « Publier ».</p>
+        <p className="mt-1 text-[10px] leading-4 text-white/45">Modifie le titre et le sous-titre affichés en haut du menu. Les modifications apparaissent directement dans l’aperçu et seront enregistrées avec « Publier ».</p>
         {(() => {
           const ai = draft.aiDesign && typeof draft.aiDesign === 'object' ? draft.aiDesign : {};
           const hero = ai.hero && typeof ai.hero === 'object' ? ai.hero as Record<string, unknown> : {};
@@ -183,17 +183,17 @@ export default function MenuConfigurator({
         })()}
       </div>
 
-      <div className="rounded-2xl border border-ink/10 bg-[#fafaf7] p-4">
+      <div className="rounded-2xl border border-white/10 bg-[#171717] p-4">
         <div className="flex items-start justify-between gap-3">
-          <div><p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-gold">Personnalisation</p><h4 className="mt-1 text-sm font-semibold text-forest">Couleurs du modèle</h4><p className="mt-1 text-[10px] leading-4 text-ink/45">Le layout reste verrouillé ; seules les couleurs et le fond changent.</p></div>
-          <span className="rounded-full border border-ink/10 bg-white px-2.5 py-1 text-[9px] font-semibold text-forest">Structure verrouillée</span>
+          <div><p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-gold">Personnalisation</p><h4 className="mt-1 text-sm font-semibold text-forest">Couleurs du modèle</h4><p className="mt-1 text-[10px] leading-4 text-white/45">Le layout reste verrouillé ; seules les couleurs et le fond changent.</p></div>
+          <span className="rounded-full border border-white/10 bg-[#111111] px-2.5 py-1 text-[9px] font-semibold text-forest">Structure verrouillée</span>
         </div>
         <div className="mt-4 rounded-xl border border-gold/20 bg-gradient-to-r from-gold/10 to-transparent p-3">
           <div className="flex items-center gap-3">
-            {logoUrl ? <img src={logoUrl} alt="Logo de l’établissement" className="h-11 w-11 rounded-lg border border-ink/10 bg-white object-contain p-1" /> : <div className="grid h-11 w-11 place-items-center rounded-lg border border-dashed border-ink/15 bg-white text-ink/30"><ImagePlus size={18}/></div>}
+            {logoUrl ? <img src={logoUrl} alt="Logo de l’établissement" className="h-11 w-11 rounded-lg border border-ink/10 bg-white object-contain p-1" /> : <div className="grid h-11 w-11 place-items-center rounded-lg border border-dashed border-ink/15 bg-white text-white/30"><ImagePlus size={18}/></div>}
             <div className="min-w-0 flex-1">
               <p className="text-xs font-semibold text-forest">Palette de marque par IA</p>
-              <p className="mt-1 text-[10px] leading-4 text-ink/45">{logoUrl ? 'Analyse le logo et propose 4 couleurs harmonisées, avec un contraste lisible.' : 'Ajoute d’abord le logo dans les informations de ton établissement.'}</p>
+              <p className="mt-1 text-[10px] leading-4 text-white/45">{logoUrl ? 'Analyse le logo et propose 4 couleurs harmonisées, avec un contraste lisible.' : 'Ajoute d’abord le logo dans les informations de ton établissement.'}</p>
             </div>
             <button type="button" disabled={publishing || paletteBusy || !logoUrl} onClick={async () => {
               setPaletteBusy(true); setPaletteNotice(null); setError(null);
@@ -217,17 +217,17 @@ export default function MenuConfigurator({
         </div>
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {([{key:'background',label:'Arrière-plan'},{key:'surface',label:'Blocs / cartes'},{key:'text',label:'Texte'},{key:'accent',label:'Accent / prix'}] as const).map(color => (
-            <label key={color.key} className="flex min-w-0 items-center gap-2 rounded-xl border border-ink/5 bg-white p-2.5">
+            <label key={color.key} className="flex min-w-0 items-center gap-2 rounded-xl border border-white/10 bg-[#111111] p-2.5">
               <input type="color" value={draft.themeColors[color.key]} onChange={event => onChange({themeColors:{...draft.themeColors,[color.key]:event.target.value}})} className="h-9 w-10 shrink-0 cursor-pointer rounded-lg border-0 bg-transparent p-0" aria-label={color.label}/>
               <span className="text-[10px] font-medium text-forest">{color.label}</span>
             </label>
           ))}
         </div>
-        <button type="button" disabled={publishing} onClick={() => onChange({themeColors:{background:'#F5F1E8',surface:'#FFFDFA',text:'#26362B',accent:'#D4AF37'}})} className="mt-3 rounded-full border border-ink/10 bg-white px-3 py-2 text-[10px] font-semibold text-forest disabled:opacity-50">Réinitialiser les couleurs</button>
+        <button type="button" disabled={publishing} onClick={() => onChange({themeColors:{background:'#F5F1E8',surface:'#FFFDFA',text:'#26362B',accent:'#D4AF37'}})} className="mt-3 rounded-full border border-white/10 bg-[#111111] px-3 py-2 text-[10px] font-semibold text-forest disabled:opacity-50">Réinitialiser les couleurs</button>
       </div>
 
-      <div className="rounded-2xl border border-ink/10 bg-white p-4">
-        <div className="flex items-center justify-between gap-3"><div><p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-gold">Wallpaper</p><p className="mt-1 text-xs text-ink/50">Règle l’intensité du voile sur l’image de fond.</p></div><span className="text-xs font-bold text-forest">{Math.round(draft.overlayOpacity * 100)}%</span></div>
+      <div className="rounded-2xl border border-white/10 bg-[#171717] p-4">
+        <div className="flex items-center justify-between gap-3"><div><p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-gold">Wallpaper</p><p className="mt-1 text-xs text-white/50">Règle l’intensité du voile sur l’image de fond.</p></div><span className="text-xs font-bold text-forest">{Math.round(draft.overlayOpacity * 100)}%</span></div>
         <input aria-label="Intensité du voile du wallpaper" type="range" min="0" max="70" step="5" value={Math.round(draft.overlayOpacity * 100)} onChange={event => onChange({overlayOpacity:Number(event.target.value)/100})} disabled={publishing} className="mt-3 w-full accent-[#D4AF37]"/>
       </div>
 
@@ -236,7 +236,7 @@ export default function MenuConfigurator({
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-gold">Expérience</p>
             <h4 className="mt-1 text-sm font-semibold text-forest">Navigation du menu</h4>
-            <p className="mt-1 text-[10px] leading-4 text-ink/40">
+            <p className="mt-1 text-[10px] leading-4 text-white/40">
               Choisis comment le visiteur parcourt ton menu.
             </p>
           </div>
@@ -271,13 +271,13 @@ export default function MenuConfigurator({
                     {active && <Check size={11} />}
                   </span>
                 </div>
-                <span className="mt-1 block text-[9px] leading-4 text-ink/35">{mode.description}</span>
+                <span className="mt-1 block text-[9px] leading-4 text-white/35">{mode.description}</span>
               </button>
             );
           })}
         </div>
 
-        <p className="mt-3 text-[9px] leading-4 text-ink/35">
+        <p className="mt-3 text-[9px] leading-4 text-white/35">
           Le choix est synchronisé avec le Draft, l’aperçu et la page publique.
         </p>
       </div>
@@ -285,8 +285,8 @@ export default function MenuConfigurator({
       <div>
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-ink/35">Wallpaper</p>
-            <p className="mt-1 text-[10px] text-ink/35">Aucun upload réseau avant « Publier ».</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white/35">Wallpaper</p>
+            <p className="mt-1 text-[10px] text-white/35">Aucun upload réseau avant « Publier ».</p>
           </div>
           <button
             type="button"
@@ -339,12 +339,12 @@ export default function MenuConfigurator({
           >
             <ImagePlus size={24} className="text-gold" />
             <span className="mt-2 text-xs font-semibold text-forest">Aucun wallpaper</span>
-            <span className="mt-1 text-[10px] text-ink/35">Ajoute ton image verticale</span>
+            <span className="mt-1 text-[10px] text-white/35">Ajoute ton image verticale</span>
           </button>
         )}
 
         <div className="mt-4">
-          <div className="flex items-center justify-between text-[10px] font-semibold text-ink/45">
+          <div className="flex items-center justify-between text-[10px] font-semibold text-white/45">
             <span>Voile de contraste</span>
             <span>{Math.round(draft.overlayOpacity * 100)}%</span>
           </div>
