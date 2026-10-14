@@ -119,11 +119,11 @@ export default function MenuConfigurator({
                   active ? 'border-gold bg-gold/10 ring-1 ring-gold/20' : 'border-ink/8 bg-[#fafaf7] hover:border-forest/20',
                 ].join(' ')}
               >
-                <div className={`mb-3 min-h-[86px] overflow-hidden rounded-xl border p-2.5 ${['dark', 'onyx', 'royal-gold', 'deep-ocean'].includes(template.family) ? 'border-white/10 bg-[#101b18] text-white' : 'border-black/5 bg-[#f7f3ea] text-forest'}`}>
+                <div className={`mb-3 min-h-[86px] overflow-hidden rounded-xl border p-2.5 ${['dark', 'onyx', 'royal-gold', 'deep-ocean'].includes(template.family) ? 'border-white/10 bg-[#111111] text-white' : 'border-black/5 bg-[#f7f3ea] text-forest'}`}>
                   {['04_menu_luxe', '17_fine_dining'].includes(template.id) ? (
                     <div className="flex h-[86px] flex-col items-center justify-center bg-[#11100d] px-3 text-center text-[#f7f0df]"><div className="mb-2 h-px w-8 bg-[#d2b46a]" /><div className="font-serif text-[10px] tracking-[0.2em]">MENU SIGNATURE</div><div className="my-2 h-px w-12 bg-[#d2b46a]/60" /><div className="space-y-1"><div className="h-1 w-20 bg-white/50" /><div className="mx-auto h-1 w-12 bg-[#d2b46a]" /><div className="mx-auto h-1 w-16 bg-white/25" /></div></div>
                   ) : template.id === '11_brunch_cafe' ? (
-                    <div className="grid h-[86px] grid-cols-2 gap-2 bg-[#e9e5d7] p-2 text-[#354637]"><div className="flex flex-col justify-end rounded-md bg-[#c4b99d] p-1.5"><div className="h-1 w-3/4 rounded bg-[#354637]/60" /><div className="mt-1 h-1 w-1/2 rounded bg-[#354637]/30" /></div><div className="space-y-2 py-1"><div className="font-serif text-[9px]">BRUNCH CLUB</div><div className="h-1 w-full bg-[#354637]/35" /><div className="h-1 w-2/3 bg-[#354637]/20" /><div className="h-1 w-1/2 bg-[#9d8150]" /></div></div>
+                    <div className="grid h-[86px] grid-cols-2 gap-2 bg-[#e9e5d7] p-2 text-[#3A3328]"><div className="flex flex-col justify-end rounded-md bg-[#c4b99d] p-1.5"><div className="h-1 w-3/4 rounded bg-[#3A3328]/60" /><div className="mt-1 h-1 w-1/2 rounded bg-[#3A3328]/30" /></div><div className="space-y-2 py-1"><div className="font-serif text-[9px]">BRUNCH CLUB</div><div className="h-1 w-full bg-[#3A3328]/35" /><div className="h-1 w-2/3 bg-[#3A3328]/20" /><div className="h-1 w-1/2 bg-[#9d8150]" /></div></div>
                   ) : template.id === '12_sushi_bar' ? (
                     <div className="h-[86px] space-y-2 bg-[#17110f] p-2 text-[#fff4e7]"><div className="flex items-center gap-2 border-b border-[#c74a3b]/60 pb-1"><div className="h-7 w-9 rounded-sm bg-[#a83b30]" /><div className="flex-1 space-y-1"><div className="h-1 w-3/4 bg-white/60" /><div className="h-1 w-1/2 bg-white/20" /></div><div className="h-1 w-5 bg-[#d6a45b]" /></div><div className="flex items-center gap-2"><div className="h-7 w-9 rounded-sm bg-[#5b3428]" /><div className="flex-1 space-y-1"><div className="h-1 w-2/3 bg-white/60" /><div className="h-1 w-1/3 bg-white/20" /></div><div className="h-1 w-5 bg-[#d6a45b]" /></div></div>
                   ) : template.id === '06_beauty_studio' ? (
@@ -213,7 +213,7 @@ export default function MenuConfigurator({
               {paletteBusy ? 'Analyse…' : 'Générer'}
             </button>
           </div>
-          {paletteNotice && <p className="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-[10px] leading-4 text-emerald-800">{paletteNotice}</p>}
+          {paletteNotice && <p className="mt-3 rounded-lg bg-[#D4AF37]/10 px-3 py-2 text-[10px] leading-4 text-[#D4AF37]">{paletteNotice}</p>}
         </div>
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {([{key:'background',label:'Arrière-plan'},{key:'surface',label:'Blocs / cartes'},{key:'text',label:'Texte'},{key:'accent',label:'Accent / prix'}] as const).map(color => (
@@ -223,7 +223,7 @@ export default function MenuConfigurator({
             </label>
           ))}
         </div>
-        <button type="button" disabled={publishing} onClick={() => onChange({themeColors:{background:'#F5F1E8',surface:'#FFFDFA',text:'#26362B',accent:'#D4AF37'}})} className="mt-3 rounded-full border border-white/10 bg-[#111111] px-3 py-2 text-[10px] font-semibold text-forest disabled:opacity-50">Réinitialiser les couleurs</button>
+        <button type="button" disabled={publishing} onClick={() => onChange({themeColors:{background:'#F5F1E8',surface:'#FFFDFA',text:'#24211C',accent:'#D4AF37'}})} className="mt-3 rounded-full border border-white/10 bg-[#111111] px-3 py-2 text-[10px] font-semibold text-forest disabled:opacity-50">Réinitialiser les couleurs</button>
       </div>
 
       <div className="rounded-2xl border border-white/10 bg-[#171717] p-4">
