@@ -83,6 +83,7 @@ const links = [
 type Establishment = {
   id: string;
   name: string;
+  slug: string;
   logo_url: string | null;
 };
 
