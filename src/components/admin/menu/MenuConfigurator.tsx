@@ -165,6 +165,24 @@ export default function MenuConfigurator({
         </div>
       </div>
 
+      <div className="rounded-2xl border border-ink/10 bg-white p-4">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-gold">Textes du menu</p>
+        <h4 className="mt-1 text-sm font-semibold text-forest">Personnaliser les titres</h4>
+        <p className="mt-1 text-[10px] leading-4 text-ink/45">Modifie le titre et le sous-titre affichés en haut du menu. Les modifications apparaissent directement dans l’aperçu et seront enregistrées avec « Publier ».</p>
+        {(() => {
+          const ai = draft.aiDesign && typeof draft.aiDesign === 'object' ? draft.aiDesign : {};
+          const hero = ai.hero && typeof ai.hero === 'object' ? ai.hero as Record<string, unknown> : {};
+          const updateHero = (key: 'title' | 'subtitle', value: string) => {
+            const nextHero = { ...hero, [key]: value };
+            onChange({ aiDesign: { ...ai, hero: nextHero } });
+          };
+          return <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <label className="block"><span className="mb-1 block text-[10px] font-medium text-forest">Titre principal</span><input type="text" maxLength={70} value={typeof hero.title === 'string' ? hero.title : ''} placeholder={establishmentName || 'Nom de votre établissement'} disabled={publishing} onChange={event => updateHero('title', event.target.value)} className="w-full rounded-xl border border-ink/10 bg-[#fafaf7] px-3 py-2.5 text-xs text-forest outline-none focus:border-gold"/></label>
+            <label className="block"><span className="mb-1 block text-[10px] font-medium text-forest">Sous-titre</span><input type="text" maxLength={100} value={typeof hero.subtitle === 'string' ? hero.subtitle : ''} placeholder="Notre carte" disabled={publishing} onChange={event => updateHero('subtitle', event.target.value)} className="w-full rounded-xl border border-ink/10 bg-[#fafaf7] px-3 py-2.5 text-xs text-forest outline-none focus:border-gold"/></label>
+          </div>;
+        })()}
+      </div>
+
       <div className="rounded-2xl border border-ink/10 bg-[#fafaf7] p-4">
         <div className="flex items-start justify-between gap-3">
           <div><p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-gold">Personnalisation</p><h4 className="mt-1 text-sm font-semibold text-forest">Couleurs du modèle</h4><p className="mt-1 text-[10px] leading-4 text-ink/45">Le layout reste verrouillé ; seules les couleurs et le fond changent.</p></div>
