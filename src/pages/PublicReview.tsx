@@ -1511,8 +1511,8 @@ function AIPremiumMenu({
       }
     : style === 'dark'
       ? {
-          page: 'bg-[#102b24] text-white',
-          body: 'bg-[#102b24]',
+          page: 'bg-[#0D0D0D] text-white',
+          body: 'bg-[#0D0D0D]',
           muted: 'text-white/55',
           accent: 'text-gold',
           line: 'border-white/10',
@@ -1989,7 +1989,7 @@ function MenuTemplate({
               <h2 className="mb-4 font-display text-2xl text-forest">{category.name}</h2>
               <div className="space-y-3">
                 {(itemsByCategory[category.id] ?? []).map(item => (
-                  <article key={item.id} className={templateLayout === 'stacked-photo' ? 'overflow-hidden rounded-[24px] bg-white shadow-sm ring-1 ring-ink/5' : 'flex gap-3 overflow-hidden rounded-2xl bg-white p-2 shadow-sm ring-1 ring-ink/5'}>
+                  <article key={item.id} className={templateLayout === 'stacked-photo' ? 'overflow-hidden rounded-[24px] shadow-sm ring-1 ring-ink/5' : 'flex gap-3 overflow-hidden rounded-2xl p-2 shadow-sm ring-1 ring-ink/5'} style={menuSurfaceStyle}>
                     {photoMode === 'with_photos' && item.image_url && <img src={item.image_url} alt="" className={templateLayout === 'stacked-photo' ? 'h-44 w-full object-cover' : 'h-24 w-24 shrink-0 rounded-xl object-cover'} />}
                     <div className={templateLayout === 'stacked-photo' ? 'flex items-start justify-between gap-3 p-4' : 'flex min-w-0 flex-1 items-start justify-between gap-3 py-2 pr-2'}>
                       <div className="min-w-0">
@@ -2024,7 +2024,7 @@ function MenuTemplate({
                 <h2 className={`font-display text-2xl text-forest ${templateLayout === 'price-list' ? 'inline-block border-b border-gold/40 pb-2' : ''}`}>{category.name}</h2>
                 {category.description && <p className="mt-1 text-xs text-ink/40">{category.description}</p>}
               </div>
-              <div className={templateLayout === 'service-table' ? 'overflow-hidden rounded-2xl border border-ink/10 bg-white' : templateLayout === 'compact-list' ? 'space-y-0' : 'space-y-4'}>
+              <div className={templateLayout === 'service-table' ? 'overflow-hidden rounded-2xl border border-ink/10' : templateLayout === 'compact-list' ? 'space-y-0' : 'space-y-4'} style={templateLayout === 'service-table' ? menuSurfaceStyle : undefined}>
                 {(itemsByCategory[category.id] ?? []).map((item,index) => (
                   <article key={item.id} className={`flex items-baseline justify-between gap-4 ${templateLayout === 'service-table' ? 'border-b border-ink/5 p-4 last:border-b-0' : templateLayout === 'compact-list' ? 'border-b border-ink/10 py-3 last:border-b-0' : 'py-1'}`}>
                     <div className="min-w-0">
@@ -2091,7 +2091,7 @@ function MenuTemplate({
               </div>
               <div className="grid grid-cols-2 gap-3">
                 {(itemsByCategory[category.id] ?? []).map((item) => (
-                  <article key={item.id} className="overflow-hidden rounded-[24px] bg-white shadow-sm ring-1 ring-ink/5">
+                  <article key={item.id} className="overflow-hidden rounded-[24px] shadow-sm ring-1 ring-ink/5" style={menuSurfaceStyle}>
                     <div className="aspect-[1.15] overflow-hidden bg-[#eee9df]">
                       {photoMode === 'with_photos' && item.image_url ? <img src={item.image_url} alt="" className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-ink/15"><UtensilsCrossed size={25} /></div>}
                     </div>
@@ -2158,7 +2158,7 @@ function MenuTemplate({
             <h2 className="mb-4 font-display text-2xl text-forest">{category.name}</h2>
             <div className="space-y-3">
               {(itemsByCategory[category.id] ?? []).map((item) => (
-                <article key={item.id} className="flex overflow-hidden rounded-[22px] bg-white p-3 shadow-sm ring-1 ring-ink/5">
+                <article key={item.id} className="flex overflow-hidden rounded-[22px] p-3 shadow-sm ring-1 ring-ink/5" style={menuSurfaceStyle}>
                   {photoMode === 'with_photos' && item.image_url && <img src={item.image_url} alt="" className="h-24 w-24 shrink-0 rounded-[16px] object-cover" />}
                   <div className="min-w-0 flex-1 p-2">
                     <div className="flex items-start justify-between gap-3"><h3 className="font-semibold text-forest">{item.name}</h3><span className="shrink-0 text-sm font-bold text-gold">{Number(item.price).toLocaleString('fr-FR')} MAD</span></div>
