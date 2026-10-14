@@ -388,11 +388,11 @@ export default function Establishments() {
             Réseau
           </p>
 
-          <h1 className="mt-2 font-display text-4xl text-forest">
+          <h1 className="mt-2 font-display text-4xl text-white">
             Établissements
           </h1>
 
-          <p className="mt-2 text-sm text-ink/50">
+          <p className="mt-2 text-sm text-white/60">
             Gérez vos lieux et leurs liens de collecte.
           </p>
         </div>
@@ -406,7 +406,7 @@ export default function Establishments() {
               setGoogleReplyApproval(false);
               setShow(true);
             }}
-            className="flex w-fit items-center gap-2 rounded-xl bg-forest px-4 py-3 text-xs font-semibold text-white transition hover:bg-forest-light"
+            className="flex w-fit items-center gap-2 rounded-xl bg-[#D4AF37] px-4 py-3 text-xs font-semibold text-[#0D0D0D] transition hover:bg-[#D4AF37]"
           >
             <Plus size={16} />
             Nouvel établissement
@@ -417,7 +417,7 @@ export default function Establishments() {
       {/* MESSAGE */}
 
       {message && (
-        <div className="mb-5 rounded-xl bg-[#e5eee9] px-4 py-3 text-sm text-forest">
+        <div className="mb-5 rounded-xl bg-[#211c10] px-4 py-3 text-sm text-white">
           {message}
         </div>
       )}
@@ -425,17 +425,17 @@ export default function Establishments() {
       {/* RESPONSABLE SANS ÉTABLISSEMENT */}
 
       {places.length === 0 && role === 'responsible' && (
-        <div className="rounded-2xl border border-dashed border-ink/15 bg-white px-6 py-20 text-center">
+        <div className="rounded-2xl border border-dashed border-white/15 bg-[#111111] px-6 py-20 text-center">
           <Building2
             className="mx-auto text-gold"
             size={36}
           />
 
-          <h2 className="mt-4 font-display text-2xl text-forest">
+          <h2 className="mt-4 font-display text-2xl text-white">
             Aucun établissement
           </h2>
 
-          <p className="mx-auto mt-2 max-w-sm text-sm text-ink/50">
+          <p className="mx-auto mt-2 max-w-sm text-sm text-white/60">
             Aucun établissement actif ne vous est actuellement
             rattaché.
           </p>
@@ -445,17 +445,17 @@ export default function Establishments() {
       {/* ADMIN SANS ÉTABLISSEMENT */}
 
       {places.length === 0 && role === 'admin' && (
-        <div className="rounded-2xl border border-dashed border-ink/15 bg-white px-6 py-20 text-center">
+        <div className="rounded-2xl border border-dashed border-white/15 bg-[#111111] px-6 py-20 text-center">
           <Building2
             className="mx-auto text-gold"
             size={36}
           />
 
-          <h2 className="mt-4 font-display text-2xl text-forest">
+          <h2 className="mt-4 font-display text-2xl text-white">
             Votre réseau commence ici
           </h2>
 
-          <p className="mx-auto mt-2 max-w-sm text-sm text-ink/50">
+          <p className="mx-auto mt-2 max-w-sm text-sm text-white/60">
             Créez votre premier établissement pour obtenir
             votre lien QR et NFC.
           </p>
@@ -468,7 +468,7 @@ export default function Establishments() {
               setGoogleReplyApproval(false);
               setShow(true);
             }}
-            className="mt-6 rounded-xl bg-forest px-5 py-3 text-xs font-semibold text-white"
+            className="mt-6 rounded-xl bg-[#D4AF37] px-5 py-3 text-xs font-semibold text-[#0D0D0D]"
           >
             Créer un établissement
           </button>
@@ -482,10 +482,10 @@ export default function Establishments() {
           {places.map((place) => (
             <div
               key={place.id}
-              className="rounded-2xl border border-ink/5 bg-white p-5 shadow-soft"
+              className="rounded-2xl border border-white/10 bg-[#111111] p-5 shadow-soft"
             >
               <div className="flex items-start gap-4">
-                <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-forest font-display text-2xl text-gold">
+                <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-[#D4AF37] font-display text-2xl text-gold">
                   {place.logo_url ? (
                     <img
                       src={place.logo_url}
@@ -498,11 +498,11 @@ export default function Establishments() {
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <h2 className="font-display text-xl text-forest">
+                  <h2 className="font-display text-xl text-white">
                     {place.name}
                   </h2>
 
-                  <p className="mt-1 truncate text-xs text-ink/40">
+                  <p className="mt-1 truncate text-xs text-white/45">
                     {publicUrl(place.slug)}
                   </p>
                 </div>
@@ -515,42 +515,42 @@ export default function Establishments() {
                 </button>
               </div>
 
-              <div className="mt-5 rounded-2xl border border-forest/10 bg-white p-4">
+              <div className="mt-5 rounded-2xl border border-white/10 bg-[#111111] p-4">
                 <div className="flex items-center justify-between gap-3">
-                  <div><p className="text-xs font-bold uppercase tracking-[0.14em] text-forest">Liens publics</p><p className="mt-1 text-[11px] text-ink/50">Générez un lien séparé pour chaque fonctionnalité.</p></div>
+                  <div><p className="text-xs font-bold uppercase tracking-[0.14em] text-white">Liens publics</p><p className="mt-1 text-[11px] text-white/60">Générez un lien séparé pour chaque fonctionnalité.</p></div>
                   <Link2 size={20} className="shrink-0 text-gold" />
                 </div>
                 <div className="mt-4 space-y-2">
                   {publicLinks(place).map((link) => {
                     const Icon = link.icon;
                     return (
-                      <div key={link.key} className="rounded-xl border border-ink/5 bg-[#f7f7f3] p-3">
-                        <div className="flex items-start gap-3"><div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white text-forest"><Icon size={16} /></div><div className="min-w-0 flex-1"><p className="text-xs font-semibold text-forest">{link.title}</p><p className="mt-0.5 text-[10px] text-ink/40">{link.description}</p><p className="mt-2 truncate rounded-lg bg-white px-2.5 py-2 text-[10px] text-ink/50">{link.url}</p></div></div>
+                      <div key={link.key} className="rounded-xl border border-white/10 bg-[#171717] p-3">
+                        <div className="flex items-start gap-3"><div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[#111111] text-white"><Icon size={16} /></div><div className="min-w-0 flex-1"><p className="text-xs font-semibold text-white">{link.title}</p><p className="mt-0.5 text-[10px] text-white/45">{link.description}</p><p className="mt-2 truncate rounded-lg bg-[#111111] px-2.5 py-2 text-[10px] text-white/60">{link.url}</p></div></div>
                         <div className="mt-2 flex flex-wrap gap-2">
-                          <button onClick={() => copy(link.url)} className="flex items-center gap-1.5 rounded-lg bg-forest px-3 py-2 text-[10px] font-semibold text-white"><Copy size={12} />Copier</button>
-                          <a href={link.url} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[10px] font-semibold text-forest"><ExternalLink size={12} />Ouvrir</a>
-                          <button onClick={() => setQr({ title: link.title, url: link.url, filename: place.slug + '-' + link.key })} className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[10px] font-semibold text-forest"><QrCode size={12} />QR</button>
+                          <button onClick={() => copy(link.url)} className="flex items-center gap-1.5 rounded-lg bg-[#D4AF37] px-3 py-2 text-[10px] font-semibold text-[#0D0D0D]"><Copy size={12} />Copier</button>
+                          <a href={link.url} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 rounded-lg bg-[#111111] px-3 py-2 text-[10px] font-semibold text-white"><ExternalLink size={12} />Ouvrir</a>
+                          <button onClick={() => setQr({ title: link.title, url: link.url, filename: place.slug + '-' + link.key })} className="flex items-center gap-1.5 rounded-lg bg-[#111111] px-3 py-2 text-[10px] font-semibold text-white"><QrCode size={12} />QR</button>
                         </div>
                       </div>
                     );
                   })}
                 </div>
               </div>
-              <div className="mt-5 rounded-2xl border border-gold/20 bg-[#f7f7f3] p-4">
+              <div className="mt-5 rounded-2xl border border-gold/20 bg-[#171717] p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-forest">
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-white">
                       Scanner fidélité
                     </p>
-                    <p className="mt-1 text-[11px] text-ink/50">
+                    <p className="mt-1 text-[11px] text-white/60">
                       Lien permanent pour les employés
                     </p>
                   </div>
                   <QrCode size={20} className="shrink-0 text-gold" />
                 </div>
 
-                <div className="mt-3 rounded-xl bg-white px-3 py-2.5">
-                  <p className="truncate text-[11px] text-ink/50">
+                <div className="mt-3 rounded-xl bg-[#111111] px-3 py-2.5">
+                  <p className="truncate text-[11px] text-white/60">
                     {scannerLinks[place.id] ?? 'Génération du lien…'}
                   </p>
                 </div>
@@ -559,7 +559,7 @@ export default function Establishments() {
                   <div className="mt-3 flex flex-wrap gap-2">
                     <button
                       onClick={() => copy(scannerLinks[place.id])}
-                      className="flex items-center gap-1.5 rounded-lg bg-forest px-3 py-2 text-[11px] font-semibold text-white"
+                      className="flex items-center gap-1.5 rounded-lg bg-[#D4AF37] px-3 py-2 text-[11px] font-semibold text-white"
                     >
                       <Copy size={13} />
                       Copier le lien
@@ -568,7 +568,7 @@ export default function Establishments() {
                       href={scannerLinks[place.id]}
                       target="_blank"
                       rel="noreferrer"
-                      className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[11px] font-semibold text-forest"
+                      className="flex items-center gap-1.5 rounded-lg bg-[#111111] px-3 py-2 text-[11px] font-semibold text-white"
                     >
                       <ExternalLink size={13} />
                       Ouvrir
@@ -581,12 +581,12 @@ export default function Establishments() {
                 )}
               </div>
 
-              <div className="mt-5 flex flex-wrap gap-2 border-t border-ink/5 pt-4">
+              <div className="mt-5 flex flex-wrap gap-2 border-t border-white/10 pt-4">
                 <a
                   href={`/p/${place.slug}/menu`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-1.5 rounded-lg bg-forest px-3 py-2 text-[11px] font-semibold text-white"
+                  className="flex items-center gap-1.5 rounded-lg bg-[#D4AF37] px-3 py-2 text-[11px] font-semibold text-white"
                 >
                   <UtensilsCrossed size={13} />
                   Voir le menu
@@ -596,7 +596,7 @@ export default function Establishments() {
                   href={`/p/${place.slug}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-1.5 rounded-lg bg-[#f7f7f3] px-3 py-2 text-[11px] font-semibold text-forest"
+                  className="flex items-center gap-1.5 rounded-lg bg-[#171717] px-3 py-2 text-[11px] font-semibold text-white"
                 >
                   <ExternalLink size={13} />
                   Voir la page
@@ -604,7 +604,7 @@ export default function Establishments() {
 
                 <button
                   onClick={() => copy(publicUrl(place.slug))}
-                  className="flex items-center gap-1.5 rounded-lg bg-[#f7f7f3] px-3 py-2 text-[11px] font-semibold text-forest"
+                  className="flex items-center gap-1.5 rounded-lg bg-[#171717] px-3 py-2 text-[11px] font-semibold text-white"
                 >
                   <Copy size={13} />
                   Copier le lien
@@ -612,7 +612,7 @@ export default function Establishments() {
 
                 <button
                   onClick={() => setQr(place)}
-                  className="flex items-center gap-1.5 rounded-lg bg-[#f7f7f3] px-3 py-2 text-[11px] font-semibold text-forest"
+                  className="flex items-center gap-1.5 rounded-lg bg-[#171717] px-3 py-2 text-[11px] font-semibold text-white"
                 >
                   <QrCode size={13} />
                   QR Code
@@ -629,10 +629,10 @@ export default function Establishments() {
         <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-5">
           <form
             onSubmit={save}
-            className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl"
+            className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-[#111111] p-6 shadow-2xl"
           >
             <div className="flex justify-between">
-              <h2 className="font-display text-2xl text-forest">
+              <h2 className="font-display text-2xl text-white">
                 {editing
                   ? 'Modifier l’établissement'
                   : 'Nouvel établissement'}
@@ -719,16 +719,16 @@ export default function Establishments() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-gold/20 bg-[#f7f7f3] p-4">
+              <div className="rounded-2xl border border-gold/20 bg-[#171717] p-4">
                 <div className="flex items-start gap-3">
-                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-gold">
+                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#111111] text-gold">
                     <Bot size={18} />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-xs font-bold uppercase tracking-[0.14em] text-forest">Réponse automatique Google</p>
-                        <p className="mt-1 text-[11px] text-ink/50">KELYANI analyse les nouveaux avis et peut publier une réponse IA automatiquement.</p>
+                        <p className="text-xs font-bold uppercase tracking-[0.14em] text-white">Réponse automatique Google</p>
+                        <p className="mt-1 text-[11px] text-white/60">KELYANI analyse les nouveaux avis et peut publier une réponse IA automatiquement.</p>
                       </div>
                       <button
                         type="button"
@@ -736,14 +736,14 @@ export default function Establishments() {
                         className={`relative h-6 w-11 shrink-0 rounded-full transition ${googleAutoReply ? 'bg-gold' : 'bg-ink/15'}`}
                         aria-label="Activer la réponse automatique Google"
                       >
-                        <span className={`absolute top-1 h-4 w-4 rounded-full bg-white transition ${googleAutoReply ? 'left-6' : 'left-1'}`} />
+                        <span className={`absolute top-1 h-4 w-4 rounded-full bg-[#111111] transition ${googleAutoReply ? 'left-6' : 'left-1'}`} />
                       </button>
                     </div>
                     {googleAutoReply && (
                       <div className="mt-4 space-y-3">
                         <label className="block text-[11px] font-semibold text-ink/65">
                           Langue
-                          <select value={googleReplyLanguage} onChange={(e) => setGoogleReplyLanguage(e.target.value)} className="mt-1.5 w-full rounded-xl border border-ink/10 bg-white p-2.5 text-xs outline-none focus:ring-2 focus:ring-gold">
+                          <select value={googleReplyLanguage} onChange={(e) => setGoogleReplyLanguage(e.target.value)} className="mt-1.5 w-full rounded-xl border border-ink/10 bg-[#111111] p-2.5 text-xs outline-none focus:ring-2 focus:ring-gold">
                             <option>français</option>
                             <option>anglais</option>
                             <option>arabe</option>
@@ -752,7 +752,7 @@ export default function Establishments() {
                         </label>
                         <label className="block text-[11px] font-semibold text-ink/65">
                           Ton
-                          <select value={googleReplyTone} onChange={(e) => setGoogleReplyTone(e.target.value)} className="mt-1.5 w-full rounded-xl border border-ink/10 bg-white p-2.5 text-xs outline-none focus:ring-2 focus:ring-gold">
+                          <select value={googleReplyTone} onChange={(e) => setGoogleReplyTone(e.target.value)} className="mt-1.5 w-full rounded-xl border border-ink/10 bg-[#111111] p-2.5 text-xs outline-none focus:ring-2 focus:ring-gold">
                             <option>professionnel et chaleureux</option>
                             <option>premium et élégant</option>
                             <option>amical et naturel</option>
@@ -794,7 +794,7 @@ export default function Establishments() {
             </div>
 
             <button
-              className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3 text-sm font-semibold text-white"
+              className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4AF37] py-3 text-sm font-semibold text-white"
             >
               <Save size={16} />
               Enregistrer
@@ -807,18 +807,18 @@ export default function Establishments() {
 
       {qr && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-5">
-          <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center">
+          <div className="w-full max-w-sm rounded-2xl bg-[#111111] p-6 text-center">
             <div className="flex justify-end">
               <button onClick={() => setQr(null)}>
                 <X size={20} />
               </button>
             </div>
 
-            <h2 className="font-display text-2xl text-forest">
+            <h2 className="font-display text-2xl text-white">
               QR Code
             </h2>
 
-            <p className="mt-1 text-xs text-ink/50">
+            <p className="mt-1 text-xs text-white/60">
               {qr.title}
             </p>
 
@@ -828,7 +828,7 @@ export default function Establishments() {
 
             <button
               onClick={() => download(qr)}
-              className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3 text-xs font-semibold text-white"
+              className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4AF37] py-3 text-xs font-semibold text-white"
             >
               <QrCode size={16} />
               Télécharger le PNG
@@ -838,7 +838,7 @@ export default function Establishments() {
               onClick={() =>
                 copy(qr.url)
               }
-              className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#f7f7f3] py-3 text-xs font-semibold text-forest"
+              className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#171717] py-3 text-xs font-semibold text-white"
             >
               <Link2 size={16} />
               Copier l’URL
