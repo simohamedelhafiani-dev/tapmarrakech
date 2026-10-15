@@ -284,11 +284,22 @@ table {
   .kelyani-page-content { animation: kelyani-enter .32s ease-out both; }
   @keyframes kelyani-enter { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 }
+/* Desktop navigation remains fixed at the bottom, matching the existing app layout. */
 @media (min-width: 1024px) {
-  .dashboard-depth-main { max-width: none !important; margin-left: 248px !important; width: calc(100% - 248px) !important; }
-  .dashboard-depth-nav { top: 76px !important; bottom: 0 !important; left: 0 !important; right: auto !important; width: 248px !important; padding: 22px 14px 28px !important; border-top: 0 !important; border-right: 1px solid rgba(255,255,255,.08) !important; }
-  .dashboard-depth-nav > div { display: flex !important; flex-direction: column !important; align-items: stretch !important; justify-content: flex-start !important; gap: 6px !important; overflow: visible !important; max-width: none !important; }
-  .dashboard-depth-nav .kelyani-nav-link { min-width: 0 !important; width: 100% !important; flex: none !important; flex-direction: row !important; justify-content: flex-start !important; gap: 13px !important; padding: 13px 14px !important; border-radius: 14px !important; }
-  .dashboard-depth-nav .kelyani-nav-link span { max-width: none !important; font-size: 12px !important; letter-spacing: .01em; }
-  .dashboard-depth-nav .kelyani-nav-link:not([aria-current="page"]):hover { background: rgba(255,255,255,.045) !important; }
+  .dashboard-depth-main { max-width: 1700px; }
+}
+
+.admin-depth-nav {
+  background: linear-gradient(180deg, rgba(20,20,20,.98), rgba(10,10,10,.99)) !important;
+  box-shadow: 0 -16px 38px -20px rgba(0,0,0,.78);
+}
+.admin-depth-nav .kelyani-nav-link[data-active="true"] {
+  color: #E7C96B !important;
+  background: linear-gradient(105deg, rgba(212,175,55,.15), rgba(212,175,55,.035)) !important;
+  box-shadow: inset 0 0 0 1px rgba(212,175,55,.12), 0 0 24px rgba(212,175,55,.04) !important;
+}
+.admin-depth-nav .kelyani-nav-link[data-active="true"] svg { filter: drop-shadow(0 0 8px rgba(212,175,55,.25)); }
+@media (min-width: 1024px) {
+  .admin-depth-main { max-width: 1700px; margin-left: auto; width: 100%; }
+  .admin-depth-nav { left: 0; right: 0; bottom: 0; top: auto; width: 100%; }
 }
