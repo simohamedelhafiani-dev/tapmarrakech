@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowUpRight,
   Heart,
+  Gift,
   Menu,
   MessageCircle,
   Users,
