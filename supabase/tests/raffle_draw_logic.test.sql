@@ -1,6 +1,6 @@
 begin;
 
-select plan(18);
+select plan(25);
 
 -- 1. No eligible customers and no enrolled customers: never produce a winner.
 select is(
@@ -68,15 +68,20 @@ select ok(
   'database uniqueness enforces one winner row per customer per raffle'
 );
 
--- Integration fixture: a due raffle with no enrolled customers must be extended,
--- and a second scheduler invocation must not create another audit attempt or winner set.
+-- End-to-end fixtures cover the actual SECURITY DEFINER worker and CSPRNG path.
 create temporary table raffle_draw_test_fixture (
+  scenario text primary key,
   user_id uuid not null,
   establishment_id uuid not null,
-  raffle_id uuid not null
+  raffle_id uuid not null,
+  expected_winners integer not null
 ) on commit drop;
 
-insert into raffle_draw_test_fixture values (gen_random_uuid(), gen_random_uuid(), gen_random_uuid());
+insert into raffle_draw_test_fixture values
+  ('empty', gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), 0),
+  ('expanded', gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), 2),
+  ('few', gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), 2),
+  ('normal', gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), 2);
 
 insert into auth.users (
   id, aud, role, email, encrypted_password, email_confirmed_at,
@@ -91,47 +96,106 @@ insert into public.establishments (id, user_id, name, slug)
 select establishment_id, user_id, 'Raffle draw test', 'raffle-test-' || replace(establishment_id::text, '-', '')
 from raffle_draw_test_fixture;
 
+-- The expanded case has enrolled clients but no client meeting the PLATINUM minimum.
+insert into public.loyalty_customers (establishment_id, phone, first_name, last_name)
+select f.establishment_id, 'test-' || replace(gen_random_uuid()::text, '-', ''), 'Test', 'Expanded'
+from raffle_draw_test_fixture f cross join generate_series(1, 2)
+where f.scenario = 'expanded';
+
+-- The "few" case has fewer eligible clients than the configured winner count.
+insert into public.loyalty_customers (establishment_id, phone, first_name, last_name)
+select f.establishment_id, 'test-' || replace(gen_random_uuid()::text, '-', ''), 'Test', 'Few'
+from raffle_draw_test_fixture f cross join generate_series(1, 2)
+where f.scenario = 'few';
+
+-- The normal case has enough eligible clients for the configured winner count.
+insert into public.loyalty_customers (establishment_id, phone, first_name, last_name)
+select f.establishment_id, 'test-' || replace(gen_random_uuid()::text, '-', ''), 'Test', 'Normal'
+from raffle_draw_test_fixture f cross join generate_series(1, 4)
+where f.scenario = 'normal';
+
 insert into public.loyalty_raffles (
   id, establishment_id, title, prize_name, starts_at, draw_at,
-  winners_count, reward_validity_mode, reward_valid_days, status
+  winners_count, reward_validity_mode, reward_valid_days, minimum_tier_key, status
 )
-select raffle_id, establishment_id, 'Empty pool test', 'Test prize',
+select raffle_id, establishment_id, 'Raffle test ' || scenario, 'Test prize',
        now() - interval '2 hours', now() - interval '1 minute',
-       3, 'DAYS_AFTER_DRAW', 7, 'SCHEDULED'
+       case when scenario = 'few' then 5 when scenario = 'normal' then 2
+            when scenario = 'expanded' then 3 else 3 end,
+       'DAYS_AFTER_DRAW', 7,
+       case when scenario = 'expanded' then 'PLATINUM' else 'STANDARD' end,
+       'SCHEDULED'
 from raffle_draw_test_fixture;
 
 select is(
   public.process_due_loyalty_raffles(),
-  1,
-  'scheduler processes a due empty raffle and records the extension'
+  4,
+  'scheduler processes all four due raffle scenarios'
 );
 select is(
-  (select r.status from public.loyalty_raffles r join raffle_draw_test_fixture f on f.raffle_id = r.id),
+  (select r.status from public.loyalty_raffles r join raffle_draw_test_fixture f on f.raffle_id = r.id where f.scenario = 'empty'),
   'SCHEDULED',
-  'empty raffle is not marked DRAWN'
+  'zero customers leaves the raffle open instead of DRAWN'
 );
 select is(
-  (select count(*)::integer from public.loyalty_raffle_winners w join raffle_draw_test_fixture f on f.raffle_id = w.raffle_id),
+  (select count(*)::integer from public.loyalty_raffle_winners w join raffle_draw_test_fixture f on f.raffle_id = w.raffle_id where f.scenario = 'empty'),
   0,
-  'empty raffle has no fabricated winners'
+  'zero customers does not fabricate winners'
 );
 select ok(
   (select r.last_draw_fallback_stage = 'EXTENDED_7_DAYS'
           and r.draw_at >= now() + interval '6 days 23 hours'
           and (select count(*) from public.loyalty_raffle_draw_audit a where a.raffle_id = r.id) = 1
-   from public.loyalty_raffles r join raffle_draw_test_fixture f on f.raffle_id = r.id),
+   from public.loyalty_raffles r join raffle_draw_test_fixture f on f.raffle_id = r.id where f.scenario = 'empty'),
   'empty raffle is postponed seven days and has one audit record'
+);
+select is(
+  (select r.status from public.loyalty_raffles r join raffle_draw_test_fixture f on f.raffle_id = r.id where f.scenario = 'expanded'),
+  'DRAWN',
+  'zero eligible customers falls back to all enrolled customers'
+);
+select is(
+  (select count(*)::integer from public.loyalty_raffle_winners w join raffle_draw_test_fixture f on f.raffle_id = w.raffle_id where f.scenario = 'expanded'),
+  2,
+  'expanded pool awards all two enrolled customers when fewer than three winners were requested'
+);
+select is(
+  (select r.last_draw_fallback_stage from public.loyalty_raffles r join raffle_draw_test_fixture f on f.raffle_id = r.id where f.scenario = 'expanded'),
+  'EXPANDED_POOL',
+  'expanded pool fallback is recorded in the raffle audit state'
+);
+select is(
+  (select count(*)::integer from public.loyalty_raffle_winners w join raffle_draw_test_fixture f on f.raffle_id = w.raffle_id where f.scenario = 'few'),
+  2,
+  'all eligible clients win when participants are fewer than planned winners'
+);
+select like(
+  (select r.last_draw_note from public.loyalty_raffles r join raffle_draw_test_fixture f on f.raffle_id = r.id where f.scenario = 'few'),
+  '%tous les participants sont gagnants%',
+  'small eligible pool is explicitly explained to the responsible'
+);
+select is(
+  (select count(*)::integer from public.loyalty_raffle_winners w join raffle_draw_test_fixture f on f.raffle_id = w.raffle_id where f.scenario = 'normal'),
+  2,
+  'normal pool selects the configured number of distinct winners'
+);
+select is(
+  (select r.last_draw_fallback_stage from public.loyalty_raffles r join raffle_draw_test_fixture f on f.raffle_id = r.id where f.scenario = 'normal'),
+  'NORMAL_POOL',
+  'normal pool stage is recorded'
 );
 select is(
   public.process_due_loyalty_raffles(),
   0,
-  'second scheduler invocation does not process the postponed raffle again'
+  'a second scheduler run does not redraw or reprocess any completed raffle'
 );
 select ok(
-  (select (select count(*) from public.loyalty_raffle_winners w where w.raffle_id = r.id) = 0
-          and (select count(*) from public.loyalty_raffle_draw_audit a where a.raffle_id = r.id) = 1
-   from public.loyalty_raffles r join raffle_draw_test_fixture f on f.raffle_id = r.id),
-  'double scheduler invocation creates neither winners nor duplicate audit rows'
+  (select bool_and(
+      (select count(*) from public.loyalty_raffle_winners w where w.raffle_id = f.raffle_id) = f.expected_winners
+      and (select count(*) from public.loyalty_raffle_draw_audit a where a.raffle_id = f.raffle_id) = 1
+    )
+   from raffle_draw_test_fixture f),
+  'double scheduler execution creates no duplicate winners or audit rows'
 );
 
 -- SECURITY DEFINER and execution privileges are part of the release gate.
