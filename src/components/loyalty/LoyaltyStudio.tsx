@@ -147,7 +147,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   const { role } = useAuth();
   const isAdmin = role === 'admin';
   const [tab, setTab] = useState<TabId>('settings');
-  const [studioHome, setStudioHome] = useState(true);
+  const [studioHome, setStudioHome] = useState(false);
   const [notificationHomeView, setNotificationHomeView] = useState<'home' | 'campaigns' | 'history'>('home');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -707,7 +707,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
         </div>
       )}
 
-      <div className={studioHome ? "grid items-start gap-6" : "grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_390px]"}>
+      <div className={studioHome ? "grid items-start gap-6" : "grid items-start gap-6 xl:grid-cols-[220px_minmax(0,1fr)_390px]"}>
         {studioHome ? (
           <div className="min-w-0">
             <div className="mb-6">
@@ -753,46 +753,38 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
           </div>
         ) : (
           <div className="min-w-0">
-            <div className="mb-6">
-              <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#D4AF37]">KELYANI · LOYALTY STUDIO</p>
-              <h3 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">Vos applications fidélité</h3>
-              <p className="mt-2 text-sm leading-6 text-white/50">Les raccourcis restent visibles. Sélectionnez une tuile pour afficher son contenu juste en dessous.</p>
-            </div>
-            <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
-              {visibleTabs.map(item => {
-                const Icon = item.icon;
-                const descriptions: Record<TabId, string> = {
-                  settings: 'Activer et régler votre programme',
-                  rewards: 'Gérer cadeaux et réductions',
-                  referral: 'Configurer le parrainage client',
-                  tiers: 'Créer vos niveaux de fidélité',
-                  raffle: 'Gérer la tombola et les gagnants',
-                  crm: 'Consulter la liste et les segments clients',
-                  notifications: 'Envoyer et suivre vos notifications',
-                  design: 'Personnaliser la carte fidélité',
-                };
-                const colors: Record<TabId, string> = {
-                  settings: 'from-[#E1C27A] to-[#B68A2B]',
-                  rewards: 'from-[#D4AF37] to-[#8D6A1E]',
-                  referral: 'from-[#E1C27A] to-[#A57B28]',
-                  tiers: 'from-[#D4AF37] to-[#9A7424]',
-                  raffle: 'from-[#E1C27A] to-[#B68A2B]',
-                  crm: 'from-[#D4AF37] to-[#8D6A1E]',
-                  notifications: 'from-[#E1C27A] to-[#A57B28]',
-                  design: 'from-[#D4AF37] to-[#9A7424]',
-                };
-                return (
-                  <button key={item.id} type="button" onClick={() => { setTab(item.id); if (item.id === 'notifications') setNotificationHomeView('home'); }} aria-pressed={tab === item.id} className={`group min-h-[88px] rounded-2xl border p-3 text-left transition hover:border-[#D4AF37]/50 hover:bg-[#171717] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] sm:p-4 ${tab === item.id ? 'border-[#D4AF37]/70 bg-[#1A1A1A] ring-1 ring-[#D4AF37]/20' : 'border-white/10 bg-[#111111]'}`}>
-                    <span className={`inline-grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br ${colors[item.id]} text-[#0D0D0D] shadow sm:h-10 sm:w-10`}>
-                      <Icon size={18} />
-                    </span>
-                    <span className="mt-2 block text-xs font-semibold text-white sm:text-sm">{item.label}</span>
-                    <span className="mt-1 hidden text-[10px] leading-4 text-white/45 sm:block">{descriptions[item.id]}</span>
-                  </button>
-                );
-              })}
+            <aside className="mb-5 rounded-2xl border border-white/10 bg-[#0D0D0D] p-2 xl:sticky xl:top-5 xl:mb-0 xl:p-3">
+              <div className="mb-3 hidden px-3 pt-2 xl:block">
+                <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#D4AF37]">KELYANI</p>
+                <p className="mt-1 text-xs text-white/45">Loyalty Studio</p>
+              </div>
+              <nav aria-label="Applications fidélité" className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 xl:flex xl:flex-col">
+                {visibleTabs.map(item => {
+                  const Icon = item.icon;
+                  return (
+                    <button key={item.id} type="button" onClick={() => { setTab(item.id); if (item.id === 'notifications') setNotificationHomeView('home'); }} aria-current={tab === item.id ? 'page' : undefined} className={`flex min-w-0 items-center gap-2.5 rounded-xl border px-3 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] ${tab === item.id ? 'border-[#D4AF37]/50 bg-[#D4AF37]/10 text-[#E1C27A]' : 'border-transparent text-white/65 hover:border-white/10 hover:bg-white/[.04] hover:text-white'}`}>
+                      <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${tab === item.id ? 'bg-gradient-to-br from-[#E1C27A] to-[#B68A2B] text-[#0D0D0D]' : 'bg-white/[.06] text-[#D4AF37]'}`}>
+                        <Icon size={18} />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block truncate text-xs font-semibold sm:text-sm">{item.id === 'crm' ? 'Mes clients' : item.label}</span>
+                        <span className="mt-0.5 hidden truncate text-[10px] text-white/40 xl:block">{item.caption}</span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </nav>
+            </aside>
+          </div>
+          <div className="min-w-0">
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#D4AF37]">Loyalty Studio</p>
+                <h3 className="mt-1 text-2xl font-semibold text-white sm:text-3xl">{tab === 'crm' ? 'Mes clients' : visibleTabs.find(item => item.id === tab)?.label}</h3>
+              </div>
             </div>
             <div className="space-y-5">
+          {tab === 'notifications' && (
           {tab === 'notifications' && (
             <div className="space-y-5">
               {notificationHomeView === 'home' ? (
@@ -1323,6 +1315,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
           )}
         </div>
             </div>
+          </div>
         )}
 
         {!studioHome && <aside className="sticky top-6 h-fit overflow-hidden rounded-3xl bg-[#050505] p-4 sm:p-5">
