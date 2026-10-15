@@ -262,6 +262,26 @@ export default function LoyaltyCard() {
     return () => { cancelled = true; };
   }, [card?.customer_id, token]);
 
+  // Remove the raffle from the customer card at its exact draw time, even if the page stays open.
+  useEffect(() => {
+    if (!activeRaffle) return;
+
+    const remainingMs = new Date(activeRaffle.draw_at).getTime() - Date.now();
+    if (!Number.isFinite(remainingMs) || remainingMs <= 0) {
+      setActiveRaffle(null);
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setActiveRaffle((current) => {
+        if (!current || current.id !== activeRaffle.id) return current;
+        return new Date(current.draw_at).getTime() <= Date.now() ? null : current;
+      });
+    }, remainingMs + 50);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [activeRaffle]);
+
   const referralMessage = referralCode
     ? `🎁 Je t’invite à rejoindre le programme fidélité de ${card?.establishment_name || 'cet établissement'}.
 
