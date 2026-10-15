@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowUpRight,
   Heart,
-  Gift,
   Menu,
   MessageCircle,
   Users,
@@ -915,7 +914,7 @@ export default function Dashboard() {
         </div>
         <div className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(280px,.75fr)]">
           <article className="overflow-hidden rounded-[24px] border border-white/[0.07] bg-[radial-gradient(ellipse_at_top_left,rgba(201,164,92,0.08),transparent_48%),linear-gradient(145deg,#141414,#090909)] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.2)] sm:rounded-[28px] sm:p-6">
-            <div className="flex items-start justify-between gap-3"><div><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#C9A45C]">Économie de fidélité</p><h3 className="mt-1 text-base font-semibold text-white sm:text-lg">Points gagnés vs utilisés</h3><p className="mt-1 text-xs text-[#F5F5DC]/35">Comprendre comment les récompenses circulent</p></div><div className="rounded-xl border border-[#C9A45C]/15 bg-[#C9A45C]/[0.08] p-2 text-[#C9A45C]"><Gift size={17} /></div></div>
+            <div className="flex items-start justify-between gap-3"><div><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#C9A45C]">Économie de fidélité</p><h3 className="mt-1 text-base font-semibold text-white sm:text-lg">Points gagnés vs utilisés</h3><p className="mt-1 text-xs text-[#F5F5DC]/35">Comprendre comment les récompenses circulent</p></div><div className="rounded-xl border border-[#C9A45C]/15 bg-[#C9A45C]/[0.08] p-2 text-[#C9A45C]"><Heart size={17} /></div></div>
             <div className="mt-5 h-56 sm:h-64">
               <ResponsiveContainer width="100%" height="100%"><BarChart data={[{ name: 'Points', gagnés: analytics.pointsEarned, utilisés: analytics.pointsRedeemed }]} barGap={18} barCategoryGap="35%" margin={{ top: 8, right: 4, left: -18, bottom: 0 }}>
                 <defs><linearGradient id="kelyaniPointsEarned" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#E1C27A" /><stop offset="100%" stopColor="#9B7737" /></linearGradient><linearGradient id="kelyaniPointsUsed" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#81796B" /><stop offset="100%" stopColor="#49443C" /></linearGradient></defs>
