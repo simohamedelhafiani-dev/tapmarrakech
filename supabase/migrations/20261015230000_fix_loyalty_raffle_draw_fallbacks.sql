@@ -382,10 +382,7 @@ begin
     raise exception 'raffle_not_found';
   end if;
 
-  if not (
-    public.is_tapmarrakech_admin()
-    or public.is_establishment_responsible(v_raffle.establishment_id)
-  ) then
+  if not public.is_establishment_responsible(v_raffle.establishment_id) then
     raise exception 'not_authorized';
   end if;
 
@@ -482,10 +479,7 @@ begin
   where r.id = p_raffle_id;
 
   if v_establishment_id is null
-     or not (
-       public.is_tapmarrakech_admin()
-       or public.is_establishment_responsible(v_establishment_id)
-     ) then
+     or not public.is_establishment_responsible(v_establishment_id) then
     raise exception 'not_authorized';
   end if;
 
