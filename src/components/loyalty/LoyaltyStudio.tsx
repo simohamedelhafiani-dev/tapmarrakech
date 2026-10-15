@@ -147,7 +147,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   const { role } = useAuth();
   const isAdmin = role === 'admin';
   const [tab, setTab] = useState<TabId>('settings');
-  const [notificationHomeView, setNotificationHomeView] = useState<'home' | 'campaigns'>('home');
+  const [notificationHomeView, setNotificationHomeView] = useState<'home' | 'campaigns' | 'history'>('home');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -750,7 +750,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                       <span className="mt-4 block text-sm font-semibold text-white">Campagnes</span>
                       <span className="mt-1 block text-xs leading-5 text-white/45">Créer et envoyer des notifications</span>
                     </button>
-                    <button type="button" onClick={() => setNotificationHomeView('campaigns')} className="group rounded-2xl border border-white/10 bg-[#151515] p-4 text-left transition hover:-translate-y-0.5 hover:border-[#D4AF37]/50 hover:bg-[#1B1B1B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]">
+                    <button type="button" onClick={() => setNotificationHomeView('history')} className="group rounded-2xl border border-white/10 bg-[#151515] p-4 text-left transition hover:-translate-y-0.5 hover:border-[#D4AF37]/50 hover:bg-[#1B1B1B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]">
                       <span className="grid h-14 w-14 place-items-center rounded-[18px] bg-gradient-to-br from-[#D4AF37] to-[#8D6A1E] text-[#0D0D0D] shadow-lg"><History size={23}/></span>
                       <span className="mt-4 block text-sm font-semibold text-white">Historique</span>
                       <span className="mt-1 block text-xs leading-5 text-white/45">Consulter les envois et leur statut</span>
@@ -767,7 +767,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   <button type="button" onClick={() => setNotificationHomeView('home')} className="inline-flex items-center gap-2 rounded-xl border border-[#D4AF37]/25 bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#E1C27A] transition hover:bg-[#1A1A1A]">
                     <X size={14}/> Retour aux applications
                   </button>
-                  <LoyaltyNotificationsPanel establishmentId={establishmentId} />
+                  <LoyaltyNotificationsPanel key={notificationHomeView} establishmentId={establishmentId} initialView={notificationHomeView} />
                 </div>
               )}
             </div>
