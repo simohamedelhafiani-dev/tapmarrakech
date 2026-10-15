@@ -81,7 +81,7 @@ Deno.serve(async (req) => {
 
     const { data: recipients, error: recipientsError } = await adminClient
       .from('loyalty_card_notifications')
-      .select('id,customer_id,card_url')
+      .select('id,customer_id')
       .eq('campaign_id', campaignId)
       .eq('establishment_id', campaign.establishment_id);
 
@@ -121,7 +121,7 @@ Deno.serve(async (req) => {
     for (const subscription of subscriptions) {
       try {
         const recipient = recipients.find((row) => row.customer_id === subscription.customer_id);
-        const targetUrl = recipient?.card_url || subscription.card_url || '/loyalty';
+        const targetUrl = subscription.card_url || '/loyalty';
 
         await webpush.sendNotification(
           {
