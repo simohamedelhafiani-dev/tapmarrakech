@@ -147,7 +147,6 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   const { role } = useAuth();
   const isAdmin = role === 'admin';
   const [tab, setTab] = useState<TabId>('settings');
-  const [studioHome, setStudioHome] = useState(false);
   const [notificationHomeView, setNotificationHomeView] = useState<'home' | 'campaigns' | 'history'>('home');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -707,53 +706,8 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
         </div>
       )}
 
-      <div className={studioHome ? "grid items-start gap-6" : "grid items-start gap-6 xl:grid-cols-[220px_minmax(0,1fr)_390px]"}>
-        {studioHome ? (
-          <div className="min-w-0">
-            <div className="mb-6">
-              <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#D4AF37]">KELYANI · LOYALTY STUDIO</p>
-              <h3 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">Votre espace fidélité</h3>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-white/50">Ouvrez une fonctionnalité en un clic. Tous vos outils restent disponibles, dans une interface simple à parcourir sur ordinateur comme sur téléphone.</p>
-            </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
-              {visibleTabs.map(item => {
-                const Icon = item.icon;
-                const descriptions: Record<TabId, string> = {
-                  settings: 'Activer et régler votre programme',
-                  rewards: 'Gérer cadeaux et réductions',
-                  referral: 'Configurer le parrainage client',
-                  tiers: 'Créer vos niveaux de fidélité',
-                  raffle: 'Gérer la tombola et les gagnants',
-                  crm: 'Consulter la liste et les segments clients',
-                  notifications: 'Envoyer et suivre vos notifications',
-                  design: 'Personnaliser la carte fidélité',
-                };
-                const colors: Record<TabId, string> = {
-                  settings: 'from-[#E1C27A] to-[#B68A2B]',
-                  rewards: 'from-[#D4AF37] to-[#8D6A1E]',
-                  referral: 'from-[#E1C27A] to-[#A57B28]',
-                  tiers: 'from-[#D4AF37] to-[#9A7424]',
-                  raffle: 'from-[#E1C27A] to-[#B68A2B]',
-                  crm: 'from-[#D4AF37] to-[#8D6A1E]',
-                  notifications: 'from-[#E1C27A] to-[#A57B28]',
-                  design: 'from-[#D4AF37] to-[#9A7424]',
-                };
-                return (
-                  <button key={item.id} type="button" onClick={() => { setTab(item.id); setStudioHome(false); if (item.id === 'notifications') setNotificationHomeView('home'); }} className="group min-h-[160px] rounded-2xl border border-white/10 bg-[#111111] p-4 text-left transition hover:-translate-y-0.5 hover:border-[#D4AF37]/50 hover:bg-[#171717] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] sm:min-h-[176px] sm:p-5">
-                    <span className={`grid h-12 w-12 place-items-center rounded-[16px] bg-gradient-to-br ${colors[item.id]} text-[#0D0D0D] shadow-lg transition group-hover:scale-105 sm:h-14 sm:w-14`}>
-                      <Icon size={22} />
-                    </span>
-                    <span className="mt-4 block text-sm font-semibold text-white">{item.label}</span>
-                    <span className="mt-1 block text-xs leading-5 text-white/45">{descriptions[item.id]}</span>
-                    <span className="mt-3 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[.12em] text-[#D4AF37]">Ouvrir <span aria-hidden="true">↗</span></span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        ) : (
-          <>
-          <div className="min-w-0">
+      <div className="grid items-start gap-6 xl:grid-cols-[220px_minmax(0,1fr)_390px]">
+        <>
             <aside className="mb-5 rounded-2xl border border-white/10 bg-[#0D0D0D] p-2 xl:sticky xl:top-5 xl:mb-0 xl:p-3">
               <div className="mb-3 hidden px-3 pt-2 xl:block">
                 <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#D4AF37]">KELYANI</p>
@@ -1316,9 +1270,9 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
         </div>
             </div>
           </>
-        )}
+        </>
 
-        {!studioHome && <aside className="sticky top-6 h-fit overflow-hidden rounded-3xl bg-[#050505] p-4 sm:p-5">
+        <aside className="sticky top-6 h-fit overflow-hidden rounded-3xl bg-[#050505] p-4 sm:p-5">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[.24em] text-[#C9A45C]">Le Miroir</p>
@@ -1349,7 +1303,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   : `${program.pointsPerCurrency} point(s) / MAD`}
             </p>
           </div>
-        </aside>}
+        </aside>
       </div>
     </section>
   );
