@@ -207,14 +207,18 @@ select ok(
   and (select p.prosecdef and coalesce(array_to_string(p.proconfig, ','), '') like '%search_path=%'
        from pg_proc p where p.oid = 'public.draw_loyalty_raffle_internal(uuid,boolean,text,uuid)'::regprocedure)
   and (select p.prosecdef and coalesce(array_to_string(p.proconfig, ','), '') like '%search_path=%'
-       from pg_proc p where p.oid = 'public.rerun_loyalty_raffle_draw(uuid)'::regprocedure),
-  'scheduler, internal draw, and manual RPC are SECURITY DEFINER with fixed search_path'
+       from pg_proc p where p.oid = 'public.rerun_loyalty_raffle_draw(uuid)'::regprocedure)
+  and position('auth.uid()' in pg_get_functiondef('public.rerun_loyalty_raffle_draw(uuid)'::regprocedure)) > 0
+  and position('is_establishment_responsible' in pg_get_functiondef('public.rerun_loyalty_raffle_draw(uuid)'::regprocedure)) > 0
+  and position('v_raffle.status <> ''SCHEDULED''' in pg_get_functiondef('public.rerun_loyalty_raffle_draw(uuid)'::regprocedure)) > 0,
+  'scheduler/internal/manual RPC are SECURITY DEFINER with fixed search_path; rerun checks identity, role, and scheduled status'
 );
 select ok(
   not has_function_privilege('anon', 'public.process_due_loyalty_raffles()', 'EXECUTE')
   and not has_function_privilege('authenticated', 'public.process_due_loyalty_raffles()', 'EXECUTE')
+  and not has_function_privilege('anon', 'public.rerun_loyalty_raffle_draw(uuid)', 'EXECUTE')
   and has_function_privilege('authenticated', 'public.rerun_loyalty_raffle_draw(uuid)', 'EXECUTE'),
-  'scheduler is not callable by public users; manual rerun RPC is authenticated-only'
+  'scheduler is restricted to service_role; manual rerun is revoked from anon and granted only to authenticated'
 );
 
 select * from finish();
