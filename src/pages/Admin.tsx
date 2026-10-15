@@ -1113,72 +1113,8 @@ function Overview({
         onRetry={reloadEstablishmentPerformance}
       />
 
-      <div className="grid gap-5 xl:grid-cols-[1.65fr_.85fr]">
-        <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-soft">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A45C]/45">Pilotage</p>
-              <h3 className="mt-1 text-lg font-semibold text-[#FFFFFF]">Performance de la plateforme</h3>
-            </div>
-            <span className="rounded-full bg-[#111111]/5 px-3 py-1.5 text-[10px] font-semibold text-[#C9A45C]">Temps réel</span>
-          </div>
-
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <div className="rounded-2xl bg-[#111111] p-5">
-              <p className="text-xs text-[#FFFFFF]/45">Avis</p>
-              <p className="mt-2 text-3xl font-semibold text-[#C9A45C]">{detailLoading ? '—' : detail.reviews.toLocaleString('fr-FR')}</p>
-              <p className="mt-1 text-[11px] text-[#FFFFFF]/35">note moyenne {detailLoading ? '—' : detail.averageRating.toFixed(1)} / 5</p>
-            </div>
-            <div className="rounded-2xl bg-[#111111] p-5">
-              <p className="text-xs text-[#FFFFFF]/45">Fidélité</p>
-              <p className="mt-2 text-3xl font-semibold text-[#C9A45C]">{detailLoading ? '—' : detail.loyaltyCustomers.toLocaleString('fr-FR')}</p>
-              <p className="mt-1 text-[11px] text-[#FFFFFF]/35">clients actifs</p>
-            </div>
-            <div className="rounded-2xl bg-[#111111] p-5">
-              <p className="text-xs text-[#FFFFFF]/45">Activité</p>
-              <p className="mt-2 text-3xl font-semibold text-[#C9A45C]">{detailLoading ? '—' : detail.analyticsEvents.toLocaleString('fr-FR')}</p>
-              <p className="mt-1 text-[11px] text-[#FFFFFF]/35">événements analytics</p>
-            </div>
-          </div>
-
-          <div className="mt-5 rounded-2xl border border-[#242424]/10 bg-[#111111] p-5 text-[#FFFFFF]">
-            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A45C]">Fidélité</p>
-                <h4 className="mt-1 text-lg font-semibold">Une expérience qui fait revenir les clients.</h4>
-                <p className="mt-1 text-xs text-[#FFFFFF]/55">CA fidélité sélectionné : {detail.loyaltyRevenue.toLocaleString('fr-FR')} DH</p>
-              </div>
-              <button onClick={() => onNavigate('loyalty')} className="rounded-xl bg-[#C9A45C] px-4 py-2.5 text-xs font-bold text-[#C9A45C] transition hover:bg-[#C9A45C]/90">Gérer la fidélité →</button>
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-soft">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A45C]/45">Activité</p>
-              <h3 className="mt-1 text-lg font-semibold">Derniers établissements</h3>
-            </div>
-            <button onClick={() => onNavigate('establishments')} className="text-xs font-semibold text-[#C9A45C]">Voir tout →</button>
-          </div>
-          <div className="mt-5 space-y-2">
-            {recent.length === 0 ? (
-              <p className="py-8 text-center text-sm text-[#FFFFFF]/35">Aucun établissement.</p>
-            ) : recent.map((item) => (
-              <button key={item.id} onClick={() => onNavigate('establishments')} className="flex w-full items-center gap-3 rounded-xl p-3 text-left transition hover:bg-[#111111]">
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#111111]/10 text-[#C9A45C]"><Building2 size={17} /></div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold">{item.name}</p>
-                  <p className="mt-0.5 text-[11px] text-[#FFFFFF]/35">/{item.slug}</p>
-                </div>
-                <span className="text-[10px] font-semibold text-[#C9A45C]">Ouvrir →</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-
+    </div>
+  );
 }
 
 function AdminMetric({ icon: Icon, label, value, detail }: { icon: typeof Star; label: string; value: string | number; detail: string }) {
