@@ -54,8 +54,10 @@ select is(
 select ok(
   position('for update skip locked' in lower(pg_get_functiondef('public.process_due_loyalty_raffles()'::regprocedure))) > 0
   and position('status <> ''SCHEDULED''' in pg_get_functiondef('public.draw_loyalty_raffle_internal(uuid,boolean,text,uuid)'::regprocedure)) > 0
-  and position('v_winner_count > 0' in pg_get_functiondef('public.draw_loyalty_raffle_internal(uuid,boolean,text,uuid)'::regprocedure)) > 0,
-  'scheduler locking and existing-winner guard prevent a second winner series'
+  and position('v_winner_count > 0' in pg_get_functiondef('public.draw_loyalty_raffle_internal(uuid,boolean,text,uuid)'::regprocedure)) > 0
+  and position('extensions.gen_random_bytes' in pg_get_functiondef('public.draw_loyalty_raffle_internal(uuid,boolean,text,uuid)'::regprocedure)) > 0
+  and position('random()' in pg_get_functiondef('public.draw_loyalty_raffle_internal(uuid,boolean,text,uuid)'::regprocedure)) = 0,
+  'scheduler is idempotent and the draw uses pgcrypto randomness instead of random()'
 );
 select ok(
   exists (
