@@ -1077,20 +1077,30 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between gap-3 rounded-2xl border border-[#C9A45C]/20 bg-[#111111] px-4 py-3 sm:min-w-[190px]">
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={referral.enabled}
+                    aria-label={referral.enabled ? 'Désactiver le programme de parrainage' : 'Activer le programme de parrainage'}
+                    onClick={() => setReferral(current => ({ ...current, enabled: !current.enabled }))}
+                    className={`group flex w-full items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A45C] sm:min-w-[190px] sm:w-auto ${referral.enabled ? 'border-[#C9A45C]/40 bg-[#C9A45C]/10 hover:bg-[#C9A45C]/15' : 'border-[#FFFFFF]/15 bg-[#111111] hover:border-[#C9A45C]/40 hover:bg-[#181818]'}`}
+                    title="Cliquer pour activer ou désactiver le parrainage"
+                  >
                     <div>
                       <p className="text-xs font-semibold text-[#E1C27A]">
                         {referral.enabled ? 'Parrainage activé' : 'Parrainage désactivé'}
                       </p>
-                      <p className="mt-1 text-[10px] text-[#FFFFFF]/45">
-                        {referral.enabled ? 'Programme actif' : 'Programme en pause'}
+                      <p className="mt-1 text-[10px] text-[#FFFFFF]/55">
+                        {referral.enabled ? 'Cliquer pour mettre en pause' : 'Cliquer pour activer le programme'}
                       </p>
                     </div>
-                    <Toggle
-                      checked={referral.enabled}
-                      onChange={enabled => setReferral(current => ({ ...current, enabled }))}
-                    />
-                  </div>
+                    <span
+                      aria-hidden="true"
+                      className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${referral.enabled ? 'bg-[#C9A45C]' : 'bg-[#444444]'}`}
+                    >
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${referral.enabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                    </span>
+                  </button>
                 </div>
 
                 <div className="mt-5 grid gap-4 md:grid-cols-2">
