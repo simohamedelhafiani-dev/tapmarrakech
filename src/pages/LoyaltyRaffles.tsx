@@ -50,6 +50,19 @@ type Raffle = {
   winner_count: number;
   minimum_tier_key: Tier['tier_key'];
   ticket_multiplier_mode: 'TIER' | 'ONE';
+  last_draw_fallback_stage: 'NORMAL_POOL' | 'EXPANDED_POOL' | 'EXTENDED_7_DAYS' | 'EXISTING_WINNERS' | null;
+  last_draw_note: string | null;
+  last_draw_attempt_at: string | null;
+};
+
+type DrawAudit = {
+  attempted_at: string;
+  trigger_source: 'SCHEDULER' | 'MANUAL';
+  fallback_stage: 'NORMAL_POOL' | 'EXPANDED_POOL' | 'EXTENDED_7_DAYS' | 'EXISTING_WINNERS';
+  candidate_count: number;
+  winner_count: number;
+  scheduled_for: string | null;
+  note: string;
 };
 
 const tierMeta: Record<Tier['tier_key'], { label: string; icon: typeof Crown }> = {
@@ -101,6 +114,8 @@ export default function LoyaltyRaffles() {
   const [saving, setSaving] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [expandedRaffle, setExpandedRaffle] = useState<string | null>(null);
+  const [rerunningRaffleId, setRerunningRaffleId] = useState<string | null>(null);
+  const [drawAudit, setDrawAudit] = useState<DrawAudit[]>([]);
 
   const now = useMemo(() => new Date(), []);
   const defaultStart = useMemo(() => toLocalInput(new Date(now.getTime() + 5 * 60_000)), [now]);
@@ -132,6 +147,21 @@ export default function LoyaltyRaffles() {
   useEffect(() => {
     if (establishmentId) void loadData();
   }, [establishmentId]);
+
+  useEffect(() => {
+    if (!expandedRaffle) {
+      setDrawAudit([]);
+      return;
+    }
+
+    let cancelled = false;
+    void supabase.rpc('get_loyalty_raffle_draw_audit', { p_raffle_id: expandedRaffle })
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        setDrawAudit(error ? [] : (data ?? []) as DrawAudit[]);
+      });
+    return () => { cancelled = true; };
+  }, [expandedRaffle]);
 
   async function loadEstablishments() {
     setLoading(true);
@@ -246,6 +276,27 @@ export default function LoyaltyRaffles() {
     setShowCreate(false);
     resetForm();
     await loadData();
+  }
+
+  async function rerunRaffleDraw(id: string) {
+    if (rerunningRaffleId) return;
+    if (!window.confirm('Relancer le tirage de cette tombola maintenant ? Cette action est réservée au responsable de l’établissement.')) return;
+
+    setRerunningRaffleId(id);
+    const { data, error } = await supabase.rpc('rerun_loyalty_raffle_draw', { p_raffle_id: id });
+    setRerunningRaffleId(null);
+
+    if (error) {
+      alert(error.message || 'Impossible de relancer le tirage.');
+      return;
+    }
+
+    await loadData();
+    if (data === 'EXTENDED_7_DAYS') {
+      alert('Aucun client inscrit : la tombola reste ouverte et le tirage est reporté de 7 jours.');
+    } else if (data === 'NORMAL_POOL' || data === 'EXPANDED_POOL' || data === 'EXISTING_WINNERS') {
+      alert('Tirage traité. Consultez le résultat et l’historique dans la fiche de la tombola.');
+    }
   }
 
   async function cancelRaffle(id: string) {
@@ -414,6 +465,29 @@ export default function LoyaltyRaffles() {
                     <div className="rounded-2xl bg-[#0B0B0B] p-4"><p className="text-[9px] uppercase tracking-[0.15em] text-white/30">Tickets</p><p className="mt-1 text-sm font-semibold text-[#E1C27A]">{raffle.ticket_multiplier_mode === 'TIER' ? 'Selon le niveau' : '1 par client'}</p></div>
                   </div>
                   {raffle.description && <p className="mt-5 text-sm leading-6 text-white/55">{raffle.description}</p>}
+                  {raffle.last_draw_note && (
+                    <div role="status" className={`mt-5 rounded-2xl border p-4 text-sm leading-6 ${raffle.last_draw_fallback_stage === 'EXTENDED_7_DAYS' ? 'border-amber-400/25 bg-amber-400/5 text-amber-100' : 'border-[#C9A45C]/20 bg-[#C9A45C]/5 text-[#F5F5DC]/80'}`}>
+                      <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-[#C9A45C]">
+                        {raffle.last_draw_fallback_stage === 'EXTENDED_7_DAYS' ? 'Action requise · Responsable' : 'Résultat du tirage'}
+                      </p>
+                      {raffle.last_draw_note}
+                      {raffle.last_draw_attempt_at && <p className="mt-2 text-[10px] opacity-60">Dernière tentative : {formatDate(raffle.last_draw_attempt_at)}</p>}
+                    </div>
+                  )}
+                  {drawAudit.length > 0 && (
+                    <div className="mt-5 rounded-2xl border border-[#242424] bg-[#0B0B0B] p-4">
+                      <h3 className="text-xs font-semibold text-white">Historique d’audit du tirage</h3>
+                      <div className="mt-3 space-y-3">
+                        {drawAudit.map((entry, index) => (
+                          <div key={`${entry.attempted_at}-${index}`} className="border-l border-[#C9A45C]/35 pl-3">
+                            <p className="text-[10px] text-[#E1C27A]">{formatDate(entry.attempted_at)} · {entry.trigger_source === 'MANUAL' ? 'Relance manuelle' : 'Scheduler'} · {entry.fallback_stage}</p>
+                            <p className="mt-1 text-xs leading-5 text-white/60">{entry.note}</p>
+                            <p className="mt-1 text-[10px] text-white/35">Pool : {entry.candidate_count} · Gagnants : {entry.winner_count}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   <div className="mt-5 flex flex-wrap gap-2 text-[10px] text-white/40">
                     <span className="rounded-full border border-[#242424] px-3 py-1.5">Lot : {raffle.prize_name}</span>
                     {raffle.reservation_required && <span className="rounded-full border border-[#242424] px-3 py-1.5">Réservation obligatoire</span>}
@@ -421,9 +495,21 @@ export default function LoyaltyRaffles() {
                     {raffle.non_cumulative && <span className="rounded-full border border-[#242424] px-3 py-1.5">Non cumulable</span>}
                   </div>
                   {raffle.status === 'SCHEDULED' && (
-                    <button type="button" onClick={() => void cancelRaffle(raffle.id)} className="mt-5 inline-flex items-center gap-2 rounded-xl border border-red-500/20 px-3 py-2 text-xs font-semibold text-red-300 hover:bg-red-500/10">
-                      <X size={14} /> Annuler la tombola
-                    </button>
+                    <div className="mt-5 flex flex-wrap gap-2">
+                      {(new Date(raffle.draw_at).getTime() <= Date.now() || raffle.last_draw_fallback_stage === 'EXTENDED_7_DAYS') && (
+                        <button
+                          type="button"
+                          disabled={Boolean(rerunningRaffleId)}
+                          onClick={() => void rerunRaffleDraw(raffle.id)}
+                          className="inline-flex items-center gap-2 rounded-xl border border-[#C9A45C]/35 bg-[#C9A45C]/10 px-3 py-2 text-xs font-semibold text-[#E1C27A] hover:bg-[#C9A45C]/15 disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          <Trophy size={14} /> {rerunningRaffleId === raffle.id ? 'Tirage en cours…' : 'Relancer le tirage'}
+                        </button>
+                      )}
+                      <button type="button" onClick={() => void cancelRaffle(raffle.id)} className="inline-flex items-center gap-2 rounded-xl border border-red-500/20 px-3 py-2 text-xs font-semibold text-red-300 hover:bg-red-500/10">
+                        <X size={14} /> Annuler la tombola
+                      </button>
+                    </div>
                   )}
                 </div>
               )}
