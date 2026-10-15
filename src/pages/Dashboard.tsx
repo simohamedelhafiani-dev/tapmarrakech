@@ -815,9 +815,9 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen space-y-5 pb-6">
-      <section className="relative overflow-hidden rounded-[28px] border border-[#242424] bg-[#111111] p-5 sm:p-7">
-        <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full border border-[#C9A45C]/10" />
+    <div className="min-h-screen space-y-6 pb-8 text-white">
+      <section className="relative isolate overflow-hidden rounded-[28px] border border-[#C9A45C]/20 bg-[radial-gradient(ellipse_at_top_right,rgba(201,164,92,0.13),transparent_42%),linear-gradient(135deg,#151515_0%,#090909_62%,#111111_100%)] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:rounded-[32px] sm:p-8 lg:p-9">
+        <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full border border-[#C9A45C]/15" /><div className="pointer-events-none absolute -bottom-36 left-[38%] h-72 w-72 rounded-full bg-[#C9A45C]/[0.035] blur-3xl" />
         <div className="relative z-10">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0">
@@ -840,26 +840,41 @@ export default function Dashboard() {
               {!isResponsible && <Link to="/dashboard/establishments" className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-[#C9A45C] px-4 text-xs font-bold text-[#050505] hover:bg-[#E1C27A]">Gérer les établissements <ArrowUpRight size={15} /></Link>}
             </div>
           </div>
-          <div className="mt-7 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="mt-8 grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
             {[
               { label: 'Avis', value: dashboardStatsLoading ? '—' : String(dashboardStats?.reviews_count ?? 0), icon: MessageCircle },
               { label: 'Note', value: dashboardStatsLoading ? '—' : String((dashboardStats?.average_rating ?? 0).toFixed(1)), icon: Star },
               { label: 'Clients', value: dashboardStatsLoading ? '—' : String(dashboardStats?.loyalty_customers_count ?? loyaltyCustomers.length), icon: Users },
               { label: 'Retour', value: dashboardStatsLoading ? '—' : String(analytics.returningRate.toFixed(0)) + '%', icon: TrendingUp },
-            ].map(({ label, value, icon: Icon }) => <div key={label} className="rounded-2xl border border-[#242424] bg-[#050505]/80 px-4 py-4"><Icon size={15} className="text-[#C9A45C]" /><p className="mt-3 text-xl font-semibold text-white">{value}</p><p className="mt-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-[#F5F5DC]/25">{label}</p></div>)}
+            ].map(({ label, value, icon: Icon }) => <div key={label} className="group rounded-2xl border border-white/[0.07] bg-black/35 px-3.5 py-4 transition duration-200 hover:border-[#C9A45C]/25 hover:bg-black/50 sm:px-4 sm:py-5"><Icon size={15} className="text-[#C9A45C]" /><p className="mt-3 text-2xl font-semibold tracking-tight text-white sm:text-[28px]">{value}</p><p className="mt-1 text-[9px] font-semibold uppercase tracking-[0.15em] text-[#F5F5DC]/40">{label}</p></div>)}
           </div>
         </div>
       </section>
 
-      <div className="grid gap-5 xl:grid-cols-[1.45fr_.75fr]">
-        <section className="rounded-[24px] border border-[#242424] bg-[#111111] p-5 sm:p-6">
+      <section aria-label="Indicateurs de performance" className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:grid-cols-4">
+        {[
+          { label: 'Chiffre d’affaires', value: dashboardStatsLoading ? '—' : `${analytics.currentRevenue.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`, detail: 'sur la période', icon: TrendingUp },
+          { label: 'Visites clients', value: dashboardStatsLoading ? '—' : analytics.visits.toLocaleString('fr-FR'), detail: 'activité fidélité', icon: Users },
+          { label: 'Clients actifs', value: dashboardStatsLoading ? '—' : analytics.activeCustomers.toLocaleString('fr-FR'), detail: `${analytics.activeRate.toFixed(0)}% de la base`, icon: Star },
+          { label: 'Points utilisés', value: dashboardStatsLoading ? '—' : analytics.pointsRedeemed.toLocaleString('fr-FR'), detail: 'points consommés', icon: TrendingDown },
+        ].map(({ label, value, detail, icon: Icon }) => (
+          <article key={label} className="rounded-2xl border border-white/[0.07] bg-[#101010] p-4 transition hover:border-[#C9A45C]/25 sm:rounded-[22px] sm:p-5">
+            <div className="flex items-center justify-between gap-2"><span className="text-[9px] font-semibold uppercase tracking-[0.13em] text-[#F5F5DC]/40 sm:text-[10px]">{label}</span><span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[#C9A45C]/[0.09] text-[#C9A45C]"><Icon size={15} /></span></div>
+            <p className="mt-4 text-xl font-semibold tracking-tight text-white sm:text-2xl">{value}</p>
+            <p className="mt-1 text-[10px] text-[#F5F5DC]/35">{detail}</p>
+          </article>
+        ))}
+      </section>
+
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,.75fr)]">
+        <section className="rounded-[24px] border border-white/[0.07] bg-[linear-gradient(145deg,#141414,#0D0D0D)] p-5 shadow-[0_16px_48px_rgba(0,0,0,0.18)] sm:rounded-[28px] sm:p-6 lg:p-7">
           <div className="flex items-center justify-between gap-3"><div><p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#C9A45C]">Activité</p><h2 className="mt-1 text-lg font-semibold text-white">Votre relation client</h2></div><select value={period} onChange={(event) => setPeriod(event.target.value)} className="h-9 rounded-xl border border-[#242424] bg-[#050505] px-3 text-[10px] font-semibold text-[#F5F5DC]/55 outline-none" aria-label="Période">{ranges.map((range) => <option className="bg-[#111111]" key={range.key} value={range.key}>{range.label}</option>)}</select></div>
-          <div className="mt-6 h-56"><ResponsiveContainer width="100%" height="100%"><BarChart data={chart} barGap={5}><CartesianGrid stroke="#242424" vertical={false} /><XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#F5F5DC', opacity: 0.3, fontSize: 10 }} /><YAxis axisLine={false} tickLine={false} tick={{ fill: '#F5F5DC', opacity: 0.2, fontSize: 9 }} width={28} /><Tooltip contentStyle={{ background: '#111111', border: '1px solid #242424', borderRadius: 14, color: '#fff' }} /><Bar dataKey="positive" stackId="reviews" fill="#C9A45C" radius={[4,4,0,0]} /><Bar dataKey="negative" stackId="reviews" fill="#6B6254" radius={[4,4,0,0]} /></BarChart></ResponsiveContainer></div>
+          <div className="mt-6 h-56 sm:h-64"><ResponsiveContainer width="100%" height="100%"><BarChart data={chart} barGap={5}><CartesianGrid stroke="#242424" vertical={false} /><XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#F5F5DC', opacity: 0.3, fontSize: 10 }} /><YAxis axisLine={false} tickLine={false} tick={{ fill: '#F5F5DC', opacity: 0.2, fontSize: 9 }} width={28} /><Tooltip contentStyle={{ background: '#111111', border: '1px solid #242424', borderRadius: 14, color: '#fff' }} /><Bar dataKey="positive" stackId="reviews" fill="#C9A45C" radius={[4,4,0,0]} /><Bar dataKey="negative" stackId="reviews" fill="#6B6254" radius={[4,4,0,0]} /></BarChart></ResponsiveContainer></div>
         </section>
         <section className="rounded-[24px] border border-[#242424] bg-[#111111] p-5 sm:p-6">
           <div className="flex items-center justify-between"><div><p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#C9A45C]">Fidélité</p><h2 className="mt-1 text-lg font-semibold text-white">Clients qui reviennent</h2></div><Heart size={18} className="text-[#C9A45C]" /></div>
-          <div className="mt-6 rounded-2xl border border-[#242424] bg-[#050505] p-5"><p className="text-[10px] text-[#F5F5DC]/35">Taux de retour</p><p className="mt-2 font-display text-4xl text-[#E1C27A]">{analytics.returningRate.toFixed(1)}%</p><p className="mt-2 text-xs leading-5 text-[#F5F5DC]/35">{analytics.returningCustomers} clients ont effectué au moins deux visites.</p></div>
-          <div className="mt-2 grid grid-cols-2 gap-2"><div className="rounded-2xl bg-[#050505] p-4"><p className="text-[9px] uppercase tracking-[0.14em] text-[#F5F5DC]/25">Visites</p><p className="mt-2 text-xl font-semibold text-white">{dashboardStatsLoading ? '—' : analytics.visits.toLocaleString('fr-FR')}</p></div><div className="rounded-2xl bg-[#050505] p-4"><p className="text-[9px] uppercase tracking-[0.14em] text-[#F5F5DC]/25">Récompenses</p><p className="mt-2 text-xl font-semibold text-white">{redemptionsLoading ? '—' : analytics.currentRedemptions}</p></div></div>
+          <div className="mt-6 rounded-2xl border border-[#C9A45C]/15 bg-[linear-gradient(135deg,rgba(201,164,92,0.08),rgba(5,5,5,0.8)_55%)] p-5 sm:p-6"><p className="text-[10px] text-[#F5F5DC]/35">Taux de retour</p><p className="mt-2 font-display text-4xl text-[#E1C27A]">{analytics.returningRate.toFixed(1)}%</p><p className="mt-2 text-xs leading-5 text-[#F5F5DC]/35">{analytics.returningCustomers} clients ont effectué au moins deux visites.</p></div>
+          <div className="mt-3 grid grid-cols-2 gap-2.5"><div className="rounded-2xl bg-[#050505] p-4"><p className="text-[9px] uppercase tracking-[0.14em] text-[#F5F5DC]/25">Visites</p><p className="mt-2 text-xl font-semibold text-white">{dashboardStatsLoading ? '—' : analytics.visits.toLocaleString('fr-FR')}</p></div><div className="rounded-2xl bg-[#050505] p-4"><p className="text-[9px] uppercase tracking-[0.14em] text-[#F5F5DC]/25">Récompenses</p><p className="mt-2 text-xl font-semibold text-white">{redemptionsLoading ? '—' : analytics.currentRedemptions}</p></div></div>
           <Link to="/dashboard/loyalty" className="mt-3 flex h-10 items-center justify-center gap-2 rounded-xl border border-[#C9A45C]/25 text-[10px] font-bold text-[#E1C27A] hover:bg-[#C9A45C]/10">Ouvrir la fidélité <ArrowUpRight size={14} /></Link>
         </section>
       </div>
