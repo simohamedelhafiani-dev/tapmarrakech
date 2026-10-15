@@ -1063,6 +1063,8 @@ function Overview({
   }, [selectedEstablishment, globalStats]);
 
   const responsibles = staff.filter((member) => member.role === 'MANAGER');
+  const activeSubscriptions = billing.subscriptions.filter((item) => item.status === 'active').length;
+
   const selectedName = selectedEstablishment === 'all'
     ? 'Tous les établissements'
     : establishments.find((item) => item.id === selectedEstablishment)?.name ?? 'Établissement';
