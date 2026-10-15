@@ -156,8 +156,9 @@ export function LoyaltyCardVisual({
     }
     let active = true;
     void QRCode.toDataURL(card.cardUrl, {
-      width: 234,
-      margin: 1,
+      // Generate a sharper QR bitmap so it stays crisp on high-density mobile screens.
+      width: 512,
+      margin: 2,
       errorCorrectionLevel: 'M',
       color: { dark: '#000000', light: '#FFFFFF' },
     }).then(value => {
@@ -474,7 +475,7 @@ export function LoyaltyCardVisual({
           </div>
         )}
         <div style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <div style={{ width: '18cqw', aspectRatio: '1', flex: '0 0 auto', padding: '1.5cqw', boxSizing: 'border-box', borderRadius: '3.5cqw', background: '#fff', display: 'grid', placeItems: 'center', boxShadow: '0 12px 28px rgba(0,0,0,.28)' }}>
+          <div style={{ width: '25cqw', maxWidth: '25cqw', aspectRatio: '1', flex: '0 0 auto', padding: '1.5cqw', boxSizing: 'border-box', borderRadius: '3.5cqw', background: '#fff', display: 'grid', placeItems: 'center', boxShadow: '0 12px 28px rgba(0,0,0,.28)' }}>
             {showQr && qr ? <img src={qr} alt="QR Code fidélité" style={{ width: '100%', height: '100%', display: 'block' }} /> : <div style={{ width: '100%', aspectRatio: '1' }} />}
           </div>
           <div style={{ marginTop: '1.2cqw', fontSize: '2.5cqw', letterSpacing: '.12em', textTransform: 'uppercase', opacity: .5 }}>{card.customerName || 'Client'}</div>

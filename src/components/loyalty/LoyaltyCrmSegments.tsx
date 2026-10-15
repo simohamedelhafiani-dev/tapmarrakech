@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Download, Loader2, RefreshCw, Users, UserCheck, AlertTriangle, UserX, Cake, Star } from 'lucide-react';
+import { Download, Loader2, RefreshCw, Users, UserCheck, AlertTriangle, UserX, Cake, Star, QrCode, X } from 'lucide-react';
+import QRCode from 'qrcode';
 import { supabase } from '@/lib/supabase';
 
 type Customer = {
@@ -48,6 +49,8 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
   const [error, setError] = useState('');
   const [segment, setSegment] = useState<SegmentId>('all');
   const [query, setQuery] = useState('');
+  const [recoveryQr, setRecoveryQr] = useState<{ url: string; name: string; phone: string; expiresAt: string } | null>(null);
+  const [recoveryLoadingId, setRecoveryLoadingId] = useState<string | null>(null);
 
   const load = async () => {
     if (!establishmentId) return;
@@ -102,6 +105,30 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
       return inSegment && matchesSearch;
     });
   }, [customers, segment, query]);
+
+  const createRecoveryQr = async (customer: Customer) => {
+    setRecoveryLoadingId(customer.id);
+    try {
+      const { data, error: requestError } = await supabase.rpc('create_loyalty_card_recovery_session', {
+        p_customer_id: customer.id,
+      });
+      if (requestError) throw requestError;
+      const row = Array.isArray(data) ? data[0] : data;
+      if (!row?.recovery_token) throw new Error('Aucun lien de récupération n’a été généré.');
+      const url = window.location.origin + '/loyalty/recover?token=' + encodeURIComponent(String(row.recovery_token));
+      const qrDataUrl = await QRCode.toDataURL(url, { width: 360, margin: 2 });
+      setRecoveryQr({
+        url: qrDataUrl,
+        name: [customer.first_name, customer.last_name ?? ''].join(' ').trim() || 'Client',
+        phone: customer.phone,
+        expiresAt: String(row.expires_at ?? ''),
+      });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Impossible de générer le QR de récupération.');
+    } finally {
+      setRecoveryLoadingId(null);
+    }
+  };
 
   const exportCsv = () => {
     const rows = [
@@ -179,9 +206,9 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
       <div className="overflow-hidden rounded-2xl border border-white/10">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[720px] text-left text-sm">
-            <thead className="bg-white/[.04] text-xs text-white/45"><tr><th className="px-4 py-3 font-medium">Client</th><th className="px-4 py-3 font-medium">Points</th><th className="px-4 py-3 font-medium">Visites</th><th className="px-4 py-3 font-medium">Dernière visite</th><th className="px-4 py-3 font-medium">Anniversaire</th><th className="px-4 py-3 font-medium">Consentements</th></tr></thead>
+            <thead className="bg-white/[.04] text-xs text-white/45"><tr><th className="px-4 py-3 font-medium">Client</th><th className="px-4 py-3 font-medium">Points</th><th className="px-4 py-3 font-medium">Visites</th><th className="px-4 py-3 font-medium">Dernière visite</th><th className="px-4 py-3 font-medium">Anniversaire</th><th className="px-4 py-3 font-medium">Consentements</th><th className="px-4 py-3 font-medium">Carte</th></tr></thead>
             <tbody className="divide-y divide-white/[.06]">
-              {loading ? <tr><td colSpan={6} className="px-4 py-10 text-center text-white/45"><Loader2 className="mx-auto mb-2 animate-spin" size={18} />Chargement des clients…</td></tr> :
+              {loading ? <tr><td colSpan={7} className="px-4 py-10 text-center text-white/45"><Loader2 className="mx-auto mb-2 animate-spin" size={18} />Chargement des clients…</td></tr> :
                 filtered.length === 0 ? <tr><td colSpan={6} className="px-4 py-10 text-center text-white/45">Aucun client dans ce segment.</td></tr> :
                 filtered.slice(0, 100).map(c => <tr key={c.id} className="hover:bg-white/[.025]">
                   <td className="px-4 py-3"><div className="font-medium text-white">{c.first_name} {c.last_name ?? ''}</div><div className="mt-1 text-xs text-white/40">{c.phone}</div></td>
@@ -190,6 +217,12 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
                   <td className="px-4 py-3 text-xs text-white/60">{c.last_visit_at ? new Date(c.last_visit_at).toLocaleDateString('fr-FR') : 'Aucune visite enregistrée'}</td>
                   <td className="px-4 py-3 text-xs text-white/60">{c.birth_day && c.birth_month ? String(c.birth_day).padStart(2, '0') + '/' + String(c.birth_month).padStart(2, '0') : '—'}</td>
                   <td className="px-4 py-3"><div className="flex flex-wrap gap-1">{c.marketing_consent && <span className="rounded-full bg-emerald-400/10 px-2 py-1 text-[10px] text-emerald-200">Marketing</span>}{c.notification_consent && <span className="rounded-full bg-sky-400/10 px-2 py-1 text-[10px] text-sky-200">Notifications</span>}{!c.marketing_consent && !c.notification_consent && <span className="text-xs text-white/30">Aucun</span>}</div></td>
+                  <td className="px-4 py-3">
+                    <button type="button" onClick={() => void createRecoveryQr(c)} disabled={recoveryLoadingId !== null} className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-[#D4AF37]/30 px-3 py-2 text-xs font-semibold text-[#E1C27A] transition hover:bg-[#D4AF37]/10 disabled:cursor-not-allowed disabled:opacity-50">
+                      {recoveryLoadingId === c.id ? <Loader2 size={13} className="animate-spin" /> : <QrCode size={13} />}
+                      Récupérer
+                    </button>
+                  </td>
                 </tr>)
               }
             </tbody>
@@ -197,6 +230,26 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
         </div>
         {!loading && filtered.length > 100 && <p className="border-t border-white/10 px-4 py-3 text-xs text-white/40">Affichage des 100 premiers clients. L’export CSV inclut tout le segment filtré.</p>}
       </div>
+      {recoveryQr && (
+        <div className="fixed inset-0 z-[100] grid place-items-center bg-black/80 p-4" role="dialog" aria-modal="true" aria-label="QR de récupération de carte">
+          <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#101010] p-5 shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#D4AF37]">Carte fidélité</p>
+                <h3 className="mt-1 text-xl font-semibold text-white">Récupérer la carte</h3>
+                <p className="mt-1 text-sm text-white/50">{recoveryQr.name} · {recoveryQr.phone}</p>
+              </div>
+              <button type="button" onClick={() => setRecoveryQr(null)} aria-label="Fermer" className="rounded-lg p-2 text-white/60 hover:bg-white/10 hover:text-white"><X size={18} /></button>
+            </div>
+            <div className="mx-auto mt-5 w-fit rounded-2xl bg-white p-3">
+              <img src={recoveryQr.url} alt="QR code de récupération de la carte fidélité" className="h-64 w-64 max-w-full" />
+            </div>
+            <p className="mt-4 text-center text-sm text-white/70">Scannez ce QR code pour récupérer la carte fidélité.</p>
+            {recoveryQr.expiresAt && <p className="mt-1 text-center text-xs text-white/40">Lien valable jusqu’au {new Date(recoveryQr.expiresAt).toLocaleString('fr-FR')}</p>}
+            <button type="button" onClick={() => window.print()} className="mt-4 w-full rounded-xl bg-[#D4AF37] px-4 py-3 text-sm font-bold text-black hover:brightness-110">Imprimer le QR code</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

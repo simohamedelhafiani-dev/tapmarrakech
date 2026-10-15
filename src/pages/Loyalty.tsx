@@ -96,7 +96,7 @@ export default function Loyalty() {
   }>>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [showNotificationHistory, setShowNotificationHistory] = useState(false);
-  const [showClientOperations, setShowClientOperations] = useState(false);
+  const [activeLoyaltySection, setActiveLoyaltySection] = useState<'overview' | 'clients'>('overview');
 
   const [programSettings, setProgramSettings] =
     useState<LoyaltyProgramSettings>({
@@ -873,13 +873,28 @@ export default function Loyalty() {
         />
       </div>
 
-      {/* Client operations stay accessible on demand, not displayed by default. */}
-      <div className="mt-6 flex justify-end">
-        <button type="button" onClick={() => setShowClientOperations(value => !value)} aria-expanded={showClientOperations} className="rounded-xl border border-[#D4AF37]/30 bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#E1C27A] transition hover:bg-[#1B1B1B]">
-          {showClientOperations ? 'Masquer les opérations clients' : 'Ouvrir les opérations clients'}
+      {/* Séparation claire entre le tableau de bord fidélité et la gestion des clients. */}
+      <div className="mt-7 mb-5 flex flex-wrap gap-2 border-b border-white/10 pb-3" role="tablist" aria-label="Sections fidélité">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeLoyaltySection === 'overview'}
+          onClick={() => setActiveLoyaltySection('overview')}
+          className={`rounded-xl px-4 py-2.5 text-xs font-semibold transition ${activeLoyaltySection === 'overview' ? 'bg-[#D4AF37] text-[#0D0D0D]' : 'border border-white/10 bg-[#111111] text-white/65 hover:border-[#D4AF37]/40 hover:text-white'}`}
+        >
+          Vue d’ensemble
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeLoyaltySection === 'clients'}
+          onClick={() => setActiveLoyaltySection('clients')}
+          className={`rounded-xl px-4 py-2.5 text-xs font-semibold transition ${activeLoyaltySection === 'clients' ? 'bg-[#D4AF37] text-[#0D0D0D]' : 'border border-white/10 bg-[#111111] text-white/65 hover:border-[#D4AF37]/40 hover:text-white'}`}
+        >
+          Clients · {customers.length}
         </button>
       </div>
-      {showClientOperations && (
+      {activeLoyaltySection === 'clients' && (
       <section className="mt-6 rounded-2xl border border-[#242424] bg-[#111111] shadow-soft">
         <div className="flex flex-col justify-between gap-4 border-b border-white/10 p-5 md:flex-row md:items-center md:p-7">
           <div>
