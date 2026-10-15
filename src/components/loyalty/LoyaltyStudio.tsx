@@ -1292,7 +1292,6 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
           )}
         </div>
             </div>
-          </div>
         )}
 
         {!studioHome && <aside className="sticky top-6 h-fit overflow-hidden rounded-3xl bg-[#050505] p-4 sm:p-5">
