@@ -1063,19 +1063,9 @@ function Overview({
   }, [selectedEstablishment, globalStats]);
 
   const responsibles = staff.filter((member) => member.role === 'MANAGER');
-  const activeSubscriptions = billing.subscriptions.filter((item) => item.status === 'active').length;
   const selectedName = selectedEstablishment === 'all'
     ? 'Tous les établissements'
     : establishments.find((item) => item.id === selectedEstablishment)?.name ?? 'Établissement';
-
-  const quickActions = [
-    { id: 'establishments' as AdminSection, label: 'Ajouter un établissement', icon: Building2 },
-    { id: 'responsibles' as AdminSection, label: 'Gérer les responsables', icon: UserRound },
-    { id: 'reviews' as AdminSection, label: 'Voir les avis', icon: MessageSquare },
-    { id: 'reports' as AdminSection, label: 'Générer un rapport', icon: Printer },
-  ];
-
-  const recent = establishments.slice(0, 5);
 
   return (
     <div className="space-y-6">
@@ -1110,24 +1100,10 @@ function Overview({
         <AdminMetric icon={WalletCards} label="MRR" value={billing.available ? `${billing.mrr.toLocaleString('fr-FR')} DH` : '—'} detail={`${activeSubscriptions} abonnements actifs`} />
       </div>
 
-      <RecentActivity
-        events={activities}
-        loading={activityLoading}
-        error={activityError}
-        onRetry={reloadRecentActivity}
-      />
-
       <EvolutionCharts
         reviewsData={overviewStats?.reviewsEvolution ?? []}
         scansData={overviewStats?.scansEvolution ?? []}
         loading={overviewStatsStatus === 'loading'}
-      />
-
-      <RecentLoyaltyCustomers
-        customers={recentLoyaltyCustomers}
-        loading={loyaltyCustomersLoading}
-        error={loyaltyCustomersError}
-        onRetry={reloadRecentLoyaltyCustomers}
       />
 
       <EstablishmentPerformanceTable
@@ -1202,42 +1178,7 @@ function Overview({
         </div>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[1.2fr_.8fr]">
-        <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-soft">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A45C]/45">Accès rapide</p>
-              <h3 className="mt-1 text-lg font-semibold">Actions administrateur</h3>
-            </div>
-          </div>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            {quickActions.map(({ id, label, icon: Icon }) => (
-              <button key={id} onClick={() => onNavigate(id)} className="group flex items-center gap-3 rounded-3xl border border-[#242424] bg-[#111111] p-4 text-left transition hover:-translate-y-0.5 hover:border-[#242424]/15 hover:bg-[#111111] hover:shadow-sm">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#111111] text-[#C9A45C] shadow-sm group-hover:bg-[#111111] group-hover:text-[#FFFFFF]"><Icon size={17} /></span>
-                <span className="text-xs font-semibold">{label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
 
-        <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-soft">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A45C]/45">Santé plateforme</p>
-              <h3 className="mt-1 text-lg font-semibold">Statistiques rapides</h3>
-            </div>
-            <button onClick={() => onNavigate('system')} className="text-xs font-semibold text-[#C9A45C]">Supervision →</button>
-          </div>
-          <div className="mt-5 space-y-3">
-            <QuickStat label="Événements analytics" value={globalStats.analyticsEvents.toLocaleString('fr-FR')} />
-            <QuickStat label="Abonnements actifs" value={String(activeSubscriptions)} />
-            <QuickStat label="Paiements échoués" value={String(billing.failedPayments)} alert={billing.failedPayments > 0} />
-            <QuickStat label="Renouvellements < 30 j." value={String(billing.upcomingRenewals)} />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 function AdminMetric({ icon: Icon, label, value, detail }: { icon: typeof Star; label: string; value: string | number; detail: string }) {
