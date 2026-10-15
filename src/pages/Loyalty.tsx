@@ -686,11 +686,11 @@ export default function Loyalty() {
             Fidélité
           </p>
 
-          <h1 className="mt-2 font-display text-4xl text-forest">
+          <h1 className="mt-2 font-display text-4xl text-white">
             Compte Fidélité
           </h1>
 
-          <p className="mt-2 text-sm text-ink/50">
+          <p className="mt-2 text-sm text-white/50">
             Fidélisez vos clients grâce à leur numéro de téléphone.
           </p>
         </div>
@@ -698,7 +698,7 @@ export default function Loyalty() {
         <div className="flex flex-wrap items-center gap-2">
           <Link
             to="/dashboard/loyalty/raffles"
-            className="flex items-center gap-2 rounded-xl border border-gold/30 bg-white px-4 py-2.5 text-xs font-semibold text-forest transition hover:bg-[#fdf9ef]"
+            className="flex items-center gap-2 rounded-xl border border-[#D4AF37]/30 bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#E1C27A] transition hover:bg-[#1B1B1B]"
           >
             <Ticket size={16} />
             Tombola & niveaux
@@ -717,7 +717,7 @@ export default function Loyalty() {
           <button
             onClick={() => setShowNotificationModal(true)}
             disabled={!establishmentId || !programSettings.enabled}
-            className="flex items-center gap-2 rounded-xl border border-gold/30 bg-white px-4 py-2.5 text-xs font-semibold text-forest transition hover:bg-[#fdf9ef] disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex items-center gap-2 rounded-xl border border-[#D4AF37]/30 bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#E1C27A] transition hover:bg-[#1B1B1B] disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Bell size={16} />
             Notification carte
@@ -726,7 +726,7 @@ export default function Loyalty() {
           <button
             onClick={() => setShowNewCustomer(true)}
           disabled={!establishmentId || !programSettings.enabled}
-          className="flex w-fit items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-forest-light disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex w-fit items-center gap-2 rounded-xl bg-[#D4AF37] px-4 py-2.5 text-xs font-semibold text-[#0D0D0D] transition hover:bg-[#E1C27A] disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Plus size={16} />
             Nouveau client
@@ -738,8 +738,8 @@ export default function Loyalty() {
       <div
         className={`mb-6 rounded-2xl border p-5 shadow-soft ${
           programSettings.enabled
-            ? 'border-forest/10 bg-white'
-            : 'border-red-200 bg-red-50'
+            ? 'border-[#D4AF37]/20 bg-[#111111]'
+            : 'border-red-500/25 bg-[#180F0F]'
         }`}
       >
         <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
@@ -748,13 +748,13 @@ export default function Loyalty() {
               Programme fidélité
             </p>
 
-            <p className="mt-1 text-sm font-medium text-forest">
+            <p className="mt-1 text-sm font-medium text-white">
               {programSettings.enabled
                 ? 'Programme actif'
                 : 'Programme désactivé'}
             </p>
 
-            <p className="mt-1 text-xs text-ink/45">
+            <p className="mt-1 text-xs text-white/45">
               {programSettings.enabled
                 ? `${programSettings.points_per_currency} point(s) par ${programSettings.currency}`
                 : 'Aucun nouveau point ne peut être attribué.'}
@@ -764,8 +764,8 @@ export default function Loyalty() {
           <div
             className={`rounded-full px-3 py-1.5 text-[11px] font-semibold ${
               programSettings.enabled
-                ? 'bg-[#e5eee9] text-forest'
-                : 'bg-red-100 text-red-700'
+                ? 'bg-[#D4AF37]/10 text-[#E1C27A]'
+                : 'bg-red-500/10 text-red-300'
             }`}
           >
             {programSettings.enabled ? 'ACTIF' : 'INACTIF'}
