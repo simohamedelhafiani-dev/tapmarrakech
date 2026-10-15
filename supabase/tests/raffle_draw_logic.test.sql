@@ -201,8 +201,12 @@ select ok(
 -- SECURITY DEFINER and execution privileges are part of the release gate.
 select ok(
   (select p.prosecdef and coalesce(array_to_string(p.proconfig, ','), '') like '%search_path=%'
-   from pg_proc p where p.oid = 'public.process_due_loyalty_raffles()'::regprocedure),
-  'scheduler worker is SECURITY DEFINER with a fixed search_path'
+   from pg_proc p where p.oid = 'public.process_due_loyalty_raffles()'::regprocedure)
+  and (select p.prosecdef and coalesce(array_to_string(p.proconfig, ','), '') like '%search_path=%'
+       from pg_proc p where p.oid = 'public.draw_loyalty_raffle_internal(uuid,boolean,text,uuid)'::regprocedure)
+  and (select p.prosecdef and coalesce(array_to_string(p.proconfig, ','), '') like '%search_path=%'
+       from pg_proc p where p.oid = 'public.rerun_loyalty_raffle_draw(uuid)'::regprocedure),
+  'scheduler, internal draw, and manual RPC are SECURITY DEFINER with fixed search_path'
 );
 select ok(
   not has_function_privilege('anon', 'public.process_due_loyalty_raffles()', 'EXECUTE')
