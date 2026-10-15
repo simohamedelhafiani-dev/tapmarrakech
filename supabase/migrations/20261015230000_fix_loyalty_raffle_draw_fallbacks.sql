@@ -158,9 +158,17 @@ begin
   from public.loyalty_raffle_entries e
   where e.raffle_id = v_raffle.id;
 
-  if v_pool_count > 0 then
-    v_stage := 'NORMAL_POOL';
-  else
+  select count(*)::integer into v_enrolled_count
+  from public.loyalty_customers c
+  where c.establishment_id = v_raffle.establishment_id
+    and c.created_at <= clock_timestamp();
+
+  select * into v_decision
+  from public.resolve_loyalty_raffle_draw_pool(v_pool_count, v_enrolled_count, v_raffle.winners_count);
+  v_stage := v_decision.fallback_stage;
+  v_winners_to_select := v_decision.winners_to_select;
+
+  if v_stage = 'EXPANDED_POOL' then
     -- Fallback: all enrolled customers at this establishment, one ticket each.
     insert into public.loyalty_raffle_entries(raffle_id, customer_id, tickets)
     select v_raffle.id, c.id, 1
@@ -172,34 +180,27 @@ begin
     select count(*)::integer into v_pool_count
     from public.loyalty_raffle_entries e
     where e.raffle_id = v_raffle.id;
+    v_winners_to_select := least(v_pool_count, v_raffle.winners_count);
+    if v_pool_count = 0 then v_stage := 'EXTENDED_7_DAYS'; end if;
+  end if;
 
-    if v_pool_count > 0 then
-      v_stage := 'EXPANDED_POOL';
-    else
-      v_stage := 'EXTENDED_7_DAYS';
-      v_scheduled_for := greatest(clock_timestamp(), v_raffle.starts_at + interval '1 second') + interval '7 days';
-      v_note := 'Aucun client inscrit au programme de fidélité. Le tirage reste ouvert et a été reporté de 7 jours. Le responsable doit vérifier les inscriptions.';
+  if v_stage = 'EXTENDED_7_DAYS' then
+    v_scheduled_for := greatest(clock_timestamp(), v_raffle.starts_at + interval '1 second') + interval '7 days';
+    v_note := v_decision.note;
+    update public.loyalty_raffles
+    set status = 'SCHEDULED', draw_at = v_scheduled_for, drawn_at = null,
+        last_draw_fallback_stage = v_stage, last_draw_note = v_note,
+        last_draw_attempt_at = clock_timestamp(), updated_at = clock_timestamp()
+    where id = v_raffle.id;
 
-      update public.loyalty_raffles
-      set status = 'SCHEDULED',
-          draw_at = v_scheduled_for,
-          drawn_at = null,
-          last_draw_fallback_stage = v_stage,
-          last_draw_note = v_note,
-          last_draw_attempt_at = clock_timestamp(),
-          updated_at = clock_timestamp()
-      where id = v_raffle.id;
-
-      insert into public.loyalty_raffle_draw_audit(
-        raffle_id, trigger_source, fallback_stage, candidate_count,
-        winner_count, scheduled_for, triggered_by, note
-      ) values (
-        v_raffle.id, p_trigger_source, v_stage, 0, 0,
-        v_scheduled_for, p_triggered_by, v_note
-      );
-
-      return v_stage;
-    end if;
+    insert into public.loyalty_raffle_draw_audit(
+      raffle_id, trigger_source, fallback_stage, candidate_count,
+      winner_count, scheduled_for, triggered_by, note
+    ) values (
+      v_raffle.id, p_trigger_source, v_stage, 0, 0,
+      v_scheduled_for, p_triggered_by, v_note
+    );
+    return v_stage;
   end if;
 
   if v_raffle.reward_validity_mode = 'DAYS_AFTER_DRAW' then
@@ -241,7 +242,7 @@ begin
       v_valid_from, v_valid_until, v_raffle.reservation_required,
       v_raffle.single_use, v_raffle.non_cumulative
     from ranked_entries ranked
-    where ranked.winner_rank <= least(v_raffle.winners_count, v_pool_count)
+    where ranked.winner_rank <= v_winners_to_select
     on conflict (raffle_id, customer_id) do nothing
     returning customer_id, prize_name, valid_from, valid_until, reservation_required
   )
@@ -293,13 +294,8 @@ begin
   set status = 'EXPIRED'
   where raffle_id = v_raffle.id and valid_until < clock_timestamp();
 
-  if v_pool_count < v_raffle.winners_count then
-    v_note := format(
-      'Pool de %s client(s) pour %s gagnant(s) prévu(s) : tous les participants sont gagnants.',
-      v_pool_count, v_raffle.winners_count
-    );
-  elsif v_stage = 'EXPANDED_POOL' then
-    v_note := format('Aucun participant éligible au niveau requis. Tirage effectué dans le pool élargi de %s client(s).', v_pool_count);
+  if v_pool_count < v_raffle.winners_count or v_stage = 'EXPANDED_POOL' then
+    v_note := v_decision.note;
   else
     v_note := format('Tirage terminé dans le pool normal : %s gagnant(s) enregistré(s).', v_winner_count);
   end if;
