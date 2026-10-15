@@ -97,7 +97,7 @@ const TABS: { id: TabId; label: string; caption: string; icon: typeof Settings2 
   { id: 'referral', label: 'Parrainage', caption: 'Acquisition', icon: Rocket },
   { id: 'tiers', label: 'Niveaux', caption: 'Clients', icon: Trophy },
   { id: 'raffle', label: 'Tombola', caption: 'Gagnants', icon: Trophy },
-  { id: 'crm', label: 'CRM', caption: 'Segments', icon: UsersRound },
+  { id: 'crm', label: 'Liste clients', caption: 'Clients & segments', icon: UsersRound },
   { id: 'notifications', label: 'Notifications', caption: 'Communication', icon: Bell },
   { id: 'design', label: 'Design', caption: 'Visuels', icon: Palette },
 ];
@@ -724,7 +724,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   referral: 'Configurer le parrainage client',
                   tiers: 'Créer vos niveaux de fidélité',
                   raffle: 'Gérer la tombola et les gagnants',
-                  crm: 'Voir les segments de clientèle',
+                  crm: 'Consulter la liste et les segments clients',
                   notifications: 'Envoyer et suivre vos notifications',
                   design: 'Personnaliser la carte fidélité',
                 };
@@ -753,9 +753,45 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
           </div>
         ) : (
           <div className="min-w-0">
-            <button type="button" onClick={() => setStudioHome(true)} className="mb-5 inline-flex items-center gap-2 rounded-xl border border-[#D4AF37]/25 bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#E1C27A] transition hover:bg-[#1A1A1A]">
-              <X size={14} /> Retour aux applications
-            </button>
+            <div className="mb-6">
+              <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#D4AF37]">KELYANI · LOYALTY STUDIO</p>
+              <h3 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">Vos applications fidélité</h3>
+              <p className="mt-2 text-sm leading-6 text-white/50">Les raccourcis restent visibles. Sélectionnez une tuile pour afficher son contenu juste en dessous.</p>
+            </div>
+            <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
+              {visibleTabs.map(item => {
+                const Icon = item.icon;
+                const descriptions: Record<TabId, string> = {
+                  settings: 'Activer et régler votre programme',
+                  rewards: 'Gérer cadeaux et réductions',
+                  referral: 'Configurer le parrainage client',
+                  tiers: 'Créer vos niveaux de fidélité',
+                  raffle: 'Gérer la tombola et les gagnants',
+                  crm: 'Consulter la liste et les segments clients',
+                  notifications: 'Envoyer et suivre vos notifications',
+                  design: 'Personnaliser la carte fidélité',
+                };
+                const colors: Record<TabId, string> = {
+                  settings: 'from-[#E1C27A] to-[#B68A2B]',
+                  rewards: 'from-[#D4AF37] to-[#8D6A1E]',
+                  referral: 'from-[#E1C27A] to-[#A57B28]',
+                  tiers: 'from-[#D4AF37] to-[#9A7424]',
+                  raffle: 'from-[#E1C27A] to-[#B68A2B]',
+                  crm: 'from-[#D4AF37] to-[#8D6A1E]',
+                  notifications: 'from-[#E1C27A] to-[#A57B28]',
+                  design: 'from-[#D4AF37] to-[#9A7424]',
+                };
+                return (
+                  <button key={item.id} type="button" onClick={() => { setTab(item.id); if (item.id === 'notifications') setNotificationHomeView('home'); }} aria-pressed={tab === item.id} className={`group min-h-[88px] rounded-2xl border p-3 text-left transition hover:border-[#D4AF37]/50 hover:bg-[#171717] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] sm:p-4 ${tab === item.id ? 'border-[#D4AF37]/70 bg-[#1A1A1A] ring-1 ring-[#D4AF37]/20' : 'border-white/10 bg-[#111111]'}`}>
+                    <span className={`inline-grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br ${colors[item.id]} text-[#0D0D0D] shadow sm:h-10 sm:w-10`}>
+                      <Icon size={18} />
+                    </span>
+                    <span className="mt-2 block text-xs font-semibold text-white sm:text-sm">{item.label}</span>
+                    <span className="mt-1 hidden text-[10px] leading-4 text-white/45 sm:block">{descriptions[item.id]}</span>
+                  </button>
+                );
+              })}
+            </div>
             <div className="space-y-5">
           {tab === 'notifications' && (
             <div className="space-y-5">
@@ -766,7 +802,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                     <h3 className="mt-2 text-2xl font-semibold text-white">Centre de notifications</h3>
                     <p className="mt-2 max-w-xl text-sm leading-6 text-white/50">Choisissez une fonctionnalité, comme sur l’écran d’accueil d’un téléphone. Vos campagnes et votre historique restent dans le même espace.</p>
                   </div>
-                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-2">
                     <button type="button" onClick={() => setNotificationHomeView('campaigns')} className="group rounded-2xl border border-white/10 bg-[#151515] p-4 text-left transition hover:-translate-y-0.5 hover:border-[#D4AF37]/50 hover:bg-[#1B1B1B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]">
                       <span className="grid h-14 w-14 place-items-center rounded-[18px] bg-gradient-to-br from-[#E1C27A] to-[#B68A2B] text-[#0D0D0D] shadow-lg"><Send size={23}/></span>
                       <span className="mt-4 block text-sm font-semibold text-white">Campagnes</span>
@@ -776,11 +812,6 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                       <span className="grid h-14 w-14 place-items-center rounded-[18px] bg-gradient-to-br from-[#D4AF37] to-[#8D6A1E] text-[#0D0D0D] shadow-lg"><History size={23}/></span>
                       <span className="mt-4 block text-sm font-semibold text-white">Historique</span>
                       <span className="mt-1 block text-xs leading-5 text-white/45">Consulter les envois et leur statut</span>
-                    </button>
-                    <button type="button" onClick={() => { setTab('crm'); }} className="group rounded-2xl border border-white/10 bg-[#151515] p-4 text-left transition hover:-translate-y-0.5 hover:border-[#D4AF37]/50 hover:bg-[#1B1B1B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]">
-                      <span className="grid h-14 w-14 place-items-center rounded-[18px] bg-gradient-to-br from-[#E1C27A] to-[#A57B28] text-[#0D0D0D] shadow-lg"><UsersRound size={23}/></span>
-                      <span className="mt-4 block text-sm font-semibold text-white">CRM clients</span>
-                      <span className="mt-1 block text-xs leading-5 text-white/45">Segments et ciblage des clients</span>
                     </button>
                   </div>
                 </div>
