@@ -752,6 +752,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
             </div>
           </div>
         ) : (
+          <>
           <div className="min-w-0">
             <aside className="mb-5 rounded-2xl border border-white/10 bg-[#0D0D0D] p-2 xl:sticky xl:top-5 xl:mb-0 xl:p-3">
               <div className="mb-3 hidden px-3 pt-2 xl:block">
@@ -784,7 +785,6 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
               </div>
             </div>
             <div className="space-y-5">
-          {tab === 'notifications' && (
           {tab === 'notifications' && (
             <div className="space-y-5">
               {notificationHomeView === 'home' ? (
@@ -1315,7 +1315,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
           )}
         </div>
             </div>
-          </div>
+          </>
         )}
 
         {!studioHome && <aside className="sticky top-6 h-fit overflow-hidden rounded-3xl bg-[#050505] p-4 sm:p-5">
