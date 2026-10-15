@@ -616,3 +616,61 @@ table {
   .kelyani-kpi-tile>div:first-child,.kelyani-chart-tile>div:first-child { font-size:7px; }
   .kelyani-kpi-tile p,.kelyani-dashboard-top p,.kelyani-dashboard-footer,.kelyani-float-chip span { color:rgba(245,240,225,.6); }
 }
+
+/* QA correction pass: keep floating UI inside the hero and improve readability */
+.kelyani-hero-stage {
+  width:100%;
+  max-width:100%;
+  margin-left:auto;
+  margin-right:auto;
+  padding-left:14px;
+  padding-right:14px;
+}
+.kelyani-dashboard-3d {
+  width:100%;
+  max-width:100%;
+}
+.kelyani-float-loyalty {
+  left:18px;
+  bottom:13%;
+}
+.kelyani-float-review {
+  right:18px;
+  top:24%;
+}
+.kelyani-float-chip {
+  max-width:calc(100% - 36px);
+}
+.kelyani-float-chip p,.kelyani-float-chip span {
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.kelyani-kpi-tile>div:first-child,.kelyani-chart-tile>div:first-child {
+  color:rgba(250,246,235,.68);
+}
+.kelyani-kpi-tile p,.kelyani-dashboard-top p {
+  color:rgba(250,246,235,.58);
+}
+.kelyani-dashboard-footer {
+  color:rgba(250,246,235,.55);
+}
+.kelyani-dashboard-footer>span:first-child {
+  color:rgba(250,246,235,.72);
+}
+.kelyani-hero-stage + div p {
+  color:rgba(250,246,235,.66);
+}
+@media (min-width:1024px) {
+  .kelyani-hero-stage { margin-top:20px; }
+}
+@media (max-height:820px) and (min-width:1024px) {
+  .kelyani-hero-stage { min-height:215px; }
+  .kelyani-float-loyalty { left:16px;bottom:11%; }
+  .kelyani-float-review { right:16px; }
+}
+@media (max-width:640px) {
+  .kelyani-hero-stage { padding-left:6px;padding-right:6px; }
+  .kelyani-float-loyalty { left:6px;bottom:6%; }
+  .kelyani-float-review { right:6px;top:15%; }
+  .kelyani-float-chip { max-width:calc(100% - 12px); }
+}
