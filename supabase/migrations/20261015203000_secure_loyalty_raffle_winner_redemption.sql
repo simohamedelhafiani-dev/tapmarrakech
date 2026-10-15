@@ -92,7 +92,7 @@ begin
         redeemed_by = auth.uid()
     where id = v_winner.id
       and status = 'PENDING'
-  returning prize_name, loyalty_raffle_winners.redeemed_at
+  returning loyalty_raffle_winners.prize_name, loyalty_raffle_winners.redeemed_at
     into v_prize_name, v_redeemed_at;
 
   if not found then
