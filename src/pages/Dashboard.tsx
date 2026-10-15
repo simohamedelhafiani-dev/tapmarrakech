@@ -11,9 +11,14 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
+  Area,
+  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -864,6 +869,42 @@ export default function Dashboard() {
             <p className="mt-1 text-[10px] text-[#F5F5DC]/35">{detail}</p>
           </article>
         ))}
+      </section>
+
+      <section aria-label="Analyses visuelles" className="grid gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(280px,.7fr)]">
+        <article className="overflow-hidden rounded-[24px] border border-white/[0.07] bg-[radial-gradient(ellipse_at_top_left,rgba(201,164,92,0.08),transparent_48%),linear-gradient(145deg,#141414,#090909)] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.2)] sm:rounded-[28px] sm:p-6 lg:p-7">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div><p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#C9A45C]">Tendance</p><h2 className="mt-1 text-lg font-semibold text-white sm:text-xl">Évolution des avis</h2><p className="mt-1 text-xs text-[#F5F5DC]/35">Avis positifs et avis à surveiller sur la période choisie</p></div>
+            <div className="flex flex-wrap gap-3 pt-1"><span className="flex items-center gap-1.5 text-[10px] text-[#F5F5DC]/55"><span className="h-2 w-2 rounded-full bg-[#C9A45C]" />Positifs</span><span className="flex items-center gap-1.5 text-[10px] text-[#F5F5DC]/55"><span className="h-2 w-2 rounded-full bg-[#82796B]" />À surveiller</span></div>
+          </div>
+          <div className="mt-5 h-56 sm:h-64">
+            <ResponsiveContainer width="100%" height="100%"><AreaChart data={chart} margin={{ top: 8, right: 4, left: -22, bottom: 0 }}>
+              <defs><linearGradient id="kelyaniPositiveFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#C9A45C" stopOpacity={0.28} /><stop offset="95%" stopColor="#C9A45C" stopOpacity={0.01} /></linearGradient><linearGradient id="kelyaniNegativeFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#82796B" stopOpacity={0.22} /><stop offset="95%" stopColor="#82796B" stopOpacity={0.01} /></linearGradient></defs>
+              <CartesianGrid stroke="#FFFFFF" strokeOpacity={0.06} vertical={false} />
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#F5F5DC', opacity: 0.42, fontSize: 10 }} />
+              <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{ fill: '#F5F5DC', opacity: 0.32, fontSize: 9 }} width={28} />
+              <Tooltip contentStyle={{ background: '#111111', border: '1px solid #34302A', borderRadius: 14, color: '#fff', fontSize: 12 }} />
+              <Area type="monotone" dataKey="positive" name="Avis positifs" stroke="#C9A45C" strokeWidth={2.5} fill="url(#kelyaniPositiveFill)" activeDot={{ r: 4, strokeWidth: 0 }} />
+              <Area type="monotone" dataKey="negative" name="Avis à surveiller" stroke="#82796B" strokeWidth={2} fill="url(#kelyaniNegativeFill)" activeDot={{ r: 4, strokeWidth: 0 }} />
+            </AreaChart></ResponsiveContainer>
+          </div>
+          <div className="mt-4 grid grid-cols-3 gap-2 border-t border-white/[0.07] pt-4">
+            <div><p className="text-[9px] uppercase tracking-wider text-[#F5F5DC]/35">Total avis</p><p className="mt-1 text-lg font-semibold text-white">{reviews.length.toLocaleString('fr-FR')}</p></div>
+            <div><p className="text-[9px] uppercase tracking-wider text-[#F5F5DC]/35">Positifs</p><p className="mt-1 text-lg font-semibold text-[#D9B76B]">{reviews.filter((review) => review.rating >= 4).length.toLocaleString('fr-FR')}</p></div>
+            <div><p className="text-[9px] uppercase tracking-wider text-[#F5F5DC]/35">À surveiller</p><p className="mt-1 text-lg font-semibold text-[#C7BBA7]">{reviews.filter((review) => review.rating <= 3).length.toLocaleString('fr-FR')}</p></div>
+          </div>
+        </article>
+        <article className="flex flex-col overflow-hidden rounded-[24px] border border-white/[0.07] bg-[linear-gradient(145deg,#141414,#090909)] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.2)] sm:rounded-[28px] sm:p-6 lg:p-7">
+          <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#C9A45C]">Réputation</p><h2 className="mt-1 text-lg font-semibold text-white sm:text-xl">Répartition des avis</h2><p className="mt-1 text-xs text-[#F5F5DC]/35">Lecture rapide de la satisfaction client</p>
+          <div className="relative mx-auto mt-3 h-52 w-full max-w-[280px]">
+            <ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={[{ name: 'Positifs', value: reviews.filter((review) => review.rating >= 4).length }, { name: 'À surveiller', value: reviews.filter((review) => review.rating <= 3).length }]} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius="67%" outerRadius="88%" paddingAngle={reviews.length ? 4 : 0} stroke="none" startAngle={90} endAngle={-270}>{[{ color: '#C9A45C' }, { color: '#5C554B' }].map((item, index) => <Cell key={index} fill={item.color} />)}</Pie><Tooltip contentStyle={{ background: '#111111', border: '1px solid #34302A', borderRadius: 12, color: '#fff', fontSize: 12 }} /></PieChart></ResponsiveContainer>
+            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center"><span className="font-display text-4xl font-semibold text-white">{reviews.length ? Math.round((reviews.filter((review) => review.rating >= 4).length / reviews.length) * 100) : 0}%</span><span className="mt-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-[#F5F5DC]/40">positifs</span></div>
+          </div>
+          <div className="mt-auto space-y-3">
+            <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-3"><span className="flex items-center gap-2 text-xs text-[#F5F5DC]/60"><span className="h-2.5 w-2.5 rounded-full bg-[#C9A45C]" />Avis positifs (4–5★)</span><strong className="text-sm text-white">{reviews.filter((review) => review.rating >= 4).length}</strong></div>
+            <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-3"><span className="flex items-center gap-2 text-xs text-[#F5F5DC]/60"><span className="h-2.5 w-2.5 rounded-full bg-[#5C554B]" />Avis à surveiller (1–3★)</span><strong className="text-sm text-white">{reviews.filter((review) => review.rating <= 3).length}</strong></div>
+          </div>
+        </article>
       </section>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,.75fr)]">
