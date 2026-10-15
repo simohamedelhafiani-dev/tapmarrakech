@@ -77,6 +77,7 @@ export type LoyaltyVisualCard = {
   cardUrl?: string;
   raffleTitle?: string | null;
   rafflePrize?: string | null;
+  raffleStartsAt?: string | null;
   raffleDrawAt?: string | null;
   customerTierName?: string | null;
   customerRankLabel?: string | null;
@@ -468,7 +469,7 @@ export function LoyaltyCardVisual({
 
         {card.raffleTitle && (
           <div style={{ marginTop: '1.5cqw', marginBottom: '1.5cqw', width: '100%', padding: '1.8cqw 2.5cqw', borderRadius: '3cqw', border: `1px solid ${design.secondary_color}77`, background: 'rgba(0,0,0,.20)', boxSizing: 'border-box' }}>
-            <div style={{ color: design.secondary_color, fontSize: '2.2cqw', fontWeight: 900, letterSpacing: '.1em', textTransform: 'uppercase' }}>🎟 Tombola en cours</div>
+            <div style={{ color: design.secondary_color, fontSize: '2.2cqw', fontWeight: 900, letterSpacing: '.1em', textTransform: 'uppercase' }}>{card.raffleStartsAt && new Date(card.raffleStartsAt).getTime() > Date.now() ? '🎟 Prochaine tombola' : '🎟 Tombola en cours'}</div>
             <div style={{ marginTop: '.7cqw', fontSize: '3cqw', fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{card.raffleTitle}</div>
             {card.rafflePrize && <div style={{ marginTop: '.5cqw', fontSize: '2.5cqw', opacity: .8 }}>À gagner : {card.rafflePrize}</div>}
             {card.raffleDrawAt && <div style={{ marginTop: '.5cqw', fontSize: '2.2cqw', opacity: .6 }}>Tirage : {new Date(card.raffleDrawAt).toLocaleDateString('fr-FR')}</div>}

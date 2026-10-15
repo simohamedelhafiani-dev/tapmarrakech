@@ -236,6 +236,11 @@ export default function LoyaltyCard() {
     if (!card?.customer_id || !token) return;
     let cancelled = false;
     void (async () => {
+      const { data: winnerData, error: winnerError } = await supabase.rpc('get_public_loyalty_raffle_winners', { p_access_token: token });
+      if (!cancelled) {
+        if (winnerError) console.error('[KELYANI] Impossible de charger les gains de tombola:', winnerError);
+        else setRaffleWins((winnerData ?? []) as RaffleWinner[]);
+      }
       setRaffleLoadError('');
       const { data, error: raffleError } = await supabase.rpc('get_public_loyalty_raffles', { p_access_token: token });
       if (cancelled) return;
@@ -248,8 +253,8 @@ export default function LoyaltyCard() {
       const rows = Array.isArray(data) ? data : data ? [data] : [];
       const now = Date.now();
       const current = (rows as ActiveRaffle[])
-        .filter(raffle => new Date(raffle.starts_at).getTime() <= now && new Date(raffle.draw_at).getTime() > now)
-        .sort((a, b) => new Date(a.draw_at).getTime() - new Date(b.draw_at).getTime())[0] ?? null;
+        .filter(raffle => new Date(raffle.draw_at).getTime() > now)
+        .sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime() || new Date(a.draw_at).getTime() - new Date(b.draw_at).getTime())[0] ?? null;
       setActiveRaffle(current);
       setRaffleLoadError('');
       console.info('[KELYANI] Tombolas reçues pour la carte:', { received: rows.length, active: Boolean(current) });
@@ -593,6 +598,12 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
     return () => { active = false; };
   }, [token]);
 
+  const markNotificationRead = async (notificationId: string) => {
+    const { data, error: readError } = await supabase.rpc('mark_public_loyalty_notification_read', { p_access_token: token, p_notification_id: notificationId });
+    if (readError || data !== true) { console.error('[KELYANI] Impossible de marquer la notification comme lue:', readError); return; }
+    setNotifications(current => current.map(item => item.id === notificationId ? { ...item, is_read: true } : item));
+  };
+
   const activatePushNotifications = async () => {
     if (pushLoading || pushEnabled) return;
 
@@ -924,6 +935,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                 cardUrl: cardUrl,
                 raffleTitle: activeRaffle?.title ?? null,
                 rafflePrize: activeRaffle?.prize_name ?? null,
+                raffleStartsAt: activeRaffle?.starts_at ?? null,
                 raffleDrawAt: activeRaffle?.draw_at ?? null,
                 customerTierName: customerTier?.tier_name ?? null,
                 customerRankLabel: customerTier ? `${customerTier.total_points.toLocaleString("fr-FR")} points · ${customerTier.rewards_redeemed} récompenses` : null,
@@ -934,6 +946,16 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
             />
           </div>
         </div>
+
+        {(notifications.length > 0 || raffleWins.length > 0) && (
+          <section className="mt-4 w-full space-y-3" aria-label="Notifications et gains de tombola">
+            {notifications.length > 0 && <div className="overflow-hidden rounded-[1.75rem] border border-[#D4AF37]/20 bg-[#111111] shadow-luxury">
+              <div className="flex items-center justify-between border-b border-white/8 px-5 py-4"><div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]"><Bell size={18} /></span><div><h2 className="text-sm font-semibold text-white">Notifications</h2><p className="mt-0.5 text-[10px] text-white/45">Les actualités de votre programme fidélité</p></div></div>{notifications.some(item => !item.is_read) && <span className="rounded-full bg-[#D4AF37] px-2.5 py-1 text-[10px] font-bold text-[#0D0D0D]">{notifications.filter(item => !item.is_read).length} nouvelle(s)</span>}</div>
+              <div className="divide-y divide-white/8">{notifications.map(item => <button key={item.id} type="button" onClick={() => { if (!item.is_read) void markNotificationRead(item.id); }} className="flex w-full items-start gap-3 px-5 py-4 text-left transition hover:bg-white/[0.03]"><span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${item.is_read ? 'bg-white/20' : 'bg-[#D4AF37]'}`} /><span className="min-w-0 flex-1"><span className="flex flex-wrap items-center gap-2 text-xs font-semibold text-white">{item.title}{!item.is_read && <span className="text-[9px] font-bold uppercase tracking-wider text-[#D4AF37]">Nouveau</span>}</span><span className="mt-1 block whitespace-pre-line text-[11px] leading-5 text-white/60">{item.message}</span><span className="mt-2 block text-[9px] text-white/30">{new Date(item.created_at).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' })}</span></span></button>)}</div>
+            </div>}
+            {raffleWins.length > 0 && <div className="overflow-hidden rounded-[1.75rem] border border-[#D4AF37]/25 bg-gradient-to-br from-[#1B1609] to-[#111111] shadow-luxury"><div className="flex items-center gap-3 border-b border-[#D4AF37]/15 px-5 py-4"><span className="grid h-10 w-10 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]"><Trophy size={18} /></span><div><h2 className="text-sm font-semibold text-white">Mes gains de tombola</h2><p className="mt-0.5 text-[10px] text-white/45">Vos récompenses et leur validité</p></div></div><div className="space-y-3 p-4">{raffleWins.map(win => <div key={win.id} className="rounded-2xl border border-[#D4AF37]/15 bg-black/20 p-4"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#D4AF37]">{win.title}</p><p className="mt-1 text-sm font-semibold text-white">🎁 {win.prize_name}</p>{win.prize_description && <p className="mt-1 text-[11px] leading-5 text-white/55">{win.prize_description}</p>}</div><span className={`shrink-0 rounded-full px-2 py-1 text-[9px] font-bold ${win.status === 'PENDING' ? 'bg-[#D4AF37]/15 text-[#E1C27A]' : win.status === 'REDEEMED' ? 'bg-white/10 text-white/55' : 'bg-red-500/10 text-red-300'}`}>{win.status === 'PENDING' ? 'À utiliser' : win.status === 'REDEEMED' ? 'Utilisé' : 'Expiré'}</span></div><p className="mt-3 text-[10px] text-white/45">Valable du {new Date(win.valid_from).toLocaleDateString('fr-FR')} au {new Date(win.valid_until).toLocaleDateString('fr-FR')}{win.reservation_required ? ' · Réservation obligatoire' : ''}</p></div>)}</div></div>}
+          </section>
+        )}
 
         {engagement && (
           <section className="mt-4 space-y-3">
