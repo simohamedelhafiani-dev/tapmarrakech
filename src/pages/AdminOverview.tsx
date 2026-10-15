@@ -109,34 +109,34 @@ export default function AdminOverview() {
   }, [loading, stats.reviewsCount, stats.averageRating]);
 
   return (
-    <section className="min-h-full bg-[#F6F7F5] px-4 py-6 sm:px-6 lg:px-8">
+    <section className="min-h-full bg-[#080808] text-white px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1500px] space-y-6">
-        <header className="relative overflow-hidden rounded-[28px] border border-white/70 bg-white/80 p-6 shadow-[0_20px_60px_rgba(23,61,50,0.08)] backdrop-blur-xl sm:p-8">
+        <header className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#111111]/95 p-6 shadow-[0_20px_60px_rgba(23,61,50,0.08)] backdrop-blur-xl sm:p-8">
           <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-[#D3A84C]/10 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-24 -left-20 h-64 w-64 rounded-full bg-[#173D32]/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-24 -left-20 h-64 w-64 rounded-full bg-[#0D0D0D]/10 blur-3xl" />
 
           <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#173D32]/10 bg-[#173D32]/[0.05] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#173D32]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#10B981]" />
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#D4AF37]/[0.08] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#D4AF37]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#D4AF37]" />
                 Administration
               </div>
 
-              <h1 className="text-3xl font-semibold tracking-[-0.03em] text-[#111827] sm:text-4xl">
+              <h1 className="text-3xl font-semibold tracking-[-0.03em] text-white sm:text-4xl">
                 Vue d’ensemble
               </h1>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-[#111827]/55">
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-white/55">
                 Une lecture claire de l’activité, de la réputation et de la
                 fidélité de votre plateforme.
               </p>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="rounded-2xl border border-[#173D32]/10 bg-white/75 px-4 py-3 text-right shadow-sm">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#111827]/40">
+              <div className="rounded-2xl border border-white/10 bg-[#0D0D0D] px-4 py-3 text-right shadow-sm">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/40">
                   Période
                 </p>
-                <p className="mt-1 text-sm font-semibold text-[#173D32]">
+                <p className="mt-1 text-sm font-semibold text-[#D4AF37]">
                   {stats.periodDays} derniers jours
                 </p>
               </div>
@@ -206,17 +206,17 @@ export default function AdminOverview() {
         </div>
 
         <div className="grid gap-6 xl:grid-cols-[1.45fr_1fr]">
-          <section className="rounded-[26px] border border-white/80 bg-white/85 p-6 shadow-[0_18px_50px_rgba(17,24,39,0.06)] backdrop-blur-xl sm:p-7">
+          <section className="rounded-[26px] border border-white/10 bg-[#111111] p-6 shadow-[0_18px_50px_rgba(17,24,39,0.06)] backdrop-blur-xl sm:p-7">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#111827]/40">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/40">
                   Fidélité
                 </p>
-                <h2 className="mt-1 text-lg font-semibold tracking-tight text-[#111827]">
+                <h2 className="mt-1 text-lg font-semibold tracking-tight text-white">
                   Activité du programme
                 </h2>
               </div>
-              <div className="rounded-xl bg-[#173D32]/[0.06] px-3 py-2 text-xs font-semibold text-[#173D32]">
+              <div className="rounded-xl bg-[#D4AF37]/[0.08] px-3 py-2 text-xs font-semibold text-[#D4AF37]">
                 {loading ? '—' : `${formatNumber(stats.visitsTotal)} visites`}
               </div>
             </div>
@@ -249,17 +249,17 @@ export default function AdminOverview() {
               />
             </div>
 
-            <div className="mt-7 rounded-2xl border border-[#173D32]/10 bg-[#F6F7F5] p-4">
+            <div className="mt-7 rounded-2xl border border-white/10 bg-[#080808] text-white p-4">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs font-semibold text-[#111827]">
+                  <p className="text-xs font-semibold text-white">
                     Solde de points
                   </p>
-                  <p className="mt-1 text-xs text-[#111827]/45">
+                  <p className="mt-1 text-xs text-white/45">
                     Points actuellement détenus par les clients
                   </p>
                 </div>
-                <p className="text-xl font-semibold tracking-tight text-[#173D32]">
+                <p className="text-xl font-semibold tracking-tight text-[#D4AF37]">
                   {loading
                     ? '—'
                     : formatNumber(stats.pointsBalanceTotal)}
@@ -268,7 +268,7 @@ export default function AdminOverview() {
             </div>
           </section>
 
-          <section className="rounded-[26px] border border-white/80 bg-[#173D32] p-6 text-white shadow-[0_18px_50px_rgba(23,61,50,0.18)] sm:p-7">
+          <section className="rounded-[26px] border border-white/10 bg-[#0D0D0D] p-6 text-white shadow-[0_18px_50px_rgba(23,61,50,0.18)] sm:p-7">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/45">
@@ -278,7 +278,7 @@ export default function AdminOverview() {
                   Revenus & transactions
                 </h2>
               </div>
-              <div className="grid h-10 w-10 place-items-center rounded-xl bg-white/10 text-[#D3A84C]">
+              <div className="grid h-10 w-10 place-items-center rounded-xl bg-white/10 text-[#D4AF37]">
                 DH
               </div>
             </div>
@@ -391,16 +391,16 @@ function MetricCard({
   testId?: string;
 }) {
   const accentClasses = {
-    forest: 'bg-[#173D32]/[0.07] text-[#173D32]',
-    gold: 'bg-[#D3A84C]/[0.14] text-[#A2761D]',
-    violet: 'bg-[#8B5CF6]/[0.10] text-[#7C3AED]',
-    indigo: 'bg-[#6366F1]/[0.10] text-[#4F46E5]',
+    forest: 'bg-[#0D0D0D]/[0.07] text-[#D4AF37]',
+    gold: 'bg-[#D3A84C]/[0.14] text-[#D4AF37]',
+    violet: 'bg-[#8B5CF6]/[0.10] text-[#D4AF37]',
+    indigo: 'bg-[#6366F1]/[0.10] text-[#D4AF37]',
   };
 
   return (
-    <article data-testid={testId} className="group rounded-[24px] border border-white/80 bg-white/85 p-5 shadow-[0_14px_40px_rgba(17,24,39,0.05)] backdrop-blur-xl transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_45px_rgba(17,24,39,0.08)]">
+    <article data-testid={testId} className="group rounded-[24px] border border-white/10 bg-[#111111] p-5 shadow-[0_14px_40px_rgba(17,24,39,0.05)] backdrop-blur-xl transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_45px_rgba(17,24,39,0.08)]">
       <div className="flex items-start justify-between gap-3">
-        <p className="text-xs font-semibold text-[#111827]/45">{label}</p>
+        <p className="text-xs font-semibold text-white/45">{label}</p>
         <span
           className={`grid h-9 w-9 place-items-center rounded-xl text-sm font-semibold ${accentClasses[accent]}`}
         >
@@ -408,10 +408,10 @@ function MetricCard({
         </span>
       </div>
 
-      <p className="mt-5 text-3xl font-semibold tracking-[-0.035em] text-[#111827]">
+      <p className="mt-5 text-3xl font-semibold tracking-[-0.035em] text-white">
         {value}
       </p>
-      <p className="mt-2 text-xs text-[#111827]/45">{detail}</p>
+      <p className="mt-2 text-xs text-white/45">{detail}</p>
     </article>
   );
 }
@@ -426,12 +426,12 @@ function Insight({
   sub: string;
 }) {
   return (
-    <div className="rounded-2xl border border-[#111827]/[0.06] bg-white p-4">
-      <p className="text-xs text-[#111827]/45">{label}</p>
-      <p className="mt-2 text-2xl font-semibold tracking-tight text-[#111827]">
+    <div className="rounded-2xl border border-[#111827]/[0.06] bg-[#0D0D0D] p-4">
+      <p className="text-xs text-white/45">{label}</p>
+      <p className="mt-2 text-2xl font-semibold tracking-tight text-white">
         {value}
       </p>
-      <p className="mt-1 text-[11px] font-medium text-[#173D32]">{sub}</p>
+      <p className="mt-1 text-[11px] font-medium text-[#D4AF37]">{sub}</p>
     </div>
   );
 }
@@ -465,15 +465,15 @@ function MiniPanel({
   secondary: string;
 }) {
   return (
-    <article className="rounded-[24px] border border-white/80 bg-white/85 p-6 shadow-[0_14px_40px_rgba(17,24,39,0.05)] backdrop-blur-xl">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#111827]/35">
+    <article className="rounded-[24px] border border-white/10 bg-[#111111] p-6 shadow-[0_14px_40px_rgba(17,24,39,0.05)] backdrop-blur-xl">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/35">
         {eyebrow}
       </p>
-      <h3 className="mt-2 text-base font-semibold text-[#111827]">{title}</h3>
-      <p className="mt-5 text-2xl font-semibold tracking-tight text-[#173D32]">
+      <h3 className="mt-2 text-base font-semibold text-white">{title}</h3>
+      <p className="mt-5 text-2xl font-semibold tracking-tight text-[#D4AF37]">
         {value}
       </p>
-      <p className="mt-2 text-xs leading-5 text-[#111827]/45">{secondary}</p>
+      <p className="mt-2 text-xs leading-5 text-white/45">{secondary}</p>
     </article>
   );
 }
