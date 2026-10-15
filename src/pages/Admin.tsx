@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import QRCode from 'qrcode';
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip as ChartTooltip } from 'recharts';
 import { useLanguage, type Language } from '@/contexts/LanguageContext';
 import {
   BarChart3,
@@ -1070,8 +1071,8 @@ function Overview({
     : establishments.find((item) => item.id === selectedEstablishment)?.name ?? 'Établissement';
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
+    <div className="space-y-6 pb-8 text-white">
+      <section className="relative isolate overflow-hidden rounded-[28px] border border-[#C9A45C]/20 bg-[radial-gradient(ellipse_at_top_right,rgba(201,164,92,0.15),transparent_42%),linear-gradient(135deg,#171717_0%,#090909_66%,#111111_100%)] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.25)] sm:rounded-[32px] sm:p-7 lg:p-8"><div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full border border-[#C9A45C]/15" /><div className="relative flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
         <div>
           <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#C9A45C]/45">Vue globale</p>
           <h2 className="text-3xl font-semibold tracking-tight text-[#FFFFFF] md:text-[38px]">
@@ -1085,15 +1086,15 @@ function Overview({
           <select
             value={selectedEstablishment}
             onChange={(event) => setSelectedEstablishment(event.target.value)}
-            className="rounded-xl border border-[#242424]/10 bg-[#111111] px-4 py-3 text-xs font-semibold text-[#FFFFFF] shadow-sm outline-none"
+            className="w-full rounded-xl border border-white/10 bg-[#050505] px-4 py-3 text-xs font-semibold text-white shadow-sm outline-none focus:border-[#C9A45C]/50 sm:w-auto"
           >
             <option value="all">Tous les établissements</option>
             {establishments.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
           </select>
         </div>
-      </div>
+      </div></section>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
         <AdminMetric icon={Building2} label="Établissements" value={establishments.length} detail="sur la plateforme" />
         <AdminMetric icon={UserRound} label="Responsables" value={responsibles.length} detail="comptes actifs" />
         <AdminMetric icon={UsersRound} label="Clients fidélisés" value={detailLoading ? '—' : detail.loyaltyCustomers.toLocaleString('fr-FR')} detail="membres enregistrés" />
@@ -1102,11 +1103,43 @@ function Overview({
         <AdminMetric icon={WalletCards} label="MRR" value={billing.available ? `${billing.mrr.toLocaleString('fr-FR')} DH` : '—'} detail={`${activeSubscriptions} abonnements actifs`} />
       </div>
 
-      <EvolutionCharts
-        reviewsData={overviewStats?.reviewsEvolution ?? []}
-        scansData={overviewStats?.scansEvolution ?? []}
-        loading={overviewStatsStatus === 'loading'}
-      />
+      <section aria-label="Indicateurs complémentaires" className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <AdminMetric icon={TrendingUp} label="Avis positifs" value={globalStats.positiveReviews.toLocaleString('fr-FR')} detail="notes de 4 et 5 étoiles" />
+        <AdminMetric icon={AlertTriangle} label="Avis négatifs" value={globalStats.negativeReviews.toLocaleString('fr-FR')} detail="à surveiller" />
+        <AdminMetric icon={Activity} label="Événements" value={globalStats.analyticsEvents.toLocaleString('fr-FR')} detail="activité enregistrée" />
+        <AdminMetric icon={CreditCard} label="Paiements ce mois" value={billing.available ? billing.paymentsThisMonth.toLocaleString('fr-FR') : '—'} detail="transactions payées" />
+      </section>
+
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
+        <EvolutionCharts
+          reviewsData={overviewStats?.reviewsEvolution ?? []}
+          scansData={overviewStats?.scansEvolution ?? []}
+          loading={overviewStatsStatus === 'loading'}
+        />
+        <section className="overflow-hidden rounded-[24px] border border-white/[0.07] bg-[radial-gradient(ellipse_at_top,rgba(201,164,92,0.09),transparent_48%),linear-gradient(145deg,#151515,#090909)] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.2)] sm:rounded-[28px] sm:p-6">
+          <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#C9A45C]">Réputation globale</p>
+          <h3 className="mt-1 text-lg font-semibold text-white">Qualité des avis</h3>
+          <p className="mt-1 text-xs leading-5 text-white/40">Répartition des avis positifs et des avis à surveiller sur la plateforme.</p>
+          <div className="relative mx-auto mt-3 h-52 w-full max-w-[250px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={[{ name: 'Avis positifs', value: globalStats.positiveReviews }, { name: 'Avis à surveiller', value: globalStats.negativeReviews }]} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius="67%" outerRadius="88%" paddingAngle={globalStats.positiveReviews + globalStats.negativeReviews > 0 ? 4 : 0} stroke="none" startAngle={90} endAngle={-270}>
+                  <Cell fill="#C9A45C" /><Cell fill="#5C554B" />
+                </Pie>
+                <ChartTooltip contentStyle={{ background: '#111111', border: '1px solid #34302A', borderRadius: 12, color: '#fff', fontSize: 12 }} />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+              <span className="font-display text-4xl font-semibold text-white">{globalStats.positiveReviews + globalStats.negativeReviews ? Math.round((globalStats.positiveReviews / (globalStats.positiveReviews + globalStats.negativeReviews)) * 100) : 0}%</span>
+              <span className="mt-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-white/40">positifs</span>
+            </div>
+          </div>
+          <div className="mt-2 space-y-2">
+            <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-3"><span className="flex items-center gap-2 text-xs text-white/60"><span className="h-2.5 w-2.5 rounded-full bg-[#C9A45C]" />Avis positifs</span><strong className="text-sm text-white">{globalStats.positiveReviews.toLocaleString('fr-FR')}</strong></div>
+            <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-3"><span className="flex items-center gap-2 text-xs text-white/60"><span className="h-2.5 w-2.5 rounded-full bg-[#5C554B]" />À surveiller</span><strong className="text-sm text-white">{globalStats.negativeReviews.toLocaleString('fr-FR')}</strong></div>
+          </div>
+        </section>
+      </div>
 
       <EstablishmentPerformanceTable
         performanceData={establishmentPerformances}
@@ -1130,14 +1163,14 @@ function AdminMetric({ icon: Icon, label, value, detail }: { icon: typeof Star; 
     <div
       data-kpi-label={label}
       data-kpi-value={String(value)}
-      className="rounded-3xl border border-[#242424] bg-[#111111] p-4 shadow-soft"
+      className="group relative overflow-hidden rounded-2xl border border-white/[0.07] bg-[linear-gradient(145deg,#171717,#0C0C0C)] p-4 shadow-[0_14px_36px_rgba(0,0,0,0.18)] transition duration-200 hover:-translate-y-0.5 hover:border-[#C9A45C]/25 sm:rounded-[22px] sm:p-5"
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#111111]/10 text-[#C9A45C]"><Icon size={18} /></div>
+        <div className="grid h-10 w-10 place-items-center rounded-xl border border-[#C9A45C]/15 bg-[#C9A45C]/[0.08] text-[#D9B76B]"><Icon size={18} /></div>
       </div>
-      <p className="mt-4 text-xs font-medium text-[#FFFFFF]/45">{label}</p>
-      <p className="mt-1 text-2xl font-semibold tracking-tight text-[#FFFFFF]">{value}</p>
-      <p className="mt-1 text-[10px] text-[#FFFFFF]/35">{detail}</p>
+      <p className="mt-4 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#FFFFFF]/45">{label}</p>
+      <p className="mt-1 text-2xl font-semibold tracking-tight text-white sm:text-[28px]">{value}</p>
+      <p className="mt-2 text-[10px] leading-4 text-[#FFFFFF]/40">{detail}</p>
     </div>
   );
 }
