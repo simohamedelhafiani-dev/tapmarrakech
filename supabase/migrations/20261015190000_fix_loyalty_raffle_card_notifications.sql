@@ -20,15 +20,19 @@ create or replace function public.create_loyalty_raffle(
  p_establishment_id uuid,p_title text,p_description text,p_prize_name text,p_prize_description text,
  p_starts_at timestamptz,p_draw_at timestamptz,p_winners_count integer,p_reward_validity_mode text,
  p_reward_valid_from timestamptz,p_reward_valid_until timestamptz,p_reward_valid_days integer,
- p_reservation_required boolean,p_single_use boolean,p_non_cumulative boolean
+ p_reservation_required boolean,p_single_use boolean,p_non_cumulative boolean,
+ p_minimum_tier_key text default 'STANDARD',p_ticket_multiplier_mode text default 'TIER'
 )
-returns uuid language plpgsql security definer set search_path=public as $$
+returns uuid language plpgsql security definer set search_path=public as $
 declare v_id uuid; v_title text; v_prize text;
 begin
  if not(public.is_tapmarrakech_admin() or public.is_establishment_responsible(p_establishment_id)) then raise exception 'not_authorized'; end if;
+ perform public.ensure_default_loyalty_tiers(p_establishment_id);
+ if not exists(select 1 from public.loyalty_tiers where establishment_id=p_establishment_id and tier_key=p_minimum_tier_key and active) then raise exception 'invalid_minimum_tier'; end if;
+ if p_ticket_multiplier_mode not in ('TIER','NONE') then raise exception 'invalid_ticket_multiplier_mode'; end if;
  v_title:=trim(p_title); v_prize:=trim(p_prize_name);
- insert into public.loyalty_raffles(establishment_id,title,description,prize_name,prize_description,starts_at,draw_at,winners_count,reward_validity_mode,reward_valid_from,reward_valid_until,reward_valid_days,reservation_required,single_use,non_cumulative,status,created_by)
- values(p_establishment_id,v_title,nullif(trim(coalesce(p_description,'')),''),v_prize,nullif(trim(coalesce(p_prize_description,'')),''),p_starts_at,p_draw_at,p_winners_count,p_reward_validity_mode,p_reward_valid_from,p_reward_valid_until,p_reward_valid_days,p_reservation_required,p_single_use,p_non_cumulative,'SCHEDULED',auth.uid())
+ insert into public.loyalty_raffles(establishment_id,title,description,prize_name,prize_description,starts_at,draw_at,winners_count,reward_validity_mode,reward_valid_from,reward_valid_until,reward_valid_days,reservation_required,single_use,non_cumulative,status,created_by,minimum_tier_key,ticket_multiplier_mode)
+ values(p_establishment_id,v_title,nullif(trim(coalesce(p_description,'')),''),v_prize,nullif(trim(coalesce(p_prize_description,'')),''),p_starts_at,p_draw_at,p_winners_count,p_reward_validity_mode,p_reward_valid_from,p_reward_valid_until,p_reward_valid_days,p_reservation_required,p_single_use,p_non_cumulative,'SCHEDULED',auth.uid(),p_minimum_tier_key,p_ticket_multiplier_mode)
  returning id into v_id;
  insert into public.loyalty_card_notifications(establishment_id,customer_id,title,message,type,expires_at,created_by)
  values(p_establishment_id,null,'🎟 Nouvelle tombola : '||v_title,
@@ -38,5 +42,5 @@ begin
   'OFFER',p_draw_at,auth.uid());
  return v_id;
 end; $$;
-revoke execute on function public.create_loyalty_raffle(uuid,text,text,text,text,timestamptz,timestamptz,integer,text,timestamptz,timestamptz,integer,boolean,boolean,boolean) from public;
-grant execute on function public.create_loyalty_raffle(uuid,text,text,text,text,timestamptz,timestamptz,integer,text,timestamptz,timestamptz,integer,boolean,boolean,boolean) to authenticated;
+revoke execute on function public.create_loyalty_raffle(uuid,text,text,text,text,timestamptz,timestamptz,integer,text,timestamptz,timestamptz,integer,boolean,boolean,boolean,text,text) from public, anon;
+grant execute on function public.create_loyalty_raffle(uuid,text,text,text,text,timestamptz,timestamptz,integer,text,timestamptz,timestamptz,integer,boolean,boolean,boolean,text,text) to authenticated;
