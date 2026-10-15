@@ -97,7 +97,7 @@ const TABS: { id: TabId; label: string; caption: string; icon: typeof Settings2 
   { id: 'referral', label: 'Parrainage', caption: 'Acquisition', icon: Rocket },
   { id: 'tiers', label: 'Niveaux', caption: 'Clients', icon: Trophy },
   { id: 'raffle', label: 'Tombola', caption: 'Gagnants', icon: Trophy },
-  { id: 'crm', label: 'Liste clients', caption: 'Clients & segments', icon: UsersRound },
+  { id: 'crm', label: 'Mes clients', caption: 'Clients & segments', icon: UsersRound },
   { id: 'notifications', label: 'Notifications', caption: 'Communication', icon: Bell },
   { id: 'design', label: 'Design', caption: 'Visuels', icon: Palette },
 ];
