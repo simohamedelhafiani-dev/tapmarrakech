@@ -437,3 +437,92 @@ table {
 @media (prefers-reduced-motion: reduce) {
   .kelyani-dashboard-3d,.kelyani-float-chip,.kelyani-glow-point { animation:none!important;transition:none!important; }
 }
+
+/* Final polish pass: directional light, stronger depth and tighter composition */
+.kelyani-hero-stage {
+  min-height: 250px;
+  margin-top: 30px;
+}
+.kelyani-hero-stage::before {
+  inset: 0 4% -5%;
+  background:
+    radial-gradient(ellipse at 56% 42%, rgba(212,175,55,.19), transparent 47%),
+    radial-gradient(ellipse at 28% 78%, rgba(212,175,55,.07), transparent 42%);
+  filter: blur(24px);
+}
+.kelyani-dashboard-3d {
+  border-color: rgba(212,175,55,.34);
+  background:
+    linear-gradient(112deg, rgba(255,255,255,.085) 0%, transparent 24%, transparent 66%, rgba(212,175,55,.055) 100%),
+    linear-gradient(145deg, #1d1b16 0%, #121211 42%, #080808 100%);
+  box-shadow:
+    0 42px 70px -28px rgba(0,0,0,.96),
+    0 18px 38px -20px rgba(212,175,55,.32),
+    0 0 0 1px rgba(212,175,55,.055),
+    inset 0 1px 0 rgba(255,255,255,.15),
+    inset 0 -2px 0 rgba(212,175,55,.13);
+  transform: rotateX(7deg) rotateY(-10deg) rotateZ(-1deg) scale(1.015);
+}
+.kelyani-dashboard-3d::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: -40% auto -40% -60%;
+  width: 35%;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255,240,190,.11), transparent);
+  transform: skewX(-18deg);
+  animation: kelyani-light-sweep 8s ease-in-out infinite;
+}
+.kelyani-dashboard-3d::after {
+  background:
+    linear-gradient(115deg, rgba(255,255,255,.07), transparent 19%, transparent 66%, rgba(212,175,55,.05)),
+    radial-gradient(ellipse at 10% 0%, rgba(255,235,170,.055), transparent 48%);
+}
+.kelyani-hero-stage:hover .kelyani-dashboard-3d {
+  transform: rotateX(3deg) rotateY(-4deg) rotateZ(0deg) translateY(-5px) scale(1.025);
+  box-shadow: 0 48px 82px -28px rgba(0,0,0,.98), 0 20px 44px -20px rgba(212,175,55,.4), inset 0 1px 0 rgba(255,255,255,.16);
+}
+.kelyani-kpi-tile,.kelyani-chart-tile {
+  box-shadow: 0 8px 22px -17px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.045);
+}
+.kelyani-kpi-featured {
+  box-shadow: 0 8px 28px -20px rgba(212,175,55,.28), inset 0 1px 0 rgba(255,235,170,.07);
+}
+.kelyani-float-chip {
+  border-color: rgba(212,175,55,.3);
+  background:
+    linear-gradient(135deg, rgba(39,35,25,.97), rgba(13,13,12,.96) 68%);
+  box-shadow:
+    0 25px 48px -19px rgba(0,0,0,.98),
+    0 5px 18px -12px rgba(212,175,55,.42),
+    inset 0 1px 0 rgba(255,255,255,.11),
+    inset 0 -1px 0 rgba(212,175,55,.09);
+}
+.kelyani-float-review { right:-15px; top:26%; }
+.kelyani-float-loyalty { left:-14px; bottom:15%; }
+.kelyani-orbit-one { border-color:rgba(212,175,55,.22); }
+.kelyani-glow-point {
+  right:13%;top:15px;
+  box-shadow:0 0 12px 4px rgba(244,215,121,.55),0 0 36px 12px rgba(212,175,55,.17);
+}
+@keyframes kelyani-light-sweep {
+  0%,15% { left:-60%;opacity:0; }
+  25% { opacity:1; }
+  48% { left:125%;opacity:0; }
+  100% { left:125%;opacity:0; }
+}
+@media (max-width: 1023px) {
+  .kelyani-hero-stage { min-height:225px; }
+  .kelyani-dashboard-3d { transform:rotateX(4deg) rotateY(-6deg) scale(1.005); }
+}
+@media (max-width: 520px) {
+  .kelyani-hero-stage { min-height:185px;margin-top:20px; }
+  .kelyani-dashboard-3d { transform:none; }
+  .kelyani-dashboard-3d::before { display:none; }
+  .kelyani-float-review { right:-3px;top:18%; }
+  .kelyani-float-loyalty { left:-3px;bottom:8%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kelyani-dashboard-3d::before { animation:none!important; }
+}
