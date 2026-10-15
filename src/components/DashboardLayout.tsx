@@ -66,12 +66,6 @@ const links = [
     icon: Gift,
     feature: 'loyalty' as const,
   },
-  {
-    to: '/dashboard/loyalty/raffles',
-    label: 'Tombola & niveaux',
-    icon: Ticket,
-    feature: 'loyalty' as const,
-  },
 ];
 
 type Establishment = {
