@@ -28,6 +28,23 @@ create index if not exists loyalty_raffle_draw_audit_raffle_attempt_idx
 alter table public.loyalty_raffle_draw_audit enable row level security;
 revoke all on public.loyalty_raffle_draw_audit from public, anon, authenticated;
 
+-- Pure decision helper shared by the worker and pgTAP regression tests.
+create or replace function public.resolve_loyalty_raffle_draw_pool(p_eligible_count integer, p_enrolled_count integer, p_winners_count integer)
+returns table(fallback_stage text, candidate_count integer, winners_to_select integer, note text)
+language plpgsql immutable set search_path = '' as $function$
+begin
+  if p_eligible_count is null or p_enrolled_count is null or p_winners_count is null or p_eligible_count < 0 or p_enrolled_count < 0 or p_winners_count < 1 then raise exception 'invalid_draw_pool_counts'; end if;
+  if p_eligible_count > 0 then
+    return query select 'NORMAL_POOL'::text, p_eligible_count, least(p_eligible_count, p_winners_count), case when p_eligible_count < p_winners_count then format('Pool de %s client(s) pour %s gagnant(s) prévu(s) : tous les participants sont gagnants.', p_eligible_count, p_winners_count) else format('Tirage normal parmi %s client(s) éligible(s).', p_eligible_count) end;
+  elsif p_enrolled_count > 0 then
+    return query select 'EXPANDED_POOL'::text, p_enrolled_count, least(p_enrolled_count, p_winners_count), case when p_enrolled_count < p_winners_count then format('Aucun participant éligible. Les %s client(s) inscrits sont tous gagnants.', p_enrolled_count) else format('Aucun participant éligible au niveau requis. Pool élargi à %s client(s).', p_enrolled_count) end;
+  else
+    return query select 'EXTENDED_7_DAYS'::text, 0, 0, 'Aucun client inscrit au programme de fidélité. Le tirage reste ouvert et a été reporté de 7 jours. Le responsable doit vérifier les inscriptions.'::text;
+  end if;
+end; $function$;
+revoke all on function public.resolve_loyalty_raffle_draw_pool(integer, integer, integer) from public, anon, authenticated;
+grant execute on function public.resolve_loyalty_raffle_draw_pool(integer, integer, integer) to service_role;
+
 create or replace function public.draw_loyalty_raffle_internal(
   p_raffle_id uuid,
   p_force boolean default false,
@@ -42,6 +59,9 @@ as $function$
 declare
   v_raffle public.loyalty_raffles%rowtype;
   v_pool_count integer := 0;
+  v_enrolled_count integer := 0;
+  v_winners_to_select integer := 0;
+  v_decision record;
   v_winner_count integer := 0;
   v_stage text;
   v_note text;
