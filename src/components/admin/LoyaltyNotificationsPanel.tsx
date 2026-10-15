@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Bell, X, RotateCcw, History } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { sendLoyaltyNotificationPush } from '@/lib/loyaltyNotificationPush';
@@ -19,7 +19,9 @@ type Audience = 'ALL' | 'INTEREST' | 'FREQUENCY' | 'POINTS' | 'VISITS' | 'CUSTOM
 type NotificationType = 'INFO' | 'OFFER' | 'REWARD' | 'POINTS';
 type Campaign = { id: string; title: string; message: string; type: NotificationType; audience: Record<string, unknown>; expires_at: string | null; recipient_count: number; status: string; created_at: string; last_push_status: string | null; last_push_at: string | null; last_push_sent: number | null; last_push_failed: number | null; last_push_skipped: number | null; last_push_total: number | null; last_push_error: string | null };
 
-export default function LoyaltyNotificationsPanel({ establishmentId }: { establishmentId: string }) {
+type Props = { establishmentId: string; initialView?: 'campaigns' | 'history' };
+
+export default function LoyaltyNotificationsPanel({ establishmentId, initialView = 'campaigns' }: Props) {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -27,6 +29,7 @@ export default function LoyaltyNotificationsPanel({ establishmentId }: { establi
   const [history, setHistory] = useState<Campaign[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
   const [resendingId, setResendingId] = useState<string | null>(null);
+  const historySectionRef = useRef<HTMLDivElement>(null);
 
   const [audience, setAudience] = useState<Audience>('ALL');
   const [interest, setInterest] = useState('');
@@ -54,6 +57,13 @@ export default function LoyaltyNotificationsPanel({ establishmentId }: { establi
   };
 
   useEffect(() => { void loadHistory(); }, [establishmentId]);
+
+  useEffect(() => {
+    if (initialView === 'history') {
+      const frame = window.requestAnimationFrame(() => historySectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+      return () => window.cancelAnimationFrame(frame);
+    }
+  }, [initialView]);
 
   const resendNotification = async (campaign: Campaign) => {
     if (resendingId) return;
@@ -256,7 +266,7 @@ export default function LoyaltyNotificationsPanel({ establishmentId }: { establi
         </div>
       </div>
 
-      <div className="rounded-3xl border border-[#242424] bg-[#111111] p-5">
+      <div ref={historySectionRef} className="scroll-mt-6 rounded-3xl border border-[#242424] bg-[#111111] p-5">
         <div className="mb-4 flex items-center gap-3">
           <div className="grid h-10 w-10 place-items-center rounded-2xl bg-white/[0.04] text-[#C9A45C]"><History size={17} /></div>
           <div>
