@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import QRCode from 'qrcode';
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip as ChartTooltip } from 'recharts';
 import { useLanguage, type Language } from '@/contexts/LanguageContext';
 import {
   BarChart3,
@@ -1109,11 +1110,36 @@ function Overview({
         <AdminMetric icon={CreditCard} label="Paiements ce mois" value={billing.available ? billing.paymentsThisMonth.toLocaleString('fr-FR') : '—'} detail="transactions payées" />
       </section>
 
-      <EvolutionCharts
-        reviewsData={overviewStats?.reviewsEvolution ?? []}
-        scansData={overviewStats?.scansEvolution ?? []}
-        loading={overviewStatsStatus === 'loading'}
-      />
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
+        <EvolutionCharts
+          reviewsData={overviewStats?.reviewsEvolution ?? []}
+          scansData={overviewStats?.scansEvolution ?? []}
+          loading={overviewStatsStatus === 'loading'}
+        />
+        <section className="overflow-hidden rounded-[24px] border border-white/[0.07] bg-[radial-gradient(ellipse_at_top,rgba(201,164,92,0.09),transparent_48%),linear-gradient(145deg,#151515,#090909)] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.2)] sm:rounded-[28px] sm:p-6">
+          <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#C9A45C]">Réputation globale</p>
+          <h3 className="mt-1 text-lg font-semibold text-white">Qualité des avis</h3>
+          <p className="mt-1 text-xs leading-5 text-white/40">Répartition des avis positifs et des avis à surveiller sur la plateforme.</p>
+          <div className="relative mx-auto mt-3 h-52 w-full max-w-[250px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={[{ name: 'Avis positifs', value: globalStats.positiveReviews }, { name: 'Avis à surveiller', value: globalStats.negativeReviews }]} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius="67%" outerRadius="88%" paddingAngle={globalStats.positiveReviews + globalStats.negativeReviews > 0 ? 4 : 0} stroke="none" startAngle={90} endAngle={-270}>
+                  <Cell fill="#C9A45C" /><Cell fill="#5C554B" />
+                </Pie>
+                <ChartTooltip contentStyle={{ background: '#111111', border: '1px solid #34302A', borderRadius: 12, color: '#fff', fontSize: 12 }} />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+              <span className="font-display text-4xl font-semibold text-white">{globalStats.positiveReviews + globalStats.negativeReviews ? Math.round((globalStats.positiveReviews / (globalStats.positiveReviews + globalStats.negativeReviews)) * 100) : 0}%</span>
+              <span className="mt-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-white/40">positifs</span>
+            </div>
+          </div>
+          <div className="mt-2 space-y-2">
+            <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-3"><span className="flex items-center gap-2 text-xs text-white/60"><span className="h-2.5 w-2.5 rounded-full bg-[#C9A45C]" />Avis positifs</span><strong className="text-sm text-white">{globalStats.positiveReviews.toLocaleString('fr-FR')}</strong></div>
+            <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-3"><span className="flex items-center gap-2 text-xs text-white/60"><span className="h-2.5 w-2.5 rounded-full bg-[#5C554B]" />À surveiller</span><strong className="text-sm text-white">{globalStats.negativeReviews.toLocaleString('fr-FR')}</strong></div>
+          </div>
+        </section>
+      </div>
 
       <EstablishmentPerformanceTable
         performanceData={establishmentPerformances}
