@@ -907,6 +907,45 @@ export default function Dashboard() {
         </article>
       </section>
 
+      <section aria-label="Performance du programme de fidélité" className="space-y-4">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div><p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#C9A45C]">Customer intelligence</p><h2 className="mt-1 text-xl font-semibold tracking-tight text-white sm:text-2xl">La fidélité, en un regard</h2><p className="mt-1 text-xs text-[#F5F5DC]/40">Engagement, circulation des points et retour des clients</p></div>
+          <span className="rounded-full border border-[#C9A45C]/20 bg-[#C9A45C]/[0.06] px-3 py-1.5 text-[9px] font-semibold uppercase tracking-wider text-[#E1C27A]">{selected.label}</span>
+        </div>
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(280px,.75fr)]">
+          <article className="overflow-hidden rounded-[24px] border border-white/[0.07] bg-[radial-gradient(ellipse_at_top_left,rgba(201,164,92,0.08),transparent_48%),linear-gradient(145deg,#141414,#090909)] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.2)] sm:rounded-[28px] sm:p-6">
+            <div className="flex items-start justify-between gap-3"><div><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#C9A45C]">Économie de fidélité</p><h3 className="mt-1 text-base font-semibold text-white sm:text-lg">Points gagnés vs utilisés</h3><p className="mt-1 text-xs text-[#F5F5DC]/35">Comprendre comment les récompenses circulent</p></div><div className="rounded-xl border border-[#C9A45C]/15 bg-[#C9A45C]/[0.08] p-2 text-[#C9A45C]"><Gift size={17} /></div></div>
+            <div className="mt-5 h-56 sm:h-64">
+              <ResponsiveContainer width="100%" height="100%"><BarChart data={[{ name: 'Points', gagnés: analytics.pointsEarned, utilisés: analytics.pointsRedeemed }]} barGap={18} barCategoryGap="35%" margin={{ top: 8, right: 4, left: -18, bottom: 0 }}>
+                <defs><linearGradient id="kelyaniPointsEarned" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#E1C27A" /><stop offset="100%" stopColor="#9B7737" /></linearGradient><linearGradient id="kelyaniPointsUsed" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#81796B" /><stop offset="100%" stopColor="#49443C" /></linearGradient></defs>
+                <CartesianGrid stroke="#FFFFFF" strokeOpacity={0.06} vertical={false} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#F5F5DC', opacity: 0.4, fontSize: 10 }} />
+                <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{ fill: '#F5F5DC', opacity: 0.3, fontSize: 9 }} width={36} />
+                <Tooltip contentStyle={{ background: '#111111', border: '1px solid #34302A', borderRadius: 14, color: '#fff', fontSize: 12 }} />
+                <Bar dataKey="gagnés" name="Points gagnés" fill="url(#kelyaniPointsEarned)" radius={[8,8,0,0]} maxBarSize={70} />
+                <Bar dataKey="utilisés" name="Points utilisés" fill="url(#kelyaniPointsUsed)" radius={[8,8,0,0]} maxBarSize={70} />
+              </BarChart></ResponsiveContainer>
+            </div>
+            <div className="grid grid-cols-2 gap-3 border-t border-white/[0.07] pt-4">
+              <div className="rounded-xl bg-white/[0.025] p-3"><p className="flex items-center gap-2 text-[10px] text-[#F5F5DC]/45"><span className="h-2 w-2 rounded-full bg-[#C9A45C]" />Points gagnés</p><p className="mt-2 text-xl font-semibold text-white">{analytics.pointsEarned.toLocaleString('fr-FR')}</p></div>
+              <div className="rounded-xl bg-white/[0.025] p-3"><p className="flex items-center gap-2 text-[10px] text-[#F5F5DC]/45"><span className="h-2 w-2 rounded-full bg-[#81796B]" />Points utilisés</p><p className="mt-2 text-xl font-semibold text-white">{analytics.pointsRedeemed.toLocaleString('fr-FR')}</p></div>
+            </div>
+          </article>
+          <article className="flex flex-col overflow-hidden rounded-[24px] border border-white/[0.07] bg-[linear-gradient(145deg,#141414,#090909)] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.2)] sm:rounded-[28px] sm:p-6">
+            <div className="flex items-start justify-between gap-3"><div><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#C9A45C]">Engagement client</p><h3 className="mt-1 text-base font-semibold text-white sm:text-lg">Clients actifs</h3><p className="mt-1 text-xs text-[#F5F5DC]/35">Part de la base active sur la période</p></div><div className="rounded-xl border border-[#C9A45C]/15 bg-[#C9A45C]/[0.08] p-2 text-[#C9A45C]"><Users size={17} /></div></div>
+            <div className="relative mx-auto mt-3 h-48 w-full max-w-[250px]">
+              <ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={[{ name: 'Actifs', value: Math.min(analytics.activeCustomers, loyaltyCustomers.length) }, { name: 'Autres clients', value: Math.max(0, loyaltyCustomers.length - analytics.activeCustomers) }]} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius="66%" outerRadius="88%" paddingAngle={loyaltyCustomers.length ? 4 : 0} stroke="none" startAngle={90} endAngle={-270}><Cell fill="#C9A45C" /><Cell fill="#403A32" /></Pie><Tooltip contentStyle={{ background: '#111111', border: '1px solid #34302A', borderRadius: 12, color: '#fff', fontSize: 12 }} /></PieChart></ResponsiveContainer>
+              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center"><span className="font-display text-4xl font-semibold text-white">{analytics.activeRate.toFixed(0)}%</span><span className="mt-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-[#F5F5DC]/40">actifs</span></div>
+            </div>
+            <div className="mt-auto space-y-3">
+              <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-3"><span className="flex items-center gap-2 text-xs text-[#F5F5DC]/60"><span className="h-2.5 w-2.5 rounded-full bg-[#C9A45C]" />Clients actifs</span><strong className="text-sm text-white">{analytics.activeCustomers.toLocaleString('fr-FR')}</strong></div>
+              <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-3"><span className="flex items-center gap-2 text-xs text-[#F5F5DC]/60"><span className="h-2.5 w-2.5 rounded-full bg-[#403A32]" />Clients à réactiver</span><strong className="text-sm text-white">{Math.max(0, loyaltyCustomers.length - analytics.activeCustomers).toLocaleString('fr-FR')}</strong></div>
+              <div className="rounded-xl border border-[#C9A45C]/15 bg-[#C9A45C]/[0.05] p-3.5"><div className="flex items-center justify-between gap-3"><span className="text-[10px] text-[#F5F5DC]/50">Taux de retour</span><strong className="text-sm text-[#E1C27A]">{analytics.returningRate.toFixed(1)}%</strong></div><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/[0.07]"><div className="h-full rounded-full bg-gradient-to-r from-[#9B7737] to-[#E1C27A]" style={{ width: `${Math.min(100, Math.max(0, analytics.returningRate))}%` }} /></div><p className="mt-2 text-[9px] text-[#F5F5DC]/35">{analytics.returningCustomers.toLocaleString('fr-FR')} clients sont revenus au moins deux fois</p></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,.75fr)]">
         <section className="rounded-[24px] border border-white/[0.07] bg-[linear-gradient(145deg,#141414,#0D0D0D)] p-5 shadow-[0_16px_48px_rgba(0,0,0,0.18)] sm:rounded-[28px] sm:p-6 lg:p-7">
           <div className="flex items-center justify-between gap-3"><div><p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#C9A45C]">Activité</p><h2 className="mt-1 text-lg font-semibold text-white">Votre relation client</h2></div><select value={period} onChange={(event) => setPeriod(event.target.value)} className="h-9 rounded-xl border border-[#242424] bg-[#050505] px-3 text-[10px] font-semibold text-[#F5F5DC]/55 outline-none" aria-label="Période">{ranges.map((range) => <option className="bg-[#111111]" key={range.key} value={range.key}>{range.label}</option>)}</select></div>
