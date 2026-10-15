@@ -1,7 +1,7 @@
 -- Keep upcoming scheduled raffles visible on public loyalty cards and announce them in-card.
 create or replace function public.get_public_loyalty_raffles(p_access_token uuid)
 returns table(id uuid,title text,description text,prize_name text,prize_description text,starts_at timestamptz,draw_at timestamptz,winners_count integer,participant_count bigint)
-language sql stable security definer set search_path=public as $$
+language sql stable security definer set search_path=public as $function$
 select r.id,r.title,r.description,r.prize_name,r.prize_description,r.starts_at,r.draw_at,r.winners_count,
  (select count(*) from public.loyalty_customers c
   join lateral public.get_loyalty_customer_tier(c.id) t on true
@@ -12,7 +12,7 @@ join public.loyalty_customer_links l on l.access_token=p_access_token
 join public.loyalty_customers current_customer on current_customer.id=l.customer_id and current_customer.establishment_id=r.establishment_id
 where r.status='SCHEDULED' and r.draw_at>now()
 order by r.starts_at asc,r.draw_at asc limit 3;
-$$;
+$function$;
 revoke all on function public.get_public_loyalty_raffles(uuid) from public;
 grant execute on function public.get_public_loyalty_raffles(uuid) to anon, authenticated;
 
@@ -23,7 +23,7 @@ create or replace function public.create_loyalty_raffle(
  p_reservation_required boolean,p_single_use boolean,p_non_cumulative boolean,
  p_minimum_tier_key text default 'STANDARD',p_ticket_multiplier_mode text default 'TIER'
 )
-returns uuid language plpgsql security definer set search_path=public as $
+returns uuid language plpgsql security definer set search_path=public as $function$
 declare v_id uuid; v_title text; v_prize text;
 begin
  if not(public.is_tapmarrakech_admin() or public.is_establishment_responsible(p_establishment_id)) then raise exception 'not_authorized'; end if;
