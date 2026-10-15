@@ -1070,8 +1070,8 @@ function Overview({
     : establishments.find((item) => item.id === selectedEstablishment)?.name ?? 'Établissement';
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
+    <div className="space-y-6 pb-8 text-white">
+      <section className="relative isolate overflow-hidden rounded-[28px] border border-[#C9A45C]/20 bg-[radial-gradient(ellipse_at_top_right,rgba(201,164,92,0.15),transparent_42%),linear-gradient(135deg,#171717_0%,#090909_66%,#111111_100%)] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.25)] sm:rounded-[32px] sm:p-7 lg:p-8"><div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full border border-[#C9A45C]/15" /><div className="relative flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
         <div>
           <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#C9A45C]/45">Vue globale</p>
           <h2 className="text-3xl font-semibold tracking-tight text-[#FFFFFF] md:text-[38px]">
@@ -1085,15 +1085,15 @@ function Overview({
           <select
             value={selectedEstablishment}
             onChange={(event) => setSelectedEstablishment(event.target.value)}
-            className="rounded-xl border border-[#242424]/10 bg-[#111111] px-4 py-3 text-xs font-semibold text-[#FFFFFF] shadow-sm outline-none"
+            className="w-full rounded-xl border border-white/10 bg-[#050505] px-4 py-3 text-xs font-semibold text-white shadow-sm outline-none focus:border-[#C9A45C]/50 sm:w-auto"
           >
             <option value="all">Tous les établissements</option>
             {establishments.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
           </select>
         </div>
-      </div>
+      </div></section>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
         <AdminMetric icon={Building2} label="Établissements" value={establishments.length} detail="sur la plateforme" />
         <AdminMetric icon={UserRound} label="Responsables" value={responsibles.length} detail="comptes actifs" />
         <AdminMetric icon={UsersRound} label="Clients fidélisés" value={detailLoading ? '—' : detail.loyaltyCustomers.toLocaleString('fr-FR')} detail="membres enregistrés" />
@@ -1101,6 +1101,13 @@ function Overview({
         <AdminMetric icon={MessageSquare} label="Avis reçus" value={detailLoading ? '—' : detail.reviews.toLocaleString('fr-FR')} detail={selectedName} />
         <AdminMetric icon={WalletCards} label="MRR" value={billing.available ? `${billing.mrr.toLocaleString('fr-FR')} DH` : '—'} detail={`${activeSubscriptions} abonnements actifs`} />
       </div>
+
+      <section aria-label="Indicateurs complémentaires" className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <AdminMetric icon={TrendingUp} label="Avis positifs" value={globalStats.positiveReviews.toLocaleString('fr-FR')} detail="notes de 4 et 5 étoiles" />
+        <AdminMetric icon={AlertTriangle} label="Avis négatifs" value={globalStats.negativeReviews.toLocaleString('fr-FR')} detail="à surveiller" />
+        <AdminMetric icon={Activity} label="Événements" value={globalStats.analyticsEvents.toLocaleString('fr-FR')} detail="activité enregistrée" />
+        <AdminMetric icon={CreditCard} label="Paiements ce mois" value={billing.available ? billing.paymentsThisMonth.toLocaleString('fr-FR') : '—'} detail="transactions payées" />
+      </section>
 
       <EvolutionCharts
         reviewsData={overviewStats?.reviewsEvolution ?? []}
@@ -1130,14 +1137,14 @@ function AdminMetric({ icon: Icon, label, value, detail }: { icon: typeof Star; 
     <div
       data-kpi-label={label}
       data-kpi-value={String(value)}
-      className="rounded-3xl border border-[#242424] bg-[#111111] p-4 shadow-soft"
+      className="group relative overflow-hidden rounded-2xl border border-white/[0.07] bg-[linear-gradient(145deg,#171717,#0C0C0C)] p-4 shadow-[0_14px_36px_rgba(0,0,0,0.18)] transition duration-200 hover:-translate-y-0.5 hover:border-[#C9A45C]/25 sm:rounded-[22px] sm:p-5"
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#111111]/10 text-[#C9A45C]"><Icon size={18} /></div>
+        <div className="grid h-10 w-10 place-items-center rounded-xl border border-[#C9A45C]/15 bg-[#C9A45C]/[0.08] text-[#D9B76B]"><Icon size={18} /></div>
       </div>
-      <p className="mt-4 text-xs font-medium text-[#FFFFFF]/45">{label}</p>
-      <p className="mt-1 text-2xl font-semibold tracking-tight text-[#FFFFFF]">{value}</p>
-      <p className="mt-1 text-[10px] text-[#FFFFFF]/35">{detail}</p>
+      <p className="mt-4 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#FFFFFF]/45">{label}</p>
+      <p className="mt-1 text-2xl font-semibold tracking-tight text-white sm:text-[28px]">{value}</p>
+      <p className="mt-2 text-[10px] leading-4 text-[#FFFFFF]/40">{detail}</p>
     </div>
   );
 }
