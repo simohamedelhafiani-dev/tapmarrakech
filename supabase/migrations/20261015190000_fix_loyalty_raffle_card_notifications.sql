@@ -29,7 +29,7 @@ begin
  if not(public.is_tapmarrakech_admin() or public.is_establishment_responsible(p_establishment_id)) then raise exception 'not_authorized'; end if;
  perform public.ensure_default_loyalty_tiers(p_establishment_id);
  if not exists(select 1 from public.loyalty_tiers where establishment_id=p_establishment_id and tier_key=p_minimum_tier_key and active) then raise exception 'invalid_minimum_tier'; end if;
- if p_ticket_multiplier_mode not in ('TIER','NONE') then raise exception 'invalid_ticket_multiplier_mode'; end if;
+ if p_ticket_multiplier_mode not in ('TIER','ONE') then raise exception 'invalid_ticket_multiplier_mode'; end if;
  v_title:=trim(p_title); v_prize:=trim(p_prize_name);
  insert into public.loyalty_raffles(establishment_id,title,description,prize_name,prize_description,starts_at,draw_at,winners_count,reward_validity_mode,reward_valid_from,reward_valid_until,reward_valid_days,reservation_required,single_use,non_cumulative,status,created_by,minimum_tier_key,ticket_multiplier_mode)
  values(p_establishment_id,v_title,nullif(trim(coalesce(p_description,'')),''),v_prize,nullif(trim(coalesce(p_prize_description,'')),''),p_starts_at,p_draw_at,p_winners_count,p_reward_validity_mode,p_reward_valid_from,p_reward_valid_until,p_reward_valid_days,p_reservation_required,p_single_use,p_non_cumulative,'SCHEDULED',auth.uid(),p_minimum_tier_key,p_ticket_multiplier_mode)
