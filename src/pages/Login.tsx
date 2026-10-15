@@ -4,6 +4,9 @@ import {
   Heart,
   BarChart3,
   Globe2,
+  TrendingUp,
+  UsersRound,
+  MessageSquareText,
   ArrowRight,
   LockKeyhole,
   ShieldCheck,
@@ -98,8 +101,8 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white">
-      <div className="mx-auto flex min-h-screen max-w-[1500px] flex-col lg:flex-row">
-        <section className="relative flex min-h-[42vh] flex-col overflow-hidden border-b border-[#242424] px-5 py-6 sm:px-8 lg:min-h-screen lg:w-[56%] lg:border-b-0 lg:border-r lg:px-12 lg:py-10 xl:px-16">
+      <div className="mx-auto flex min-h-screen max-w-[1600px] flex-col lg:flex-row">
+        <section className="relative flex min-h-[42vh] flex-col overflow-hidden border-b border-white/[0.07] px-5 py-6 sm:px-8 lg:min-h-screen lg:w-[54%] lg:border-b-0 lg:border-r lg:border-white/[0.07] lg:px-12 lg:py-8 xl:px-16">
           <div className="pointer-events-none absolute -left-28 -top-28 h-72 w-72 rounded-full border border-[#C9A45C]/10" />
           <div className="pointer-events-none absolute right-[-20%] top-[18%] h-[520px] w-[520px] rounded-full border border-[#C9A45C]/[0.07]" />
           <div className="pointer-events-none absolute bottom-[-20%] left-[20%] h-[480px] w-[480px] rounded-full bg-[#C9A45C]/[0.035] blur-[100px]" />
@@ -126,7 +129,7 @@ export default function Login() {
               </label>
             </div>
 
-            <div className="relative mt-auto max-w-3xl pb-2 pt-14 lg:pt-0">
+            <div className="relative mt-auto max-w-3xl pb-2 pt-12 lg:pt-8 xl:pt-4">
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#C9A45C]/25 bg-[#C9A45C]/[0.06] px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.24em] text-[#E1C27A] shadow-[0_8px_28px_rgba(201,164,92,.08)] backdrop-blur-xl">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#C9A45C]" />
                 Plateforme client 2026
@@ -136,7 +139,7 @@ export default function Login() {
                 {language === 'fr' ? 'Réputation · Fidélité · Relation client' : language === 'en' ? 'Reputation · Loyalty · Customer relationship' : 'السمعة · الولاء · علاقة العملاء'}
               </p>
 
-              <h1 className="mt-4 max-w-3xl font-display text-[42px] leading-[0.98] tracking-[-0.045em] sm:text-6xl xl:text-[76px]">
+              <h1 className="mt-4 max-w-3xl font-display text-[40px] leading-[1.02] tracking-[-0.045em] sm:text-6xl xl:text-[68px] 2xl:text-[74px]">
                 Faites de chaque client
                 <span className="block text-[#C9A45C]">un client régulier.</span>
               </h1>
@@ -145,26 +148,45 @@ export default function Login() {
                 KELYANI réunit vos avis, votre fidélité et votre expérience client dans un seul espace de pilotage.
               </p>
 
-              <div className="mt-9 grid max-w-2xl grid-cols-3 gap-3">
-                <div className="group rounded-[22px] border border-white/[0.07] bg-white/[0.025] p-4 backdrop-blur-xl shadow-[0_18px_45px_rgba(5,5,5,.28),inset_0_1px_0_rgba(245,245,220,.04)] transition-all duration-300 hover:-translate-y-1 hover:border-[#C9A45C]/25 hover:shadow-[0_24px_55px_rgba(5,5,5,.4),inset_0_1px_0_rgba(245,245,220,.06)] active:translate-y-0">
-                  <Star size={18} className="text-[#C9A45C]" />
-                  <p className="mt-8 text-sm font-semibold text-white">Réputation</p>
-                  <p className="mt-1 text-[9px] uppercase tracking-[0.18em] text-white/30">Avis & réponses</p>
+              <div className="mt-7 max-w-2xl overflow-hidden rounded-[26px] border border-white/[0.085] bg-gradient-to-br from-[#141414] via-[#0D0D0D] to-[#090909] p-4 shadow-[0_24px_65px_rgba(0,0,0,.34),inset_0_1px_0_rgba(255,255,255,.045)] sm:p-5">
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-[#C9A45C]">L’espace de pilotage</p>
+                    <p className="mt-1 text-sm font-semibold text-white">Toute votre relation client, au même endroit.</p>
+                  </div>
+                  <div className="hidden items-center gap-1.5 rounded-full border border-[#C9A45C]/20 bg-[#C9A45C]/[0.06] px-2.5 py-1.5 text-[9px] font-medium text-[#E1C27A] sm:inline-flex">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#C9A45C]" /> Vue unifiée
+                  </div>
                 </div>
-                <div className="group rounded-[22px] border border-[#C9A45C]/20 bg-[#C9A45C]/[0.055] p-4 backdrop-blur-xl shadow-[0_18px_45px_rgba(5,5,5,.3),inset_0_1px_0_rgba(225,194,122,.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_26px_60px_rgba(5,5,5,.42),inset_0_1px_0_rgba(225,194,122,.08)] active:translate-y-0">
-                  <Heart size={18} className="text-[#C9A45C]" />
-                  <p className="mt-8 text-sm font-semibold text-white">Fidélité</p>
-                  <p className="mt-1 text-[9px] uppercase tracking-[0.18em] text-white/30">Clients réguliers</p>
+                <div className="grid grid-cols-3 gap-2.5">
+                  <div className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-3 transition-colors duration-200 hover:border-[#C9A45C]/20 sm:p-3.5">
+                    <div className="flex items-center gap-2 text-[#C9A45C]"><Star size={15} /><span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-white/40">Réputation</span></div>
+                    <p className="mt-3 text-xs font-semibold text-white sm:text-sm">Avis clients</p>
+                    <p className="mt-1 text-[10px] text-white/35">Suivi & réponses</p>
+                  </div>
+                  <div className="rounded-2xl border border-[#C9A45C]/20 bg-[#C9A45C]/[0.055] p-3 transition-colors duration-200 hover:border-[#C9A45C]/35 sm:p-3.5">
+                    <div className="flex items-center gap-2 text-[#E1C27A]"><Heart size={15} /><span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-white/40">Fidélité</span></div>
+                    <p className="mt-3 text-xs font-semibold text-white sm:text-sm">Clients réguliers</p>
+                    <p className="mt-1 text-[10px] text-white/35">Récompenses & retours</p>
+                  </div>
+                  <div className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-3 transition-colors duration-200 hover:border-[#C9A45C]/20 sm:p-3.5">
+                    <div className="flex items-center gap-2 text-[#C9A45C]"><BarChart3 size={15} /><span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-white/40">Pilotage</span></div>
+                    <p className="mt-3 text-xs font-semibold text-white sm:text-sm">Vue globale</p>
+                    <p className="mt-1 text-[10px] text-white/35">Indicateurs essentiels</p>
+                  </div>
                 </div>
-                <div className="group rounded-[22px] border border-white/[0.07] bg-white/[0.025] p-4 backdrop-blur-xl transition hover:-translate-y-1 hover:border-[#C9A45C]/25">
-                  <BarChart3 size={18} className="text-[#C9A45C]" />
-                  <p className="mt-8 text-sm font-semibold text-white">Pilotage</p>
-                  <p className="mt-1 text-[9px] uppercase tracking-[0.18em] text-white/30">Une seule vision</p>
+                <div className="mt-3 flex items-center gap-3 rounded-2xl border border-white/[0.055] bg-black/20 px-3.5 py-3">
+                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#C9A45C]/10 text-[#E1C27A]"><TrendingUp size={17} /></div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] font-medium text-white/80">De l’avis à la fidélisation</p>
+                    <p className="mt-0.5 text-[10px] text-white/35">Une vision claire pour mieux décider.</p>
+                  </div>
+                  <div className="hidden items-center gap-1.5 text-[10px] text-white/35 sm:flex"><UsersRound size={14} className="text-[#C9A45C]" /> <MessageSquareText size={14} className="text-[#C9A45C]" /></div>
                 </div>
               </div>
-              <div className="mt-6 flex max-w-2xl items-center gap-3 rounded-[22px] border border-white/[0.06] bg-white/[0.02] px-5 py-4 backdrop-blur-xl shadow-[0_16px_42px_rgba(5,5,5,.25),inset_0_1px_0_rgba(245,245,220,.035)]">
-                <div className="h-2 w-2 rounded-full bg-[#C9A45C] shadow-[0_0_14px_rgba(201,164,92,.7)]" />
-                <p className="text-xs text-white/45">Une plateforme pensée pour transformer chaque interaction en relation durable.</p>
+              <div className="mt-4 flex max-w-2xl items-center gap-3 rounded-2xl border border-white/[0.055] bg-white/[0.018] px-4 py-3.5">
+                <div className="h-2 w-2 shrink-0 rounded-full bg-[#C9A45C] shadow-[0_0_14px_rgba(201,164,92,.7)]" />
+                <p className="text-[11px] leading-5 text-white/45">Une plateforme pensée pour transformer chaque interaction en relation durable.</p>
               </div>
 
               <div className="mt-8 hidden items-center gap-4 text-[10px] uppercase tracking-[0.16em] text-[#F5F5DC]/25 lg:flex">
@@ -174,9 +196,9 @@ export default function Login() {
           </div>
         </section>
 
-        <section className="flex flex-1 items-center justify-center px-4 py-8 sm:px-8 lg:px-12 xl:px-16">
-          <div className="w-full max-w-[500px]">
-            <div className="mb-7 rounded-[28px] border border-white/[0.06] bg-white/[0.018] p-7 backdrop-blur-xl shadow-[0_24px_70px_rgba(5,5,5,.32),inset_0_1px_0_rgba(245,245,220,.04)] sm:p-8">
+        <section className="relative flex flex-1 items-center justify-center overflow-hidden px-4 py-8 sm:px-8 lg:px-10 xl:px-14"><div className="pointer-events-none absolute left-1/2 top-1/2 h-[540px] w-[540px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#C9A45C]/[0.025] blur-[100px]" />
+          <div className="relative z-10 w-full max-w-[460px]">
+            <div className="mb-5 rounded-[26px] border border-white/[0.075] bg-gradient-to-br from-[#111111] to-[#090909] p-6 shadow-[0_24px_70px_rgba(0,0,0,.38),inset_0_1px_0_rgba(255,255,255,.04)] sm:p-7">
               <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-[#C9A45C]">Espace sécurisé</p>
               <h2 className="mt-2 font-display text-3xl tracking-[-0.035em] text-white sm:text-4xl">
                 {selectedRole ? 'Bienvenue dans KELYANI' : 'Accédez à votre espace'}
@@ -188,7 +210,7 @@ export default function Login() {
 
             {!selectedRole ? (
               <div className="space-y-3">
-                <button type="button" onClick={() => selectRole('admin')} className="group flex w-full items-center gap-4 rounded-3xl border border-[#242424] bg-[#111111] p-4 text-left shadow-[0_16px_45px_rgba(5,5,5,.32),inset_0_1px_0_rgba(245,245,220,.025)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#C9A45C]/45 hover:bg-[#151515] hover:shadow-[0_24px_55px_rgba(5,5,5,.42),inset_0_1px_0_rgba(245,245,220,.045)] active:translate-y-0">
+                <button type="button" onClick={() => selectRole('admin')} className="group flex w-full items-center gap-4 rounded-[24px] border border-white/[0.075] bg-gradient-to-r from-[#151515] to-[#0E0E0E] p-4 text-left shadow-[0_16px_45px_rgba(0,0,0,.28),inset_0_1px_0_rgba(255,255,255,.035)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#C9A45C]/40 hover:from-[#191714] hover:to-[#11100D] hover:shadow-[0_24px_55px_rgba(0,0,0,.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A45C]/60 active:translate-y-0">
                   <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#C9A45C]/10 text-[#E1C27A]"><ShieldCheck size={21} /></div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#F5F5DC]/30">Plateforme</p>
@@ -198,7 +220,7 @@ export default function Login() {
                   <ArrowRight size={18} className="text-[#C9A45C] transition-transform group-hover:translate-x-1" />
                 </button>
 
-                <button type="button" onClick={() => selectRole('responsible')} className="group flex w-full items-center gap-4 rounded-3xl border border-[#242424] bg-[#111111] p-4 text-left transition hover:-translate-y-0.5 hover:border-[#C9A45C]/45 hover:bg-[#151515]">
+                <button type="button" onClick={() => selectRole('responsible')} className="group flex w-full items-center gap-4 rounded-[24px] border border-white/[0.075] bg-gradient-to-r from-[#151515] to-[#0E0E0E] p-4 text-left shadow-[0_16px_45px_rgba(0,0,0,.24),inset_0_1px_0_rgba(255,255,255,.025)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#C9A45C]/40 hover:from-[#191714] hover:to-[#11100D] hover:shadow-[0_24px_55px_rgba(0,0,0,.38)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A45C]/60 active:translate-y-0">
                   <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#C9A45C]/10 text-[#E1C27A]"><UserRound size={21} /></div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#F5F5DC]/30">Établissement</p>
