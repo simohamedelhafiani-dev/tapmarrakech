@@ -1,6 +1,6 @@
 begin;
 
-select plan(17);
+select plan(18);
 
 -- 1. No eligible customers and no enrolled customers: never produce a winner.
 select is(
