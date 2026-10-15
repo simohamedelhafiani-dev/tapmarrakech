@@ -1,4 +1,41 @@
 -- Secure, establishment-scoped lookup and redemption for raffle winner claims.
+-- Once redeemed, a raffle prize leaves the active gains section on the customer's card.
+create or replace function public.get_public_loyalty_raffle_winners(p_access_token uuid)
+returns table(
+  id uuid,
+  raffle_id uuid,
+  title text,
+  prize_name text,
+  prize_description text,
+  valid_from timestamptz,
+  valid_until timestamptz,
+  reservation_required boolean,
+  single_use boolean,
+  non_cumulative boolean,
+  status text,
+  claim_token uuid,
+  drawn_at timestamptz
+)
+language sql
+stable
+security definer
+set search_path = public
+as $function$
+  select w.id, w.raffle_id, r.title, w.prize_name, w.prize_description,
+         w.valid_from, w.valid_until, w.reservation_required, w.single_use,
+         w.non_cumulative, w.status, w.claim_token, r.drawn_at
+  from public.loyalty_raffle_winners w
+  join public.loyalty_raffles r on r.id = w.raffle_id
+  join public.loyalty_customer_links l on l.customer_id = w.customer_id
+  where l.access_token = p_access_token
+    and w.status = 'PENDING'
+    and w.valid_from <= now()
+    and w.valid_until >= now()
+  order by w.created_at desc;
+$function$;
+revoke all on function public.get_public_loyalty_raffle_winners(uuid) from public;
+grant execute on function public.get_public_loyalty_raffle_winners(uuid) to anon, authenticated;
+
 -- Additive migration: existing raffle, loyalty and reward functions remain unchanged.
 
 create or replace function public.get_public_loyalty_raffle_winner_by_code(
