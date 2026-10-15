@@ -4,10 +4,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: '#EDE9DF',
-        forest: '#C9A45C',
-        gold: '#C9A45C',
-        'gold-light': '#E1C27A',
+        ink: '#F5F5DC',
+        forest: '#D4AF37',
+        gold: '#D4AF37',
+        'gold-light': '#E7C96B',
         cream: '#111111',
         onyx: '#050505',
         surface: '#111111',
@@ -23,7 +23,7 @@ export default {
         gold: '0 0 0 1px rgba(201,164,92,.24), 0 18px 50px rgba(201,164,92,.10)',
       },
       backgroundImage: {
-        'gold-gradient': 'linear-gradient(135deg, #C9A45C 0%, #E1C27A 48%, #A77D35 100%)',
+        'gold-gradient': 'linear-gradient(135deg, #D4AF37 0%, #E7C96B 48%, #A77D35 100%)',
         'glass-gradient': 'linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.025))',
       },
       borderRadius: {
