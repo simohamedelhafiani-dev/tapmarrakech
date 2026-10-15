@@ -41,6 +41,6 @@ begin
   '. Tirage : '||to_char(p_draw_at,'DD/MM/YYYY HH24:MI')||'.',
   'OFFER',p_draw_at,auth.uid());
  return v_id;
-end; $$;
+end; $function$;
 revoke execute on function public.create_loyalty_raffle(uuid,text,text,text,text,timestamptz,timestamptz,integer,text,timestamptz,timestamptz,integer,boolean,boolean,boolean,text,text) from public, anon;
 grant execute on function public.create_loyalty_raffle(uuid,text,text,text,text,timestamptz,timestamptz,integer,text,timestamptz,timestamptz,integer,boolean,boolean,boolean,text,text) to authenticated;
