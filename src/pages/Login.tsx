@@ -148,40 +148,46 @@ export default function Login() {
                 KELYANI réunit vos avis, votre fidélité et votre expérience client dans un seul espace de pilotage.
               </p>
 
-              <div className="mt-7 max-w-2xl overflow-hidden rounded-[26px] border border-white/[0.085] bg-gradient-to-br from-[#141414] via-[#0D0D0D] to-[#090909] p-4 shadow-[0_24px_65px_rgba(0,0,0,.34),inset_0_1px_0_rgba(255,255,255,.045)] sm:p-5">
-                <div className="mb-4 flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-[#C9A45C]">L’espace de pilotage</p>
-                    <p className="mt-1 text-sm font-semibold text-white">Toute votre relation client, au même endroit.</p>
+              <div className="kelyani-hero-stage mt-7 max-w-2xl" aria-label="Aperçu de la plateforme KELYANI">
+                <div className="kelyani-orbit kelyani-orbit-one" />
+                <div className="kelyani-orbit kelyani-orbit-two" />
+                <div className="kelyani-glow-point" />
+                <div className="kelyani-dashboard-3d">
+                  <div className="kelyani-dashboard-top">
+                    <div className="flex items-center gap-2.5">
+                      <div className="grid h-8 w-8 place-items-center rounded-xl border border-[#D4AF37]/25 bg-[#D4AF37]/10 text-[#E4C56A]"><BarChart3 size={16} /></div>
+                      <div>
+                        <p className="text-[10px] font-bold tracking-[0.12em] text-white/90">KELYANI <span className="text-[#D4AF37]">/ INSIGHTS</span></p>
+                        <p className="mt-0.5 text-[9px] text-white/35">Customer intelligence</p>
+                      </div>
+                    </div>
+                    <div className="kelyani-live-pill"><span /> LIVE</div>
                   </div>
-                  <div className="hidden items-center gap-1.5 rounded-full border border-[#C9A45C]/20 bg-[#C9A45C]/[0.06] px-2.5 py-1.5 text-[9px] font-medium text-[#E1C27A] sm:inline-flex">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#C9A45C]" /> Vue unifiée
+                  <div className="kelyani-dashboard-body">
+                    <div className="kelyani-kpi-tile">
+                      <div className="flex items-center justify-between"><span>RÉPUTATION</span><Star size={13} className="text-[#D4AF37]" /></div>
+                      <div className="mt-2 flex items-baseline gap-1.5"><strong>4.9</strong><span className="text-[10px] text-[#D4AF37]">/ 5</span></div>
+                      <div className="mt-1 flex gap-0.5 text-[#D4AF37]">{[1,2,3,4,5].map((n) => <Star key={n} size={9} fill="currentColor" />)}</div>
+                    </div>
+                    <div className="kelyani-kpi-tile kelyani-kpi-featured">
+                      <div className="flex items-center justify-between"><span>FIDÉLITÉ</span><Heart size={13} className="text-[#D4AF37]" /></div>
+                      <div className="mt-2 flex items-baseline gap-1.5"><strong>+28%</strong><span className="text-[9px] text-emerald-300">↗</span></div>
+                      <p className="mt-1 text-[9px] text-white/35">Clients qui reviennent</p>
+                    </div>
+                    <div className="kelyani-chart-tile">
+                      <div className="flex items-center justify-between"><span>ENGAGEMENT CLIENT</span><span className="text-[9px] text-[#D4AF37]">30 jours ↗</span></div>
+                      <svg viewBox="0 0 320 68" className="mt-2 h-[58px] w-full overflow-visible" role="img" aria-label="Courbe illustrative de progression">
+                        <defs><linearGradient id="kelyaniChartFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#D4AF37" stopOpacity=".3" /><stop offset="100%" stopColor="#D4AF37" stopOpacity="0" /></linearGradient></defs>
+                        <path d="M0 58 C24 52 28 45 48 48 S76 53 96 35 S126 42 145 29 S173 38 196 20 S230 29 250 15 S287 18 320 3 L320 68 L0 68 Z" fill="url(#kelyaniChartFill)" />
+                        <path d="M0 58 C24 52 28 45 48 48 S76 53 96 35 S126 42 145 29 S173 38 196 20 S230 29 250 15 S287 18 320 3" fill="none" stroke="#D4AF37" strokeWidth="2" strokeLinecap="round" />
+                        <circle cx="250" cy="15" r="4" fill="#F5D978" stroke="#15120A" strokeWidth="2" />
+                      </svg>
+                    </div>
                   </div>
+                  <div className="kelyani-dashboard-footer"><span><span className="kelyani-footer-dot" /> Vue unifiée</span><span>RÉPUTATION · FIDÉLITÉ · CROISSANCE</span></div>
                 </div>
-                <div className="grid grid-cols-3 gap-2.5">
-                  <div className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-3 transition-colors duration-200 hover:border-[#C9A45C]/20 sm:p-3.5">
-                    <div className="flex items-center gap-2 text-[#C9A45C]"><Star size={15} /><span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-white/40">Réputation</span></div>
-                    <p className="mt-3 text-xs font-semibold text-white sm:text-sm">Avis clients</p>
-                    <p className="mt-1 text-[10px] text-white/35">Suivi & réponses</p>
-                  </div>
-                  <div className="rounded-2xl border border-[#C9A45C]/20 bg-[#C9A45C]/[0.055] p-3 transition-colors duration-200 hover:border-[#C9A45C]/35 sm:p-3.5">
-                    <div className="flex items-center gap-2 text-[#E1C27A]"><Heart size={15} /><span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-white/40">Fidélité</span></div>
-                    <p className="mt-3 text-xs font-semibold text-white sm:text-sm">Clients réguliers</p>
-                    <p className="mt-1 text-[10px] text-white/35">Récompenses & retours</p>
-                  </div>
-                  <div className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-3 transition-colors duration-200 hover:border-[#C9A45C]/20 sm:p-3.5">
-                    <div className="flex items-center gap-2 text-[#C9A45C]"><BarChart3 size={15} /><span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-white/40">Pilotage</span></div>
-                    <p className="mt-3 text-xs font-semibold text-white sm:text-sm">Vue globale</p>
-                    <p className="mt-1 text-[10px] text-white/35">Indicateurs essentiels</p>
-                  </div>
-                </div>
-                <div className="mt-3 flex items-center gap-3 rounded-2xl border border-white/[0.055] bg-black/20 px-3.5 py-3">
-                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#C9A45C]/10 text-[#E1C27A]"><TrendingUp size={17} /></div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[11px] font-medium text-white/80">De l’avis à la fidélisation</p>
-                    <p className="mt-0.5 text-[10px] text-white/35">Une vision claire pour mieux décider.</p>
-                  </div>
-                  <div className="hidden items-center gap-1.5 text-[10px] text-white/35 sm:flex"><UsersRound size={14} className="text-[#C9A45C]" /> <MessageSquareText size={14} className="text-[#C9A45C]" /></div>
+                <div className="kelyani-float-chip kelyani-float-review"><div className="kelyani-float-icon"><Star size={14} fill="currentColor" /></div><div><p>Nouvel avis</p><span>Excellent service !</span></div><span className="kelyani-float-check">✓</span></div>
+                <div className="kelyani-float-chip kelyani-float-loyalty"><div className="kelyani-loyalty-symbol">K</div><div><p>Client fidèle</p><span>Récompense débloquée</span></div><Heart size={14} className="text-[#D4AF37]" />
                 </div>
               </div>
               <div className="mt-4 flex max-w-2xl items-center gap-3 rounded-2xl border border-white/[0.055] bg-white/[0.018] px-4 py-3.5">
