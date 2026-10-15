@@ -96,6 +96,7 @@ export default function Loyalty() {
   }>>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [showNotificationHistory, setShowNotificationHistory] = useState(false);
+  const [showClientOperations, setShowClientOperations] = useState(false);
 
   const [programSettings, setProgramSettings] =
     useState<LoyaltyProgramSettings>({
@@ -872,15 +873,21 @@ export default function Loyalty() {
         />
       </div>
 
-      {/* CLIENTS */}
-      <section className="mt-6 rounded-2xl border border-ink/5 bg-white shadow-soft">
-        <div className="flex flex-col justify-between gap-4 border-b border-ink/5 p-5 md:flex-row md:items-center md:p-7">
+      {/* Client operations stay accessible on demand, not displayed by default. */}
+      <div className="mt-6 flex justify-end">
+        <button type="button" onClick={() => setShowClientOperations(value => !value)} aria-expanded={showClientOperations} className="rounded-xl border border-[#D4AF37]/30 bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#E1C27A] transition hover:bg-[#1B1B1B]">
+          {showClientOperations ? 'Masquer les opérations clients' : 'Ouvrir les opérations clients'}
+        </button>
+      </div>
+      {showClientOperations && (
+      <section className="mt-6 rounded-2xl border border-[#242424] bg-[#111111] shadow-soft">
+        <div className="flex flex-col justify-between gap-4 border-b border-white/10 p-5 md:flex-row md:items-center md:p-7">
           <div>
-            <h2 className="font-display text-xl text-forest">
+            <h2 className="font-display text-xl text-white">
               Mes clients
             </h2>
 
-            <p className="mt-1 text-xs text-ink/45">
+            <p className="mt-1 text-xs text-white/45">
               Recherchez un client par son prénom ou son numéro.
             </p>
           </div>
@@ -888,14 +895,14 @@ export default function Loyalty() {
           <div className="relative w-full md:w-80">
             <Search
               size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/30"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30"
             />
 
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Rechercher un client..."
-              className="w-full rounded-xl border border-ink/10 bg-[#fafaf7] py-2.5 pl-9 pr-3 text-xs outline-none focus:border-gold"
+              className="w-full rounded-xl border border-ink/10 bg-[#0D0D0D] text-white py-2.5 pl-9 pr-3 text-xs outline-none focus:border-gold"
             />
           </div>
         </div>
@@ -903,7 +910,7 @@ export default function Loyalty() {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[760px] text-left">
             <thead>
-              <tr className="border-b border-ink/5 text-[10px] uppercase tracking-wider text-ink/40">
+              <tr className="border-b border-white/10 text-[10px] uppercase tracking-wider text-white/40">
                 <th className="px-6 py-4">Client</th>
                 <th className="px-6 py-4">Téléphone</th>
                 <th className="px-6 py-4">Points</th>
@@ -917,15 +924,15 @@ export default function Loyalty() {
               {filteredCustomers.map(customer => (
                 <tr
                   key={customer.id}
-                  className="border-b border-ink/5 last:border-0"
+                  className="border-b border-white/10 last:border-0"
                 >
                   <td className="px-6 py-4">
-                    <div className="font-medium text-sm text-forest">
+                    <div className="font-medium text-sm text-white">
                       {customer.first_name || 'Client'}
                     </div>
                   </td>
 
-                  <td className="px-6 py-4 text-xs text-ink/55">
+                  <td className="px-6 py-4 text-xs text-white/55">
                     <span className="inline-flex items-center gap-2">
                       <Phone size={13} />
                       {customer.phone}
@@ -933,16 +940,16 @@ export default function Loyalty() {
                   </td>
 
                   <td className="px-6 py-4">
-                    <span className="rounded-full bg-[#f4ead3] px-3 py-1 text-xs font-semibold text-forest">
+                    <span className="rounded-full bg-[#D4AF37]/10 px-3 py-1 text-xs font-semibold text-white">
                       ⭐ {customer.points_balance}
                     </span>
                   </td>
 
-                  <td className="px-6 py-4 text-xs text-ink/55">
+                  <td className="px-6 py-4 text-xs text-white/55">
                     {customer.visit_count}
                   </td>
 
-                  <td className="px-6 py-4 text-xs text-ink/45">
+                  <td className="px-6 py-4 text-xs text-white/45">
                     {customer.last_visit_at
                       ? new Date(
                           customer.last_visit_at
@@ -960,7 +967,7 @@ export default function Loyalty() {
                           setShowPoints(customer);
                         }}
                         disabled={!programSettings.enabled}
-                        className="rounded-lg bg-forest px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-forest-light disabled:cursor-not-allowed disabled:opacity-40"
+                        className="rounded-lg bg-[#D4AF37] text-[#0D0D0D] px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-[#D4AF37] text-[#0D0D0D]-light disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         Ajouter
                       </button>
@@ -979,7 +986,7 @@ export default function Loyalty() {
                           !programSettings.enabled ||
                           rewards.length === 0
                         }
-                        className="rounded-lg border border-gold/30 bg-[#fdf9ef] px-3 py-2 text-[11px] font-semibold text-forest transition hover:bg-[#f4ead3] disabled:cursor-not-allowed disabled:opacity-40"
+                        className="rounded-lg border border-gold/30 bg-[#181818] px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-[#D4AF37]/10 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         Récompenses
                       </button>
@@ -987,7 +994,7 @@ export default function Loyalty() {
                         type="button"
                         onClick={() => void createRecoveryQr(customer)}
                         disabled={recoveryLoading}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-ink/10 px-3 py-2 text-[11px] font-semibold text-ink/60 transition hover:border-gold/40 hover:text-gold disabled:opacity-40"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-ink/10 px-3 py-2 text-[11px] font-semibold text-white/60 transition hover:border-gold/40 hover:text-gold disabled:opacity-40"
                       >
                         <QrCode size={13} /> Récupérer
                       </button>
@@ -1000,7 +1007,7 @@ export default function Loyalty() {
                 <tr>
                   <td
                     colSpan={6}
-                    className="px-6 py-16 text-center text-sm text-ink/40"
+                    className="px-6 py-16 text-center text-sm text-white/40"
                   >
                     {search
                       ? 'Aucun client trouvé.'
@@ -1012,6 +1019,7 @@ export default function Loyalty() {
           </table>
         </div>
       </section>
+      )}
 
       {/* CARD NOTIFICATION MODAL */}
       {showNotificationModal && (
