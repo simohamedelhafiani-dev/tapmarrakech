@@ -827,18 +827,18 @@ export function DashboardLayout() {
           </div>
         )}
 
-<main className="dashboard-depth-main mx-auto w-full max-w-[1700px] px-3 pb-28 pt-6 sm:px-5 md:px-8 lg:px-10 lg:pt-8">
-          <Outlet />
+<main className="dashboard-depth-main kelyani-workspace mx-auto w-full max-w-[1700px] px-3 pb-28 pt-6 sm:px-5 md:px-8 lg:px-10 lg:pb-10 lg:pt-8">
+          <div className="kelyani-page-content"><Outlet /></div>
         </main>
 
-        <nav className="dashboard-depth-nav fixed inset-x-0 bottom-0 z-[60] border-t border-[#242424] bg-[#050505]/96 px-2 pb-[max(8px,env(safe-area-inset-bottom))] pt-2 backdrop-blur-2xl">
+        <nav aria-label="Navigation principale" className="dashboard-depth-nav kelyani-sidebar fixed inset-x-0 bottom-0 z-[60] border-t border-[#242424] bg-[#050505]/96 px-2 pb-[max(8px,env(safe-area-inset-bottom))] pt-2 backdrop-blur-2xl">
           <div className="mx-auto flex max-w-[1100px] items-center justify-start gap-1 overflow-x-auto scrollbar-none">
             {links.map(({ to, label, icon: Icon, end }) => (
               <NavLink
                 key={to}
                 to={to}
                 end={end}
-                className={({ isActive }) => `group flex min-w-[76px] flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 transition-all ${
+                className={({ isActive }) => `kelyani-nav-link group flex min-w-[76px] flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 transition-all ${
                   isActive
                     ? 'bg-[#111111] text-[#E1C27A] shadow-[0_0_24px_rgba(201,164,92,0.10)]'
                     : 'text-[#F5F5DC]/40 hover:bg-[#111111] hover:text-[#F5F5DC]'
