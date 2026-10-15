@@ -449,6 +449,9 @@ export default function LoyaltyRaffles() {
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 className="truncate text-base font-semibold text-white">{raffle.title}</h2>
                       <span className={`rounded-full px-2 py-1 text-[9px] font-semibold ${raffle.status === 'SCHEDULED' ? 'bg-[#C9A45C]/10 text-[#E1C27A]' : raffle.status === 'DRAWN' ? 'bg-emerald-500/10 text-emerald-300' : 'bg-white/5 text-white/40'}`}>{raffle.status}</span>
+                      {raffle.status === 'SCHEDULED' && raffle.last_draw_fallback_stage === 'EXTENDED_7_DAYS' && (
+                        <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-1 text-[9px] font-semibold text-amber-200">Action requise</span>
+                      )}
                     </div>
                     <p className="mt-1 text-xs text-[#F5F5DC]/45">Lot : {raffle.prize_name} · Tirage : {formatDate(raffle.draw_at)}</p>
                   </div>
