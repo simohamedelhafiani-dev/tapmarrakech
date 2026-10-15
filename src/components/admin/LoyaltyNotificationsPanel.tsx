@@ -236,6 +236,7 @@ export default function LoyaltyNotificationsPanel({ establishmentId, initialView
 
   return (
     <>
+      {initialView !== 'history' && (
       <div className="rounded-3xl border border-[#242424] bg-[#111111] p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
@@ -265,6 +266,8 @@ export default function LoyaltyNotificationsPanel({ establishmentId, initialView
           <span className="rounded-full bg-[#C9A45C]/10 px-3 py-1.5 text-[#C9A45C]">{customers.filter(c => c.notification_consent).length} notifications activées</span>
         </div>
       </div>
+
+      )}
 
       <div ref={historySectionRef} className="scroll-mt-6 rounded-3xl border border-[#242424] bg-[#111111] p-5">
         <div className="mb-4 flex items-center gap-3">
