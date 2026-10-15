@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Gift,
+  Bell,
+  History,
+  Send,
   ImagePlus,
   Loader2,
   Palette,
@@ -29,11 +32,12 @@ import LoyaltyPreview from './LoyaltyPreview';
 import LoyaltyRaffleStudio from './LoyaltyRaffleStudio';
 import LoyaltyTierStudio from './LoyaltyTierStudio';
 import LoyaltyCrmSegments from './LoyaltyCrmSegments';
+import LoyaltyNotificationsPanel from '@/components/admin/LoyaltyNotificationsPanel';
 import { WALLET_TEMPLATES } from '@/components/LoyaltyCardVisual';
 import type { LoyaltyExperienceConfig, LoyaltyExperienceReward } from './LoyaltyExperience';
 
 type Props = { establishmentId: string };
-type TabId = 'settings' | 'rewards' | 'referral' | 'tiers' | 'raffle' | 'crm' | 'design';
+type TabId = 'settings' | 'rewards' | 'referral' | 'tiers' | 'raffle' | 'crm' | 'notifications' | 'design';
 type RewardType = 'GIFT' | 'DISCOUNT';
 
 type Reward = {
@@ -94,6 +98,7 @@ const TABS: { id: TabId; label: string; caption: string; icon: typeof Settings2 
   { id: 'tiers', label: 'Niveaux', caption: 'Clients', icon: Trophy },
   { id: 'raffle', label: 'Tombola', caption: 'Gagnants', icon: Trophy },
   { id: 'crm', label: 'CRM', caption: 'Segments', icon: UsersRound },
+  { id: 'notifications', label: 'Notifications', caption: 'Communication', icon: Bell },
   { id: 'design', label: 'Design', caption: 'Visuels', icon: Palette },
 ];
 
@@ -142,6 +147,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   const { role } = useAuth();
   const isAdmin = role === 'admin';
   const [tab, setTab] = useState<TabId>('settings');
+  const [notificationHomeView, setNotificationHomeView] = useState<'home' | 'campaigns'>('home');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -703,7 +709,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
         <div className="min-w-0">
           <div className="mb-5 overflow-x-auto rounded-2xl bg-[#111111] p-1.5">
-            <div className={`grid gap-1 ${isAdmin ? 'min-w-[1050px] grid-cols-7' : 'min-w-[900px] grid-cols-6'}`}>
+            <div className={`grid gap-1 ${isAdmin ? 'min-w-[1200px] grid-cols-8' : 'min-w-[1050px] grid-cols-7'}`}>
               {visibleTabs.map(item => {
                 const Icon = item.icon;
                 const active = tab === item.id;
@@ -711,7 +717,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   <button
                     key={item.id}
                     type="button"
-                    onClick={() => setTab(item.id)}
+                    onClick={() => { setTab(item.id); if (item.id === 'notifications') setNotificationHomeView('home'); }}
                     className={`group rounded-xl px-3 py-3 text-left transition ${active ? 'bg-[#111111] shadow-sm' : 'text-[#FFFFFF]/45 hover:bg-[#111111]/60'}`}
                   >
                     <span className="flex items-center gap-2.5">
@@ -728,6 +734,44 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
               })}
             </div>
           </div>
+
+          {tab === 'notifications' && (
+            <div className="space-y-5">
+              {notificationHomeView === 'home' ? (
+                <div className="rounded-3xl border border-[#C9A45C]/20 bg-[#0D0D0D] p-5 sm:p-7">
+                  <div className="mb-6">
+                    <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#D4AF37]">Loyalty Studio · Applications</p>
+                    <h3 className="mt-2 text-2xl font-semibold text-white">Centre de notifications</h3>
+                    <p className="mt-2 max-w-xl text-sm leading-6 text-white/50">Choisissez une fonctionnalité, comme sur l’écran d’accueil d’un téléphone. Vos campagnes et votre historique restent dans le même espace.</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                    <button type="button" onClick={() => setNotificationHomeView('campaigns')} className="group rounded-2xl border border-white/10 bg-[#151515] p-4 text-left transition hover:-translate-y-0.5 hover:border-[#D4AF37]/50 hover:bg-[#1B1B1B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]">
+                      <span className="grid h-14 w-14 place-items-center rounded-[18px] bg-gradient-to-br from-[#E1C27A] to-[#B68A2B] text-[#0D0D0D] shadow-lg"><Send size={23}/></span>
+                      <span className="mt-4 block text-sm font-semibold text-white">Campagnes</span>
+                      <span className="mt-1 block text-xs leading-5 text-white/45">Créer et envoyer des notifications</span>
+                    </button>
+                    <button type="button" onClick={() => setNotificationHomeView('campaigns')} className="group rounded-2xl border border-white/10 bg-[#151515] p-4 text-left transition hover:-translate-y-0.5 hover:border-[#D4AF37]/50 hover:bg-[#1B1B1B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]">
+                      <span className="grid h-14 w-14 place-items-center rounded-[18px] bg-gradient-to-br from-[#D4AF37] to-[#8D6A1E] text-[#0D0D0D] shadow-lg"><History size={23}/></span>
+                      <span className="mt-4 block text-sm font-semibold text-white">Historique</span>
+                      <span className="mt-1 block text-xs leading-5 text-white/45">Consulter les envois et leur statut</span>
+                    </button>
+                    <button type="button" onClick={() => { setTab('crm'); }} className="group rounded-2xl border border-white/10 bg-[#151515] p-4 text-left transition hover:-translate-y-0.5 hover:border-[#D4AF37]/50 hover:bg-[#1B1B1B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]">
+                      <span className="grid h-14 w-14 place-items-center rounded-[18px] bg-gradient-to-br from-[#E1C27A] to-[#A57B28] text-[#0D0D0D] shadow-lg"><UsersRound size={23}/></span>
+                      <span className="mt-4 block text-sm font-semibold text-white">CRM clients</span>
+                      <span className="mt-1 block text-xs leading-5 text-white/45">Segments et ciblage des clients</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <button type="button" onClick={() => setNotificationHomeView('home')} className="inline-flex items-center gap-2 rounded-xl border border-[#D4AF37]/25 bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#E1C27A] transition hover:bg-[#1A1A1A]">
+                    <X size={14}/> Retour aux applications
+                  </button>
+                  <LoyaltyNotificationsPanel establishmentId={establishmentId} />
+                </div>
+              )}
+            </div>
+          )}
 
           {tab === 'crm' && <LoyaltyCrmSegments establishmentId={establishmentId} />}
 
