@@ -964,9 +964,10 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                 )}
               </div>
             )}
-            <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#111111] shadow-luxury">
-              <div className="px-5 py-4">
-                <p className="text-[9px] font-bold uppercase tracking-[0.24em]" style={{ color: design.secondary_color }}>Questionnaire</p>
+            {!engagement.feedback_submitted && (
+              <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#111111] shadow-luxury">
+                <div className="px-5 py-4">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.24em]" style={{ color: design.secondary_color }}>Questionnaire</p>
                 <h2 className="mt-1 text-base font-semibold text-white">Comment était votre expérience ?</h2>
                 <div className="mt-4 flex gap-2">
                   {[1,2,3,4,5].map(value => (
@@ -981,10 +982,10 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                     <button type="button" onClick={() => void submitFeedback()} disabled={feedbackSaving} className="w-full rounded-2xl bg-[#D4AF37] px-4 py-3 text-xs font-semibold text-[#0D0D0D] disabled:opacity-50">{feedbackSaving ? 'Envoi…' : 'Envoyer mon retour · +10 points'}</button>
                   </div>
                 )}
-                {engagement.feedback_submitted && <p className="mt-3 flex items-center gap-2 text-xs text-white/55"><CheckCircle2 size={15} className="text-[#D4AF37]" /> Retour déjà envoyé. Merci !</p>}
-                {feedbackMessage && <p className="mt-3 text-xs text-[#D4AF37]">{feedbackMessage}</p>}
+                  {feedbackMessage && <p className="mt-3 text-xs text-[#D4AF37]">{feedbackMessage}</p>}
+                </div>
               </div>
-            </div>
+            )}
           </section>
         )}
 
