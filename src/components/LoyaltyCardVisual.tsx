@@ -197,6 +197,8 @@ export function LoyaltyCardVisual({
     <div
       style={{
         width: cardWidth ?? 'min(90vw, 400px)',
+        maxWidth: '100%',
+        minWidth: 0,
         height: 'auto',
         aspectRatio: '2 / 3',
         position: 'relative',
@@ -248,7 +250,7 @@ export function LoyaltyCardVisual({
           </div>
         </div>
 
-        <div style={{ flex: '1 1 auto', minHeight: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1cqw', textAlign: 'center', overflow: 'hidden' }}>
+        <div style={{ flex: '1 1 0%', minHeight: 0, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1cqw', textAlign: 'center', overflow: 'hidden' }}>
           <div style={{ fontSize: '3cqw', fontWeight: 800, letterSpacing: '.24em', textTransform: 'uppercase', color: design.secondary_color }}>
             {mode === 'STAMP' ? 'CARTE À TAMPONS' : mode === 'DISCOUNT' ? 'POINTS & RÉDUCTION' : 'POINTS & RÉCOMPENSES'}
           </div>

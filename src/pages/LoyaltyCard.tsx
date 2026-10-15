@@ -446,7 +446,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
           discount_valid_days: Number(programRow.discount_valid_days ?? 7),
           discount_points_threshold: Number(programRow.discount_points_threshold ?? 1000),
           discount_expires_at: (Array.isArray(discountData) ? discountData[0]?.expires_at : discountData?.expires_at) ?? null,
-          referral_enabled: Boolean(programRow.referral_enabled),
+          referral_enabled: programRow.referral_enabled === true || programRow.referral_enabled === 'true',
         });
       }
 
@@ -886,8 +886,8 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
           </div>
         )}
 
-        <div className="flex w-full justify-center">
-          <div className={isLiveRefreshing ? 'opacity-90 transition-opacity duration-200' : 'opacity-100 transition-opacity duration-200'}>
+        <div className="flex w-full min-w-0 justify-center">
+          <div className={`w-full min-w-0 ${isLiveRefreshing ? 'opacity-90 transition-opacity duration-200' : 'opacity-100 transition-opacity duration-200'}`}>
             <LoyaltyCardVisual
               design={{
                 template_id: design.template_id,
@@ -929,8 +929,8 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                 customerRankLabel: customerTier ? `${customerTier.total_points.toLocaleString("fr-FR")} points · ${customerTier.rewards_redeemed} récompenses` : null,
               }}
               programType={mode}
-              cardWidth="min(94vw, 460px)"
-              onInviteFriend={program.referral_enabled && cardSaved ? () => { void openReferral(); } : undefined}
+              cardWidth="min(100%, 400px)"
+              onInviteFriend={program.referral_enabled === true && cardSaved ? () => { void openReferral(); } : undefined}
             />
           </div>
         </div>
