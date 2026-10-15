@@ -1,19 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  ArrowUpRight,
-  BarChart3,
-  Building2,
-  ExternalLink,
-  Globe2,
   Heart,
   Menu,
-  QrCode,
-  Settings,
-  Sparkles,
-  Wifi,
-  CheckCircle2,
-  Coins,
-  Gift,
   MessageCircle,
   Users,
   Star,
@@ -21,7 +9,6 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import QRCode from 'qrcode';
 import {
   Bar,
   BarChart,
@@ -174,27 +161,6 @@ export default function Dashboard() {
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
   const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
   const [dashboardStatsLoading, setDashboardStatsLoading] = useState(false);
-  const [showEnrollmentQr, setShowEnrollmentQr] = useState(false);
-  const [enrollmentQrDataUrl, setEnrollmentQrDataUrl] = useState('');
-
-  useEffect(() => {
-    let active = true;
-    const generateEnrollmentQr = async () => {
-      if (!selectedEstablishmentId) { setEnrollmentQrDataUrl(''); return; }
-      try {
-        const url = new URL('/loyalty/join', window.location.origin);
-        url.searchParams.set('est', selectedEstablishmentId);
-        const dataUrl = await QRCode.toDataURL(url.toString(), { width: 640, margin: 2 });
-        if (active) setEnrollmentQrDataUrl(dataUrl);
-      } catch (error) {
-        console.error('Erreur génération QR inscription:', error);
-        if (active) setEnrollmentQrDataUrl('');
-      }
-    };
-    void generateEnrollmentQr();
-    return () => { active = false; };
-  }, [selectedEstablishmentId]);
-
   useEffect(() => {
     let active = true;
 
@@ -884,39 +850,6 @@ export default function Dashboard() {
         </div>
       </section>
 
-      <section>
-        <div className="mb-3 px-1"><p className="text-[9px] font-bold uppercase tracking-[0.22em] text-[#C9A45C]">Actions</p><h2 className="mt-1 text-lg font-semibold text-white">Piloter votre établissement</h2></div>
-        <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-5">
-          <button type="button" onClick={() => setShowEnrollmentQr(true)} disabled={!selectedEstablishmentId} className="group rounded-2xl border border-[#C9A45C]/30 bg-[#C9A45C]/[0.07] p-4 text-left transition hover:-translate-y-0.5 hover:border-[#C9A45C]/60 disabled:opacity-40">
-            <div className="flex items-start justify-between"><span className="grid h-10 w-10 place-items-center rounded-xl bg-[#C9A45C]/15 text-[#E1C27A]"><QrCode size={18} /></span><ExternalLink size={15} className="text-[#C9A45C]/50 group-hover:text-[#C9A45C]" /></div>
-            <p className="mt-5 text-sm font-semibold text-white">Ajouter un client</p><p className="mt-1 text-[10px] text-[#F5F5DC]/40">QR d'inscription instantanée</p>
-          </button>
-          {[
-            { label: 'Avis clients', detail: 'Répondre & analyser', to: '/dashboard/reviews', icon: MessageCircle },
-            { label: 'Fidélité', detail: 'Clients & récompenses', to: '/dashboard/loyalty', icon: Heart },
-            { label: 'Menu digital', detail: 'Menu & présentation', to: '/dashboard/menu', icon: Menu },
-            { label: 'Analytics', detail: 'Comprendre les chiffres', to: '/dashboard/analytics', icon: BarChart3 },
-          ].map(({ label, detail, to, icon: Icon }) => <Link key={label} to={to} className="group rounded-2xl border border-[#242424] bg-[#111111] p-4 transition hover:-translate-y-0.5 hover:border-[#C9A45C]/40"><div className="flex items-start justify-between"><span className="grid h-10 w-10 place-items-center rounded-xl bg-[#C9A45C]/10 text-[#E1C27A]"><Icon size={18} /></span><ArrowUpRight size={15} className="text-[#F5F5DC]/20 group-hover:text-[#C9A45C]" /></div><p className="mt-5 text-sm font-semibold text-white">{label}</p><p className="mt-1 text-[10px] text-[#F5F5DC]/30">{detail}</p></Link>)}
-        </div>
-      </section>
-
-      {showEnrollmentQr && selectedEstablishmentId && (
-        <div className="fixed inset-0 z-[100] grid place-items-center bg-black/75 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-[28px] border border-[#242424] bg-[#111111] p-6 shadow-2xl">
-            <div className="flex items-start justify-between gap-4">
-              <div><p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#C9A45C]">Nouveau client</p><h2 className="mt-1 text-2xl font-semibold text-white">Inscription par QR</h2><p className="mt-2 text-xs leading-5 text-white/40">Le client scanne ce QR, remplit son profil et reçoit immédiatement sa carte fidélité.</p></div>
-              <button type="button" onClick={() => setShowEnrollmentQr(false)} className="grid h-9 w-9 place-items-center rounded-full border border-[#242424] text-white/50">×</button>
-            </div>
-            <div className="mt-6 flex justify-center rounded-3xl bg-white p-5">{enrollmentQrDataUrl ? <img src={enrollmentQrDataUrl} alt="QR inscription fidélité" className="h-56 w-56" /> : <div className="grid h-56 w-56 place-items-center text-xs text-black/40">Génération…</div>}</div>
-            <div className="mt-5 grid grid-cols-2 gap-2">
-              <button type="button" onClick={async () => { const url = new URL('/loyalty/join', window.location.origin); url.searchParams.set('est', selectedEstablishmentId); await navigator.clipboard.writeText(url.toString()); }} className="rounded-xl border border-[#242424] px-4 py-3 text-xs font-semibold text-white/70 hover:border-[#C9A45C]/50">Copier le lien</button>
-              <a href={`/loyalty/join?est=${selectedEstablishmentId}`} target="_blank" rel="noreferrer" className="rounded-xl bg-[#C9A45C] px-4 py-3 text-center text-xs font-bold text-[#050505]">Ouvrir le formulaire</a>
-            </div>
-            <p className="mt-4 text-center text-[10px] text-white/25">Conseil : affichez ce QR au comptoir ou sur une plaque NFC.</p>
-          </div>
-        </div>
-      )}
-
       <div className="grid gap-5 xl:grid-cols-[1.45fr_.75fr]">
         <section className="rounded-[24px] border border-[#242424] bg-[#111111] p-5 sm:p-6">
           <div className="flex items-center justify-between gap-3"><div><p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#C9A45C]">Activité</p><h2 className="mt-1 text-lg font-semibold text-white">Votre relation client</h2></div><select value={period} onChange={(event) => setPeriod(event.target.value)} className="h-9 rounded-xl border border-[#242424] bg-[#050505] px-3 text-[10px] font-semibold text-[#F5F5DC]/55 outline-none" aria-label="Période">{ranges.map((range) => <option className="bg-[#111111]" key={range.key} value={range.key}>{range.label}</option>)}</select></div>
@@ -930,13 +863,7 @@ export default function Dashboard() {
         </section>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[1.1fr_.9fr]">
-        <section className="rounded-[24px] border border-[#242424] bg-[#111111] p-5 sm:p-6">
-          <div className="flex items-center justify-between"><div><p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#C9A45C]">Derniers retours</p><h2 className="mt-1 text-lg font-semibold text-white">Ce que disent vos clients</h2></div><Link to="/dashboard/reviews" className="text-[10px] font-semibold text-[#C9A45C]">Voir tout</Link></div>
-          <div className="mt-4 divide-y divide-[#242424]">{latest.length === 0 ? <div className="py-8 text-center text-xs text-[#F5F5DC]/25">Aucun avis pour le moment.</div> : latest.map((review) => <div key={review.id} className="flex gap-3 py-4"><div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#C9A45C]/10 text-[#C9A45C]"><Star size={15} /></div><div className="min-w-0 flex-1"><div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2"><Stars rating={review.rating} /><span className="text-[9px] text-[#F5F5DC]/25">{new Date(review.created_at).toLocaleDateString('fr-FR')}</span></div><span className="text-[9px] text-[#F5F5DC]/25">{review.status}</span></div><p className="mt-2 line-clamp-2 text-xs leading-5 text-[#F5F5DC]/55">{review.comment || 'Avis sans commentaire.'}</p></div></div>)}</div>
-        </section>
-        <section className="rounded-[24px] border border-[#242424] bg-[#111111] p-5 sm:p-6"><div className="mb-4 flex h-20 w-28 items-center justify-center rounded-2xl border border-[#242424] bg-[#050505] px-3"><img src="/kelyani-brand.svg" alt="KELYANI" className="h-16 w-24 object-contain" /></div><h2 className="mt-1 font-display text-2xl leading-tight text-white">Faites de chaque client un client régulier.</h2><p className="mt-2 text-xs leading-5 text-[#F5F5DC]/35">Vos avis, votre fidélité et vos données réunis dans un seul espace.</p>{isResponsible && <div className="mt-5 rounded-2xl border border-[#242424] bg-[#050505] p-4"><div className="flex items-center justify-between"><div><p className="text-[9px] uppercase tracking-[0.14em] text-[#F5F5DC]/25">Abonnement</p><p className="mt-1 text-sm font-semibold text-white">{subscriptionLoading ? 'Chargement…' : subscription?.plan_name || 'Aucun abonnement'}</p></div>{subscription && <span className="rounded-full bg-[#C9A45C]/10 px-2.5 py-1 text-[9px] font-bold text-[#E1C27A]">{subscription.subscription_status === 'trial' ? 'Essai' : 'Actif'}</span>}</div>{subscription && <p className="mt-3 text-[10px] text-[#F5F5DC]/30">Valable jusqu’au {subscription.current_period_end ? new Date(subscription.current_period_end).toLocaleDateString('fr-FR') : '—'}</p>}</div>}<div className="mt-5 grid grid-cols-2 gap-2"><Link to="/dashboard/menu" className="rounded-xl bg-[#C9A45C] px-3 py-3 text-center text-[10px] font-bold text-[#050505]">Menu digital</Link><Link to="/dashboard/loyalty" className="rounded-xl border border-[#242424] px-3 py-3 text-center text-[10px] font-bold text-[#F5F5DC]/60 hover:border-[#C9A45C]/40">Fidélité</Link></div></section>
-      </div>
+
     </div>
   );
 }
