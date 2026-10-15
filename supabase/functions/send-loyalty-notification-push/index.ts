@@ -42,20 +42,27 @@ Deno.serve(async (req) => {
     const campaignId = String(body.campaign_id ?? '').trim();
     if (!campaignId) return json({ success: false, error: 'campaign_id obligatoire.' }, 400);
 
-    const { data: campaign, error: campaignError } = await userClient
+    // Use the service client for the campaign lookup so RLS on the campaign
+    // table cannot produce a false 404. Authorization is still checked below
+    // with the authenticated user's session before sending any push.
+    const adminClient = createClient(url, service, { auth: { persistSession: false, autoRefreshToken: false } });
+
+    const { data: campaign, error: campaignError } = await adminClient
       .from('loyalty_notification_campaigns')
       .select('id,establishment_id,title,message,type')
       .eq('id', campaignId)
       .maybeSingle();
 
-    if (campaignError || !campaign) return json({ success: false, error: 'Campagne introuvable.' }, 404);
+    if (campaignError) {
+      console.error('Campaign lookup failed:', campaignError);
+      return json({ success: false, error: 'Impossible de charger la campagne.' }, 500);
+    }
+    if (!campaign) return json({ success: false, error: 'Campagne introuvable.' }, 404);
 
     const { data: establishments, error: establishmentError } = await userClient.rpc('get_my_establishments');
     if (establishmentError || !((establishments ?? []) as Array<Record<string, unknown>>).some((x) => String(x.id ?? '') === campaign.establishment_id)) {
       return json({ success: false, error: 'Accès à cet établissement refusé.' }, 403);
     }
-
-    const adminClient = createClient(url, service, { auth: { persistSession: false, autoRefreshToken: false } });
 
     const { data: attempt, error: attemptInsertError } = await adminClient
       .from('loyalty_notification_push_attempts')
@@ -74,7 +81,7 @@ Deno.serve(async (req) => {
 
     const { data: recipients, error: recipientsError } = await adminClient
       .from('loyalty_card_notifications')
-      .select('id,customer_id,card_url')
+      .select('id,customer_id')
       .eq('campaign_id', campaignId)
       .eq('establishment_id', campaign.establishment_id);
 
@@ -114,7 +121,7 @@ Deno.serve(async (req) => {
     for (const subscription of subscriptions) {
       try {
         const recipient = recipients.find((row) => row.customer_id === subscription.customer_id);
-        const targetUrl = recipient?.card_url || subscription.card_url || '/loyalty';
+        const targetUrl = subscription.card_url || '/loyalty';
 
         await webpush.sendNotification(
           {
