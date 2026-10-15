@@ -657,7 +657,7 @@ export default function Admin() {
         </div>
       </header>
 
-        <main className="admin-depth-main mx-auto w-full max-w-[1700px] px-3 pb-28 pt-6 sm:px-5 md:px-8 lg:px-10 lg:pt-8">
+        <main className="admin-depth-main kelyani-workspace mx-auto w-full max-w-[1700px] px-3 pb-28 pt-6 sm:px-5 md:px-8 lg:px-10 lg:pt-8">
 
           {section === 'overview' && (
             <Overview
@@ -816,7 +816,7 @@ export default function Admin() {
           )}
         </main>
       
-      <nav className="fixed inset-x-0 bottom-0 z-[60] border-t border-[#242424] bg-[#050505]/95 px-2 pb-[max(8px,env(safe-area-inset-bottom))] pt-2 backdrop-blur-2xl">
+      <nav aria-label="Navigation administration" className="admin-depth-nav fixed inset-x-0 bottom-0 z-[60] border-t border-[#242424] bg-[#050505]/95 px-2 pb-[max(8px,env(safe-area-inset-bottom))] pt-2 backdrop-blur-2xl">
         <div className="mx-auto flex max-w-[900px] items-center justify-start gap-1 overflow-x-auto scrollbar-none">
           {menuItems.map(({ id, label, icon: Icon }) => {
             const active = section === id;
@@ -829,7 +829,7 @@ export default function Admin() {
                   if (id === 'loyalty' && !selectedEstablishmentId && establishments[0]) setSelectedEstablishmentId(establishments[0].id);
                 }}
                 aria-label={label}
-                className={`group flex min-w-[68px] flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 transition-all ${
+                data-active={active} className={`kelyani-nav-link group flex min-w-[68px] flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 transition-all ${
                   active
                     ? 'bg-[#111111] text-[#E1C27A] shadow-[0_0_24px_rgba(201,164,92,0.10)]'
                     : 'text-[#F5F5DC]/40 hover:bg-[#111111] hover:text-[#F5F5DC]'
