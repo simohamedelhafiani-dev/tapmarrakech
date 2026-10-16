@@ -125,7 +125,7 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
       }
       const { data: reviewRows, error: reviewError } = await supabase
         .from('google_business_reviews')
-        .select('id,location_id,reviewer_display_name,star_rating,comment,owner_reply,review_created_at,owner_reply_updated_at')
+        .select('id,location_id,reviewer_display_name,star_rating,comment,owner_reply,review_created_at,owner_reply_updated_at,reply_draft,reply_status,reply_error,reply_generated_at,reply_published_at')
         .in('location_id', locationIds)
         .order('review_created_at', { ascending: false })
         .limit(500);
@@ -165,7 +165,7 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
       .filter((review) => replyFilter === 'all' || (review.reply_status ?? (review.owner_reply ? 'published' : 'none')) === replyFilter)
       .filter((review) => {
         const query = search.trim().toLocaleLowerCase();
-        return !query || [review.establishmentName, review.locationName, review.reviewer_display_name, review.comment, review.owner_reply]
+        return !query || [review.establishmentName, review.locationName, review.reviewer_display_name, review.comment, review.owner_reply, review.reply_draft, review.reply_status, review.reply_error]
           .some((value) => (value ?? '').toLocaleLowerCase().includes(query));
       });
   }, [connections, establishments, locations, reviews, search, selectedEstablishmentId, replyFilter]);
