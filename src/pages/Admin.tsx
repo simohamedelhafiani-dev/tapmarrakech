@@ -718,6 +718,8 @@ export default function Admin() {
           {section === 'reviews' && (
             <GoogleBusinessAdminSection
               establishments={establishments}
+              businessTypes={aiBusinessTypes}
+              onEstablishmentCreated={async () => { await Promise.all([loadEstablishments(), reloadEstablishmentList()]); }}
               legacyReviews={<ReviewsSection establishments={establishments} />}
             />
           )}
