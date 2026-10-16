@@ -209,11 +209,34 @@ export default function GoogleReputationModule({ establishmentId }: Props) {
     setError('');
     setMessage('');
     try {
+      // Explicitly attach the current user session. This prevents the Edge Function
+      // gateway from receiving the sync request without an Authorization header.
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) {
+        throw new Error('Votre session a expiré. Reconnectez-vous à Kelyani puis relancez la synchronisation.');
+      }
+
       const { data, error: invokeError } = await supabase.functions.invoke(
         'google-business-sync',
-        { body: { establishment_id: establishmentId } },
+        {
+          body: { establishment_id: establishmentId },
+          headers: { Authorization: `Bearer ${accessToken}` },
+        },
       );
-      if (invokeError) throw invokeError;
+      if (invokeError) {
+        const context = (invokeError as { context?: Response }).context;
+        if (context && typeof context.json === 'function') {
+          try {
+            const details = await context.json();
+            throw new Error(details?.error || details?.message || invokeError.message);
+          } catch (detailError) {
+            if (detailError instanceof Error && detailError.message !== invokeError.message) throw detailError;
+          }
+        }
+        throw invokeError;
+      }
       if (!data?.success) throw new Error(data?.error || 'Synchronisation impossible.');
       setMessage(`Synchronisation terminée : ${data.locations ?? 0} établissement(s), ${data.reviews ?? 0} avis.`);
       await load();
