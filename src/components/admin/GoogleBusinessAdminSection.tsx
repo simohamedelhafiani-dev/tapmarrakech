@@ -31,6 +31,11 @@ type Review = {
   owner_reply: string | null;
   review_created_at: string | null;
   owner_reply_updated_at: string | null;
+  reply_draft: string | null;
+  reply_status: 'none' | 'pending_approval' | 'ready_to_publish' | 'published' | 'failed';
+  reply_error: string | null;
+  reply_generated_at: string | null;
+  reply_published_at: string | null;
 };
 type ReviewRow = Review & { establishmentName: string; locationName: string };
 type View = 'reviews' | 'appReviews' | 'establishment' | 'ai' | 'settings';
@@ -56,6 +61,9 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
   const [selectedEstablishmentId, setSelectedEstablishmentId] = useState('all');
   const [activeView, setActiveView] = useState<View>('reviews');
   const [search, setSearch] = useState('');
+  const [replyFilter, setReplyFilter] = useState('all');
+  const [replyActionId, setReplyActionId] = useState<string | null>(null);
+  const [replyMessage, setReplyMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -97,7 +105,7 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
       }
       const { data: reviewRows, error: reviewError } = await supabase
         .from('google_business_reviews')
-        .select('id,location_id,reviewer_display_name,star_rating,comment,owner_reply,review_created_at,owner_reply_updated_at')
+        .select('id,location_id,reviewer_display_name,star_rating,comment,owner_reply,review_created_at,owner_reply_updated_at,reply_draft,reply_status,reply_error,reply_generated_at,reply_published_at')
         .in('location_id', locationIds)
         .order('review_created_at', { ascending: false })
         .limit(500);
@@ -134,18 +142,21 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
       .filter((review) => selectedEstablishmentId === 'all' || connections.some((connection) =>
         connection.establishment_id === selectedEstablishmentId &&
         locations.some((location) => location.connection_id === connection.id && location.id === review.location_id)))
+      .filter((review) => replyFilter === 'all' || (review.reply_status ?? (review.owner_reply ? 'published' : 'none')) === replyFilter)
       .filter((review) => {
         const query = search.trim().toLocaleLowerCase();
         return !query || [review.establishmentName, review.locationName, review.reviewer_display_name, review.comment, review.owner_reply]
           .some((value) => (value ?? '').toLocaleLowerCase().includes(query));
       });
-  }, [connections, establishments, locations, reviews, search, selectedEstablishmentId]);
+  }, [connections, establishments, locations, reviews, search, selectedEstablishmentId, replyFilter]);
 
   const connectedIds = new Set(connections.filter((item) => item.status === 'active').map((item) => item.establishment_id));
   const connectedCount = establishments.filter((item) => connectedIds.has(item.id)).length;
   const autoReplyCount = establishments.filter((item) => connectedIds.has(item.id) &&
     replySettings.some((setting) => setting.establishment_id === item.id && setting.auto_reply_enabled)).length;
   const repliedCount = rows.filter((item) => Boolean(item.owner_reply)).length;
+  const replyCounts = { published: rows.filter((item) => item.reply_status === 'published' || (!item.reply_status && Boolean(item.owner_reply))).length, pending: rows.filter((item) => item.reply_status === 'pending_approval').length, ready: rows.filter((item) => item.reply_status === 'ready_to_publish').length, failed: rows.filter((item) => item.reply_status === 'failed').length };
+  const runReplyAction = async (reviewId: string, action: 'generate' | 'publish' | 'save', reply?: string) => { setReplyActionId(reviewId); setReplyMessage(''); setError(''); try { const { data, error: invokeError } = await supabase.functions.invoke('google-business-reply', { body: { review_id: reviewId, action, ...(reply !== undefined ? { reply } : {}) } }); if (invokeError) throw invokeError; if (!data?.success) throw new Error(data?.error || 'Action sur la réponse impossible.'); setReplyMessage(action === 'generate' ? 'Réponse IA enregistrée.' : action === 'publish' ? 'Publication confirmée par Google.' : 'Brouillon enregistré.'); await load(); } catch (e) { setError(e instanceof Error ? e.message : 'Impossible de traiter cette réponse.'); } finally { setReplyActionId(null); } };
   const averageRating = rows.length ? rows.reduce((sum, item) => sum + rating(item.star_rating), 0) / rows.length : 0;
   const selectedEstablishment = establishments.find((item) => item.id === selectedEstablishmentId);
   const selectedSetting = replySettings.find((item) => item.establishment_id === selectedEstablishmentId);
@@ -237,7 +248,8 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
                   <div><h3 className="text-lg font-semibold text-white">Avis Google reçus</h3><p className="mt-1 text-xs text-white/40">Les avis sont filtrés selon l’établissement sélectionné ci-dessus.</p></div>
                   <label className="relative block w-full sm:max-w-sm"><Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#C9A45C]" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Rechercher dans les avis…" className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] py-3 pl-9 pr-3 text-sm text-white placeholder:text-white/25" /></label>
                 </div>
-                <div className="mt-5 space-y-3">
+                <div className="mt-5 grid gap-2 sm:grid-cols-5">{[{key:'all',label:'Tous',count:rows.length},{key:'published',label:'Publiées',count:replyCounts.published},{key:'pending_approval',label:'En attente',count:replyCounts.pending},{key:'ready_to_publish',label:'Prêtes à publier',count:replyCounts.ready},{key:'failed',label:'En échec',count:replyCounts.failed}].map((item)=><button key={item.key} type="button" onClick={()=>setReplyFilter(item.key)} className={`rounded-xl border px-3 py-3 text-left ${replyFilter===item.key?'border-[#C9A45C]/50 bg-[#C9A45C]/10':'border-[#242424] bg-[#0b0b0b]'}`}><span className="block text-[10px] text-white/45">{item.label}</span><span className="mt-1 block text-lg font-semibold text-white">{item.count}</span></button>)}</div>{replyMessage && <p className="mt-3 rounded-xl border border-emerald-400/20 bg-emerald-400/5 p-3 text-xs text-emerald-200">{replyMessage}</p>}
+                <div className="mt-4 space-y-3">
                   {loading ? <div className="py-12 text-center text-sm text-white/35">Chargement des avis…</div> :
                     rows.length === 0 ? <div className="rounded-xl border border-dashed border-[#242424] px-5 py-12 text-center"><MessageSquare size={24} className="mx-auto text-white/20" /><p className="mt-3 text-sm font-semibold text-white">Aucun avis trouvé</p><p className="mt-1 text-xs text-white/35">Aucun avis pour ce filtre, ou aucune fiche Google synchronisée.</p></div> :
                     rows.map((review) => <article key={review.id} className="rounded-xl border border-[#242424] bg-[#0b0b0b] p-4">
@@ -247,10 +259,11 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
                           <p className="mt-2 text-sm font-semibold text-white">{review.reviewer_display_name || 'Client Google'}</p>
                           <p className="mt-1 text-sm text-[#C9A45C]">{'★'.repeat(Math.max(0, Math.min(5, rating(review.star_rating))))}<span className="ml-2 text-xs text-white/30">{review.review_created_at ? new Date(review.review_created_at).toLocaleDateString('fr-FR') : 'Date inconnue'}</span></p>
                         </div>
-                        {review.owner_reply ? <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/20 bg-emerald-400/5 px-3 py-1 text-[10px] font-semibold text-emerald-300"><CheckCircle2 size={12} /> Réponse publiée</span> : <span className="rounded-full border border-amber-400/20 bg-amber-400/5 px-3 py-1 text-[10px] font-semibold text-amber-200">À traiter</span>}
+                        {(() => { const status=review.reply_status ?? (review.owner_reply?'published':'none'); const labels:Record<string,string>={published:'Réponse publiée',pending_approval:'En attente de validation',ready_to_publish:'Prête à publier',failed:'Échec de publication',none:'Sans réponse'}; const styles:Record<string,string>={published:'border-emerald-400/20 bg-emerald-400/5 text-emerald-300',pending_approval:'border-amber-400/20 bg-amber-400/5 text-amber-200',ready_to_publish:'border-sky-400/20 bg-sky-400/5 text-sky-200',failed:'border-red-400/20 bg-red-400/5 text-red-200',none:'border-white/10 bg-white/5 text-white/45'}; return <span className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[10px] font-semibold ${styles[status]||styles.none}`}>{status==='published'&&<CheckCircle2 size={12}/ >}{labels[status]||labels.none}</span>; })()}
                       </div>
                       {review.comment && <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-white/70">{review.comment}</p>}
-                      {review.owner_reply && <div className="mt-3 rounded-xl border border-[#242424] bg-[#111111] p-3"><p className="text-[10px] font-semibold uppercase tracking-wider text-white/35">Réponse de l’établissement</p><p className="mt-1 whitespace-pre-wrap text-sm text-white/60">{review.owner_reply}</p></div>}
+                      {review.owner_reply && <div className="mt-3 rounded-xl border border-emerald-400/15 bg-emerald-400/[0.03] p-3"><div className="flex items-center justify-between gap-2"><p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-200/70">Réponse publiée sur Google</p><span className="text-[10px] text-white/35">{review.reply_published_at || review.owner_reply_updated_at ? new Date(review.reply_published_at || review.owner_reply_updated_at!).toLocaleString('fr-FR') : ''}</span></div><p className="mt-1 whitespace-pre-wrap text-sm text-white/70">{review.owner_reply}</p></div>}
+                      {(!review.owner_reply || ['pending_approval','ready_to_publish','failed'].includes(review.reply_status)) && <div className="mt-3 rounded-xl border border-[#242424] bg-[#111111] p-3"><p className="text-[10px] font-semibold uppercase tracking-wider text-white/40">{review.reply_status==='pending_approval'?'Brouillon en attente de validation':review.reply_status==='ready_to_publish'?'Brouillon prêt à publier':review.reply_status==='failed'?'Échec : vérifiez et réessayez':'Réponse à préparer'}</p><textarea value={review.reply_draft ?? ''} onChange={(event)=>setReviews(current=>current.map(item=>item.id===review.id?{...item,reply_draft:event.target.value,reply_status:item.reply_status==='pending_approval'?'pending_approval':'ready_to_publish'}:item))} rows={3} placeholder="Générez ou rédigez une réponse…" className="mt-2 w-full rounded-xl border border-[#242424] bg-[#0b0b0b] p-3 text-sm text-white placeholder:text-white/25"/>{review.reply_error && <p className="mt-2 text-xs text-red-300">Erreur : {review.reply_error}</p>}<div className="mt-3 flex flex-wrap gap-2"><button type="button" disabled={replyActionId===review.id} onClick={()=>void runReplyAction(review.id,'generate')} className="inline-flex items-center gap-2 rounded-lg border border-[#C9A45C]/30 px-3 py-2 text-xs font-semibold text-[#C9A45C] disabled:opacity-50"><Sparkles size={13}/>{replyActionId===review.id?'Traitement…':'Générer avec IA'}</button><button type="button" disabled={replyActionId===review.id||!review.reply_draft?.trim()} onClick={()=>void runReplyAction(review.id,'save',review.reply_draft??'')} className="rounded-lg border border-white/10 px-3 py-2 text-xs text-white/70 disabled:opacity-50">Enregistrer le brouillon</button><button type="button" disabled={replyActionId===review.id||!review.reply_draft?.trim()} onClick={()=>void runReplyAction(review.id,'publish')} className="rounded-lg bg-[#C9A45C] px-3 py-2 text-xs font-semibold text-[#111111] disabled:opacity-50">{replyActionId===review.id?'Publication…':'Valider et publier'}</button></div></div>}
                     </article>)
                   }
                 </div>
