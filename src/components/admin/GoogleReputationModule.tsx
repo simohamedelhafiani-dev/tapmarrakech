@@ -226,7 +226,8 @@ export default function GoogleReputationModule({ establishmentId }: Props) {
         throw new Error('Configuration Supabase manquante dans cet aperçu Vercel.');
       }
 
-      const response = await fetch(`${supabaseUrl.replace(/\\/$/, '')}/functions/v1/google-business-sync-access-test`, {
+      const baseUrl = supabaseUrl.endsWith('/') ? supabaseUrl.slice(0, -1) : supabaseUrl;
+      const response = await fetch(`${baseUrl}/functions/v1/google-business-sync-access-test`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -241,7 +242,7 @@ export default function GoogleReputationModule({ establishmentId }: Props) {
         data = JSON.parse(rawBody);
       } catch {
         const status = `HTTP ${response.status}`;
-        const excerpt = rawBody.replace(/\\s+/g, ' ').slice(0, 240);
+        const excerpt = rawBody.replaceAll('\n', ' ').replaceAll('\r', ' ').slice(0, 240);
         throw new Error(`La synchronisation a reçu une réponse non JSON (${status}). Vérifie le routage/protection de la fonction. Réponse : ${excerpt || '(vide)'}`);
       }
       if (!response.ok) {
