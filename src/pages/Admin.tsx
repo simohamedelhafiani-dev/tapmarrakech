@@ -55,7 +55,7 @@ import EstablishmentPerformanceTable from '@/components/admin/EstablishmentPerfo
 import EstablishmentsSection from '@/components/admin/EstablishmentsSection';
 import ProfileForm from '@/components/admin/ProfileForm';
 import WifiForm from '@/components/admin/WifiForm';
-import GoogleReputationModule from '@/components/admin/GoogleReputationModule';
+import GoogleBusinessAdminSection from '@/components/admin/GoogleBusinessAdminSection';
 import MenuStudio from '@/components/admin/menu/MenuStudio';
 import LoyaltyNotificationsPanel from '@/components/admin/LoyaltyNotificationsPanel';
 import LoyaltyRaffleStudio from '@/components/loyalty/LoyaltyRaffleStudio';
@@ -141,6 +141,7 @@ type BillingSnapshot = {
 type AdminSection =
   | 'overview'
   | 'establishments'
+  | 'google-business'
   | 'responsibles'
   | 'employees'
   | 'reviews'
@@ -161,7 +162,7 @@ export default function Admin() {
   const sectionFromPath = (pathname: string): AdminSection => {
     const slug = pathname.replace(/^\/admin\/?/, '').split('/')[0];
     const validSections: AdminSection[] = [
-      'overview', 'establishments', 'responsibles', 'employees', 'reviews',
+      'overview', 'establishments', 'google-business', 'responsibles', 'employees', 'reviews',
       'analysis', 'ai', 'analytics', 'reports', 'billing', 'loyalty', 'system',
     ];
     return validSections.includes(slug as AdminSection) ? slug as AdminSection : 'overview';
@@ -553,6 +554,11 @@ export default function Admin() {
       icon: Building2,
     },
     {
+      id: 'google-business',
+      label: 'Google Business',
+      icon: Star,
+    },
+    {
       id: 'responsibles',
       label: 'Responsables',
       icon: UserRound,
@@ -713,6 +719,10 @@ export default function Admin() {
               loading={staffLoading}
               reload={loadStaff}
             />
+          )}
+
+          {section === 'google-business' && (
+            <GoogleBusinessAdminSection establishments={establishments} />
           )}
 
           {section === 'reviews' && (
@@ -1859,7 +1869,7 @@ function EstablishmentWorkspace({
 
   const tabs: { id: WorkspaceTab; label: string }[] = [
     { id: 'profile', label: 'Profil' }, { id: 'wifi', label: 'Wi-Fi' }, { id: 'menu', label: 'Menu' }, { id: 'promotions', label: 'Promotions' },
-    { id: 'reviews', label: 'Avis' }, { id: 'google', label: 'Google Business' }, { id: 'analytics', label: 'Analytics' }, { id: 'public', label: 'Liens publics' },
+    { id: 'reviews', label: 'Avis' }, { id: 'analytics', label: 'Analytics' }, { id: 'public', label: 'Liens publics' },
   ];
 
   return (
@@ -1933,7 +1943,6 @@ function EstablishmentWorkspace({
       {tab === 'wifi' && <WifiForm establishmentId={establishment.id} />}
 
       {tab === 'menu' && <MenuStudio establishmentId={establishment.id} />}
-      {tab === 'google' && <GoogleReputationModule establishmentId={establishment.id} />}
 
       {editingMenuItemId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#050505]/40 p-4 backdrop-blur-sm">
