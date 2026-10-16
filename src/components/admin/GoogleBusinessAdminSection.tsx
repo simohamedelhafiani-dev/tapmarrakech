@@ -12,6 +12,7 @@ type Connection = {
   last_error: string | null;
 };
 type Location = { id: string; connection_id: string; title: string | null; location_name: string | null };
+type ReplySetting = { establishment_id: string; auto_reply_enabled: boolean; require_approval: boolean; auto_reply_language: string | null; auto_reply_tone: string | null };
 type Review = {
   id: string;
   location_id: string;
@@ -33,6 +34,7 @@ export default function GoogleBusinessAdminSection({ establishments }: { establi
   const [connections, setConnections] = useState<Connection[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [replySettings, setReplySettings] = useState<ReplySetting[]>([]);
   const [selectedEstablishmentId, setSelectedEstablishmentId] = useState('all');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -48,6 +50,12 @@ export default function GoogleBusinessAdminSection({ establishments }: { establi
       if (connectionError) throw connectionError;
       const nextConnections = (connectionRows ?? []) as Connection[];
       setConnections(nextConnections);
+
+      const { data: settingsRows, error: settingsError } = await supabase
+        .from('google_business_settings')
+        .select('establishment_id,auto_reply_enabled,require_approval,auto_reply_language,auto_reply_tone');
+      if (settingsError) throw settingsError;
+      setReplySettings((settingsRows ?? []) as ReplySetting[]);
 
       const connectionIds = nextConnections.map((item) => item.id);
       if (!connectionIds.length) {
@@ -108,7 +116,9 @@ export default function GoogleBusinessAdminSection({ establishments }: { establi
       });
   }, [connections, establishments, locations, reviews, search, selectedEstablishmentId]);
 
-  const connectedCount = connections.filter((item) => item.status === 'active').length;
+  const connectedEstablishmentIds = new Set(connections.filter((item) => item.status === 'active').map((item) => item.establishment_id));
+  const connectedCount = establishments.filter((item) => connectedEstablishmentIds.has(item.id)).length;
+  const autoReplyCount = establishments.filter((item) => replySettings.some((setting) => setting.establishment_id === item.id && setting.auto_reply_enabled)).length;
   const repliedCount = rows.filter((item) => Boolean(item.owner_reply)).length;
   const averageRating = rows.length ? rows.reduce((sum, item) => sum + rating(item.star_rating), 0) / rows.length : 0;
 
@@ -134,7 +144,7 @@ export default function GoogleBusinessAdminSection({ establishments }: { establi
         <div className="rounded-2xl border border-[#242424] bg-[#111111] p-5"><p className="text-xs text-white/40">Établissements Google connectés</p><p className="mt-2 text-3xl font-semibold text-[#C9A45C]">{connectedCount}<span className="ml-2 text-sm font-normal text-white/30">/ {establishments.length}</span></p></div>
         <div className="rounded-2xl border border-[#242424] bg-[#111111] p-5"><p className="text-xs text-white/40">Avis récupérés</p><p className="mt-2 text-3xl font-semibold text-white">{rows.length}</p></div>
         <div className="rounded-2xl border border-[#242424] bg-[#111111] p-5"><p className="text-xs text-white/40">Note moyenne</p><p className="mt-2 text-3xl font-semibold text-[#C9A45C]">{averageRating ? averageRating.toFixed(1) : '—'} <span className="text-lg">★</span></p></div>
-        <div className="rounded-2xl border border-[#242424] bg-[#111111] p-5"><p className="text-xs text-white/40">Avis avec réponse</p><p className="mt-2 text-3xl font-semibold text-white">{repliedCount}<span className="ml-2 text-sm font-normal text-white/30">/ {rows.length}</span></p></div>
+        <div className="rounded-2xl border border-[#242424] bg-[#111111] p-5"><p className="text-xs text-white/40">Réponses automatiques actives</p><p className="mt-2 text-3xl font-semibold text-white">{autoReplyCount}<span className="ml-2 text-sm font-normal text-white/30">/ {establishments.length}</span></p><p className="mt-1 text-[10px] text-white/30">{repliedCount} avis avec réponse publiée</p></div>
       </div>
 
       <section className="rounded-3xl border border-[#242424] bg-[#111111] p-5 sm:p-6">
@@ -159,6 +169,24 @@ export default function GoogleBusinessAdminSection({ establishments }: { establi
               {review.owner_reply && <div className="mt-3 rounded-xl border border-[#242424] bg-[#111111] p-3"><p className="text-[10px] font-semibold uppercase tracking-wider text-white/35">Réponse de l’établissement</p><p className="mt-1 whitespace-pre-wrap text-sm text-white/60">{review.owner_reply}</p></div>}
             </article>)
           }
+        </div>
+      </section>
+
+      <section className="rounded-3xl border border-[#242424] bg-[#111111] p-5 sm:p-6">
+        <div className="mb-5"><h3 className="text-lg font-semibold text-white">Éligibilité et activation par établissement</h3><p className="mt-1 text-sm text-white/40">Cette vue permet de repérer les établissements connectés à Google et ceux pour lesquels les réponses automatiques sont activées.</p></div>
+        <div className="space-y-2">
+          {establishments.map((establishment) => {
+            const connection = connections.find((item) => item.establishment_id === establishment.id);
+            const setting = replySettings.find((item) => item.establishment_id === establishment.id);
+            const isConnected = connection?.status === 'active';
+            return <div key={establishment.id} className="flex flex-col gap-3 rounded-2xl border border-[#242424] bg-[#0b0b0b] p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div><p className="text-sm font-semibold text-white">{establishment.name}</p><p className="mt-1 text-xs text-white/35">{connection?.last_sync_at ? `Dernière synchronisation : ${new Date(connection.last_sync_at).toLocaleString('fr-FR')}` : 'Aucune synchronisation enregistrée'}</p>{connection?.last_error && <p className="mt-1 text-xs text-red-300">{connection.last_error}</p>}</div>
+              <div className="flex flex-wrap gap-2">
+                <span className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${isConnected ? 'bg-emerald-400/10 text-emerald-300' : 'bg-amber-400/10 text-amber-200'}`}>{isConnected ? 'Google connecté' : 'Google non connecté'}</span>
+                <span className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${setting?.auto_reply_enabled ? 'bg-emerald-400/10 text-emerald-300' : 'bg-white/5 text-white/45'}`}>{setting?.auto_reply_enabled ? (setting.require_approval ? 'Réponses IA · validation' : 'Réponses auto activées') : 'Réponses auto désactivées'}</span>
+              </div>
+            </div>;
+          })}
         </div>
       </section>
 
