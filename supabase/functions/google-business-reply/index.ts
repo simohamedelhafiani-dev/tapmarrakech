@@ -6,19 +6,72 @@ const cid=Deno.env.get('GOOGLE_BUSINESS_CLIENT_ID')??'',secret=Deno.env.get('GOO
 const json=(d:unknown,s=200)=>new Response(JSON.stringify(d),{status:s,headers:{'Content-Type':'application/json','Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization,content-type'}});
 async function refresh(r:string){const b=new URLSearchParams({refresh_token:r,client_id:cid,client_secret:secret,grant_type:'refresh_token'});const x=await fetch('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:b});const d=await x.json();if(!x.ok)throw new Error(d?.error_description??'Token refresh failed');return d}
 async function gen(comment:string,rating:string,lang:string,tone:string){if(!ai)return 'Merci pour votre retour. Nous sommes ravis de vous avoir accueilli et prenons votre commentaire en compte. Au plaisir de vous revoir !';const prompt=`Rédige une réponse courte à un avis Google. Langue: ${lang||'français'}. Ton: ${tone||'professionnel et chaleureux'}. Note: ${rating}. Avis: ${comment}. Ne mentionne jamais une récompense, un point, une promotion ou une contrepartie. N'invente aucun fait. Maximum 70 mots.`;const r=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:`Bearer ${ai}`,'Content-Type':'application/json'},body:JSON.stringify({model:'gpt-5.6-luna',input:prompt,max_output_tokens:180})});const d=await r.json();if(!r.ok)throw new Error(d?.error?.message??'AI error');return String(d.output_text??'').trim()}
-export async function publishReply(reviewId:string){
- const {data:review}=await db.from('google_business_reviews').select('*, google_business_locations!inner(connection_id,google_account_id,google_location_id)').eq('id',reviewId).maybeSingle();if(!review)throw new Error('Avis introuvable');
- const {data:c}=await db.from('google_business_connections').select('*').eq('id',review.google_business_locations.connection_id).maybeSingle();if(!c)throw new Error('Connexion Google introuvable');
- const {data:s}=await db.from('google_business_settings').select('*').eq('establishment_id',c.establishment_id).maybeSingle();if(!s?.auto_reply_enabled)return {skipped:true,reason:'auto_reply_disabled'};
- if(!review.comment)return {skipped:true,reason:'rating_only'};
- if(s.require_approval)return {skipped:true,reason:'human_approval_required'};
- let token=c.access_token;if(!token||!c.token_expires_at||new Date(c.token_expires_at).getTime()<Date.now()+120000){const t=await refresh(c.refresh_token);token=t.access_token;await db.from('google_business_connections').update({access_token:token,token_expires_at:new Date(Date.now()+Number(t.expires_in??3600)*1000).toISOString(),updated_at:new Date().toISOString()}).eq('id',c.id)}
- const reply=await gen(review.comment,String(review.star_rating??''),s.auto_reply_language,s.auto_reply_tone);
- const aid=String(review.google_business_locations.google_account_id||c.google_account_id||'');const gid=String(review.google_business_locations.google_location_id||'');const rid=String(review.google_review_name).split('/').pop()||'';
+async function getReview(reviewId:string){
+ const {data:review,error}=await db.from('google_business_reviews').select('*, google_business_locations!inner(connection_id,google_account_id,google_location_id)').eq('id',reviewId).maybeSingle();
+ if(error)throw error;if(!review)throw new Error('Avis introuvable');
+ const {data:c,error:connectionError}=await db.from('google_business_connections').select('*').eq('id',review.google_business_locations.connection_id).maybeSingle();
+ if(connectionError)throw connectionError;if(!c)throw new Error('Connexion Google introuvable');
+ const {data:s,error:settingError}=await db.from('google_business_settings').select('*').eq('establishment_id',c.establishment_id).maybeSingle();
+ if(settingError)throw settingError;
+ return {review,c,s};
+}
+async function getToken(c:any){
+ let token=c.access_token;
+ if(!token||!c.token_expires_at||new Date(c.token_expires_at).getTime()<Date.now()+120000){
+  const t=await refresh(c.refresh_token);token=t.access_token;
+  const {error}=await db.from('google_business_connections').update({access_token:token,token_expires_at:new Date(Date.now()+Number(t.expires_in??3600)*1000).toISOString(),updated_at:new Date().toISOString()}).eq('id',c.id);
+  if(error)throw error;
+ }
+ return token;
+}
+async function generateDraft(reviewId:string){
+ const {review,s}=await getReview(reviewId);
+ if(!review.comment)return {success:false,error:'Cet avis ne contient pas de commentaire.'};
+ const reply=await gen(review.comment,String(review.star_rating??''),s?.auto_reply_language??'fr',s?.auto_reply_tone??'professional_warm');
+ const status=s?.require_approval ? 'pending_approval' : 'ready_to_publish';
+ const {error}=await db.from('google_business_reviews').update({reply_draft:reply,reply_status:status,reply_error:null,reply_generated_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq('id',reviewId);
+ if(error)throw error;
+ return {success:true,reply,status};
+}
+async function publishDraft(reviewId:string){
+ const {review,c}=await getReview(reviewId);
+ const reply=String(review.reply_draft??'').trim();
+ if(!reply)throw new Error('Aucun brouillon à publier. Générez une réponse ou enregistrez un brouillon.');
+ const token=await getToken(c);
+ const aid=String(review.google_business_locations.google_account_id||c.google_account_id||'');
+ const gid=String(review.google_business_locations.google_location_id||'');
+ const rid=String(review.google_review_name).split('/').pop()||'';
  if(!aid||!gid||!rid)throw new Error('Mapping Google incomplet');
  const endpoint=`https://mybusiness.googleapis.com/v4/accounts/${aid}/locations/${gid}/reviews/${encodeURIComponent(rid)}/reply`;
- const r=await fetch(endpoint,{method:'PUT',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({comment:reply})});const d=await r.json();if(!r.ok)throw new Error(d?.error?.message??'Google reply failed');
- await db.from('google_business_reviews').update({owner_reply:reply,owner_reply_updated_at:new Date().toISOString(),last_synced_at:new Date().toISOString(),raw_payload:d,updated_at:new Date().toISOString()}).eq('id',reviewId);
- return {success:true,reply};
+ const response=await fetch(endpoint,{method:'PUT',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({comment:reply})});
+ const raw=await response.text();let data:any={};try{data=JSON.parse(raw)}catch{}
+ if(!response.ok){const message=data?.error?.message??raw.slice(0,300)??'Google reply failed';await db.from('google_business_reviews').update({reply_status:'failed',reply_error:String(message),updated_at:new Date().toISOString()}).eq('id',reviewId);throw new Error(String(message))}
+ const now=new Date().toISOString();
+ const {error}=await db.from('google_business_reviews').update({owner_reply:reply,owner_reply_updated_at:now,reply_published_at:now,reply_status:'published',reply_error:null,last_synced_at:now,raw_payload:data,updated_at:now}).eq('id',reviewId);
+ if(error)throw error;
+ return {success:true,reply,status:'published'};
 }
-Deno.serve(async req=>{try{if(req.method==='OPTIONS')return new Response('ok');const auth=req.headers.get('Authorization');if(!auth)return json({success:false,error:'Session manquante'},401);const bearer=auth.replace(/^Bearer\s+/i,'');const {data:{user}}=await db.auth.getUser(bearer);if(!user)return json({success:false,error:'Session invalide'},401);const body=await req.json();const id=String(body?.review_id??'');if(!id)return json({success:false,error:'review_id requis'},400);const {data:r}=await db.from('google_business_reviews').select('google_business_locations!inner(connection_id)').eq('id',id).maybeSingle();if(!r)return json({success:false,error:'Avis introuvable'},404);const {data:c}=await db.from('google_business_connections').select('establishment_id').eq('id',r.google_business_locations.connection_id).maybeSingle();if(!c)return json({success:false,error:'Connexion introuvable'},404);const {data:access}=await db.rpc('user_has_establishment_access',{p_establishment_id:c.establishment_id});if(!access)return json({success:false,error:'Accès refusé'},403);return json(await publishReply(id));}catch(e){console.error(e);return json({success:false,error:e instanceof Error?e.message:'Erreur serveur'},500)}});
+export async function publishReply(reviewId:string){return publishDraft(reviewId)}
+Deno.serve(async req=>{
+ try{
+  if(req.method==='OPTIONS')return new Response('ok');
+  const auth=req.headers.get('Authorization');if(!auth)return json({success:false,error:'Session manquante'},401);
+  const bearer=auth.replace(/^Bearer\\s+/i,'');const {data:{user}}=await db.auth.getUser(bearer);if(!user)return json({success:false,error:'Session invalide'},401);
+  const body=await req.json();const id=String(body?.review_id??'');const action=String(body?.action??'generate');
+  if(!id)return json({success:false,error:'review_id requis'},400);
+  const {data:r,error:reviewError}=await db.from('google_business_reviews').select('google_business_locations!inner(connection_id)').eq('id',id).maybeSingle();
+  if(reviewError)throw reviewError;if(!r)return json({success:false,error:'Avis introuvable'},404);
+  const {data:c,error:connectionError}=await db.from('google_business_connections').select('establishment_id').eq('id',r.google_business_locations.connection_id).maybeSingle();
+  if(connectionError)throw connectionError;if(!c)return json({success:false,error:'Connexion introuvable'},404);
+  const {data:access,error:accessError}=await db.rpc('user_has_establishment_access',{p_establishment_id:c.establishment_id});
+  if(accessError)throw accessError;if(!access)return json({success:false,error:'Accès refusé'},403);
+  if(action==='generate')return json(await generateDraft(id));
+  if(action==='publish')return json(await publishDraft(id));
+  if(action==='save'){
+   const reply=String(body?.reply??'').trim();if(!reply)return json({success:false,error:'Le brouillon ne peut pas être vide.'},400);
+   const {error}=await db.from('google_business_reviews').update({reply_draft:reply,reply_status:'ready_to_publish',reply_error:null,updated_at:new Date().toISOString()}).eq('id',id);
+   if(error)throw error;return json({success:true,status:'ready_to_publish'});
+  }
+  return json({success:false,error:'Action inconnue'},400);
+ }catch(e){console.error(e);return json({success:false,error:e instanceof Error?e.message:'Erreur serveur'},500)}
+});
