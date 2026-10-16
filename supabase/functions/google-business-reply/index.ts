@@ -59,15 +59,11 @@ Deno.serve(async req=>{
   if(req.method==='OPTIONS')return new Response('ok',{headers:cors});
   if(req.method!=='POST')return json({success:false,error:'Méthode non autorisée'},405);
   const auth=req.headers.get('Authorization');if(!auth)return json({success:false,error:'Session manquante'},401);
-  const bearer=auth.replace(/^Bearer\\s+/i,'');const {data:{user}}=await db.auth.getUser(bearer);if(!user)return json({success:false,error:'Session invalide'},401);
+  const bearer=auth.replace(/^Bearer\s+/i,'');const {data:{user}}=await db.auth.getUser(bearer);if(!user)return json({success:false,error:'Session invalide'},401);
+  const {data:profile,error:profileError}=await db.from('profiles').select('role').eq('id',user.id).maybeSingle();
+  if(profileError)throw profileError;if(profile?.role!=='admin')return json({success:false,error:'Accès réservé à l’administrateur'},403);
   const body=await req.json();const id=String(body?.review_id??'');const action=String(body?.action??'generate');
   if(!id)return json({success:false,error:'review_id requis'},400);
-  const {data:r,error:reviewError}=await db.from('google_business_reviews').select('google_business_locations!inner(connection_id)').eq('id',id).maybeSingle();
-  if(reviewError)throw reviewError;if(!r)return json({success:false,error:'Avis introuvable'},404);
-  const {data:c,error:connectionError}=await db.from('google_business_connections').select('establishment_id').eq('id',r.google_business_locations.connection_id).maybeSingle();
-  if(connectionError)throw connectionError;if(!c)return json({success:false,error:'Connexion introuvable'},404);
-  const {data:access,error:accessError}=await db.rpc('user_has_establishment_access',{p_establishment_id:c.establishment_id});
-  if(accessError)throw accessError;if(!access)return json({success:false,error:'Accès refusé'},403);
   if(action==='generate')return json(await generateDraft(id));
   if(action==='publish')return json(await publishDraft(id,body?.reply===undefined?undefined:String(body.reply)));
   if(action==='save'){
