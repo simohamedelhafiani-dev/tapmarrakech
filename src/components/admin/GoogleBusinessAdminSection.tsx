@@ -14,7 +14,7 @@ type Connection = {
   last_sync_at: string | null;
   last_error: string | null;
 };
-type Location = { id: string; connection_id: string; title: string | null; location_name: string | null };
+type Location = { id: string; connection_id: string; title: string | null; location_name: string | null; mapped_establishment_id: string | null };
 type ReplySetting = {
   establishment_id: string;
   auto_reply_enabled: boolean;
@@ -92,7 +92,7 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
       }
       const { data: locationRows, error: locationError } = await supabase
         .from('google_business_locations')
-        .select('id,connection_id,title,location_name')
+        .select('id,connection_id,title,location_name,mapped_establishment_id')
         .in('connection_id', connectionIds);
       if (locationError) throw locationError;
       const nextLocations = (locationRows ?? []) as Location[];
@@ -135,13 +135,15 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
       const connection = location ? connectionById.get(location.connection_id) : undefined;
       return {
         ...review,
-        establishmentName: connection ? (establishmentById.get(connection.establishment_id) ?? 'Établissement inconnu') : 'Établissement inconnu',
+        establishmentName: location?.mapped_establishment_id
+          ? (establishmentById.get(location.mapped_establishment_id) ?? 'Établissement associé introuvable')
+          : 'Non associé — validation requise',
         locationName: location?.title || location?.location_name || 'Fiche Google',
       };
     })
-      .filter((review) => selectedEstablishmentId === 'all' || connections.some((connection) =>
-        connection.establishment_id === selectedEstablishmentId &&
-        locations.some((location) => location.connection_id === connection.id && location.id === review.location_id)))
+      .filter((review) => selectedEstablishmentId === 'all'
+        ? Boolean(locationById.get(review.location_id)?.mapped_establishment_id)
+        : locationById.get(review.location_id)?.mapped_establishment_id === selectedEstablishmentId)
       .filter((review) => replyFilter === 'all' || (review.reply_status ?? (review.owner_reply ? 'published' : 'none')) === replyFilter)
       .filter((review) => {
         const query = search.trim().toLocaleLowerCase();
@@ -283,18 +285,25 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
 
           {activeView === 'establishment' && (
             <section className="rounded-2xl border border-[#242424] bg-[#111111] p-4 sm:p-5">
-              <div className="mb-4"><h3 className="text-lg font-semibold text-white">Établissements et état de connexion</h3><p className="mt-1 text-xs text-white/40">Choisissez un commerce avec le sélecteur ci-dessus. Sa sélection reste active lorsque vous changez de tuile.</p></div>
-              <div className="space-y-2">
-                {establishments.map((item) => {
-                  const connection = connections.find((row) => row.establishment_id === item.id);
-                  const setting = replySettings.find((row) => row.establishment_id === item.id);
-                  const active = selectedEstablishmentId === item.id;
-                  return <button key={item.id} type="button" onClick={() => setSelectedEstablishmentId(item.id)} className={`flex w-full flex-col gap-3 rounded-xl border p-4 text-left sm:flex-row sm:items-center sm:justify-between ${active ? 'border-[#C9A45C]/60 bg-[#C9A45C]/5' : 'border-[#242424] bg-[#0b0b0b] hover:border-[#C9A45C]/30'}`}>
-                    <span><span className="block text-sm font-semibold text-white">{item.name}</span><span className="mt-1 block text-xs text-white/40">{connection?.last_sync_at ? `Dernière synchro : ${new Date(connection.last_sync_at).toLocaleString('fr-FR')}` : 'Aucune synchronisation enregistrée'}</span>{connection?.last_error && <span className="mt-1 block text-xs text-red-300">{connection.last_error}</span>}</span>
-                    <span className="flex flex-wrap gap-2"><span className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${connection?.status === 'active' ? 'bg-emerald-400/10 text-emerald-300' : 'bg-amber-400/10 text-amber-200'}`}>{connection?.status === 'active' ? 'Google connecté' : 'Non connecté'}</span><span className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${setting?.auto_reply_enabled ? 'bg-emerald-400/10 text-emerald-300' : 'bg-white/5 text-white/45'}`}>{setting?.auto_reply_enabled ? (setting.require_approval ? 'IA · validation' : 'Réponses auto') : 'IA désactivée'}</span></span>
-                  </button>;
+              <div className="mb-4"><h3 className="text-lg font-semibold text-white">Associer les fiches Google manuellement</h3><p className="mt-1 text-xs leading-5 text-white/40">Chaque fiche Google reste indépendante. Les avis d’une fiche ne seront affichés sous un établissement Kelyani qu’après association explicite ci-dessous. Vérifiez le nom et l’adresse avant de choisir.</p></div>
+              <div className="space-y-3">
+                {locations.map((location) => {
+                  const connection = connections.find((row) => row.id === location.connection_id);
+                  const label = location.title || location.location_name || 'Fiche Google sans nom';
+                  return <div key={location.id} className="rounded-xl border border-[#242424] bg-[#0b0b0b] p-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="min-w-0"><p className="text-sm font-semibold text-white">{label}</p><p className="mt-1 text-xs text-white/40">ID Google : {location.id} · Connexion : {connection?.status === 'active' ? 'active' : 'à vérifier'}</p><p className="mt-1 text-xs text-amber-200">{location.mapped_establishment_id ? 'Fiche associée explicitement' : 'Non associée — ses avis sont masqués des vues par établissement'}</p></div>
+                      <label className="block w-full sm:max-w-xs"><span className="sr-only">Associer la fiche Google {label} à un établissement Kelyani</span><select value={location.mapped_establishment_id ?? ''} onChange={async (event) => {
+                        const mappedId = event.target.value || null;
+                        setError('');
+                        const { error: saveError } = await supabase.from('google_business_locations').update({ mapped_establishment_id: mappedId, updated_at: new Date().toISOString() }).eq('id', location.id);
+                        if (saveError) { setError(saveError.message); return; }
+                        setLocations(current => current.map(item => item.id === location.id ? { ...item, mapped_establishment_id: mappedId } : item));
+                      }} className="w-full rounded-xl border border-[#242424] bg-[#111111] px-3 py-3 text-sm text-white focus:border-[#C9A45C] focus:outline-none"><option value="">Ne pas associer</option>{establishments.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+                    </div>
+                  </div>;
                 })}
-                {!establishments.length && <p className="py-8 text-center text-sm text-white/40">Aucun établissement disponible.</p>}
+                {!locations.length && <p className="py-8 text-center text-sm text-white/40">Aucune fiche Google synchronisée. Connectez Google puis actualisez pour découvrir les fiches.</p>}
               </div>
             </section>
           )}
