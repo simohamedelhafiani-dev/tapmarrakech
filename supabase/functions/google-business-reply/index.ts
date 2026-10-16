@@ -3,7 +3,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const url=Deno.env.get('SUPABASE_URL')!,key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const db=createClient(url,key,{auth:{autoRefreshToken:false,persistSession:false}});
 const cid=Deno.env.get('GOOGLE_BUSINESS_CLIENT_ID')??'',secret=Deno.env.get('GOOGLE_BUSINESS_CLIENT_SECRET')??'',ai=Deno.env.get('OPENAI_API_KEY')??'';
-const json=(d:unknown,s=200)=>new Response(JSON.stringify(d),{status:s,headers:{'Content-Type':'application/json','Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization,content-type'}});
+const cors={'Content-Type':'application/json','Access-Control-Allow-Origin':'*','Access-Control-Allow-Methods':'POST, OPTIONS','Access-Control-Allow-Headers':'authorization, apikey, x-client-info, content-type, x-supabase-api-version'};
+const json=(d:unknown,s=200)=>new Response(JSON.stringify(d),{status:s,headers:cors});
 async function refresh(r:string){const b=new URLSearchParams({refresh_token:r,client_id:cid,client_secret:secret,grant_type:'refresh_token'});const x=await fetch('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:b});const d=await x.json();if(!x.ok)throw new Error(d?.error_description??'Token refresh failed');return d}
 async function gen(comment:string,rating:string,lang:string,tone:string){if(!ai)return 'Merci pour votre retour. Nous sommes ravis de vous avoir accueilli et prenons votre commentaire en compte. Au plaisir de vous revoir !';const prompt=`Rédige une réponse courte à un avis Google. Langue: ${lang||'français'}. Ton: ${tone||'professionnel et chaleureux'}. Note: ${rating}. Avis: ${comment}. Ne mentionne jamais une récompense, un point, une promotion ou une contrepartie. N'invente aucun fait. Maximum 70 mots.`;const r=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:`Bearer ${ai}`,'Content-Type':'application/json'},body:JSON.stringify({model:'gpt-5.6-luna',input:prompt,max_output_tokens:180})});const d=await r.json();if(!r.ok)throw new Error(d?.error?.message??'AI error');return String(d.output_text??'').trim()}
 async function getReview(reviewId:string){
@@ -54,7 +55,8 @@ async function publishDraft(reviewId:string){
 export async function publishReply(reviewId:string){return publishDraft(reviewId)}
 Deno.serve(async req=>{
  try{
-  if(req.method==='OPTIONS')return new Response('ok');
+  if(req.method==='OPTIONS')return new Response('ok',{headers:cors});
+  if(req.method!=='POST')return json({success:false,error:'Méthode non autorisée'},405);
   const auth=req.headers.get('Authorization');if(!auth)return json({success:false,error:'Session manquante'},401);
   const bearer=auth.replace(/^Bearer\\s+/i,'');const {data:{user}}=await db.auth.getUser(bearer);if(!user)return json({success:false,error:'Session invalide'},401);
   const body=await req.json();const id=String(body?.review_id??'');const action=String(body?.action??'generate');
