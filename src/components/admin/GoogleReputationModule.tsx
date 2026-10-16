@@ -227,12 +227,28 @@ export default function GoogleReputationModule({ establishmentId }: Props) {
       );
       if (invokeError) {
         const context = (invokeError as { context?: Response }).context;
-        if (context && typeof context.json === 'function') {
+        if (context && typeof context.text === 'function') {
+          let rawBody = '';
           try {
-            const details = await context.json();
-            throw new Error(details?.error || details?.message || invokeError.message);
-          } catch (detailError) {
-            if (detailError instanceof Error && detailError.message !== invokeError.message) throw detailError;
+            rawBody = await context.text();
+          } catch {
+            // Fall back to the SDK error when the response body is unavailable.
+          }
+
+          if (rawBody) {
+            try {
+              const details = JSON.parse(rawBody);
+              throw new Error(details?.error || details?.message || invokeError.message);
+            } catch (parseOrDetailsError) {
+              if (parseOrDetailsError instanceof Error && parseOrDetailsError.message !== invokeError.message) {
+                // JSON error bodies should show their message; HTML/non-JSON bodies
+                // should expose status and a short sanitized excerpt for diagnosis.
+                if (!rawBody.trimStart().startsWith('<')) throw parseOrDetailsError;
+                const status = context.status ? `HTTP ${context.status}` : 'Réponse non JSON';
+                const excerpt = rawBody.replace(/\\s+/g, ' ').slice(0, 180);
+                throw new Error(`La fonction de synchronisation a renvoyé du HTML au lieu du JSON (${status}). Détail : ${excerpt}`);
+              }
+            }
           }
         }
         throw invokeError;
