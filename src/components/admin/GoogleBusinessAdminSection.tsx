@@ -31,11 +31,11 @@ type Review = {
   owner_reply: string | null;
   review_created_at: string | null;
   owner_reply_updated_at: string | null;
-  reply_draft: string | null;
-  reply_status: 'none' | 'pending_approval' | 'ready_to_publish' | 'published' | 'failed';
-  reply_error: string | null;
-  reply_generated_at: string | null;
-  reply_published_at: string | null;
+  reply_draft?: string | null;
+  reply_status?: 'none' | 'pending_approval' | 'ready_to_publish' | 'published' | 'failed' | null;
+  reply_error?: string | null;
+  reply_generated_at?: string | null;
+  reply_published_at?: string | null;
 };
 type ReviewRow = Review & { establishmentName: string; locationName: string };
 type View = 'reviews' | 'appReviews' | 'establishment' | 'ai' | 'settings';
@@ -105,7 +105,7 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
       }
       const { data: reviewRows, error: reviewError } = await supabase
         .from('google_business_reviews')
-        .select('id,location_id,reviewer_display_name,star_rating,comment,owner_reply,review_created_at,owner_reply_updated_at,reply_draft,reply_status,reply_error,reply_generated_at,reply_published_at')
+        .select('id,location_id,reviewer_display_name,star_rating,comment,owner_reply,review_created_at,owner_reply_updated_at')
         .in('location_id', locationIds)
         .order('review_created_at', { ascending: false })
         .limit(500);
