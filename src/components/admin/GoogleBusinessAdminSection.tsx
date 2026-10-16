@@ -327,12 +327,12 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
                               if (duplicate) throw new Error('Ce slug existe déjà. Modifiez-le avant de créer la fiche.');
                               const { data: created, error: createError } = await supabase.from('establishments').insert({ name: newEstablishmentName.trim(), slug, ai_business_type_id: newEstablishmentTypeId }).select('id,name').single();
                               if (createError) throw createError;
+                              await onEstablishmentCreated?.();
                               const { error: mappingError } = await supabase.from('google_business_locations').update({ mapped_establishment_id: created.id, updated_at: new Date().toISOString() }).eq('id', location.id);
-                              if (mappingError) throw new Error('Fiche créée, mais association non enregistrée : ' + mappingError.message + '. Vous pourrez associer la fiche depuis cette liste.');
+                              if (mappingError) throw new Error('Fiche créée, mais association non enregistrée : ' + mappingError.message + '. La fiche est créée ; sélectionnez-la manuellement dans la liste après actualisation.');
                               setLocations(current => current.map(item => item.id === location.id ? { ...item, mapped_establishment_id: created.id } : item));
                               setCreatingForLocationId(null);
                               setReplyMessage('Fiche « ' + created.name + ' » créée et associée à cette fiche Google.');
-                              await onEstablishmentCreated?.();
                               await load();
                             } catch (caught) {
                               setError(caught instanceof Error ? caught.message : 'Impossible de créer la fiche établissement.');
