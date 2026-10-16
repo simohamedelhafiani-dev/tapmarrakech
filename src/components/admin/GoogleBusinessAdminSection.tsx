@@ -14,7 +14,7 @@ type Connection = {
   last_sync_at: string | null;
   last_error: string | null;
 };
-type Location = { id: string; connection_id: string; title: string | null; location_name: string | null; mapped_establishment_id: string | null };
+type Location = { id: string; connection_id: string; google_location_id: string; title: string | null; location_name: string | null; mapped_establishment_id: string | null };
 type ReplySetting = {
   establishment_id: string;
   auto_reply_enabled: boolean;
@@ -92,7 +92,7 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
       }
       const { data: locationRows, error: locationError } = await supabase
         .from('google_business_locations')
-        .select('id,connection_id,title,location_name,mapped_establishment_id')
+        .select('id,connection_id,google_location_id,title,location_name,mapped_establishment_id')
         .in('connection_id', connectionIds);
       if (locationError) throw locationError;
       const nextLocations = (locationRows ?? []) as Location[];
@@ -127,12 +127,10 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
   }, [establishments, selectedEstablishmentId]);
 
   const rows = useMemo<ReviewRow[]>(() => {
-    const connectionById = new Map(connections.map((item) => [item.id, item]));
     const locationById = new Map(locations.map((item) => [item.id, item]));
     const establishmentById = new Map(establishments.map((item) => [item.id, item.name]));
     return reviews.map((review) => {
       const location = locationById.get(review.location_id);
-      const connection = location ? connectionById.get(location.connection_id) : undefined;
       return {
         ...review,
         establishmentName: location?.mapped_establishment_id
@@ -292,7 +290,7 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
                   const label = location.title || location.location_name || 'Fiche Google sans nom';
                   return <div key={location.id} className="rounded-xl border border-[#242424] bg-[#0b0b0b] p-4">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="min-w-0"><p className="text-sm font-semibold text-white">{label}</p><p className="mt-1 text-xs text-white/40">ID Google : {location.id} · Connexion : {connection?.status === 'active' ? 'active' : 'à vérifier'}</p><p className="mt-1 text-xs text-amber-200">{location.mapped_establishment_id ? 'Fiche associée explicitement' : 'Non associée — ses avis sont masqués des vues par établissement'}</p></div>
+                      <div className="min-w-0"><p className="text-sm font-semibold text-white">{label}</p><p className="mt-1 text-xs text-white/40">ID Google : {location.google_location_id} · Connexion : {connections.find((item) => item.id === location.connection_id)?.status === 'active' ? 'active' : 'à vérifier'}</p><p className="mt-1 text-xs text-amber-200">{location.mapped_establishment_id ? 'Fiche associée explicitement' : 'Non associée — ses avis sont masqués des vues par établissement'}</p></div>
                       <label className="block w-full sm:max-w-xs"><span className="sr-only">Associer la fiche Google {label} à un établissement Kelyani</span><select value={location.mapped_establishment_id ?? ''} onChange={async (event) => {
                         const mappedId = event.target.value || null;
                         setError('');
