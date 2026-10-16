@@ -219,7 +219,7 @@ export default function GoogleReputationModule({ establishmentId }: Props) {
       }
 
       const { data, error: invokeError } = await supabase.functions.invoke(
-        'google-business-sync',
+        'google-business-sync-access-test',
         {
           body: { establishment_id: establishmentId },
           headers: { Authorization: `Bearer ${accessToken}` },
