@@ -218,24 +218,35 @@ export default function GoogleReputationModule({ establishmentId }: Props) {
         throw new Error('Votre session a expiré. Reconnectez-vous à Kelyani puis relancez la synchronisation.');
       }
 
-      const { data, error: invokeError } = await supabase.functions.invoke(
-        'google-business-sync',
-        {
-          body: { establishment_id: establishmentId },
-          headers: { Authorization: `Bearer ${accessToken}` },
+      // Use fetch directly so an HTML gateway/protection response is captured as text
+      // instead of being auto-parsed as JSON inside supabase.functions.invoke().
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      if (!supabaseUrl || !supabaseAnonKey) {
+        throw new Error('Configuration Supabase manquante dans cet aperçu Vercel.');
+      }
+
+      const baseUrl = supabaseUrl.endsWith('/') ? supabaseUrl.slice(0, -1) : supabaseUrl;
+      const response = await fetch(`${baseUrl}/functions/v1/google-business-sync-access-test`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: supabaseAnonKey,
+          Authorization: `Bearer ${accessToken}`,
         },
-      );
-      if (invokeError) {
-        const context = (invokeError as { context?: Response }).context;
-        if (context && typeof context.json === 'function') {
-          try {
-            const details = await context.json();
-            throw new Error(details?.error || details?.message || invokeError.message);
-          } catch (detailError) {
-            if (detailError instanceof Error && detailError.message !== invokeError.message) throw detailError;
-          }
-        }
-        throw invokeError;
+        body: JSON.stringify({ establishment_id: establishmentId }),
+      });
+      const rawBody = await response.text();
+      let data: { success?: boolean; error?: string; message?: string; locations?: number; reviews?: number } | null = null;
+      try {
+        data = JSON.parse(rawBody);
+      } catch {
+        const status = `HTTP ${response.status}`;
+        const excerpt = rawBody.replaceAll('\n', ' ').replaceAll('\r', ' ').slice(0, 240);
+        throw new Error(`La synchronisation a reçu une réponse non JSON (${status}). Vérifie le routage/protection de la fonction. Réponse : ${excerpt || '(vide)'}`);
+      }
+      if (!response.ok) {
+        throw new Error(data?.error || data?.message || `Erreur HTTP ${response.status}`);
       }
       if (!data?.success) throw new Error(data?.error || 'Synchronisation impossible.');
       setMessage(`Synchronisation terminée : ${data.locations ?? 0} établissement(s), ${data.reviews ?? 0} avis.`);
