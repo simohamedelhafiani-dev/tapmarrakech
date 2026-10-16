@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import GoogleReputationModule from '@/components/admin/GoogleReputationModule';
 
 type Establishment = { id: string; name: string };
+type BusinessType = { id: string; name: string; active: boolean };
 type Connection = {
   id: string;
   establishment_id: string;
@@ -53,7 +54,7 @@ function rating(value: string | null) {
   return map[String(value ?? '').toUpperCase()] ?? Number(value ?? 0);
 }
 
-export default function GoogleBusinessAdminSection({ establishments, legacyReviews }: { establishments: Establishment[]; legacyReviews?: ReactNode }) {
+export default function GoogleBusinessAdminSection({ establishments, legacyReviews, businessTypes = [], onEstablishmentCreated }: { establishments: Establishment[]; legacyReviews?: ReactNode; businessTypes?: BusinessType[]; onEstablishmentCreated?: () => Promise<void> | void }) {
   const [connections, setConnections] = useState<Connection[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -66,6 +67,11 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
   const [replyMessage, setReplyMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [creatingForLocationId, setCreatingForLocationId] = useState<string | null>(null);
+  const [newEstablishmentName, setNewEstablishmentName] = useState('');
+  const [newEstablishmentSlug, setNewEstablishmentSlug] = useState('');
+  const [newEstablishmentTypeId, setNewEstablishmentTypeId] = useState('');
+  const [creatingEstablishment, setCreatingEstablishment] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -291,13 +297,51 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
                   return <div key={location.id} className="rounded-xl border border-[#242424] bg-[#0b0b0b] p-4">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div className="min-w-0"><p className="text-sm font-semibold text-white">{label}</p><p className="mt-1 text-xs text-white/40">ID Google : {location.google_location_id} · Connexion : {connections.find((item) => item.id === location.connection_id)?.status === 'active' ? 'active' : 'à vérifier'}</p><p className="mt-1 text-xs text-amber-200">{location.mapped_establishment_id ? 'Fiche associée explicitement' : 'Non associée — ses avis sont masqués des vues par établissement'}</p></div>
-                      <label className="block w-full sm:max-w-xs"><span className="sr-only">Associer la fiche Google {label} à un établissement Kelyani</span><select value={location.mapped_establishment_id ?? ''} onChange={async (event) => {
-                        const mappedId = event.target.value || null;
-                        setError('');
-                        const { error: saveError } = await supabase.from('google_business_locations').update({ mapped_establishment_id: mappedId, updated_at: new Date().toISOString() }).eq('id', location.id);
-                        if (saveError) { setError(saveError.message); return; }
-                        setLocations(current => current.map(item => item.id === location.id ? { ...item, mapped_establishment_id: mappedId } : item));
-                      }} className="w-full rounded-xl border border-[#242424] bg-[#111111] px-3 py-3 text-sm text-white focus:border-[#C9A45C] focus:outline-none"><option value="">Ne pas associer</option>{establishments.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+                      <div className="w-full space-y-2 sm:max-w-xs">
+                        <label className="block"><span className="sr-only">Associer la fiche Google {label} à un établissement Kelyani</span><select value={location.mapped_establishment_id ?? ''} onChange={async (event) => {
+                          const mappedId = event.target.value || null;
+                          if (mappedId === '__create__') {
+                            setCreatingForLocationId(location.id);
+                            setNewEstablishmentName(label);
+                            setNewEstablishmentSlug(label.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''));
+                            setNewEstablishmentTypeId('');
+                            return;
+                          }
+                          setError('');
+                          const { error: saveError } = await supabase.from('google_business_locations').update({ mapped_establishment_id: mappedId, updated_at: new Date().toISOString() }).eq('id', location.id);
+                          if (saveError) { setError(saveError.message); return; }
+                          setLocations(current => current.map(item => item.id === location.id ? { ...item, mapped_establishment_id: mappedId } : item));
+                        }} className="w-full rounded-xl border border-[#242424] bg-[#111111] px-3 py-3 text-sm text-white focus:border-[#C9A45C] focus:outline-none"><option value="">Ne pas associer</option>{establishments.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}<option value="__create__">＋ Créer une fiche établissement</option></select></label>
+                        {creatingForLocationId === location.id && <div className="space-y-3 rounded-xl border border-[#C9A45C]/25 bg-[#C9A45C]/5 p-3">
+                          <p className="text-xs font-semibold text-[#C9A45C]">Créer depuis cette fiche Google</p>
+                          <label className="block text-[11px] text-white/60">Nom de l’établissement<input value={newEstablishmentName} onChange={(event) => { const value = event.target.value; setNewEstablishmentName(value); setNewEstablishmentSlug(value.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')); }} className="mt-1 w-full rounded-lg border border-[#242424] bg-[#111111] px-3 py-2 text-sm text-white" /></label>
+                          <label className="block text-[11px] text-white/60">Slug<input value={newEstablishmentSlug} onChange={(event) => setNewEstablishmentSlug(event.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, ''))} className="mt-1 w-full rounded-lg border border-[#242424] bg-[#111111] px-3 py-2 text-sm text-white" /></label>
+                          <label className="block text-[11px] text-white/60">Type de commerce<select value={newEstablishmentTypeId} onChange={(event) => setNewEstablishmentTypeId(event.target.value)} className="mt-1 w-full rounded-lg border border-[#242424] bg-[#111111] px-3 py-2 text-sm text-white"><option value="">Choisir un type</option>{businessTypes.filter((type) => type.active).map((type) => <option key={type.id} value={type.id}>{type.name}</option>)}</select></label>
+                          <div className="flex gap-2"><button type="button" disabled={creatingEstablishment} onClick={() => setCreatingForLocationId(null)} className="flex-1 rounded-lg border border-white/10 px-3 py-2 text-xs text-white/60">Annuler</button><button type="button" disabled={creatingEstablishment || !newEstablishmentName.trim() || !newEstablishmentSlug.trim() || !newEstablishmentTypeId} onClick={async () => {
+                            setCreatingEstablishment(true);
+                            setError('');
+                            try {
+                              const slug = newEstablishmentSlug.trim();
+                              const { data: duplicate, error: duplicateError } = await supabase.from('establishments').select('id,name').eq('slug', slug).maybeSingle();
+                              if (duplicateError) throw duplicateError;
+                              if (duplicate) throw new Error('Ce slug existe déjà. Modifiez-le avant de créer la fiche.');
+                              const { data: created, error: createError } = await supabase.from('establishments').insert({ name: newEstablishmentName.trim(), slug, ai_business_type_id: newEstablishmentTypeId }).select('id,name').single();
+                              if (createError) throw createError;
+                              const { error: mappingError } = await supabase.from('google_business_locations').update({ mapped_establishment_id: created.id, updated_at: new Date().toISOString() }).eq('id', location.id);
+                              if (mappingError) throw new Error('Fiche créée, mais association non enregistrée : ' + mappingError.message + '. Vous pourrez associer la fiche depuis cette liste.');
+                              setLocations(current => current.map(item => item.id === location.id ? { ...item, mapped_establishment_id: created.id } : item));
+                              setCreatingForLocationId(null);
+                              setReplyMessage('Fiche « ' + created.name + ' » créée et associée à cette fiche Google.');
+                              await onEstablishmentCreated?.();
+                              await load();
+                            } catch (caught) {
+                              setError(caught instanceof Error ? caught.message : 'Impossible de créer la fiche établissement.');
+                            } finally {
+                              setCreatingEstablishment(false);
+                            }
+                          }} className="flex-1 rounded-lg bg-[#C9A45C] px-3 py-2 text-xs font-semibold text-[#111111] disabled:opacity-50">{creatingEstablishment ? 'Création…' : 'Créer et associer'}</button></div>
+                        </div>}
+                      </div>
                     </div>
                   </div>;
                 })}
