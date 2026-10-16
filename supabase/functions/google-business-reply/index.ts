@@ -34,10 +34,11 @@ async function generateDraft(reviewId:string){
  if(error)throw error;
  return {success:true,reply,status};
 }
-async function publishDraft(reviewId:string){
+async function publishDraft(reviewId:string, replyOverride?:string){
  const {review,c}=await getReview(reviewId);
- const reply=String(review.reply_draft??'').trim();
+ const reply=String(replyOverride??review.reply_draft??'').trim();
  if(!reply)throw new Error('Aucun brouillon à publier. Générez une réponse ou enregistrez un brouillon.');
+ if(replyOverride!==undefined){const {error:draftError}=await db.from('google_business_reviews').update({reply_draft:reply,reply_status:'ready_to_publish',reply_error:null,updated_at:new Date().toISOString()}).eq('id',reviewId);if(draftError)throw draftError;}
  const token=await getToken(c);
  const aid=String(review.google_business_locations.google_account_id||c.google_account_id||'');
  const gid=String(review.google_business_locations.google_location_id||'');
@@ -68,7 +69,7 @@ Deno.serve(async req=>{
   const {data:access,error:accessError}=await db.rpc('user_has_establishment_access',{p_establishment_id:c.establishment_id});
   if(accessError)throw accessError;if(!access)return json({success:false,error:'Accès refusé'},403);
   if(action==='generate')return json(await generateDraft(id));
-  if(action==='publish')return json(await publishDraft(id));
+  if(action==='publish')return json(await publishDraft(id,body?.reply===undefined?undefined:String(body.reply)));
   if(action==='save'){
    const reply=String(body?.reply??'').trim();if(!reply)return json({success:false,error:'Le brouillon ne peut pas être vide.'},400);
    const {error}=await db.from('google_business_reviews').update({reply_draft:reply,reply_status:'ready_to_publish',reply_error:null,updated_at:new Date().toISOString()}).eq('id',id);
