@@ -176,7 +176,35 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
     replySettings.some((setting) => setting.establishment_id === item.id && setting.auto_reply_enabled)).length;
   const repliedCount = rows.filter((item) => Boolean(item.owner_reply)).length;
   const replyCounts = { published: rows.filter((item) => item.reply_status === 'published' || (!item.reply_status && Boolean(item.owner_reply))).length, pending: rows.filter((item) => item.reply_status === 'pending_approval').length, ready: rows.filter((item) => item.reply_status === 'ready_to_publish').length, failed: rows.filter((item) => item.reply_status === 'failed').length };
-  const runReplyAction = async (reviewId: string, action: 'generate' | 'publish' | 'save', reply?: string) => { setReplyActionId(reviewId); setReplyMessage(''); setError(''); try { const { data, error: invokeError } = await supabase.functions.invoke('google-business-reply', { body: { review_id: reviewId, action, ...(reply !== undefined ? { reply } : {}) } }); if (invokeError) throw invokeError; if (!data?.success) throw new Error(data?.error || 'Action sur la réponse impossible.'); setReplyMessage(action === 'generate' ? 'Réponse IA enregistrée.' : action === 'publish' ? 'Publication confirmée par Google.' : 'Brouillon enregistré.'); await load(); } catch (e) { setError(e instanceof Error ? e.message : 'Impossible de traiter cette réponse.'); } finally { setReplyActionId(null); } };
+  const runReplyAction = async (reviewId: string, action: 'generate' | 'publish' | 'save', reply?: string) => {
+    setReplyActionId(reviewId); setReplyMessage(''); setError('');
+    try {
+      const { data, error: invokeError } = await supabase.functions.invoke('google-business-reply', {
+        body: { review_id: reviewId, action, ...(reply !== undefined ? { reply } : {}) },
+      });
+      if (invokeError) throw invokeError;
+      if (!data?.success) throw new Error(data?.error || 'Action sur la réponse impossible.');
+      if ((action === 'generate' || action === 'save') && typeof data.reply === 'string' || (action === 'save' && typeof reply === 'string')) {
+        const draft = typeof data.reply === 'string' ? data.reply : (reply ?? '');
+        if (!draft.trim()) throw new Error('Le serveur a confirmé l’action sans renvoyer de texte. Le brouillon ne peut pas être affiché.');
+        setReviews(current => current.map(item => item.id === reviewId ? {
+          ...item, reply_draft: draft,
+          reply_status: data.status ?? 'ready_to_publish',
+          reply_error: null,
+          reply_generated_at: action === 'generate' ? new Date().toISOString() : item.reply_generated_at,
+        } : item));
+      }
+      setReplyMessage(action === 'generate' ? 'Réponse IA générée et chargée dans le champ.' : action === 'publish' ? 'Publication confirmée par Google.' : 'Brouillon enregistré.');
+      await load();
+      // Keep the returned draft visible even if a stale read replica/cache returns the old row.
+      if ((action === 'generate' || action === 'save') && (typeof data.reply === 'string' || typeof reply === 'string')) {
+        const draft = typeof data.reply === 'string' ? data.reply : (reply ?? '');
+        setReviews(current => current.map(item => item.id === reviewId ? { ...item, reply_draft: draft, reply_status: data.status ?? 'ready_to_publish', reply_error: null } : item));
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Impossible de traiter cette réponse.');
+    } finally { setReplyActionId(null); }
+  };
   const averageRating = rows.length ? rows.reduce((sum, item) => sum + rating(item.star_rating), 0) / rows.length : 0;
   const selectedEstablishment = establishments.find((item) => item.id === selectedEstablishmentId);
   const selectedSetting = replySettings.find((item) => item.establishment_id === selectedEstablishmentId);
