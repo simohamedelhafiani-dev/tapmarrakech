@@ -218,40 +218,34 @@ export default function GoogleReputationModule({ establishmentId }: Props) {
         throw new Error('Votre session a expiré. Reconnectez-vous à Kelyani puis relancez la synchronisation.');
       }
 
-      const { data, error: invokeError } = await supabase.functions.invoke(
-        'google-business-sync-access-test',
-        {
-          body: { establishment_id: establishmentId },
-          headers: { Authorization: `Bearer ${accessToken}` },
-        },
-      );
-      if (invokeError) {
-        const context = (invokeError as { context?: Response }).context;
-        if (context && typeof context.text === 'function') {
-          let rawBody = '';
-          try {
-            rawBody = await context.text();
-          } catch {
-            // Fall back to the SDK error when the response body is unavailable.
-          }
+      // Use fetch directly so an HTML gateway/protection response is captured as text
+      // instead of being auto-parsed as JSON inside supabase.functions.invoke().
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      if (!supabaseUrl || !supabaseAnonKey) {
+        throw new Error('Configuration Supabase manquante dans cet aperçu Vercel.');
+      }
 
-          if (rawBody) {
-            try {
-              const details = JSON.parse(rawBody);
-              throw new Error(details?.error || details?.message || invokeError.message);
-            } catch (parseOrDetailsError) {
-              if (parseOrDetailsError instanceof Error && parseOrDetailsError.message !== invokeError.message) {
-                // JSON error bodies should show their message; HTML/non-JSON bodies
-                // should expose status and a short sanitized excerpt for diagnosis.
-                if (!rawBody.trimStart().startsWith('<')) throw parseOrDetailsError;
-                const status = context.status ? `HTTP ${context.status}` : 'Réponse non JSON';
-                const excerpt = rawBody.replace(/\\s+/g, ' ').slice(0, 180);
-                throw new Error(`La fonction de synchronisation a renvoyé du HTML au lieu du JSON (${status}). Détail : ${excerpt}`);
-              }
-            }
-          }
-        }
-        throw invokeError;
+      const response = await fetch(`${supabaseUrl.replace(/\\/$/, '')}/functions/v1/google-business-sync-access-test`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: supabaseAnonKey,
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ establishment_id: establishmentId }),
+      });
+      const rawBody = await response.text();
+      let data: { success?: boolean; error?: string; message?: string; locations?: number; reviews?: number } | null = null;
+      try {
+        data = JSON.parse(rawBody);
+      } catch {
+        const status = `HTTP ${response.status}`;
+        const excerpt = rawBody.replace(/\\s+/g, ' ').slice(0, 240);
+        throw new Error(`La synchronisation a reçu une réponse non JSON (${status}). Vérifie le routage/protection de la fonction. Réponse : ${excerpt || '(vide)'}`);
+      }
+      if (!response.ok) {
+        throw new Error(data?.error || data?.message || `Erreur HTTP ${response.status}`);
       }
       if (!data?.success) throw new Error(data?.error || 'Synchronisation impossible.');
       setMessage(`Synchronisation terminée : ${data.locations ?? 0} établissement(s), ${data.reviews ?? 0} avis.`);
