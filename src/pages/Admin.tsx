@@ -716,10 +716,10 @@ export default function Admin() {
           )}
 
           {section === 'reviews' && (
-            <div className="space-y-10">
-              <ReviewsSection establishments={establishments} />
-              <GoogleBusinessAdminSection establishments={establishments} />
-            </div>
+            <GoogleBusinessAdminSection
+              establishments={establishments}
+              legacyReviews={<ReviewsSection establishments={establishments} />}
+            />
           )}
 
           {section === 'analysis' && (
