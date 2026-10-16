@@ -96,12 +96,26 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
         setReviews([]);
         return;
       }
-      const { data: locationRows, error: locationError } = await supabase
+      // Backward compatibility: the explicit-mapping migration may not yet be applied
+      // to the database used by this preview. Keep legacy review loading operational.
+      let locationRows: Location[] = [];
+      const mappedQuery = await supabase
         .from('google_business_locations')
         .select('id,connection_id,google_location_id,title,location_name,mapped_establishment_id')
         .in('connection_id', connectionIds);
-      if (locationError) throw locationError;
-      const nextLocations = (locationRows ?? []) as Location[];
+      if (mappedQuery.error && /mapped_establishment_id|column .* does not exist|schema cache/i.test(mappedQuery.error.message)) {
+        const legacyQuery = await supabase
+          .from('google_business_locations')
+          .select('id,connection_id,google_location_id,title,location_name')
+          .in('connection_id', connectionIds);
+        if (legacyQuery.error) throw legacyQuery.error;
+        locationRows = ((legacyQuery.data ?? []) as Omit<Location, 'mapped_establishment_id'>[])
+          .map((location) => ({ ...location, mapped_establishment_id: null }));
+      } else {
+        if (mappedQuery.error) throw mappedQuery.error;
+        locationRows = (mappedQuery.data ?? []) as Location[];
+      }
+      const nextLocations = locationRows;
       setLocations(nextLocations);
 
       const locationIds = nextLocations.map((item) => item.id);
