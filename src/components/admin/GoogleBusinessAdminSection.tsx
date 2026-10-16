@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import {
   AlertTriangle, Building2, CheckCircle2, MessageSquare, RefreshCw, Search,
   Settings2, Sparkles, Star, Store,
@@ -33,10 +33,11 @@ type Review = {
   owner_reply_updated_at: string | null;
 };
 type ReviewRow = Review & { establishmentName: string; locationName: string };
-type View = 'reviews' | 'establishment' | 'ai' | 'settings';
+type View = 'reviews' | 'appReviews' | 'establishment' | 'ai' | 'settings';
 
 const navigation: { id: View; label: string; description: string; icon: typeof MessageSquare }[] = [
-  { id: 'reviews', label: 'Avis Google', description: 'Avis et réponses reçues', icon: MessageSquare },
+  { id: 'reviews', label: 'Avis Google', description: 'Avis Google et réponses', icon: MessageSquare },
+  { id: 'appReviews', label: 'Avis Kelyani', description: 'Avis reçus dans Kelyani', icon: MessageSquare },
   { id: 'establishment', label: 'Établissement concerné', description: 'Choisir le commerce à gérer', icon: Store },
   { id: 'ai', label: 'Réponses IA', description: 'État et mode de réponse', icon: Sparkles },
   { id: 'settings', label: 'Connexion Google', description: 'Connexion et synchronisation', icon: Settings2 },
@@ -47,7 +48,7 @@ function rating(value: string | null) {
   return map[String(value ?? '').toUpperCase()] ?? Number(value ?? 0);
 }
 
-export default function GoogleBusinessAdminSection({ establishments }: { establishments: Establishment[] }) {
+export default function GoogleBusinessAdminSection({ establishments, legacyReviews }: { establishments: Establishment[]; legacyReviews?: ReactNode }) {
   const [connections, setConnections] = useState<Connection[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -255,6 +256,16 @@ export default function GoogleBusinessAdminSection({ establishments }: { establi
                 </div>
               </section>
             </>
+          )}
+
+          {activeView === 'appReviews' && (
+            <section className="rounded-2xl border border-[#242424] bg-[#111111] p-4 sm:p-5">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-white">Avis Kelyani</h3>
+                <p className="mt-1 text-xs text-white/40">Les avis collectés directement par Kelyani restent disponibles ici, séparément des avis Google.</p>
+              </div>
+              {legacyReviews}
+            </section>
           )}
 
           {activeView === 'establishment' && (
