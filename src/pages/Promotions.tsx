@@ -6,6 +6,7 @@ import {
   Image as ImageIcon,
   Loader2,
   Plus,
+  Pencil,
   Sparkles,
   Trash2,
 } from 'lucide-react';
@@ -48,6 +49,7 @@ export default function Promotions() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
@@ -107,6 +109,44 @@ export default function Promotions() {
 
   function updateForm(field: keyof typeof emptyForm, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
+  }
+
+  function startEditing(promotion: Promotion) {
+    setEditingId(promotion.id);
+    setForm({
+      name: promotion.name,
+      description: promotion.description ?? '',
+      normal_price: promotion.normal_price == null ? '' : String(promotion.normal_price),
+      promo_price: promotion.promo_price == null ? '' : String(promotion.promo_price),
+    });
+    setErrorMessage('');
+  }
+
+  function cancelEditing() {
+    setEditingId(null);
+    setForm(emptyForm);
+    setErrorMessage('');
+  }
+
+  async function savePromotionEdits() {
+    if (!editingId || !establishmentId) return;
+    const name = form.name.trim();
+    if (!name) { setErrorMessage('Le nom de la promotion est obligatoire.'); return; }
+    const normalPrice = form.normal_price.trim() ? Number(form.normal_price) : null;
+    const promoPrice = form.promo_price.trim() ? Number(form.promo_price) : null;
+    if ((normalPrice !== null && (!Number.isFinite(normalPrice) || normalPrice < 0)) ||
+        (promoPrice !== null && (!Number.isFinite(promoPrice) || promoPrice < 0))) {
+      setErrorMessage('Les prix doivent être des nombres positifs.'); return;
+    }
+    setSaving(true);
+    setErrorMessage('');
+    const { error } = await supabase.from('promotions').update({
+      name, description: form.description.trim() || null,
+      normal_price: normalPrice, promo_price: promoPrice,
+    }).eq('id', editingId).eq('establishment_id', establishmentId);
+    if (error) { setErrorMessage(error.message); setSaving(false); return; }
+    setEditingId(null); setForm(emptyForm);
+    await loadPromotions(); setSaving(false);
   }
 
   async function generateAndPublish() {
@@ -275,9 +315,9 @@ export default function Promotions() {
             <ImageIcon size={19} />
           </div>
           <div>
-            <h2 className="text-xl font-semibold text-forest">Nouvelle promotion</h2>
+            <h2 className="text-xl font-semibold text-forest">{editingId ? "Modifier la promotion" : "Nouvelle promotion"}</h2>
             <p className="mt-1 text-sm text-ink/45">
-              Renseigne le contenu commercial. Le visuel est toujours généré par l’IA.
+              Renseigne le contenu commercial. Le visuel est généré par l’IA à la création et peut être régénéré ensuite.
             </p>
           </div>
         </div>
@@ -328,16 +368,21 @@ export default function Promotions() {
           </label>
         </div>
 
-        <div className="mt-5 flex justify-end">
-          <button
-            type="button"
-            onClick={() => void generateAndPublish()}
-            disabled={saving}
-            className="inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
-          >
-            {saving ? <Loader2 size={17} className="animate-spin" /> : <Sparkles size={17} />}
-            {saving ? 'Génération du visuel…' : 'Générer et publier avec l’IA'}
-          </button>
+        <div className="mt-5 flex flex-wrap justify-end gap-2">
+          {editingId ? (
+            <>
+              <button type="button" onClick={cancelEditing} disabled={saving} className="rounded-xl border border-ink/15 px-5 py-3 text-sm font-semibold text-ink/70">Annuler</button>
+              <button type="button" onClick={() => void savePromotionEdits()} disabled={saving} className="inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-50">
+                {saving ? <Loader2 size={17} className="animate-spin" /> : <Pencil size={17} />}
+                {saving ? 'Enregistrement…' : 'Enregistrer les modifications'}
+              </button>
+            </>
+          ) : (
+            <button type="button" onClick={() => void generateAndPublish()} disabled={saving} className="inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-50">
+              {saving ? <Loader2 size={17} className="animate-spin" /> : <Sparkles size={17} />}
+              {saving ? 'Génération du visuel…' : 'Générer et publier avec l’IA'}
+            </button>
+          )}
         </div>
       </section>
 
@@ -406,7 +451,10 @@ export default function Promotions() {
                       )}
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap justify-end gap-2">
+                      <button type="button" onClick={() => startEditing(promotion)} className="inline-flex items-center gap-1.5 rounded-xl border border-ink/10 px-3 py-2 text-xs font-semibold text-ink/70" aria-label={"Modifier " + promotion.name}>
+                        <Pencil size={14} /> Modifier
+                      </button>
                       <button
                         type="button"
                         onClick={() => void regeneratePromotion(promotion)}
