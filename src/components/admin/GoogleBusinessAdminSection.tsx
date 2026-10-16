@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Building2, RefreshCw, Star, MessageSquare, CheckCircle2, AlertTriangle, Search } from 'lucide-react';
+import {
+  AlertTriangle, Building2, CheckCircle2, MessageSquare, RefreshCw, Search,
+  Settings2, Sparkles, Star, Store,
+} from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import GoogleReputationModule from '@/components/admin/GoogleReputationModule';
 
@@ -12,7 +15,13 @@ type Connection = {
   last_error: string | null;
 };
 type Location = { id: string; connection_id: string; title: string | null; location_name: string | null };
-type ReplySetting = { establishment_id: string; auto_reply_enabled: boolean; require_approval: boolean; auto_reply_language: string | null; auto_reply_tone: string | null };
+type ReplySetting = {
+  establishment_id: string;
+  auto_reply_enabled: boolean;
+  require_approval: boolean;
+  auto_reply_language: string | null;
+  auto_reply_tone: string | null;
+};
 type Review = {
   id: string;
   location_id: string;
@@ -24,6 +33,14 @@ type Review = {
   owner_reply_updated_at: string | null;
 };
 type ReviewRow = Review & { establishmentName: string; locationName: string };
+type View = 'reviews' | 'establishment' | 'ai' | 'settings';
+
+const navigation: { id: View; label: string; description: string; icon: typeof MessageSquare }[] = [
+  { id: 'reviews', label: 'Avis Google', description: 'Avis et réponses reçues', icon: MessageSquare },
+  { id: 'establishment', label: 'Établissement concerné', description: 'Choisir le commerce à gérer', icon: Store },
+  { id: 'ai', label: 'Réponses IA', description: 'État et mode de réponse', icon: Sparkles },
+  { id: 'settings', label: 'Connexion Google', description: 'Connexion et synchronisation', icon: Settings2 },
+];
 
 function rating(value: string | null) {
   const map: Record<string, number> = { ONE: 1, TWO: 2, THREE: 3, FOUR: 4, FIVE: 5 };
@@ -36,6 +53,7 @@ export default function GoogleBusinessAdminSection({ establishments }: { establi
   const [reviews, setReviews] = useState<Review[]>([]);
   const [replySettings, setReplySettings] = useState<ReplySetting[]>([]);
   const [selectedEstablishmentId, setSelectedEstablishmentId] = useState('all');
+  const [activeView, setActiveView] = useState<View>('reviews');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -63,7 +81,6 @@ export default function GoogleBusinessAdminSection({ establishments }: { establi
         setReviews([]);
         return;
       }
-
       const { data: locationRows, error: locationError } = await supabase
         .from('google_business_locations')
         .select('id,connection_id,title,location_name')
@@ -77,7 +94,6 @@ export default function GoogleBusinessAdminSection({ establishments }: { establi
         setReviews([]);
         return;
       }
-
       const { data: reviewRows, error: reviewError } = await supabase
         .from('google_business_reviews')
         .select('id,location_id,reviewer_display_name,star_rating,comment,owner_reply,review_created_at,owner_reply_updated_at')
@@ -95,6 +111,12 @@ export default function GoogleBusinessAdminSection({ establishments }: { establi
 
   useEffect(() => { void load(); }, [load]);
 
+  useEffect(() => {
+    if (selectedEstablishmentId !== 'all' && !establishments.some((item) => item.id === selectedEstablishmentId)) {
+      setSelectedEstablishmentId('all');
+    }
+  }, [establishments, selectedEstablishmentId]);
+
   const rows = useMemo<ReviewRow[]>(() => {
     const connectionById = new Map(connections.map((item) => [item.id, item]));
     const locationById = new Map(locations.map((item) => [item.id, item]));
@@ -107,33 +129,47 @@ export default function GoogleBusinessAdminSection({ establishments }: { establi
         establishmentName: connection ? (establishmentById.get(connection.establishment_id) ?? 'Établissement inconnu') : 'Établissement inconnu',
         locationName: location?.title || location?.location_name || 'Fiche Google',
       };
-    }).filter((review) => selectedEstablishmentId === 'all' || connections.some((connection) => connection.establishment_id === selectedEstablishmentId && locations.some((location) => location.connection_id === connection.id && location.id === review.location_id)))
+    })
+      .filter((review) => selectedEstablishmentId === 'all' || connections.some((connection) =>
+        connection.establishment_id === selectedEstablishmentId &&
+        locations.some((location) => location.connection_id === connection.id && location.id === review.location_id)))
       .filter((review) => {
         const query = search.trim().toLocaleLowerCase();
-        if (!query) return true;
-        return [review.establishmentName, review.locationName, review.reviewer_display_name, review.comment, review.owner_reply]
+        return !query || [review.establishmentName, review.locationName, review.reviewer_display_name, review.comment, review.owner_reply]
           .some((value) => (value ?? '').toLocaleLowerCase().includes(query));
       });
   }, [connections, establishments, locations, reviews, search, selectedEstablishmentId]);
 
-  const connectedEstablishmentIds = new Set(connections.filter((item) => item.status === 'active').map((item) => item.establishment_id));
-  const connectedCount = establishments.filter((item) => connectedEstablishmentIds.has(item.id)).length;
-  const autoReplyCount = establishments.filter((item) => replySettings.some((setting) => setting.establishment_id === item.id && setting.auto_reply_enabled)).length;
+  const connectedIds = new Set(connections.filter((item) => item.status === 'active').map((item) => item.establishment_id));
+  const connectedCount = establishments.filter((item) => connectedIds.has(item.id)).length;
+  const autoReplyCount = establishments.filter((item) => connectedIds.has(item.id) &&
+    replySettings.some((setting) => setting.establishment_id === item.id && setting.auto_reply_enabled)).length;
   const repliedCount = rows.filter((item) => Boolean(item.owner_reply)).length;
   const averageRating = rows.length ? rows.reduce((sum, item) => sum + rating(item.star_rating), 0) / rows.length : 0;
+  const selectedEstablishment = establishments.find((item) => item.id === selectedEstablishmentId);
+  const selectedSetting = replySettings.find((item) => item.establishment_id === selectedEstablishmentId);
+  const selectedConnection = connections.find((item) => item.establishment_id === selectedEstablishmentId);
+  const needsSpecificEstablishment = activeView === 'ai' || activeView === 'settings';
+
+  const metric = (label: string, value: string | number, accent = false) => (
+    <div className="rounded-2xl border border-[#242424] bg-[#111111] p-4 sm:p-5">
+      <p className="text-xs text-white/45">{label}</p>
+      <p className={`mt-2 text-2xl font-semibold ${accent ? 'text-[#C9A45C]' : 'text-white'}`}>{value}</p>
+    </div>
+  );
 
   return (
-    <div className="space-y-6">
-      <header className="relative overflow-hidden rounded-3xl border border-[#242424] bg-[#111111] p-6 sm:p-8">
+    <div className="space-y-5">
+      <header className="relative overflow-hidden rounded-3xl border border-[#242424] bg-[#111111] p-5 sm:p-7">
         <div className="absolute -right-8 -top-12 h-48 w-48 rounded-full bg-[#C9A45C]/10 blur-3xl" />
         <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#C9A45C]">Administration centralisée</p>
             <h2 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">Google Business Profile</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/45">Tous les avis Google des établissements au même endroit. Filtrez les avis, contrôlez les réponses et gérez la connexion de chaque fiche sans passer par le profil de l’établissement.</p>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/45">Gérez les avis Google, la connexion et les réponses IA depuis une seule interface.</p>
           </div>
           <button type="button" onClick={() => void load()} disabled={loading} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-[#C9A45C]/30 px-4 py-2.5 text-xs font-semibold text-[#C9A45C] disabled:opacity-50">
-            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Actualiser les avis
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Actualiser
           </button>
         </div>
       </header>
@@ -141,59 +177,129 @@ export default function GoogleBusinessAdminSection({ establishments }: { establi
       {error && <div className="rounded-2xl border border-red-400/20 bg-red-400/5 p-4 text-sm text-red-200"><AlertTriangle size={16} className="mr-2 inline" />{error}</div>}
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-2xl border border-[#242424] bg-[#111111] p-5"><p className="text-xs text-white/40">Établissements Google connectés</p><p className="mt-2 text-3xl font-semibold text-[#C9A45C]">{connectedCount}<span className="ml-2 text-sm font-normal text-white/30">/ {establishments.length}</span></p></div>
-        <div className="rounded-2xl border border-[#242424] bg-[#111111] p-5"><p className="text-xs text-white/40">Avis récupérés</p><p className="mt-2 text-3xl font-semibold text-white">{rows.length}</p></div>
-        <div className="rounded-2xl border border-[#242424] bg-[#111111] p-5"><p className="text-xs text-white/40">Note moyenne</p><p className="mt-2 text-3xl font-semibold text-[#C9A45C]">{averageRating ? averageRating.toFixed(1) : '—'} <span className="text-lg">★</span></p></div>
-        <div className="rounded-2xl border border-[#242424] bg-[#111111] p-5"><p className="text-xs text-white/40">Réponses automatiques actives</p><p className="mt-2 text-3xl font-semibold text-white">{autoReplyCount}<span className="ml-2 text-sm font-normal text-white/30">/ {establishments.length}</span></p><p className="mt-1 text-[10px] text-white/30">{repliedCount} avis avec réponse publiée</p></div>
+        {metric('Établissements connectés', `${connectedCount} / ${establishments.length}`, true)}
+        {metric('Avis affichés', rows.length)}
+        {metric('Note moyenne', averageRating ? `${averageRating.toFixed(1)} ★` : '—', true)}
+        {metric('Réponses auto configurées et connectées', `${autoReplyCount} / ${establishments.length}`)}
       </div>
 
-      <section className="rounded-3xl border border-[#242424] bg-[#111111] p-5 sm:p-6">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          <label className="block w-full max-w-sm"><span className="mb-2 block text-xs font-semibold text-white/50">Filtrer par établissement</span><select value={selectedEstablishmentId} onChange={(event) => setSelectedEstablishmentId(event.target.value)} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white"><option value="all">Tous les établissements</option>{establishments.map((establishment) => <option key={establishment.id} value={establishment.id}>{establishment.name}</option>)}</select></label>
-          <label className="relative block w-full max-w-md"><Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#C9A45C]" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Rechercher un avis, un client..." className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] py-3 pl-9 pr-3 text-sm text-white placeholder:text-white/25" /></label>
-        </div>
-
-        <div className="mt-5 space-y-3">
-          {loading ? <div className="py-12 text-center text-sm text-white/35">Chargement des avis de tous les établissements…</div> :
-            rows.length === 0 ? <div className="rounded-2xl border border-dashed border-[#242424] px-5 py-12 text-center"><MessageSquare size={24} className="mx-auto text-white/20" /><p className="mt-3 text-sm font-semibold text-white">Aucun avis trouvé</p><p className="mt-1 text-xs text-white/35">Connectez une fiche Google ou modifiez les filtres.</p></div> :
-            rows.map((review) => <article key={review.id} className="rounded-2xl border border-[#242424] bg-[#0b0b0b] p-4 sm:p-5">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2"><Building2 size={14} className="text-[#C9A45C]" /><span className="text-xs font-semibold text-[#C9A45C]">{review.establishmentName}</span><span className="text-white/20">·</span><span className="text-xs text-white/45">{review.locationName}</span></div>
-                  <p className="mt-2 text-sm font-semibold text-white">{review.reviewer_display_name || 'Client Google'}</p>
-                  <p className="mt-1 text-sm text-[#C9A45C]">{'★'.repeat(Math.max(0, Math.min(5, rating(review.star_rating))))}<span className="ml-2 text-xs text-white/30">{review.review_created_at ? new Date(review.review_created_at).toLocaleDateString('fr-FR') : 'Date inconnue'}</span></p>
-                </div>
-                {review.owner_reply ? <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/20 bg-emerald-400/5 px-3 py-1 text-[10px] font-semibold text-emerald-300"><CheckCircle2 size={12} /> Réponse publiée</span> : <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/20 bg-amber-400/5 px-3 py-1 text-[10px] font-semibold text-amber-200">À traiter</span>}
-              </div>
-              {review.comment && <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-white/70">{review.comment}</p>}
-              {review.owner_reply && <div className="mt-3 rounded-xl border border-[#242424] bg-[#111111] p-3"><p className="text-[10px] font-semibold uppercase tracking-wider text-white/35">Réponse de l’établissement</p><p className="mt-1 whitespace-pre-wrap text-sm text-white/60">{review.owner_reply}</p></div>}
-            </article>)
-          }
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-[#242424] bg-[#111111] p-5 sm:p-6">
-        <div className="mb-5"><h3 className="text-lg font-semibold text-white">Éligibilité et activation par établissement</h3><p className="mt-1 text-sm text-white/40">Cette vue permet de repérer les établissements connectés à Google et ceux pour lesquels les réponses automatiques sont activées.</p></div>
-        <div className="space-y-2">
-          {establishments.map((establishment) => {
-            const connection = connections.find((item) => item.establishment_id === establishment.id);
-            const setting = replySettings.find((item) => item.establishment_id === establishment.id);
-            const isConnected = connection?.status === 'active';
-            return <div key={establishment.id} className="flex flex-col gap-3 rounded-2xl border border-[#242424] bg-[#0b0b0b] p-4 sm:flex-row sm:items-center sm:justify-between">
-              <div><p className="text-sm font-semibold text-white">{establishment.name}</p><p className="mt-1 text-xs text-white/35">{connection?.last_sync_at ? `Dernière synchronisation : ${new Date(connection.last_sync_at).toLocaleString('fr-FR')}` : 'Aucune synchronisation enregistrée'}</p>{connection?.last_error && <p className="mt-1 text-xs text-red-300">{connection.last_error}</p>}</div>
-              <div className="flex flex-wrap gap-2">
-                <span className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${isConnected ? 'bg-emerald-400/10 text-emerald-300' : 'bg-amber-400/10 text-amber-200'}`}>{isConnected ? 'Google connecté' : 'Google non connecté'}</span>
-                <span className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${setting?.auto_reply_enabled ? 'bg-emerald-400/10 text-emerald-300' : 'bg-white/5 text-white/45'}`}>{setting?.auto_reply_enabled ? (setting.require_approval ? 'Réponses IA · validation' : 'Réponses auto activées') : 'Réponses auto désactivées'}</span>
-              </div>
-            </div>;
+      <div className="grid items-start gap-5 lg:grid-cols-[250px_minmax(0,1fr)]">
+        <nav aria-label="Navigation Google Business" className="grid grid-cols-2 gap-2 lg:sticky lg:top-4 lg:grid-cols-1">
+          {navigation.map(({ id, label, description, icon: Icon }) => {
+            const active = activeView === id;
+            return (
+              <button key={id} type="button" onClick={() => setActiveView(id)} aria-current={active ? 'page' : undefined}
+                className={`flex min-w-0 items-start gap-3 rounded-2xl border p-3 text-left transition sm:p-4 ${active ? 'border-[#C9A45C]/60 bg-[#C9A45C]/10' : 'border-[#242424] bg-[#111111] hover:border-[#C9A45C]/30'}`}>
+                <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${active ? 'bg-[#C9A45C] text-[#111111]' : 'bg-white/5 text-[#C9A45C]'}`}><Icon size={17} /></span>
+                <span className="min-w-0">
+                  <span className={`block text-xs font-semibold sm:text-sm ${active ? 'text-[#C9A45C]' : 'text-white'}`}>{label}</span>
+                  <span className="mt-1 hidden text-[11px] leading-4 text-white/40 sm:block">{description}</span>
+                </span>
+              </button>
+            );
           })}
-        </div>
-      </section>
+        </nav>
 
-      <section className="rounded-3xl border border-[#242424] bg-[#111111] p-5 sm:p-6">
-        <div className="mb-5"><h3 className="text-lg font-semibold text-white">Connexion et paramètres par établissement</h3><p className="mt-1 text-sm text-white/40">Choisissez un établissement pour connecter sa fiche, synchroniser ses avis et configurer les réponses IA.</p></div>
-        {establishments.length ? <><label className="mb-5 block max-w-md"><span className="mb-2 block text-xs font-semibold text-white/50">Établissement à configurer</span><select value={selectedEstablishmentId === 'all' ? (establishments[0]?.id ?? '') : selectedEstablishmentId} onChange={(event) => setSelectedEstablishmentId(event.target.value)} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white">{establishments.map((establishment) => <option key={establishment.id} value={establishment.id}>{establishment.name}</option>)}</select></label><GoogleReputationModule key={selectedEstablishmentId === 'all' ? (establishments[0]?.id ?? '') : selectedEstablishmentId} establishmentId={selectedEstablishmentId === 'all' ? (establishments[0]?.id ?? '') : selectedEstablishmentId} /></> : <p className="rounded-2xl border border-dashed border-[#242424] p-8 text-center text-sm text-white/40">Aucun établissement à configurer.</p>}
-      </section>
+        <main className="min-w-0 space-y-5">
+          <section className="rounded-2xl border border-[#242424] bg-[#111111] p-4 sm:p-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#C9A45C]">Établissement concerné</p>
+                <p className="mt-1 text-sm font-semibold text-white">{selectedEstablishment?.name ?? 'Tous les établissements'}</p>
+                <p className="mt-1 text-xs text-white/40">{needsSpecificEstablishment ? 'Sélectionnez un établissement avant de modifier sa connexion ou ses réponses IA.' : 'Choisissez un établissement pour filtrer les avis, ou gardez la vue globale.'}</p>
+              </div>
+              <label className="block w-full sm:max-w-xs">
+                <span className="sr-only">Sélectionner l’établissement concerné</span>
+                <select value={selectedEstablishmentId} onChange={(event) => setSelectedEstablishmentId(event.target.value)}
+                  className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white focus:border-[#C9A45C] focus:outline-none">
+                  <option value="all">Tous les établissements</option>
+                  {establishments.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+                </select>
+              </label>
+            </div>
+            {selectedEstablishment && (
+              <div className="mt-4 flex flex-wrap gap-2 border-t border-[#242424] pt-4">
+                <span className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${selectedConnection?.status === 'active' ? 'bg-emerald-400/10 text-emerald-300' : 'bg-amber-400/10 text-amber-200'}`}>
+                  {selectedConnection?.status === 'active' ? 'Google connecté' : 'Google non connecté'}
+                </span>
+                <span className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${selectedSetting?.auto_reply_enabled ? 'bg-emerald-400/10 text-emerald-300' : 'bg-white/5 text-white/45'}`}>
+                  {selectedSetting?.auto_reply_enabled ? (selectedSetting.require_approval ? 'IA avec validation' : 'Réponses automatiques activées') : 'Réponses IA désactivées'}
+                </span>
+              </div>
+            )}
+          </section>
+
+          {activeView === 'reviews' && (
+            <>
+              <section className="rounded-2xl border border-[#242424] bg-[#111111] p-4 sm:p-5">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div><h3 className="text-lg font-semibold text-white">Avis Google reçus</h3><p className="mt-1 text-xs text-white/40">Les avis sont filtrés selon l’établissement sélectionné ci-dessus.</p></div>
+                  <label className="relative block w-full sm:max-w-sm"><Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#C9A45C]" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Rechercher dans les avis…" className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] py-3 pl-9 pr-3 text-sm text-white placeholder:text-white/25" /></label>
+                </div>
+                <div className="mt-5 space-y-3">
+                  {loading ? <div className="py-12 text-center text-sm text-white/35">Chargement des avis…</div> :
+                    rows.length === 0 ? <div className="rounded-xl border border-dashed border-[#242424] px-5 py-12 text-center"><MessageSquare size={24} className="mx-auto text-white/20" /><p className="mt-3 text-sm font-semibold text-white">Aucun avis trouvé</p><p className="mt-1 text-xs text-white/35">Aucun avis pour ce filtre, ou aucune fiche Google synchronisée.</p></div> :
+                    rows.map((review) => <article key={review.id} className="rounded-xl border border-[#242424] bg-[#0b0b0b] p-4">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2"><Building2 size={14} className="text-[#C9A45C]" /><span className="text-xs font-semibold text-[#C9A45C]">{review.establishmentName}</span><span className="text-white/20">·</span><span className="text-xs text-white/45">{review.locationName}</span></div>
+                          <p className="mt-2 text-sm font-semibold text-white">{review.reviewer_display_name || 'Client Google'}</p>
+                          <p className="mt-1 text-sm text-[#C9A45C]">{'★'.repeat(Math.max(0, Math.min(5, rating(review.star_rating))))}<span className="ml-2 text-xs text-white/30">{review.review_created_at ? new Date(review.review_created_at).toLocaleDateString('fr-FR') : 'Date inconnue'}</span></p>
+                        </div>
+                        {review.owner_reply ? <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/20 bg-emerald-400/5 px-3 py-1 text-[10px] font-semibold text-emerald-300"><CheckCircle2 size={12} /> Réponse publiée</span> : <span className="rounded-full border border-amber-400/20 bg-amber-400/5 px-3 py-1 text-[10px] font-semibold text-amber-200">À traiter</span>}
+                      </div>
+                      {review.comment && <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-white/70">{review.comment}</p>}
+                      {review.owner_reply && <div className="mt-3 rounded-xl border border-[#242424] bg-[#111111] p-3"><p className="text-[10px] font-semibold uppercase tracking-wider text-white/35">Réponse de l’établissement</p><p className="mt-1 whitespace-pre-wrap text-sm text-white/60">{review.owner_reply}</p></div>}
+                    </article>)
+                  }
+                </div>
+              </section>
+            </>
+          )}
+
+          {activeView === 'establishment' && (
+            <section className="rounded-2xl border border-[#242424] bg-[#111111] p-4 sm:p-5">
+              <div className="mb-4"><h3 className="text-lg font-semibold text-white">Établissements et état de connexion</h3><p className="mt-1 text-xs text-white/40">Choisissez un commerce avec le sélecteur ci-dessus. Sa sélection reste active lorsque vous changez de tuile.</p></div>
+              <div className="space-y-2">
+                {establishments.map((item) => {
+                  const connection = connections.find((row) => row.establishment_id === item.id);
+                  const setting = replySettings.find((row) => row.establishment_id === item.id);
+                  const active = selectedEstablishmentId === item.id;
+                  return <button key={item.id} type="button" onClick={() => setSelectedEstablishmentId(item.id)} className={`flex w-full flex-col gap-3 rounded-xl border p-4 text-left sm:flex-row sm:items-center sm:justify-between ${active ? 'border-[#C9A45C]/60 bg-[#C9A45C]/5' : 'border-[#242424] bg-[#0b0b0b] hover:border-[#C9A45C]/30'}`}>
+                    <span><span className="block text-sm font-semibold text-white">{item.name}</span><span className="mt-1 block text-xs text-white/40">{connection?.last_sync_at ? `Dernière synchro : ${new Date(connection.last_sync_at).toLocaleString('fr-FR')}` : 'Aucune synchronisation enregistrée'}</span>{connection?.last_error && <span className="mt-1 block text-xs text-red-300">{connection.last_error}</span>}</span>
+                    <span className="flex flex-wrap gap-2"><span className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${connection?.status === 'active' ? 'bg-emerald-400/10 text-emerald-300' : 'bg-amber-400/10 text-amber-200'}`}>{connection?.status === 'active' ? 'Google connecté' : 'Non connecté'}</span><span className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${setting?.auto_reply_enabled ? 'bg-emerald-400/10 text-emerald-300' : 'bg-white/5 text-white/45'}`}>{setting?.auto_reply_enabled ? (setting.require_approval ? 'IA · validation' : 'Réponses auto') : 'IA désactivée'}</span></span>
+                  </button>;
+                })}
+                {!establishments.length && <p className="py-8 text-center text-sm text-white/40">Aucun établissement disponible.</p>}
+              </div>
+            </section>
+          )}
+
+          {activeView === 'ai' && (
+            <section className="rounded-2xl border border-[#242424] bg-[#111111] p-4 sm:p-5">
+              <div className="flex items-start gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#C9A45C]/10 text-[#C9A45C]"><Sparkles size={19} /></span><div><h3 className="text-lg font-semibold text-white">Réponses IA de l’établissement</h3><p className="mt-1 text-sm text-white/40">Le réglage est propre au commerce sélectionné. Pour modifier le mode de réponse, ouvrez « Connexion Google ».</p></div></div>
+              {!selectedEstablishment ? <p className="mt-5 rounded-xl border border-dashed border-[#242424] p-5 text-sm text-amber-100">Sélectionnez un établissement dans le menu ci-dessus pour consulter sa configuration IA.</p> :
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-xl border border-[#242424] bg-[#0b0b0b] p-4"><p className="text-xs text-white/40">Établissement</p><p className="mt-2 font-semibold text-white">{selectedEstablishment.name}</p></div>
+                  <div className="rounded-xl border border-[#242424] bg-[#0b0b0b] p-4"><p className="text-xs text-white/40">État des réponses IA</p><p className={`mt-2 font-semibold ${selectedSetting?.auto_reply_enabled ? 'text-emerald-300' : 'text-white/60'}`}>{selectedSetting?.auto_reply_enabled ? (selectedSetting.require_approval ? 'Génération IA avec validation manuelle' : 'Réponses automatiques activées') : 'Désactivées'}</p></div>
+                  <div className="rounded-xl border border-[#242424] bg-[#0b0b0b] p-4"><p className="text-xs text-white/40">Langue</p><p className="mt-2 font-semibold text-white">{selectedSetting?.auto_reply_language || 'Français (par défaut)'}</p></div>
+                  <div className="rounded-xl border border-[#242424] bg-[#0b0b0b] p-4"><p className="text-xs text-white/40">Ton des réponses</p><p className="mt-2 font-semibold text-white">{selectedSetting?.auto_reply_tone || 'Professionnel et chaleureux (par défaut)'}</p></div>
+                </div>
+              }
+              <button type="button" onClick={() => setActiveView('settings')} className="mt-5 inline-flex items-center gap-2 rounded-xl border border-[#C9A45C]/30 px-4 py-3 text-xs font-semibold text-[#C9A45C]">Configurer les réponses et la connexion <Settings2 size={14} /></button>
+            </section>
+          )}
+
+          {activeView === 'settings' && (
+            <section className="rounded-2xl border border-[#242424] bg-[#111111] p-4 sm:p-5">
+              <div className="mb-5"><h3 className="text-lg font-semibold text-white">Connexion Google et paramètres</h3><p className="mt-1 text-xs text-white/40">Les actions ci-dessous ne concernent que l’établissement sélectionné.</p></div>
+              {!selectedEstablishment ? <p className="rounded-xl border border-dashed border-[#242424] p-6 text-center text-sm text-amber-100">Sélectionnez d’abord un établissement dans le menu « Établissement concerné ».</p> :
+                <GoogleReputationModule key={selectedEstablishment.id} establishmentId={selectedEstablishment.id} />
+              }
+            </section>
+          )}
+        </main>
+      </div>
     </div>
   );
 }
