@@ -141,7 +141,6 @@ type BillingSnapshot = {
 type AdminSection =
   | 'overview'
   | 'establishments'
-  | 'google-business'
   | 'responsibles'
   | 'employees'
   | 'reviews'
@@ -162,7 +161,7 @@ export default function Admin() {
   const sectionFromPath = (pathname: string): AdminSection => {
     const slug = pathname.replace(/^\/admin\/?/, '').split('/')[0];
     const validSections: AdminSection[] = [
-      'overview', 'establishments', 'google-business', 'responsibles', 'employees', 'reviews',
+      'overview', 'establishments', 'responsibles', 'employees', 'reviews',
       'analysis', 'ai', 'analytics', 'reports', 'billing', 'loyalty', 'system',
     ];
     return validSections.includes(slug as AdminSection) ? slug as AdminSection : 'overview';
@@ -554,11 +553,6 @@ export default function Admin() {
       icon: Building2,
     },
     {
-      id: 'google-business',
-      label: 'Google Business',
-      icon: Star,
-    },
-    {
       id: 'responsibles',
       label: 'Responsables',
       icon: UserRound,
@@ -721,12 +715,11 @@ export default function Admin() {
             />
           )}
 
-          {section === 'google-business' && (
-            <GoogleBusinessAdminSection establishments={establishments} />
-          )}
-
           {section === 'reviews' && (
-            <ReviewsSection establishments={establishments} />
+            <div className="space-y-10">
+              <ReviewsSection establishments={establishments} />
+              <GoogleBusinessAdminSection establishments={establishments} />
+            </div>
           )}
 
           {section === 'analysis' && (
