@@ -39,14 +39,15 @@ type Review = {
   reply_published_at?: string | null;
 };
 type ReviewRow = Review & { establishmentName: string; locationName: string };
-type View = 'reviews' | 'appReviews' | 'establishment' | 'ai' | 'settings';
+type View = 'reviews' | 'appReviews' | 'establishment' | 'ai' | 'sync' | 'settings';
 
 const navigation: { id: View; label: string; description: string; icon: typeof MessageSquare }[] = [
   { id: 'reviews', label: 'Avis Google', description: 'Avis Google et réponses', icon: MessageSquare },
   { id: 'appReviews', label: 'Avis Kelyani', description: 'Avis reçus dans Kelyani', icon: MessageSquare },
-  { id: 'establishment', label: 'Établissement concerné', description: 'Choisir le commerce à gérer', icon: Store },
-  { id: 'ai', label: 'Réponses IA', description: 'État et mode de réponse', icon: Sparkles },
-  { id: 'settings', label: 'Connexion Google', description: 'Connexion et synchronisation', icon: Settings2 },
+  { id: 'establishment', label: 'Connexion & attribution', description: 'Connecter Google et associer les fiches', icon: Store },
+  { id: 'ai', label: 'Configuration IA', description: 'Règles IA pour le commerce choisi', icon: Sparkles },
+  { id: 'sync', label: 'Fréquence de rafraîchissement', description: 'Régler le délai de synchronisation', icon: RefreshCw },
+  { id: 'settings', label: 'Bonus & liens', description: 'Points et liens vers les avis', icon: Settings2 },
 ];
 
 function rating(value: string | null) {
@@ -213,7 +214,7 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
   const selectedEstablishment = establishments.find((item) => item.id === selectedEstablishmentId);
   const selectedSetting = replySettings.find((item) => item.establishment_id === selectedEstablishmentId);
   const selectedConnection = connections.find((item) => item.establishment_id === selectedEstablishmentId);
-  const needsSpecificEstablishment = activeView === 'ai' || activeView === 'settings';
+  const needsSpecificEstablishment = activeView === 'ai' || activeView === 'sync' || activeView === 'settings';
 
   const metric = (label: string, value: string | number, accent = false) => (
     <div className="rounded-2xl border border-[#242424] bg-[#111111] p-4 sm:p-5">
@@ -334,6 +335,7 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
           )}
 
           {activeView === 'establishment' && (
+            <>
             <section className="rounded-2xl border border-[#242424] bg-[#111111] p-4 sm:p-5">
               <div className="mb-4"><h3 className="text-lg font-semibold text-white">Associer les fiches Google manuellement</h3><p className="mt-1 text-xs leading-5 text-white/40">Chaque fiche Google reste indépendante. Les avis d’une fiche ne seront affichés sous un établissement Kelyani qu’après association explicite ci-dessous. Vérifiez le nom et l’adresse avant de choisir.</p></div>
               <div className="space-y-3">
@@ -394,28 +396,38 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
                 {!locations.length && <p className="py-8 text-center text-sm text-white/40">Aucune fiche Google synchronisée. Connectez Google puis actualisez pour découvrir les fiches.</p>}
               </div>
             </section>
+            <section className="rounded-2xl border border-[#242424] bg-[#111111] p-4 sm:p-5">
+              <div className="mb-4"><h3 className="text-lg font-semibold text-white">Connexion Google pour cet établissement</h3><p className="mt-1 text-xs text-white/40">Choisissez un établissement dans le sélecteur au-dessus pour démarrer ou vérifier sa connexion Google. L’association des fiches reste gérée dans le panneau précédent.</p></div>
+              {!selectedEstablishment ? <p className="rounded-xl border border-dashed border-[#242424] p-6 text-center text-sm text-amber-100">Sélectionnez un établissement précis dans le sélecteur ci-dessus pour connecter Google.</p> :
+                <GoogleReputationModule key={selectedEstablishment.id} establishmentId={selectedEstablishment.id} mode="connection" />
+              }
+            </section>
+            </>
           )}
 
           {activeView === 'ai' && (
             <section className="rounded-2xl border border-[#242424] bg-[#111111] p-4 sm:p-5">
-              <div className="flex items-start gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#C9A45C]/10 text-[#C9A45C]"><Sparkles size={19} /></span><div><h3 className="text-lg font-semibold text-white">Réponses IA de l’établissement</h3><p className="mt-1 text-sm text-white/40">Le réglage est propre au commerce sélectionné. Pour modifier le mode de réponse, ouvrez « Connexion Google ».</p></div></div>
-              {!selectedEstablishment ? <p className="mt-5 rounded-xl border border-dashed border-[#242424] p-5 text-sm text-amber-100">Sélectionnez un établissement dans le menu ci-dessus pour consulter sa configuration IA.</p> :
-                <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-xl border border-[#242424] bg-[#0b0b0b] p-4"><p className="text-xs text-white/40">Établissement</p><p className="mt-2 font-semibold text-white">{selectedEstablishment.name}</p></div>
-                  <div className="rounded-xl border border-[#242424] bg-[#0b0b0b] p-4"><p className="text-xs text-white/40">État des réponses IA</p><p className={`mt-2 font-semibold ${selectedSetting?.auto_reply_enabled ? 'text-emerald-300' : 'text-white/60'}`}>{selectedSetting?.auto_reply_enabled ? (selectedSetting.require_approval ? 'Génération IA avec validation manuelle' : 'Réponses automatiques activées') : 'Désactivées'}</p></div>
-                  <div className="rounded-xl border border-[#242424] bg-[#0b0b0b] p-4"><p className="text-xs text-white/40">Langue</p><p className="mt-2 font-semibold text-white">{selectedSetting?.auto_reply_language || 'Français (par défaut)'}</p></div>
-                  <div className="rounded-xl border border-[#242424] bg-[#0b0b0b] p-4"><p className="text-xs text-white/40">Ton des réponses</p><p className="mt-2 font-semibold text-white">{selectedSetting?.auto_reply_tone || 'Professionnel et chaleureux (par défaut)'}</p></div>
-                </div>
+              <div className="mb-4"><h3 className="text-lg font-semibold text-white">Configuration IA par établissement</h3><p className="mt-1 text-xs text-white/40">Réglez le mode de réponse, la validation, le seuil de publication, la langue et le ton pour le commerce sélectionné.</p></div>
+              {!selectedEstablishment ? <p className="rounded-xl border border-dashed border-[#242424] p-6 text-center text-sm text-amber-100">Sélectionnez un établissement dans le menu ci-dessus pour configurer ses réponses IA.</p> :
+                <GoogleReputationModule key={selectedEstablishment.id} establishmentId={selectedEstablishment.id} mode="ai" />
               }
-              <button type="button" onClick={() => setActiveView('settings')} className="mt-5 inline-flex items-center gap-2 rounded-xl border border-[#C9A45C]/30 px-4 py-3 text-xs font-semibold text-[#C9A45C]">Configurer les réponses et la connexion <Settings2 size={14} /></button>
+            </section>
+          )}
+
+          {activeView === 'sync' && (
+            <section className="rounded-2xl border border-[#242424] bg-[#111111] p-4 sm:p-5">
+              <div className="mb-4"><h3 className="text-lg font-semibold text-white">Délai de rafraîchissement des avis</h3><p className="mt-1 text-xs text-white/40">Le délai est indépendant pour chaque établissement et ne modifie pas les autres tâches planifiées de KELYANI.</p></div>
+              {!selectedEstablishment ? <p className="rounded-xl border border-dashed border-[#242424] p-6 text-center text-sm text-amber-100">Sélectionnez un établissement pour régler son intervalle de synchronisation.</p> :
+                <GoogleReputationModule key={selectedEstablishment.id} establishmentId={selectedEstablishment.id} mode="sync" />
+              }
             </section>
           )}
 
           {activeView === 'settings' && (
             <section className="rounded-2xl border border-[#242424] bg-[#111111] p-4 sm:p-5">
-              <div className="mb-5"><h3 className="text-lg font-semibold text-white">Connexion Google et paramètres</h3><p className="mt-1 text-xs text-white/40">Les actions ci-dessous ne concernent que l’établissement sélectionné.</p></div>
-              {!selectedEstablishment ? <p className="rounded-xl border border-dashed border-[#242424] p-6 text-center text-sm text-amber-100">Sélectionnez d’abord un établissement dans le menu « Établissement concerné ».</p> :
-                <GoogleReputationModule key={selectedEstablishment.id} establishmentId={selectedEstablishment.id} />
+              <div className="mb-5"><h3 className="text-lg font-semibold text-white">Bonus et liens d’avis</h3><p className="mt-1 text-xs text-white/40">Les réglages ci-dessous ne concernent que l’établissement sélectionné.</p></div>
+              {!selectedEstablishment ? <p className="rounded-xl border border-dashed border-[#242424] p-6 text-center text-sm text-amber-100">Sélectionnez un établissement dans le menu « Établissement concerné ».</p> :
+                <GoogleReputationModule key={selectedEstablishment.id} establishmentId={selectedEstablishment.id} mode="links" />
               }
             </section>
           )}
