@@ -271,7 +271,7 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#C9A45C]">Établissement concerné</p>
                 <p className="mt-1 text-sm font-semibold text-white">{selectedEstablishment?.name ?? 'Tous les établissements'}</p>
-                <p className="mt-1 text-xs text-white/40">{needsSpecificEstablishment ? 'Sélectionnez un établissement avant de modifier sa connexion ou ses réponses IA.' : 'Choisissez un établissement pour filtrer les avis, ou gardez la vue globale.'}</p>
+                <p className="mt-1 text-xs text-white/40">{needsSpecificEstablishment ? 'Sélectionnez un établissement avant de modifier ses réglages.' : activeView === 'establishment' ? 'Choisissez un établissement pour connecter son compte Google ; les associations de fiches restent globales.' : 'Choisissez un établissement pour filtrer les avis, ou gardez la vue globale.'}</p>
               </div>
               <label className="block w-full sm:max-w-xs">
                 <span className="sr-only">Sélectionner l’établissement concerné</span>
