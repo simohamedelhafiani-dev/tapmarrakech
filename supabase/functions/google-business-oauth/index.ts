@@ -44,6 +44,9 @@ Deno.serve(async req=>{
   const auth=req.headers.get('Authorization');if(!auth)return json({success:false,error:'Session utilisateur manquante.'},401);
   const bearer=auth.replace(/^Bearer\s+/i,'');
   const {data:{user}}=await db.auth.getUser(bearer);if(!user)return json({success:false,error:'Session invalide.'},401);
+  const {data:profile,error:profileError}=await db.from('profiles').select('role').eq('id',user.id).maybeSingle();
+  if(profileError)throw profileError;
+  if(profile?.role!=='admin')return json({success:false,error:'Connexion Google Business réservée à l’administrateur.'},403);
   if(action==='start'){
    const body=await req.json(),eid=String(body?.establishment_id??'');if(!eid)return json({success:false,error:'establishment_id requis.'},400);
    const {data:access}=await db.rpc('user_has_establishment_access',{p_establishment_id:eid});if(!access)return json({success:false,error:'Accès établissement refusé.'},403);
