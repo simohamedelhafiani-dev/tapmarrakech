@@ -44,6 +44,9 @@ Deno.serve(async req=>{
   const auth=req.headers.get('Authorization');if(!auth)return json({success:false,error:'Session utilisateur manquante.'},401);
   const bearer=auth.replace(/^Bearer\s+/i,'');
   const {data:{user}}=await db.auth.getUser(bearer);if(!user)return json({success:false,error:'Session invalide.'},401);
+  const {data:profile,error:profileError}=await db.from('profiles').select('role').eq('id',user.id).maybeSingle();
+  if(profileError)throw profileError;
+  if(profile?.role!=='admin')return json({success:false,error:'Connexion Google Business réservée à l’administrateur.'},403);
   if(action==='start'){
    const body=await req.json(),eid=String(body?.establishment_id??'');if(!eid)return json({success:false,error:'establishment_id requis.'},400);
    const {data:access}=await db.rpc('user_has_establishment_access',{p_establishment_id:eid});if(!access)return json({success:false,error:'Accès établissement refusé.'},403);
@@ -52,8 +55,13 @@ Deno.serve(async req=>{
    return json({success:true,authorization_url:`https://accounts.google.com/o/oauth2/v2/auth?${p.toString()}`});
   }
   if(action==='refresh'){
+   const {data:profile,error:profileError}=await db.from('profiles').select('role').eq('id',user.id).maybeSingle();
+   if(profileError)throw profileError;
+   if(profile?.role!=='admin')return json({success:false,error:'Accès réservé à l’administrateur.'},403);
    const body=await req.json(),eid=String(body?.establishment_id??'');if(!eid)return json({success:false,error:'establishment_id requis.'},400);
-   const {data:c}=await db.from('google_business_connections').select('*').eq('establishment_id',eid).maybeSingle();if(!c)return json({success:false,error:'Connexion Google introuvable.'},404);
+   const {data:c,error:connectionError}=await db.from('google_business_connections').select('*').eq('establishment_id',eid).maybeSingle();
+   if(connectionError)throw connectionError;
+   if(!c)return json({success:false,error:'Connexion Google introuvable.'},404);
    const t=await refreshToken(c.refresh_token);const aid=await getGoogleAccountId(t.access_token);
    await db.from('google_business_connections').update({google_account_id:aid,access_token:t.access_token,token_expires_at:new Date(Date.now()+Number(t.expires_in??3600)*1000).toISOString(),status:'active',last_error:null,updated_at:new Date().toISOString()}).eq('id',c.id);
    return json({success:true,google_account_id:aid});
