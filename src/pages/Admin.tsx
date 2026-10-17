@@ -574,7 +574,7 @@ export default function Admin() {
     },
     {
       id: 'ai',
-      label: 'Configuration IA',
+      label: 'Intelligence artificielle',
       icon: Brain,
     },
     {
