@@ -71,19 +71,36 @@ function ratingNumber(value: unknown) {
 
 async function generateReply(comment: string, stars: string, language: string, tone: string) {
   const { data: settings, error: settingsError } = await db.from('ai_global_settings')
-    .select('provider,model,api_key,enabled').eq('id', true).maybeSingle();
+    .select('provider,model,api_key,enabled,temperature,max_output_tokens,system_instructions').eq('id', true).maybeSingle();
   if (settingsError) throw settingsError;
   const provider = String(settings?.provider ?? '').trim().toLowerCase();
   const model = String(settings?.model ?? '').trim();
   const key = String(settings?.api_key ?? '').trim();
+  const temperature = Number(settings?.temperature);
+  const maxOutputTokens = Number(settings?.max_output_tokens);
+  const systemInstructions = String(settings?.system_instructions ?? '').trim();
   if (settings?.enabled !== true || provider !== 'openai' || !model || !key) {
     throw new Error('La configuration IA globale est désactivée ou incomplète. Vérifiez Admin → Configuration IA.');
+  }
+  if (!Number.isFinite(temperature) || temperature < 0 || temperature > 2) {
+    throw new Error('La température IA globale doit être comprise entre 0 et 2.');
+  }
+  if (!Number.isInteger(maxOutputTokens) || maxOutputTokens < 256 || maxOutputTokens > 128000) {
+    throw new Error('Le nombre de tokens IA global doit être compris entre 256 et 128000.');
   }
   const prompt = `Rédige une réponse courte à un avis Google. Langue: ${language || 'français'}. Ton: ${tone || 'professionnel et chaleureux'}. Note: ${stars}. Avis: ${comment}. N'invente aucun fait, ne mentionne aucune récompense ni contrepartie. Maximum 70 mots.`;
   const response = await fetch('https://api.openai.com/v1/responses', {
     method: 'POST',
     headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model, input: prompt, max_output_tokens: 180 }),
+    body: JSON.stringify({
+      model,
+      input: [
+        { role: 'system', content: [{ type: 'input_text', text: ['Tu rédiges des réponses Google factuelles, courtes, polies et sans promesse commerciale.', systemInstructions].filter(Boolean).join(' ') }] },
+        { role: 'user', content: [{ type: 'input_text', text: prompt }] },
+      ],
+      max_output_tokens: maxOutputTokens,
+      temperature,
+    }),
   });
   const data = await response.json();
   if (!response.ok) throw new Error(data?.error?.message ?? 'Génération IA impossible');
