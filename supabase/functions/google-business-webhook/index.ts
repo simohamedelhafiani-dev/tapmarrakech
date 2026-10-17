@@ -161,10 +161,15 @@ Deno.serve(async (req) => {
     }, { onConflict: 'google_review_name' }).select('id').single();
     if (storeError) throw storeError;
 
+    // Only an explicitly mapped Google location may trigger AI replies or publication.
+    if (!loc.mapped_establishment_id) {
+      return json({ ok: true, review_id: stored.id, auto_reply: 'skipped_unmapped_location' });
+    }
+
     const { data: settings, error: settingsError } = await db
       .from('google_business_settings')
       .select('auto_reply_enabled,require_approval,auto_reply_min_rating,auto_reply_language,auto_reply_tone,auto_reply_activated_at')
-      .eq('establishment_id', connection.establishment_id)
+      .eq('establishment_id', loc.mapped_establishment_id)
       .maybeSingle();
     if (settingsError) throw settingsError;
 
