@@ -199,7 +199,9 @@ Deno.serve(async (request) => {
             },
           },
           max_output_tokens: Math.min(Math.max(Number(aiSettings.max_output_tokens) || 12000, 2000), 30000),
-          temperature: Math.min(Math.max(Number(aiSettings.temperature) || 0.1, 0), 1),
+          temperature: Number.isFinite(Number(aiSettings.temperature)) && Number(aiSettings.temperature) >= 0 && Number(aiSettings.temperature) <= 2
+            ? Number(aiSettings.temperature)
+            : 0.2,
         }),
       });
 
