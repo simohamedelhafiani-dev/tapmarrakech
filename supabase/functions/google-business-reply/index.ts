@@ -53,15 +53,31 @@ async function publishDraft(reviewId:string, replyOverride?:string){
  const reply=String(replyOverride??review.reply_draft??'').trim();
  if(!reply)throw new Error('Aucun brouillon à publier. Générez une réponse ou enregistrez un brouillon.');
  if(replyOverride!==undefined){const {error:draftError}=await db.from('google_business_reviews').update({reply_draft:reply,reply_status:'ready_to_publish',reply_error:null,updated_at:new Date().toISOString()}).eq('id',reviewId);if(draftError)throw draftError;}
- const token=await getToken(c);
  const aid=String(review.google_business_locations.google_account_id||c.google_account_id||'');
  const gid=String(review.google_business_locations.google_location_id||'');
  const rid=String(review.google_review_name).split('/').pop()||'';
  if(!aid||!gid||!rid)throw new Error('Mapping Google incomplet');
+ const markFailed=async(message:string)=>{
+  const {error}=await db.from('google_business_reviews').update({reply_status:'failed',reply_error:message,updated_at:new Date().toISOString()}).eq('id',reviewId);
+  if(error)console.error('Unable to persist Google reply failure status',error);
+ };
+ let token:string;
+ try{token=await getToken(c)}catch(error){
+  const message=error instanceof Error?error.message:'Impossible de renouveler le jeton Google.';
+  await markFailed(message);
+  throw error;
+ }
  const endpoint=`https://mybusiness.googleapis.com/v4/accounts/${aid}/locations/${gid}/reviews/${encodeURIComponent(rid)}/reply`;
- const response=await fetch(endpoint,{method:'PUT',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({comment:reply})});
+ let response:Response;
+ try{
+  response=await fetch(endpoint,{method:'PUT',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({comment:reply})});
+ }catch(error){
+  const message='Résultat de publication Google indéterminé après une erreur réseau. Vérifiez l’avis Google avant de réessayer.';
+  await markFailed(message);
+  throw new Error(message);
+ }
  const raw=await response.text();let data:any={};try{data=JSON.parse(raw)}catch{}
- if(!response.ok){const message=data?.error?.message??raw.slice(0,300)??'Google reply failed';await db.from('google_business_reviews').update({reply_status:'failed',reply_error:String(message),updated_at:new Date().toISOString()}).eq('id',reviewId);throw new Error(String(message))}
+ if(!response.ok){const message=String(data?.error?.message||raw.slice(0,300)||'Google reply failed');await markFailed(message);throw new Error(message)}
  const now=new Date().toISOString();
  const {error}=await db.from('google_business_reviews').update({owner_reply:reply,owner_reply_updated_at:now,reply_published_at:now,reply_status:'published',reply_error:null,last_synced_at:now,raw_payload:data,updated_at:now}).eq('id',reviewId);
  if(error)throw error;
