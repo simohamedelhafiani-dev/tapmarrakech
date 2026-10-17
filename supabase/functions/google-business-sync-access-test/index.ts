@@ -221,9 +221,11 @@ Deno.serve(async (req: Request) => {
           const isNewReview = !existing;
           const threshold = Math.max(1, Math.min(5, Number(replySettings?.auto_reply_min_rating ?? 4)));
           const reviewRating = ratingNumber(review.starRating);
+          // The rating threshold is authoritative for autonomous mode: reviews at or
+          // above the configured threshold auto-publish when auto replies are enabled.
+          // Reviews below the threshold always get a draft for human approval.
           const shouldAutoPublish = isNewReview && replySettings?.auto_reply_enabled === true &&
-            replySettings?.require_approval !== true && reviewRating >= threshold &&
-            !review.reviewReply?.comment && Boolean(review.comment?.trim());
+            reviewRating >= threshold && !review.reviewReply?.comment && Boolean(review.comment?.trim());
           if (shouldAutoPublish && savedReview) {
             try {
               const draft = await generateReply(String(review.comment), String(review.starRating ?? ''), String(replySettings.auto_reply_language ?? 'fr'), String(replySettings.auto_reply_tone ?? 'professional_warm'));
