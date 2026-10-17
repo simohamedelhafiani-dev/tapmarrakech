@@ -27,6 +27,7 @@ type Setting = {
   auto_reply_tone: string;
   require_approval: boolean;
   auto_reply_min_rating: number;
+  sync_interval_minutes: number;
 };
 
 type GoogleReview = {
@@ -45,6 +46,7 @@ const emptySettings: Setting = {
   auto_reply_tone: 'professional_warm',
   require_approval: false,
   auto_reply_min_rating: 4,
+  sync_interval_minutes: 10,
 };
 
 function stars(value: string | null) {
@@ -101,7 +103,7 @@ export default function GoogleReputationModule({ establishmentId }: Props) {
           .maybeSingle(),
         supabase
           .from('google_business_settings')
-          .select('auto_reply_enabled,auto_reply_language,auto_reply_tone,require_approval,auto_reply_min_rating')
+          .select('auto_reply_enabled,auto_reply_language,auto_reply_tone,require_approval,auto_reply_min_rating,sync_interval_minutes')
           .eq('establishment_id', establishmentId)
           .maybeSingle(),
       ]);
@@ -114,7 +116,7 @@ export default function GoogleReputationModule({ establishmentId }: Props) {
       setGoogleReviewUrl(establishment?.google_review_url ?? '');
       setTripadvisorReviewUrl(establishment?.tripadvisor_review_url ?? '');
       setConnection(connectionRow as Connection | null);
-      setSettings(settingsRow ? { ...emptySettings, ...(settingsRow as Setting), auto_reply_min_rating: Number((settingsRow as Setting).auto_reply_min_rating ?? 4) } : emptySettings);
+      setSettings(settingsRow ? { ...emptySettings, ...(settingsRow as Setting), auto_reply_min_rating: Number((settingsRow as Setting).auto_reply_min_rating ?? 4), sync_interval_minutes: Number((settingsRow as Setting).sync_interval_minutes ?? 10) } : emptySettings);
 
       await loadReviews();
     } catch (e) {
@@ -369,6 +371,7 @@ export default function GoogleReputationModule({ establishmentId }: Props) {
             <input type="checkbox" checked={settings.require_approval} onChange={(e) => setSettings((v) => ({ ...v, require_approval: e.target.checked }))} />
           </label>
           <label className="block"><span className="mb-2 block text-xs font-semibold text-white/55">Seuil de publication automatique</span><select value={settings.auto_reply_min_rating} onChange={(e) => setSettings((v) => ({ ...v, auto_reply_min_rating: Number(e.target.value) }))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white"><option value={5}>5 étoiles uniquement</option><option value={4}>4 étoiles et plus (recommandé)</option><option value={3}>3 étoiles et plus</option><option value={2}>2 étoiles et plus</option><option value={1}>Toutes les notes</option></select><p className="mt-2 text-xs text-white/35">Les avis sous ce seuil restent en brouillon et nécessitent une validation humaine.</p></label>
+          <label className="block"><span className="mb-2 block text-xs font-semibold text-white/55">Fréquence de synchronisation</span><select value={settings.sync_interval_minutes} onChange={(e) => setSettings((v) => ({ ...v, sync_interval_minutes: Number(e.target.value) }))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white"><option value={5}>Toutes les 5 minutes — flux élevé</option><option value={10}>Toutes les 10 minutes — recommandé</option><option value={15}>Toutes les 15 minutes</option><option value={30}>Toutes les 30 minutes — flux modéré</option><option value={60}>Toutes les heures — flux faible</option></select><p className="mt-2 text-xs text-white/35">Le réglage s’applique à cet établissement. La synchronisation manuelle reste disponible.</p></label>
           <label className="block"><span className="mb-2 block text-xs font-semibold text-white/55">Langue</span><select value={settings.auto_reply_language} onChange={(e) => setSettings((v) => ({ ...v, auto_reply_language: e.target.value }))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white"><option value="fr">Français</option><option value="en">English</option><option value="ar">العربية</option></select></label>
           <label className="block"><span className="mb-2 block text-xs font-semibold text-white/55">Ton</span><select value={settings.auto_reply_tone} onChange={(e) => setSettings((v) => ({ ...v, auto_reply_tone: e.target.value }))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white"><option value="professional_warm">Professionnel & chaleureux</option><option value="professional">Professionnel</option><option value="friendly">Amical</option><option value="luxury">Premium / luxe</option></select></label>
         </div>
