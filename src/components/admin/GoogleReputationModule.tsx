@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
-type Props = { establishmentId: string };
+type Props = { establishmentId: string; mode?: 'connection' | 'ai' | 'sync' | 'links' };
 
 type Connection = {
   status: 'active' | 'revoked' | 'error';
@@ -68,7 +68,7 @@ const numericValue = Number(value ?? 0);
 return Number.isFinite(numericValue) ? numericValue : 0;
 }
 
-export default function GoogleReputationModule({ establishmentId }: Props) {
+export default function GoogleReputationModule({ establishmentId, mode = 'ai' }: Props) {
   const [connection, setConnection] = useState<Connection | null>(null);
   const [settings, setSettings] = useState<Setting>(emptySettings);
   const [reviewBonus, setReviewBonus] = useState(0);
@@ -262,35 +262,28 @@ export default function GoogleReputationModule({ establishmentId }: Props) {
     }
   };
 
-  const saveSettings = async () => {
+  const saveSettings = async (scope: 'ai' | 'sync' | 'links') => {
     setSaving(true);
     setError('');
     setMessage('');
     try {
-      const { error: settingsError } = await supabase
-        .from('google_business_settings')
-        .upsert(
-          {
-            establishment_id: establishmentId,
-            ...settings,
-          },
-          { onConflict: 'establishment_id' },
-        );
-      if (settingsError) throw settingsError;
-
-      const { error: establishmentError } = await supabase
-        .from('establishments')
-        .update({
+      if (scope === 'ai' || scope === 'sync') {
+        const settingsPayload = scope === 'ai'
+          ? { establishment_id: establishmentId, auto_reply_enabled: settings.auto_reply_enabled, auto_reply_language: settings.auto_reply_language, auto_reply_tone: settings.auto_reply_tone, require_approval: settings.require_approval, auto_reply_min_rating: settings.auto_reply_min_rating }
+          : { establishment_id: establishmentId, sync_interval_minutes: settings.sync_interval_minutes };
+        const { error: settingsError } = await supabase.from('google_business_settings').upsert(settingsPayload, { onConflict: 'establishment_id' });
+        if (settingsError) throw settingsError;
+        setMessage(scope === 'ai' ? 'Configuration des réponses IA enregistrée.' : 'Fréquence de synchronisation enregistrée.');
+      } else {
+        const { error: establishmentError } = await supabase.from('establishments').update({
           review_bonus_points: Math.max(0, Math.floor(Number(reviewBonus) || 0)),
           google_review_url: googleReviewUrl.trim(),
           tripadvisor_review_url: tripadvisorReviewUrl.trim() || null,
-        })
-        .eq('id', establishmentId);
-
-      if (establishmentError) throw establishmentError;
-
-      setReviewBonus(Math.max(0, Math.floor(Number(reviewBonus) || 0)));
-      setMessage('Paramètres Google Business enregistrés.');
+        }).eq('id', establishmentId);
+        if (establishmentError) throw establishmentError;
+        setReviewBonus(Math.max(0, Math.floor(Number(reviewBonus) || 0)));
+        setMessage('Bonus et liens d’avis enregistrés.');
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Impossible d’enregistrer les paramètres.');
     } finally {
@@ -298,6 +291,7 @@ export default function GoogleReputationModule({ establishmentId }: Props) {
     }
   };
 
+      {mode === 'connection' && (
   const summary = useMemo(() => {
     const ratings = reviews.map((review) => stars(review.star_rating)).filter((n) => n > 0);
     const average = ratings.length
@@ -336,13 +330,16 @@ export default function GoogleReputationModule({ establishmentId }: Props) {
                 </button>
               </>
             ) : (
-              <button type="button" onClick={() => void connectGoogle()} disabled={connecting} className="inline-flex items-center gap-2 rounded-xl bg-[#C9A45C] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50">
+              <button type="button" onClick={() => void connectGoogle()} disabled={connect      )}
+
+ing} className="inline-flex items-center gap-2 rounded-xl bg-[#C9A45C] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50">
                 <Link2 size={14} /> {connecting ? 'Connexion…' : 'Connecter Google'}
               </button>
             )}
           </div>
         </div>
-        {connection?.last_sync_at && <p className="mt-4 text-[10px] text-white/30">Dernière synchronisation : {new Date(connection.last_sync_at).toLocaleString('fr-FR')}</p>}
+        {connection?.last_sync_at && <p className="mt-4 text-[10px] text-white/30">Derni      {mode === 'connection' && (
+ère synchronisation : {new Date(connection.last_sync_at).toLocaleString('fr-FR')}</p>}
         {connection?.last_error && <p className="mt-2 text-xs text-amber-300">{connection.last_error}</p>}
       </div>
 
@@ -354,7 +351,10 @@ export default function GoogleReputationModule({ establishmentId }: Props) {
       )}
 
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-2xl border border-[#242424] bg-[#111111] p-5"><p className="text-[10px] uppercase tracking-[0.16em] text-white/35">Avis Google</p><p className="mt-2 text-2xl font-semibold text-[#C9A45C]">{summary.total}</p></div>
+        <div className="rounded-2xl border border-[#242424] bg-[#111111] p-5"><p className="text-[10px] uppercase tracking-[0.16em] text-white/35">Avis Google</p><p className="mt-2 text-2xl font-semibold te      )}
+
+      {mode === 'ai' && (
+xt-[#C9A45C]">{summary.total}</p></div>
         <div className="rounded-2xl border border-[#242424] bg-[#111111] p-5"><p className="text-[10px] uppercase tracking-[0.16em] text-white/35">Note moyenne</p><p className="mt-2 text-2xl font-semibold text-[#C9A45C]">{summary.average ? summary.average.toFixed(1) : '—'} ★</p></div>
         <div className="rounded-2xl border border-[#242424] bg-[#111111] p-5"><p className="text-[10px] uppercase tracking-[0.16em] text-white/35">Réponses générées</p><p className="mt-2 text-2xl font-semibold text-[#C9A45C]">{summary.replied}</p></div>
       </div>
@@ -373,9 +373,13 @@ export default function GoogleReputationModule({ establishmentId }: Props) {
           <label className="block"><span className="mb-2 block text-xs font-semibold text-white/55">Seuil de publication automatique</span><select value={settings.auto_reply_min_rating} onChange={(e) => setSettings((v) => ({ ...v, auto_reply_min_rating: Number(e.target.value) }))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white"><option value={5}>5 étoiles uniquement</option><option value={4}>4 étoiles et plus (recommandé)</option><option value={3}>3 étoiles et plus</option><option value={2}>2 étoiles et plus</option><option value={1}>Toutes les notes</option></select><p className="mt-2 text-xs text-white/35">Les avis sous ce seuil restent en brouillon et nécessitent une validation humaine.</p></label>
           <label className="block"><span className="mb-2 block text-xs font-semibold text-white/55">Fréquence de synchronisation</span><select value={settings.sync_interval_minutes} onChange={(e) => setSettings((v) => ({ ...v, sync_interval_minutes: Number(e.target.value) }))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white"><option value={5}>Toutes les 5 minutes — flux élevé</option><option value={10}>Toutes les 10 minutes — recommandé</option><option value={15}>Toutes les 15 minutes</option><option value={30}>Toutes les 30 minutes — flux modéré</option><option value={60}>Toutes les heures — flux faible</option></select><p className="mt-2 text-xs text-white/35">Le réglage s’applique à cet établissement. La synchronisation manuelle reste disponible.</p></label>
           <label className="block"><span className="mb-2 block text-xs font-semibold text-white/55">Langue</span><select value={settings.auto_reply_language} onChange={(e) => setSettings((v) => ({ ...v, auto_reply_language: e.target.value }))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white"><option value="fr">Français</option><option value="en">English</option><option value="ar">العربية</option></select></label>
-          <label className="block"><span className="mb-2 block text-xs font-semibold text-white/55">Ton</span><select value={settings.auto_reply_tone} onChange={(e) => setSettings((v) => ({ ...v, auto_reply_tone: e.target.value }))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white"><option value="professional_warm">Professionnel & chaleureux</option><option value="professional">Professionnel</option><option value="friendly">Amical</option><option value="luxury">Premium / luxe</option></select></label>
+          <label className="block"><span className="mb-2 block text-xs font-semibold text-white/55">Ton</span><select value={settings.auto_reply_tone} onChange={(e) => setSettings((v) => ({ ...v, auto_reply_tone: e.target.value }))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 p
+      )}
+
+      {mode === 'links' && (
+y-3 text-sm text-white"><option value="professional_warm">Professionnel & chaleureux</option><option value="professional">Professionnel</option><option value="friendly">Amical</option><option value="luxury">Premium / luxe</option></select></label>
         </div>
-        <button type="button" onClick={() => void saveSettings()} disabled={saving} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#C9A45C] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50"><Save size={14} /> {saving ? 'Enregistrement…' : 'Enregistrer les paramètres'}</button>
+        <button type="button" onClick={() => void saveSettings('links') disabled={saving} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#C9A45C] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50"><Save size={14} /> {saving ? 'Enregistrement…' : 'Enregistrer les paramètres'}</button>
       </section>
 
       <section className="rounded-3xl border border-[#242424] bg-[#111111] p-6">
@@ -383,28 +387,24 @@ export default function GoogleReputationModule({ establishmentId }: Props) {
         <div className="mt-5 grid gap-4 md:grid-cols-3">
           <label className="block"><span className="mb-2 block text-xs font-semibold text-white/55">Bonus Google / TripAdvisor (points)</span><input type="number" min="0" step="1" value={reviewBonus} onChange={(e) => setReviewBonus(Number(e.target.value))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white" /></label>
           <label className="block md:col-span-2"><span className="mb-2 block text-xs font-semibold text-white/55">Lien avis Google</span><input value={googleReviewUrl} onChange={(e) => setGoogleReviewUrl(e.target.value)} placeholder="https://g.page/…" className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white" /></label>
-          <label className="block md:col-span-2"><span className="mb-2 block text-xs font-semibold text-white/55">Lien avis TripAdvisor</span><input value={tripadvisorReviewUrl} onChange={(e) => setTripadvisorReviewUrl(e.target.value)} placeholder="https://www.tripadvisor.fr/…" className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white" /></label>
-        </div>
-        <p className="mt-3 text-[10px] text-white/30">Le bonus est configuré par établissement et ne rétroactive pas un avis déjà réclamé.</p>
-        <button type="button" onClick={() => void saveSettings()} disabled={saving} className="mt-4 inline-flex items-center gap-2 rounded-xl border border-[#C9A45C]/30 px-4 py-2.5 text-xs font-semibold text-[#C9A45C] disabled:opacity-50"><Save size={14} /> Enregistrer bonus & liens</button>
-      </section>
+          <label className="block md:col-span-2"><span className="mb-2 block text-xs font-semibold text-white/55">Lien avis TripAdvisor</span><input value={tripadvisorReviewUrl} onChange={(e) => setTripadvisorReviewUrl(e.target.value)} placeholder="https://www.
+      )}
 
-      <section className="rounded-3xl border border-[#242424] bg-[#111111] p-6">
-        <div className="flex items-center gap-2"><MessageSquare size={17} className="text-[#C9A45C]" /><h3 className="font-semibold text-white">Avis Google & réponses générées</h3></div>
-        <div className="mt-5 space-y-3">
-          {reviews.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-[#242424] p-8 text-center text-sm text-white/35">Aucun avis Google synchronisé.</div>
-          ) : reviews.map((review) => (
-            <article key={review.id} className="rounded-2xl border border-[#242424] bg-[#0b0b0b] p-5">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-3"><span className="font-semibold text-white">{review.reviewer_display_name || 'Client Google'}</span><span className="text-[#C9A45C]">{'★'.repeat(stars(review.star_rating))}<span className="text-white/15">{'★'.repeat(Math.max(0, 5 - stars(review.star_rating)))}</span></span></div>
-                {review.review_created_at && <span className="text-[10px] text-white/30">{new Date(review.review_created_at).toLocaleString('fr-FR')}</span>}
-              </div>
-              <p className="mt-3 text-sm leading-6 text-white/65">{review.comment || 'Avis sans commentaire.'}</p>
-              <div className="mt-4 rounded-2xl border border-[#C9A45C]/15 bg-[#C9A45C]/5 p-4">
+      {mode === 'sync' && (
+        <section className="rounded-3xl border border-[#242424] bg-[#111111] p-6">
+          <div className="flex items-center gap-2"><RefreshCw size={17} className="text-[#C9A45C]" /><h3 className="font-semibold text-white">Fréquence de synchronisation</h3></div>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-white/45">Définissez à quelle fréquence KELYANI vérifie les nouveaux avis de cet établissement. La synchronisation manuelle reste disponible dans la section de connexion.</p>
+          <label className="mt-5 block max-w-xl"><span className="mb-2 block text-xs font-semibold text-white/55">Intervalle de rafraîchissement</span><select value={settings.sync_interval_minutes} onChange={(e) => setSettings((v) => ({ ...v, sync_interval_minutes: Number(e.target.value) }))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white"><option value={5}>Toutes les 5 minutes — flux élevé</option><option value={10}>Toutes les 10 minutes — recommandé</option><option value={15}>Toutes les 15 minutes</option><option value={30}>Toutes les 30 minutes — flux modéré</option><option value={60}>Toutes les heures — flux faible</option></select><p className="mt-2 text-xs text-white/35">Le planificateur vérifie périodiquement les établissements et respecte cet intervalle configuré.</p></label>
+          <button type="button" onClick={() => void saveSettings('sync')} disabled={saving} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#C9A45C] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50"><Save size={14} /> {saving ? 'Enregistrement…' : 'Enregistrer la fréquence'}</button>
+        </section>
+      )}
+
+      {mode === 'ai' || mode === 'links' ? (
+45C]/5 p-4">
                 <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[#C9A45C]"><Sparkles size={13} /> Réponse générée</p>
                 <p className="mt-2 text-sm leading-6 text-white/70">{review.owner_reply || 'Aucune réponse générée pour le moment.'}</p>
-                {review.owner_reply_updated_at && <p className="mt-2 text-[10px] text-white/25">Dernière mise à jour : {new Date(review.owner_reply_updated_at).toLocaleString('fr-FR')}</p>}
+                {review.owner_reply_
+      ) : null}updated_at && <p className="mt-2 text-[10px] text-white/25">Dernière mise à jour : {new Date(review.owner_reply_updated_at).toLocaleString('fr-FR')}</p>}
               </div>
             </article>
           ))}
