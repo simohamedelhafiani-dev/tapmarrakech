@@ -122,16 +122,21 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const authorization = req.headers.get('Authorization');
-    if (!authorization) return json({ success: false, error: 'Session manquante' }, 401);
+    const cronSecret = Deno.env.get('KELYANI_CRON_SECRET') ?? '';
+    const suppliedCronSecret = req.headers.get('x-kelyani-cron-secret') ?? '';
+    let diff = suppliedCronSecret.length ^ cronSecret.length;
+    for (let i = 0; i < Math.max(suppliedCronSecret.length, cronSecret.length); i++) {
+      diff |= (suppliedCronSecret.charCodeAt(i) || 0) ^ (cronSecret.charCodeAt(i) || 0);
+    }
+    const isCronCall = !!cronSecret && diff === 0;
 
-    const { data: { user }, error: userError } = await db.auth.getUser(authorization.replace(/^Bearer\s+/i, ''));
-    if (userError || !user) return json({ success: false, error: 'Session invalide' }, 401);
-
-    // This endpoint is intentionally admin-only. Check the same profile role as the
-    // guard above, then verify the target establishment exists. Do not call the
-    // auth.uid()-based RPC using the service-role client (auth.uid() would be NULL).
-    if (!(await isAdmin(user.id))) return json({ success: false, error: 'Accès réservé à l’administrateur' }, 403);
+    if (!isCronCall) {
+      const authorization = req.headers.get('Authorization');
+      if (!authorization) return json({ success: false, error: 'Session manquante' }, 401);
+      const { data: { user }, error: userError } = await db.auth.getUser(authorization.replace(/^Bearer\\s+/i, ''));
+      if (userError || !user) return json({ success: false, error: 'Session invalide' }, 401);
+      if (!(await isAdmin(user.id))) return json({ success: false, error: 'Accès réservé à l’administrateur' }, 403);
+    }
 
     const body = await req.json();
     const establishmentId = String(body?.establishment_id ?? '');
