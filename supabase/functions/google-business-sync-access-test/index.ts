@@ -39,11 +39,27 @@ async function refresh(refreshToken: string) {
 }
 
 async function api(path: string, token: string) {
-  const response = await fetch('https://mybusiness.googleapis.com/v4/' + path, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data?.error?.message ?? 'Google Business Profile API error');
+  let endpoint: string;
+  if (path === 'accounts') {
+    endpoint = 'https://mybusinessaccountmanagement.googleapis.com/v1/accounts';
+  } else if (path.startsWith('accounts/') && path.includes('/locations?')) {
+    const [resourcePath, query = ''] = path.split('?');
+    const accountId = resourcePath.split('/')[1];
+    const params = new URLSearchParams(query);
+    params.delete('pageSize');
+    params.set('readMask', 'name,title,storeCode');
+    params.set('pageSize', '100');
+    endpoint = `https://mybusinessbusinessinformation.googleapis.com/v1/accounts/${accountId}/locations?${params.toString()}`;
+  } else {
+    endpoint = 'https://mybusiness.googleapis.com/v4/' + path;
+  }
+  const response = await fetch(endpoint, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+  const raw = await response.text();
+  let data: any;
+  try { data = JSON.parse(raw); } catch {
+    throw new Error(`Google API a renvoyé du contenu non JSON (HTTP ${response.status}) pour ${endpoint}.`);
+  }
+  if (!response.ok) throw new Error(data?.error?.message ?? `Google Business Profile API HTTP ${response.status}`);
   return data;
 }
 
@@ -64,8 +80,9 @@ async function generateReply(comment: string, stars: string, language: string, t
   });
   const data = await response.json();
   if (!response.ok) throw new Error(data?.error?.message ?? 'Génération IA impossible');
-  const reply = String(data.output_text ?? '').trim();
-  if (!reply) throw new Error('La génération IA a renvoyé une réponse vide.');
+  const nestedText = Array.isArray(data?.output) ? data.output.flatMap((item: any) => Array.isArray(item?.content) ? item.content.map((part: any) => part?.text ?? '') : []).join('\\n').trim() : '';
+  const reply = String(data.output_text ?? nestedText).trim();
+  if (!reply) throw new Error('OpenAI n’a renvoyé aucun texte. Aucun brouillon n’a été enregistré.');
   return reply;
 }
 
