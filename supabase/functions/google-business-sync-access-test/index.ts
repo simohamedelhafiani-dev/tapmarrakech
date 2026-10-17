@@ -118,6 +118,7 @@ async function publishGeneratedReply(review: any, location: any, connection: any
 }
 
 Deno.serve(async (req: Request) => {
+  let activeConnectionId: string | null = null;
   if (req.method === 'OPTIONS') {
     return new Response('ok', {
       headers: {
@@ -164,6 +165,7 @@ Deno.serve(async (req: Request) => {
       .maybeSingle();
     if (connectionError) throw connectionError;
     if (!connection) return json({ success: false, error: 'Google Business Profile non connecté' }, 404);
+    activeConnectionId = connection.id;
 
     let token = connection.access_token;
     if (!token || !connection.token_expires_at || new Date(connection.token_expires_at).getTime() < Date.now() + 120000) {
@@ -304,7 +306,14 @@ Deno.serve(async (req: Request) => {
 
     return json({ success: true, locations, reviews });
   } catch (error) {
+    const message = error instanceof Error ? error.message : 'Erreur serveur';
     console.error('google-business-sync-access-test:', error);
-    return json({ success: false, error: error instanceof Error ? error.message : 'Erreur serveur' }, 500);
+    if (activeConnectionId) {
+      const { error: statusError } = await db.from('google_business_connections').update({
+        status: 'error', last_error: message, updated_at: new Date().toISOString(),
+      }).eq('id', activeConnectionId);
+      if (statusError) console.error('Impossible de sauvegarder last_error Google Business:', statusError);
+    }
+    return json({ success: false, error: message }, 500);
   }
 });
