@@ -192,9 +192,20 @@ Deno.serve(async (req: Request) => {
 
         const reviewResult = await api(`accounts/${accountId}/locations/${googleLocationId}/reviews?pageSize=50`, token);
         const { data: replySettings, error: replySettingsError } = await db.from('google_business_settings')
-          .select('auto_reply_enabled,require_approval,auto_reply_min_rating,auto_reply_language,auto_reply_tone')
+          .select('auto_reply_enabled,require_approval,auto_reply_min_rating,auto_reply_language,auto_reply_tone,auto_reply_activated_at')
           .eq('establishment_id', establishmentId).maybeSingle();
         if (replySettingsError) throw replySettingsError;
+        // First activation establishes a cutoff: the initial sync must never treat
+        // the establishment's historical Google reviews as new reviews to answer.
+        let autoReplyActivatedAt = replySettings?.auto_reply_activated_at ?? null;
+        if (replySettings?.auto_reply_enabled === true && !autoReplyActivatedAt) {
+          autoReplyActivatedAt = new Date().toISOString();
+          const { error: activationError } = await db.from('google_business_settings')
+            .update({ auto_reply_activated_at: autoReplyActivatedAt, updated_at: autoReplyActivatedAt })
+            .eq('establishment_id', establishmentId)
+            .is('auto_reply_activated_at', null);
+          if (activationError) throw activationError;
+        }
         for (const review of reviewResult.reviews ?? []) {
           const googleReviewName = String(review.name ?? '');
           const { data: existing, error: existingError } = await db.from('google_business_reviews')
@@ -219,12 +230,14 @@ Deno.serve(async (req: Request) => {
           if (reviewError) throw reviewError;
           reviews++;
           const isNewReview = !existing;
+          const reviewCreatedAt = review.createTime ? new Date(review.createTime).getTime() : 0;
+          const afterAutoReplyActivation = !!autoReplyActivatedAt && reviewCreatedAt >= new Date(autoReplyActivatedAt).getTime();
           const threshold = Math.max(1, Math.min(5, Number(replySettings?.auto_reply_min_rating ?? 4)));
           const reviewRating = ratingNumber(review.starRating);
           // The rating threshold is authoritative for autonomous mode: reviews at or
           // above the configured threshold auto-publish when auto replies are enabled.
           // Reviews below the threshold always get a draft for human approval.
-          const shouldAutoPublish = isNewReview && replySettings?.auto_reply_enabled === true &&
+          const shouldAutoPublish = isNewReview && afterAutoReplyActivation && replySettings?.auto_reply_enabled === true &&
             reviewRating >= threshold && !review.reviewReply?.comment && Boolean(review.comment?.trim());
           if (shouldAutoPublish && savedReview) {
             try {
@@ -245,7 +258,7 @@ Deno.serve(async (req: Request) => {
               }).eq('id', savedReview.id);
               console.error('Auto-reply failed for review', savedReview.id, message);
             }
-          } else if (isNewReview && replySettings?.auto_reply_enabled === true && !review.reviewReply?.comment && reviewRating > 0 && reviewRating < threshold && Boolean(review.comment?.trim()) && savedReview) {
+          } else if (isNewReview && afterAutoReplyActivation && replySettings?.auto_reply_enabled === true && !review.reviewReply?.comment && reviewRating > 0 && reviewRating < threshold && Boolean(review.comment?.trim()) && savedReview) {
             try {
               const draft = await generateReply(String(review.comment), String(review.starRating ?? ''), String(replySettings.auto_reply_language ?? 'fr'), String(replySettings.auto_reply_tone ?? 'professional_warm'));
               const now = new Date().toISOString();
