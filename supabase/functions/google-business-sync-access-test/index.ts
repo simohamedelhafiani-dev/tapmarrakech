@@ -199,16 +199,22 @@ Deno.serve(async (req: Request) => {
           title: location.title ?? null,
           metadata: location,
           updated_at: new Date().toISOString(),
-        }, { onConflict: 'google_location_id' }).select('id').single();
+        }, { onConflict: 'google_location_id' }).select('id,mapped_establishment_id').single();
         if (locationError) throw locationError;
         if (!row) continue;
         locations++;
 
         const reviewResult = await api(`accounts/${accountId}/locations/${googleLocationId}/reviews?pageSize=50`, token);
-        const { data: replySettings, error: replySettingsError } = await db.from('google_business_settings')
-          .select('auto_reply_enabled,require_approval,auto_reply_min_rating,auto_reply_language,auto_reply_tone,auto_reply_activated_at')
-          .eq('establishment_id', establishmentId).maybeSingle();
-        if (replySettingsError) throw replySettingsError;
+        // Reviews may be synced for diagnostics, but AI replies are only allowed after an
+        // administrator explicitly maps this Google location to a Kelyani establishment.
+        let replySettings: any = null;
+        if (row.mapped_establishment_id) {
+          const { data, error: replySettingsError } = await db.from('google_business_settings')
+            .select('auto_reply_enabled,require_approval,auto_reply_min_rating,auto_reply_language,auto_reply_tone,auto_reply_activated_at')
+            .eq('establishment_id', row.mapped_establishment_id).maybeSingle();
+          if (replySettingsError) throw replySettingsError;
+          replySettings = data;
+        }
         // First activation establishes a cutoff: the initial sync must never treat
         // the establishment's historical Google reviews as new reviews to answer.
         let autoReplyActivatedAt = replySettings?.auto_reply_activated_at ?? null;
