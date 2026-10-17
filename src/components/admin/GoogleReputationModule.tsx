@@ -291,7 +291,6 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
     }
   };
 
-      {mode === 'connection' && (
   const summary = useMemo(() => {
     const ratings = reviews.map((review) => stars(review.star_rating)).filter((n) => n > 0);
     const average = ratings.length
@@ -310,6 +309,7 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
 
   return (
     <div className="space-y-5">
+      {mode === 'connection' && (
       <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -330,18 +330,17 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
                 </button>
               </>
             ) : (
-              <button type="button" onClick={() => void connectGoogle()} disabled={connect      )}
-
-ing} className="inline-flex items-center gap-2 rounded-xl bg-[#C9A45C] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50">
+              <button type="button" onClick={() => void connectGoogle()} disabled={connecting} className="inline-flex items-center gap-2 rounded-xl bg-[#C9A45C] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50">
                 <Link2 size={14} /> {connecting ? 'Connexion…' : 'Connecter Google'}
               </button>
             )}
           </div>
         </div>
-        {connection?.last_sync_at && <p className="mt-4 text-[10px] text-white/30">Derni      {mode === 'connection' && (
-ère synchronisation : {new Date(connection.last_sync_at).toLocaleString('fr-FR')}</p>}
+        {connection?.last_sync_at && <p className="mt-4 text-[10px] text-white/30">Dernière synchronisation : {new Date(connection.last_sync_at).toLocaleString('fr-FR')}</p>}
         {connection?.last_error && <p className="mt-2 text-xs text-amber-300">{connection.last_error}</p>}
       </div>
+
+      )}
 
       {(error || message) && (
         <div className={`rounded-2xl border p-4 text-sm ${error ? 'border-red-400/20 bg-red-400/5 text-red-200' : 'border-emerald-400/20 bg-emerald-400/5 text-emerald-200'}`}>
@@ -350,15 +349,16 @@ ing} className="inline-flex items-center gap-2 rounded-xl bg-[#C9A45C] px-4 py-2
         </div>
       )}
 
+      {mode === 'connection' && (
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-2xl border border-[#242424] bg-[#111111] p-5"><p className="text-[10px] uppercase tracking-[0.16em] text-white/35">Avis Google</p><p className="mt-2 text-2xl font-semibold te      )}
-
-      {mode === 'ai' && (
-xt-[#C9A45C]">{summary.total}</p></div>
+        <div className="rounded-2xl border border-[#242424] bg-[#111111] p-5"><p className="text-[10px] uppercase tracking-[0.16em] text-white/35">Avis Google</p><p className="mt-2 text-2xl font-semibold text-[#C9A45C]">{summary.total}</p></div>
         <div className="rounded-2xl border border-[#242424] bg-[#111111] p-5"><p className="text-[10px] uppercase tracking-[0.16em] text-white/35">Note moyenne</p><p className="mt-2 text-2xl font-semibold text-[#C9A45C]">{summary.average ? summary.average.toFixed(1) : '—'} ★</p></div>
         <div className="rounded-2xl border border-[#242424] bg-[#111111] p-5"><p className="text-[10px] uppercase tracking-[0.16em] text-white/35">Réponses générées</p><p className="mt-2 text-2xl font-semibold text-[#C9A45C]">{summary.replied}</p></div>
       </div>
 
+      )}
+
+      {mode === 'ai' && (
       <section className="rounded-3xl border border-[#242424] bg-[#111111] p-6">
         <div className="flex items-center gap-2"><Settings2 size={17} className="text-[#C9A45C]" /><h3 className="font-semibold text-white">Configuration des réponses IA</h3></div>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
@@ -373,21 +373,27 @@ xt-[#C9A45C]">{summary.total}</p></div>
           <label className="block"><span className="mb-2 block text-xs font-semibold text-white/55">Seuil de publication automatique</span><select value={settings.auto_reply_min_rating} onChange={(e) => setSettings((v) => ({ ...v, auto_reply_min_rating: Number(e.target.value) }))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white"><option value={5}>5 étoiles uniquement</option><option value={4}>4 étoiles et plus (recommandé)</option><option value={3}>3 étoiles et plus</option><option value={2}>2 étoiles et plus</option><option value={1}>Toutes les notes</option></select><p className="mt-2 text-xs text-white/35">Les avis sous ce seuil restent en brouillon et nécessitent une validation humaine.</p></label>
           <label className="block"><span className="mb-2 block text-xs font-semibold text-white/55">Fréquence de synchronisation</span><select value={settings.sync_interval_minutes} onChange={(e) => setSettings((v) => ({ ...v, sync_interval_minutes: Number(e.target.value) }))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white"><option value={5}>Toutes les 5 minutes — flux élevé</option><option value={10}>Toutes les 10 minutes — recommandé</option><option value={15}>Toutes les 15 minutes</option><option value={30}>Toutes les 30 minutes — flux modéré</option><option value={60}>Toutes les heures — flux faible</option></select><p className="mt-2 text-xs text-white/35">Le réglage s’applique à cet établissement. La synchronisation manuelle reste disponible.</p></label>
           <label className="block"><span className="mb-2 block text-xs font-semibold text-white/55">Langue</span><select value={settings.auto_reply_language} onChange={(e) => setSettings((v) => ({ ...v, auto_reply_language: e.target.value }))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white"><option value="fr">Français</option><option value="en">English</option><option value="ar">العربية</option></select></label>
-          <label className="block"><span className="mb-2 block text-xs font-semibold text-white/55">Ton</span><select value={settings.auto_reply_tone} onChange={(e) => setSettings((v) => ({ ...v, auto_reply_tone: e.target.value }))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 p
+          <label className="block"><span className="mb-2 block text-xs font-semibold text-white/55">Ton</span><select value={settings.auto_reply_tone} onChange={(e) => setSettings((v) => ({ ...v, auto_reply_tone: e.target.value }))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white"><option value="professional_warm">Professionnel & chaleureux</option><option value="professional">Professionnel</option><option value="friendly">Amical</option><option value="luxury">Premium / luxe</option></select></label>
+        </div>
+        <button type="button" onClick={() => void saveSettings('ai') disabled={saving} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#C9A45C] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50"><Save size={14} /> {saving ? 'Enregistrement…' : 'Enregistrer les paramètres'}</button>
+      </section>
+
+
       )}
 
       {mode === 'links' && (
-y-3 text-sm text-white"><option value="professional_warm">Professionnel & chaleureux</option><option value="professional">Professionnel</option><option value="friendly">Amical</option><option value="luxury">Premium / luxe</option></select></label>
-        </div>
-        <button type="button" onClick={() => void saveSettings('links') disabled={saving} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#C9A45C] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50"><Save size={14} /> {saving ? 'Enregistrement…' : 'Enregistrer les paramètres'}</button>
-      </section>
-
       <section className="rounded-3xl border border-[#242424] bg-[#111111] p-6">
         <div className="flex items-center gap-2"><Sparkles size={17} className="text-[#C9A45C]" /><h3 className="font-semibold text-white">Bonus & liens d’avis</h3></div>
         <div className="mt-5 grid gap-4 md:grid-cols-3">
           <label className="block"><span className="mb-2 block text-xs font-semibold text-white/55">Bonus Google / TripAdvisor (points)</span><input type="number" min="0" step="1" value={reviewBonus} onChange={(e) => setReviewBonus(Number(e.target.value))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white" /></label>
           <label className="block md:col-span-2"><span className="mb-2 block text-xs font-semibold text-white/55">Lien avis Google</span><input value={googleReviewUrl} onChange={(e) => setGoogleReviewUrl(e.target.value)} placeholder="https://g.page/…" className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white" /></label>
-          <label className="block md:col-span-2"><span className="mb-2 block text-xs font-semibold text-white/55">Lien avis TripAdvisor</span><input value={tripadvisorReviewUrl} onChange={(e) => setTripadvisorReviewUrl(e.target.value)} placeholder="https://www.
+          <label className="block md:col-span-2"><span className="mb-2 block text-xs font-semibold text-white/55">Lien avis TripAdvisor</span><input value={tripadvisorReviewUrl} onChange={(e) => setTripadvisorReviewUrl(e.target.value)} placeholder="https://www.tripadvisor.fr/…" className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white" /></label>
+        </div>
+        <p className="mt-3 text-[10px] text-white/30">Le bonus est configuré par établissement et ne rétroactive pas un avis déjà réclamé.</p>
+        <button type="button" onClick={() => void saveSettings('links') disabled={saving} className="mt-4 inline-flex items-center gap-2 rounded-xl border border-[#C9A45C]/30 px-4 py-2.5 text-xs font-semibold text-[#C9A45C] disabled:opacity-50"><Save size={14} /> Enregistrer bonus & liens</button>
+      </section>
+
+
       )}
 
       {mode === 'sync' && (
@@ -400,21 +406,11 @@ y-3 text-sm text-white"><option value="professional_warm">Professionnel & chaleu
       )}
 
       {mode === 'ai' || mode === 'links' ? (
-45C]/5 p-4">
-                <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[#C9A45C]"><Sparkles size={13} /> Réponse générée</p>
-                <p className="mt-2 text-sm leading-6 text-white/70">{review.owner_reply || 'Aucune réponse générée pour le moment.'}</p>
-                {review.owner_reply_
-      ) : null}updated_at && <p className="mt-2 text-[10px] text-white/25">Dernière mise à jour : {new Date(review.owner_reply_updated_at).toLocaleString('fr-FR')}</p>}
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
       <div className="flex items-start gap-3 rounded-2xl border border-[#242424] bg-[#0b0b0b] p-4 text-xs text-white/40">
         <Star size={15} className="mt-0.5 shrink-0 text-[#C9A45C]" />
         <p>Les avis Google et les réponses sont séparés du système de bonus de fidélité. Les réponses IA ne mentionnent pas les récompenses.</p>
       </div>
+      ) : null}
     </div>
   );
 }
