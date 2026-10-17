@@ -81,6 +81,7 @@ Deno.serve(async req=>{
   if(action==='generate')return json(await generateDraft(id));
   if(action==='publish')return json(await publishDraft(id,body?.reply===undefined?undefined:String(body.reply)));
   if(action==='save'){
+   await getReview(id);
    const reply=String(body?.reply??'').trim();if(!reply)return json({success:false,error:'Le brouillon ne peut pas être vide.'},400);
    const {error}=await db.from('google_business_reviews').update({reply_draft:reply,reply_status:'ready_to_publish',reply_error:null,updated_at:new Date().toISOString()}).eq('id',id);
    if(error)throw error;return json({success:true,status:'ready_to_publish'});
