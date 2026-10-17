@@ -243,10 +243,22 @@ Deno.serve(async (req: Request) => {
               }).eq('id', savedReview.id);
               console.error('Auto-reply failed for review', savedReview.id, message);
             }
-          } else if (isNewReview && replySettings?.auto_reply_enabled === true && !review.reviewReply?.comment && reviewRating > 0 && reviewRating < threshold) {
-            await db.from('google_business_reviews').update({
-              reply_status: 'pending_approval', reply_error: null, updated_at: new Date().toISOString(),
-            }).eq('id', savedReview.id);
+          } else if (isNewReview && replySettings?.auto_reply_enabled === true && !review.reviewReply?.comment && reviewRating > 0 && reviewRating < threshold && Boolean(review.comment?.trim()) && savedReview) {
+            try {
+              const draft = await generateReply(String(review.comment), String(review.starRating ?? ''), String(replySettings.auto_reply_language ?? 'fr'), String(replySettings.auto_reply_tone ?? 'professional_warm'));
+              const now = new Date().toISOString();
+              const { error: draftError } = await db.from('google_business_reviews').update({
+                reply_draft: draft, reply_status: 'pending_approval', reply_error: null,
+                reply_generated_at: now, updated_at: now,
+              }).eq('id', savedReview.id);
+              if (draftError) throw draftError;
+            } catch (draftError) {
+              const message = draftError instanceof Error ? draftError.message : 'Impossible de générer le brouillon';
+              await db.from('google_business_reviews').update({
+                reply_status: 'failed', reply_error: message, updated_at: new Date().toISOString(),
+              }).eq('id', savedReview.id);
+              console.error('Pending reply draft failed for review', savedReview.id, message);
+            }
           }
         }
       }
