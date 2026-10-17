@@ -70,13 +70,20 @@ function ratingNumber(value: unknown) {
 }
 
 async function generateReply(comment: string, stars: string, language: string, tone: string) {
-  const key = Deno.env.get('OPENAI_API_KEY') ?? '';
-  if (!key) throw new Error('OPENAI_API_KEY manquante : publication automatique suspendue.');
+  const { data: settings, error: settingsError } = await db.from('ai_global_settings')
+    .select('provider,model,api_key,enabled').eq('id', true).maybeSingle();
+  if (settingsError) throw settingsError;
+  const provider = String(settings?.provider ?? '').trim().toLowerCase();
+  const model = String(settings?.model ?? '').trim();
+  const key = String(settings?.api_key ?? '').trim();
+  if (settings?.enabled !== true || provider !== 'openai' || !model || !key) {
+    throw new Error('La configuration IA globale est désactivée ou incomplète. Vérifiez Admin → Configuration IA.');
+  }
   const prompt = `Rédige une réponse courte à un avis Google. Langue: ${language || 'français'}. Ton: ${tone || 'professionnel et chaleureux'}. Note: ${stars}. Avis: ${comment}. N'invente aucun fait, ne mentionne aucune récompense ni contrepartie. Maximum 70 mots.`;
   const response = await fetch('https://api.openai.com/v1/responses', {
     method: 'POST',
     headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: 'gpt-4o-mini', input: prompt, max_output_tokens: 180 }),
+    body: JSON.stringify({ model, input: prompt, max_output_tokens: 180 }),
   });
   const data = await response.json();
   if (!response.ok) throw new Error(data?.error?.message ?? 'Génération IA impossible');
