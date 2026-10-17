@@ -243,7 +243,8 @@ Deno.serve(async (req: Request) => {
           // above the configured threshold auto-publish when auto replies are enabled.
           // Reviews below the threshold always get a draft for human approval.
           const shouldAutoPublish = isNewReview && afterAutoReplyActivation && replySettings?.auto_reply_enabled === true &&
-            reviewRating >= threshold && !review.reviewReply?.comment && Boolean(review.comment?.trim());
+            replySettings?.require_approval === false && reviewRating >= threshold &&
+            !review.reviewReply?.comment && Boolean(review.comment?.trim());
           if (shouldAutoPublish && savedReview) {
             try {
               const draft = await generateReply(String(review.comment), String(review.starRating ?? ''), String(replySettings.auto_reply_language ?? 'fr'), String(replySettings.auto_reply_tone ?? 'professional_warm'));
@@ -263,7 +264,9 @@ Deno.serve(async (req: Request) => {
               }).eq('id', savedReview.id);
               console.error('Auto-reply failed for review', savedReview.id, message);
             }
-          } else if (isNewReview && afterAutoReplyActivation && replySettings?.auto_reply_enabled === true && !review.reviewReply?.comment && reviewRating > 0 && reviewRating < threshold && Boolean(review.comment?.trim()) && savedReview) {
+          } else if (isNewReview && afterAutoReplyActivation && replySettings?.auto_reply_enabled === true &&
+            !review.reviewReply?.comment && reviewRating > 0 && Boolean(review.comment?.trim()) && savedReview &&
+            (replySettings?.require_approval === true || reviewRating < threshold)) {
             try {
               const draft = await generateReply(String(review.comment), String(review.starRating ?? ''), String(replySettings.auto_reply_language ?? 'fr'), String(replySettings.auto_reply_tone ?? 'professional_warm'));
               const now = new Date().toISOString();
