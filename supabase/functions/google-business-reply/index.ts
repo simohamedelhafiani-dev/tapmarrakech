@@ -2,14 +2,17 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const url=Deno.env.get('SUPABASE_URL')!,key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const db=createClient(url,key,{auth:{autoRefreshToken:false,persistSession:false}});
-const cid=Deno.env.get('GOOGLE_BUSINESS_CLIENT_ID')??'',secret=Deno.env.get('GOOGLE_BUSINESS_CLIENT_SECRET')??'',ai=Deno.env.get('OPENAI_API_KEY')??'';
+const cid=Deno.env.get('GOOGLE_BUSINESS_CLIENT_ID')??'',secret=Deno.env.get('GOOGLE_BUSINESS_CLIENT_SECRET')??'';
 const cors={'Content-Type':'application/json','Access-Control-Allow-Origin':'*','Access-Control-Allow-Methods':'POST, OPTIONS','Access-Control-Allow-Headers':'authorization, apikey, x-client-info, content-type, x-supabase-api-version'};
 const json=(d:unknown,s=200)=>new Response(JSON.stringify(d),{status:s,headers:cors});
 async function refresh(r:string){const b=new URLSearchParams({refresh_token:r,client_id:cid,client_secret:secret,grant_type:'refresh_token'});const x=await fetch('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:b});const d=await x.json();if(!x.ok)throw new Error(d?.error_description??'Token refresh failed');return d}
 async function gen(comment:string,rating:string,lang:string,tone:string){
- if(!ai)throw new Error('OPENAI_API_KEY manquante : aucune réponse IA n’a été générée.');
+ const {data:settings,error:settingsError}=await db.from('ai_global_settings').select('provider,model,api_key,enabled').eq('id',true).maybeSingle();
+ if(settingsError)throw settingsError;
+ const provider=String(settings?.provider??'').trim().toLowerCase(),model=String(settings?.model??'').trim(),apiKey=String(settings?.api_key??'').trim();
+ if(settings?.enabled!==true||provider!=='openai'||!model||!apiKey)throw new Error('La configuration IA globale est désactivée ou incomplète. Vérifiez Admin → Configuration IA.');
  const prompt=`Rédige une réponse courte à un avis Google. Langue: ${lang||'français'}. Ton: ${tone||'professionnel et chaleureux'}. Note: ${rating}. Avis: ${comment}. Ne mentionne jamais une récompense, un point, une promotion ou une contrepartie. N'invente aucun fait. Maximum 70 mots.`;
- const response=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:`Bearer ${ai}`,'Content-Type':'application/json'},body:JSON.stringify({model:'gpt-4o-mini',input:prompt,max_output_tokens:180})});
+ const response=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:`Bearer ${apiKey}`,'Content-Type':'application/json'},body:JSON.stringify({model,input:prompt,max_output_tokens:180})});
  const data=await response.json();
  if(!response.ok)throw new Error(data?.error?.message??'Erreur de génération IA.');
  const fromOutput=Array.isArray(data?.output)?data.output.flatMap((item:any)=>Array.isArray(item?.content)?item.content.map((part:any)=>part?.text??''):[]).join('\n').trim():'';
