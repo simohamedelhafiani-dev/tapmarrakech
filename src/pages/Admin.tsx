@@ -716,12 +716,7 @@ export default function Admin() {
           )}
 
           {section === 'reviews' && (
-            <GoogleBusinessAdminSection
-              establishments={establishments}
-              businessTypes={aiBusinessTypes}
-              onEstablishmentCreated={async () => { await Promise.all([loadEstablishments(), reloadEstablishmentList()]); }}
-              legacyReviews={<ReviewsSection establishments={establishments} />}
-            />
+            <ReviewsSection establishments={establishments} />
           )}
 
           {section === 'analysis' && (
@@ -733,10 +728,33 @@ export default function Admin() {
           )}
 
           {section === 'ai' && (
-            <AIConfigurationSection
-              businessTypes={aiBusinessTypes}
-              reload={loadAIBusinessTypes}
-            />
+            <div className="space-y-8">
+              <section aria-labelledby="ai-global-settings-heading">
+                <div className="mb-5">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#C9A45C]/60">Centre de contrôle</p>
+                  <h2 id="ai-global-settings-heading" className="font-display text-3xl text-[#C9A45C] md:text-4xl">Intelligence artificielle</h2>
+                  <p className="mt-2 max-w-3xl text-sm text-white/50">Gérez ici le moteur IA global et les fonctionnalités IA de KELYANI, y compris les réponses Google Business. Les paramètres opérationnels restent disponibles par établissement.</p>
+                </div>
+                <AIConfigurationSection
+                  businessTypes={aiBusinessTypes}
+                  reload={loadAIBusinessTypes}
+                />
+              </section>
+
+              <section aria-labelledby="ai-google-business-heading" className="border-t border-[#242424] pt-7">
+                <div className="mb-5">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#C9A45C]/60">Intégration et automatisation</p>
+                  <h2 id="ai-google-business-heading" className="font-display text-2xl text-[#C9A45C] md:text-3xl">Google Business et réponses IA</h2>
+                  <p className="mt-2 max-w-3xl text-sm text-white/50">Connectez les fiches, associez-les explicitement aux établissements KELYANI et gérez les réponses, validations et paramètres de chaque commerce.</p>
+                </div>
+                <GoogleBusinessAdminSection
+                  establishments={establishments}
+                  businessTypes={aiBusinessTypes}
+                  onEstablishmentCreated={async () => { await Promise.all([loadEstablishments(), reloadEstablishmentList()]); }}
+                  legacyReviews={<ReviewsSection establishments={establishments} />}
+                />
+              </section>
+            </div>
           )}
 
           {section === 'reports' && (
