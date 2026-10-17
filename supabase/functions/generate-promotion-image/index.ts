@@ -93,7 +93,7 @@ Deno.serve(async (request) => {
 
     const { data: aiSettings, error: aiSettingsError } = await serviceClient
       .from('ai_global_settings')
-      .select('provider, api_key, enabled')
+      .select('provider, model, api_key, enabled, system_instructions')
       .eq('id', true)
       .maybeSingle();
 
@@ -102,9 +102,11 @@ Deno.serve(async (request) => {
     }
 
     const provider = String(aiSettings.provider ?? '').trim().toLowerCase();
+    const model = String(aiSettings.model ?? '').trim();
     const apiKey = String(aiSettings.api_key ?? '').trim();
+    const adminSystemInstructions = String(aiSettings.system_instructions ?? '').trim();
 
-    if (aiSettings.enabled !== true || provider !== 'openai' || !apiKey) {
+    if (aiSettings.enabled !== true || provider !== 'openai' || !model || !apiKey) {
       return json({
         success: false,
         error: 'L’IA OpenAI doit être activée et configurée dans Admin → Configuration IA.',
@@ -154,6 +156,7 @@ Deno.serve(async (request) => {
 
     const prompt = [
       configuredPrompt,
+      adminSystemInstructions ? `INSTRUCTIONS GLOBALES DE L’ADMINISTRATEUR : ${adminSystemInstructions}` : '',
       '',
       'CONTEXTE FOURNI PAR LE RESPONSABLE :',
       `Établissement : ${establishmentName}`,
@@ -172,7 +175,7 @@ Deno.serve(async (request) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5',
+        model,
         input: [
           {
             role: 'user',
