@@ -21,11 +21,12 @@ async function gen(comment:string,rating:string,lang:string,tone:string){
  return reply;
 }
 async function getReview(reviewId:string){
- const {data:review,error}=await db.from('google_business_reviews').select('*, google_business_locations!inner(connection_id,google_account_id,google_location_id)').eq('id',reviewId).maybeSingle();
+ const {data:review,error}=await db.from('google_business_reviews').select('*, google_business_locations!inner(connection_id,google_account_id,google_location_id,mapped_establishment_id)').eq('id',reviewId).maybeSingle();
  if(error)throw error;if(!review)throw new Error('Avis introuvable');
+ if(!review.google_business_locations?.mapped_establishment_id)throw new Error('Cette fiche Google n’est pas associée à un établissement KELYANI. Associez-la avant de générer ou publier une réponse.');
  const {data:c,error:connectionError}=await db.from('google_business_connections').select('*').eq('id',review.google_business_locations.connection_id).maybeSingle();
  if(connectionError)throw connectionError;if(!c)throw new Error('Connexion Google introuvable');
- const {data:s,error:settingError}=await db.from('google_business_settings').select('*').eq('establishment_id',c.establishment_id).maybeSingle();
+ const {data:s,error:settingError}=await db.from('google_business_settings').select('*').eq('establishment_id',review.google_business_locations.mapped_establishment_id).maybeSingle();
  if(settingError)throw settingError;
  return {review,c,s};
 }
