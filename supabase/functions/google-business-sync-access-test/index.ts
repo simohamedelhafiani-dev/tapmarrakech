@@ -140,7 +140,7 @@ Deno.serve(async (req: Request) => {
     if (!isCronCall) {
       const authorization = req.headers.get('Authorization');
       if (!authorization) return json({ success: false, error: 'Session manquante' }, 401);
-      const { data: { user }, error: userError } = await db.auth.getUser(authorization.replace(/^Bearer\\s+/i, ''));
+      const { data: { user }, error: userError } = await db.auth.getUser(authorization.replace(/^Bearer\s+/i, ''));
       if (userError || !user) return json({ success: false, error: 'Session invalide' }, 401);
       if (!(await isAdmin(user.id))) return json({ success: false, error: 'Accès réservé à l’administrateur' }, 403);
     }
