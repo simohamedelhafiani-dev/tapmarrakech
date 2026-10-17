@@ -4566,21 +4566,24 @@ function AIConfigurationSection({
           </h2>
 
           <p className="mt-2 max-w-3xl text-sm leading-6 text-[#FFFFFF]/50">
-            Configure les comportements métier de l’IA. Chaque établissement utilise
-            automatiquement le prompt correspondant au type que tu lui attribues.
+            {view === 'engine'
+              ? 'Configure le fournisseur, le modèle et les paramètres partagés par les fonctionnalités IA compatibles.'
+              : 'Gère les prompts des promotions et les comportements métier attribués à chaque type d’établissement.'}
           </p>
         </div>
 
-        {view === 'prompts' && (        <button
-          onClick={() => {
-            resetForm();
-            setShowForm(true);
-          }}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#111111] px-5 py-3 text-sm font-semibold text-[#FFFFFF] transition hover:bg-[#111111]"
-        >
-          <Plus size={16} />
-          Nouveau type
-        </button>)}
+        {view === 'prompts' && (
+          <button
+            onClick={() => {
+              resetForm();
+              setShowForm(true);
+            }}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#111111] px-5 py-3 text-sm font-semibold text-[#FFFFFF] transition hover:bg-[#111111]"
+          >
+            <Plus size={16} />
+            Nouveau type
+          </button>
+        )}
       </div>
 
       {view === 'prompts' && (
