@@ -172,7 +172,7 @@ export default function Admin() {
     nextSection === 'overview' ? '/admin' : `/admin/${nextSection}`;
 
   const [section, setSection] = useState<AdminSection>(() => sectionFromPath(window.location.pathname));
-  const [aiWorkspaceTab, setAIWorkspaceTab] = useState<'engine' | 'prompts' | 'google'>('engine');
+  const [aiWorkspaceTab, setAIWorkspaceTab] = useState<'home' | 'engine' | 'prompts' | 'google'>('home');
 
   useEffect(() => {
     const nextSection = sectionFromPath(location.pathname);
@@ -737,37 +737,44 @@ export default function Admin() {
                 </div>
               </header>
 
-              <div className="grid items-start gap-5 lg:grid-cols-[250px_minmax(0,1fr)]">
-                <nav aria-label="Fonctionnalités et automatisations" className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                  <button type="button" onClick={() => setAIWorkspaceTab('engine')} aria-pressed={aiWorkspaceTab === 'engine'} className={`group flex min-h-[145px] flex-col items-start gap-4 rounded-2xl border p-5 text-left transition [transform:perspective(900px)_rotateX(2deg)] hover:-translate-y-1 hover:shadow-[0_18px_35px_rgba(0,0,0,.35)] ${aiWorkspaceTab === 'engine' ? 'border-[#C9A45C]/70 bg-[#C9A45C]/10 shadow-[0_8px_30px_rgba(201,164,92,.08)]' : 'border-[#242424] bg-[#0b0b0b] hover:border-[#C9A45C]/35 hover:bg-[#111111]'}`}>
-                    <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${aiWorkspaceTab === 'engine' ? 'bg-[#C9A45C]/15 text-[#E1C27A]' : 'bg-[#171717] text-white/50'}`}><Brain size={18} /></span>
-                    <span className="min-w-0"><span className={`block text-sm font-semibold ${aiWorkspaceTab === 'engine' ? 'text-[#E1C27A]' : 'text-white'}`}>Moteur IA global</span><span className="mt-1 block text-xs leading-5 text-white/40">Modèle, clé API et paramètres</span>{aiWorkspaceTab === 'engine' && <span className="mt-2 block text-[9px] font-semibold uppercase tracking-wider text-[#C9A45C]">Sélectionné</span>}</span>
+              {aiWorkspaceTab === 'home' ? (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  <button type="button" onClick={() => setAIWorkspaceTab('engine')} className="group min-h-[190px] rounded-3xl border border-[#C9A45C]/35 bg-gradient-to-br from-[#19150c] via-[#0d0d0d] to-[#080808] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#C9A45C]/75 hover:shadow-[0_20px_45px_rgba(201,164,92,.12)] [transform:perspective(1000px)_rotateX(2deg)]">
+                    <span className="grid h-12 w-12 place-items-center rounded-2xl border border-[#C9A45C]/30 bg-[#C9A45C]/10 text-[#E1C27A]"><Brain size={22} /></span>
+                    <span className="mt-5 block text-lg font-semibold text-[#E1C27A]">Moteur IA global</span>
+                    <span className="mt-2 block text-sm leading-6 text-white/50">Fournisseur, modèle, clé API, température et limites de génération.</span>
+                    <span className="mt-5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#C9A45C]">Ouvrir les paramètres →</span>
                   </button>
-                  <button type="button" onClick={() => setAIWorkspaceTab('prompts')} aria-pressed={aiWorkspaceTab === 'prompts'} className={`group flex min-h-[145px] flex-col items-start gap-4 rounded-2xl border p-5 text-left transition [transform:perspective(900px)_rotateX(2deg)] hover:-translate-y-1 hover:shadow-[0_18px_35px_rgba(0,0,0,.35)] ${aiWorkspaceTab === 'prompts' ? 'border-[#C9A45C]/70 bg-[#C9A45C]/10 shadow-[0_8px_30px_rgba(201,164,92,.08)]' : 'border-[#242424] bg-[#0b0b0b] hover:border-[#C9A45C]/35 hover:bg-[#111111]'}`}>
-                    <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${aiWorkspaceTab === 'prompts' ? 'bg-[#C9A45C]/15 text-[#E1C27A]' : 'bg-[#171717] text-white/50'}`}><FileText size={18} /></span>
-                    <span className="min-w-0"><span className={`block text-sm font-semibold ${aiWorkspaceTab === 'prompts' ? 'text-[#E1C27A]' : 'text-white'}`}>Prompts & fonctionnalités</span><span className="mt-1 block text-xs leading-5 text-white/40">Promotions et comportements métier</span>{aiWorkspaceTab === 'prompts' && <span className="mt-2 block text-[9px] font-semibold uppercase tracking-wider text-[#C9A45C]">Sélectionné</span>}</span>
+                  <button type="button" onClick={() => setAIWorkspaceTab('prompts')} className="group min-h-[190px] rounded-3xl border border-[#242424] bg-gradient-to-br from-[#171717] via-[#0d0d0d] to-[#080808] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#C9A45C]/60 hover:shadow-[0_20px_45px_rgba(201,164,92,.1)] [transform:perspective(1000px)_rotateX(2deg)]">
+                    <span className="grid h-12 w-12 place-items-center rounded-2xl border border-white/10 bg-white/5 text-[#E1C27A]"><FileText size={22} /></span>
+                    <span className="mt-5 block text-lg font-semibold text-white">Prompts & fonctionnalités</span>
+                    <span className="mt-2 block text-sm leading-6 text-white/50">Instructions métier et comportements des fonctionnalités IA.</span>
+                    <span className="mt-5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#C9A45C]">Ouvrir les paramètres →</span>
                   </button>
-                  <button type="button" onClick={() => setAIWorkspaceTab('google')} aria-pressed={aiWorkspaceTab === 'google'} className={`group flex min-h-[145px] flex-col items-start gap-4 rounded-2xl border p-5 text-left transition [transform:perspective(900px)_rotateX(2deg)] hover:-translate-y-1 hover:shadow-[0_18px_35px_rgba(0,0,0,.35)] ${aiWorkspaceTab === 'google' ? 'border-[#C9A45C]/70 bg-[#C9A45C]/10 shadow-[0_8px_30px_rgba(201,164,92,.08)]' : 'border-[#242424] bg-[#0b0b0b] hover:border-[#C9A45C]/35 hover:bg-[#111111]'}`}>
-                    <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${aiWorkspaceTab === 'google' ? 'bg-[#C9A45C]/15 text-[#E1C27A]' : 'bg-[#171717] text-white/50'}`}><MessageSquare size={18} /></span>
-                    <span className="min-w-0"><span className={`block text-sm font-semibold ${aiWorkspaceTab === 'google' ? 'text-[#E1C27A]' : 'text-white'}`}>Google Business</span><span className="mt-1 block text-xs leading-5 text-white/40">Réponses IA et automatisations</span>{aiWorkspaceTab === 'google' && <span className="mt-2 block text-[9px] font-semibold uppercase tracking-wider text-[#C9A45C]">Sélectionné</span>}</span>
+                  <button type="button" onClick={() => setAIWorkspaceTab('google')} className="group min-h-[190px] rounded-3xl border border-[#242424] bg-gradient-to-br from-[#171717] via-[#0d0d0d] to-[#080808] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#C9A45C]/60 hover:shadow-[0_20px_45px_rgba(201,164,92,.1)] [transform:perspective(1000px)_rotateX(2deg)]">
+                    <span className="grid h-12 w-12 place-items-center rounded-2xl border border-white/10 bg-white/5 text-[#E1C27A]"><MessageSquare size={22} /></span>
+                    <span className="mt-5 block text-lg font-semibold text-white">Avis & Google Business</span>
+                    <span className="mt-2 block text-sm leading-6 text-white/50">Avis, connexion des fiches, réponses IA, synchronisation et liens.</span>
+                    <span className="mt-5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#C9A45C]">Ouvrir les options →</span>
                   </button>
-                </nav>
-
-                <div className="min-w-0 rounded-3xl border border-[#242424] bg-[#080808] p-3 sm:p-5 lg:p-6">
+                </div>
+              ) : (
+                <div className="space-y-5">
+                  <button type="button" onClick={() => setAIWorkspaceTab('home')} className="inline-flex items-center gap-2 rounded-xl border border-[#242424] bg-[#101010] px-4 py-2.5 text-xs font-semibold text-[#E1C27A] transition hover:border-[#C9A45C]/60"><span aria-hidden="true">←</span> Toutes les options</button>
                   {aiWorkspaceTab === 'engine' && <AIConfigurationSection view="engine" businessTypes={aiBusinessTypes} reload={loadAIBusinessTypes} />}
                   {aiWorkspaceTab === 'prompts' && <AIConfigurationSection view="prompts" businessTypes={aiBusinessTypes} reload={loadAIBusinessTypes} />}
                   {aiWorkspaceTab === 'google' && (
                     <div>
                       <div className="mb-5">
-                        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A45C]/60">Intégration et automatisation</p>
-                        <h3 className="font-display text-2xl text-[#E1C27A] md:text-3xl">Google Business et réponses IA</h3>
-                        <p className="mt-2 max-w-3xl text-sm leading-6 text-white/50">Gérez les fiches Google, les associations, les réponses générées et les validations par établissement.</p>
+                        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A45C]/60">Avis et automatisation</p>
+                        <h3 className="font-display text-2xl text-[#E1C27A] md:text-3xl">Avis & Google Business</h3>
+                        <p className="mt-2 max-w-3xl text-sm leading-6 text-white/50">Choisissez une tuile pour afficher uniquement les réglages de cette fonctionnalité.</p>
                       </div>
                       <GoogleBusinessAdminSection establishments={establishments} businessTypes={aiBusinessTypes} onEstablishmentCreated={async () => { await Promise.all([loadEstablishments(), reloadEstablishmentList()]); }} legacyReviews={<ReviewsSection establishments={establishments} />} />
                     </div>
                   )}
                 </div>
-              </div>
+              )}
             </section>
           )}
 
