@@ -249,12 +249,12 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
       </div>
 
       <div className="grid items-start gap-5 lg:grid-cols-[250px_minmax(0,1fr)]">
-        <nav aria-label="Navigation Google Business" className="grid grid-cols-2 gap-2 lg:sticky lg:top-4 lg:grid-cols-1">
+        <nav aria-label="Options Google Business" className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
           {navigation.map(({ id, label, description, icon: Icon }) => {
             const active = activeView === id;
             return (
               <button key={id} type="button" onClick={() => setActiveView(id)} aria-current={active ? 'page' : undefined}
-                className={`flex min-w-0 items-start gap-3 rounded-2xl border p-3 text-left transition sm:p-4 ${active ? 'border-[#C9A45C]/60 bg-[#C9A45C]/10' : 'border-[#242424] bg-[#111111] hover:border-[#C9A45C]/30'}`}>
+                className={`flex min-h-[124px] min-w-0 flex-col items-start gap-3 rounded-2xl border p-4 text-left transition [transform:perspective(900px)_rotateX(2deg)] hover:-translate-y-1 hover:shadow-[0_16px_30px_rgba(0,0,0,.32)] ${active ? 'border-[#C9A45C]/60 bg-[#C9A45C]/10' : 'border-[#242424] bg-[#111111] hover:border-[#C9A45C]/30'}`}>
                 <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${active ? 'bg-[#C9A45C] text-[#111111]' : 'bg-white/5 text-[#C9A45C]'}`}><Icon size={17} /></span>
                 <span className="min-w-0">
                   <span className={`block text-xs font-semibold sm:text-sm ${active ? 'text-[#C9A45C]' : 'text-white'}`}>{label}</span>
