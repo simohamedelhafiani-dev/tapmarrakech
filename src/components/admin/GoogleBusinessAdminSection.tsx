@@ -39,7 +39,7 @@ type Review = {
   reply_published_at?: string | null;
 };
 type ReviewRow = Review & { establishmentName: string; locationName: string };
-type View = 'reviews' | 'appReviews' | 'establishment' | 'ai' | 'sync' | 'settings';
+type View = 'home' | 'reviews' | 'appReviews' | 'establishment' | 'ai' | 'sync' | 'settings';
 
 const navigation: { id: View; label: string; description: string; icon: typeof MessageSquare }[] = [
   { id: 'reviews', label: 'Avis Google', description: 'Avis Google et réponses', icon: MessageSquare },
@@ -65,7 +65,7 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
   const [reviews, setReviews] = useState<Review[]>([]);
   const [replySettings, setReplySettings] = useState<ReplySetting[]>([]);
   const [selectedEstablishmentId, setSelectedEstablishmentId] = useState('all');
-  const [activeView, setActiveView] = useState<View>('reviews');
+  const [activeView, setActiveView] = useState<View>('home');
   const [search, setSearch] = useState('');
   const [replyFilter, setReplyFilter] = useState('all');
   const [replyActionId, setReplyActionId] = useState<string | null>(null);
@@ -248,7 +248,7 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
         {metric('Réponses auto configurées et connectées', `${autoReplyCount} / ${establishments.length}`)}
       </div>
 
-      <div className="grid items-start gap-5 lg:grid-cols-[250px_minmax(0,1fr)]">
+      <div className="space-y-5">
         <nav aria-label="Options Google Business" className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
           {navigation.map(({ id, label, description, icon: Icon }) => {
             const active = activeView === id;
@@ -265,7 +265,7 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
           })}
         </nav>
 
-        <main className="min-w-0 space-y-5">
+        {activeView !== 'home' && <main className="min-w-0 space-y-5">
           <section className="rounded-2xl border border-[#242424] bg-[#111111] p-4 sm:p-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -431,7 +431,7 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
               }
             </section>
           )}
-        </main>
+        </main>}
       </div>
     </div>
   );
