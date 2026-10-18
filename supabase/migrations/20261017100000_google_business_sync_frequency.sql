@@ -40,8 +40,7 @@ begin
         from public.google_business_settings s
         join public.google_business_connections c
           on c.establishment_id = s.establishment_id
-        where s.auto_reply_enabled = true
-          and c.status = 'active'
+        where c.status = 'active'
           and (
             c.last_sync_at is null
             or c.last_sync_at <= now() - make_interval(mins => coalesce(s.sync_interval_minutes, 10))
