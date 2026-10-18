@@ -239,7 +239,7 @@ Deno.serve(async (req: Request) => {
           autoReplyActivatedAt = new Date().toISOString();
           const { error: activationError } = await db.from('google_business_settings')
             .update({ auto_reply_activated_at: autoReplyActivatedAt, updated_at: autoReplyActivatedAt })
-            .eq('establishment_id', establishmentId)
+            .eq('establishment_id', row.mapped_establishment_id)
             .is('auto_reply_activated_at', null);
           if (activationError) throw activationError;
         }
