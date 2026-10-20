@@ -178,6 +178,10 @@ export default function Admin() {
   useEffect(() => {
     const nextSection = sectionFromPath(location.pathname);
     setSection(nextSection);
+
+    // Preserve the old /admin/reviews deep link while Google reviews live in the AI workspace.
+    const slug = location.pathname.replace(/^\/admin\/?/, '').split('/')[0];
+    if (slug === 'reviews') setAIWorkspaceTab('google');
   }, [location.pathname]);
   const [open, setOpen] = useState(false);
 
