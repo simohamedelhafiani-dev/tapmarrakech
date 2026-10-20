@@ -79,6 +79,7 @@ type EngagementContext = {
   google_review_url: string | null;
   tripadvisor_review_url: string | null;
   review_bonus_points: number;
+  feedback_bonus_points: number;
   whatsapp_number: string | null;
   google_claimed: boolean;
   tripadvisor_claimed: boolean;
@@ -446,6 +447,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
           google_review_url: engagementRow.google_review_url ?? null,
           tripadvisor_review_url: engagementRow.tripadvisor_review_url ?? null,
           review_bonus_points: Math.max(0, Number(engagementRow.review_bonus_points ?? 0)),
+          feedback_bonus_points: Math.max(0, Number(engagementRow.feedback_bonus_points ?? 10)),
           whatsapp_number: engagementRow.whatsapp_number ?? null,
           google_claimed: Boolean(engagementRow.google_claimed),
           tripadvisor_claimed: Boolean(engagementRow.tripadvisor_claimed),
@@ -1016,7 +1018,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                 {!engagement.feedback_submitted && feedbackRating > 0 && (
                   <div className="mt-4 space-y-3">
                     <textarea value={feedbackComment} onChange={e => setFeedbackComment(e.target.value)} maxLength={2000} rows={3} placeholder="Un commentaire à partager ? (facultatif)" className="w-full resize-none rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#D4AF37]" />
-                    <button type="button" onClick={() => void submitFeedback()} disabled={feedbackSaving} className="w-full rounded-2xl bg-[#D4AF37] px-4 py-3 text-xs font-semibold text-[#0D0D0D] disabled:opacity-50">{feedbackSaving ? 'Envoi…' : 'Envoyer mon retour · +10 points'}</button>
+                    <button type="button" onClick={() => void submitFeedback()} disabled={feedbackSaving} className="w-full rounded-2xl bg-[#D4AF37] px-4 py-3 text-xs font-semibold text-[#0D0D0D] disabled:opacity-50">{feedbackSaving ? 'Envoi…' : 'Envoyer mon retour · +{engagement.feedback_bonus_points} points'}</button>
                   </div>
                 )}
                   {feedbackMessage && <p className="mt-3 text-xs text-[#D4AF37]">{feedbackMessage}</p>}
