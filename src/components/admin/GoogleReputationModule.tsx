@@ -415,9 +415,10 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
         <div className="mt-5 grid gap-4 md:grid-cols-3">
           <label className="block md:col-span-2"><span className="mb-2 block text-xs font-semibold text-white/55">Lien avis Google</span><input value={googleReviewUrl} onChange={(e) => setGoogleReviewUrl(e.target.value)} placeholder="https://g.page/…" className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white" /></label>
           <label className="block md:col-span-2"><span className="mb-2 block text-xs font-semibold text-white/55">Lien avis TripAdvisor</span><input value={tripadvisorReviewUrl} onChange={(e) => setTripadvisorReviewUrl(e.target.value)} placeholder="https://www.tripadvisor.fr/…" className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white" /></label>
+          <label className="block"><span className="mb-2 block text-xs font-semibold text-white/55">Bonus questionnaire privé (points)</span><input type="number" min="0" max="10000" step="1" value={feedbackBonus} onChange={(e) => setFeedbackBonus(Math.max(0, Math.floor(Number(e.target.value) || 0)))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white" /><span className="mt-1 block text-[10px] text-white/35">Attribué une seule fois après l’envoi du questionnaire privé.</span></label>
         </div>
-        <p className="mt-3 text-[10px] leading-5 text-white/40">KELYANI ne récompense pas la publication d’avis publics. Les points de fidélité doivent rester indépendants des avis Google et TripAdvisor.</p>
-        <button type="button" onClick={() => void saveSettings('links')} disabled={saving} className="mt-4 inline-flex items-center gap-2 rounded-xl border border-[#C9A45C]/30 px-4 py-2.5 text-xs font-semibold text-[#C9A45C] disabled:opacity-50"><Save size={14} /> Enregistrer les liens</button>
+        <p className="mt-3 text-[10px] leading-5 text-white/40">Les points configurés ici récompensent uniquement le questionnaire privé de satisfaction, jamais la publication d’un avis Google ou TripAdvisor.</p>
+        <button type="button" onClick={() => void saveSettings('links')} disabled={saving} className="mt-4 inline-flex items-center gap-2 rounded-xl border border-[#C9A45C]/30 px-4 py-2.5 text-xs font-semibold text-[#C9A45C] disabled:opacity-50"><Save size={14} /> Enregistrer les liens et le bonus</button>
       </section>
 
 
