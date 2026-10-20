@@ -172,7 +172,8 @@ export default function Admin() {
     nextSection === 'overview' ? '/admin' : `/admin/${nextSection}`;
 
   const [section, setSection] = useState<AdminSection>(() => sectionFromPath(window.location.pathname));
-  const [aiWorkspaceTab, setAIWorkspaceTab] = useState<'home' | 'engine' | 'prompts' | 'google'>('home');
+  const [aiWorkspaceTab, setAIWorkspaceTab] = useState<'home' | 'engine' | 'prompts' | 'google' | 'menus' | 'automation'>('home');
+  const [selectedMenuEstablishmentId, setSelectedMenuEstablishmentId] = useState('');
 
   useEffect(() => {
     const nextSection = sectionFromPath(location.pathname);
@@ -757,12 +758,47 @@ export default function Admin() {
                     <span className="mt-2 block text-sm leading-6 text-white/50">Avis, connexion des fiches, réponses IA, synchronisation et liens.</span>
                     <span className="mt-5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#C9A45C]">Ouvrir les options →</span>
                   </button>
+                  <button type="button" onClick={() => setAIWorkspaceTab('menus')} className="group min-h-[190px] rounded-3xl border border-[#242424] bg-gradient-to-br from-[#171717] via-[#0d0d0d] to-[#080808] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#C9A45C]/60 [transform:perspective(1000px)_rotateX(2deg)]">
+                    <span className="grid h-12 w-12 place-items-center rounded-2xl border border-white/10 bg-white/5 text-[#E1C27A]"><Sparkles size={22} /></span>
+                    <span className="mt-5 block text-lg font-semibold text-white">IA pour les menus</span>
+                    <span className="mt-2 block text-sm leading-6 text-white/50">Ouvrir le studio de menus IA d’un établissement.</span>
+                    <span className="mt-5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#C9A45C]">Ouvrir le studio →</span>
+                  </button>
+                  <button type="button" onClick={() => setAIWorkspaceTab('automation')} className="group min-h-[190px] rounded-3xl border border-[#242424] bg-gradient-to-br from-[#171717] via-[#0d0d0d] to-[#080808] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#C9A45C]/60 [transform:perspective(1000px)_rotateX(2deg)]">
+                    <span className="grid h-12 w-12 place-items-center rounded-2xl border border-white/10 bg-white/5 text-[#E1C27A]"><RefreshCw size={22} /></span>
+                    <span className="mt-5 block text-lg font-semibold text-white">Gestion des automatisations</span>
+                    <span className="mt-2 block text-sm leading-6 text-white/50">Accéder aux réglages de détection, réponse IA et synchronisation par établissement.</span>
+                    <span className="mt-5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#C9A45C]">Configurer →</span>
+                  </button>
                 </div>
               ) : (
                 <div className="space-y-5">
                   <button type="button" onClick={() => setAIWorkspaceTab('home')} className="inline-flex items-center gap-2 rounded-xl border border-[#242424] bg-[#101010] px-4 py-2.5 text-xs font-semibold text-[#E1C27A] transition hover:border-[#C9A45C]/60"><span aria-hidden="true">←</span> Toutes les options</button>
                   {aiWorkspaceTab === 'engine' && <AIConfigurationSection view="engine" businessTypes={aiBusinessTypes} reload={loadAIBusinessTypes} />}
                   {aiWorkspaceTab === 'prompts' && <AIConfigurationSection view="prompts" businessTypes={aiBusinessTypes} reload={loadAIBusinessTypes} />}
+                  {aiWorkspaceTab === 'menus' && (
+                    <section className="space-y-5 rounded-3xl border border-[#242424] bg-[#111111] p-5 sm:p-7">
+                      <div><h3 className="font-display text-2xl text-[#E1C27A]">IA pour les menus</h3><p className="mt-2 text-sm text-white/50">Sélectionnez un établissement pour ouvrir son studio de menus existant.</p></div>
+                      {establishments.length ? (
+                        <div className="space-y-4">
+                          <label className="block max-w-xl text-xs font-semibold text-[#C9A45C]">Établissement
+                            <select value={selectedMenuEstablishmentId} onChange={event => setSelectedMenuEstablishmentId(event.target.value)} className="mt-2 w-full rounded-xl border border-[#242424] bg-[#080808] px-3 py-3 text-sm text-white">
+                              <option value="">Choisir un établissement</option>
+                              {establishments.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}
+                            </select>
+                          </label>
+                          {selectedMenuEstablishmentId && <MenuStudio key={selectedMenuEstablishmentId} establishmentId={selectedMenuEstablishmentId} />}
+                        </div>
+                      ) : <p className="text-sm text-white/50">Créez d’abord un établissement pour configurer son menu.</p>}
+                    </section>
+                  )}
+                  {aiWorkspaceTab === 'automation' && (
+                    <section className="space-y-4 rounded-3xl border border-[#242424] bg-[#111111] p-5 sm:p-7">
+                      <h3 className="font-display text-2xl text-[#E1C27A]">Gestion des automatisations</h3>
+                      <p className="text-sm leading-6 text-white/50">Les réglages de détection des avis, de réponse IA, de langue et de fréquence sont personnalisés par établissement dans l’espace Avis & Google Business.</p>
+                      <button type="button" onClick={() => setAIWorkspaceTab('google')} className="rounded-xl border border-[#C9A45C]/40 bg-[#C9A45C]/10 px-4 py-3 text-sm font-semibold text-[#E1C27A]">Ouvrir les réglages des avis et automatisations</button>
+                    </section>
+                  )}
                   {aiWorkspaceTab === 'google' && (
                     <div>
                       <div className="mb-5">
