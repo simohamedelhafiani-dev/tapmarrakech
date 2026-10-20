@@ -15,6 +15,7 @@ async function sha256(v:string){const h=await crypto.subtle.digest('SHA-256',new
 async function tokenExchange(body:URLSearchParams){const r=await fetch('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});const d=await r.json();if(!r.ok)throw new Error(d?.error_description??'Google OAuth error');return d}
 async function refreshToken(r:string){return tokenExchange(new URLSearchParams({refresh_token:r,client_id:clientId,client_secret:clientSecret,grant_type:'refresh_token'}))}
 async function getGoogleAccountId(accessToken:string){const r=await fetch('https://mybusiness.googleapis.com/v4/accounts',{headers:{Authorization:`Bearer ${accessToken}`}});const d=await r.json();if(!r.ok)throw new Error(d?.error?.message??'Impossible de récupérer les comptes Google Business');const first=(d.accounts??[])[0];return first?.name?String(first.name).replace(/^accounts\//,''):''}
+async function getGoogleEmail(accessToken:string){const r=await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:`Bearer ${accessToken}`}});if(!r.ok)return null;const d=await r.json();return typeof d.email==='string'?d.email:null}
 
 Deno.serve(async req=>{
  if(req.method==='OPTIONS')return new Response('ok',{headers:cors});
@@ -32,6 +33,7 @@ Deno.serve(async req=>{
    let refresh=t.refresh_token as string|undefined;
    const googleAccountId=await getGoogleAccountId(t.access_token);
    if(!googleAccountId)return json({success:false,error:'Aucun compte Google Business Profile accessible.'},400);
+   const googleEmail = row.establishment_id ? null : await getGoogleEmail(t.access_token);
    if (row.establishment_id) {
     if(!refresh){const {data:e}=await db.from('google_business_connections').select('refresh_token').eq('establishment_id',row.establishment_id).maybeSingle();refresh=e?.refresh_token}
     if(!refresh)return json({success:false,error:'Google n’a pas renvoyé de refresh token. Reconnectez le compte avec consentement.'},400);
@@ -48,7 +50,7 @@ Deno.serve(async req=>{
     }
     if(!refresh)return json({success:false,error:'Google n’a pas renvoyé de refresh token. Reconnectez le compte avec consentement.'},400);
     const {error:accountError}=await db.from('google_business_accounts').upsert({
-      google_account_id:googleAccountId,access_token:t.access_token,refresh_token:refresh,
+      google_account_id:googleAccountId,email:googleEmail,access_token:t.access_token,refresh_token:refresh,
       token_expires_at:new Date(Date.now()+Number(t.expires_in??3600)*1000).toISOString(),
       scopes:String(t.scope??'').split(' ').filter(Boolean),connected_by:row.user_id,status:'active',last_error:null,updated_at:new Date().toISOString()
     },{onConflict:'connected_by,google_account_id'});
@@ -71,7 +73,7 @@ Deno.serve(async req=>{
    const state=randomState();
    const {error:stateError}=await db.from('google_business_oauth_states').insert({state_hash:await sha256(state),user_id:user.id,establishment_id:accountFirst?null:eid,expires_at:new Date(Date.now()+600000).toISOString()});
    if(stateError)throw stateError;
-   const p=new URLSearchParams({client_id:clientId,redirect_uri:redirectUri,response_type:'code',access_type:'offline',prompt:'consent',scope:'https://www.googleapis.com/auth/business.manage',state});
+   const p=new URLSearchParams({client_id:clientId,redirect_uri:redirectUri,response_type:'code',access_type:'offline',prompt:'consent',scope:'openid email profile https://www.googleapis.com/auth/business.manage',state});
    return json({success:true,authorization_url:`https://accounts.google.com/o/oauth2/v2/auth?${p.toString()}`});
   }
   if(action==='refresh'){
