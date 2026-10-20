@@ -27,8 +27,20 @@ Deno.serve(async req=>{
    if(!code||!state)return json({success:false,error:'Paramètres OAuth manquants.'},400);
    const stateHash=await sha256(state);
    const {data:row,error}=await db.from('google_business_oauth_states').select('state_hash,user_id,establishment_id,expires_at,used_at').eq('state_hash',stateHash).maybeSingle();
-   if(error||!row||row.used_at||new Date(row.expires_at).getTime()<Date.now())return json({success:false,error:'État OAuth invalide ou expiré.'},400);
-   await db.from('google_business_oauth_states').update({used_at:new Date().toISOString()}).eq('state_hash',stateHash);
+   if(error)throw error;
+   if(!row||row.used_at||new Date(row.expires_at).getTime()<Date.now())return json({success:false,error:'État OAuth invalide ou expiré.'},400);
+   // Consume the OAuth state atomically: only one callback can change used_at from NULL.
+   // The conditional UPDATE prevents concurrent/replayed callbacks from both exchanging the code.
+   const consumedAt=new Date().toISOString();
+   const {data:consumed,error:consumeError}=await db.from('google_business_oauth_states')
+    .update({used_at:consumedAt})
+    .eq('state_hash',stateHash)
+    .is('used_at',null)
+    .gt('expires_at',consumedAt)
+    .select('state_hash')
+    .maybeSingle();
+   if(consumeError)throw consumeError;
+   if(!consumed)return json({success:false,error:'État OAuth déjà utilisé, invalide ou expiré.'},400);
    const t=await tokenExchange(new URLSearchParams({code,client_id:clientId,client_secret:clientSecret,redirect_uri:redirectUri,grant_type:'authorization_code'}));
    let refresh=t.refresh_token as string|undefined;
    const googleAccountId=await getGoogleAccountId(t.access_token);
