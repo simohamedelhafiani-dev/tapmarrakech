@@ -27,7 +27,7 @@ returns table(
   feedback_submitted boolean,
   feedback_bonus_points integer
 )
-language sql stable security definer set search_path = public, pg_temp
+language sql stable security definer set search_path = pg_catalog, public, pg_temp
 as $$
   select
     c.id,
@@ -54,7 +54,7 @@ create or replace function public.submit_public_loyalty_feedback(
   p_comment text default null
 )
 returns table(success boolean, points_awarded integer, points_balance integer)
-language plpgsql security definer set search_path = public, pg_temp
+language plpgsql security definer set search_path = pg_catalog, public, pg_temp
 as $$
 declare
   v_customer public.loyalty_customers%rowtype;
