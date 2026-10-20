@@ -54,6 +54,135 @@ Deno.serve(async (req: Request) => {
       return json({ success: true });
     }
 
+    if (action === 'load_establishment') {
+      const establishmentId = String(body?.establishment_id ?? '');
+      if (!establishmentId) return json({ success: false, error: 'establishment_id requis' }, 400);
+
+      const [establishmentResult, connectionResult, settingsResult, locationsResult] = await Promise.all([
+        db.from('establishments')
+          .select('id,google_review_url,tripadvisor_review_url,feedback_bonus_points')
+          .eq('id', establishmentId).maybeSingle(),
+        db.from('google_business_connections')
+          .select('id,status,last_sync_at,last_error,google_account_id')
+          .eq('establishment_id', establishmentId).maybeSingle(),
+        db.from('google_business_settings')
+          .select('establishment_id,auto_reply_enabled,auto_reply_language,auto_reply_tone,require_approval,auto_reply_min_rating,sync_interval_minutes')
+          .eq('establishment_id', establishmentId).maybeSingle(),
+        db.from('google_business_locations')
+          .select('id,metadata,google_business_account_id,mapped_establishment_id')
+          .eq('mapped_establishment_id', establishmentId)
+          .limit(500),
+      ]);
+      if (establishmentResult.error) throw establishmentResult.error;
+      if (!establishmentResult.data) return json({ success: false, error: 'Établissement introuvable' }, 404);
+      if (connectionResult.error) throw connectionResult.error;
+      if (settingsResult.error) throw settingsResult.error;
+      if (locationsResult.error) throw locationsResult.error;
+
+      const locations = locationsResult.data ?? [];
+      let connection: any = connectionResult.data ?? null;
+      if (!connection) {
+        const accountId = locations.find((location: any) => location.google_business_account_id)?.google_business_account_id;
+        if (accountId) {
+          const { data, error } = await db.from('google_business_accounts')
+            .select('id,status,last_sync_at,last_error,google_account_id')
+            .eq('id', accountId).maybeSingle();
+          if (error) throw error;
+          connection = data;
+        }
+      }
+
+      const locationIds = locations.map((location: any) => location.id);
+      let reviews: any[] = [];
+      if (locationIds.length) {
+        const { data, error } = await db.from('google_business_reviews')
+          .select('id,location_id,reviewer_display_name,star_rating,comment,owner_reply,review_created_at,owner_reply_updated_at')
+          .in('location_id', locationIds)
+          .order('review_created_at', { ascending: false })
+          .limit(100);
+        if (error) throw error;
+        reviews = data ?? [];
+      }
+
+      return json({
+        success: true,
+        establishment: establishmentResult.data,
+        connection,
+        settings: settingsResult.data,
+        locations: locations.map((location: any) => ({ id: location.id, metadata: location.metadata ?? null })),
+        reviews,
+      });
+    }
+
+    if (action === 'save_settings') {
+      const establishmentId = String(body?.establishment_id ?? '');
+      const scope = String(body?.scope ?? '');
+      if (!establishmentId || !['ai', 'sync'].includes(scope)) {
+        return json({ success: false, error: 'Paramètres de configuration invalides' }, 400);
+      }
+      const { data: establishment, error: establishmentError } = await db.from('establishments')
+        .select('id').eq('id', establishmentId).maybeSingle();
+      if (establishmentError) throw establishmentError;
+      if (!establishment) return json({ success: false, error: 'Établissement introuvable' }, 404);
+
+      let payload: Record<string, unknown>;
+      if (scope === 'ai') {
+        const enabled = body?.auto_reply_enabled;
+        const approval = body?.require_approval;
+        const rating = Number(body?.auto_reply_min_rating);
+        const language = String(body?.auto_reply_language ?? '');
+        const tone = String(body?.auto_reply_tone ?? '');
+        if (typeof enabled !== 'boolean' || typeof approval !== 'boolean' ||
+            !Number.isInteger(rating) || rating < 1 || rating > 5 ||
+            !['auto', 'fr', 'en', 'ar'].includes(language) ||
+            !['professional_warm', 'professional', 'friendly', 'luxury'].includes(tone)) {
+          return json({ success: false, error: 'Paramètres IA invalides' }, 400);
+        }
+        payload = {
+          establishment_id: establishmentId,
+          auto_reply_enabled: enabled,
+          auto_reply_language: language,
+          auto_reply_tone: tone,
+          require_approval: approval,
+          auto_reply_min_rating: rating,
+        };
+      } else {
+        const interval = Number(body?.sync_interval_minutes);
+        if (![5, 10, 15, 30, 60].includes(interval)) {
+          return json({ success: false, error: 'Fréquence de synchronisation invalide' }, 400);
+        }
+        payload = { establishment_id: establishmentId, sync_interval_minutes: interval };
+      }
+      const { error } = await db.from('google_business_settings').upsert(payload, { onConflict: 'establishment_id' });
+      if (error) throw error;
+      return json({ success: true });
+    }
+
+    if (action === 'save_links') {
+      const establishmentId = String(body?.establishment_id ?? '');
+      const googleReviewUrl = String(body?.google_review_url ?? '').trim();
+      const tripadvisorReviewUrl = String(body?.tripadvisor_review_url ?? '').trim();
+      const feedbackBonus = Number(body?.feedback_bonus_points);
+      if (!establishmentId || !Number.isInteger(feedbackBonus) || feedbackBonus < 0 || feedbackBonus > 10000) {
+        return json({ success: false, error: 'Liens ou bonus invalides' }, 400);
+      }
+      const isHttpsOrEmpty = (value: string) => !value || /^https:\/\//i.test(value);
+      if (!isHttpsOrEmpty(googleReviewUrl) || !isHttpsOrEmpty(tripadvisorReviewUrl)) {
+        return json({ success: false, error: 'Les liens doivent utiliser HTTPS' }, 400);
+      }
+      const { data: establishment, error: establishmentError } = await db.from('establishments')
+        .select('id').eq('id', establishmentId).maybeSingle();
+      if (establishmentError) throw establishmentError;
+      if (!establishment) return json({ success: false, error: 'Établissement introuvable' }, 404);
+      const { error } = await db.from('establishments').update({
+        google_review_url: googleReviewUrl || null,
+        tripadvisor_review_url: tripadvisorReviewUrl || null,
+        feedback_bonus_points: feedbackBonus,
+      }).eq('id', establishmentId);
+      if (error) throw error;
+      return json({ success: true });
+    }
+
     if (action !== 'load') return json({ success: false, error: 'Action inconnue' }, 400);
 
     // Never return OAuth access/refresh tokens or raw Google payloads to the browser.
