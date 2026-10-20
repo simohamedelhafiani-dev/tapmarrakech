@@ -235,11 +235,18 @@ Deno.serve(async (req) => {
     // Retry only a prior failed generation that never reached Google's publish endpoint.
     // A non-null claim means a publish attempt may have had an ambiguous outcome, so do not retry it automatically.
     const retryableGenerationFailure = Boolean(existing && existing.reply_status === 'failed' && !existing.auto_reply_claimed_at);
+    // A scheduled sync can persist a newly created review just before Pub/Sub delivers its event.
+    // Treat an unprocessed row as eligible too, but never override an existing draft or reply.
+    const retryableUnprocessedReview = Boolean(existing &&
+      (existing.reply_status == null || existing.reply_status === 'none') &&
+      !existing.owner_reply &&
+      !existing.reply_draft &&
+      !existing.auto_reply_claimed_at);
     const afterActivation = activatedAt > 0 && createdAt > 0 && createdAt >= activatedAt;
 
-    // Publish only new positive reviews when autonomous replies are enabled and approval is disabled.
+    // Publish only new/unprocessed positive reviews when autonomous replies are enabled and approval is disabled.
     // Negative/below-threshold reviews are never published automatically.
-    const shouldAutoPublish = (isNewReview || retryableGenerationFailure) &&
+    const shouldAutoPublish = (isNewReview || retryableGenerationFailure || retryableUnprocessedReview) &&
       afterActivation &&
       settings?.auto_reply_enabled === true &&
       settings?.require_approval === false &&
