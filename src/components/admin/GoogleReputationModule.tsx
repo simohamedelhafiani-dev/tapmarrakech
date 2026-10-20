@@ -71,7 +71,6 @@ return Number.isFinite(numericValue) ? numericValue : 0;
 export default function GoogleReputationModule({ establishmentId, mode = 'ai' }: Props) {
   const [connection, setConnection] = useState<Connection | null>(null);
   const [settings, setSettings] = useState<Setting>(emptySettings);
-  const [reviewBonus, setReviewBonus] = useState(0);
   const [googleReviewUrl, setGoogleReviewUrl] = useState('');
   const [tripadvisorReviewUrl, setTripadvisorReviewUrl] = useState('');
   const [reviews, setReviews] = useState<GoogleReview[]>([]);
@@ -92,7 +91,7 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
       ] = await Promise.all([
         supabase
           .from('establishments')
-          .select('review_bonus_points,google_review_url,tripadvisor_review_url')
+          .select('google_review_url,tripadvisor_review_url')
           .eq('id', establishmentId)
           .maybeSingle(),
         supabase
@@ -126,7 +125,6 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
         settingsRow = settingsWithInterval.data as Record<string, unknown> | null;
       }
 
-      setReviewBonus(Number(establishment?.review_bonus_points ?? 0));
       setGoogleReviewUrl(establishment?.google_review_url ?? '');
       setTripadvisorReviewUrl(establishment?.tripadvisor_review_url ?? '');
       if (!establishment?.google_review_url) {
@@ -304,13 +302,11 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
         setMessage(scope === 'ai' ? 'Configuration des réponses IA enregistrée.' : 'Fréquence de synchronisation enregistrée.');
       } else {
         const { error: establishmentError } = await supabase.from('establishments').update({
-          review_bonus_points: Math.max(0, Math.floor(Number(reviewBonus) || 0)),
           google_review_url: googleReviewUrl.trim(),
           tripadvisor_review_url: tripadvisorReviewUrl.trim() || null,
         }).eq('id', establishmentId);
         if (establishmentError) throw establishmentError;
-        setReviewBonus(Math.max(0, Math.floor(Number(reviewBonus) || 0)));
-        setMessage('Bonus et liens d’avis enregistrés.');
+        setMessage('Liens d’avis enregistrés.');
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Impossible d’enregistrer les paramètres.');
@@ -411,14 +407,13 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
 
       {mode === 'links' && (
       <section className="rounded-3xl border border-[#242424] bg-[#111111] p-6">
-        <div className="flex items-center gap-2"><Sparkles size={17} className="text-[#C9A45C]" /><h3 className="font-semibold text-white">Bonus & liens d’avis</h3></div>
+        <div className="flex items-center gap-2"><Sparkles size={17} className="text-[#C9A45C]" /><h3 className="font-semibold text-white">Liens d’avis</h3></div>
         <div className="mt-5 grid gap-4 md:grid-cols-3">
-          <label className="block"><span className="mb-2 block text-xs font-semibold text-white/55">Bonus Google / TripAdvisor (points)</span><input type="number" min="0" step="1" value={reviewBonus} onChange={(e) => setReviewBonus(Number(e.target.value))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white" /></label>
           <label className="block md:col-span-2"><span className="mb-2 block text-xs font-semibold text-white/55">Lien avis Google</span><input value={googleReviewUrl} onChange={(e) => setGoogleReviewUrl(e.target.value)} placeholder="https://g.page/…" className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white" /></label>
           <label className="block md:col-span-2"><span className="mb-2 block text-xs font-semibold text-white/55">Lien avis TripAdvisor</span><input value={tripadvisorReviewUrl} onChange={(e) => setTripadvisorReviewUrl(e.target.value)} placeholder="https://www.tripadvisor.fr/…" className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white" /></label>
         </div>
-        <p className="mt-3 text-[10px] text-white/30">Le bonus est configuré par établissement et ne rétroactive pas un avis déjà réclamé.</p>
-        <button type="button" onClick={() => void saveSettings('links')} disabled={saving} className="mt-4 inline-flex items-center gap-2 rounded-xl border border-[#C9A45C]/30 px-4 py-2.5 text-xs font-semibold text-[#C9A45C] disabled:opacity-50"><Save size={14} /> Enregistrer bonus & liens</button>
+        <p className="mt-3 text-[10px] leading-5 text-white/40">KELYANI ne récompense pas la publication d’avis publics. Les points de fidélité doivent rester indépendants des avis Google et TripAdvisor.</p>
+        <button type="button" onClick={() => void saveSettings('links')} disabled={saving} className="mt-4 inline-flex items-center gap-2 rounded-xl border border-[#C9A45C]/30 px-4 py-2.5 text-xs font-semibold text-[#C9A45C] disabled:opacity-50"><Save size={14} /> Enregistrer les liens</button>
       </section>
 
 
