@@ -138,6 +138,7 @@ async function publishGeneratedReply(review: any, location: any, connection: any
 
 Deno.serve(async (req: Request) => {
   let activeConnectionId: string | null = null;
+  let activeConnectionTable: 'google_business_connections' | 'google_business_accounts' = 'google_business_connections';
   if (req.method === 'OPTIONS') {
     return new Response('ok', {
       headers: {
@@ -192,6 +193,7 @@ Deno.serve(async (req: Request) => {
       connection = legacyConnection;
     }
     activeConnectionId = connection.id;
+    activeConnectionTable = accountMode ? 'google_business_accounts' : 'google_business_connections';
 
     let token = connection.access_token;
     if (!token || !connection.token_expires_at || new Date(connection.token_expires_at).getTime() < Date.now() + 120000) {
@@ -339,7 +341,7 @@ Deno.serve(async (req: Request) => {
     const message = error instanceof Error ? error.message : 'Erreur serveur';
     console.error('google-business-sync-access-test:', error);
     if (activeConnectionId) {
-      const { error: statusError } = await db.from('google_business_connections').update({
+      const { error: statusError } = await db.from(activeConnectionTable).update({
         status: 'error', last_error: message, updated_at: new Date().toISOString(),
       }).eq('id', activeConnectionId);
       if (statusError) console.error('Impossible de sauvegarder last_error Google Business:', statusError);
