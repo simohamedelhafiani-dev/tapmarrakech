@@ -273,7 +273,7 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
         {activeView !== 'home' && <main className="min-w-0 space-y-5">
           {(activeTile === 'ai') && <nav aria-label="Gestion des avis" className="flex flex-wrap gap-2 rounded-2xl border border-[#242424] bg-[#111111] p-3">
             {([{id:'ai',label:'Automatisation IA'},{id:'reviews',label:'Avis Google'},{id:'appReviews',label:'Avis KELYANI'},{id:'sync',label:'Fréquence de synchronisation'}] as {id:View;label:string}[]).map(item => <button key={item.id} type="button" onClick={() => setActiveView(item.id)} className={`rounded-xl border px-3 py-2 text-xs font-semibold transition ${activeView===item.id?'border-[#C9A45C]/50 bg-[#C9A45C]/10 text-[#C9A45C]':'border-[#242424] text-white/55 hover:border-[#C9A45C]/30'}`}>{item.label}</button>)}
-          </nav>
+          </nav>}
           <section className="rounded-2xl border border-[#242424] bg-[#111111] p-4 sm:p-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
