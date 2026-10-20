@@ -77,11 +77,21 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
   const [newEstablishmentSlug, setNewEstablishmentSlug] = useState('');
   const [newEstablishmentTypeId, setNewEstablishmentTypeId] = useState('');
   const [creatingEstablishment, setCreatingEstablishment] = useState(false);
+  const [googleAccounts, setGoogleAccounts] = useState<Array<{id:string; google_account_id:string|null; email:string|null; status:string; last_sync_at:string|null; last_error:string|null}>>([]);
+  const [accountLoading, setAccountLoading] = useState(false);
+
 
   const load = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
+      const { data: accountRows, error: accountError } = await supabase
+        .from('google_business_accounts')
+        .select('id,google_account_id,email,status,last_sync_at,last_error')
+        .order('created_at', { ascending: false });
+      if (accountError && !/google_business_accounts|does not exist|schema cache/i.test(accountError.message)) throw accountError;
+      setGoogleAccounts((accountRows ?? []) as Array<{id:string; google_account_id:string|null; email:string|null; status:string; last_sync_at:string|null; last_error:string|null}>);
+
       const { data: connectionRows, error: connectionError } = await supabase
         .from('google_business_connections')
         .select('id,establishment_id,status,last_sync_at,last_error');
@@ -337,6 +347,16 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
           {activeView === 'establishment' && (
             <>
             <section className="rounded-2xl border border-[#242424] bg-[#111111] p-4 sm:p-5">
+              <section className="mb-5 rounded-2xl border border-[#C9A45C]/25 bg-gradient-to-br from-[#17130b] to-[#0b0b0b] p-5">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#C9A45C]">Compte Google central</p><h3 className="mt-1 text-lg font-semibold text-white">Comptes Google connectés</h3><p className="mt-1 max-w-2xl text-xs leading-5 text-white/45">Connectez le compte qui possède les accès Google Business Profile, puis découvrez ses fiches et attribuez-les aux établissements KELYANI.</p></div>
+                  <button type="button" onClick={async()=>{setAccountLoading(true);setError('');try{const {data,error}=await supabase.functions.invoke('google-business-oauth',{body:{action:'start_account'}});if(error)throw error;if(!data?.success||!data?.authorization_url)throw new Error(data?.error||'Connexion du compte Google indisponible : la fonction OAuth doit prendre en charge le mode compte.');window.open(data.authorization_url,'_blank','noopener,noreferrer');}catch(e){setError(e instanceof Error?e.message:'Connexion Google impossible.');}finally{setAccountLoading(false);}}} disabled={accountLoading} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#C9A45C] px-4 py-3 text-xs font-semibold text-[#111111] disabled:opacity-50"><Store size={15}/>{accountLoading?'Connexion…':'Connecter un compte Google'}</button>
+                </div>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  {googleAccounts.map(account=><article key={account.id} className="rounded-xl border border-[#29251b] bg-black/30 p-4"><div className="flex items-start justify-between gap-2"><div><p className="text-sm font-semibold text-white">{account.email||account.google_account_id||'Compte Google Business'}</p><p className="mt-1 text-[11px] text-white/40">Compte {account.google_account_id||'en attente de synchronisation'}</p></div><span className={`rounded-full px-2 py-1 text-[10px] ${account.status==='active'?'bg-emerald-400/10 text-emerald-300':'bg-amber-400/10 text-amber-200'}`}>{account.status==='active'?'Connecté':account.status}</span></div>{account.last_error&&<p className="mt-2 text-xs text-red-300">{account.last_error}</p>}<p className="mt-3 text-[10px] text-white/35">Dernière synchronisation : {account.last_sync_at?new Date(account.last_sync_at).toLocaleString('fr-FR'):'Jamais'}</p></article>)}
+                  {!googleAccounts.length&&<p className="rounded-xl border border-dashed border-[#29251b] p-4 text-xs text-white/40 sm:col-span-2 xl:col-span-3">Aucun compte Google centralisé. La connexion par établissement existante reste disponible pendant la transition.</p>}
+                </div>
+              </section>
               <div className="mb-4"><h3 className="text-lg font-semibold text-white">Associer les fiches Google manuellement</h3><p className="mt-1 text-xs leading-5 text-white/40">Chaque fiche Google reste indépendante. Les avis d’une fiche ne seront affichés sous un établissement Kelyani qu’après association explicite ci-dessous. Vérifiez le nom et l’adresse avant de choisir.</p></div>
               <div className="space-y-3">
                 {locations.map((location) => {
