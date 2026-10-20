@@ -145,7 +145,10 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
   const connectedIds = new Set([
     ...connections.filter((item) => item.status === 'active').map((item) => item.establishment_id),
     ...locations
-      .filter((location) => Boolean(location.google_business_account_id && activeGoogleAccountIds.has(location.google_business_account_id)))
+      .filter((location) => {
+        const accountId = location.google_business_account_id;
+        return typeof accountId === 'string' && activeGoogleAccountIds.has(accountId);
+      })
       .map((location) => location.mapped_establishment_id)
       .filter((establishmentId): establishmentId is string => Boolean(establishmentId)),
   ]);
