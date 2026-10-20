@@ -42,12 +42,9 @@ type ReviewRow = Review & { establishmentName: string; locationName: string };
 type View = 'home' | 'reviews' | 'appReviews' | 'establishment' | 'ai' | 'sync' | 'settings';
 
 const navigation: { id: View; label: string; description: string; icon: typeof MessageSquare }[] = [
-  { id: 'reviews', label: 'Avis Google', description: 'Avis Google et réponses', icon: MessageSquare },
-  { id: 'appReviews', label: 'Avis Kelyani', description: 'Avis reçus dans Kelyani', icon: MessageSquare },
-  { id: 'establishment', label: 'Connexion & attribution', description: 'Connecter Google et associer les fiches', icon: Store },
-  { id: 'ai', label: 'Configuration IA', description: 'Règles IA pour le commerce choisi', icon: Sparkles },
-  { id: 'sync', label: 'Fréquence de rafraîchissement', description: 'Régler le délai de synchronisation', icon: RefreshCw },
-  { id: 'settings', label: 'Bonus & liens', description: 'Points et liens vers les avis', icon: Settings2 },
+  { id: 'establishment', label: 'Connecter Google', description: 'Compte Google, fiches et attribution', icon: Store },
+  { id: 'ai', label: 'Paramètres des avis', description: 'Automatisation IA, réponses et langues', icon: MessageSquare },
+  { id: 'settings', label: 'Bonus & liens', description: 'Liens Google et points de fidélité', icon: Settings2 },
 ];
 
 function rating(value: string | null) {
@@ -222,6 +219,7 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
   const selectedSetting = replySettings.find((item) => item.establishment_id === selectedEstablishmentId);
   const selectedConnection = connections.find((item) => item.establishment_id === selectedEstablishmentId);
   const needsSpecificEstablishment = activeView === 'ai' || activeView === 'sync' || activeView === 'settings';
+  const activeTile: View = activeView === 'establishment' ? 'establishment' : activeView === 'settings' ? 'settings' : 'ai';
 
   const metric = (label: string, value: string | number, accent = false) => (
     <div className="rounded-2xl border border-[#242424] bg-[#111111] p-4 sm:p-5">
@@ -258,7 +256,7 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
       <div className="space-y-5">
         <nav aria-label="Options Google Business" className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
           {navigation.map(({ id, label, description, icon: Icon }) => {
-            const active = activeView === id;
+            const active = activeTile === id;
             return (
               <button key={id} type="button" onClick={() => setActiveView(id)} aria-current={active ? 'page' : undefined}
                 className={`flex min-h-[124px] min-w-0 flex-col items-start gap-3 rounded-2xl border p-4 text-left transition [transform:perspective(900px)_rotateX(2deg)] hover:-translate-y-1 hover:shadow-[0_16px_30px_rgba(0,0,0,.32)] ${active ? 'border-[#C9A45C]/60 bg-[#C9A45C]/10' : 'border-[#242424] bg-[#111111] hover:border-[#C9A45C]/30'}`}>
@@ -273,6 +271,9 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
         </nav>
 
         {activeView !== 'home' && <main className="min-w-0 space-y-5">
+          {(activeTile === 'ai') && <nav aria-label="Gestion des avis" className="flex flex-wrap gap-2 rounded-2xl border border-[#242424] bg-[#111111] p-3">
+            {([{id:'ai',label:'Automatisation IA'},{id:'reviews',label:'Avis Google'},{id:'appReviews',label:'Avis KELYANI'},{id:'sync',label:'Fréquence de synchronisation'}] as {id:View;label:string}[]).map(item => <button key={item.id} type="button" onClick={() => setActiveView(item.id)} className={`rounded-xl border px-3 py-2 text-xs font-semibold transition ${activeView===item.id?'border-[#C9A45C]/50 bg-[#C9A45C]/10 text-[#C9A45C]':'border-[#242424] text-white/55 hover:border-[#C9A45C]/30'}`}>{item.label}</button>)}
+          </nav>
           <section className="rounded-2xl border border-[#242424] bg-[#111111] p-4 sm:p-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
