@@ -8,13 +8,13 @@ const clientId=Deno.env.get('GOOGLE_BUSINESS_CLIENT_ID')??'';
 const clientSecret=Deno.env.get('GOOGLE_BUSINESS_CLIENT_SECRET')??'';
 const redirectUri=Deno.env.get('GOOGLE_BUSINESS_REDIRECT_URI')??'';
 const db=createClient(supabaseUrl,serviceKey,{auth:{autoRefreshToken:false,persistSession:false}});
-const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization,content-type,apikey','Access-Control-Allow-Methods':'POST,OPTIONS'};
+const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization,content-type,apikey,x-client-info,x-supabase-api-version','Access-Control-Allow-Methods':'POST,OPTIONS'};
 const json=(d:unknown,s=200)=>new Response(JSON.stringify(d),{status:s,headers:{...cors,'Content-Type':'application/json'}});
 function randomState(){const b=crypto.getRandomValues(new Uint8Array(32));return btoa(String.fromCharCode(...b)).replaceAll('+','-').replaceAll('/','_').replaceAll('=','')}
 async function sha256(v:string){const h=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v));return Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0')).join('')}
 async function tokenExchange(body:URLSearchParams){const r=await fetch('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});const d=await r.json();if(!r.ok)throw new Error(d?.error_description??'Google OAuth error');return d}
 async function refreshToken(r:string){return tokenExchange(new URLSearchParams({refresh_token:r,client_id:clientId,client_secret:clientSecret,grant_type:'refresh_token'}))}
-async function getGoogleAccountId(accessToken:string){const r=await fetch('https://mybusiness.googleapis.com/v4/accounts',{headers:{Authorization:`Bearer ${accessToken}`}});const d=await r.json();if(!r.ok)throw new Error(d?.error?.message??'Impossible de récupérer les comptes Google Business');const first=(d.accounts??[])[0];return first?.name?String(first.name).replace(/^accounts\//,''):''}
+async function getGoogleAccountId(accessToken:string){const r=await fetch('https://mybusinessaccountmanagement.googleapis.com/v1/accounts',{headers:{Authorization:`Bearer ${accessToken}`}});const raw=await r.text();let d:any;try{d=JSON.parse(raw)}catch{throw new Error(`Google Business Account Management a renvoyé une réponse non JSON (HTTP ${r.status}). Vérifiez que l’API Account Management est activée dans Google Cloud.`)}if(!r.ok)throw new Error(d?.error?.message??`Impossible de récupérer les comptes Google Business (HTTP ${r.status})`);const first=(d.accounts??[])[0];return first?.name?String(first.name).replace(/^accounts\//,''):''}
 async function getGoogleEmail(accessToken:string){const r=await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:`Bearer ${accessToken}`}});if(!r.ok)return null;const d=await r.json();return typeof d.email==='string'?d.email:null}
 
 Deno.serve(async req=>{
@@ -44,6 +44,9 @@ Deno.serve(async req=>{
     },{onConflict:'establishment_id'});
     if(legacyError)throw legacyError;
    } else {
+    // Keep history and existing location mappings, but mark the previous account inactive when the admin switches accounts.
+    const {error:deactivateError}=await db.from('google_business_accounts').update({status:'revoked',updated_at:new Date().toISOString()}).eq('connected_by',row.user_id).neq('google_account_id',googleAccountId);
+    if(deactivateError)throw deactivateError;
     if(!refresh){
       const {data:e}=await db.from('google_business_accounts').select('refresh_token').eq('connected_by',row.user_id).eq('google_account_id',googleAccountId).maybeSingle();
       refresh=e?.refresh_token;
@@ -64,6 +67,13 @@ Deno.serve(async req=>{
   const {data:profile,error:profileError}=await db.from('profiles').select('role').eq('id',user.id).maybeSingle();
   if(profileError)throw profileError;
   if(profile?.role!=='admin')return json({success:false,error:'Connexion Google Business réservée à l’administrateur.'},403);
+  if(action==='list_accounts'){
+   const {data:accounts,error:accountsError}=await db.from('google_business_accounts')
+    .select('id,google_account_id,email,status,last_sync_at,last_error,created_at,updated_at')
+    .eq('connected_by',user.id).order('created_at',{ascending:false});
+   if(accountsError)throw accountsError;
+   return json({success:true,accounts:accounts??[]});
+  }
   if(action==='start'){
    const body=await req.json();
    const accountFirst=body?.action==='start_account';
@@ -73,7 +83,7 @@ Deno.serve(async req=>{
    const state=randomState();
    const {error:stateError}=await db.from('google_business_oauth_states').insert({state_hash:await sha256(state),user_id:user.id,establishment_id:accountFirst?null:eid,expires_at:new Date(Date.now()+600000).toISOString()});
    if(stateError)throw stateError;
-   const p=new URLSearchParams({client_id:clientId,redirect_uri:redirectUri,response_type:'code',access_type:'offline',prompt:'consent',scope:'openid email profile https://www.googleapis.com/auth/business.manage',state});
+   const p=new URLSearchParams({client_id:clientId,redirect_uri:redirectUri,response_type:'code',access_type:'offline',prompt:accountFirst?'select_account consent':'consent',scope:'openid email profile https://www.googleapis.com/auth/business.manage',state});
    return json({success:true,authorization_url:`https://accounts.google.com/o/oauth2/v2/auth?${p.toString()}`});
   }
   if(action==='refresh'){
