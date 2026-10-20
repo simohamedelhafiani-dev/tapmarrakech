@@ -247,6 +247,22 @@ Deno.serve(async (req) => {
 
     if (!shouldAutoPublish) return json({ ok: true, review_id: stored?.id ?? null, auto_reply: 'skipped' });
 
+    // Claim this review atomically before generating or publishing. Pub/Sub may deliver
+    // duplicate events concurrently; only one request can set this nullable timestamp.
+    const claimedAt = new Date().toISOString();
+    const { data: claimedReview, error: claimError } = await db
+      .from('google_business_reviews')
+      .update({ auto_reply_claimed_at: claimedAt, updated_at: claimedAt })
+      .eq('id', stored.id)
+      .is('auto_reply_claimed_at', null)
+      .is('owner_reply', null)
+      .select('id')
+      .maybeSingle();
+    if (claimError) throw claimError;
+    if (!claimedReview) {
+      return json({ ok: true, review_id: stored.id, auto_reply: 'skipped_already_claimed' });
+    }
+
     try {
       const reply = await generateReply(
         String(review.comment),
