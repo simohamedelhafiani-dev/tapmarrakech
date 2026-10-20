@@ -30,15 +30,30 @@ Deno.serve(async req=>{
    await db.from('google_business_oauth_states').update({used_at:new Date().toISOString()}).eq('state_hash',stateHash);
    const t=await tokenExchange(new URLSearchParams({code,client_id:clientId,client_secret:clientSecret,redirect_uri:redirectUri,grant_type:'authorization_code'}));
    let refresh=t.refresh_token as string|undefined;
-   if(!refresh){const {data:e}=await db.from('google_business_connections').select('refresh_token').eq('establishment_id',row.establishment_id).maybeSingle();refresh=e?.refresh_token}
-   if(!refresh)return json({success:false,error:'Google n’a pas renvoyé de refresh token. Reconnectez le compte avec consentement.'},400);
    const googleAccountId=await getGoogleAccountId(t.access_token);
    if(!googleAccountId)return json({success:false,error:'Aucun compte Google Business Profile accessible.'},400);
-   await db.from('google_business_connections').upsert({
-    establishment_id:row.establishment_id,google_account_id:googleAccountId,access_token:t.access_token,refresh_token:refresh,
-    token_expires_at:new Date(Date.now()+Number(t.expires_in??3600)*1000).toISOString(),
-    scopes:String(t.scope??'').split(' ').filter(Boolean),connected_by:row.user_id,status:'active',last_error:null,updated_at:new Date().toISOString()
-   },{onConflict:'establishment_id'});
+   if (row.establishment_id) {
+    if(!refresh){const {data:e}=await db.from('google_business_connections').select('refresh_token').eq('establishment_id',row.establishment_id).maybeSingle();refresh=e?.refresh_token}
+    if(!refresh)return json({success:false,error:'Google n’a pas renvoyé de refresh token. Reconnectez le compte avec consentement.'},400);
+    const {error:legacyError}=await db.from('google_business_connections').upsert({
+     establishment_id:row.establishment_id,google_account_id:googleAccountId,access_token:t.access_token,refresh_token:refresh,
+     token_expires_at:new Date(Date.now()+Number(t.expires_in??3600)*1000).toISOString(),
+     scopes:String(t.scope??'').split(' ').filter(Boolean),connected_by:row.user_id,status:'active',last_error:null,updated_at:new Date().toISOString()
+    },{onConflict:'establishment_id'});
+    if(legacyError)throw legacyError;
+   } else {
+    if(!refresh){
+      const {data:e}=await db.from('google_business_accounts').select('refresh_token').eq('connected_by',row.user_id).eq('google_account_id',googleAccountId).maybeSingle();
+      refresh=e?.refresh_token;
+    }
+    if(!refresh)return json({success:false,error:'Google n’a pas renvoyé de refresh token. Reconnectez le compte avec consentement.'},400);
+    const {error:accountError}=await db.from('google_business_accounts').upsert({
+      google_account_id:googleAccountId,access_token:t.access_token,refresh_token:refresh,
+      token_expires_at:new Date(Date.now()+Number(t.expires_in??3600)*1000).toISOString(),
+      scopes:String(t.scope??'').split(' ').filter(Boolean),connected_by:row.user_id,status:'active',last_error:null,updated_at:new Date().toISOString()
+    },{onConflict:'connected_by,google_account_id'});
+    if(accountError)throw accountError;
+   }
    return new Response('<html><body><script>window.close();</script><p>Google Business Profile connecté. Vous pouvez fermer cette fenêtre.</p></body></html>',{headers:{'Content-Type':'text/html; charset=utf-8'}});
   }
   const auth=req.headers.get('Authorization');if(!auth)return json({success:false,error:'Session utilisateur manquante.'},401);
@@ -48,9 +63,14 @@ Deno.serve(async req=>{
   if(profileError)throw profileError;
   if(profile?.role!=='admin')return json({success:false,error:'Connexion Google Business réservée à l’administrateur.'},403);
   if(action==='start'){
-   const body=await req.json(),eid=String(body?.establishment_id??'');if(!eid)return json({success:false,error:'establishment_id requis.'},400);
-   const {data:access}=await db.rpc('user_has_establishment_access',{p_establishment_id:eid});if(!access)return json({success:false,error:'Accès établissement refusé.'},403);
-   const state=randomState();await db.from('google_business_oauth_states').insert({state_hash:await sha256(state),user_id:user.id,establishment_id:eid,expires_at:new Date(Date.now()+600000).toISOString()});
+   const body=await req.json();
+   const accountFirst=body?.action==='start_account';
+   const eid=String(body?.establishment_id??'');
+   if(!accountFirst&&!eid)return json({success:false,error:'establishment_id requis.'},400);
+   if(!accountFirst){const {data:access}=await db.rpc('user_has_establishment_access',{p_establishment_id:eid});if(!access)return json({success:false,error:'Accès établissement refusé.'},403);}
+   const state=randomState();
+   const {error:stateError}=await db.from('google_business_oauth_states').insert({state_hash:await sha256(state),user_id:user.id,establishment_id:accountFirst?null:eid,expires_at:new Date(Date.now()+600000).toISOString()});
+   if(stateError)throw stateError;
    const p=new URLSearchParams({client_id:clientId,redirect_uri:redirectUri,response_type:'code',access_type:'offline',prompt:'consent',scope:'https://www.googleapis.com/auth/business.manage',state});
    return json({success:true,authorization_url:`https://accounts.google.com/o/oauth2/v2/auth?${p.toString()}`});
   }
