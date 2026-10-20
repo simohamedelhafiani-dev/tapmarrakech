@@ -86,56 +86,18 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
     setLoading(true);
     setError('');
     try {
-      const [
-        { data: establishment, error: establishmentError },
-        { data: connectionRow, error: connectionError },
-      ] = await Promise.all([
-        supabase
-          .from('establishments')
-          .select('google_review_url,tripadvisor_review_url,feedback_bonus_points')
-          .eq('id', establishmentId)
-          .maybeSingle(),
-        supabase
-          .from('google_business_connections')
-          .select('status,last_sync_at,last_error,google_account_id')
-          .eq('establishment_id', establishmentId)
-          .maybeSingle(),
-      ]);
+      const { data, error: invokeError } = await supabase.functions.invoke('google-business-admin-dashboard', {
+        body: { action: 'load_establishment', establishment_id: establishmentId },
+      });
+      if (invokeError) throw invokeError;
+      if (!data?.success) throw new Error(data?.error || 'Impossible de charger Google Business.');
 
-      if (establishmentError) throw establishmentError;
-      if (connectionError) throw connectionError;
-
-      // Some existing deployments do not yet have sync_interval_minutes.
-      // Fall back to the established settings columns so the AI panel remains usable.
-      let settingsRow: Record<string, unknown> | null = null;
-      const settingsWithInterval = await supabase
-        .from('google_business_settings')
-        .select('auto_reply_enabled,auto_reply_language,auto_reply_tone,require_approval,auto_reply_min_rating,sync_interval_minutes')
-        .eq('establishment_id', establishmentId)
-        .maybeSingle();
-      if (settingsWithInterval.error && /sync_interval_minutes|column .* does not exist|schema cache/i.test(settingsWithInterval.error.message)) {
-        const legacySettings = await supabase
-          .from('google_business_settings')
-          .select('auto_reply_enabled,auto_reply_language,auto_reply_tone,require_approval,auto_reply_min_rating')
-          .eq('establishment_id', establishmentId)
-          .maybeSingle();
-        if (legacySettings.error) throw legacySettings.error;
-        settingsRow = legacySettings.data as Record<string, unknown> | null;
-      } else {
-        if (settingsWithInterval.error) throw settingsWithInterval.error;
-        settingsRow = settingsWithInterval.data as Record<string, unknown> | null;
-      }
-
-      setGoogleReviewUrl(establishment?.google_review_url ?? '');
-      setTripadvisorReviewUrl(establishment?.tripadvisor_review_url ?? '');
-      setFeedbackBonus(Math.max(0, Number(establishment?.feedback_bonus_points ?? 10)));
-      if (!establishment?.google_review_url) {
-        const { data: mappedLocations } = await supabase
-          .from('google_business_locations')
-          .select('metadata')
-          .eq('mapped_establishment_id', establishmentId)
-          .limit(10);
-        const generatedReviewUrl = (mappedLocations ?? [])
+      const establishment = data.establishment ?? {};
+      setGoogleReviewUrl(establishment.google_review_url ?? '');
+      setTripadvisorReviewUrl(establishment.tripadvisor_review_url ?? '');
+      setFeedbackBonus(Math.max(0, Number(establishment.feedback_bonus_points ?? 10)));
+      if (!establishment.google_review_url) {
+        const generatedReviewUrl = (data.locations ?? [])
           .map((row: { metadata?: unknown }) => {
             const metadata = row.metadata && typeof row.metadata === 'object' ? row.metadata as Record<string, unknown> : {};
             return typeof metadata.newReviewUri === 'string' ? metadata.newReviewUri : '';
@@ -143,47 +105,20 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
           .find((url: string) => /^https:\/\//i.test(url));
         if (generatedReviewUrl) setGoogleReviewUrl(generatedReviewUrl);
       }
-      setConnection(connectionRow as Connection | null);
-      setSettings(settingsRow ? { ...emptySettings, ...(settingsRow as Setting), auto_reply_min_rating: Number((settingsRow as Setting).auto_reply_min_rating ?? 4), sync_interval_minutes: Number((settingsRow as Setting).sync_interval_minutes ?? 10) } : emptySettings);
-
-      await loadReviews();
+      setConnection((data.connection ?? null) as Connection | null);
+      const settingsRow = data.settings as Partial<Setting> | null;
+      setSettings(settingsRow ? {
+        ...emptySettings,
+        ...settingsRow,
+        auto_reply_min_rating: Number(settingsRow.auto_reply_min_rating ?? 4),
+        sync_interval_minutes: Number(settingsRow.sync_interval_minutes ?? 10),
+      } : emptySettings);
+      setReviews((data.reviews ?? []) as GoogleReview[]);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Impossible de charger Google Business.');
     } finally {
       setLoading(false);
     }
-  };
-
-  const loadReviews = async () => {
-    const { data: locations, error: locationsError } = await supabase
-      .from('google_business_locations')
-      .select('id,google_business_connections!inner(establishment_id)')
-      .eq('google_business_connections.establishment_id', establishmentId);
-
-    if (locationsError) {
-      setError(locationsError.message);
-      return;
-    }
-
-    const ids = (locations ?? []).map((row: { id: string }) => row.id);
-    if (!ids.length) {
-      setReviews([]);
-      return;
-    }
-
-    const { data, error: reviewsError } = await supabase
-      .from('google_business_reviews')
-      .select('id,reviewer_display_name,star_rating,comment,owner_reply,review_created_at,owner_reply_updated_at')
-      .in('location_id', ids)
-      .order('review_created_at', { ascending: false })
-      .limit(100);
-
-    if (reviewsError) {
-      setError(reviewsError.message);
-      return;
-    }
-
-    setReviews((data ?? []) as GoogleReview[]);
   };
 
   useEffect(() => {
@@ -295,23 +230,37 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
     setError('');
     setMessage('');
     try {
-      if (scope === 'ai' || scope === 'sync') {
-        const settingsPayload = scope === 'ai'
-          ? { establishment_id: establishmentId, auto_reply_enabled: settings.auto_reply_enabled, auto_reply_language: settings.auto_reply_language, auto_reply_tone: settings.auto_reply_tone, require_approval: settings.require_approval, auto_reply_min_rating: settings.auto_reply_min_rating }
-          : { establishment_id: establishmentId, sync_interval_minutes: settings.sync_interval_minutes };
-        const { error: settingsError } = await supabase.from('google_business_settings').upsert(settingsPayload, { onConflict: 'establishment_id' });
-        if (settingsError) throw settingsError;
-        setMessage(scope === 'ai' ? 'Configuration des réponses IA enregistrée.' : 'Fréquence de synchronisation enregistrée.');
-      } else {
-        const { error: establishmentError } = await supabase.from('establishments').update({
-          google_review_url: googleReviewUrl.trim(),
-          tripadvisor_review_url: tripadvisorReviewUrl.trim() || null,
-          feedback_bonus_points: Math.max(0, Math.floor(Number(feedbackBonus) || 0)),
-        }).eq('id', establishmentId);
-        if (establishmentError) throw establishmentError;
-        setFeedbackBonus(Math.max(0, Math.floor(Number(feedbackBonus) || 0)));
-        setMessage('Liens et bonus du questionnaire enregistrés.');
-      }
+      const action = scope === 'links' ? 'save_links' : 'save_settings';
+      const payload = scope === 'ai'
+        ? {
+            action,
+            scope,
+            establishment_id: establishmentId,
+            auto_reply_enabled: settings.auto_reply_enabled,
+            auto_reply_language: settings.auto_reply_language,
+            auto_reply_tone: settings.auto_reply_tone,
+            require_approval: settings.require_approval,
+            auto_reply_min_rating: settings.auto_reply_min_rating,
+          }
+        : scope === 'sync'
+          ? { action, scope, establishment_id: establishmentId, sync_interval_minutes: settings.sync_interval_minutes }
+          : {
+              action,
+              establishment_id: establishmentId,
+              google_review_url: googleReviewUrl.trim(),
+              tripadvisor_review_url: tripadvisorReviewUrl.trim(),
+              feedback_bonus_points: Math.max(0, Math.floor(Number(feedbackBonus) || 0)),
+            };
+      const { data, error: invokeError } = await supabase.functions.invoke('google-business-admin-dashboard', { body: payload });
+      if (invokeError) throw invokeError;
+      if (!data?.success) throw new Error(data?.error || 'Impossible d’enregistrer les paramètres.');
+
+      if (scope === 'links') setFeedbackBonus(Math.max(0, Math.floor(Number(feedbackBonus) || 0)));
+      setMessage(scope === 'ai'
+        ? 'Configuration des réponses IA enregistrée.'
+        : scope === 'sync'
+          ? 'Fréquence de synchronisation enregistrée.'
+          : 'Liens et bonus du questionnaire enregistrés.');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Impossible d’enregistrer les paramètres.');
     } finally {
