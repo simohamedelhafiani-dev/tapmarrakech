@@ -209,7 +209,7 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
         data = JSON.parse(rawBody);
       } catch {
         const status = `HTTP ${response.status}`;
-        const excerpt = rawBody.replaceAll('\n', ' ').replaceAll('\r', ' ').slice(0, 240);
+        const excerpt = rawBody.replace(/\n/g, ' ').replace(/\r/g, ' ').slice(0, 240);
         throw new Error(`La synchronisation a reçu une réponse non JSON (${status}). Vérifie le routage/protection de la fonction. Réponse : ${excerpt || '(vide)'}`);
       }
       if (!response.ok) {
