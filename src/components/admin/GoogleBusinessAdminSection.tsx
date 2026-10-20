@@ -15,7 +15,7 @@ type Connection = {
   last_sync_at: string | null;
   last_error: string | null;
 };
-type Location = { id: string; connection_id: string | null; google_business_account_id?: string | null; google_location_id: string; title: string | null; location_name: string | null; mapped_establishment_id: string | null };
+type Location = { id: string; connection_id: string | null; google_business_account_id?: string | null; google_location_id: string; title: string | null; location_name: string | null; mapped_establishment_id: string | null; metadata?: Record<string, unknown> | null };
 type ReplySetting = {
   establishment_id: string;
   auto_reply_enabled: boolean;
@@ -111,7 +111,7 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
       let locationRows: Location[] = [];
       const mappedQuery = await supabase
         .from('google_business_locations')
-        .select('id,connection_id,google_business_account_id,google_location_id,title,location_name,mapped_establishment_id');
+        .select('id,connection_id,google_business_account_id,google_location_id,title,location_name,mapped_establishment_id,metadata');
       if (mappedQuery.error && /mapped_establishment_id|column .* does not exist|schema cache/i.test(mappedQuery.error.message)) {
         const legacyQuery = await supabase
           .from('google_business_locations')
