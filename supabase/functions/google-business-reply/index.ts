@@ -99,7 +99,7 @@ async function publishDraft(reviewId:string, replyOverride?:string){
   await markFailed(message);
   throw new Error(message);
  }
- const raw=await response.text();let data:any={};try{data=JSON.parse(raw)}catch{}
+ const raw=await response.text();let data:any={};try{data=JSON.parse(raw)}catch{/* Keep raw response text for Google error reporting. */}
  if(!response.ok){const message=String(data?.error?.message||raw.slice(0,300)||'Google reply failed');await markFailed(message);throw new Error(message)}
  const now=new Date().toISOString();
  const {error}=await db.from('google_business_reviews').update({owner_reply:reply,owner_reply_updated_at:now,reply_published_at:now,reply_status:'published',reply_error:null,last_synced_at:now,raw_payload:data,updated_at:now}).eq('id',reviewId);
