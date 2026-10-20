@@ -984,7 +984,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                 <div className="grid gap-2 p-4 sm:grid-cols-2">
                   {engagement.google_review_url && !engagement.google_claimed && !googleLinkAlreadyOpened && (
                     <button type="button" onClick={() => void openGoogleReview()} className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-left transition hover:border-[#D4AF37]/50">
-                      <span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]"><Star size={17} /></span><span><span className="block text-sm font-semibold text-white">Avis Google</span><span className="block text-[10px] text-white/35">'Partager mon expérience'</span></span></span>
+                      <span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]"><Star size={17} /></span><span><span className="block text-sm font-semibold text-white">Avis Google</span><span className="block text-[10px] text-white/35">Partager mon expérience</span></span></span>
                       <ExternalLink size={15} className="text-white/35" />
                     </button>
                   )}
