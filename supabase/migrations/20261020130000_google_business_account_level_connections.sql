@@ -20,6 +20,8 @@ alter table public.google_business_accounts enable row level security;
 revoke all on public.google_business_accounts from anon, authenticated;
 
 alter table public.google_business_locations
+  alter column connection_id drop not null;
+alter table public.google_business_locations
   add column if not exists google_business_account_id uuid null
   references public.google_business_accounts(id) on delete set null;
 create index if not exists google_business_locations_account_idx
