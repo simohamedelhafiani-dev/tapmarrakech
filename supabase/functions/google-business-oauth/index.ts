@@ -76,6 +76,13 @@ Deno.serve(async req=>{
   }
   if(action==='start'){
    const body=await req.json();
+   if(body?.action==='list_accounts'){
+    const {data:accounts,error:accountsError}=await db.from('google_business_accounts')
+     .select('id,google_account_id,email,status,last_sync_at,last_error,created_at,updated_at')
+     .eq('connected_by',user.id).order('created_at',{ascending:false});
+    if(accountsError)throw accountsError;
+    return json({success:true,accounts:accounts??[]});
+   }
    const accountFirst=body?.action==='start_account';
    const eid=String(body?.establishment_id??'');
    if(!accountFirst&&!eid)return json({success:false,error:'establishment_id requis.'},400);
