@@ -754,9 +754,15 @@ export default function Admin() {
                   </button>
                   <button type="button" onClick={() => setAIWorkspaceTab('google')} className="group min-h-[190px] rounded-3xl border border-[#242424] bg-gradient-to-br from-[#171717] via-[#0d0d0d] to-[#080808] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#C9A45C]/60 hover:shadow-[0_20px_45px_rgba(201,164,92,.1)] [transform:perspective(1000px)_rotateX(2deg)]">
                     <span className="grid h-12 w-12 place-items-center rounded-2xl border border-white/10 bg-white/5 text-[#E1C27A]"><MessageSquare size={22} /></span>
-                    <span className="mt-5 block text-lg font-semibold text-white">Avis & Google Business</span>
-                    <span className="mt-2 block text-sm leading-6 text-white/50">Avis, connexion des fiches, réponses IA, synchronisation et liens.</span>
+                    <span className="mt-5 block text-lg font-semibold text-white">Connexion Google</span>
+                    <span className="mt-2 block text-sm leading-6 text-white/50">Connecter le compte Google et synchroniser les fiches établissements.</span>
                     <span className="mt-5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#C9A45C]">Ouvrir les options →</span>
+                  </button>
+                  <button type="button" onClick={() => setAIWorkspaceTab('google')} className="group min-h-[190px] rounded-3xl border border-[#242424] bg-gradient-to-br from-[#171717] via-[#0d0d0d] to-[#080808] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#C9A45C]/60 [transform:perspective(1000px)_rotateX(2deg)]">
+                    <span className="grid h-12 w-12 place-items-center rounded-2xl border border-white/10 bg-white/5 text-[#E1C27A]"><MessageSquare size={22} /></span>
+                    <span className="mt-5 block text-lg font-semibold text-white">IA pour les avis</span>
+                    <span className="mt-2 block text-sm leading-6 text-white/50">Langue, génération des réponses, détection des nouveaux avis, liens et bonus de fidélité.</span>
+                    <span className="mt-5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#C9A45C]">Configurer les avis →</span>
                   </button>
                   <button type="button" onClick={() => setAIWorkspaceTab('menus')} className="group min-h-[190px] rounded-3xl border border-[#242424] bg-gradient-to-br from-[#171717] via-[#0d0d0d] to-[#080808] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#C9A45C]/60 [transform:perspective(1000px)_rotateX(2deg)]">
                     <span className="grid h-12 w-12 place-items-center rounded-2xl border border-white/10 bg-white/5 text-[#E1C27A]"><Sparkles size={22} /></span>
