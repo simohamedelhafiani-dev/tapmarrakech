@@ -13,6 +13,12 @@
 BEGIN;
 
 REVOKE ALL PRIVILEGES ON TABLE public.profiles FROM anon;
-REVOKE ALL PRIVILEGES ON TABLE public.establishment_staff FROM anon;
+DO $migration$
+BEGIN
+  IF to_regclass('public.establishment_staff') IS NOT NULL THEN
+    EXECUTE 'REVOKE ALL PRIVILEGES ON TABLE public.establishment_staff FROM anon';
+  END IF;
+END
+$migration$;
 
 COMMIT;
