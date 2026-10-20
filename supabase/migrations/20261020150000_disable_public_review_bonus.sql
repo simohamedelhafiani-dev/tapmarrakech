@@ -3,3 +3,6 @@
 revoke execute on function public.claim_public_loyalty_review_bonus(text, text) from public;
 revoke execute on function public.claim_public_loyalty_review_bonus(text, text) from anon;
 revoke execute on function public.claim_public_loyalty_review_bonus(text, text) from authenticated;
+revoke execute on function public.claim_public_loyalty_review_bonus(uuid, text) from public;
+revoke execute on function public.claim_public_loyalty_review_bonus(uuid, text) from anon;
+revoke execute on function public.claim_public_loyalty_review_bonus(uuid, text) from authenticated;
