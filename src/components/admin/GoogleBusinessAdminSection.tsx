@@ -106,11 +106,9 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
       setReplySettings((settingsRows ?? []) as ReplySetting[]);
 
       const connectionIds = nextConnections.map((item) => item.id);
-      if (!connectionIds.length) {
-        setLocations([]);
-        setReviews([]);
-        return;
-      }
+      // Load both legacy establishment-linked locations and new account-linked locations.
+      // The query below is global and remains admin-only; do not early-return when there
+      // are no legacy connections because an account-first Google connection may exist.
       // Backward compatibility: the explicit-mapping migration may not yet be applied
       // to the database used by this preview. Keep legacy review loading operational.
       let locationRows: Location[] = [];
