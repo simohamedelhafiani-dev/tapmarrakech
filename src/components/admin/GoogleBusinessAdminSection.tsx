@@ -87,57 +87,15 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
       if (!accountData?.success) throw new Error(accountData?.error || 'Impossible de charger le statut du compte Google.');
       setGoogleAccounts((accountData.accounts ?? []) as Array<{id:string; google_account_id:string|null; email:string|null; status:string; last_sync_at:string|null; last_error:string|null}>);
 
-      const { data: connectionRows, error: connectionError } = await supabase
-        .from('google_business_connections')
-        .select('id,establishment_id,status,last_sync_at,last_error');
-      if (connectionError) throw connectionError;
-      const nextConnections = (connectionRows ?? []) as Connection[];
-      setConnections(nextConnections);
-
-      const { data: settingsRows, error: settingsError } = await supabase
-        .from('google_business_settings')
-        .select('establishment_id,auto_reply_enabled,require_approval,auto_reply_language,auto_reply_tone');
-      if (settingsError) throw settingsError;
-      setReplySettings((settingsRows ?? []) as ReplySetting[]);
-
-      const connectionIds = nextConnections.map((item) => item.id);
-      // Load both legacy establishment-linked locations and new account-linked locations.
-      // The query below is global and remains admin-only; do not early-return when there
-      // are no legacy connections because an account-first Google connection may exist.
-      // Backward compatibility: the explicit-mapping migration may not yet be applied
-      // to the database used by this preview. Keep legacy review loading operational.
-      let locationRows: Location[] = [];
-      const mappedQuery = await supabase
-        .from('google_business_locations')
-        .select('id,connection_id,google_business_account_id,google_location_id,title,location_name,mapped_establishment_id,metadata');
-      if (mappedQuery.error && /mapped_establishment_id|column .* does not exist|schema cache/i.test(mappedQuery.error.message)) {
-        const legacyQuery = await supabase
-          .from('google_business_locations')
-          .select('id,connection_id,google_location_id,title,location_name')
-          .not('connection_id','is',null);
-        if (legacyQuery.error) throw legacyQuery.error;
-        locationRows = ((legacyQuery.data ?? []) as Omit<Location, 'mapped_establishment_id'>[])
-          .map((location) => ({ ...location, mapped_establishment_id: null }));
-      } else {
-        if (mappedQuery.error) throw mappedQuery.error;
-        locationRows = (mappedQuery.data ?? []) as Location[];
-      }
-      const nextLocations = locationRows;
-      setLocations(nextLocations);
-
-      const locationIds = nextLocations.map((item) => item.id);
-      if (!locationIds.length) {
-        setReviews([]);
-        return;
-      }
-      const { data: reviewRows, error: reviewError } = await supabase
-        .from('google_business_reviews')
-        .select('id,location_id,reviewer_display_name,star_rating,comment,owner_reply,review_created_at,owner_reply_updated_at,reply_draft,reply_status,reply_error,reply_generated_at,reply_published_at')
-        .in('location_id', locationIds)
-        .order('review_created_at', { ascending: false })
-        .limit(500);
-      if (reviewError) throw reviewError;
-      setReviews((reviewRows ?? []) as Review[]);
+      const { data: dashboardData, error: dashboardError } = await supabase.functions.invoke('google-business-admin-dashboard', {
+        body: { action: 'load' },
+      });
+      if (dashboardError) throw dashboardError;
+      if (!dashboardData?.success) throw new Error(dashboardData?.error || 'Impossible de charger les données Google Business.');
+      setConnections((dashboardData.connections ?? []) as Connection[]);
+      setReplySettings((dashboardData.replySettings ?? []) as ReplySetting[]);
+      setLocations((dashboardData.locations ?? []) as Location[]);
+      setReviews((dashboardData.reviews ?? []) as Review[]);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Impossible de charger les avis Google.');
     } finally {
@@ -378,7 +336,9 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
                             return;
                           }
                           setError('');
-                          const { error: saveError } = await supabase.from('google_business_locations').update({ mapped_establishment_id: mappedId, updated_at: new Date().toISOString() }).eq('id', location.id);
+                          const { data: mappingData, error: saveError } = await supabase.functions.invoke('google-business-admin-dashboard', { body: { action: 'map_location', location_id: location.id, establishment_id: mappedId || null } });
+                          if (saveError) { setError(saveError.message); return; }
+                          if (!mappingData?.success) { setError(mappingData?.error || 'Association de la fiche impossible.'); return; }
                           if (saveError) { setError(saveError.message); return; }
                           setLocations(current => current.map(item => item.id === location.id ? { ...item, mapped_establishment_id: mappedId } : item));
                         }} className="w-full rounded-xl border border-[#242424] bg-[#111111] px-3 py-3 text-sm text-white focus:border-[#C9A45C] focus:outline-none"><option value="">Ne pas associer</option>{establishments.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}<option value="__create__">＋ Créer une fiche établissement</option></select></label>
@@ -405,7 +365,9 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
                               }).select('id,name').single();
                               if (createError) throw createError;
                               await onEstablishmentCreated?.();
-                              const { error: mappingError } = await supabase.from('google_business_locations').update({ mapped_establishment_id: created.id, updated_at: new Date().toISOString() }).eq('id', location.id);
+                              const { data: mappingData, error: mappingError } = await supabase.functions.invoke('google-business-admin-dashboard', { body: { action: 'map_location', location_id: location.id, establishment_id: created.id } });
+                              if (mappingError) throw mappingError;
+                              if (!mappingData?.success) throw new Error(mappingData?.error || 'Association de la fiche impossible.');
                               if (mappingError) throw new Error('Fiche créée, mais association non enregistrée : ' + mappingError.message + '. La fiche est créée ; sélectionnez-la manuellement dans la liste après actualisation.');
                               setLocations(current => current.map(item => item.id === location.id ? { ...item, mapped_establishment_id: created.id } : item));
                               setCreatingForLocationId(null);
