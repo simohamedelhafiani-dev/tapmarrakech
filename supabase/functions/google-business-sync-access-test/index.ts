@@ -162,8 +162,17 @@ Deno.serve(async (req: Request) => {
     if (!isCronCall) {
       const authorization = req.headers.get('Authorization');
       if (!authorization) return json({ success: false, error: 'Session manquante' }, 401);
-      const { data: { user }, error: userError } = await db.auth.getUser(authorization.replace(/^Bearer\s+/i, ''));
-      if (userError || !user) return json({ success: false, error: 'Session invalide' }, 401);
+      const bearerToken = authorization.replace(/^Bearer\s+/i, '');
+      const { data: { user }, error: userError } = await db.auth.getUser(bearerToken);
+      if (userError || !user) {
+        // Diagnostic only: never log the token or other session credentials.
+        console.warn('[SYNC AUTH] Session validation failed', {
+          error: userError?.message ?? 'Utilisateur absent',
+          status: userError?.status ?? null,
+          tokenPresent: bearerToken.length > 0,
+        });
+        return json({ success: false, error: 'Session invalide' }, 401);
+      }
       if (!(await isAdmin(user.id))) return json({ success: false, error: 'Accès réservé à l’administrateur' }, 403);
     }
 
