@@ -391,7 +391,14 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
                               const { data: duplicate, error: duplicateError } = await supabase.from('establishments').select('id,name').eq('slug', slug).maybeSingle();
                               if (duplicateError) throw duplicateError;
                               if (duplicate) throw new Error('Ce slug existe déjà. Modifiez-le avant de créer la fiche.');
-                              const { data: created, error: createError } = await supabase.from('establishments').insert({ name: newEstablishmentName.trim(), slug, ai_business_type_id: newEstablishmentTypeId }).select('id,name').single();
+                              const googleMetadata = location.metadata && typeof location.metadata === 'object' ? location.metadata as Record<string, any> : {};
+                              const googleAddress = googleMetadata.storefrontAddress && typeof googleMetadata.storefrontAddress === 'object' ? googleMetadata.storefrontAddress as Record<string, any> : {};
+                              const { data: created, error: createError } = await supabase.from('establishments').insert({
+                                name: newEstablishmentName.trim(),
+                                slug,
+                                ai_business_type_id: newEstablishmentTypeId,
+                                city: typeof googleAddress.locality === 'string' ? googleAddress.locality : null,
+                              }).select('id,name').single();
                               if (createError) throw createError;
                               await onEstablishmentCreated?.();
                               const { error: mappingError } = await supabase.from('google_business_locations').update({ mapped_establishment_id: created.id, updated_at: new Date().toISOString() }).eq('id', location.id);
