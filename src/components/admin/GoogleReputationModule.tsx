@@ -115,6 +115,20 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
       setReviewBonus(Number(establishment?.review_bonus_points ?? 0));
       setGoogleReviewUrl(establishment?.google_review_url ?? '');
       setTripadvisorReviewUrl(establishment?.tripadvisor_review_url ?? '');
+      if (!establishment?.google_review_url) {
+        const { data: mappedLocations } = await supabase
+          .from('google_business_locations')
+          .select('metadata')
+          .eq('mapped_establishment_id', establishmentId)
+          .limit(10);
+        const generatedReviewUrl = (mappedLocations ?? [])
+          .map((row: { metadata?: unknown }) => {
+            const metadata = row.metadata && typeof row.metadata === 'object' ? row.metadata as Record<string, unknown> : {};
+            return typeof metadata.newReviewUri === 'string' ? metadata.newReviewUri : '';
+          })
+          .find((url: string) => /^https:\/\//i.test(url));
+        if (generatedReviewUrl) setGoogleReviewUrl(generatedReviewUrl);
+      }
       setConnection(connectionRow as Connection | null);
       setSettings(settingsRow ? { ...emptySettings, ...(settingsRow as Setting), auto_reply_min_rating: Number((settingsRow as Setting).auto_reply_min_rating ?? 4), sync_interval_minutes: Number((settingsRow as Setting).sync_interval_minutes ?? 10) } : emptySettings);
 
@@ -372,7 +386,7 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
           </label>
           <label className="block"><span className="mb-2 block text-xs font-semibold text-white/55">Seuil de publication automatique</span><select value={settings.auto_reply_min_rating} onChange={(e) => setSettings((v) => ({ ...v, auto_reply_min_rating: Number(e.target.value) }))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white"><option value={5}>5 étoiles uniquement</option><option value={4}>4 étoiles et plus (recommandé)</option><option value={3}>3 étoiles et plus</option><option value={2}>2 étoiles et plus</option><option value={1}>Toutes les notes</option></select><p className="mt-2 text-xs text-white/35">Les avis sous ce seuil restent en brouillon et nécessitent une validation humaine.</p></label>
 
-          <label className="block"><span className="mb-2 block text-xs font-semibold text-white/55">Langue</span><select value={settings.auto_reply_language} onChange={(e) => setSettings((v) => ({ ...v, auto_reply_language: e.target.value }))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white"><option value="fr">Français</option><option value="en">English</option><option value="ar">العربية</option></select></label>
+          <label className="block"><span className="mb-2 block text-xs font-semibold text-white/55">Langue</span><select value={settings.auto_reply_language} onChange={(e) => setSettings((v) => ({ ...v, auto_reply_language: e.target.value }))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white"><option value="auto">Détecter la langue de chaque avis</option><option value="fr">Français</option><option value="en">English</option><option value="ar">العربية</option></select></label>
           <label className="block"><span className="mb-2 block text-xs font-semibold text-white/55">Ton</span><select value={settings.auto_reply_tone} onChange={(e) => setSettings((v) => ({ ...v, auto_reply_tone: e.target.value }))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white"><option value="professional_warm">Professionnel & chaleureux</option><option value="professional">Professionnel</option><option value="friendly">Amical</option><option value="luxury">Premium / luxe</option></select></label>
         </div>
         <button type="button" onClick={() => void saveSettings('ai')} disabled={saving} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#C9A45C] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50"><Save size={14} /> {saving ? 'Enregistrement…' : 'Enregistrer les paramètres'}</button>
