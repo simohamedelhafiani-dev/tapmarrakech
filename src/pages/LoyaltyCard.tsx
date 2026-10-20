@@ -688,6 +688,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
           google_review_url: engagementRow.google_review_url ?? null,
           tripadvisor_review_url: engagementRow.tripadvisor_review_url ?? null,
           review_bonus_points: Math.max(0, Number(engagementRow.review_bonus_points ?? 0)),
+          feedback_bonus_points: Math.max(0, Number(engagementRow.feedback_bonus_points ?? 10)),
           whatsapp_number: engagementRow.whatsapp_number ?? null,
           google_claimed: Boolean(engagementRow.google_claimed),
           tripadvisor_claimed: Boolean(engagementRow.tripadvisor_claimed),
