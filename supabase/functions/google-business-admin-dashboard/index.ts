@@ -15,7 +15,7 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
 async function requireAdmin(req: Request) {
   const authorization = req.headers.get('Authorization');
   if (!authorization) throw Object.assign(new Error('Session manquante'), { status: 401 });
-  const token = authorization.replace(/^Bearer\\s+/i, '');
+  const token = authorization.replace(/^Bearer\s+/i, '');
   const { data: { user }, error: userError } = await db.auth.getUser(token);
   if (userError || !user) throw Object.assign(new Error('Session invalide'), { status: 401 });
   const { data: profile, error } = await db.from('profiles').select('role').eq('id', user.id).maybeSingle();
