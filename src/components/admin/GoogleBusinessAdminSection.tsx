@@ -141,7 +141,14 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
       });
   }, [connections, establishments, locations, reviews, search, selectedEstablishmentId, replyFilter]);
 
-  const connectedIds = new Set(connections.filter((item) => item.status === 'active').map((item) => item.establishment_id));
+  const activeGoogleAccountIds = new Set(googleAccounts.filter((account) => account.status === 'active').map((account) => account.id));
+  const connectedIds = new Set([
+    ...connections.filter((item) => item.status === 'active').map((item) => item.establishment_id),
+    ...locations
+      .filter((location) => Boolean(location.google_business_account_id && activeGoogleAccountIds.has(location.google_business_account_id)))
+      .map((location) => location.mapped_establishment_id)
+      .filter((establishmentId): establishmentId is string => Boolean(establishmentId)),
+  ]);
   const connectedCount = establishments.filter((item) => connectedIds.has(item.id)).length;
   const autoReplyCount = establishments.filter((item) => connectedIds.has(item.id) &&
     replySettings.some((setting) => setting.establishment_id === item.id && setting.auto_reply_enabled)).length;
