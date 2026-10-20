@@ -25,20 +25,39 @@ async function gen(comment:string,rating:string,lang:string,tone:string){
  return reply;
 }
 async function getReview(reviewId:string){
- const {data:review,error}=await db.from('google_business_reviews').select('*, google_business_locations!inner(connection_id,google_account_id,google_location_id,mapped_establishment_id)').eq('id',reviewId).maybeSingle();
+ const {data:review,error}=await db.from('google_business_reviews').select('*, google_business_locations!inner(connection_id,google_business_account_id,google_account_id,google_location_id,mapped_establishment_id)').eq('id',reviewId).maybeSingle();
  if(error)throw error;if(!review)throw new Error('Avis introuvable');
- if(!review.google_business_locations?.mapped_establishment_id)throw new Error('Cette fiche Google n’est pas associée à un établissement KELYANI. Associez-la avant de générer ou publier une réponse.');
- const {data:c,error:connectionError}=await db.from('google_business_connections').select('*').eq('id',review.google_business_locations.connection_id).maybeSingle();
- if(connectionError)throw connectionError;if(!c)throw new Error('Connexion Google introuvable');
- const {data:s,error:settingError}=await db.from('google_business_settings').select('*').eq('establishment_id',review.google_business_locations.mapped_establishment_id).maybeSingle();
+ const location=review.google_business_locations;
+ if(!location?.mapped_establishment_id)throw new Error('Cette fiche Google n’est pas associée à un établissement KELYANI. Associez-la avant de générer ou publier une réponse.');
+ let c:any=null;
+ let connectionTable:'google_business_connections'|'google_business_accounts'='google_business_connections';
+ if(location.connection_id){
+  const {data,error:connectionError}=await db.from('google_business_connections').select('*').eq('id',location.connection_id).maybeSingle();
+  if(connectionError)throw connectionError;
+  c=data;
+ }
+ if(!c&&location.google_business_account_id){
+  const {data,error:accountError}=await db.from('google_business_accounts').select('*').eq('id',location.google_business_account_id).eq('status','active').maybeSingle();
+  if(accountError)throw accountError;
+  c=data;
+  if(c)connectionTable='google_business_accounts';
+ }
+ if(!c&&!location.connection_id&&location.google_account_id){
+  const {data,error:accountError}=await db.from('google_business_accounts').select('*').eq('google_account_id',location.google_account_id).eq('status','active').maybeSingle();
+  if(accountError)throw accountError;
+  c=data;
+  if(c)connectionTable='google_business_accounts';
+ }
+ if(!c)throw new Error('Connexion Google introuvable. Vérifiez que le compte Google est toujours actif.');
+ const {data:s,error:settingError}=await db.from('google_business_settings').select('*').eq('establishment_id',location.mapped_establishment_id).maybeSingle();
  if(settingError)throw settingError;
- return {review,c,s};
+ return {review,c,s,connectionTable};
 }
-async function getToken(c:any){
+async function getToken(c:any,connectionTable:'google_business_connections'|'google_business_accounts'='google_business_connections'){
  let token=c.access_token;
  if(!token||!c.token_expires_at||new Date(c.token_expires_at).getTime()<Date.now()+120000){
   const t=await refresh(c.refresh_token);token=t.access_token;
-  const {error}=await db.from('google_business_connections').update({access_token:token,token_expires_at:new Date(Date.now()+Number(t.expires_in??3600)*1000).toISOString(),updated_at:new Date().toISOString()}).eq('id',c.id);
+  const {error}=await db.from(connectionTable).update({access_token:token,token_expires_at:new Date(Date.now()+Number(t.expires_in??3600)*1000).toISOString(),updated_at:new Date().toISOString()}).eq('id',c.id);
   if(error)throw error;
  }
  return token;
@@ -53,7 +72,7 @@ async function generateDraft(reviewId:string){
  return {success:true,reply,status};
 }
 async function publishDraft(reviewId:string, replyOverride?:string){
- const {review,c}=await getReview(reviewId);
+ const {review,c,connectionTable}=await getReview(reviewId);
  const reply=String(replyOverride??review.reply_draft??'').trim();
  if(!reply)throw new Error('Aucun brouillon à publier. Générez une réponse ou enregistrez un brouillon.');
  if(replyOverride!==undefined){const {error:draftError}=await db.from('google_business_reviews').update({reply_draft:reply,reply_status:'ready_to_publish',reply_error:null,updated_at:new Date().toISOString()}).eq('id',reviewId);if(draftError)throw draftError;}
@@ -66,7 +85,7 @@ async function publishDraft(reviewId:string, replyOverride?:string){
   if(error)console.error('Unable to persist Google reply failure status',error);
  };
  let token:string;
- try{token=await getToken(c)}catch(error){
+ try{token=await getToken(c,connectionTable)}catch(error){
   const message=error instanceof Error?error.message:'Impossible de renouveler le jeton Google.';
   await markFailed(message);
   throw error;
