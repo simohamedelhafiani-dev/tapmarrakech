@@ -117,26 +117,60 @@ Deno.serve(async (req) => {
 
     const { data: loc, error: locationError } = await db
       .from('google_business_locations')
-      .select('id,connection_id,mapped_establishment_id')
+      .select('id,connection_id,google_business_account_id,mapped_establishment_id')
       .eq('google_account_id', accountId)
       .eq('google_location_id', locationId)
       .maybeSingle();
     if (locationError) throw locationError;
     if (!loc) return json({ ok: true });
 
-    const { data: connection, error: connectionError } = await db
-      .from('google_business_connections')
-      .select('*')
-      .eq('id', loc.connection_id)
-      .maybeSingle();
-    if (connectionError) throw connectionError;
-    if (!connection) return json({ ok: true });
+    // Resolve either the legacy establishment-scoped connection or the new account-scoped connection.
+    let connection: any = null;
+    let connectionTable: 'google_business_connections' | 'google_business_accounts' | null = null;
+
+    if (loc.connection_id) {
+      const { data, error } = await db
+        .from('google_business_connections')
+        .select('*')
+        .eq('id', loc.connection_id)
+        .maybeSingle();
+      if (error) throw error;
+      connection = data;
+      if (connection) connectionTable = 'google_business_connections';
+    }
+
+    if (!connection && loc.google_business_account_id) {
+      const { data, error } = await db
+        .from('google_business_accounts')
+        .select('*')
+        .eq('id', loc.google_business_account_id)
+        .eq('status', 'active')
+        .maybeSingle();
+      if (error) throw error;
+      connection = data;
+      if (connection) connectionTable = 'google_business_accounts';
+    }
+
+    // Legacy rows may have a null account FK but still match the connected Google account.
+    if (!connection && !loc.connection_id) {
+      const { data, error } = await db
+        .from('google_business_accounts')
+        .select('*')
+        .eq('google_account_id', accountId)
+        .eq('status', 'active')
+        .maybeSingle();
+      if (error) throw error;
+      connection = data;
+      if (connection) connectionTable = 'google_business_accounts';
+    }
+
+    if (!connection || !connectionTable) return json({ ok: true });
 
     let token = connection.access_token;
     if (!token || !connection.token_expires_at || new Date(connection.token_expires_at).getTime() < Date.now() + 120000) {
       const refreshed = await refresh(connection.refresh_token);
       token = refreshed.access_token;
-      const { error } = await db.from('google_business_connections').update({
+      const { error } = await db.from(connectionTable).update({
         access_token: token,
         token_expires_at: new Date(Date.now() + Number(refreshed.expires_in ?? 3600) * 1000).toISOString(),
         status: 'active',
