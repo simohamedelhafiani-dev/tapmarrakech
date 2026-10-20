@@ -255,7 +255,6 @@ Deno.serve(async (req) => {
       .update({ auto_reply_claimed_at: claimedAt, updated_at: claimedAt })
       .eq('id', stored.id)
       .is('auto_reply_claimed_at', null)
-      .is('owner_reply', null)
       .select('id')
       .maybeSingle();
     if (claimError) throw claimError;
