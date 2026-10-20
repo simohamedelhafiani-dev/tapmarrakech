@@ -15,7 +15,7 @@ type Connection = {
   last_sync_at: string | null;
   last_error: string | null;
 };
-type Location = { id: string; connection_id: string; google_location_id: string; title: string | null; location_name: string | null; mapped_establishment_id: string | null };
+type Location = { id: string; connection_id: string | null; google_business_account_id?: string | null; google_location_id: string; title: string | null; location_name: string | null; mapped_establishment_id: string | null };
 type ReplySetting = {
   establishment_id: string;
   auto_reply_enabled: boolean;
@@ -116,13 +116,12 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
       let locationRows: Location[] = [];
       const mappedQuery = await supabase
         .from('google_business_locations')
-        .select('id,connection_id,google_location_id,title,location_name,mapped_establishment_id')
-        .in('connection_id', connectionIds);
+        .select('id,connection_id,google_business_account_id,google_location_id,title,location_name,mapped_establishment_id');
       if (mappedQuery.error && /mapped_establishment_id|column .* does not exist|schema cache/i.test(mappedQuery.error.message)) {
         const legacyQuery = await supabase
           .from('google_business_locations')
           .select('id,connection_id,google_location_id,title,location_name')
-          .in('connection_id', connectionIds);
+          .not('connection_id','is',null);
         if (legacyQuery.error) throw legacyQuery.error;
         locationRows = ((legacyQuery.data ?? []) as Omit<Location, 'mapped_establishment_id'>[])
           .map((location) => ({ ...location, mapped_establishment_id: null }));
@@ -353,7 +352,7 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
                   <button type="button" onClick={async()=>{setAccountLoading(true);setError('');try{const {data,error}=await supabase.functions.invoke('google-business-oauth',{body:{action:'start_account'}});if(error)throw error;if(!data?.success||!data?.authorization_url)throw new Error(data?.error||'Connexion du compte Google indisponible : la fonction OAuth doit prendre en charge le mode compte.');window.open(data.authorization_url,'_blank','noopener,noreferrer');}catch(e){setError(e instanceof Error?e.message:'Connexion Google impossible.');}finally{setAccountLoading(false);}}} disabled={accountLoading} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#C9A45C] px-4 py-3 text-xs font-semibold text-[#111111] disabled:opacity-50"><Store size={15}/>{accountLoading?'Connexion…':'Connecter un compte Google'}</button>
                 </div>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                  {googleAccounts.map(account=><article key={account.id} className="rounded-xl border border-[#29251b] bg-black/30 p-4"><div className="flex items-start justify-between gap-2"><div><p className="text-sm font-semibold text-white">{account.email||account.google_account_id||'Compte Google Business'}</p><p className="mt-1 text-[11px] text-white/40">Compte {account.google_account_id||'en attente de synchronisation'}</p></div><span className={`rounded-full px-2 py-1 text-[10px] ${account.status==='active'?'bg-emerald-400/10 text-emerald-300':'bg-amber-400/10 text-amber-200'}`}>{account.status==='active'?'Connecté':account.status}</span></div>{account.last_error&&<p className="mt-2 text-xs text-red-300">{account.last_error}</p>}<p className="mt-3 text-[10px] text-white/35">Dernière synchronisation : {account.last_sync_at?new Date(account.last_sync_at).toLocaleString('fr-FR'):'Jamais'}</p></article>)}
+                  {googleAccounts.map(account=><article key={account.id} className="rounded-xl border border-[#29251b] bg-black/30 p-4"><div className="flex items-start justify-between gap-2"><div><p className="text-sm font-semibold text-white">{account.email||account.google_account_id||'Compte Google Business'}</p><p className="mt-1 text-[11px] text-white/40">Compte {account.google_account_id||'en attente de synchronisation'}</p></div><span className={`rounded-full px-2 py-1 text-[10px] ${account.status==='active'?'bg-emerald-400/10 text-emerald-300':'bg-amber-400/10 text-amber-200'}`}>{account.status==='active'?'Connecté':account.status}</span></div>{account.last_error&&<p className="mt-2 text-xs text-red-300">{account.last_error}</p>}<p className="mt-3 text-[10px] text-white/35">Dernière synchronisation : {account.last_sync_at?new Date(account.last_sync_at).toLocaleString('fr-FR'):'Jamais'}</p><button type="button" onClick={async()=>{setAccountLoading(true);setError('');try{const {data,error}=await supabase.functions.invoke('google-business-sync-access-test',{body:{google_business_account_id:account.id}});if(error)throw error;if(!data?.success)throw new Error(data?.error||'Synchronisation impossible');setReplyMessage('Synchronisation terminée : '+(data.locations??0)+' fiche(s) Google et '+(data.reviews??0)+' avis.');await load();}catch(e){setError(e instanceof Error?e.message:'Synchronisation impossible.');}finally{setAccountLoading(false);}}} disabled={accountLoading} className="mt-3 rounded-lg border border-[#C9A45C]/30 px-3 py-2 text-xs font-semibold text-[#C9A45C] disabled:opacity-50"><RefreshCw size={12} className="mr-1 inline"/>Synchroniser les fiches</button></article>)}
                   {!googleAccounts.length&&<p className="rounded-xl border border-dashed border-[#29251b] p-4 text-xs text-white/40 sm:col-span-2 xl:col-span-3">Aucun compte Google centralisé. La connexion par établissement existante reste disponible pendant la transition.</p>}
                 </div>
               </section>
