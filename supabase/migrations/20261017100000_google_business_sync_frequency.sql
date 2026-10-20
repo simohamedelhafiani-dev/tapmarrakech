@@ -44,6 +44,23 @@ begin
           and (
             c.last_sync_at is null
             or c.last_sync_at <= now() - make_interval(mins => coalesce(s.sync_interval_minutes, 10))
+          )
+        union all
+        select net.http_post(
+          url := 'https://tehhhdtfbonneqbyvlwx.supabase.co/functions/v1/google-business-sync-access-test',
+          body := jsonb_build_object('google_business_account_id', a.id),
+          headers := jsonb_build_object(
+            'Content-Type', 'application/json',
+            'x-kelyani-cron-secret',
+            (select decrypted_secret from vault.decrypted_secrets where name = 'kelyani_cron_secret')
+          ),
+          timeout_milliseconds := 10000
+        )
+        from public.google_business_accounts a
+        where a.status = 'active'
+          and (
+            a.last_sync_at is null
+            or a.last_sync_at <= now() - interval '10 minutes'
           );
       $job$
     );
