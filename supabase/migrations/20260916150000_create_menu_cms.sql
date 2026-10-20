@@ -86,12 +86,18 @@ CREATE POLICY "menu_categories_responsible_all"
   FOR ALL
   TO authenticated
   USING (
-    public.user_owns_establishment(establishment_id)
-    OR public.is_establishment_responsible(establishment_id)
+    EXISTS (
+      SELECT 1 FROM public.establishments e
+      WHERE e.id = menu_categories.establishment_id
+        AND e.user_id = auth.uid()
+    )
   )
   WITH CHECK (
-    public.user_owns_establishment(establishment_id)
-    OR public.is_establishment_responsible(establishment_id)
+    EXISTS (
+      SELECT 1 FROM public.establishments e
+      WHERE e.id = menu_categories.establishment_id
+        AND e.user_id = auth.uid()
+    )
   );
 
 DROP POLICY IF EXISTS "menu_items_public_select" ON public.menu_items;
@@ -139,12 +145,18 @@ CREATE POLICY "menu_items_responsible_all"
   FOR ALL
   TO authenticated
   USING (
-    public.user_owns_establishment(establishment_id)
-    OR public.is_establishment_responsible(establishment_id)
+    EXISTS (
+      SELECT 1 FROM public.establishments e
+      WHERE e.id = menu_items.establishment_id
+        AND e.user_id = auth.uid()
+    )
   )
   WITH CHECK (
-    public.user_owns_establishment(establishment_id)
-    OR public.is_establishment_responsible(establishment_id)
+    EXISTS (
+      SELECT 1 FROM public.establishments e
+      WHERE e.id = menu_items.establishment_id
+        AND e.user_id = auth.uid()
+    )
   );
 
 CREATE OR REPLACE FUNCTION public.update_menu_updated_at()
