@@ -47,7 +47,7 @@ drop trigger if exists trg_google_business_auto_reply_activation_cutoff
   on public.google_business_settings;
 
 create trigger trg_google_business_auto_reply_activation_cutoff
-before insert or update of auto_reply_enabled, auto_reply_activated_at
+before insert or update
 on public.google_business_settings
 for each row
 execute function public.set_google_business_auto_reply_activation_cutoff();
