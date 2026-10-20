@@ -164,36 +164,42 @@ Deno.serve(async (req: Request) => {
     }
 
     const body = await req.json();
+    const accountConnectionId = String(body?.google_business_account_id ?? '');
     const establishmentId = String(body?.establishment_id ?? '');
-    if (!establishmentId) return json({ success: false, error: 'establishment_id requis' }, 400);
+    const accountMode = Boolean(accountConnectionId);
+    if (!accountMode && !establishmentId) return json({ success: false, error: 'establishment_id ou google_business_account_id requis' }, 400);
 
-    const { data: establishment, error: establishmentError } = await db
-      .from('establishments')
-      .select('id')
-      .eq('id', establishmentId)
-      .maybeSingle();
-    if (establishmentError) throw establishmentError;
-    if (!establishment) return json({ success: false, error: 'Établissement introuvable' }, 404);
-
-    const { data: connection, error: connectionError } = await db
-      .from('google_business_connections')
-      .select('*')
-      .eq('establishment_id', establishmentId)
-      .maybeSingle();
-    if (connectionError) throw connectionError;
-    if (!connection) return json({ success: false, error: 'Google Business Profile non connecté' }, 404);
+    let connection: any;
+    let accountConnection: any = null;
+    if (accountMode) {
+      const { data: account, error: accountError } = await db.from('google_business_accounts')
+        .select('*').eq('id', accountConnectionId).maybeSingle();
+      if (accountError) throw accountError;
+      if (!account) return json({ success: false, error: 'Compte Google Business introuvable' }, 404);
+      accountConnection = account;
+      connection = { ...account, id: account.id, establishment_id: null };
+    } else {
+      const { data: establishment, error: establishmentError } = await db
+        .from('establishments').select('id').eq('id', establishmentId).maybeSingle();
+      if (establishmentError) throw establishmentError;
+      if (!establishment) return json({ success: false, error: 'Établissement introuvable' }, 404);
+      const { data: legacyConnection, error: connectionError } = await db.from('google_business_connections')
+        .select('*').eq('establishment_id', establishmentId).maybeSingle();
+      if (connectionError) throw connectionError;
+      if (!legacyConnection) return json({ success: false, error: 'Google Business Profile non connecté' }, 404);
+      connection = legacyConnection;
+    }
     activeConnectionId = connection.id;
 
     let token = connection.access_token;
     if (!token || !connection.token_expires_at || new Date(connection.token_expires_at).getTime() < Date.now() + 120000) {
       const refreshed = await refresh(connection.refresh_token);
       token = refreshed.access_token;
-      const { error: updateError } = await db.from('google_business_connections').update({
+      const tokenTable = accountMode ? 'google_business_accounts' : 'google_business_connections';
+      const { error: updateError } = await db.from(tokenTable).update({
         access_token: token,
         token_expires_at: new Date(Date.now() + Number(refreshed.expires_in ?? 3600) * 1000).toISOString(),
-        updated_at: new Date().toISOString(),
-        status: 'active',
-        last_error: null,
+        updated_at: new Date().toISOString(), status: 'active', last_error: null,
       }).eq('id', connection.id);
       if (updateError) throw updateError;
     }
@@ -209,7 +215,8 @@ Deno.serve(async (req: Request) => {
       for (const location of result.locations ?? []) {
         const googleLocationId = String(location.name ?? '').replace(/^locations\//, '');
         const { data: row, error: locationError } = await db.from('google_business_locations').upsert({
-          connection_id: connection.id,
+          connection_id: accountMode ? null : connection.id,
+          google_business_account_id: accountMode ? accountConnection.id : null,
           google_account_id: accountId,
           google_location_id: googleLocationId,
           location_name: location.name,
@@ -319,11 +326,9 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    const { error: syncUpdateError } = await db.from('google_business_connections').update({
-      last_sync_at: new Date().toISOString(),
-      status: 'active',
-      last_error: null,
-      updated_at: new Date().toISOString(),
+    const syncTable = accountMode ? 'google_business_accounts' : 'google_business_connections';
+    const { error: syncUpdateError } = await db.from(syncTable).update({
+      last_sync_at: new Date().toISOString(), status: 'active', last_error: null, updated_at: new Date().toISOString(),
     }).eq('id', connection.id);
     if (syncUpdateError) throw syncUpdateError;
 
