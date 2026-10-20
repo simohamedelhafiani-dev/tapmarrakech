@@ -112,12 +112,13 @@ async function generateReply(comment: string, stars: string, language: string, t
   return reply;
 }
 
-async function publishGeneratedReply(review: any, location: any, connection: any, token: string, reply: string) {
+async function publishGeneratedReply(review: any, location: any, connection: any, token: string, reply: string, onPublishAttempt?: () => void) {
   const accountId = String(location.google_account_id || connection.google_account_id || '');
   const locationId = String(location.google_location_id || '');
   const reviewId = String(review.google_review_name || '').split('/').pop() || '';
   if (!accountId || !locationId || !reviewId) throw new Error('Mapping Google incomplet pour publier la réponse.');
   const endpoint = `https://mybusiness.googleapis.com/v4/accounts/${accountId}/locations/${locationId}/reviews/${encodeURIComponent(reviewId)}/reply`;
+  onPublishAttempt?.();
   const response = await fetch(endpoint, {
     method: 'PUT',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -289,6 +290,19 @@ Deno.serve(async (req: Request) => {
             replySettings?.require_approval === false && reviewRating >= threshold &&
             !review.reviewReply?.comment && Boolean(review.comment?.trim());
           if (shouldAutoPublish && savedReview) {
+            // The cron may overlap when a sync takes longer than its interval. Claim the
+            // review atomically so the sync worker and Pub/Sub webhook cannot publish twice.
+            const claimedAt = new Date().toISOString();
+            const { data: claimedReview, error: claimError } = await db.from('google_business_reviews')
+              .update({ auto_reply_claimed_at: claimedAt, updated_at: claimedAt })
+              .eq('id', savedReview.id)
+              .is('auto_reply_claimed_at', null)
+              .select('id')
+              .maybeSingle();
+            if (claimError) throw claimError;
+            if (!claimedReview) continue;
+
+            let publishAttempted = false;
             try {
               const draft = await generateReply(String(review.comment), String(review.starRating ?? ''), String(replySettings.auto_reply_language ?? 'fr'), String(replySettings.auto_reply_tone ?? 'professional_warm'));
               const now = new Date().toISOString();
@@ -299,12 +313,16 @@ Deno.serve(async (req: Request) => {
               if (draftError) throw draftError;
               await publishGeneratedReply({ ...review, id: savedReview.id }, {
                 google_account_id: accountId, google_location_id: googleLocationId,
-              }, connection, token, draft);
+              }, connection, token, draft, () => { publishAttempted = true; });
             } catch (autoReplyError) {
               const message = autoReplyError instanceof Error ? autoReplyError.message : 'Erreur de réponse automatique';
-              await db.from('google_business_reviews').update({
+              const failureUpdate: Record<string, unknown> = {
                 reply_status: 'failed', reply_error: message, updated_at: new Date().toISOString(),
-              }).eq('id', savedReview.id);
+              };
+              // Release only if no Google publish request was attempted. A network error
+              // after the request is ambiguous; retaining the claim prevents a duplicate reply.
+              if (!publishAttempted) failureUpdate.auto_reply_claimed_at = null;
+              await db.from('google_business_reviews').update(failureUpdate).eq('id', savedReview.id);
               console.error('Auto-reply failed for review', savedReview.id, message);
             }
           } else if (isNewReview && afterAutoReplyActivation && replySettings?.auto_reply_enabled === true &&
