@@ -189,7 +189,7 @@ Deno.serve(async (req) => {
 
     const { data: existing, error: existingError } = await db
       .from('google_business_reviews')
-      .select('id,reply_status,owner_reply,reply_draft')
+      .select('id,reply_status,owner_reply,reply_draft,auto_reply_claimed_at')
       .eq('google_review_name', String(review.name ?? reviewName))
       .maybeSingle();
     if (existingError) throw existingError;
@@ -232,11 +232,14 @@ Deno.serve(async (req) => {
     const hasComment = Boolean(String(review.comment ?? '').trim());
     const hasGoogleReply = Boolean(String(review.reviewReply?.comment ?? '').trim());
     const isNewReview = !existing;
+    // Retry only a prior failed generation that never reached Google's publish endpoint.
+    // A non-null claim means a publish attempt may have had an ambiguous outcome, so do not retry it automatically.
+    const retryableGenerationFailure = Boolean(existing && existing.reply_status === 'failed' && !existing.auto_reply_claimed_at);
     const afterActivation = activatedAt > 0 && createdAt > 0 && createdAt >= activatedAt;
 
     // Publish only new positive reviews when autonomous replies are enabled and approval is disabled.
     // Negative/below-threshold reviews are never published automatically.
-    const shouldAutoPublish = isNewReview &&
+    const shouldAutoPublish = (isNewReview || retryableGenerationFailure) &&
       afterActivation &&
       settings?.auto_reply_enabled === true &&
       settings?.require_approval === false &&
@@ -262,6 +265,7 @@ Deno.serve(async (req) => {
       return json({ ok: true, review_id: stored.id, auto_reply: 'skipped_already_claimed' });
     }
 
+    let publishAttempted = false;
     try {
       const reply = await generateReply(
         String(review.comment),
@@ -280,6 +284,9 @@ Deno.serve(async (req) => {
       if (draftError) throw draftError;
 
       const endpoint = `https://mybusiness.googleapis.com/v4/accounts/${accountId}/locations/${locationId}/reviews/${encodeURIComponent(reviewId)}/reply`;
+      // From this point, a transport error can mean Google accepted the reply but
+      // the response was lost; keep the idempotency claim in that case.
+      publishAttempted = true;
       const publishResponse = await fetch(endpoint, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -305,11 +312,17 @@ Deno.serve(async (req) => {
       return json({ ok: true, review_id: stored.id, auto_reply: 'published' });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Google reply failed';
-      await db.from('google_business_reviews').update({
+      const failedAt = new Date().toISOString();
+      const failureUpdate: Record<string, unknown> = {
         reply_status: 'failed',
         reply_error: message,
-        updated_at: new Date().toISOString(),
-      }).eq('id', stored.id);
+        updated_at: failedAt,
+      };
+      // If generation or draft persistence failed before any publish request, release the
+      // claim so a Pub/Sub redelivery can retry. Once Google has been called, retain the
+      // claim because a network/server failure can leave publication outcome ambiguous.
+      if (!publishAttempted) failureUpdate.auto_reply_claimed_at = null;
+      await db.from('google_business_reviews').update(failureUpdate).eq('id', stored.id);
       throw error;
     }
   } catch (error) {
