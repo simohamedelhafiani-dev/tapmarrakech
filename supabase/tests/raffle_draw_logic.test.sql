@@ -1,6 +1,6 @@
 begin;
 
-select plan(25);
+select plan(26);
 
 -- 1. No eligible customers and no enrolled customers: never produce a winner.
 select is(
@@ -219,6 +219,13 @@ select ok(
   and not has_function_privilege('anon', 'public.rerun_loyalty_raffle_draw(uuid)', 'EXECUTE')
   and has_function_privilege('authenticated', 'public.rerun_loyalty_raffle_draw(uuid)', 'EXECUTE'),
   'scheduler is restricted to service_role; manual rerun is revoked from anon and granted only to authenticated'
+);
+
+-- Expanded fallback must normalize pre-existing entries to exactly one ticket.
+select ok(
+  position('on conflict (raffle_id, customer_id) do update' in lower(pg_get_functiondef('public.draw_loyalty_raffle_internal(uuid,boolean,text,uuid)'::regprocedure))) > 0
+  and position('set tickets = excluded.tickets' in lower(pg_get_functiondef('public.draw_loyalty_raffle_internal(uuid,boolean,text,uuid)'::regprocedure))) > 0,
+  'expanded fallback resets existing participant ticket weights to one ticket each'
 );
 
 select * from finish();
