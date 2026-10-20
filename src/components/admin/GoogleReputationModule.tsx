@@ -340,7 +340,7 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#C9A45C]">Réputation Google</p>
             <h3 className="mt-1 text-2xl font-semibold text-white">Google Business Profile</h3>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-white/45">
-              Connexion, synchronisation, réponses IA et bonus sont administrés ici. Le Responsable reste en lecture seule.
+              Connexion, synchronisation et réponses IA sont administrées ici. Le Responsable reste en lecture seule.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -431,7 +431,7 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
       {mode === 'ai' || mode === 'links' ? (
       <div className="flex items-start gap-3 rounded-2xl border border-[#242424] bg-[#0b0b0b] p-4 text-xs text-white/40">
         <Star size={15} className="mt-0.5 shrink-0 text-[#C9A45C]" />
-        <p>Les avis Google et les réponses sont séparés du système de bonus de fidélité. Les réponses IA ne mentionnent pas les récompenses.</p>
+        <p>Les programmes de fidélité restent indépendants des avis publics. Ne conditionnez jamais une récompense à la publication d’un avis.</p>
       </div>
       ) : null}
     </div>
