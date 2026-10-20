@@ -79,16 +79,21 @@ begin
     raise exception 'invalid_access_token';
   end if;
 
-  if not exists (
+  -- The card UI hides the questionnaire after the first submission. Enforce the
+  -- same rule in SQL so direct/repeated RPC calls cannot create duplicate feedback.
+  if exists (
     select 1 from public.satisfaction_feedback f
     where f.customer_id = v_customer.id
   ) then
-    select greatest(coalesce(e.feedback_bonus_points, 10), 0)
-      into v_reward
-    from public.establishments e
-    where e.id = v_customer.establishment_id;
-    v_reward := coalesce(v_reward, 10);
+    return query select true, 0, v_customer.points_balance;
+    return;
   end if;
+
+  select greatest(coalesce(e.feedback_bonus_points, 10), 0)
+    into v_reward
+  from public.establishments e
+  where e.id = v_customer.establishment_id;
+  v_reward := coalesce(v_reward, 10);
 
   insert into public.satisfaction_feedback(
     customer_id, establishment_id, rating, comment, points_awarded
