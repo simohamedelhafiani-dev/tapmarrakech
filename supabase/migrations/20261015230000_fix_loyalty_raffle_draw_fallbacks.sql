@@ -175,7 +175,8 @@ begin
     from public.loyalty_customers c
     where c.establishment_id = v_raffle.establishment_id
       and c.created_at <= clock_timestamp()
-    on conflict (raffle_id, customer_id) do nothing;
+    on conflict (raffle_id, customer_id) do update
+      set tickets = excluded.tickets;
 
     select count(*)::integer into v_pool_count
     from public.loyalty_raffle_entries e
