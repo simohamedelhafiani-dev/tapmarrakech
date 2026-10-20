@@ -79,6 +79,7 @@ type EngagementContext = {
   google_review_url: string | null;
   tripadvisor_review_url: string | null;
   review_bonus_points: number;
+  feedback_bonus_points: number;
   whatsapp_number: string | null;
   google_claimed: boolean;
   tripadvisor_claimed: boolean;
@@ -134,6 +135,7 @@ export default function LoyaltyCard() {
   const [isLiveRefreshing, setIsLiveRefreshing] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const [engagement, setEngagement] = useState<EngagementContext | null>(null);
+  const [googleLinkAlreadyOpened, setGoogleLinkAlreadyOpened] = useState(false);
   const [feedbackRating, setFeedbackRating] = useState(0);
   const [feedbackComment, setFeedbackComment] = useState('');
   const [feedbackSaving, setFeedbackSaving] = useState(false);
@@ -435,11 +437,17 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
       setRewards((rewardsData ?? []) as LoyaltyExperienceReward[]);
       setNotifications((notificationsData ?? []) as CardNotification[]);
       const engagementRow = Array.isArray(engagementData) ? engagementData[0] : engagementData;
+      try {
+        setGoogleLinkAlreadyOpened(window.localStorage.getItem(`kelyani:google-review-clicked:${token}`) === '1');
+      } catch {
+        setGoogleLinkAlreadyOpened(false);
+      }
       if (engagementRow) {
         setEngagement({
           google_review_url: engagementRow.google_review_url ?? null,
           tripadvisor_review_url: engagementRow.tripadvisor_review_url ?? null,
           review_bonus_points: Math.max(0, Number(engagementRow.review_bonus_points ?? 0)),
+          feedback_bonus_points: Math.max(0, Number(engagementRow.feedback_bonus_points ?? 10)),
           whatsapp_number: engagementRow.whatsapp_number ?? null,
           google_claimed: Boolean(engagementRow.google_claimed),
           tripadvisor_claimed: Boolean(engagementRow.tripadvisor_claimed),
@@ -547,40 +555,27 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
 
     // Open synchronously before awaiting Supabase so mobile browsers do not block the new tab.
     window.open(engagement.google_review_url, '_blank', 'noopener,noreferrer');
-    setReviewMessage('');
 
-    const { data, error: reviewError } = await supabase.rpc('claim_public_loyalty_review_bonus', {
-      p_access_token: token,
-      p_platform: 'google',
-    });
-
-    if (reviewError) {
-      console.error('Failed to claim Google review bonus:', reviewError);
-      setReviewMessage('L’avis a été ouvert, mais l’attribution des points n’a pas pu être confirmée.');
-      return;
+    // Record the click timestamp for establishment-level analytics. Google does not
+    // expose the review author's email, so this event is not proof that a review was posted.
+    if (card?.establishment_id) {
+      const { error: trackingError } = await supabase.from('analytics_events').insert({
+        establishment_id: card.establishment_id,
+        event_type: 'google_redirect',
+      });
+      if (trackingError) {
+        console.error('Failed to record Google review link click:', trackingError);
+      }
     }
 
-    const result = Array.isArray(data) ? data[0] : data;
-    const pointsAwarded = Math.max(0, Number(result?.points_awarded ?? 0));
-    const alreadyClaimed = Boolean(result?.already_claimed);
-
-    if (alreadyClaimed) {
-      setEngagement(current => current ? { ...current, google_claimed: true } : current);
-      setReviewMessage('Votre bonus Google a déjà été attribué.');
-      return;
+    // Prevent repeated clicks in this browser without claiming that a review was verified.
+    try {
+      window.localStorage.setItem(`kelyani:google-review-clicked:${token}`, '1');
+    } catch {
+      // Local storage may be unavailable; the click remains recorded when the insert succeeds.
     }
-
-    setCard(current => current
-      ? { ...current, points_balance: Number(result?.points_balance ?? current.points_balance) }
-      : current
-    );
-    setEngagement(current => current ? { ...current, google_claimed: true } : current);
-
-    setReviewMessage(
-      pointsAwarded > 0
-        ? `Merci ! +${pointsAwarded} points ont été ajoutés à votre carte fidélité.`
-        : 'Merci pour votre avis Google !'
-    );
+    setGoogleLinkAlreadyOpened(true);
+    setReviewMessage('Le lien Google a été ouvert. Merci de partager librement votre expérience.');
   };
 
   const submitFeedback = async () => {
@@ -989,9 +984,9 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                   <p className="mt-1 text-[11px] leading-5 text-white/40">Partagez librement votre expérience. Le questionnaire fidélité vous permet, lui, de gagner des points.</p>
                 </div>
                 <div className="grid gap-2 p-4 sm:grid-cols-2">
-                  {engagement.google_review_url && !engagement.google_claimed && (
+                  {engagement.google_review_url && !engagement.google_claimed && !googleLinkAlreadyOpened && (
                     <button type="button" onClick={() => void openGoogleReview()} className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-left transition hover:border-[#D4AF37]/50">
-                      <span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]"><Star size={17} /></span><span><span className="block text-sm font-semibold text-white">Avis Google</span><span className="block text-[10px] text-white/35">{engagement.review_bonus_points > 0 ? `Laisser un avis & gagner ${engagement.review_bonus_points} pts` : 'Partager mon expérience'}</span></span></span>
+                      <span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]"><Star size={17} /></span><span><span className="block text-sm font-semibold text-white">Avis Google</span><span className="block text-[10px] text-white/35">Partager mon expérience</span></span></span>
                       <ExternalLink size={15} className="text-white/35" />
                     </button>
                   )}
@@ -1023,7 +1018,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                 {!engagement.feedback_submitted && feedbackRating > 0 && (
                   <div className="mt-4 space-y-3">
                     <textarea value={feedbackComment} onChange={e => setFeedbackComment(e.target.value)} maxLength={2000} rows={3} placeholder="Un commentaire à partager ? (facultatif)" className="w-full resize-none rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#D4AF37]" />
-                    <button type="button" onClick={() => void submitFeedback()} disabled={feedbackSaving} className="w-full rounded-2xl bg-[#D4AF37] px-4 py-3 text-xs font-semibold text-[#0D0D0D] disabled:opacity-50">{feedbackSaving ? 'Envoi…' : 'Envoyer mon retour · +10 points'}</button>
+                    <button type="button" onClick={() => void submitFeedback()} disabled={feedbackSaving} className="w-full rounded-2xl bg-[#D4AF37] px-4 py-3 text-xs font-semibold text-[#0D0D0D] disabled:opacity-50">{feedbackSaving ? 'Envoi…' : `Envoyer mon retour · +${engagement.feedback_bonus_points} points`}</button>
                   </div>
                 )}
                   {feedbackMessage && <p className="mt-3 text-xs text-[#D4AF37]">{feedbackMessage}</p>}
@@ -1071,35 +1066,6 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
           </section>
         )}
 
-        {!pushEnabled && (
-          <section className="mt-4 overflow-hidden rounded-[1.75rem] border border-[#D4AF37]/20 bg-[#111111] p-5 shadow-luxury">
-            <div className="flex items-start gap-3">
-              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]">
-                <Bell className="h-4 w-4" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <h2 className="text-sm font-semibold text-white">Recevoir les notifications</h2>
-                <p className="mt-1 text-[11px] leading-5 text-white/40">
-                  Recevez les offres et messages de votre établissement directement sur votre téléphone, même lorsque la carte est fermée ou que l’écran est verrouillé.
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => void activatePushNotifications()}
-              disabled={pushLoading}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#D4AF37] px-4 py-3 text-xs font-semibold text-[#0D0D0D] disabled:opacity-50"
-            >
-              <Bell size={15} />
-              {pushLoading ? 'Activation…' : 'Activer les notifications'}
-            </button>
-            {pushMessage && (
-              <p className="mt-3 text-center text-[10px] leading-4 text-[#D4AF37]" role="status">
-                {pushMessage}
-              </p>
-            )}
-          </section>
-        )}
         {pushEnabled && pushMessage && (
           <p className="mt-3 text-center text-[10px] leading-4 text-[#D4AF37]" role="status">
             {pushMessage}

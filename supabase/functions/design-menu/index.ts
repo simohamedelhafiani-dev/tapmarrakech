@@ -125,7 +125,7 @@ Deno.serve(async (request) => {
 
     const { data: aiSettings, error: aiSettingsError } = await serviceClient
       .from('ai_global_settings')
-      .select('provider,model,api_key,enabled,max_output_tokens,system_instructions')
+      .select('provider,model,api_key,enabled,temperature,max_output_tokens,system_instructions')
       .eq('id', true)
       .maybeSingle();
 
@@ -226,6 +226,9 @@ Deno.serve(async (request) => {
           },
         },
         max_output_tokens: Math.min(Math.max(Number(aiSettings.max_output_tokens) || 6000, 3000), 12000),
+        temperature: Number.isFinite(Number(aiSettings.temperature)) && Number(aiSettings.temperature) >= 0 && Number(aiSettings.temperature) <= 2
+          ? Number(aiSettings.temperature)
+          : 0.2,
       }),
     });
 
