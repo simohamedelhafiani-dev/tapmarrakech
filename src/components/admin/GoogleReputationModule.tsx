@@ -73,6 +73,7 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
   const [settings, setSettings] = useState<Setting>(emptySettings);
   const [googleReviewUrl, setGoogleReviewUrl] = useState('');
   const [tripadvisorReviewUrl, setTripadvisorReviewUrl] = useState('');
+  const [feedbackBonus, setFeedbackBonus] = useState(10);
   const [reviews, setReviews] = useState<GoogleReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -91,7 +92,7 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
       ] = await Promise.all([
         supabase
           .from('establishments')
-          .select('google_review_url,tripadvisor_review_url')
+          .select('google_review_url,tripadvisor_review_url,feedback_bonus_points')
           .eq('id', establishmentId)
           .maybeSingle(),
         supabase
@@ -127,6 +128,7 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
 
       setGoogleReviewUrl(establishment?.google_review_url ?? '');
       setTripadvisorReviewUrl(establishment?.tripadvisor_review_url ?? '');
+      setFeedbackBonus(Math.max(0, Number(establishment?.feedback_bonus_points ?? 10)));
       if (!establishment?.google_review_url) {
         const { data: mappedLocations } = await supabase
           .from('google_business_locations')
@@ -304,9 +306,11 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
         const { error: establishmentError } = await supabase.from('establishments').update({
           google_review_url: googleReviewUrl.trim(),
           tripadvisor_review_url: tripadvisorReviewUrl.trim() || null,
+          feedback_bonus_points: Math.max(0, Math.floor(Number(feedbackBonus) || 0)),
         }).eq('id', establishmentId);
         if (establishmentError) throw establishmentError;
-        setMessage('Liens d’avis enregistrés.');
+        setFeedbackBonus(Math.max(0, Math.floor(Number(feedbackBonus) || 0)));
+        setMessage('Liens et bonus du questionnaire enregistrés.');
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Impossible d’enregistrer les paramètres.');
@@ -407,7 +411,7 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
 
       {mode === 'links' && (
       <section className="rounded-3xl border border-[#242424] bg-[#111111] p-6">
-        <div className="flex items-center gap-2"><Sparkles size={17} className="text-[#C9A45C]" /><h3 className="font-semibold text-white">Liens d’avis</h3></div>
+        <div className="flex items-center gap-2"><Sparkles size={17} className="text-[#C9A45C]" /><h3 className="font-semibold text-white">Avis & retour client</h3></div>
         <div className="mt-5 grid gap-4 md:grid-cols-3">
           <label className="block md:col-span-2"><span className="mb-2 block text-xs font-semibold text-white/55">Lien avis Google</span><input value={googleReviewUrl} onChange={(e) => setGoogleReviewUrl(e.target.value)} placeholder="https://g.page/…" className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white" /></label>
           <label className="block md:col-span-2"><span className="mb-2 block text-xs font-semibold text-white/55">Lien avis TripAdvisor</span><input value={tripadvisorReviewUrl} onChange={(e) => setTripadvisorReviewUrl(e.target.value)} placeholder="https://www.tripadvisor.fr/…" className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white" /></label>
