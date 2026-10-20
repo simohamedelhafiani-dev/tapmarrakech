@@ -148,6 +148,12 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
   useEffect(() => { void load(); }, [load]);
 
   useEffect(() => {
+    const refreshWhenReturning = () => { void load(); };
+    window.addEventListener('focus', refreshWhenReturning);
+    return () => window.removeEventListener('focus', refreshWhenReturning);
+  }, [load]);
+
+  useEffect(() => {
     if (selectedEstablishmentId !== 'all' && !establishments.some((item) => item.id === selectedEstablishmentId)) {
       setSelectedEstablishmentId('all');
     }
