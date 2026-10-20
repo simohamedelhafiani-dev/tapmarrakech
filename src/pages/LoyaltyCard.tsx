@@ -1018,7 +1018,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                 {!engagement.feedback_submitted && feedbackRating > 0 && (
                   <div className="mt-4 space-y-3">
                     <textarea value={feedbackComment} onChange={e => setFeedbackComment(e.target.value)} maxLength={2000} rows={3} placeholder="Un commentaire à partager ? (facultatif)" className="w-full resize-none rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#D4AF37]" />
-                    <button type="button" onClick={() => void submitFeedback()} disabled={feedbackSaving} className="w-full rounded-2xl bg-[#D4AF37] px-4 py-3 text-xs font-semibold text-[#0D0D0D] disabled:opacity-50">{feedbackSaving ? 'Envoi…' : 'Envoyer mon retour · +{engagement.feedback_bonus_points} points'}</button>
+                    <button type="button" onClick={() => void submitFeedback()} disabled={feedbackSaving} className="w-full rounded-2xl bg-[#D4AF37] px-4 py-3 text-xs font-semibold text-[#0D0D0D] disabled:opacity-50">{feedbackSaving ? 'Envoi…' : `Envoyer mon retour · +${engagement.feedback_bonus_points} points`}</button>
                   </div>
                 )}
                   {feedbackMessage && <p className="mt-3 text-xs text-[#D4AF37]">{feedbackMessage}</p>}
