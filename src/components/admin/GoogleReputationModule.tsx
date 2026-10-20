@@ -89,7 +89,6 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
       const [
         { data: establishment, error: establishmentError },
         { data: connectionRow, error: connectionError },
-        { data: settingsRow, error: settingsError },
       ] = await Promise.all([
         supabase
           .from('establishments')
@@ -101,16 +100,31 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
           .select('status,last_sync_at,last_error,google_account_id')
           .eq('establishment_id', establishmentId)
           .maybeSingle(),
-        supabase
-          .from('google_business_settings')
-          .select('auto_reply_enabled,auto_reply_language,auto_reply_tone,require_approval,auto_reply_min_rating,sync_interval_minutes')
-          .eq('establishment_id', establishmentId)
-          .maybeSingle(),
       ]);
 
       if (establishmentError) throw establishmentError;
       if (connectionError) throw connectionError;
-      if (settingsError) throw settingsError;
+
+      // Some existing deployments do not yet have sync_interval_minutes.
+      // Fall back to the established settings columns so the AI panel remains usable.
+      let settingsRow: Record<string, unknown> | null = null;
+      const settingsWithInterval = await supabase
+        .from('google_business_settings')
+        .select('auto_reply_enabled,auto_reply_language,auto_reply_tone,require_approval,auto_reply_min_rating,sync_interval_minutes')
+        .eq('establishment_id', establishmentId)
+        .maybeSingle();
+      if (settingsWithInterval.error && /sync_interval_minutes|column .* does not exist|schema cache/i.test(settingsWithInterval.error.message)) {
+        const legacySettings = await supabase
+          .from('google_business_settings')
+          .select('auto_reply_enabled,auto_reply_language,auto_reply_tone,require_approval,auto_reply_min_rating')
+          .eq('establishment_id', establishmentId)
+          .maybeSingle();
+        if (legacySettings.error) throw legacySettings.error;
+        settingsRow = legacySettings.data as Record<string, unknown> | null;
+      } else {
+        if (settingsWithInterval.error) throw settingsWithInterval.error;
+        settingsRow = settingsWithInterval.data as Record<string, unknown> | null;
+      }
 
       setReviewBonus(Number(establishment?.review_bonus_points ?? 0));
       setGoogleReviewUrl(establishment?.google_review_url ?? '');
