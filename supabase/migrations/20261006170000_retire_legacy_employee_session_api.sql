@@ -1,7 +1,6 @@
--- Legacy employee-code/session API is no longer used by the KELYANI scanner flow.
--- Keep the underlying tables/functions intact. Revoke anonymous/public execution only
--- for legacy functions that exist in this schema, so clean installs and older schemas
--- both apply deterministically without dropping or replacing operational functionality.
+-- Restrict legacy employee-code/session RPCs from anonymous/public clients.
+-- The current employee-login Edge Function still calls login_employee_with_code_only(text)
+-- with a service-role client, so retain that server-side execution path explicitly.
 do $$
 declare
   v_signature text;
@@ -22,5 +21,9 @@ begin
       execute format('revoke execute on function %s from anon, public', to_regprocedure(v_signature));
     end if;
   end loop;
+
+  if to_regprocedure('public.login_employee_with_code_only(text)') is not null then
+    grant execute on function public.login_employee_with_code_only(text) to service_role;
+  end if;
 end;
 $$;
