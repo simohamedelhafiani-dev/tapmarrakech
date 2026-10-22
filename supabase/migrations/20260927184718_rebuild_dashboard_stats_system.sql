@@ -1,4 +1,12 @@
--- Restrict dashboard stats RPC to authenticated users.
-REVOKE ALL ON FUNCTION public.get_dashboard_stats(uuid, integer) FROM PUBLIC;
-REVOKE ALL ON FUNCTION public.get_dashboard_stats(uuid, integer) FROM anon;
-GRANT EXECUTE ON FUNCTION public.get_dashboard_stats(uuid, integer) TO authenticated;
+-- Restrict dashboard stats RPC when the function exists in this schema version.
+-- Some clean-install paths do not define this legacy RPC; never fail all migrations
+-- solely while attempting to adjust privileges on an absent function.
+DO $migration$
+BEGIN
+  IF to_regprocedure('public.get_dashboard_stats(uuid,integer)') IS NOT NULL THEN
+    REVOKE ALL ON FUNCTION public.get_dashboard_stats(uuid, integer) FROM PUBLIC;
+    REVOKE ALL ON FUNCTION public.get_dashboard_stats(uuid, integer) FROM anon;
+    GRANT EXECUTE ON FUNCTION public.get_dashboard_stats(uuid, integer) TO authenticated;
+  END IF;
+END
+$migration$;
