@@ -1,6 +1,6 @@
 begin;
 
-select plan(5);
+select plan(6);
 
 create temporary table employee_access_fixture (
   employee_id uuid not null,
