@@ -71,7 +71,6 @@ AS $function$
     );
 $function$;
 
-
 CREATE OR REPLACE FUNCTION public.user_owns_establishment(target_establishment_id uuid)
 RETURNS boolean
 LANGUAGE sql
@@ -87,6 +86,22 @@ AS $function$
   );
 $function$;
 
+-- This RPC is used by the dashboard, establishment manager and loyalty settings.
+-- It returns all establishments to admins, owned establishments to their owners,
+-- and only actively assigned establishments to responsible staff/employees.
+CREATE OR REPLACE FUNCTION public.get_my_establishments()
+RETURNS SETOF public.establishments
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = pg_catalog, public
+AS $function$
+  SELECT e.*
+  FROM public.establishments AS e
+  WHERE public.user_has_establishment_access(e.id)
+  ORDER BY e.created_at DESC, e.id;
+$function$;
+
 REVOKE ALL ON FUNCTION public.user_owns_establishment(uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.user_owns_establishment(uuid) TO authenticated, service_role;
 REVOKE ALL ON FUNCTION public.is_tapmarrakech_admin() FROM PUBLIC, anon;
@@ -95,3 +110,5 @@ REVOKE ALL ON FUNCTION public.is_establishment_responsible(uuid) FROM PUBLIC, an
 GRANT EXECUTE ON FUNCTION public.is_tapmarrakech_admin() TO authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.user_has_establishment_access(uuid) TO authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.is_establishment_responsible(uuid) TO authenticated, service_role;
+REVOKE ALL ON FUNCTION public.get_my_establishments() FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.get_my_establishments() TO authenticated, service_role;
