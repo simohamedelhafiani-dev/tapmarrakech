@@ -27,8 +27,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const hasSessionRef = useRef(false);
 
-  const loadProfile = async (userId: string) => {
-    const { data, error } = await supabase
+  const loadProfile = async (userId: string, user?: User) => {
+    let { data, error } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', userId)
@@ -38,6 +38,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error('Erreur chargement du profil:', error);
       setRole(null);
       return;
+    }
+
+    // Email confirmation can leave a newly registered account without a
+    // profile because the registration page has no authenticated session yet.
+    // Recover only accounts carrying the name metadata collected at signup;
+    // never infer or elevate a role from user-editable metadata.
+    const metadataName = user?.user_metadata?.name;
+    if (!data && typeof metadataName === 'string' && metadataName.trim()) {
+      const { error: insertError } = await supabase.from('profiles').insert({
+        id: userId,
+        email: user?.email ?? '',
+        name: metadataName.trim(),
+      });
+
+      // Another auth event/tab may have created the same profile concurrently.
+      if (insertError && insertError.code !== '23505') {
+        console.error('Erreur création du profil manquant:', insertError);
+        setRole(null);
+        return;
+      }
+
+      const refreshed = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
+        .maybeSingle();
+
+      data = refreshed.data;
+      error = refreshed.error;
+
+      if (error) {
+        console.error('Erreur rechargement du profil:', error);
+        setRole(null);
+        return;
+      }
     }
 
     setRole((data?.role as UserRole) ?? null);
@@ -64,7 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         hasSessionRef.current = Boolean(data.session);
 
         if (data.session?.user) {
-          await loadProfile(data.session.user.id);
+          await loadProfile(data.session.user.id, data.session.user);
         } else {
           setRole(null);
         }
@@ -111,7 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         setTimeout(() => {
           if (!active) return;
-          void loadProfile(nextSession.user.id).finally(() => {
+          void loadProfile(nextSession.user.id, nextSession.user).finally(() => {
             if (active && !wasAlreadyAuthenticated) {
               setLoading(false);
             }
