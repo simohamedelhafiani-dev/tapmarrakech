@@ -99,8 +99,10 @@ set search_path = ''
 as $$
 begin
   if auth.uid() is null
-     or not public.is_tapmarrakech_admin()
-     or not public.user_has_establishment_access(p_establishment_id) then
+     or not (
+       public.is_tapmarrakech_admin()
+       or public.is_establishment_responsible(p_establishment_id)
+     ) then
     raise exception 'Not authorized';
   end if;
 
