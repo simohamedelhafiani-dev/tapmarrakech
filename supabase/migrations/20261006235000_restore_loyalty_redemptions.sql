@@ -14,9 +14,15 @@ CREATE TABLE IF NOT EXISTS public.loyalty_employee_rewards (
 );
 
 CREATE INDEX IF NOT EXISTS loyalty_employee_rewards_customer_idx
-  ON public.loyalty_employee_rewards(customer_id, created_at DESC);
+  ON public.loyalty_employee_rewards(customer_id);
+CREATE INDEX IF NOT EXISTS loyalty_employee_rewards_employee_idx
+  ON public.loyalty_employee_rewards(employee_id);
 CREATE INDEX IF NOT EXISTS loyalty_employee_rewards_establishment_idx
-  ON public.loyalty_employee_rewards(establishment_id, created_at DESC);
+  ON public.loyalty_employee_rewards(establishment_id);
+CREATE UNIQUE INDEX IF NOT EXISTS loyalty_employee_rewards_customer_employee_unique
+  ON public.loyalty_employee_rewards(establishment_id, customer_id, employee_id);
+CREATE UNIQUE INDEX IF NOT EXISTS loyalty_employee_rewards_unique_customer_employee
+  ON public.loyalty_employee_rewards(establishment_id, customer_id, employee_id);
 
 ALTER TABLE public.loyalty_employee_rewards ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON public.loyalty_employee_rewards FROM PUBLIC, anon, authenticated;
