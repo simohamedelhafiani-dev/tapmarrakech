@@ -32,8 +32,7 @@ CREATE TABLE IF NOT EXISTS public.loyalty_customers (
   visit_frequency text
     CHECK (visit_frequency IS NULL OR visit_frequency IN ('WEEKLY','MONTHLY','OCCASIONAL')),
   birth_day smallint CHECK (birth_day IS NULL OR birth_day BETWEEN 1 AND 31),
-  birth_month smallint CHECK (birth_month IS NULL OR birth_month BETWEEN 1 AND 12),
-  CONSTRAINT loyalty_customers_establishment_phone_unique UNIQUE (establishment_id, phone)
+  birth_month smallint CHECK (birth_month IS NULL OR birth_month BETWEEN 1 AND 12)
 );
 
 CREATE INDEX IF NOT EXISTS loyalty_customers_establishment_idx
