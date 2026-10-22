@@ -11,7 +11,7 @@ create or replace function public.save_loyalty_card_builder_config(
   p_text_color text,
   p_button_color text,
   p_border_radius integer,
-  p_published boolean
+  p_published boolean DEFAULT false
 )
 returns void
 language plpgsql
