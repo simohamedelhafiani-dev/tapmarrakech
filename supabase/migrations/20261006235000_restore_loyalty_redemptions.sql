@@ -1,3 +1,32 @@
+-- Restore birthday reward ledger before privilege hardening.
+CREATE TABLE IF NOT EXISTS public.loyalty_birthday_rewards (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  establishment_id uuid NOT NULL REFERENCES public.establishments(id) ON DELETE CASCADE,
+  customer_id uuid NOT NULL REFERENCES public.loyalty_customers(id) ON DELETE CASCADE,
+  birthday_year integer NOT NULL,
+  birthday_date date NOT NULL,
+  reward_name text NOT NULL,
+  description text,
+  reward_points integer NOT NULL DEFAULT 0 CHECK (reward_points >= 0),
+  reward_amount numeric NOT NULL DEFAULT 0 CHECK (reward_amount >= 0),
+  valid_from date NOT NULL,
+  valid_until date NOT NULL,
+  status text NOT NULL DEFAULT 'AVAILABLE' CHECK (status IN ('AVAILABLE', 'USED', 'EXPIRED', 'CANCELLED')),
+  used_at timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT loyalty_birthday_rewards_check CHECK (valid_until >= valid_from)
+);
+
+CREATE INDEX IF NOT EXISTS loyalty_birthday_rewards_customer_idx ON public.loyalty_birthday_rewards(customer_id);
+CREATE INDEX IF NOT EXISTS loyalty_birthday_rewards_date_idx ON public.loyalty_birthday_rewards(birthday_date);
+CREATE INDEX IF NOT EXISTS loyalty_birthday_rewards_establishment_idx ON public.loyalty_birthday_rewards(establishment_id);
+CREATE UNIQUE INDEX IF NOT EXISTS loyalty_birthday_rewards_one_per_year
+  ON public.loyalty_birthday_rewards(establishment_id, customer_id, birthday_year);
+
+ALTER TABLE public.loyalty_birthday_rewards ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON public.loyalty_birthday_rewards FROM PUBLIC, anon, authenticated;
+GRANT ALL ON public.loyalty_birthday_rewards TO service_role;
+
 -- Restore the employee reward audit ledger used by the employee loyalty workflow.
 CREATE TABLE IF NOT EXISTS public.loyalty_employee_rewards (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
