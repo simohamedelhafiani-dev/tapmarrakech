@@ -29,10 +29,18 @@ $function$;
 revoke execute on function public.ensure_default_loyalty_tiers(uuid) from public, anon;
 grant execute on function public.ensure_default_loyalty_tiers(uuid) to authenticated;
 
-revoke execute on function public.create_loyalty_raffle(uuid,text,text,text,text,timestamptz,timestamptz,integer,text,timestamptz,timestamptz,integer,boolean,boolean,boolean) from public, anon;
-revoke execute on function public.create_loyalty_raffle(uuid,text,text,text,text,timestamptz,timestamptz,integer,text,timestamptz,timestamptz,integer,boolean,boolean,boolean,text,text) from public, anon;
-grant execute on function public.create_loyalty_raffle(uuid,text,text,text,text,timestamptz,timestamptz,integer,text,timestamptz,timestamptz,integer,boolean,boolean,boolean) to authenticated;
-grant execute on function public.create_loyalty_raffle(uuid,text,text,text,text,timestamptz,timestamptz,integer,text,timestamptz,timestamptz,integer,boolean,boolean,boolean,text,text) to authenticated;
+DO $raffle_permissions$
+BEGIN
+  IF to_regprocedure('public.create_loyalty_raffle(uuid,text,text,text,text,timestamptz,timestamptz,integer,text,timestamptz,timestamptz,integer,boolean,boolean,boolean)') IS NOT NULL THEN
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.create_loyalty_raffle(uuid,text,text,text,text,timestamptz,timestamptz,integer,text,timestamptz,timestamptz,integer,boolean,boolean,boolean) FROM PUBLIC, anon';
+    EXECUTE 'GRANT EXECUTE ON FUNCTION public.create_loyalty_raffle(uuid,text,text,text,text,timestamptz,timestamptz,integer,text,timestamptz,timestamptz,integer,boolean,boolean,boolean) TO authenticated';
+  END IF;
+  IF to_regprocedure('public.create_loyalty_raffle(uuid,text,text,text,text,timestamptz,timestamptz,integer,text,timestamptz,timestamptz,integer,boolean,boolean,boolean,text,text)') IS NOT NULL THEN
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.create_loyalty_raffle(uuid,text,text,text,text,timestamptz,timestamptz,integer,text,timestamptz,timestamptz,integer,boolean,boolean,boolean,text,text) FROM PUBLIC, anon';
+    EXECUTE 'GRANT EXECUTE ON FUNCTION public.create_loyalty_raffle(uuid,text,text,text,text,timestamptz,timestamptz,integer,text,timestamptz,timestamptz,integer,boolean,boolean,boolean,text,text) TO authenticated';
+  END IF;
+END
+$raffle_permissions$;
 
 revoke execute on function public.get_loyalty_raffles(uuid) from public, anon;
 grant execute on function public.get_loyalty_raffles(uuid) to authenticated;
