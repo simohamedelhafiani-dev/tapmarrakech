@@ -18,7 +18,7 @@ returns void
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 begin
   if auth.uid() is null
      or not (public.is_tapmarrakech_admin() or public.is_establishment_responsible(p_establishment_id)) then
