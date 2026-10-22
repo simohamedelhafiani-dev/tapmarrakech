@@ -65,10 +65,12 @@ BEGIN
     AND c.status = 'PENDING'
     AND c.expires_at <= now();
 
-  INSERT INTO public.loyalty_promotion_claims (customer_id, establishment_id, promotion_id)
+  INSERT INTO public.loyalty_promotion_claims AS inserted_claim
+    (customer_id, establishment_id, promotion_id)
   VALUES (v_customer.id, v_customer.establishment_id, v_promotion.id)
-  RETURNING claim_token, public.loyalty_promotion_claims.expires_at
-  INTO claim_token, expires_at;
+  RETURNING inserted_claim.claim_token, inserted_claim.expires_at
+  INTO create_public_loyalty_promotion_claim.claim_token,
+       create_public_loyalty_promotion_claim.expires_at;
 
   promotion_id := v_promotion.id;
   promotion_name := v_promotion.name;
