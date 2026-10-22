@@ -1,3 +1,6 @@
+-- Preserve the original DEFAULT false argument from the builder migration.
+-- PostgreSQL cannot remove an existing parameter default via CREATE OR REPLACE.
+-- Keep responsible access and draft/publish behavior intact.
 CREATE OR REPLACE FUNCTION public.save_loyalty_card_builder_config(
   p_establishment_id uuid,
   p_design_config jsonb,
@@ -8,7 +11,7 @@ CREATE OR REPLACE FUNCTION public.save_loyalty_card_builder_config(
   p_text_color text,
   p_button_color text,
   p_border_radius integer,
-  p_published boolean
+  p_published boolean DEFAULT false
 )
 RETURNS void
 LANGUAGE plpgsql
