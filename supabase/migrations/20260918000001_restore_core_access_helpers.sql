@@ -71,6 +71,24 @@ AS $function$
     );
 $function$;
 
+
+CREATE OR REPLACE FUNCTION public.user_owns_establishment(target_establishment_id uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = pg_catalog, public
+AS $function$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.establishments e
+    WHERE e.id = target_establishment_id
+      AND e.user_id = auth.uid()
+  );
+$function$;
+
+REVOKE ALL ON FUNCTION public.user_owns_establishment(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.user_owns_establishment(uuid) TO authenticated, service_role;
 REVOKE ALL ON FUNCTION public.is_tapmarrakech_admin() FROM PUBLIC, anon;
 REVOKE ALL ON FUNCTION public.user_has_establishment_access(uuid) FROM PUBLIC, anon;
 REVOKE ALL ON FUNCTION public.is_establishment_responsible(uuid) FROM PUBLIC, anon;
