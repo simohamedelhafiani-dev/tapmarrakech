@@ -1,5 +1,4 @@
-undefined
-
-revoke all on function public.get_dashboard_stats(uuid, integer) from public;
-revoke all on function public.get_dashboard_stats(uuid, integer) from anon;
-grant execute on function public.get_dashboard_stats(uuid, integer) to authenticated;
+-- Restrict dashboard stats RPC to authenticated users.
+REVOKE ALL ON FUNCTION public.get_dashboard_stats(uuid, integer) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.get_dashboard_stats(uuid, integer) FROM anon;
+GRANT EXECUTE ON FUNCTION public.get_dashboard_stats(uuid, integer) TO authenticated;
