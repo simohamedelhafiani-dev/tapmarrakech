@@ -1,6 +1,5 @@
--- Commercial audit: loyalty card design is an admin-only capability.
--- Responsible users may manage loyalty program parameters, but must never be able
--- to publish or modify the loyalty card visual design through the RPC.
+-- Restrict loyalty card design changes to administrators and the responsible user
+-- assigned to the establishment. Employees and public visitors are not authorized.
 create or replace function public.save_loyalty_card_builder_config(
   p_establishment_id uuid,
   p_design_config jsonb,
