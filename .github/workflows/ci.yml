@@ -58,7 +58,7 @@ jobs:
       - name: Start local Supabase stack
         # pgTAP uses PostgreSQL directly; skip UI, mail, analytics, functions,
         # realtime and pooler services to keep CI startup lean and deterministic.
-        run: supabase start --exclude studio,mail,analytics,functions,realtime,pooler
+        run: supabase start --exclude edge-runtime,gotrue,imgproxy,kong,logflare,mailpit,postgres-meta,postgrest,realtime,storage-api,studio,supavisor,vector
 
       # Supabase CLI pulls pg_prove from public ECR, which has intermittently
       # returned anonymous data-limit throttles. Preload the same public image
