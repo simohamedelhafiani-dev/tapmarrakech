@@ -161,11 +161,10 @@ Deno.serve(async (req: Request) => {
 
     if (!isCronCall) {
       const authorization = req.headers.get('Authorization');
-      if (!authorization) return json({ success: false, error: 'Session manquante' }, 401);
-      const bearerToken = authorization.replace(/^Bearer\s+/i, '');
-      if (!/^Bearer\s+\S+/i.test(authorization)) {
+      if (!/^Bearer\s+\S+/i.test(authorization ?? '')) {
         return json({ success: false, error: 'En-tête de session invalide. Reconnectez-vous à KELYANI puis relancez la synchronisation.' }, 401);
       }
+      const bearerToken = authorization!.replace(/^Bearer\s+/i, '');
       if (!bearerToken || bearerToken.length > 8192) {
         return json({ success: false, error: 'Jeton de session absent ou invalide. Reconnectez-vous à KELYANI.' }, 401);
       }
