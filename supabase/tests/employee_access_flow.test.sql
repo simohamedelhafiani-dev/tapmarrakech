@@ -1,6 +1,6 @@
 begin;
 
-select plan(6);
+select plan(11);
 
 create temporary table employee_access_fixture (
   employee_id uuid not null,
@@ -93,6 +93,35 @@ select is(
    join employee_login_result l on l.employee_id = s.employee_id),
   0,
   'logout invalidates the employee session'
+);
+
+-- These RPCs are called through the service-role employee-login Edge Function.
+-- Exposing the SECURITY DEFINER login RPC to authenticated clients bypasses the
+-- Edge Function's IP rate limit and can permit code-guessing against staff PINs.
+select ok(
+  not has_function_privilege('anon', 'public.login_employee_with_code_only(text)', 'EXECUTE'),
+  'anonymous clients cannot call the SECURITY DEFINER employee login RPC directly'
+);
+
+select ok(
+  not has_function_privilege('authenticated', 'public.login_employee_with_code_only(text)', 'EXECUTE'),
+  'authenticated clients cannot bypass employee login rate limiting through the RPC'
+);
+
+select ok(
+  not has_function_privilege('anon', 'public.get_active_employee_session_establishment(text)', 'EXECUTE'),
+  'anonymous clients cannot inspect employee session scope'
+);
+
+select ok(
+  not has_function_privilege('authenticated', 'public.get_active_employee_session_establishment(text)', 'EXECUTE'),
+  'authenticated clients cannot call the internal employee session resolver'
+);
+
+select ok(
+  has_function_privilege('service_role', 'public.login_employee_with_code_only(text)', 'EXECUTE')
+  and has_function_privilege('service_role', 'public.get_active_employee_session_establishment(text)', 'EXECUTE'),
+  'the trusted Edge Function service role retains the required employee RPC access'
 );
 
 select * from finish();
