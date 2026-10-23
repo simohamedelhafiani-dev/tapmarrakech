@@ -60,6 +60,14 @@ jobs:
         # realtime and pooler services to keep CI startup lean and deterministic.
         run: supabase start --exclude studio,mail,analytics,functions,realtime,pooler
 
+      # Supabase CLI pulls pg_prove from public ECR, which has intermittently
+      # returned anonymous data-limit throttles. Preload the same public image
+      # from GHCR (confirmed available in CI logs) and alias it to the expected tag.
+      - name: Preload pgTAP image from GHCR
+        run: |
+          docker pull ghcr.io/supabase/pg_prove:3.36
+          docker tag ghcr.io/supabase/pg_prove:3.36 public.ecr.aws/supabase/pg_prove:3.36
+
       - name: Run pgTAP database tests
         run: supabase test db
 
