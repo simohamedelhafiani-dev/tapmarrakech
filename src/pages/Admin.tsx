@@ -172,7 +172,7 @@ export default function Admin() {
     nextSection === 'overview' ? '/admin' : `/admin/${nextSection}`;
 
   const [section, setSection] = useState<AdminSection>(() => sectionFromPath(window.location.pathname));
-  const [aiWorkspaceTab, setAIWorkspaceTab] = useState<'home' | 'engine' | 'prompts' | 'google' | 'menus' | 'automation'>('home');
+  const [aiWorkspaceTab, setAIWorkspaceTab] = useState<'home' | 'engine' | 'prompts' | 'google' | 'menus'>('home');
   const [selectedMenuEstablishmentId, setSelectedMenuEstablishmentId] = useState('');
 
   useEffect(() => {
@@ -783,13 +783,6 @@ export default function Admin() {
                           {selectedMenuEstablishmentId && <MenuStudio key={selectedMenuEstablishmentId} establishmentId={selectedMenuEstablishmentId} />}
                         </div>
                       ) : <p className="text-sm text-white/50">Créez d’abord un établissement pour configurer son menu.</p>}
-                    </section>
-                  )}
-                  {aiWorkspaceTab === 'automation' && (
-                    <section className="space-y-4 rounded-3xl border border-[#242424] bg-[#111111] p-5 sm:p-7">
-                      <h3 className="font-display text-2xl text-[#E1C27A]">Gestion des automatisations</h3>
-                      <p className="text-sm leading-6 text-white/50">Les réglages de détection des avis, de réponse IA, de langue et de fréquence sont personnalisés par établissement dans l’espace Avis & Google Business.</p>
-                      <button type="button" onClick={() => setAIWorkspaceTab('google')} className="rounded-xl border border-[#C9A45C]/40 bg-[#C9A45C]/10 px-4 py-3 text-sm font-semibold text-[#E1C27A]">Ouvrir les réglages des avis et automatisations</button>
                     </section>
                   )}
                   {aiWorkspaceTab === 'google' && (
