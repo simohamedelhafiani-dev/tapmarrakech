@@ -191,7 +191,7 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
   const selectedSetting = replySettings.find((item) => item.establishment_id === selectedEstablishmentId);
   const selectedConnection = connections.find((item) => item.establishment_id === selectedEstablishmentId);
   const needsSpecificEstablishment = activeView === 'ai' || activeView === 'sync' || activeView === 'settings';
-  const activeTile: View = activeView === 'establishment' ? 'establishment' : activeView === 'settings' ? 'settings' : 'ai';
+  const activeTile: View = activeView === 'home' ? 'home' : activeView === 'establishment' ? 'establishment' : activeView === 'settings' ? 'settings' : 'ai';
 
   const metric = (label: string, value: string | number, accent = false) => (
     <div className="rounded-2xl border border-[#242424] bg-[#111111] p-4 sm:p-5">
