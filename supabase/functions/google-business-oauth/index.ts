@@ -80,7 +80,7 @@ Deno.serve(async req=>{
   }
   const auth=req.headers.get('Authorization');if(!auth)return json({success:false,error:'Session utilisateur manquante.'},401);
   const bearer=auth.replace(/^Bearer\s+/i,'');
-  const {data:{user}}=await db.auth.getUser(bearer);if(!user)return json({success:false,error:'Session invalide.'},401);
+  const {data:{user},error:userError}=await db.auth.getUser(bearer);if(userError||!user)return json({success:false,code:'INVALID_SESSION',error:'Supabase a refusé la session utilisateur. Reconnectez-vous à KELYANI puis relancez cette action.'},401);
   const {data:profile,error:profileError}=await db.from('profiles').select('role').eq('id',user.id).maybeSingle();
   if(profileError)throw profileError;
   if(profile?.role!=='admin')return json({success:false,error:'Connexion Google Business réservée à l’administrateur.'},403);
