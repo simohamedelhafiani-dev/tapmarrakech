@@ -1,5 +1,11 @@
 name: CI
 
+# Avoid booting multiple heavyweight local Supabase stacks for successive pushes
+# to the same pull request. The newest commit supersedes earlier validation runs.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [main]
