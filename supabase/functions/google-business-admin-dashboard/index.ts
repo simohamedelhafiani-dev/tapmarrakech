@@ -80,7 +80,7 @@ Deno.serve(async (req: Request) => {
       if (locationsResult.error) throw locationsResult.error;
 
       const locations = locationsResult.data ?? [];
-      let connection: any = connectionResult.data ?? null;
+      let connection: any = connectionResult.data ? { ...connectionResult.data, connection_source: 'legacy' } : null;
       if (!connection) {
         const accountId = locations.find((location: any) => location.google_business_account_id)?.google_business_account_id;
         if (accountId) {
@@ -88,7 +88,7 @@ Deno.serve(async (req: Request) => {
             .select('id,status,last_sync_at,last_error,google_account_id')
             .eq('id', accountId).maybeSingle();
           if (error) throw error;
-          connection = data;
+          connection = data ? { ...data, connection_source: 'account' } : null;
         }
       }
 
