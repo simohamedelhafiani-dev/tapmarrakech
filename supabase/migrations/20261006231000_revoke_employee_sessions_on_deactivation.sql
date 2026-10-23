@@ -14,7 +14,7 @@ begin
     on st.user_id = es.employee_id
    and st.establishment_id = es.establishment_id
    and st.active = true
-   and st.role = 'employee'
+   and st.role = 'STAFF'
   join public.profiles p
     on p.id = es.employee_id
    and p.role = 'employee'

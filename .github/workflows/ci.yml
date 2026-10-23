@@ -1,5 +1,11 @@
 name: CI
 
+# Avoid booting multiple heavyweight local Supabase stacks for successive pushes
+# to the same pull request. The newest commit supersedes earlier validation runs.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [main]
@@ -31,3 +37,91 @@ jobs:
 
       - name: Build
         run: npm run build
+
+
+  database-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: 2.122.0
+
+      - name: Initialize local Supabase config
+        run: supabase init --force
+
+      # Prime the local Docker cache from GHCR. Supabase CLI pulls these same
+      # images from public ECR, which has intermittently hit anonymous data limits.
+      - name: Preload Supabase images from GHCR
+        run: |
+          set -euo pipefail
+          images=(
+            "postgres:17.11.0.006"
+            "realtime:v2.147.1"
+            "storage-api:v1.84.19"
+            "gotrue:v2.197.0"
+            "kong:2.8.1"
+            "mailpit:v1.31.3"
+            "vector:0.58.0-alpine"
+            "postgrest:v16.5"
+            "logflare:1.50.15"
+            "postgres-meta:v0.100.0"
+            "edge-runtime:v1.77.8"
+          )
+          for image in "${images[@]}"; do
+            docker pull "ghcr.io/supabase/${image}"
+            docker tag "ghcr.io/supabase/${image}" "public.ecr.aws/supabase/${image}"
+          done
+
+      - name: Start local Supabase stack
+        # Tests only need the local Postgres schema. Keep the standard stack
+        # config but exclude service containers not required by pgTAP.
+        run: timeout 300s supabase start --exclude edge-runtime,gotrue,imgproxy,kong,logflare,mailpit,postgres-meta,postgrest,realtime,storage-api,studio,supavisor,vector
+
+      # Supabase CLI pulls pg_prove from public ECR, which has intermittently
+      # returned anonymous data-limit throttles. Preload the same public image
+      # from GHCR (confirmed available in CI logs) and alias it to the expected tag.
+      - name: Preload pgTAP image from GHCR
+        run: |
+          docker pull ghcr.io/supabase/pg_prove:3.36
+          docker tag ghcr.io/supabase/pg_prove:3.36 public.ecr.aws/supabase/pg_prove:3.36
+
+      - name: Run pgTAP database tests
+        run: supabase test db
+
+      - name: Stop local Supabase stack
+        if: always()
+        run: supabase stop --no-backup
+
+  edge-function-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.1.4
+
+      - name: Type-check Supabase Edge Functions
+        run: |
+          deno check --no-lock \
+            supabase/functions/analyze-reviews/index.ts \
+            supabase/functions/design-menu/index.ts \
+            supabase/functions/generate-brand-palette/index.ts \
+            supabase/functions/generate-promotion-image/index.ts \
+            supabase/functions/google-business-admin-dashboard/index.ts \
+            supabase/functions/google-business-oauth/index.ts \
+            supabase/functions/google-business-reply/index.ts \
+            supabase/functions/google-business-sync-access-test/index.ts \
+            supabase/functions/google-business-sync/index.ts \
+            supabase/functions/google-business-webhook/index.ts \
+            supabase/functions/import-menu/index.ts

@@ -211,7 +211,7 @@ BEGIN
 
   IF p_reward_type = 'DISCOUNT'
      AND (p_discount_percent IS NULL OR p_discount_percent <= 0 OR p_discount_percent > 20) THEN
-    RAISE EXCEPTION 'La réduction doit être comprise entre 0 et 20%';
+    RAISE EXCEPTION 'La réduction doit être comprise entre 0 et 20%%';
   END IF;
 
   INSERT INTO public.loyalty_rewards (

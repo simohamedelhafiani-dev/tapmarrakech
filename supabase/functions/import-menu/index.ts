@@ -31,6 +31,29 @@ function extractOutputText(payload: any): string {
   return chunks.join('').trim();
 }
 
+function parseMenuJson(outputText: string): any {
+  // Avoid embedding backticks in regex literals; OpenAI may wrap valid JSON in a
+  // Markdown fence even when JSON schema mode is requested.
+  const fence = String.fromCharCode(96).repeat(3);
+  const cleaned = outputText.trim()
+    .replace(new RegExp('^' + fence + '(?:json)?\\s*', 'i'), '')
+    .replace(new RegExp('\\s*' + fence + '$', 'i'), '')
+    .trim();
+
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    const firstBrace = cleaned.indexOf('{');
+    const lastBrace = cleaned.lastIndexOf('}');
+
+    if (firstBrace >= 0 && lastBrace > firstBrace) {
+      return JSON.parse(cleaned.slice(firstBrace, lastBrace + 1));
+    }
+
+    throw new Error('Le moteur IA n’a pas retourné un JSON valide.');
+  }
+}
+
 const menuSchema = {
   type: 'object',
   additionalProperties: false,
@@ -199,7 +222,9 @@ Deno.serve(async (request) => {
             },
           },
           max_output_tokens: Math.min(Math.max(Number(aiSettings.max_output_tokens) || 12000, 2000), 30000),
-          temperature: Math.min(Math.max(Number(aiSettings.temperature) || 0.1, 0), 1),
+          temperature: Number.isFinite(Number(aiSettings.temperature)) && Number(aiSettings.temperature) >= 0 && Number(aiSettings.temperature) <= 2
+            ? Number(aiSettings.temperature)
+            : 0.2,
         }),
       });
 

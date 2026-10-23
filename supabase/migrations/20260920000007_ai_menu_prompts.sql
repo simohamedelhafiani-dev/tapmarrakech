@@ -84,5 +84,5 @@ Ne force jamais une esthétique marocaine, luxueuse, sombre ou autre si les donn
 L’objectif est de produire une expérience comparable à un menu digital éditorial haut de gamme.$$,
   true
 where not exists (
-  select 1 from public.ai_business_types where name = 'Menu IA — Design Premium';
+  select 1 from public.ai_business_types where name = 'Menu IA — Design Premium'
 );
