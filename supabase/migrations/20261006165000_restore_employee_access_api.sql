@@ -162,7 +162,8 @@ begin
 
   update public.employee_access_codes
   set last_used_at = now(), updated_at = now()
-  where user_id = v_employee_id and establishment_id = v_establishment_id;
+  where employee_access_codes.user_id = v_employee_id
+    and employee_access_codes.establishment_id = v_establishment_id;
 
   return query select v_raw_token, v_employee_id, v_employee_name,
                       v_establishment_id, v_establishment_name, v_expires_at;
