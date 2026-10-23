@@ -163,15 +163,26 @@ Deno.serve(async (req: Request) => {
       const authorization = req.headers.get('Authorization');
       if (!authorization) return json({ success: false, error: 'Session manquante' }, 401);
       const bearerToken = authorization.replace(/^Bearer\s+/i, '');
+      if (!/^Bearer\s+\S+/i.test(authorization)) {
+        return json({ success: false, error: 'En-tête de session invalide. Reconnectez-vous à KELYANI puis relancez la synchronisation.' }, 401);
+      }
+      if (!bearerToken || bearerToken.length > 8192) {
+        return json({ success: false, error: 'Jeton de session absent ou invalide. Reconnectez-vous à KELYANI.' }, 401);
+      }
       const { data: { user }, error: userError } = await db.auth.getUser(bearerToken);
       if (userError || !user) {
-        // Diagnostic only: never log the token or other session credentials.
+        // Log safe diagnostic metadata only. Never log session credentials or request headers.
         console.warn('[SYNC AUTH] Session validation failed', {
-          error: userError?.message ?? 'Utilisateur absent',
+          errorCode: typeof userError?.code === 'string' ? userError.code : null,
           status: userError?.status ?? null,
-          tokenPresent: bearerToken.length > 0,
+          tokenPresent: true,
+          tokenLength: bearerToken.length,
         });
-        return json({ success: false, error: 'Session invalide' }, 401);
+        return json({
+          success: false,
+          code: 'INVALID_SESSION',
+          error: 'Supabase a refusé la session utilisateur. Reconnectez-vous à KELYANI puis relancez la synchronisation.',
+        }, 401);
       }
       if (!(await isAdmin(user.id))) return json({ success: false, error: 'Accès réservé à l’administrateur' }, 403);
     }
@@ -373,14 +384,31 @@ Deno.serve(async (req: Request) => {
 
     return json({ success: true, locations, reviews });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Erreur serveur';
-    console.error('google-business-sync-access-test:', error);
+    const rawMessage = error instanceof Error ? error.message : 'Erreur serveur';
+    // Preserve actionable provider/database details without echoing credentials.
+    const message = rawMessage
+      .replace(/Bearer\s+[A-Za-z0-9._~+\/-]+=*/gi, 'Bearer [masqué]')
+      .replace(/\b(?:access|refresh)?_?token\s*[:=]\s*[^\s,;]+/gi, 'token=[masqué]')
+      .replace(/\bsk-[A-Za-z0-9_-]{12,}\b/g, '[secret masqué]')
+      .replace(/[\r\n\t]+/g, ' ')
+      .slice(0, 500);
+    console.error('google-business-sync-access-test failed', {
+      message,
+      status: typeof (error as { status?: unknown })?.status === 'number'
+        ? (error as { status: number }).status
+        : null,
+      connectionMode: activeConnectionTable === 'google_business_accounts' ? 'account' : 'legacy',
+      connectionPresent: activeConnectionId !== null,
+    });
     if (activeConnectionId) {
       const { error: statusError } = await db.from(activeConnectionTable).update({
         status: 'error', last_error: message, updated_at: new Date().toISOString(),
       }).eq('id', activeConnectionId);
-      if (statusError) console.error('Impossible de sauvegarder last_error Google Business:', statusError);
+      if (statusError) console.error('Unable to persist Google Business sync error', {
+        code: statusError.code ?? null,
+        message: statusError.message,
+      });
     }
-    return json({ success: false, error: message }, 500);
+    return json({ success: false, code: 'GOOGLE_BUSINESS_SYNC_FAILED', error: message }, 500);
   }
 });
