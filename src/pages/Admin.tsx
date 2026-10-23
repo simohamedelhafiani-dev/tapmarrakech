@@ -762,7 +762,6 @@ export default function Admin() {
                     <span className="mt-2 block text-sm leading-6 text-white/50">Un seul espace pour connecter Google, gérer les avis, configurer les réponses IA, les langues, les liens et la fréquence de synchronisation.</span>
                     <span className="mt-5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#C9A45C]">Ouvrir l’espace centralisé →</span>
                   </button>
-                  </button>
                 </div>
               ) : (
                 <div className="space-y-5">
