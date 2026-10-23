@@ -59,9 +59,9 @@ Deno.serve(async req=>{
    } else {
     // One Google OAuth identity may manage multiple Business Profile accounts.
     // Keep existing accounts active and create/update a row for each accessible account.
-    if(!refresh){
+    if(!refresh && googleEmail){
       const {data:e,error:refreshError}=await db.from('google_business_accounts')
-        .select('refresh_token').eq('connected_by',row.user_id)
+        .select('refresh_token').eq('connected_by',row.user_id).eq('email',googleEmail)
         .order('updated_at',{ascending:false}).limit(1).maybeSingle();
       if(refreshError)throw refreshError;
       refresh=e?.refresh_token;
