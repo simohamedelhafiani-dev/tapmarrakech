@@ -15,6 +15,8 @@ import { supabase } from '@/lib/supabase';
 type Props = { establishmentId: string; mode?: 'connection' | 'ai' | 'sync' | 'links' };
 
 type Connection = {
+  id: string;
+  connection_source?: 'legacy' | 'account';
   status: 'active' | 'revoked' | 'error';
   last_sync_at: string | null;
   last_error: string | null;
@@ -201,7 +203,9 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
           apikey: supabaseAnonKey,
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ establishment_id: establishmentId }),
+        body: JSON.stringify(connection?.connection_source === 'account' && connection.id
+          ? { google_business_account_id: connection.id }
+          : { establishment_id: establishmentId }),
       });
       const rawBody = await response.text();
       let data: { success?: boolean; error?: string; message?: string; locations?: number; reviews?: number } | null = null;
