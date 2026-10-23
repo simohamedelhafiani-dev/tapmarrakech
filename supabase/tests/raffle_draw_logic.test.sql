@@ -171,9 +171,9 @@ select is(
   2,
   'all eligible clients win when participants are fewer than planned winners'
 );
-select like(
+select matches(
   (select r.last_draw_note from public.loyalty_raffles r join raffle_draw_test_fixture f on f.raffle_id = r.id where f.scenario = 'few'),
-  '%tous les participants sont gagnants%',
+  '.*tous les participants sont gagnants.*',
   'small eligible pool is explicitly explained to the responsible'
 );
 select is(
