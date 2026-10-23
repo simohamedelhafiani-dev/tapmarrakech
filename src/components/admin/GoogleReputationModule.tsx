@@ -203,17 +203,26 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
       }
 
       const baseUrl = supabaseUrl.endsWith('/') ? supabaseUrl.slice(0, -1) : supabaseUrl;
-      const response = await fetch(`${baseUrl}/functions/v1/google-business-sync-access-test`, {
+      const makeSyncRequest = (token: string) => fetch(`${baseUrl}/functions/v1/google-business-sync-access-test`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           apikey: supabaseAnonKey,
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(connection?.connection_source === 'account' && connection.id
           ? { google_business_account_id: connection.id }
           : { establishment_id: establishmentId }),
       });
+      let response = await makeSyncRequest(accessToken);
+      if (response.status === 401) {
+        const refreshed = await supabase.auth.refreshSession();
+        if (refreshed.error || !refreshed.data.session?.access_token) {
+          throw new Error('Supabase a refusé votre session. Reconnectez-vous à KELYANI puis relancez la synchronisation.');
+        }
+        accessToken = refreshed.data.session.access_token;
+        response = await makeSyncRequest(accessToken);
+      }
       const rawBody = await response.text();
       let data: { success?: boolean; error?: string; message?: string; locations?: number; reviews?: number } | null = null;
       try {
