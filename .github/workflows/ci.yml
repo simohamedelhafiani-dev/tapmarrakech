@@ -66,3 +66,31 @@ jobs:
       - name: Stop local Supabase stack
         if: always()
         run: supabase stop --no-backup
+
+  edge-function-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.1.4
+
+      - name: Type-check Supabase Edge Functions
+        run: |
+          deno check --no-lock \
+            supabase/functions/analyze-reviews/index.ts \
+            supabase/functions/design-menu/index.ts \
+            supabase/functions/generate-brand-palette/index.ts \
+            supabase/functions/generate-promotion-image/index.ts \
+            supabase/functions/google-business-admin-dashboard/index.ts \
+            supabase/functions/google-business-oauth/index.ts \
+            supabase/functions/google-business-reply/index.ts \
+            supabase/functions/google-business-sync-access-test/index.ts \
+            supabase/functions/google-business-sync/index.ts \
+            supabase/functions/google-business-webhook/index.ts \
+            supabase/functions/import-menu/index.ts
