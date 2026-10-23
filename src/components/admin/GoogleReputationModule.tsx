@@ -228,9 +228,9 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
       try {
         data = JSON.parse(rawBody);
       } catch {
-        const status = `HTTP ${response.status}`;
-        const excerpt = rawBody.replace(/\n/g, ' ').replace(/\r/g, ' ').slice(0, 240);
-        throw new Error(`La synchronisation a reçu une réponse non JSON (${status}). Vérifie le routage/protection de la fonction. Réponse : ${excerpt || '(vide)'}`);
+        // Do not display raw gateway/HTML bodies: they are not actionable and may
+        // contain infrastructure details. Keep only the HTTP status in the UI.
+        throw new Error(`La synchronisation a reçu une réponse non JSON (HTTP ${response.status}). Vérifie le routage et la configuration de la fonction.`);
       }
       if (!response.ok) {
         throw new Error(data?.error || data?.message || `Erreur HTTP ${response.status}`);
