@@ -8,9 +8,9 @@ select ok(
     from pg_policies
     where schemaname = 'public'
       and tablename = 'google_business_connections'
-      and policyname = 'Google connections visible to admins and responsibles'
+      and cmd = 'SELECT'
   ),
-  'responsible users have no SELECT policy on rows containing Google OAuth tokens'
+  'google_business_connections has no separate SELECT policy: OAuth token rows are admin-only'
 );
 
 select ok(
