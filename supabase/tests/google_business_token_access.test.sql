@@ -1,6 +1,6 @@
 begin;
 
-select plan(2);
+select plan(4);
 
 select ok(
   not exists (
@@ -25,6 +25,19 @@ select ok(
       and with_check ilike '%is_tapmarrakech_admin%'
   ),
   'Google Business connection management remains restricted by the admin-only policy'
+);
+
+
+select ok(
+  not has_table_privilege('anon', 'public.google_business_accounts', 'SELECT')
+  and not has_table_privilege('authenticated', 'public.google_business_accounts', 'SELECT'),
+  'Google OAuth account tokens are not directly readable through the Data API'
+);
+
+select ok(
+  not has_table_privilege('anon', 'public.google_business_accounts', 'UPDATE')
+  and not has_table_privilege('authenticated', 'public.google_business_accounts', 'UPDATE'),
+  'Google OAuth account tokens cannot be changed directly by browser roles'
 );
 
 select * from finish();
