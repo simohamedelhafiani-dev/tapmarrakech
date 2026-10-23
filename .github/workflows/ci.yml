@@ -56,7 +56,9 @@ jobs:
         run: supabase init --force
 
       - name: Start local Supabase stack
-        run: supabase start
+        # pgTAP uses PostgreSQL directly; skip UI, mail, analytics, functions,
+        # realtime and pooler services to keep CI startup lean and deterministic.
+        run: supabase start --exclude studio,mail,analytics,functions,realtime,pooler
 
       - name: Run pgTAP database tests
         run: supabase test db
