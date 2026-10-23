@@ -43,6 +43,8 @@ function SubscriptionFeatureRoute({
   const { user } = useAuth();
   const [establishmentId, setEstablishmentId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [retryToken, setRetryToken] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -51,49 +53,59 @@ function SubscriptionFeatureRoute({
       if (!user?.id) {
         if (active) {
           setEstablishmentId(null);
+          setLoadError(false);
           setLoading(false);
         }
         return;
       }
 
       setLoading(true);
+      setLoadError(false);
 
-      const { data, error } = await supabase.rpc('get_my_establishments');
+      try {
+        const { data, error } = await supabase.rpc('get_my_establishments');
+        if (error) throw error;
 
-      if (error) {
+        const establishments = (data ?? []) as EstablishmentRow[];
+        const storageKey = `tapmarrakech:selected-establishment:${user.id}`;
+        let storedId: string | null = null;
+
+        // Storage can be disabled by browser privacy settings. Fall back to the
+        // first accessible establishment rather than blocking the route.
+        try {
+          storedId = window.localStorage.getItem(storageKey);
+        } catch {
+          storedId = null;
+        }
+
+        const selectedId = establishments.some(
+          (establishment) => establishment.id === storedId
+        )
+          ? storedId
+          : establishments[0]?.id ?? null;
+
+        if (selectedId && selectedId !== storedId) {
+          try {
+            window.localStorage.setItem(storageKey, selectedId);
+          } catch {
+            // Selection still works for this page view when storage is blocked.
+          }
+        }
+
+        if (active) setEstablishmentId(selectedId);
+      } catch (error) {
         console.error(
           'Erreur chargement établissement pour le contrôle abonnement:',
           error
         );
-
         if (active) {
           setEstablishmentId(null);
-          setLoading(false);
+          setLoadError(true);
         }
-
-        return;
-      }
-
-      const establishments = (data ?? []) as EstablishmentRow[];
-      const storageKey = `tapmarrakech:selected-establishment:${user.id}`;
-      const storedId = window.localStorage.getItem(storageKey);
-
-      const selectedId = establishments.some(
-        (establishment) => establishment.id === storedId
-      )
-        ? storedId
-        : establishments[0]?.id ?? null;
-
-      if (selectedId && selectedId !== storedId) {
-        window.localStorage.setItem(storageKey, selectedId);
-      }
-
-      if (active) {
-        setEstablishmentId(selectedId);
-        setLoading(false);
+      } finally {
+        if (active) setLoading(false);
       }
     };
-
     loadSelectedEstablishment();
 
     const handleEstablishmentChanged = (event: Event) => {
@@ -117,12 +129,35 @@ function SubscriptionFeatureRoute({
         handleEstablishmentChanged
       );
     };
-  }, [user?.id]);
+  }, [user?.id, retryToken]);
 
   if (loading) {
     return (
       <div className="grid min-h-[400px] place-items-center">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div
+        className="rounded-2xl border border-red-200 bg-white px-6 py-12 text-center"
+        role="alert"
+      >
+        <h2 className="font-display text-xl text-forest">
+          Impossible de charger les établissements
+        </h2>
+        <p className="mx-auto mt-2 max-w-md text-sm text-ink/50">
+          Vérifie ta connexion puis réessaie. Aucune modification n’a été effectuée.
+        </p>
+        <button
+          type="button"
+          onClick={() => setRetryToken((value) => value + 1)}
+          className="mt-4 rounded-xl bg-[#0D0D0D] px-4 py-2.5 text-xs font-semibold text-white"
+        >
+          Réessayer
+        </button>
       </div>
     );
   }

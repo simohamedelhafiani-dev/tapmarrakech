@@ -50,10 +50,15 @@ jobs:
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 2.122.0
 
       - name: Initialize local Supabase config
         run: supabase init --force
+
+      - name: Preload PostgreSQL image from GHCR
+        run: |
+          docker pull ghcr.io/supabase/postgres:17.11.0.006
+          docker tag ghcr.io/supabase/postgres:17.11.0.006 public.ecr.aws/supabase/postgres:17.11.0.006
 
       - name: Start local Supabase stack
         # pgTAP uses PostgreSQL directly; skip UI, mail, analytics, functions,
