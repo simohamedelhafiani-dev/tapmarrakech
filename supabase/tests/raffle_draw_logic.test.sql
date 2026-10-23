@@ -32,9 +32,9 @@ select is(
   2,
   'fewer participants than winners means every participant wins'
 );
-select like(
+select matches(
   (select note from public.resolve_loyalty_raffle_draw_pool(2, 2, 5)),
-  '%tous les participants sont gagnants%',
+  '.*tous les participants sont gagnants.*',
   'small pool outcome is clearly recorded'
 );
 
