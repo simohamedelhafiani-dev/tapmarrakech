@@ -80,16 +80,20 @@ Deno.serve(async (req: Request) => {
       if (locationsResult.error) throw locationsResult.error;
 
       const locations = locationsResult.data ?? [];
-      let connection: any = connectionResult.data ? { ...connectionResult.data, connection_source: 'legacy' } : null;
-      if (!connection) {
-        const accountId = locations.find((location: any) => location.google_business_account_id)?.google_business_account_id;
-        if (accountId) {
-          const { data, error } = await db.from('google_business_accounts')
-            .select('id,status,last_sync_at,last_error,google_account_id')
-            .eq('id', accountId).maybeSingle();
-          if (error) throw error;
-          connection = data ? { ...data, connection_source: 'account' } : null;
-        }
+      let connection: any = null;
+      // Prefer the account-level connection explicitly linked to the mapped Google location.
+      // A legacy establishment connection may still exist during migration and must not
+      // override the account that actually owns the selected location.
+      const accountId = locations.find((location: any) => location.google_business_account_id)?.google_business_account_id;
+      if (accountId) {
+        const { data, error } = await db.from('google_business_accounts')
+          .select('id,status,last_sync_at,last_error,google_account_id')
+          .eq('id', accountId).maybeSingle();
+        if (error) throw error;
+        connection = data ? { ...data, connection_source: 'account' } : null;
+      }
+      if (!connection && connectionResult.data) {
+        connection = { ...connectionResult.data, connection_source: 'legacy' };
       }
 
       const locationIds = locations.map((location: any) => location.id);
