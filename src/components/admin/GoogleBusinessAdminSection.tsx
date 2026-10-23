@@ -43,6 +43,25 @@ type View = 'home' | 'reviews' | 'appReviews' | 'establishment' | 'ai' | 'sync' 
 
 type EdgeFunctionFailure = Error & { context?: Response };
 
+async function invokeGoogleBusinessSync(accountId: string) {
+  let result = await supabase.functions.invoke('google-business-sync-access-test', {
+    body: { google_business_account_id: accountId },
+  });
+  if (result.error) {
+    const context = (result.error as EdgeFunctionFailure).context;
+    if (context?.status === 401) {
+      const refreshed = await supabase.auth.refreshSession();
+      if (!refreshed.error && refreshed.data.session?.access_token) {
+        // The SDK uses the refreshed stored session for the one safe retry.
+        result = await supabase.functions.invoke('google-business-sync-access-test', {
+          body: { google_business_account_id: accountId },
+        });
+      }
+    }
+  }
+  return result;
+}
+
 function sanitizeGoogleBusinessError(message: string): string {
   return message
     .replace(/Bearer\s+[A-Za-z0-9._~+-]+=*/gi, 'Bearer [masqué]')
@@ -377,7 +396,7 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
                   <button type="button" onClick={async()=>{setAccountLoading(true);setError('');try{const {data,error}=await supabase.functions.invoke('google-business-oauth',{body:{action:'start_account'}});if(error)throw error;if(!data?.success||!data?.authorization_url)throw new Error(data?.error||'Connexion du compte Google indisponible.');const popup=window.open(data.authorization_url,'kelyani-google-oauth','popup,width=620,height=760');if(!popup)window.location.assign(data.authorization_url);}catch(e){setError(e instanceof Error?e.message:'Connexion Google impossible.');}finally{setAccountLoading(false);}}} disabled={accountLoading} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#C9A45C] px-4 py-3 text-xs font-semibold text-[#111111] disabled:opacity-50"><Store size={15}/>{accountLoading?'Connexion…':googleAccounts.length?'Changer de compte Google':'Connecter un compte Google'}</button>
                 </div>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                  {googleAccounts.map(account=><article key={account.id} className="rounded-xl border border-[#29251b] bg-black/30 p-4"><div className="flex items-start justify-between gap-2"><div><p className="text-sm font-semibold text-white">{account.email||account.google_account_id||'Compte Google Business'}</p><p className="mt-1 text-[11px] text-white/40">Compte {account.google_account_id||'en attente de synchronisation'}</p></div><span className={`rounded-full px-2 py-1 text-[10px] ${account.status==='active'?'bg-emerald-400/10 text-emerald-300':'bg-amber-400/10 text-amber-200'}`}>{account.status==='active'?'Connecté':account.status}</span></div>{account.last_error&&<p className="mt-2 text-xs text-red-300">{sanitizeGoogleBusinessError(account.last_error)}</p>}<p className="mt-3 text-[10px] text-white/35">Dernière synchronisation : {account.last_sync_at?new Date(account.last_sync_at).toLocaleString('fr-FR'):'Jamais'}</p><button type="button" onClick={async()=>{setAccountLoading(true);setError('');setReplyMessage('');try{const {data,error}=await supabase.functions.invoke('google-business-sync-access-test',{body:{google_business_account_id:account.id}});if(error)throw new Error(await edgeFunctionErrorMessage(error,'Synchronisation Google Business impossible.'));if(!data?.success)throw new Error(sanitizeGoogleBusinessError(typeof data?.error==='string'?data.error:'Synchronisation Google Business impossible.'));setReplyMessage('Synchronisation terminée : '+(data.locations??0)+' fiche(s) Google et '+(data.reviews??0)+' avis.');await load();}catch(e){setError(e instanceof Error?sanitizeGoogleBusinessError(e.message):'Synchronisation Google Business impossible.');}finally{setAccountLoading(false);}}} disabled={accountLoading} className="mt-3 rounded-lg border border-[#C9A45C]/30 px-3 py-2 text-xs font-semibold text-[#C9A45C] disabled:opacity-50"><RefreshCw size={12} className="mr-1 inline"/>{accountLoading?'Synchronisation…':'Synchroniser les fiches'}</button></article>)}
+                  {googleAccounts.map(account=><article key={account.id} className="rounded-xl border border-[#29251b] bg-black/30 p-4"><div className="flex items-start justify-between gap-2"><div><p className="text-sm font-semibold text-white">{account.email||account.google_account_id||'Compte Google Business'}</p><p className="mt-1 text-[11px] text-white/40">Compte {account.google_account_id||'en attente de synchronisation'}</p></div><span className={`rounded-full px-2 py-1 text-[10px] ${account.status==='active'?'bg-emerald-400/10 text-emerald-300':'bg-amber-400/10 text-amber-200'}`}>{account.status==='active'?'Connecté':account.status}</span></div>{account.last_error&&<p className="mt-2 text-xs text-red-300">{sanitizeGoogleBusinessError(account.last_error)}</p>}<p className="mt-3 text-[10px] text-white/35">Dernière synchronisation : {account.last_sync_at?new Date(account.last_sync_at).toLocaleString('fr-FR'):'Jamais'}</p><button type="button" onClick={async()=>{setAccountLoading(true);setError('');setReplyMessage('');try{const {data,error}=await invokeGoogleBusinessSync(account.id);if(error)throw new Error(await edgeFunctionErrorMessage(error,'Synchronisation Google Business impossible.'));if(!data?.success)throw new Error(sanitizeGoogleBusinessError(typeof data?.error==='string'?data.error:'Synchronisation Google Business impossible.'));setReplyMessage('Synchronisation terminée : '+(data.locations??0)+' fiche(s) Google et '+(data.reviews??0)+' avis.');await load();}catch(e){setError(e instanceof Error?sanitizeGoogleBusinessError(e.message):'Synchronisation Google Business impossible.');}finally{setAccountLoading(false);}}} disabled={accountLoading} className="mt-3 rounded-lg border border-[#C9A45C]/30 px-3 py-2 text-xs font-semibold text-[#C9A45C] disabled:opacity-50"><RefreshCw size={12} className="mr-1 inline"/>{accountLoading?'Synchronisation…':'Synchroniser les fiches'}</button></article>)}
                   {!googleAccounts.length&&<p className="rounded-xl border border-dashed border-[#29251b] p-4 text-xs text-white/40 sm:col-span-2 xl:col-span-3">Aucun compte Google centralisé. La connexion par établissement existante reste disponible pendant la transition.</p>}
                 </div>
               </section>
