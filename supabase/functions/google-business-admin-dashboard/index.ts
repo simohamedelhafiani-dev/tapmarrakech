@@ -17,7 +17,7 @@ async function requireAdmin(req: Request) {
   if (!authorization) throw Object.assign(new Error('Session manquante'), { status: 401 });
   const token = authorization.replace(/^Bearer\s+/i, '');
   const { data: { user }, error: userError } = await db.auth.getUser(token);
-  if (userError || !user) throw Object.assign(new Error('Session invalide'), { status: 401 });
+  if (userError || !user) throw Object.assign(new Error('Supabase a refusé la session utilisateur. Reconnectez-vous à KELYANI puis relancez cette action.'), { status: 401, code: 'INVALID_SESSION' });
   const { data: profile, error } = await db.from('profiles').select('role').eq('id', user.id).maybeSingle();
   if (error) throw error;
   if (profile?.role !== 'admin') throw Object.assign(new Error('Accès réservé à l’administrateur'), { status: 403 });
