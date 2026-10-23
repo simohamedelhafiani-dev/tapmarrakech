@@ -42,6 +42,15 @@ DECLARE
     JOIN public.google_business_connections c
       ON c.establishment_id = s.establishment_id
     WHERE c.status = 'active'
+      -- Prefer the central OAuth connection when it represents the same Google account.
+      -- This prevents legacy rows and the account row from racing to update the same locations.
+      AND NOT EXISTS (
+        SELECT 1
+        FROM public.google_business_accounts a
+        WHERE a.status = 'active'
+          AND a.google_account_id IS NOT NULL
+          AND a.google_account_id = c.google_account_id
+      )
       AND (
         c.last_sync_at IS NULL
         OR c.last_sync_at <= now() - make_interval(mins => coalesce(s.sync_interval_minutes, 10))
