@@ -17,7 +17,7 @@ select ok(
   'points RPC validates its scanner token against the stored scanner link'
 );
 select ok(
-  position('c.establishment_id=v_est' in regexp_replace(
+  position('c.establishment_id=v_establishment_id' in regexp_replace(
     lower(pg_get_functiondef('public.add_loyalty_points_by_scanner(uuid,uuid,numeric,text,text)'::regprocedure)),
     '\s+', '', 'g'
   )) > 0,
