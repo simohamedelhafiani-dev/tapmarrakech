@@ -13,6 +13,10 @@ WHERE sync_interval_minutes IS NULL
    OR sync_interval_minutes NOT IN (5, 10, 15, 30, 60);
 
 ALTER TABLE public.google_business_settings
+  ALTER COLUMN sync_interval_minutes SET DEFAULT 10,
+  ALTER COLUMN sync_interval_minutes SET NOT NULL;
+
+ALTER TABLE public.google_business_settings
   DROP CONSTRAINT IF EXISTS google_business_settings_sync_interval_minutes_check;
 
 ALTER TABLE public.google_business_settings
