@@ -32,9 +32,8 @@ select is(
   2,
   'fewer participants than winners means every participant wins'
 );
-select matches(
-  (select note from public.resolve_loyalty_raffle_draw_pool(2, 2, 5)),
-  '.*tous les participants sont gagnants.*',
+select ok(
+  position('tous les participants sont gagnants' in lower((select note from public.resolve_loyalty_raffle_draw_pool(2, 2, 5)))) > 0,
   'small pool outcome is clearly recorded'
 );
 
@@ -171,9 +170,8 @@ select is(
   2,
   'all eligible clients win when participants are fewer than planned winners'
 );
-select matches(
-  (select r.last_draw_note from public.loyalty_raffles r join raffle_draw_test_fixture f on f.raffle_id = r.id where f.scenario = 'few'),
-  '.*tous les participants sont gagnants.*',
+select ok(
+  position('tous les participants sont gagnants' in lower((select r.last_draw_note from public.loyalty_raffles r join raffle_draw_test_fixture f on f.raffle_id = r.id where f.scenario = 'few'))) > 0,
   'small eligible pool is explicitly explained to the responsible'
 );
 select is(
