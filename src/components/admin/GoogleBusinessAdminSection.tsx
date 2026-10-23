@@ -45,7 +45,7 @@ type EdgeFunctionFailure = Error & { context?: Response };
 
 function sanitizeGoogleBusinessError(message: string): string {
   return message
-    .replace(/Bearer\s+[A-Za-z0-9._~+\/-]+=*/gi, 'Bearer [masqué]')
+    .replace(/Bearer\s+[A-Za-z0-9._~+-]+=*/gi, 'Bearer [masqué]')
     .replace(/\b(?:access|refresh)?_?token\s*[:=]\s*[^\s,;]+/gi, 'token=[masqué]')
     .replace(/\bsk-[A-Za-z0-9_-]{12,}\b/g, '[secret masqué]')
     .replace(/[\r\n\t]+/g, ' ')
