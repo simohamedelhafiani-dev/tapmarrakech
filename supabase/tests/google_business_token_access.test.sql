@@ -21,6 +21,8 @@ select ok(
       and tablename = 'google_business_connections'
       and policyname = 'Google connections managed by admins'
       and cmd = 'ALL'
+      and qual ilike '%is_tapmarrakech_admin%'
+      and with_check ilike '%is_tapmarrakech_admin%'
   ),
   'Google Business connection management remains restricted by the admin-only policy'
 );
