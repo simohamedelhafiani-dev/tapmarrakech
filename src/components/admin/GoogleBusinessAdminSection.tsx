@@ -137,15 +137,15 @@ export default function GoogleBusinessAdminSection({ establishments, legacyRevie
     setError('');
     try {
       const { data: accountData, error: accountError } = await supabase.functions.invoke('google-business-oauth', { body: { action: 'list_accounts' } });
-      if (accountError) throw accountError;
-      if (!accountData?.success) throw new Error(accountData?.error || 'Impossible de charger le statut du compte Google.');
+      if (accountError) throw new Error(await edgeFunctionErrorMessage(accountError, 'Impossible de charger le statut du compte Google.'));
+      if (!accountData?.success) throw new Error(sanitizeGoogleBusinessError(typeof accountData?.error === 'string' ? accountData.error : 'Impossible de charger le statut du compte Google.'));
       setGoogleAccounts((accountData.accounts ?? []) as Array<{id:string; google_account_id:string|null; email:string|null; status:string; last_sync_at:string|null; last_error:string|null}>);
 
       const { data: dashboardData, error: dashboardError } = await supabase.functions.invoke('google-business-admin-dashboard', {
         body: { action: 'load' },
       });
-      if (dashboardError) throw dashboardError;
-      if (!dashboardData?.success) throw new Error(dashboardData?.error || 'Impossible de charger les données Google Business.');
+      if (dashboardError) throw new Error(await edgeFunctionErrorMessage(dashboardError, 'Impossible de charger les données Google Business.'));
+      if (!dashboardData?.success) throw new Error(sanitizeGoogleBusinessError(typeof dashboardData?.error === 'string' ? dashboardData.error : 'Impossible de charger les données Google Business.'));
       setConnections((dashboardData.connections ?? []) as Connection[]);
       setReplySettings((dashboardData.replySettings ?? []) as ReplySetting[]);
       setLocations((dashboardData.locations ?? []) as Location[]);
