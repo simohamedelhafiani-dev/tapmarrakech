@@ -219,10 +219,18 @@ Deno.serve(async (req: Request) => {
     }
 
     const accounts = await api('accounts', token);
+    const linkedGoogleAccountId = String(connection.google_account_id ?? '');
+    const accessibleAccounts = (accounts.accounts ?? []) as any[];
+    const accountsToSync = linkedGoogleAccountId
+      ? accessibleAccounts.filter((account: any) => String(account.name ?? '').replace(/^accounts\//, '') === linkedGoogleAccountId)
+      : accessibleAccounts;
+    if (linkedGoogleAccountId && accountsToSync.length === 0) {
+      throw new Error('Le compte Google Business lié à cette connexion n’est plus accessible. Reconnectez le compte Google.');
+    }
     let locations = 0;
     let reviews = 0;
 
-    for (const account of accounts.accounts ?? []) {
+    for (const account of accountsToSync) {
       const accountId = String(account.name ?? '').replace(/^accounts\//, '');
       const result = await api(`accounts/${accountId}/locations?pageSize=100`, token);
 
