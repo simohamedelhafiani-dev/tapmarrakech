@@ -1,6 +1,6 @@
 begin;
 
-select plan(5);
+select plan(6);
 
 select is(
   (select count(*)::integer
@@ -24,6 +24,16 @@ select ok(
     select command from cron.job where jobname = 'kelyani-google-review-sync' and active = true
   )) > 0,
   'scheduler respects per-establishment sync intervals for legacy and mapped account locations'
+);
+
+select ok(
+  position('not exists (' in lower((
+    select command from cron.job where jobname = 'kelyani-google-review-sync' and active = true
+  ))) > 0
+  and position('a.google_account_id = c.google_account_id' in lower((
+    select command from cron.job where jobname = 'kelyani-google-review-sync' and active = true
+  ))) > 0,
+  'legacy synchronization is skipped when the same Google account has an active central connection'
 );
 
 select ok(
