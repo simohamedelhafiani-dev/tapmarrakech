@@ -182,9 +182,16 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
       // gateway from receiving the sync request without an Authorization header.
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       if (sessionError) throw sessionError;
-      const accessToken = sessionData.session?.access_token;
+      let accessToken = sessionData.session?.access_token;
       if (!accessToken) {
-        throw new Error('Votre session a expiré. Reconnectez-vous à Kelyani puis relancez la synchronisation.');
+        const refreshed = await supabase.auth.refreshSession();
+        if (refreshed.error || !refreshed.data.session?.access_token) {
+          throw new Error('Votre session KELYANI a expiré. Reconnectez-vous puis relancez la synchronisation.');
+        }
+        accessToken = refreshed.data.session.access_token;
+      }
+      if (!accessToken) {
+        throw new Error('Aucune session KELYANI valide. Reconnectez-vous puis relancez la synchronisation.');
       }
 
       // Use fetch directly so an HTML gateway/protection response is captured as text
