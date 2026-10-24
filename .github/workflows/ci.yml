@@ -124,6 +124,7 @@ jobs:
             supabase/functions/design-menu/index.ts \
             supabase/functions/employee-login/index.ts \
             supabase/functions/generate-brand-palette/index.ts \
+            supabase/functions/generate-loyalty-template/index.ts \
             supabase/functions/generate-promotion-image/index.ts \
             supabase/functions/google-business-admin-dashboard/index.ts \
             supabase/functions/google-business-oauth/index.ts \
@@ -133,4 +134,5 @@ jobs:
             supabase/functions/google-business-webhook/index.ts \
             supabase/functions/import-menu/index.ts \
             supabase/functions/send-loyalty-notification-push/index.ts \
+            supabase/functions/send-promotion-push/index.ts \
             supabase/functions/submit-public-review/index.ts
