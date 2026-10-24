@@ -35,8 +35,12 @@ select ok(
   'public loyalty enrollment remains anonymous-only through the intended v2 wrapper'
 );
 select ok(
-  has_function_privilege('anon', 'public.get_public_loyalty_link(uuid,text,text)', 'EXECUTE'),
-  'newly registered public loyalty customers can retrieve their card link'
+  has_function_privilege('anon', 'public.register_public_loyalty_customer_for_enrollment_v3(uuid,text,text,text,date,text,text[],boolean,boolean,text,text)', 'EXECUTE')
+  and not has_function_privilege('authenticated', 'public.register_public_loyalty_customer_for_enrollment_v3(uuid,text,text,text,date,text,text[],boolean,boolean,text,text)', 'EXECUTE')
+  and pg_get_function_result('public.register_public_loyalty_customer_for_enrollment_v3(uuid,text,text,text,date,text,text[],boolean,boolean,text,text)'::regprocedure) = 'jsonb'
+  and position('access_token' in lower(pg_get_functiondef('public.register_public_loyalty_customer_for_enrollment_v3(uuid,text,text,text,date,text,text[],boolean,boolean,text,text)'::regprocedure))) > 0
+  and position('loyalty_number' in lower(pg_get_functiondef('public.register_public_loyalty_customer_for_enrollment_v3(uuid,text,text,text,date,text,text[],boolean,boolean,text,text)'::regprocedure))) > 0,
+  'public enrollment returns only the new customer details and bearer link through the dedicated RPC'
 );
 
 -- The public claim flows must remain reachable through their narrow RPCs.
