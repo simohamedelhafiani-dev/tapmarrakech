@@ -1,6 +1,6 @@
 begin;
 
-select plan(16);
+select plan(18);
 
 -- Public loyalty-card RPCs are token-scoped capabilities used by the live card UI.
 select ok(
@@ -26,6 +26,17 @@ select ok(
 select ok(
   has_function_privilege('anon', 'public.get_public_loyalty_raffles(uuid)', 'EXECUTE'),
   'public loyalty cards can still load eligible tombolas'
+);
+
+-- The public enrollment flow creates the card and immediately resolves its bearer URL.
+select ok(
+  has_function_privilege('anon', 'public.register_public_loyalty_customer_for_enrollment_v2(uuid,text,text,text,date,text,text[],boolean,boolean,text,text)', 'EXECUTE')
+  and not has_function_privilege('authenticated', 'public.register_public_loyalty_customer_for_enrollment_v2(uuid,text,text,text,date,text,text[],boolean,boolean,text,text)', 'EXECUTE'),
+  'public loyalty enrollment remains anonymous-only through the intended v2 wrapper'
+);
+select ok(
+  has_function_privilege('anon', 'public.get_public_loyalty_link(uuid,text,text)', 'EXECUTE'),
+  'newly registered public loyalty customers can retrieve their card link'
 );
 
 -- The public claim flows must remain reachable through their narrow RPCs.
