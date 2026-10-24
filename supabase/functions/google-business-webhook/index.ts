@@ -1,6 +1,7 @@
 // Google Business Profile Pub/Sub webhook.
 // Security invariant: no webhook processing (and especially no publication) without a configured secret.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { validateWebhookSecret } from '../_shared/webhookAuth.ts';
 
 const url = Deno.env.get('SUPABASE_URL')!;
 const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -80,13 +81,13 @@ async function generateReply(comment: string, rating: string, language: string, 
 
 Deno.serve(async (req) => {
   try {
-    if (!secret) {
+    const suppliedSecret = new URL(req.url).searchParams.get('secret') ?? '';
+    const secretFailure = validateWebhookSecret(secret, suppliedSecret);
+    if (secretFailure === 'not_configured') {
       console.error('GOOGLE_BUSINESS_PUBSUB_SECRET is not configured; refusing webhook processing.');
       return json({ ok: false, error: 'Webhook secret not configured' }, 503);
     }
-
-    const suppliedSecret = new URL(req.url).searchParams.get('secret') ?? '';
-    if (suppliedSecret.length !== secret.length || suppliedSecret !== secret) {
+    if (secretFailure === 'unauthorized') {
       return json({ ok: false, error: 'unauthorized' }, 401);
     }
 
