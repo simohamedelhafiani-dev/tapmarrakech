@@ -111,6 +111,9 @@ jobs:
         with:
           deno-version: v2.1.4
 
+      - name: Test Edge Function authorization parsing
+        run: deno test supabase/functions/_shared/auth.test.ts
+
       - name: Type-check Supabase Edge Functions
         run: |
           deno check --no-lock \

@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { extractBearerToken } from '../_shared/auth.ts';
 
 const url = Deno.env.get('SUPABASE_URL')!;
 const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -161,12 +162,9 @@ Deno.serve(async (req: Request) => {
 
     if (!isCronCall) {
       const authorization = req.headers.get('Authorization');
-      if (!/^Bearer\s+\S+/i.test(authorization ?? '')) {
-        return json({ success: false, error: 'En-tête de session invalide. Reconnectez-vous à KELYANI puis relancez la synchronisation.' }, 401);
-      }
-      const bearerToken = authorization!.replace(/^Bearer\s+/i, '');
+      const bearerToken = extractBearerToken(authorization);
       if (!bearerToken || bearerToken.length > 8192) {
-        return json({ success: false, error: 'Jeton de session absent ou invalide. Reconnectez-vous à KELYANI.' }, 401);
+        return json({ success: false, error: 'En-tête de session invalide. Reconnectez-vous à KELYANI puis relancez la synchronisation.' }, 401);
       }
       const { data: { user }, error: userError } = await db.auth.getUser(bearerToken);
       if (userError || !user) {
