@@ -117,7 +117,10 @@ jobs:
       - name: Type-check Supabase Edge Functions
         run: |
           deno check --no-lock --node-modules-dir=auto \
+            supabase/functions/admin-update-staff-account/index.ts \
             supabase/functions/analyze-reviews/index.ts \
+            supabase/functions/create-employee/index.ts \
+            supabase/functions/create-staff-account/index.ts \
             supabase/functions/design-menu/index.ts \
             supabase/functions/employee-login/index.ts \
             supabase/functions/generate-brand-palette/index.ts \
