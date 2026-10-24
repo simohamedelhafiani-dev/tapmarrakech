@@ -55,28 +55,13 @@ jobs:
       - name: Initialize local Supabase config
         run: supabase init --force
 
-      # Prime the local Docker cache from GHCR. Supabase CLI pulls these same
-      # images from public ECR, which has intermittently hit anonymous data limits.
-      - name: Preload Supabase images from GHCR
+      # pgTAP tests exclude the Supabase API/service containers; only PostgreSQL
+      # is needed for local migrations and SQL tests.
+      - name: Preload PostgreSQL image from GHCR
+        timeout-minutes: 3
         run: |
-          set -euo pipefail
-          images=(
-            "postgres:17.11.0.006"
-            "realtime:v2.147.1"
-            "storage-api:v1.84.19"
-            "gotrue:v2.197.0"
-            "kong:2.8.1"
-            "mailpit:v1.31.3"
-            "vector:0.58.0-alpine"
-            "postgrest:v16.5"
-            "logflare:1.50.15"
-            "postgres-meta:v0.100.0"
-            "edge-runtime:v1.77.8"
-          )
-          for image in "${images[@]}"; do
-            docker pull "ghcr.io/supabase/${image}"
-            docker tag "ghcr.io/supabase/${image}" "public.ecr.aws/supabase/${image}"
-          done
+          timeout 120s docker pull "ghcr.io/supabase/postgres:17.11.0.006"
+          docker tag "ghcr.io/supabase/postgres:17.11.0.006" "public.ecr.aws/supabase/postgres:17.11.0.006"
 
       - name: Start local Supabase stack
         # Tests only need the local Postgres schema. Keep the standard stack
@@ -87,8 +72,9 @@ jobs:
       # returned anonymous data-limit throttles. Preload the same public image
       # from GHCR (confirmed available in CI logs) and alias it to the expected tag.
       - name: Preload pgTAP image from GHCR
+        timeout-minutes: 3
         run: |
-          docker pull ghcr.io/supabase/pg_prove:3.36
+          timeout 120s docker pull ghcr.io/supabase/pg_prove:3.36
           docker tag ghcr.io/supabase/pg_prove:3.36 public.ecr.aws/supabase/pg_prove:3.36
 
       - name: Run pgTAP database tests
