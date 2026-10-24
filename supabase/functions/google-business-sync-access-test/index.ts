@@ -1,9 +1,13 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { extractBearerToken } from '../_shared/auth.ts';
+import { withTransientPostgrestJwtRetry } from '../_shared/retryFetch.ts';
 
 const url = Deno.env.get('SUPABASE_URL')!;
 const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const db = createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } });
+const db = createClient(url, key, {
+  global: { fetch: withTransientPostgrestJwtRetry() },
+  auth: { autoRefreshToken: false, persistSession: false },
+});
 const cid = Deno.env.get('GOOGLE_BUSINESS_CLIENT_ID') ?? '';
 const secret = Deno.env.get('GOOGLE_BUSINESS_CLIENT_SECRET') ?? '';
 
