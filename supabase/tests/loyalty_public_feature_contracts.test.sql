@@ -16,8 +16,8 @@ select ok(
   'public loyalty cards can still load notifications'
 );
 select ok(
-  has_function_privilege('anon', 'public.get_public_loyalty_history(uuid,integer)', 'EXECUTE'),
-  'public loyalty cards can still load transaction history'
+  has_function_privilege('authenticated', 'public.get_loyalty_customer_link(uuid)', 'EXECUTE'),
+  'authenticated staff can still retrieve a customer card link within their establishment scope'
 );
 select ok(
   has_function_privilege('anon', 'public.get_public_loyalty_discount_status(uuid)', 'EXECUTE'),
