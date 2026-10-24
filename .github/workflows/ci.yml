@@ -116,7 +116,7 @@ jobs:
 
       - name: Type-check Supabase Edge Functions
         run: |
-          deno check --no-lock \
+          deno check --no-lock --node-modules-dir=auto \
             supabase/functions/analyze-reviews/index.ts \
             supabase/functions/design-menu/index.ts \
             supabase/functions/employee-login/index.ts \
