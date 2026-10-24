@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { parseMenuJson } from '../_shared/menuParser.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -29,29 +30,6 @@ function extractOutputText(payload: any): string {
   }
 
   return chunks.join('').trim();
-}
-
-function parseMenuJson(outputText: string): any {
-  // Avoid embedding backticks in regex literals; OpenAI may wrap valid JSON in a
-  // Markdown fence even when JSON schema mode is requested.
-  const fence = String.fromCharCode(96).repeat(3);
-  const cleaned = outputText.trim()
-    .replace(new RegExp('^' + fence + '(?:json)?\\s*', 'i'), '')
-    .replace(new RegExp('\\s*' + fence + '$', 'i'), '')
-    .trim();
-
-  try {
-    return JSON.parse(cleaned);
-  } catch {
-    const firstBrace = cleaned.indexOf('{');
-    const lastBrace = cleaned.lastIndexOf('}');
-
-    if (firstBrace >= 0 && lastBrace > firstBrace) {
-      return JSON.parse(cleaned.slice(firstBrace, lastBrace + 1));
-    }
-
-    throw new Error('Le moteur IA n’a pas retourné un JSON valide.');
-  }
 }
 
 const menuSchema = {
@@ -239,7 +217,7 @@ Deno.serve(async (request) => {
 
       let menu: any;
       try {
-        menu = JSON.parse(outputText);
+        menu = parseMenuJson(outputText);
       } catch {
         return json({ success: false, error: 'Le résultat IA est inexploitable.' }, 502);
       }
