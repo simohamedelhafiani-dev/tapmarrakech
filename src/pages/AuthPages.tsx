@@ -109,7 +109,7 @@ export function Register() {
     const { data, error: authError } = await supabase.auth.signUp({
       email: form.email.trim(),
       password: form.password,
-      options: { data: { name: form.name.trim() } },
+      options: { data: { name: form.name.trim(), role: 'responsible' } },
     });
     if (authError) {
       setError(authError.message.toLowerCase().includes('already')
@@ -119,7 +119,7 @@ export function Register() {
     }
     if (data.user && data.session) {
       const { error: profileError } = await supabase.from('profiles').upsert({
-        id: data.user.id, email: form.email.trim(), name: form.name.trim(),
+        id: data.user.id, email: form.email.trim(), name: form.name.trim(), role: 'responsible',
       }, { onConflict: 'id' });
       if (profileError) {
         setError('Le compte est créé mais le profil n’a pas pu être enregistré.');
@@ -150,6 +150,7 @@ export function Register() {
       id: data.user.id,
       email: form.email.trim(),
       name: form.name.trim() || String(data.user.user_metadata?.name || ''),
+      role: 'responsible',
     }, { onConflict: 'id' });
     if (profileError) {
       setError('Adresse confirmée, mais le profil n’a pas pu être enregistré. Réessayez de vous connecter.');
