@@ -280,6 +280,18 @@ export default function Login() {
               </div>
             )}
 
+            {selectedRole === null && (
+              <div className="mt-6 rounded-2xl border border-[#C9A45C]/25 bg-[#C9A45C]/[0.05] p-4 text-center">
+                <p className="text-sm text-[#F5F5DC]/65">Vous découvrez KELYANI ?</p>
+                <Link
+                  to="/register"
+                  className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[#C9A45C]/60 bg-[#C9A45C] px-4 py-3 text-sm font-bold text-[#050505] transition hover:-translate-y-0.5 hover:bg-[#E1C27A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A45C]/60"
+                >
+                  Créer votre compte <ArrowRight size={16} />
+                </Link>
+              </div>
+            )}
+
             <div className="mt-7 flex items-center justify-center gap-5 text-[9px] uppercase tracking-[0.12em] text-[#F5F5DC]/20">
               <span className="inline-flex items-center gap-1.5"><ShieldCheck size={13} /> Sécurisé</span>
               <span className="inline-flex items-center gap-1.5"><Heart size={13} /> Client d’abord</span>
