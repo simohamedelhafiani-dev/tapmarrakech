@@ -307,7 +307,7 @@ export default function Admin() {
 
     const { data, error } = await supabase
       .from('establishments')
-      .select('id, name, slug, ai_business_type_id, created_at')
+      .select('id, name, slug, created_at')
       .order('created_at', { ascending: false });
 
     console.log(
@@ -322,7 +322,7 @@ export default function Admin() {
       console.error('Erreur établissements:', error);
       setEstablishments([]);
     } else {
-      setEstablishments(data ?? []);
+      setEstablishments((data ?? []).map((row) => ({ ...row, ai_business_type_id: null })));
     }
 
     setLoading(false);
