@@ -118,6 +118,8 @@ export function useEstablishments() {
         if (!subscriptionRow) {
           return {
             ...row,
+            city: null,
+            business_type: null,
             subscription: null,
           };
         }
