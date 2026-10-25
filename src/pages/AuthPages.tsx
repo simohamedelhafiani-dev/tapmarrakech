@@ -97,6 +97,7 @@ export function Register() {
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [error, setError] = useState('');
   const [pendingVerification, setPendingVerification] = useState(false);
+  const [enterExistingCode, setEnterExistingCode] = useState(false);
   const [token, setToken] = useState('');
   const [verifying, setVerifying] = useState(false);
   const [resending, setResending] = useState(false);
@@ -172,17 +173,19 @@ export function Register() {
   };
 
   return <AuthShell eyebrow={pendingVerification ? 'Vérification sécurisée' : 'Commencer simplement'} title={pendingVerification ? 'Confirmez votre adresse.' : 'Créez votre espace.'}>
-    {pendingVerification ? (
+    {pendingVerification || enterExistingCode ? (
       <div className="mt-9 space-y-4">
-        <p className="text-sm leading-6 text-white/65">Nous avons demandé l’envoi d’un code de confirmation à <strong>{form.email}</strong>. Saisissez le code reçu pour confirmer votre adresse et activer votre espace KELYANI.</p>
+        <p className="text-sm leading-6 text-white/65">{pendingVerification ? <>Nous avons demandé l’envoi d’un code de confirmation à <strong>{form.email}</strong>. Saisissez-le ci-dessous pour confirmer votre adresse et activer votre espace KELYANI.</> : 'Vous avez déjà reçu un code ? Saisissez l’adresse e-mail utilisée lors de l’inscription et le code à 6 chiffres.'}</p>
+        {enterExistingCode && <Field icon={Mail} type="email" required placeholder="Adresse e-mail de l’inscription" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />}
         <form onSubmit={verify} className="space-y-4">
           <Field icon={LockKeyhole} type="text" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} minLength={6} required placeholder="Code de confirmation à 6 chiffres" value={token} onChange={e => setToken(e.target.value.replace(/\\D/g, '').slice(0, 6))} />
           {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
           {notice && <p role="status" className="text-sm text-white/65">{notice}</p>}
           <button disabled={verifying || token.length !== 6} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4AF37] py-3.5 text-sm font-semibold text-white disabled:opacity-50">{verifying ? 'Vérification…' : 'Confirmer mon adresse'} <ArrowRight size={16} /></button>
         </form>
-        <button type="button" onClick={resendCode} disabled={resending} className="w-full text-center text-sm font-semibold text-gold disabled:opacity-50">{resending ? 'Envoi…' : 'Renvoyer un code'}</button>
-        <p className="text-center text-xs text-ink/50">Vérifiez également vos courriers indésirables.</p>
+        <button type="button" onClick={resendCode} disabled={resending || !form.email.trim()} className="w-full text-center text-sm font-semibold text-[#D4AF37] disabled:opacity-50">{resending ? 'Envoi…' : 'Renvoyer un code'}</button>
+        {!pendingVerification && <button type="button" onClick={() => { setEnterExistingCode(false); setToken(''); setError(''); setNotice(''); }} className="w-full text-center text-xs text-white/50 hover:text-[#D4AF37]">Retour à la création du compte</button>}
+        <p className="text-center text-xs text-white/40">Vérifiez également vos courriers indésirables.</p>
       </div>
     ) : (
       <>
@@ -193,7 +196,8 @@ export function Register() {
           {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
           <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4AF37] py-3.5 text-sm font-semibold text-[#0D0D0D] transition hover:bg-[#E1C15A]">Créer mon compte <ArrowRight size={16} /></button>
         </form>
-        <p className="mt-5 text-center text-xs text-ink/50">Déjà inscrit ? <Link to="/login" className="font-semibold text-gold">Se connecter</Link></p>
+        <button type="button" onClick={() => { setEnterExistingCode(true); setPendingVerification(false); setError(''); setNotice(''); setToken(''); }} className="mt-5 w-full text-center text-sm font-semibold text-[#D4AF37] hover:text-[#E1C15A]">J’ai déjà un code de validation</button>
+        <p className="mt-4 text-center text-xs text-white/50">Déjà inscrit ? <Link to="/login" className="font-semibold text-[#D4AF37]">Se connecter</Link></p>
       </>
     )}
   </AuthShell>;
