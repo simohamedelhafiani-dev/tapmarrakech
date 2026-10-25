@@ -2423,7 +2423,6 @@ function ResponsiblesSection({
   loading: boolean;
   reload: () => Promise<void>;
 }) {
-  const [showForm, setShowForm] = useState(false);
   const [selectedEstablishment, setSelectedEstablishment] = useState('all');
 
   const establishmentMap = useMemo(
@@ -2457,18 +2456,10 @@ function ResponsiblesSection({
           </h2>
 
           <p className="mt-2 text-sm text-[#FFFFFF]/50">
-            Créez et gérez les responsables de chaque établissement.
+            Les responsables créent leur compte ; affectez ensuite chaque compte inscrit à son établissement.
           </p>
         </div>
 
-        <button
-          onClick={() => setShowForm(true)}
-          disabled={establishments.length === 0}
-          className="inline-flex items-center gap-2 rounded-xl bg-[#111111] px-5 py-3 text-sm font-semibold text-[#FFFFFF] transition hover:bg-[#111111] disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          <UserPlus size={16} />
-          Nouveau responsable
-        </button>
       </div>
 
       <div className="mb-5 max-w-xl rounded-3xl border border-[#242424] bg-[#111111] p-4 shadow-sm">
@@ -2479,15 +2470,6 @@ function ResponsiblesSection({
         </select>
       </div>
 
-      {showForm && (
-        <CreateStaffForm
-          role="responsible"
-          establishments={establishments}
-          close={() => setShowForm(false)}
-          reload={reload}
-        />
-      )}
-
       <div className="overflow-hidden rounded-3xl border border-[#242424] bg-[#111111] shadow-sm">
         {loading ? (
           <div className="p-8 text-sm text-[#FFFFFF]/40">
@@ -2497,7 +2479,7 @@ function ResponsiblesSection({
           <EmptyStaff
             icon={UserRound}
             title="Aucun responsable"
-            description="Créez le premier responsable d’un établissement."
+            description="Les comptes responsables inscrits apparaîtront ici en attente d’affectation."
           />
         ) : (
           <div className="divide-y divide-ink/5">
