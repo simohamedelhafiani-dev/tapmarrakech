@@ -819,6 +819,25 @@ export default function Dashboard() {
     return <div className="h-72 animate-pulse rounded-[28px] border border-[#242424] bg-[#111111]" />;
   }
 
+  if (!selectedEstablishmentId && !loading) {
+    return (
+      <div className="flex min-h-[70vh] items-center justify-center px-4 py-10 text-white">
+        <section className="w-full max-w-xl rounded-[28px] border border-[#C9A45C]/20 bg-[#0D0D0D] p-8 text-center shadow-xl">
+          <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl border border-[#C9A45C]/25 bg-[#C9A45C]/10 text-[#E1C27A]"><Menu size={27} /></div>
+          <p className="mt-6 text-[10px] font-bold uppercase tracking-[0.24em] text-[#C9A45C]">Votre espace KELYANI</p>
+          <h1 className="mt-3 font-display text-3xl text-[#F5F5DC]">Votre espace est presque prêt</h1>
+          <p className="mx-auto mt-4 max-w-md text-sm leading-7 text-[#F5F5DC]/60">Aucun établissement ne vous a encore été attribué. Votre compte est bien créé ; un administrateur KELYANI doit associer votre établissement pour que vos données et vos outils apparaissent ici.</p>
+          <div className="mt-7 rounded-2xl border border-white/[0.07] bg-white/[0.025] p-4 text-left">
+            <p className="text-xs font-semibold text-[#F5F5DC]">Que faire maintenant ?</p>
+            <p className="mt-1 text-xs leading-6 text-[#F5F5DC]/50">Contactez votre administrateur ou l’équipe KELYANI pour demander l’attribution de votre établissement.</p>
+            <a href="mailto:kelyani.support@gmail.com" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#E1C27A]">Contacter le support <ArrowUpRight size={15} /></a>
+          </div>
+          <button type="button" onClick={() => window.location.reload()} className="mt-6 inline-flex items-center justify-center rounded-xl border border-[#C9A45C]/30 px-5 py-3 text-xs font-bold text-[#E1C27A] hover:bg-[#C9A45C]/10">Actualiser mon espace</button>
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen space-y-6 pb-8 text-white">
       <section className="relative isolate overflow-hidden rounded-[28px] border border-[#C9A45C]/20 bg-[radial-gradient(ellipse_at_top_right,rgba(201,164,92,0.13),transparent_42%),linear-gradient(135deg,#151515_0%,#090909_62%,#111111_100%)] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:rounded-[32px] sm:p-8 lg:p-9">
