@@ -330,65 +330,63 @@ export default function Admin() {
 
   const loadStaff = async () => {
     setStaffLoading(true);
+    try {
+      const { data: staffRows, error: staffError } = await supabase
+        .from('establishment_staff')
+        .select('id, establishment_id, user_id, role, active, created_at')
+        .order('created_at', { ascending: false });
 
-    const { data: staffRows, error: staffError } = await supabase
-      .from('establishment_staff')
-      .select('id, establishment_id, user_id, role, active, created_at')
-      .order('created_at', { ascending: false });
+      if (staffError) throw staffError;
 
-    if (staffError) {
-      console.error('Erreur équipe:', staffError);
+      const rows = staffRows ?? [];
+      const userIds = rows.map((row) => row.user_id).filter(Boolean);
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, email, name, role, created_at')
+        .or('role.eq.responsible,role.eq.employee,role.eq.admin');
+
+      if (profilesError) throw profilesError;
+
+      const profileMap = new Map((profiles ?? []).map((profile) => [profile.id, profile]));
+      const assignedIds = new Set(userIds);
+
+      const assigned: StaffMember[] = rows.map((row) => {
+        const profile = profileMap.get(row.user_id);
+        return {
+          id: row.id,
+          establishment_id: row.establishment_id,
+          user_id: row.user_id,
+          role: row.role,
+          active: row.active,
+          created_at: row.created_at,
+          email: profile?.email ?? '—',
+          name: profile?.name ?? 'Utilisateur',
+          profileRole: profile?.role ?? null,
+        };
+      });
+
+      // Show self-registered responsible accounts even before an establishment is assigned.
+      const awaitingAssignment: StaffMember[] = (profiles ?? [])
+        .filter((profile) => profile.role === 'responsible' && !assignedIds.has(profile.id))
+        .map((profile) => ({
+          id: `unassigned-${profile.id}`,
+          establishment_id: '',
+          user_id: profile.id,
+          role: 'MANAGER',
+          active: true,
+          created_at: profile.created_at ?? new Date().toISOString(),
+          email: profile.email ?? '—',
+          name: profile.name ?? 'Responsable',
+          profileRole: 'responsible',
+        }));
+
+      setStaff([...awaitingAssignment, ...assigned]);
+    } catch (error) {
+      console.error('Erreur chargement responsables et équipe:', error);
       setStaff([]);
+    } finally {
       setStaffLoading(false);
-      return;
     }
-
-    const rows = staffRows ?? [];
-    const userIds = rows.map((row) => row.user_id);
-
-    if (userIds.length === 0) {
-      setStaff([]);
-      setStaffLoading(false);
-      return;
-    }
-
-    const { data: profiles, error: profilesError } = await supabase
-      .from('profiles')
-      .select('id, email, name, role')
-      .in('id', userIds);
-
-    if (profilesError) {
-      console.error('Erreur profils:', profilesError);
-      setStaff([]);
-      setStaffLoading(false);
-      return;
-    }
-
-    const profileMap = new Map(
-      (profiles ?? []).map((profile) => [
-        profile.id,
-        profile,
-      ])
-    );
-
-    const result: StaffMember[] = rows.map((row) => {
-      const profile = profileMap.get(row.user_id);
-
-      return {
-        id: row.id,
-        establishment_id: row.establishment_id,
-        user_id: row.user_id,
-        role: row.role,
-        active: row.active,
-        created_at: row.created_at,
-        email: profile?.email ?? '—',
-        name: profile?.name ?? 'Utilisateur',
-        profileRole: profile?.role ?? null,
-      };
-    });
-
-    setStaff(result);
-    setStaffLoading(false);
   };
 
   const loadAIBusinessTypes = async () => {
@@ -2507,13 +2505,22 @@ function ResponsiblesSection({
               const establishment =
                 establishmentMap.get(member.establishment_id);
 
+              if (!member.establishment_id && member.profileRole === 'responsible') {
+                return (
+                  <AssignResponsibleRow
+                    key={member.id}
+                    member={member}
+                    establishments={establishments}
+                    reload={reload}
+                  />
+                );
+              }
+
               return (
                 <StaffRow
                   key={member.id}
                   member={member}
-                  establishmentName={
-                    establishment?.name ?? 'Établissement inconnu'
-                  }
+                  establishmentName={establishment?.name ?? 'Établissement inconnu'}
                   reload={reload}
                   establishments={establishments}
                 />
@@ -2521,6 +2528,73 @@ function ResponsiblesSection({
             })}
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+function AssignResponsibleRow({
+  member,
+  establishments,
+  reload,
+}: {
+  member: StaffMember;
+  establishments: Establishment[];
+  reload: () => Promise<void>;
+}) {
+  const [establishmentId, setEstablishmentId] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const assign = async () => {
+    if (!establishmentId) {
+      setErrorMessage('Sélectionnez un établissement.');
+      return;
+    }
+    setSaving(true);
+    setErrorMessage('');
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-assign-responsible', {
+        body: { user_id: member.user_id, establishment_id: establishmentId },
+      });
+      if (error) throw new Error(data?.error || error.message || 'Affectation impossible.');
+      if (data?.success !== true) throw new Error(data?.error || 'Affectation impossible.');
+      await reload();
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Erreur lors de l’affectation.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-3 p-5 md:flex-row md:items-center md:justify-between">
+      <div className="min-w-0">
+        <p className="font-semibold text-[#FFFFFF]">{member.name}</p>
+        <p className="mt-1 text-sm text-[#FFFFFF]/50">{member.email}</p>
+        <p className="mt-2 text-xs font-semibold text-[#C9A45C]">Compte inscrit — en attente d’affectation</p>
+        {errorMessage && <p role="alert" className="mt-2 text-xs text-red-400">{errorMessage}</p>}
+      </div>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <select
+          aria-label={`Établissement à attribuer à ${member.name}`}
+          value={establishmentId}
+          onChange={(event) => setEstablishmentId(event.target.value)}
+          className="min-w-56 rounded-xl border border-[#242424] bg-[#111111] px-3 py-2 text-sm text-white"
+        >
+          <option value="">Choisir un établissement</option>
+          {establishments.map((establishment) => (
+            <option key={establishment.id} value={establishment.id}>{establishment.name}</option>
+          ))}
+        </select>
+        <button
+          type="button"
+          onClick={assign}
+          disabled={saving || !establishmentId}
+          className="rounded-xl bg-[#C9A45C] px-4 py-2 text-sm font-semibold text-black disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {saving ? 'Affectation…' : 'Affecter'}
+        </button>
       </div>
     </div>
   );
