@@ -3,8 +3,35 @@ import { ArrowRight, Check, LockKeyhole, Mail, UserRound } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 
-function AuthShell({ children, title, eyebrow }: { children: React.ReactNode; title: string; eyebrow: string }) { return <div className="grid min-h-screen bg-[#f7f7f3] lg:grid-cols-[1fr_1.1fr]"><div className="hidden bg-forest p-12 text-white lg:flex lg:flex-col lg:justify-between"><div className="font-display text-2xl">KELYANI</div><div><p className="mb-5 text-xs font-semibold uppercase tracking-[0.25em] text-gold">La voix de vos clients</p><h2 className="max-w-md font-display text-5xl leading-[1.1]">Transformez chaque retour en fidélité.</h2><p className="mt-6 max-w-sm text-sm leading-7 text-white/55">Une expérience simple pour vos clients. Des insights précieux pour votre établissement.</p></div><p className="text-xs text-white/35">© 2026 KELYANI</p></div><div className="flex items-center justify-center p-6"><div className="w-full max-w-[420px]"><div className="mb-10 lg:hidden"><div className="font-display text-2xl text-forest">KELYANI</div></div><p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">{eyebrow}</p><h1 className="mt-3 font-display text-4xl text-forest">{title}</h1>{children}</div></div></div>; }
-function Field({ icon: Icon, ...props }: { icon: typeof Mail } & React.InputHTMLAttributes<HTMLInputElement>) { return <div className="relative"><Icon size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/30" /><input {...props} className="w-full rounded-xl border border-ink/10 bg-white py-3 pl-10 pr-3 text-sm outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/20" /></div>; }
+function AuthShell({ children, title, eyebrow }: { children: React.ReactNode; title: string; eyebrow: string }) {
+  return (
+    <div className="grid min-h-screen bg-[#0D0D0D] lg:grid-cols-[1fr_1.1fr]">
+      <div className="hidden bg-[#0D0D0D] p-12 text-white lg:flex lg:flex-col lg:justify-between border-r border-[#D4AF37]/15">
+        <div className="font-display text-2xl tracking-[0.12em] text-[#D4AF37]">KELYANI</div>
+        <div>
+          <p className="mb-5 text-xs font-semibold uppercase tracking-[0.25em] text-[#D4AF37]">La voix de vos clients</p>
+          <h2 className="max-w-md font-display text-5xl leading-[1.1] text-[#F8F5EC]">Transformez chaque retour en fidélité.</h2>
+          <p className="mt-6 max-w-sm text-sm leading-7 text-white/55">Une expérience simple pour vos clients. Des insights précieux pour votre établissement.</p>
+        </div>
+        <p className="text-xs text-white/35">© 2026 KELYANI</p>
+      </div>
+      <div className="flex items-center justify-center bg-[#0D0D0D] px-6 py-12">
+        <div className="w-full max-w-[420px]">
+          <div className="mb-10 lg:hidden"><div className="font-display text-2xl tracking-[0.12em] text-[#D4AF37]">KELYANI</div></div>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#D4AF37]">{eyebrow}</p>
+          <h1 className="mt-3 font-display text-4xl text-[#D4AF37]">{title}</h1>
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+function Field({ icon: Icon, ...props }: { icon: typeof Mail } & React.InputHTMLAttributes<HTMLInputElement>) {
+  return <div className="relative">
+    <Icon size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#D4AF37]/65" />
+    <input {...props} className="w-full rounded-xl border border-[#D4AF37]/20 bg-[#171717] py-3 pl-10 pr-3 text-sm text-[#F8F5EC] placeholder:text-white/40 outline-none transition focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20" />
+  </div>;
+}
 export function Login() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -54,15 +81,15 @@ export function Login() {
     <form onSubmit={submit} className="mt-9 space-y-4">
       <Field icon={Mail} type="email" required placeholder="Adresse email" value={email} onChange={e => setEmail(e.target.value)} />
       <Field icon={LockKeyhole} type="password" required placeholder="Mot de passe" value={password} onChange={e => setPassword(e.target.value)} />
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      <button disabled={busy} className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white transition hover:bg-forest-light disabled:opacity-50">{busy ? 'Connexion…' : 'Se connecter'} <ArrowRight size={16} /></button>
+      {error && <p className="text-sm text-red-400">{error}</p>}
+      <button disabled={busy} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4AF37] py-3.5 text-sm font-semibold text-[#0D0D0D] transition hover:bg-[#E1C15A] disabled:opacity-50">{busy ? 'Connexion…' : 'Se connecter'} <ArrowRight size={16} /></button>
     </form>
-    {needsConfirmation && <div className="mt-4 rounded-xl border border-gold/40 bg-white p-4">
-      <p className="text-sm text-ink/70">Confirmez votre adresse pour activer votre compte KELYANI.</p>
-      <button type="button" disabled={resending || !email.trim()} onClick={resendConfirmation} className="mt-3 w-full rounded-xl border border-gold px-3 py-2 text-sm font-semibold text-forest disabled:opacity-50">{resending ? 'Envoi…' : 'Renvoyer l’e-mail de confirmation'}</button>
-      {resendMessage && <p role="status" className="mt-3 text-sm text-ink/70">{resendMessage}</p>}
+    {needsConfirmation && <div className="mt-4 rounded-xl border border-[#D4AF37]/40 bg-[#171717] p-4">
+      <p className="text-sm text-white/65">Confirmez votre adresse pour activer votre compte KELYANI.</p>
+      <button type="button" disabled={resending || !email.trim()} onClick={resendConfirmation} className="mt-3 w-full rounded-xl border border-gold px-3 py-2 text-sm font-semibold text-[#D4AF37] disabled:opacity-50">{resending ? 'Envoi…' : 'Renvoyer l’e-mail de confirmation'}</button>
+      {resendMessage && <p role="status" className="mt-3 text-sm text-white/65">{resendMessage}</p>}
     </div>}
-    <div className="mt-5 flex justify-between text-xs"><Link to="/forgot-password" className="text-forest underline underline-offset-4">Mot de passe oublié ?</Link><Link to="/register" className="font-semibold text-gold">Créer un compte</Link></div>
+    <div className="mt-5 flex justify-between text-xs"><Link to="/forgot-password" className="text-[#D4AF37] underline underline-offset-4">Mot de passe oublié ?</Link><Link to="/register" className="font-semibold text-gold">Créer un compte</Link></div>
   </AuthShell>;
 }
 export function Register() {
@@ -147,12 +174,12 @@ export function Register() {
   return <AuthShell eyebrow={pendingVerification ? 'Vérification sécurisée' : 'Commencer simplement'} title={pendingVerification ? 'Confirmez votre adresse.' : 'Créez votre espace.'}>
     {pendingVerification ? (
       <div className="mt-9 space-y-4">
-        <p className="text-sm leading-6 text-ink/70">Nous avons demandé l’envoi d’un code de confirmation à <strong>{form.email}</strong>. Saisissez le code reçu pour confirmer votre adresse et activer votre espace KELYANI.</p>
+        <p className="text-sm leading-6 text-white/65">Nous avons demandé l’envoi d’un code de confirmation à <strong>{form.email}</strong>. Saisissez le code reçu pour confirmer votre adresse et activer votre espace KELYANI.</p>
         <form onSubmit={verify} className="space-y-4">
           <Field icon={LockKeyhole} type="text" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} minLength={6} required placeholder="Code de confirmation à 6 chiffres" value={token} onChange={e => setToken(e.target.value.replace(/\\D/g, '').slice(0, 6))} />
-          {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
-          {notice && <p role="status" className="text-sm text-ink/70">{notice}</p>}
-          <button disabled={verifying || token.length !== 6} className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white disabled:opacity-50">{verifying ? 'Vérification…' : 'Confirmer mon adresse'} <ArrowRight size={16} /></button>
+          {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
+          {notice && <p role="status" className="text-sm text-white/65">{notice}</p>}
+          <button disabled={verifying || token.length !== 6} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4AF37] py-3.5 text-sm font-semibold text-white disabled:opacity-50">{verifying ? 'Vérification…' : 'Confirmer mon adresse'} <ArrowRight size={16} /></button>
         </form>
         <button type="button" onClick={resendCode} disabled={resending} className="w-full text-center text-sm font-semibold text-gold disabled:opacity-50">{resending ? 'Envoi…' : 'Renvoyer un code'}</button>
         <p className="text-center text-xs text-ink/50">Vérifiez également vos courriers indésirables.</p>
@@ -163,8 +190,8 @@ export function Register() {
           <Field icon={UserRound} required placeholder="Votre nom" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
           <Field icon={Mail} type="email" required placeholder="Adresse email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
           <Field icon={LockKeyhole} type="password" minLength={6} required placeholder="Mot de passe (6 caractères minimum)" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
-          {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
-          <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white transition hover:bg-forest-light">Créer mon compte <ArrowRight size={16} /></button>
+          {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
+          <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4AF37] py-3.5 text-sm font-semibold text-[#0D0D0D] transition hover:bg-[#E1C15A]">Créer mon compte <ArrowRight size={16} /></button>
         </form>
         <p className="mt-5 text-center text-xs text-ink/50">Déjà inscrit ? <Link to="/login" className="font-semibold text-gold">Se connecter</Link></p>
       </>
@@ -172,7 +199,7 @@ export function Register() {
   </AuthShell>;
 }
 
-export function ForgotPassword() { const [email, setEmail] = useState(''); const [sent, setSent] = useState(false); const [error, setError] = useState(''); const submit = async (e: React.FormEvent) => { e.preventDefault(); setError(''); const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}/reset-password` }); if (resetError) { setError('Impossible d’envoyer le lien. Vérifiez l’adresse email et réessayez.'); return; } setSent(true); }; return <AuthShell eyebrow="Accès sécurisé" title="Réinitialiser l’accès.">{sent ? <div className="mt-9 rounded-2xl bg-white p-5 text-sm text-ink/70"><Check className="mb-2 text-forest" />Si un compte correspond à cette adresse, vous recevrez un email avec les instructions.</div> : <form onSubmit={submit} className="mt-9 space-y-4"><Field icon={Mail} type="email" required placeholder="Adresse email" value={email} onChange={e => setEmail(e.target.value)} />{error && <p className="text-sm text-red-600">{error}</p>}<button className="w-full rounded-xl bg-forest py-3.5 text-sm font-semibold text-white transition hover:bg-forest-light">Recevoir le lien</button><Link to="/login" className="block text-center text-xs text-gold">Retour à la connexion</Link></form>}</AuthShell>; }
+export function ForgotPassword() { const [email, setEmail] = useState(''); const [sent, setSent] = useState(false); const [error, setError] = useState(''); const submit = async (e: React.FormEvent) => { e.preventDefault(); setError(''); const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}/reset-password` }); if (resetError) { setError('Impossible d’envoyer le lien. Vérifiez l’adresse email et réessayez.'); return; } setSent(true); }; return <AuthShell eyebrow="Accès sécurisé" title="Réinitialiser l’accès.">{sent ? <div className="mt-9 rounded-2xl bg-white p-5 text-sm text-white/65"><Check className="mb-2 text-forest" />Si un compte correspond à cette adresse, vous recevrez un email avec les instructions.</div> : <form onSubmit={submit} className="mt-9 space-y-4"><Field icon={Mail} type="email" required placeholder="Adresse email" value={email} onChange={e => setEmail(e.target.value)} />{error && <p className="text-sm text-red-400">{error}</p>}<button className="w-full rounded-xl bg-[#D4AF37] py-3.5 text-sm font-semibold text-[#0D0D0D] transition hover:bg-[#E1C15A]">Recevoir le lien</button><Link to="/login" className="block text-center text-xs text-gold">Retour à la connexion</Link></form>}</AuthShell>; }
 
 
 export function ResetPassword() {
@@ -213,7 +240,7 @@ export function ResetPassword() {
   return (
     <AuthShell eyebrow="Accès sécurisé" title="Définir un nouveau mot de passe.">
       {updated ? (
-        <div className="mt-9 rounded-2xl bg-white p-5 text-sm text-ink/70">
+        <div className="mt-9 rounded-2xl bg-white p-5 text-sm text-white/65">
           <Check className="mb-2 text-forest" />
           Votre mot de passe a été mis à jour. Redirection vers la connexion…
         </div>
@@ -221,8 +248,8 @@ export function ResetPassword() {
         <form onSubmit={submit} className="mt-9 space-y-4">
           <Field icon={LockKeyhole} type="password" minLength={6} required placeholder="Nouveau mot de passe" value={password} onChange={e => setPassword(e.target.value)} />
           <Field icon={LockKeyhole} type="password" minLength={6} required placeholder="Confirmer le mot de passe" value={confirmation} onChange={e => setConfirmation(e.target.value)} />
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          <button disabled={saving} className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white transition hover:bg-forest-light disabled:opacity-50">
+          {error && <p className="text-sm text-red-400">{error}</p>}
+          <button disabled={saving} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4AF37] py-3.5 text-sm font-semibold text-[#0D0D0D] transition hover:bg-[#E1C15A] disabled:opacity-50">
             {saving ? 'Mise à jour…' : 'Enregistrer le nouveau mot de passe'} <ArrowRight size={16} />
           </button>
         </form>
@@ -282,20 +309,20 @@ export function EmailConfirmation() {
   return (
     <AuthShell eyebrow="Confirmation sécurisée" title={status === 'success' ? 'Adresse confirmée.' : status === 'checking' ? 'Vérification en cours…' : status === 'expired' ? 'Lien expiré.' : 'Confirmation impossible.'}>
       {status === 'checking' ? (
-        <div className="mt-9 rounded-2xl border border-ink/10 bg-white p-5 text-sm text-ink/70">Nous vérifions votre adresse e-mail. Veuillez patienter.</div>
+        <div className="mt-9 rounded-2xl border border-ink/10 bg-white p-5 text-sm text-white/65">Nous vérifions votre adresse e-mail. Veuillez patienter.</div>
       ) : status === 'success' ? (
-        <div className="mt-9 rounded-2xl border border-ink/10 bg-white p-5 text-sm text-ink/70">
+        <div className="mt-9 rounded-2xl border border-ink/10 bg-white p-5 text-sm text-white/65">
           <Check className="mb-3 text-forest" />
           Votre adresse e-mail est confirmée. Vous pouvez maintenant vous connecter à KELYANI.
-          <button type="button" onClick={() => navigate('/login')} className="mt-5 w-full rounded-xl bg-forest py-3 font-semibold text-white">Se connecter</button>
+          <button type="button" onClick={() => navigate('/login')} className="mt-5 w-full rounded-xl bg-[#D4AF37] py-3 font-semibold text-white">Se connecter</button>
         </div>
       ) : (
         <div className="mt-9 rounded-2xl border border-ink/10 bg-white p-5">
-          <p className="text-sm text-ink/70">Ce lien de confirmation est invalide ou a expiré. Demandez un nouveau lien pour terminer la création de votre compte.</p>
+          <p className="text-sm text-white/65">Ce lien de confirmation est invalide ou a expiré. Demandez un nouveau lien pour terminer la création de votre compte.</p>
           <form onSubmit={resend} className="mt-5 space-y-3">
             <Field icon={Mail} type="email" required placeholder="Adresse email utilisée à l’inscription" value={email} onChange={e => setEmail(e.target.value)} />
-            {message && <p role="status" className="text-sm text-ink/70">{message}</p>}
-            <button disabled={resending} className="w-full rounded-xl bg-forest py-3 text-sm font-semibold text-white disabled:opacity-50">{resending ? 'Envoi…' : 'Renvoyer l’e-mail de confirmation'}</button>
+            {message && <p role="status" className="text-sm text-white/65">{message}</p>}
+            <button disabled={resending} className="w-full rounded-xl bg-[#D4AF37] py-3 text-sm font-semibold text-white disabled:opacity-50">{resending ? 'Envoi…' : 'Renvoyer l’e-mail de confirmation'}</button>
           </form>
           <Link to="/login" className="mt-5 block text-center text-xs text-gold">Retour à la connexion</Link>
         </div>
