@@ -14,7 +14,7 @@ import LoyaltyCard from '@/pages/LoyaltyCard';
 import LoyaltyJoin from '@/pages/LoyaltyJoin';
 import LoyaltyRecover from '@/pages/LoyaltyRecover';
 import Login from '@/pages/Login';
-import { ForgotPassword, Register, ResetPassword } from '@/pages/AuthPages';
+import { EmailConfirmation, ForgotPassword, Register, ResetPassword } from '@/pages/AuthPages';
 
 import Dashboard from '@/pages/Dashboard';
 import Reviews from '@/pages/Reviews';
@@ -201,6 +201,7 @@ function App() {
           <Route path="/loyalty/:token" element={<LoyaltyCard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/auth/callback" element={<EmailConfirmation />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
 
