@@ -139,7 +139,7 @@ export function Register() {
     const { data, error: verifyError } = await supabase.auth.verifyOtp({
       email: form.email.trim(),
       token: token.trim(),
-      type: 'email',
+      type: 'signup',
     });
     setVerifying(false);
     if (verifyError || !data.user) {
@@ -178,10 +178,10 @@ export function Register() {
         <p className="text-sm leading-6 text-white/65">{pendingVerification ? <>Nous avons demandé l’envoi d’un code de confirmation à <strong>{form.email}</strong>. Saisissez-le ci-dessous pour confirmer votre adresse et activer votre espace KELYANI.</> : 'Vous avez déjà reçu un code ? Saisissez l’adresse e-mail utilisée lors de l’inscription et le code à 6 chiffres.'}</p>
         {enterExistingCode && <Field icon={Mail} type="email" required placeholder="Adresse e-mail de l’inscription" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />}
         <form onSubmit={verify} className="space-y-4">
-          <Field icon={LockKeyhole} type="text" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} minLength={6} required placeholder="Code de confirmation à 6 chiffres" value={token} onChange={e => setToken(e.target.value.replace(/\\D/g, '').slice(0, 6))} />
+          <Field icon={LockKeyhole} type="text" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{8}" maxLength={8} minLength={8} required placeholder="Code de confirmation à 8 chiffres" value={token} onChange={e => setToken(e.target.value.replace(/\\D/g, '').slice(0, 8))} />
           {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
           {notice && <p role="status" className="text-sm text-white/65">{notice}</p>}
-          <button disabled={verifying || token.length !== 6} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4AF37] py-3.5 text-sm font-semibold text-white disabled:opacity-50">{verifying ? 'Vérification…' : 'Confirmer mon adresse'} <ArrowRight size={16} /></button>
+          <button disabled={verifying || token.length !== 8} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4AF37] py-3.5 text-sm font-semibold text-white disabled:opacity-50">{verifying ? 'Vérification…' : 'Confirmer mon adresse'} <ArrowRight size={16} /></button>
         </form>
         <button type="button" onClick={resendCode} disabled={resending || !form.email.trim()} className="w-full text-center text-sm font-semibold text-[#D4AF37] disabled:opacity-50">{resending ? 'Envoi…' : 'Renvoyer un code'}</button>
         {!pendingVerification && <button type="button" onClick={() => { setEnterExistingCode(false); setToken(''); setError(''); setNotice(''); }} className="w-full text-center text-xs text-white/50 hover:text-[#D4AF37]">Retour à la création du compte</button>}
@@ -192,7 +192,7 @@ export function Register() {
         <form onSubmit={submit} className="mt-9 space-y-4">
           <Field icon={UserRound} required placeholder="Votre nom" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
           <Field icon={Mail} type="email" required placeholder="Adresse email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
-          <Field icon={LockKeyhole} type="password" minLength={6} required placeholder="Mot de passe (6 caractères minimum)" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
+          <Field icon={LockKeyhole} type="password" minLength={8} required placeholder="Mot de passe (6 caractères minimum)" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
           {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
           <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4AF37] py-3.5 text-sm font-semibold text-[#0D0D0D] transition hover:bg-[#E1C15A]">Créer mon compte <ArrowRight size={16} /></button>
         </form>
@@ -250,8 +250,8 @@ export function ResetPassword() {
         </div>
       ) : (
         <form onSubmit={submit} className="mt-9 space-y-4">
-          <Field icon={LockKeyhole} type="password" minLength={6} required placeholder="Nouveau mot de passe" value={password} onChange={e => setPassword(e.target.value)} />
-          <Field icon={LockKeyhole} type="password" minLength={6} required placeholder="Confirmer le mot de passe" value={confirmation} onChange={e => setConfirmation(e.target.value)} />
+          <Field icon={LockKeyhole} type="password" minLength={8} required placeholder="Nouveau mot de passe" value={password} onChange={e => setPassword(e.target.value)} />
+          <Field icon={LockKeyhole} type="password" minLength={8} required placeholder="Confirmer le mot de passe" value={confirmation} onChange={e => setConfirmation(e.target.value)} />
           {error && <p className="text-sm text-red-400">{error}</p>}
           <button disabled={saving} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4AF37] py-3.5 text-sm font-semibold text-[#0D0D0D] transition hover:bg-[#E1C15A] disabled:opacity-50">
             {saving ? 'Mise à jour…' : 'Enregistrer le nouveau mot de passe'} <ArrowRight size={16} />
