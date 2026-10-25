@@ -830,9 +830,12 @@ export default function Dashboard() {
           <div className="mt-7 rounded-2xl border border-white/[0.07] bg-white/[0.025] p-4 text-left">
             <p className="text-xs font-semibold text-[#F5F5DC]">Que faire maintenant ?</p>
             <p className="mt-1 text-xs leading-6 text-[#F5F5DC]/50">Contactez votre administrateur ou l’équipe KELYANI pour demander l’attribution de votre établissement.</p>
-            <div className="mt-3 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <a href="mailto:kelyani.support@gmail.com" className="inline-flex items-center gap-2 text-sm font-semibold text-[#E1C27A]">Envoyer un e-mail <ArrowUpRight size={15} /></a>
-              <a href="tel:+212630359176" className="inline-flex items-center gap-2 text-sm font-semibold text-[#E1C27A]">Appeler le +212 630 35 91 76</a>
+            <div className="mt-4 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap">
+              <a href="https://wa.me/212630359176?text=Bonjour%20KELYANI%2C%20j%E2%80%99ai%20besoin%20d%E2%80%99aide%20pour%20attribuer%20mon%20%C3%A9tablissement%20%C3%A0%20mon%20compte." target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-5 py-3 text-sm font-bold text-[#071B10] transition hover:bg-[#20BD5A]">
+                <MessageCircle size={17} /> Contacter sur WhatsApp
+              </a>
+              <a href="tel:+212630359176" className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#C9A45C]/30 px-5 py-3 text-sm font-semibold text-[#E1C27A] hover:bg-[#C9A45C]/10">Appeler le +212 630 35 91 76</a>
+              <a href="mailto:kelyani.support@gmail.com" className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 px-5 py-3 text-sm font-semibold text-[#F5F5DC]/75 hover:bg-white/5">Envoyer un e-mail <ArrowUpRight size={15} /></a>
             </div>
           </div>
           <button type="button" onClick={() => window.location.reload()} className="mt-6 inline-flex items-center justify-center rounded-xl border border-[#C9A45C]/30 px-5 py-3 text-xs font-bold text-[#E1C27A] hover:bg-[#C9A45C]/10">Actualiser mon espace</button>
