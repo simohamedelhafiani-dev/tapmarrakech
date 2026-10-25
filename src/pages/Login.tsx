@@ -281,13 +281,18 @@ export default function Login() {
             )}
 
             {selectedRole === null && (
-              <div className="mt-6 rounded-2xl border border-[#C9A45C]/25 bg-[#C9A45C]/[0.05] p-4 text-center">
-                <p className="text-sm text-[#F5F5DC]/65">Vous découvrez KELYANI ?</p>
+              <div className="mt-6">
                 <Link
                   to="/register"
-                  className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[#C9A45C]/60 bg-[#C9A45C] px-4 py-3 text-sm font-bold text-[#050505] transition hover:-translate-y-0.5 hover:bg-[#E1C27A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A45C]/60"
+                  className="group flex w-full items-center gap-4 rounded-[24px] border border-white/[0.075] bg-gradient-to-r from-[#151515] to-[#0E0E0E] p-4 text-left shadow-[0_16px_45px_rgba(0,0,0,.24),inset_0_1px_0_rgba(255,255,255,.025)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#C9A45C]/40 hover:from-[#191714] hover:to-[#11100D] hover:shadow-[0_24px_55px_rgba(0,0,0,.38)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A45C]/60 active:translate-y-0"
                 >
-                  Créer votre compte <ArrowRight size={16} />
+                  <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#C9A45C]/10 text-[#E1C27A]"><UserRound size={21} /></div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#F5F5DC]/30">Nouveau sur KELYANI</p>
+                    <p className="mt-1 font-display text-xl text-white">Créer votre compte</p>
+                    <p className="mt-1 text-xs text-[#F5F5DC]/40">Créer votre espace et commencer</p>
+                  </div>
+                  <ArrowRight size={18} className="text-[#C9A45C] transition-transform group-hover:translate-x-1" />
                 </Link>
               </div>
             )}
