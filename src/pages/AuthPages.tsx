@@ -65,7 +65,113 @@ export function Login() {
     <div className="mt-5 flex justify-between text-xs"><Link to="/forgot-password" className="text-forest underline underline-offset-4">Mot de passe oublié ?</Link><Link to="/register" className="font-semibold text-gold">Créer un compte</Link></div>
   </AuthShell>;
 }
-export function Register() { const navigate = useNavigate(); const [form, setForm] = useState({ name: '', email: '', password: '' }); const [error, setError] = useState(''); const submit = async (e: React.FormEvent) => { e.preventDefault(); setError(''); const { data, error: authError } = await supabase.auth.signUp({ email: form.email.trim(), password: form.password, options: { data: { name: form.name.trim() }, emailRedirectTo: `${window.location.origin}/auth/callback` } }); if (authError) { setError(authError.message.includes('already') ? 'Un compte existe déjà avec cet email.' : 'Impossible de créer le compte.'); return; } if (data.user && data.session) { const { error: profileError } = await supabase.from('profiles').upsert({ id: data.user.id, email: form.email.trim(), name: form.name.trim() }, { onConflict: 'id' }); if (profileError) { setError('Le compte est créé mais le profil n’a pas pu être enregistré.'); return; } navigate('/dashboard'); } else { setError('Compte créé. Vérifiez votre email avant de vous connecter.'); } }; return <AuthShell eyebrow="Commencer simplement" title="Créez votre espace."><form onSubmit={submit} className="mt-9 space-y-4"><Field icon={UserRound} required placeholder="Votre nom" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /><Field icon={Mail} type="email" required placeholder="Adresse email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} /><Field icon={LockKeyhole} type="password" minLength={6} required placeholder="Mot de passe (6 caractères minimum)" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />{error && <p className="text-sm text-red-600">{error}</p>}<button className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white transition hover:bg-forest-light">Créer mon compte <ArrowRight size={16} /></button></form><p className="mt-5 text-center text-xs text-ink/50">Déjà inscrit ? <Link to="/login" className="font-semibold text-gold">Se connecter</Link></p></AuthShell>; }
+export function Register() {
+  const navigate = useNavigate();
+  const [form, setForm] = useState({ name: '', email: '', password: '' });
+  const [error, setError] = useState('');
+  const [pendingVerification, setPendingVerification] = useState(false);
+  const [token, setToken] = useState('');
+  const [verifying, setVerifying] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [notice, setNotice] = useState('');
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    const { data, error: authError } = await supabase.auth.signUp({
+      email: form.email.trim(),
+      password: form.password,
+      options: { data: { name: form.name.trim() } },
+    });
+    if (authError) {
+      setError(authError.message.toLowerCase().includes('already')
+        ? 'Un compte existe déjà avec cet email.'
+        : 'Impossible de créer le compte. Vérifiez les informations et réessayez.');
+      return;
+    }
+    if (data.user && data.session) {
+      const { error: profileError } = await supabase.from('profiles').upsert({
+        id: data.user.id, email: form.email.trim(), name: form.name.trim(),
+      }, { onConflict: 'id' });
+      if (profileError) {
+        setError('Le compte est créé mais le profil n’a pas pu être enregistré.');
+        return;
+      }
+      navigate('/dashboard');
+      return;
+    }
+    setPendingVerification(true);
+    setNotice('Un code de confirmation a été demandé par e-mail.');
+  };
+
+  const verify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setVerifying(true);
+    const { data, error: verifyError } = await supabase.auth.verifyOtp({
+      email: form.email.trim(),
+      token: token.trim(),
+      type: 'email',
+    });
+    setVerifying(false);
+    if (verifyError || !data.user) {
+      setError('Code invalide ou expiré. Vérifiez le code reçu ou demandez-en un nouveau.');
+      return;
+    }
+    const { error: profileError } = await supabase.from('profiles').upsert({
+      id: data.user.id,
+      email: form.email.trim(),
+      name: form.name.trim() || String(data.user.user_metadata?.name || ''),
+    }, { onConflict: 'id' });
+    if (profileError) {
+      setError('Adresse confirmée, mais le profil n’a pas pu être enregistré. Réessayez de vous connecter.');
+      return;
+    }
+    navigate('/dashboard');
+  };
+
+  const resendCode = async () => {
+    setResending(true);
+    setError('');
+    setNotice('');
+    const { error: resendError } = await supabase.auth.resend({
+      type: 'signup',
+      email: form.email.trim(),
+    });
+    setResending(false);
+    setNotice(resendError
+      ? 'Impossible de renvoyer le code pour le moment. Réessayez dans quelques minutes.'
+      : 'Si cette inscription est en attente, un nouveau code a été envoyé.');
+  };
+
+  return <AuthShell eyebrow={pendingVerification ? 'Vérification sécurisée' : 'Commencer simplement'} title={pendingVerification ? 'Confirmez votre adresse.' : 'Créez votre espace.'}>
+    {pendingVerification ? (
+      <div className="mt-9 space-y-4">
+        <p className="text-sm leading-6 text-ink/70">Nous avons demandé l’envoi d’un code de confirmation à <strong>{form.email}</strong>. Saisissez le code reçu pour confirmer votre adresse et activer votre espace KELYANI.</p>
+        <form onSubmit={verify} className="space-y-4">
+          <Field icon={LockKeyhole} type="text" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} minLength={6} required placeholder="Code de confirmation à 6 chiffres" value={token} onChange={e => setToken(e.target.value.replace(/\\D/g, '').slice(0, 6))} />
+          {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+          {notice && <p role="status" className="text-sm text-ink/70">{notice}</p>}
+          <button disabled={verifying || token.length !== 6} className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white disabled:opacity-50">{verifying ? 'Vérification…' : 'Confirmer mon adresse'} <ArrowRight size={16} /></button>
+        </form>
+        <button type="button" onClick={resendCode} disabled={resending} className="w-full text-center text-sm font-semibold text-gold disabled:opacity-50">{resending ? 'Envoi…' : 'Renvoyer un code'}</button>
+        <p className="text-center text-xs text-ink/50">Vérifiez également vos courriers indésirables.</p>
+      </div>
+    ) : (
+      <>
+        <form onSubmit={submit} className="mt-9 space-y-4">
+          <Field icon={UserRound} required placeholder="Votre nom" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+          <Field icon={Mail} type="email" required placeholder="Adresse email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+          <Field icon={LockKeyhole} type="password" minLength={6} required placeholder="Mot de passe (6 caractères minimum)" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
+          {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+          <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white transition hover:bg-forest-light">Créer mon compte <ArrowRight size={16} /></button>
+        </form>
+        <p className="mt-5 text-center text-xs text-ink/50">Déjà inscrit ? <Link to="/login" className="font-semibold text-gold">Se connecter</Link></p>
+      </>
+    )}
+  </AuthShell>;
+}
+
 export function ForgotPassword() { const [email, setEmail] = useState(''); const [sent, setSent] = useState(false); const [error, setError] = useState(''); const submit = async (e: React.FormEvent) => { e.preventDefault(); setError(''); const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}/reset-password` }); if (resetError) { setError('Impossible d’envoyer le lien. Vérifiez l’adresse email et réessayez.'); return; } setSent(true); }; return <AuthShell eyebrow="Accès sécurisé" title="Réinitialiser l’accès.">{sent ? <div className="mt-9 rounded-2xl bg-white p-5 text-sm text-ink/70"><Check className="mb-2 text-forest" />Si un compte correspond à cette adresse, vous recevrez un email avec les instructions.</div> : <form onSubmit={submit} className="mt-9 space-y-4"><Field icon={Mail} type="email" required placeholder="Adresse email" value={email} onChange={e => setEmail(e.target.value)} />{error && <p className="text-sm text-red-600">{error}</p>}<button className="w-full rounded-xl bg-forest py-3.5 text-sm font-semibold text-white transition hover:bg-forest-light">Recevoir le lien</button><Link to="/login" className="block text-center text-xs text-gold">Retour à la connexion</Link></form>}</AuthShell>; }
 
 
