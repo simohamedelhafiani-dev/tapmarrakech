@@ -339,16 +339,12 @@ export default function Admin() {
       if (staffError) throw staffError;
 
       const rows = staffRows ?? [];
-      const userIds = rows.map((row) => row.user_id).filter(Boolean);
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, email, name, role, created_at')
-        .or('role.eq.responsible,role.eq.employee,role.eq.admin');
-
-      if (profilesError) throw profilesError;
-
-      const profileMap = new Map((profiles ?? []).map((profile) => [profile.id, profile]));
-      const assignedIds = new Set(userIds);
+      const { data: accountsData, error: accountsError } = await supabase.functions.invoke('admin-list-responsible-accounts');
+      if (accountsError) throw new Error(accountsData?.error || accountsError.message || 'Impossible de charger les comptes responsables.');
+      if (accountsData?.success !== true) throw new Error(accountsData?.error || 'Impossible de charger les comptes responsables.');
+      const profiles = accountsData.profiles ?? [];
+      const profileMap = new Map(profiles.map((profile: { id: string; email?: string | null; name?: string | null; role?: string | null; created_at?: string | null }) => [profile.id, profile]));
+      const assignedIds = new Set<string>(accountsData.assigned_user_ids ?? []);
 
       const assigned: StaffMember[] = rows.map((row) => {
         const profile = profileMap.get(row.user_id);
@@ -366,9 +362,9 @@ export default function Admin() {
       });
 
       // Show self-registered responsible accounts even before an establishment is assigned.
-      const awaitingAssignment: StaffMember[] = (profiles ?? [])
-        .filter((profile) => profile.role === 'responsible' && !assignedIds.has(profile.id))
-        .map((profile) => ({
+      const awaitingAssignment: StaffMember[] = profiles
+        .filter((profile: { id: string; role?: string | null }) => profile.role === 'responsible' && !assignedIds.has(profile.id))
+        .map((profile: { id: string; role?: string | null; created_at?: string | null; email?: string | null; name?: string | null }) => ({
           id: `unassigned-${profile.id}`,
           establishment_id: '',
           user_id: profile.id,
@@ -379,7 +375,6 @@ export default function Admin() {
           name: profile.name ?? 'Responsable',
           profileRole: 'responsible',
         }));
-
       setStaff([...awaitingAssignment, ...assigned]);
     } catch (error) {
       console.error('Erreur chargement responsables et équipe:', error);
