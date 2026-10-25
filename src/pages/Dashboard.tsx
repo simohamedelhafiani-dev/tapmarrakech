@@ -830,7 +830,10 @@ export default function Dashboard() {
           <div className="mt-7 rounded-2xl border border-white/[0.07] bg-white/[0.025] p-4 text-left">
             <p className="text-xs font-semibold text-[#F5F5DC]">Que faire maintenant ?</p>
             <p className="mt-1 text-xs leading-6 text-[#F5F5DC]/50">Contactez votre administrateur ou l’équipe KELYANI pour demander l’attribution de votre établissement.</p>
-            <a href="mailto:kelyani.support@gmail.com" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#E1C27A]">Contacter le support <ArrowUpRight size={15} /></a>
+            <div className="mt-3 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <a href="mailto:kelyani.support@gmail.com" className="inline-flex items-center gap-2 text-sm font-semibold text-[#E1C27A]">Envoyer un e-mail <ArrowUpRight size={15} /></a>
+              <a href="tel:+212630359176" className="inline-flex items-center gap-2 text-sm font-semibold text-[#E1C27A]">Appeler le +212 630 35 91 76</a>
+            </div>
           </div>
           <button type="button" onClick={() => window.location.reload()} className="mt-6 inline-flex items-center justify-center rounded-xl border border-[#C9A45C]/30 px-5 py-3 text-xs font-bold text-[#E1C27A] hover:bg-[#C9A45C]/10">Actualiser mon espace</button>
         </section>
