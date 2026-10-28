@@ -22,6 +22,17 @@ Deno.serve(async request=>{
     const {data:places,error:accessError}=await userClient.rpc('get_my_establishments');
     if(accessError||!(places??[]).some((x:any)=>String(x.id)===establishmentId)) return json({success:false,error:'Accès à cet établissement refusé.'},403);
 
+
+    // Server-side subscription enforcement for AI loyalty-card generation.
+    const {data:subscriptionData,error:subscriptionError}=await userClient.rpc('get_responsible_subscription_card',{p_establishment_id:establishmentId});
+    if(subscriptionError||!subscriptionData||typeof subscriptionData!=='object'||Array.isArray(subscriptionData)) return json({success:false,error:'Impossible de vérifier les droits de l’abonnement.'},403);
+    const subscription=subscriptionData as Record<string,unknown>;
+    const status=String(subscription.subscription_status??'').toLowerCase();
+    const end=subscription.current_period_end?new Date(String(subscription.current_period_end)).getTime():null;
+    const features=Array.isArray(subscription.features)?subscription.features.map((x)=>String(x).trim().toLowerCase()):[];
+    const expired=end!==null&&Number.isFinite(end)&&end<=Date.now();
+    if(!['active','trial'].includes(status)||expired||!features.some((x)=>['fidélité','programme fidélité'].includes(x))) return json({success:false,error:'La génération IA des cartes de fidélité n’est pas incluse dans votre abonnement actif.'},403);
+
     const serviceClient=createClient(url,service,{auth:{persistSession:false,autoRefreshToken:false}});
     const {data:settings,error:settingsError}=await serviceClient.from('ai_global_settings').select('provider,api_key,enabled').eq('id',true).maybeSingle();
     if(settingsError||!settings?.enabled||String(settings.provider).toLowerCase()!=='openai'||!settings.api_key) return json({success:false,error:'L’IA OpenAI doit être activée dans Configuration IA.'},503);
