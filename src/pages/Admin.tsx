@@ -5216,11 +5216,16 @@ function BillingSection({
     if (!selectedPlan) return alert('Pack introuvable.');
 
     setSavingAssignment(true);
+    const startedAt = new Date();
+    const periodEnd = new Date(startedAt);
+    periodEnd.setMonth(periodEnd.getMonth() + (selectedPlan.interval === 'year' ? 12 : 1));
     const { error } = await supabase.rpc('assign_subscription_to_establishment', {
       p_establishment_id: assignmentEstablishmentId,
       p_plan_id: assignmentPlanId,
       p_status: assignmentStatus,
       p_trial_days: assignmentStatus === 'trial' ? Math.max(1, Number(assignmentTrialDays) || 14) : 0,
+      p_started_at: startedAt.toISOString(),
+      p_period_end: periodEnd.toISOString(),
     });
     setSavingAssignment(false);
 
@@ -5241,14 +5246,12 @@ function BillingSection({
     if (!selectedPlan) return alert('Pack introuvable.');
 
     const startedAt = toIsoDate(subscriptionForm.startedAt);
-    const periodEnd = toIsoDate(subscriptionForm.periodEnd);
-    if (!startedAt || !periodEnd) {
-      return alert('La date de début et la date de fin sont obligatoires.');
+    if (!startedAt) {
+      return alert('La date de validation de l’abonnement est obligatoire.');
     }
-
-    if (new Date(periodEnd).getTime() <= new Date(startedAt).getTime()) {
-      return alert('La date de fin doit être postérieure à la date de début.');
-    }
+    const periodEndDate = new Date(startedAt);
+    periodEndDate.setMonth(periodEndDate.getMonth() + (selectedPlan.interval === 'year' ? 12 : 1));
+    const periodEnd = periodEndDate.toISOString();
 
     const trialDays = subscriptionForm.status === 'trial'
       ? Math.max(1, Number(subscriptionForm.trialDays) || 14)
@@ -5445,15 +5448,11 @@ function BillingSection({
                     />
                   </label>
 
-                  <label className="text-xs font-semibold">
-                    Date de fin / échéance
-                    <input
-                      type="datetime-local"
-                      value={subscriptionForm.periodEnd}
-                      onChange={(e) => setSubscriptionForm((v) => ({ ...v, periodEnd: e.target.value }))}
-                      className="mt-2 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-3 py-3 text-sm font-normal outline-none focus:border-[#242424]"
-                    />
-                  </label>
+                  <div className="rounded-xl border border-[#242424]/10 bg-[#111111] px-3 py-3 text-xs text-[#FFFFFF]/55">
+                    La date d’échéance est calculée automatiquement : {subscriptionForm.startedAt
+                      ? new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format((() => { const d = new Date(subscriptionForm.startedAt); d.setMonth(d.getMonth() + ((billing.plans.find((p) => p.id === subscriptionForm.planId)?.interval === 'year') ? 12 : 1)); return d; })())
+                      : 'choisissez une date de validation'}.
+                  </div>
 
                   <label className="text-xs font-semibold">
                     Durée de l’essai
