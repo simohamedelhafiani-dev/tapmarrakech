@@ -17,6 +17,14 @@ const {data:es,error:ee}=await uc.rpc('get_my_establishments');if(ee)return j({s
 if(!((es??[]) as Array<Record<string,unknown>>).some(x=>String(x.id??'')===eid))return j({success:false,error:'Accès à cet établissement refusé.'},403);
 const {data:p,error:pe}=await uc.from('promotions').select('id,name,promo_price,active').eq('id',pid).eq('establishment_id',eid).maybeSingle();
 if(pe||!p)return j({success:false,error:'Promotion introuvable ou accès refusé.'},404);if(!p.active)return j({success:false,error:'Cette promotion est masquée.'},400);
+
+const {data:subscriptionData,error:subscriptionError}=await uc.rpc('get_responsible_subscription_card',{p_establishment_id:eid});
+if(subscriptionError||!subscriptionData||typeof subscriptionData!=='object'||Array.isArray(subscriptionData))return j({success:false,error:'Impossible de vérifier les droits de l’abonnement.'},403);
+const subscription=subscriptionData as Record<string,unknown>;
+const status=String(subscription.subscription_status??'').toLowerCase();
+const end=subscription.current_period_end?new Date(String(subscription.current_period_end)).getTime():null;
+const features=Array.isArray(subscription.features)?subscription.features.map(x=>String(x).trim().toLowerCase()):[];
+if(!['active','trial'].includes(status)||(end!==null&&Number.isFinite(end)&&end<=Date.now())||!features.some(x=>['promotions','promotion'].includes(x)))return j({success:false,error:'Les notifications promotionnelles ne sont pas incluses dans votre abonnement actif.'},403);
 const sc=createClient(url,service,{auth:{persistSession:false,autoRefreshToken:false}});
 const {data:ss,error:se}=await sc.from('loyalty_push_subscriptions').select('id,endpoint,p256dh,auth,card_url').eq('establishment_id',eid);
 if(se)return j({success:false,error:'Impossible de charger les abonnements de notification.'},500);
