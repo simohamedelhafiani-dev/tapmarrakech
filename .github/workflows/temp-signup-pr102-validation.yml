@@ -1,0 +1,27 @@
+name: Temporary signup PR102 validation
+on:
+  push:
+    branches:
+      - test/signup-pr102-20261028
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout isolated test branch
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: TypeScript typecheck
+        run: npm run typecheck
+      - name: ESLint
+        run: npm run lint
+      - name: Production build
+        run: npm run build
