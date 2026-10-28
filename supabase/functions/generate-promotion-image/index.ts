@@ -87,6 +87,33 @@ Deno.serve(async (request) => {
       return json({ success: false, error: 'Accès à cet établissement refusé.' }, 403);
     }
 
+    // Enforce the subscription on the server too; hiding the UI alone is not authorization.
+    const { data: subscriptionData, error: subscriptionError } = await userClient.rpc(
+      'get_responsible_subscription_card',
+      { p_establishment_id: establishmentId }
+    );
+
+    if (subscriptionError || !subscriptionData || typeof subscriptionData !== 'object' || Array.isArray(subscriptionData)) {
+      console.error('Subscription access lookup failed', subscriptionError);
+      return json({ success: false, error: 'Impossible de vérifier les droits de l’abonnement.' }, 403);
+    }
+
+    const subscription = subscriptionData as Record<string, unknown>;
+    const subscriptionStatus = String(subscription.subscription_status ?? '').toLowerCase();
+    const periodEnd = subscription.current_period_end ? new Date(String(subscription.current_period_end)).getTime() : null;
+    const subscriptionFeatures = Array.isArray(subscription.features)
+      ? subscription.features.map((feature) => String(feature).trim().toLowerCase())
+      : [];
+
+    const hasPromotionFeature = subscriptionFeatures.some((feature) =>
+      ['promotions', 'promotion'].includes(feature)
+    );
+    const subscriptionExpired = periodEnd !== null && Number.isFinite(periodEnd) && periodEnd <= Date.now();
+
+    if (!['active', 'trial'].includes(subscriptionStatus) || subscriptionExpired || !hasPromotionFeature) {
+      return json({ success: false, error: 'La génération IA de promotions n’est pas incluse dans votre abonnement actif.' }, 403);
+    }
+
     const serviceClient = createClient(supabaseUrl, serviceKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
