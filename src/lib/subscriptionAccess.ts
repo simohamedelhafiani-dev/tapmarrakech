@@ -67,6 +67,20 @@ export function planHasFeature(
 ) {
   if (!access) return false;
 
+  // Never grant feature access for canceled, unpaid, or overdue subscriptions.
+  if (!['active', 'trial'].includes(access.subscription_status.toLowerCase())) {
+    return false;
+  }
+
+  // Expired subscriptions must not retain access even if their status was not
+  // updated by a billing webhook or an administrator.
+  if (access.current_period_end) {
+    const periodEnd = new Date(access.current_period_end).getTime();
+    if (Number.isFinite(periodEnd) && periodEnd <= Date.now()) {
+      return false;
+    }
+  }
+
   const normalized = new Set(
     (access.features ?? []).map((item) =>
       String(item).trim().toLowerCase()
