@@ -5,14 +5,14 @@
 :root {
   color-scheme: dark;
   font-family: 'DM Sans', sans-serif;
-  color: #F5F5DC;
-  background: #0D0D0D;
+  color: var(--kelyani-text);
+  background: var(--kelyani-bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   --kelyani-bg: #0D0D0D;
-  --kelyani-panel: #141414;
+  --kelyani-panel: #111111;
   --kelyani-panel-raised: #1A1A1A;
-  --kelyani-border: rgba(255,255,255,.085);
+  --kelyani-border: rgba(212, 175, 55, 0.18);
   --kelyani-text: #F5F5DC;
   --kelyani-muted: rgba(245,245,220,.55);
   --kelyani-gold: #D4AF37;
@@ -26,7 +26,7 @@
 body { margin: 0; min-width: 320px; }
 button, input, textarea, select { font: inherit; }
 .font-display { font-family: 'Playfair Display', serif; }
-@layer utilities { .bg-cream { background-color: #111111; } .text-ink { color: #F5F5DC; } .bg-forest { background-color: #0D0D0D; } .text-forest { color: #D4AF37; } .bg-gold { background-color: #D4AF37; } .text-gold { color: #D4AF37; } .border-gold { border-color: #D4AF37; } .bg-forest-light { background-color: #1A1A1A; } }
+@layer utilities { .bg-cream { background-color: var(--kelyani-panel); } .text-ink { color: var(--kelyani-text); } .bg-forest { background-color: var(--kelyani-bg); } .text-forest { color: var(--kelyani-gold); } .bg-gold { background-color: var(--kelyani-gold); } .text-gold { color: var(--kelyani-gold); } .border-gold { border-color: var(--kelyani-gold); } .bg-forest-light { background-color: var(--kelyani-panel-raised); } }
 
 
 html, body, #root {
