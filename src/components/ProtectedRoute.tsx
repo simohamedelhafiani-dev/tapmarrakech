@@ -12,7 +12,7 @@ export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen grid place-items-center bg-cream">
+      <div className="min-h-screen grid place-items-center bg-[#111111]">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
       </div>
     );
