@@ -280,6 +280,12 @@ export default function Login() {
               </div>
             )}
 
+            <div className="mt-5 flex justify-center">
+              <Link to="/register" className="rounded-xl border border-[#C9A45C]/35 px-5 py-3 text-xs font-semibold text-[#E1C27A] transition hover:border-[#C9A45C] hover:bg-[#C9A45C]/10">
+                Créer un compte KELYANI
+              </Link>
+            </div>
+
             <div className="mt-7 flex items-center justify-center gap-5 text-[9px] uppercase tracking-[0.12em] text-[#F5F5DC]/20">
               <span className="inline-flex items-center gap-1.5"><ShieldCheck size={13} /> Sécurisé</span>
               <span className="inline-flex items-center gap-1.5"><Heart size={13} /> Client d’abord</span>
