@@ -178,7 +178,7 @@ export default function LoyaltyJoin() {
 
   if (!referralCode && !establishmentId) {
     return (
-      <main className="min-h-screen bg-[#f7f7f3] px-4 py-8">
+      <main className="min-h-screen bg-[#111111] px-4 py-8">
         <div className="mx-auto max-w-md rounded-[2rem] bg-[#111111] p-7 text-center shadow-xl">
           <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#e5eee9] text-[#E1C27A]">
             <Gift className="h-6 w-6" />
