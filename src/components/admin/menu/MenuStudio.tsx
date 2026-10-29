@@ -60,7 +60,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
     wallpaperObjectUrl: null,
     wallpaperRemoved: false,
     overlayOpacity: 0.35,
-    themeColors: { background: '#F5F1E8', surface: '#FFFDFA', text: '#24211C', accent: '#D4AF37' },
+    themeColors: { background: '#0D0D0D', surface: '#111111', text: '#F5F5DC', accent: '#D4AF37' },
     aiDesign: null,
   });
 
