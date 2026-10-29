@@ -144,7 +144,7 @@ function SubscriptionFeatureRoute({
   if (loadError) {
     return (
       <div
-        className="rounded-2xl border border-red-200 bg-white px-6 py-12 text-center"
+        className="rounded-2xl border border-red-200 bg-[var(--kelyani-panel)] px-6 py-12 text-center"
         role="alert"
       >
         <h2 className="font-display text-xl text-forest">
@@ -166,7 +166,7 @@ function SubscriptionFeatureRoute({
 
   if (!establishmentId) {
     return (
-      <div className="rounded-2xl border border-dashed border-ink/15 bg-white px-6 py-16 text-center">
+      <div className="rounded-2xl border border-dashed border-ink/15 bg-[var(--kelyani-panel)] px-6 py-16 text-center">
         <h2 className="font-display text-2xl text-forest">
           Aucun établissement sélectionné
         </h2>
@@ -348,7 +348,7 @@ function RoleRedirect() {
 
   if (loading) {
     return (
-      <div className="min-h-screen grid place-items-center bg-[#f7f7f3]">
+      <div className="min-h-screen grid place-items-center bg-[var(--kelyani-panel)]">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
       </div>
     );
