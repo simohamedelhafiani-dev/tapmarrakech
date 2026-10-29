@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -29,6 +29,7 @@ import AdminOverviewV2 from '@/pages/AdminOverviewV2';
 import AdminStatCardTest from '@/pages/AdminStatCardTest';
 import LoyaltyScanner from '@/pages/LoyaltyScanner';
 import AssistantIA from '@/pages/AssistantIA';
+import Onboarding from '@/pages/Onboarding';
 
 type EstablishmentRow = {
   id: string;
@@ -187,6 +188,48 @@ function SubscriptionFeatureRoute({
   );
 }
 
+function OnboardingGate() {
+  const { user, loading: authLoading } = useAuth();
+  const [status, setStatus] = useState<'loading' | 'complete' | 'incomplete' | 'error'>('loading');
+  const [retry, setRetry] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    if (authLoading) return () => { active = false; };
+    if (!user?.id) {
+      setStatus('error');
+      return () => { active = false; };
+    }
+    setStatus('loading');
+    void supabase.from('profiles').select('onboarding_completed_at').eq('id', user.id).maybeSingle()
+      .then(({ data, error }) => {
+        if (!active) return;
+        if (error) {
+          console.error('Impossible de vérifier la fin de l’onboarding:', error);
+          setStatus('error');
+        } else {
+          setStatus(data?.onboarding_completed_at ? 'complete' : 'incomplete');
+        }
+      });
+    return () => { active = false; };
+  }, [user?.id, authLoading, retry]);
+
+  if (authLoading || status === 'loading') {
+    return <div className="grid min-h-screen place-items-center bg-[var(--kelyani-bg)]"><div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--kelyani-gold)] border-t-transparent" /></div>;
+  }
+  if (status === 'incomplete') return <Navigate to="/dashboard/onboarding" replace />;
+  if (status === 'error') {
+    return <div className="grid min-h-[60vh] place-items-center bg-[var(--kelyani-bg)] px-6 text-center text-[var(--kelyani-text)]">
+      <div className="max-w-md rounded-2xl border border-[var(--kelyani-border)] bg-[var(--kelyani-panel)] p-6">
+        <h1 className="font-display text-xl text-[var(--kelyani-gold)]">Vérification du profil impossible</h1>
+        <p className="mt-3 text-sm text-white/60">Nous ne pouvons pas vérifier si votre profil est terminé. Réessayez avant de continuer.</p>
+        <button type="button" onClick={() => setRetry(value => value + 1)} className="mt-5 rounded-xl bg-[var(--kelyani-gold)] px-4 py-2.5 text-sm font-semibold text-[var(--kelyani-bg)]">Réessayer</button>
+      </div>
+    </div>;
+  }
+  return <Outlet />;
+}
+
 function App() {
   return (
     <LanguageProvider>
@@ -214,7 +257,9 @@ function App() {
           </Route>
 
           <Route element={<ProtectedRoute allowedRoles={['responsible']} />}>
-            <Route element={<DashboardLayout />}>
+            <Route path="/dashboard/onboarding" element={<Onboarding />} />
+            <Route element={<OnboardingGate />}>
+              <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/dashboard/assistant-ia" element={<AssistantIA />} />
               <Route
@@ -273,6 +318,7 @@ function App() {
                 path="/dashboard/loyalty/settings"
                 element={<Navigate to="/dashboard/loyalty" replace />}
               />
+              </Route>
             </Route>
           </Route>
 
