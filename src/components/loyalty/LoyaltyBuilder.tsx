@@ -140,11 +140,11 @@ export default function LoyaltyBuilder({ establishmentId }: Props) {
   );
 
   if (loading) {
-    return <div className="grid min-h-[520px] place-items-center rounded-[28px] bg-white ring-1 ring-ink/5"><Loader2 className="animate-spin text-gold" /></div>;
+    return <div className="grid min-h-[520px] place-items-center rounded-[28px] bg-[#111111] ring-1 ring-ink/5"><Loader2 className="animate-spin text-gold" /></div>;
   }
 
   return (
-    <section className="rounded-[28px] bg-white p-4 shadow-soft ring-1 ring-ink/5 md:p-6">
+    <section className="rounded-[28px] bg-[#111111] p-4 shadow-soft ring-1 ring-ink/5 md:p-6">
       <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold">Fidélité</p>
@@ -152,7 +152,7 @@ export default function LoyaltyBuilder({ establishmentId }: Props) {
           <p className="mt-1 text-sm text-ink/45">Créez une carte unique qui reflète votre établissement.</p>
         </div>
         <div className="flex gap-2">
-          <button type="button" onClick={() => void save(false)} disabled={saving} className="rounded-xl border border-forest/15 bg-white px-4 py-2.5 text-xs font-semibold text-forest">
+          <button type="button" onClick={() => void save(false)} disabled={saving} className="rounded-xl border border-forest/15 bg-[#111111] px-4 py-2.5 text-xs font-semibold text-forest">
             Enregistrer
           </button>
           <button type="button" onClick={() => void save(true)} disabled={saving} className="inline-flex items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white">
@@ -206,9 +206,9 @@ function BuilderPanel({
 }) {
   return (
     <div className="min-w-0">
-      <div className="flex overflow-x-auto rounded-2xl bg-[#f7f7f3] p-1">
+      <div className="flex overflow-x-auto rounded-2xl bg-[#111111] p-1">
         {TABS.map(tab => (
-          <button key={tab} type="button" onClick={() => setActiveTab(tab)} className={`flex-1 whitespace-nowrap rounded-xl px-3 py-2.5 text-xs font-semibold transition ${activeTab === tab ? 'bg-white text-forest shadow-sm' : 'text-ink/40 hover:text-forest'}`}>
+          <button key={tab} type="button" onClick={() => setActiveTab(tab)} className={`flex-1 whitespace-nowrap rounded-xl px-3 py-2.5 text-xs font-semibold transition ${activeTab === tab ? 'bg-[#111111] text-forest shadow-sm' : 'text-ink/40 hover:text-forest'}`}>
             {tab}
           </button>
         ))}
@@ -221,7 +221,7 @@ function BuilderPanel({
             <AssetButton title="Photo de fond" image={config.coverImageUrl} loading={uploading === 'cover'} onClick={() => coverInput.current?.click()} />
           </div>
 
-          <div className="rounded-2xl border border-ink/8 p-4">
+          <div className="rounded-2xl border border-[#D4AF37]/20 p-4">
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-ink/40">Couleurs</p>
             <div className="mt-3 grid grid-cols-2 gap-2">
               {([
@@ -230,7 +230,7 @@ function BuilderPanel({
               ] as const).map(([label, key]) => (
                 <label key={key} className="text-[10px] font-semibold text-ink/45">
                   {label}
-                  <div className="mt-1 flex items-center gap-2 rounded-xl border border-ink/10 p-2">
+                  <div className="mt-1 flex items-center gap-2 rounded-xl border border-[#D4AF37]/20 p-2">
                     <input type="color" value={config[key]} onChange={e => update({ [key]: e.target.value })} className="h-7 w-7 rounded-lg border-0 p-0" />
                     <span>{config[key]}</span>
                   </div>
@@ -239,14 +239,14 @@ function BuilderPanel({
             </div>
           </div>
 
-          <div className="rounded-2xl border border-ink/8 p-4">
+          <div className="rounded-2xl border border-[#D4AF37]/20 p-4">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-ink/40">Identification</p>
                 <p className="mt-1 text-xs text-ink/45">Le QR est indépendant du design de la carte.</p>
               </div>
               <button type="button" onClick={() => update({ showQr: !config.showQr })} className={`relative h-6 w-11 rounded-full transition ${config.showQr ? 'bg-forest' : 'bg-ink/15'}`}>
-                <span className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow transition ${config.showQr ? 'left-6' : 'left-1'}`} />
+                <span className={`absolute top-1 h-4 w-4 rounded-full bg-[#111111] shadow transition ${config.showQr ? 'left-6' : 'left-1'}`} />
               </button>
             </div>
             <div className="mt-3 flex items-center gap-2 text-[10px] font-semibold text-ink/50">
@@ -254,15 +254,15 @@ function BuilderPanel({
             </div>
           </div>
 
-          <div className="rounded-2xl border border-ink/8 p-4">
+          <div className="rounded-2xl border border-[#D4AF37]/20 p-4">
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-ink/40">Type de fidélité</p>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               {TYPE_OPTIONS.map(option => {
                 const Icon = option.icon;
                 const active = config.loyaltyType === option.id;
                 return (
-                  <button key={option.id} type="button" onClick={() => update({ loyaltyType: option.id })} className={`flex items-center gap-3 rounded-2xl border p-3 text-left ${active ? 'border-forest bg-forest/[0.04] ring-2 ring-forest/10' : 'border-ink/10 hover:border-forest/25'}`}>
-                    <span className={`grid h-9 w-9 place-items-center rounded-xl ${active ? 'bg-forest text-white' : 'bg-[#f7f7f3] text-ink/40'}`}><Icon size={18} /></span>
+                  <button key={option.id} type="button" onClick={() => update({ loyaltyType: option.id })} className={`flex items-center gap-3 rounded-2xl border p-3 text-left ${active ? 'border-forest bg-forest/[0.04] ring-2 ring-forest/10' : 'border-[#D4AF37]/20 hover:border-forest/25'}`}>
+                    <span className={`grid h-9 w-9 place-items-center rounded-xl ${active ? 'bg-forest text-white' : 'bg-[#111111] text-ink/40'}`}><Icon size={18} /></span>
                     <span className="min-w-0"><span className="block text-xs font-semibold text-forest">{option.title}</span><span className="mt-0.5 block text-[9px] leading-4 text-ink/40">{option.description}</span></span>
                     {active && <Check className="ml-auto shrink-0 text-gold" size={15} />}
                   </button>
@@ -287,38 +287,38 @@ function BuilderPanel({
       {activeTab === 'Récompense' && (
         <div className="mt-4 space-y-4">
           {config.loyaltyType === 'STAMP' && (
-            <div className="grid gap-3 rounded-2xl bg-[#f7f7f3] p-4 sm:grid-cols-2">
+            <div className="grid gap-3 rounded-2xl bg-[#111111] p-4 sm:grid-cols-2">
               <NumberField label="Nombre de tampons" value={config.stampGoal} min={1} max={12} onChange={v => update({ stampGoal: v })} />
               <Field label="Récompense" value={config.rewardName} onChange={v => update({ rewardName: v })} />
               <Field label="Description" value={config.rewardDescription} onChange={v => update({ rewardDescription: v })} />
             </div>
           )}
           {config.loyaltyType === 'POINTS' && (
-            <div className="grid gap-3 rounded-2xl bg-[#f7f7f3] p-4">
+            <div className="grid gap-3 rounded-2xl bg-[#111111] p-4">
               <NumberField label="Points nécessaires" value={config.rewardThreshold} min={1} max={100000} onChange={v => update({ rewardThreshold: v })} />
               <Field label="Récompense" value={config.rewardName} onChange={v => update({ rewardName: v })} />
               <Field label="Description" value={config.rewardDescription} onChange={v => update({ rewardDescription: v })} />
             </div>
           )}
           {config.loyaltyType === 'DISCOUNT' && (
-            <div className="grid gap-3 rounded-2xl bg-[#f7f7f3] p-4 sm:grid-cols-2">
+            <div className="grid gap-3 rounded-2xl bg-[#111111] p-4 sm:grid-cols-2">
               <NumberField label="Pourcentage de réduction" value={config.discountPercent} min={1} max={100} onChange={v => update({ discountPercent: v })} />
               <Field label="Condition" value={config.progressText} onChange={v => update({ progressText: v })} />
             </div>
           )}
           {config.loyaltyType === 'REWARD' && (
-            <div className="grid gap-3 rounded-2xl bg-[#f7f7f3] p-4 sm:grid-cols-2">
+            <div className="grid gap-3 rounded-2xl bg-[#111111] p-4 sm:grid-cols-2">
               <NumberField label="Seuil de visites / achats" value={config.stampGoal} min={1} max={100} onChange={v => update({ stampGoal: v })} />
               <Field label="Récompense" value={config.rewardName} onChange={v => update({ rewardName: v })} />
             </div>
           )}
           {config.loyaltyType === 'TIER' && (
-            <div className="rounded-2xl bg-[#f7f7f3] p-4 text-xs text-ink/50">
+            <div className="rounded-2xl bg-[#111111] p-4 text-xs text-ink/50">
               Les niveaux Bronze, Silver et Gold sont prévisualisés dans la carte. Les seuils peuvent être branchés au moteur de points existant.
             </div>
           )}
           {config.loyaltyType === 'CHALLENGE' || config.loyaltyType === 'CASHBACK' ? (
-            <div className="rounded-2xl bg-[#f7f7f3] p-4 text-xs text-ink/50">
+            <div className="rounded-2xl bg-[#111111] p-4 text-xs text-ink/50">
               Cette mécanique est préparée dans l'interface et peut être activée lorsque le moteur correspondant sera disponible.
             </div>
           ) : null}
@@ -326,7 +326,7 @@ function BuilderPanel({
       )}
 
       {activeTab === 'Aperçu' && (
-        <div className="mt-4 rounded-2xl bg-[#f7f7f3] p-5 text-center">
+        <div className="mt-4 rounded-2xl bg-[#111111] p-5 text-center">
           <Sparkles className="mx-auto text-gold" size={22} />
           <p className="mt-3 text-sm font-semibold text-forest">Aperçu côté client</p>
           <p className="mt-1 text-xs text-ink/45">La carte centrale est mise à jour en temps réel à chaque modification.</p>
@@ -361,13 +361,13 @@ function ClientPreview({ config, establishment }: { config: LoyaltyBuilderConfig
   } as const;
 
   return (
-    <div className="min-w-0 rounded-2xl bg-[#f7f7f3] p-4">
+    <div className="min-w-0 rounded-2xl bg-[#111111] p-4">
       <div className="text-center">
         <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-ink">Aperçu côté client</p>
         <p className="mt-1 text-xs text-ink/45">Chaque modification est reflétée ici immédiatement.</p>
       </div>
       <div className="mx-auto mt-4 max-w-[360px] rounded-[2.2rem] border-[6px] border-[#171b1a] bg-[#171b1a] p-1.5 shadow-2xl">
-        <div className="overflow-hidden rounded-[1.8rem] bg-white">
+        <div className="overflow-hidden rounded-[1.8rem] bg-[#111111]">
           <LoyaltyCardVisual
             design={visualConfig}
             card={{
@@ -397,13 +397,13 @@ function TemplateGallery({ filter, setFilter, templates, selectedId, onSelect }:
       <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink">Modèles de cartes restaurant</p>
       <p className="mt-1 text-xs text-ink/45">Choisissez un modèle et personnalisez-le selon votre univers.</p>
       <div className="mt-3 flex gap-1.5 overflow-x-auto pb-1">
-        {filters.map(item => <button key={item} type="button" onClick={() => setFilter(item)} className={`whitespace-nowrap rounded-full px-3 py-1.5 text-[9px] font-semibold ${filter === item ? 'bg-forest text-white' : 'bg-[#f7f7f3] text-ink/50'}`}>{item}</button>)}
+        {filters.map(item => <button key={item} type="button" onClick={() => setFilter(item)} className={`whitespace-nowrap rounded-full px-3 py-1.5 text-[9px] font-semibold ${filter === item ? 'bg-forest text-white' : 'bg-[#111111] text-ink/50'}`}>{item}</button>)}
       </div>
       <div className="mt-4 grid grid-cols-2 gap-3">
         {templates.map(template => (
-          <button key={template.id} type="button" onClick={() => onSelect(template)} className={`overflow-hidden rounded-2xl border text-left transition hover:-translate-y-0.5 ${selectedId === template.id ? 'border-forest ring-2 ring-forest/10' : 'border-ink/8'}`}>
+          <button key={template.id} type="button" onClick={() => onSelect(template)} className={`overflow-hidden rounded-2xl border text-left transition hover:-translate-y-0.5 ${selectedId === template.id ? 'border-forest ring-2 ring-forest/10' : 'border-[#D4AF37]/20'}`}>
             <TemplateThumb template={template} />
-            <div className="bg-white p-3"><p className="text-xs font-semibold text-forest">{template.name}</p><p className="mt-1 text-[9px] text-ink/40">{template.description}</p></div>
+            <div className="bg-[#111111] p-3"><p className="text-xs font-semibold text-forest">{template.name}</p><p className="mt-1 text-[9px] text-ink/40">{template.description}</p></div>
           </button>
         ))}
       </div>
@@ -428,19 +428,19 @@ function TemplateThumb({ template }: { template: LoyaltyTemplate }) {
 
 function AssetButton({ title, image, loading, onClick }: { title: string; image: string | null; loading: boolean; onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} className="overflow-hidden rounded-2xl border border-dashed border-ink/15 bg-[#fafaf8] text-left">
+    <button type="button" onClick={onClick} className="overflow-hidden rounded-2xl border border-dashed border-[#D4AF37]/20 bg-[#111111] text-left">
       <div className="flex h-28 items-center justify-center p-2">
         {image ? <img src={image} alt="" className="h-full w-full rounded-xl object-cover" /> : <ImagePlus className="text-ink/25" size={25} />}
       </div>
-      <div className="flex items-center justify-between border-t border-ink/8 bg-white px-3 py-2.5"><span className="text-[10px] font-semibold text-forest">{title}</span>{loading ? <Loader2 className="animate-spin text-gold" size={15} /> : <Upload size={14} className="text-ink/35" />}</div>
+      <div className="flex items-center justify-between border-t border-[#D4AF37]/20 bg-[#111111] px-3 py-2.5"><span className="text-[10px] font-semibold text-forest">{title}</span>{loading ? <Loader2 className="animate-spin text-gold" size={15} /> : <Upload size={14} className="text-ink/35" />}</div>
     </button>
   );
 }
 
 function Field({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
-  return <label className="block text-xs font-medium text-ink/50">{label}<input value={value} onChange={e => onChange(e.target.value)} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm text-ink outline-none focus:border-gold" /></label>;
+  return <label className="block text-xs font-medium text-ink/50">{label}<input value={value} onChange={e => onChange(e.target.value)} className="mt-1 w-full rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-3 py-2.5 text-sm text-ink outline-none focus:border-gold" /></label>;
 }
 
 function NumberField({ label, value, min, max, onChange }: { label: string; value: number; min: number; max: number; onChange: (v: number) => void }) {
-  return <label className="block text-xs font-medium text-ink/50">{label}<input type="number" min={min} max={max} value={value} onChange={e => onChange(Math.max(min, Math.min(max, Number(e.target.value) || min)))} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm text-ink outline-none focus:border-gold" /></label>;
+  return <label className="block text-xs font-medium text-ink/50">{label}<input type="number" min={min} max={max} value={value} onChange={e => onChange(Math.max(min, Math.min(max, Number(e.target.value) || min)))} className="mt-1 w-full rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-3 py-2.5 text-sm text-ink outline-none focus:border-gold" /></label>;
 }
