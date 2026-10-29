@@ -1125,7 +1125,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                     >
                       Bienvenue dans la famille {card?.establishment_name || "cet établissement"} 🤍
                     </p>
-                    <div className="flex aspect-square w-[min(30vh,210px)] max-w-full items-center justify-center rounded-2xl bg-white p-2 shadow-sm">
+                    <div className="flex aspect-square w-[min(30vh,210px)] max-w-full items-center justify-center rounded-2xl bg-[#111111] p-2 shadow-sm">
                       {referralQrDataUrl ? (
                         <img
                           src={referralQrDataUrl}
@@ -1133,7 +1133,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                           className="h-full w-full rounded-xl"
                         />
                       ) : (
-                        <div className="h-full w-full animate-pulse rounded-xl bg-[#eef0ed]" />
+                        <div className="h-full w-full animate-pulse rounded-xl bg-[#111111]" />
                       )}
                     </div>
                   </div>
