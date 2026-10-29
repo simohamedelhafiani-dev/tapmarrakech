@@ -1960,7 +1960,7 @@ function MenuTemplate({
               <div className="grid grid-cols-2 gap-3">
                 {(itemsByCategory[category.id] ?? []).map((item) => (
                   <article key={item.id} className="overflow-hidden rounded-[24px] bg-[#111111] shadow-sm ring-1 ring-ink/5">
-                    <div className="aspect-[1.15] overflow-hidden bg-[#eee9df]">
+                    <div className="aspect-[1.15] overflow-hidden bg-[#111111]">
                       {photoMode === 'with_photos' && item.image_url ? <img src={item.image_url} alt="" className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-ink/15"><UtensilsCrossed size={25} /></div>}
                     </div>
                     <div className="p-3.5">
