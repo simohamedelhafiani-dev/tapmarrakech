@@ -106,6 +106,10 @@ export function Register() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    if (form.password.length < 8) {
+      setError('Le mot de passe doit contenir au moins 8 caractères.');
+      return;
+    }
     const { data, error: authError } = await supabase.auth.signUp({
       email: form.email.trim(),
       password: form.password,
@@ -250,7 +254,7 @@ export function ResetPassword() {
         </div>
       ) : (
         <form onSubmit={submit} className="mt-9 space-y-4">
-          <Field icon={LockKeyhole} type="password" minLength={8} required placeholder="Nouveau mot de passe" value={password} onChange={e => setPassword(e.target.value)} />
+          <Field icon={LockKeyhole} type="password" minLength={8} required placeholder="Nouveau mot de passe (8 caractères minimum)" value={password} onChange={e => setPassword(e.target.value)} />
           <Field icon={LockKeyhole} type="password" minLength={8} required placeholder="Confirmer le mot de passe" value={confirmation} onChange={e => setConfirmation(e.target.value)} />
           {error && <p className="text-sm text-red-400">{error}</p>}
           <button disabled={saving} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4AF37] py-3.5 text-sm font-semibold text-[#0D0D0D] transition hover:bg-[#E1C15A] disabled:opacity-50">
