@@ -721,7 +721,7 @@ export default function Reviews() {
                                 {recommendation.action}
                               </p>
 
-                              <span className="rounded-full bg-[var(--kelyani-gold)]/10 px-2.5 py-1 text-[11px] font-semibold text-[#E7C96B]">
+                              <span className="rounded-full bg-gold/10 px-2.5 py-1 text-[11px] font-semibold text-[#E7C96B]">
                                 {recommendation.priority}
                               </span>
                             </div>
@@ -884,7 +884,7 @@ export default function Reviews() {
                 review.status === 'Nouveau'
                   ? 'bg-red-400/10 text-red-300'
                   : review.status === 'En cours'
-                    ? 'bg-[var(--kelyani-gold)]/10 text-[#E7C96B]'
+                    ? 'bg-gold/10 text-[#E7C96B]'
                     : 'bg-emerald-400/10 text-forest'
               }`}>{review.status}</span>
             </div>
