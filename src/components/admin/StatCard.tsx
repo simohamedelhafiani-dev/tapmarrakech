@@ -14,7 +14,7 @@ type StatCardProps = {
 const iconToneClasses: Record<NonNullable<StatCardProps['iconTone']>, string> = {
   indigo: 'bg-[#6366F1]/10 text-[#4F46E5]',
   emerald: 'bg-[#10B981]/10 text-[#059669]',
-  amber: 'bg-[#F59E0B]/10 text-[#D97706]',
+  amber: 'bg-[#D4AF37]/10 text-[#D4AF37]',
 };
 
 function TrendIndicator({ value, label }: { value: number; label?: string }) {
