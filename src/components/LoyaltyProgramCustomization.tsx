@@ -38,16 +38,16 @@ type LoyaltyPreset = {
 
 const LOYALTY_PRESETS: LoyaltyPreset[] = [
   { id: 'obsidian', name: '01 — Obsidian', description: 'Fond photo immersif, contraste cinématique, or discret et composition luxe pour restaurants et lounges.', primary: '#0A0A09', secondary: '#D6B15A', background: '#111111', text: '#FFFFFF', radius: 30, mode: 'POINTS_REWARD', title: 'Bon goût. Belles rencontres.', subtitle: 'Votre fidélité mérite une expérience à part.', stampStyle: 'circles' },
-  { id: 'editorial', name: '02 — Editorial', description: 'Direction artistique éditoriale : ivoire, typographie magazine, espace négatif et détails champagne.', primary: '#3B332B', secondary: '#C9A86A', background: '#F4EDE1', text: '#17130F', radius: 30, mode: 'POINTS_REWARD', title: 'Des moments qui comptent.', subtitle: 'Une expérience pensée pour vous.', stampStyle: 'circles' },
+  { id: 'editorial', name: '02 — Editorial', description: 'Direction artistique éditoriale : ivoire, typographie magazine, espace négatif et détails champagne.', primary: '#3B332B', secondary: '#C9A86A', background: '#111111', text: '#F5F5DC', radius: 30, mode: 'POINTS_REWARD', title: 'Des moments qui comptent.', subtitle: 'Une expérience pensée pour vous.', stampStyle: 'circles' },
   { id: 'glass', name: '03 — Glass', description: 'Photo plein écran, surfaces vitrées, blur et lumière pour une esthétique wellness ultra premium.', primary: '#18372C', secondary: '#D8C28A', background: '#10251E', text: '#FFFFFF', radius: 30, mode: 'POINTS_REWARD', title: 'Prendre soin de vous, toujours.', subtitle: 'Vos avantages évoluent avec vous.', stampStyle: 'circles' },
   { id: 'titanium', name: '04 — Titanium', description: 'Noir profond, reflets métalliques et signature gold pour une carte au caractère exclusif.', primary: '#11110F', secondary: '#D6B15A', background: '#10100F', text: '#FFFFFF', radius: 26, mode: 'POINTS_REWARD', title: 'GOOD FOOD. BETTER PEOPLE.', subtitle: 'Elevate every visit.', stampStyle: 'squares' },
   { id: 'hospitality', name: '05 — Hospitality', description: 'Univers hôtel, restaurant et travel : photographie immersive, chaleur et statut membre.', primary: '#3A2115', secondary: '#E2B66D', background: '#2B1B13', text: '#FFFFFF', radius: 30, mode: 'POINTS_REWARD', title: 'Plus qu’un repas, une expérience.', subtitle: 'Saveurs. Partage. Souvenirs.', stampStyle: 'circles' },
-  { id: 'apple-wallet', name: '06 — Apple Wallet', description: 'Minimalisme premium, hiérarchie typographique et lecture instantanée sur mobile.', primary: '#403A32', secondary: '#B9975B', background: '#F2EEE6', text: '#1B1A18', radius: 28, mode: 'POINTS_REWARD', title: 'Beauty in every detail.', subtitle: 'Vos privilèges, toujours avec vous.', stampStyle: 'circles' },
+  { id: 'apple-wallet', name: '06 — Apple Wallet', description: 'Minimalisme premium, hiérarchie typographique et lecture instantanée sur mobile.', primary: '#403A32', secondary: '#B9975B', background: '#111111', text: '#F5F5DC', radius: 28, mode: 'POINTS_REWARD', title: 'Beauty in every detail.', subtitle: 'Vos privilèges, toujours avec vous.', stampStyle: 'circles' },
   { id: 'wallet', name: '07 — Premium Wallet', description: 'Carte Wallet haut de gamme : verre fumé, lumière diagonale, hiérarchie premium et QR central.', primary: '#0B0B0B', secondary: '#D6B15A', background: '#1A1A1A', text: '#FFFFFF', radius: 36, mode: 'POINTS_REWARD', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
   { id: 'onyx-black', name: '08 — Onyx Black', description: 'Wallet noir profond, contraste net et finition premium.', primary: '#181818', secondary: '#D7D7D7', background: '#070707', text: '#FFFFFF', radius: 36, mode: 'POINTS_REWARD', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
   { id: 'royal-gold', name: '09 — Royal Gold', description: 'Wallet noir chaud et signature or pour une expérience luxe.', primary: '#6E4B18', secondary: '#D6B15A', background: '#17110A', text: '#FFF8E8', radius: 36, mode: 'POINTS_REWARD', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
   { id: 'deep-ocean', name: '10 — Deep Ocean', description: 'Wallet bleu profond avec effet verre et lumière froide.', primary: '#0D4050', secondary: '#6FD3E8', background: '#061923', text: '#F4FCFF', radius: 36, mode: 'POINTS_REWARD', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
-  { id: 'minimal-white', name: '11 — Minimal White', description: 'Wallet clair minimaliste, moderne et ultra lisible.', primary: '#FFFFFF', secondary: '#777777', background: '#F5F5F2', text: '#151515', radius: 36, mode: 'POINTS_REWARD', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
+  { id: 'minimal-white', name: '11 — Minimal Onyx', description: 'Wallet noir profond, accents dorés et typographie ivoire.', primary: '#181818', secondary: '#D4AF37', background: '#0D0D0D', text: '#F5F5DC', radius: 36, mode: 'POINTS_REWARD', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
   { id: 'forest-green', name: '12 — Forest Green', description: 'Wallet vert profond inspiré des univers premium hospitality.', primary: '#164D3A', secondary: '#B9D8A4', background: '#071A14', text: '#F7FFF9', radius: 36, mode: 'POINTS_REWARD', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
   { id: 'ruby-red', name: '13 — Ruby Red', description: 'Wallet rouge rubis profond avec signature éditoriale.', primary: '#6D1724', secondary: '#E8A0A8', background: '#21080D', text: '#FFF5F5', radius: 36, mode: 'POINTS_REWARD', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
   { id: 'silver-chrome', name: '14 — Silver Chrome', description: 'Wallet chrome argenté avec reflets métalliques.', primary: '#BFC4C9', secondary: '#F5F5F5', background: '#777B80', text: '#FFFFFF', radius: 36, mode: 'POINTS_REWARD', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
@@ -70,7 +70,7 @@ const baseDesign: Design = {
   template_id: 'onyx-black',
   primary_color: '#0B3327',
   secondary_color: '#D6B15A',
-  background_color: '#F7F7F3',
+  background_color: '#111111',
   text_color: '#FFFFFF',
   button_color: '#173D32',
   border_radius: 24,
@@ -193,7 +193,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
           description: row.description || '',
           primary: c.primary || '#173D32',
           secondary: c.secondary || '#D3A84C',
-          background: c.background || '#F7F7F3',
+          background: c.background || '#111111',
           text: c.text || '#FFFFFF',
           radius: Number(c.radius || 28),
           mode: c.mode === 'STAMP' ? 'STAMP' : c.mode === 'POINTS_DISCOUNT' ? 'POINTS_DISCOUNT' : 'POINTS_REWARD',
@@ -1093,7 +1093,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
             </div>
           </div>
 
-          <div id="loyalty-preview" className="scroll-mt-6 flex min-h-[78vh] flex-col overflow-hidden rounded-[32px] border border-white/70 bg-[linear-gradient(145deg,#f8faf8_0%,#eef2ef_48%,#e5eae6_100%)] p-5 shadow-[0_24px_70px_rgba(23,61,50,0.10)] sm:p-7">
+          <div id="loyalty-preview" className="scroll-mt-6 flex min-h-[78vh] flex-col overflow-hidden rounded-[32px] border border-white/70 bg-[#111111] p-5 shadow-[0_24px_70px_rgba(23,61,50,0.10)] sm:p-7">
             <div className="flex items-center justify-between">
               <div><p className="text-[10px] font-bold uppercase tracking-[.16em] text-gold">Aperçu en temps réel</p><p className="mt-1 text-xs text-ink/45">Voici exactement ce que vos clients verront.</p></div>
               <span className="rounded-full bg-[#111111] px-3 py-1.5 text-[10px] font-semibold text-forest shadow-sm">Client</span>
@@ -1216,7 +1216,7 @@ function PresetMiniPreview({ preset }: { preset: LoyaltyPreset }) {
 
   if (preset.id === 'editorial') {
     return (
-      <div className={base + ' bg-[#111111] text-[#2B241D]'}>
+      <div className={base + ' bg-[#111111] text-[#F5F5DC]'}>
         <div className="absolute inset-x-4 top-4 border-t border-[#2B241D]/20" />
         <div className="absolute left-4 top-7">
           <p className="text-[7px] uppercase tracking-[.3em] opacity-45">MEMBERSHIP</p>
@@ -1277,7 +1277,7 @@ function PresetMiniPreview({ preset }: { preset: LoyaltyPreset }) {
   }
 
   return (
-    <div className={base + ' bg-[#111111] text-[#1B1A18]'}>
+    <div className={base + ' bg-[#111111] text-[#F5F5DC]'}>
       <div className="absolute inset-x-4 top-4 flex items-center justify-between">
         <div className="flex items-center gap-2"><span className="h-7 w-7 rounded-lg border border-black/10 bg-[#111111]" /><span className="text-[8px] font-semibold">ESTABLISHMENT</span></div>
         <span className="text-[6px] uppercase tracking-[.2em] opacity-45">PRIVILEGE</span>
