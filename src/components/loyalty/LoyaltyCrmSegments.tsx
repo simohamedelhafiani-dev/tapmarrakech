@@ -168,7 +168,7 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
         </div>
         <div className="flex gap-2">
           <button type="button" onClick={() => void load()} disabled={loading} className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2.5 text-xs font-semibold text-white/80 hover:bg-white/5 disabled:opacity-50"><RefreshCw size={14} /> Actualiser</button>
-          <button type="button" onClick={exportCsv} disabled={loading || filtered.length === 0} className="inline-flex items-center gap-2 rounded-xl bg-[#D4AF37] px-3 py-2.5 text-xs font-bold text-black hover:brightness-110 disabled:opacity-40"><Download size={14} /> Exporter CSV ({filtered.length})</button>
+          <button type="button" onClick={exportCsv} disabled={loading || filtered.length === 0} className="inline-flex items-center gap-2 rounded-xl bg-[#D4AF37] px-3 py-2.5 text-xs font-bold text-[#F5F5DC] hover:brightness-110 disabled:opacity-40"><Download size={14} /> Exporter CSV ({filtered.length})</button>
         </div>
       </div>
 
@@ -241,7 +241,7 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
               </div>
               <button type="button" onClick={() => setRecoveryQr(null)} aria-label="Fermer" className="rounded-lg p-2 text-white/60 hover:bg-white/10 hover:text-white"><X size={18} /></button>
             </div>
-            <div className="mx-auto mt-5 w-fit rounded-2xl bg-white p-3">
+            <div className="mx-auto mt-5 w-fit rounded-2xl bg-[#111111] p-3">
               <img src={recoveryQr.url} alt="QR code de récupération de la carte fidélité" className="h-64 w-64 max-w-full" />
             </div>
             <p className="mt-4 text-center text-sm text-white/70">Scannez ce QR code pour récupérer la carte fidélité.</p>
