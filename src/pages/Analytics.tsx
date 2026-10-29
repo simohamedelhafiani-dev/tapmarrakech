@@ -355,7 +355,7 @@ function InfoCard({
 }) {
   return (
     <div className="flex items-center gap-4 rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-5 shadow-soft">
-      <div className="grid h-11 w-11 place-items-center rounded-xl bg-[#e5eee9] text-forest">
+      <div className="grid h-11 w-11 place-items-center rounded-xl bg-[#111111] text-[#D4AF37]">
         <Icon size={19} />
       </div>
       <div>
