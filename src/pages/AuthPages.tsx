@@ -181,7 +181,7 @@ export function Register() {
           <Field icon={LockKeyhole} type="text" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{8}" maxLength={8} minLength={8} required placeholder="Code de confirmation à 8 chiffres" value={token} onChange={e => setToken(e.target.value.replace(/\\D/g, '').slice(0, 8))} />
           {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
           {notice && <p role="status" className="text-sm text-white/65">{notice}</p>}
-          <button disabled={verifying || token.length !== 8} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4AF37] py-3.5 text-sm font-semibold text-white disabled:opacity-50">{verifying ? 'Vérification…' : 'Confirmer mon adresse'} <ArrowRight size={16} /></button>
+          <button disabled={verifying || token.length !== 8} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4AF37] py-3.5 text-sm font-semibold text-[#0D0D0D] disabled:opacity-50">{verifying ? 'Vérification…' : 'Confirmer mon adresse'} <ArrowRight size={16} /></button>
         </form>
         <button type="button" onClick={resendCode} disabled={resending || !form.email.trim()} className="w-full text-center text-sm font-semibold text-[#D4AF37] disabled:opacity-50">{resending ? 'Envoi…' : 'Renvoyer un code'}</button>
         {!pendingVerification && <button type="button" onClick={() => { setEnterExistingCode(false); setToken(''); setError(''); setNotice(''); }} className="w-full text-center text-xs text-white/50 hover:text-[#D4AF37]">Retour à la création du compte</button>}
@@ -192,7 +192,7 @@ export function Register() {
         <form onSubmit={submit} className="mt-9 space-y-4">
           <Field icon={UserRound} required placeholder="Votre nom" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
           <Field icon={Mail} type="email" required placeholder="Adresse email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
-          <Field icon={LockKeyhole} type="password" minLength={8} required placeholder="Mot de passe (6 caractères minimum)" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
+          <Field icon={LockKeyhole} type="password" minLength={8} required placeholder="Mot de passe (8 caractères minimum)" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
           {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
           <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4AF37] py-3.5 text-sm font-semibold text-[#0D0D0D] transition hover:bg-[#E1C15A]">Créer mon compte <ArrowRight size={16} /></button>
         </form>
@@ -203,7 +203,7 @@ export function Register() {
   </AuthShell>;
 }
 
-export function ForgotPassword() { const [email, setEmail] = useState(''); const [sent, setSent] = useState(false); const [error, setError] = useState(''); const submit = async (e: React.FormEvent) => { e.preventDefault(); setError(''); const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}/reset-password` }); if (resetError) { setError('Impossible d’envoyer le lien. Vérifiez l’adresse email et réessayez.'); return; } setSent(true); }; return <AuthShell eyebrow="Accès sécurisé" title="Réinitialiser l’accès.">{sent ? <div className="mt-9 rounded-2xl bg-white p-5 text-sm text-white/65"><Check className="mb-2 text-forest" />Si un compte correspond à cette adresse, vous recevrez un email avec les instructions.</div> : <form onSubmit={submit} className="mt-9 space-y-4"><Field icon={Mail} type="email" required placeholder="Adresse email" value={email} onChange={e => setEmail(e.target.value)} />{error && <p className="text-sm text-red-400">{error}</p>}<button className="w-full rounded-xl bg-[#D4AF37] py-3.5 text-sm font-semibold text-[#0D0D0D] transition hover:bg-[#E1C15A]">Recevoir le lien</button><Link to="/login" className="block text-center text-xs text-gold">Retour à la connexion</Link></form>}</AuthShell>; }
+export function ForgotPassword() { const [email, setEmail] = useState(''); const [sent, setSent] = useState(false); const [error, setError] = useState(''); const submit = async (e: React.FormEvent) => { e.preventDefault(); setError(''); const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}/reset-password` }); if (resetError) { setError('Impossible d’envoyer le lien. Vérifiez l’adresse email et réessayez.'); return; } setSent(true); }; return <AuthShell eyebrow="Accès sécurisé" title="Réinitialiser l’accès.">{sent ? <div className="mt-9 rounded-2xl bg-[var(--kelyani-panel)] p-5 text-sm text-white/65"><Check className="mb-2 text-forest" />Si un compte correspond à cette adresse, vous recevrez un email avec les instructions.</div> : <form onSubmit={submit} className="mt-9 space-y-4"><Field icon={Mail} type="email" required placeholder="Adresse email" value={email} onChange={e => setEmail(e.target.value)} />{error && <p className="text-sm text-red-400">{error}</p>}<button className="w-full rounded-xl bg-[#D4AF37] py-3.5 text-sm font-semibold text-[#0D0D0D] transition hover:bg-[#E1C15A]">Recevoir le lien</button><Link to="/login" className="block text-center text-xs text-gold">Retour à la connexion</Link></form>}</AuthShell>; }
 
 
 export function ResetPassword() {
@@ -244,7 +244,7 @@ export function ResetPassword() {
   return (
     <AuthShell eyebrow="Accès sécurisé" title="Définir un nouveau mot de passe.">
       {updated ? (
-        <div className="mt-9 rounded-2xl bg-white p-5 text-sm text-white/65">
+        <div className="mt-9 rounded-2xl bg-[var(--kelyani-panel)] p-5 text-sm text-white/65">
           <Check className="mb-2 text-forest" />
           Votre mot de passe a été mis à jour. Redirection vers la connexion…
         </div>
@@ -313,15 +313,15 @@ export function EmailConfirmation() {
   return (
     <AuthShell eyebrow="Confirmation sécurisée" title={status === 'success' ? 'Adresse confirmée.' : status === 'checking' ? 'Vérification en cours…' : status === 'expired' ? 'Lien expiré.' : 'Confirmation impossible.'}>
       {status === 'checking' ? (
-        <div className="mt-9 rounded-2xl border border-ink/10 bg-white p-5 text-sm text-white/65">Nous vérifions votre adresse e-mail. Veuillez patienter.</div>
+        <div className="mt-9 rounded-2xl border border-[var(--kelyani-border)] bg-[var(--kelyani-panel)] p-5 text-sm text-white/65">Nous vérifions votre adresse e-mail. Veuillez patienter.</div>
       ) : status === 'success' ? (
-        <div className="mt-9 rounded-2xl border border-ink/10 bg-white p-5 text-sm text-white/65">
+        <div className="mt-9 rounded-2xl border border-[var(--kelyani-border)] bg-[var(--kelyani-panel)] p-5 text-sm text-white/65">
           <Check className="mb-3 text-forest" />
           Votre adresse e-mail est confirmée. Vous pouvez maintenant vous connecter à KELYANI.
-          <button type="button" onClick={() => navigate('/login')} className="mt-5 w-full rounded-xl bg-[#D4AF37] py-3 font-semibold text-white">Se connecter</button>
+          <button type="button" onClick={() => navigate('/login')} className="mt-5 w-full rounded-xl bg-[#D4AF37] py-3 font-semibold text-[#0D0D0D]">Se connecter</button>
         </div>
       ) : (
-        <div className="mt-9 rounded-2xl border border-ink/10 bg-white p-5">
+        <div className="mt-9 rounded-2xl border border-[var(--kelyani-border)] bg-[var(--kelyani-panel)] p-5">
           <p className="text-sm text-white/65">Ce lien de confirmation est invalide ou a expiré. Demandez un nouveau lien pour terminer la création de votre compte.</p>
           <form onSubmit={resend} className="mt-5 space-y-3">
             <Field icon={Mail} type="email" required placeholder="Adresse email utilisée à l’inscription" value={email} onChange={e => setEmail(e.target.value)} />
