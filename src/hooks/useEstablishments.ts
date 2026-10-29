@@ -82,7 +82,7 @@ export function useEstablishments() {
       const [establishmentsResult, subscriptionsResult] = await Promise.all([
         supabase
           .from('establishments')
-          .select('id, name, slug, city, business_type, logo_url, created_at')
+          .select('id, name, slug, logo_url, created_at')
           .order('created_at', { ascending: false }),
         supabase
           .from('subscriptions')
@@ -96,8 +96,10 @@ export function useEstablishments() {
         throw establishmentsResult.error;
       }
 
+      // Billing tables are optional during staging/bootstrap. Their absence must not
+      // prevent the admin from seeing establishments.
       if (subscriptionsResult.error) {
-        throw subscriptionsResult.error;
+        console.warn('[Establishments] Subscriptions unavailable; loading establishments without billing data:', subscriptionsResult.error.message);
       }
 
       const latestSubscriptionByEstablishment = new Map<string, SubscriptionRow>();
@@ -116,6 +118,8 @@ export function useEstablishments() {
         if (!subscriptionRow) {
           return {
             ...row,
+            city: null,
+            business_type: null,
             subscription: null,
           };
         }
@@ -124,6 +128,8 @@ export function useEstablishments() {
 
         return {
           ...row,
+          city: null,
+          business_type: null,
           subscription: {
             status: subscriptionRow.status,
             plan_name: plan?.name ?? null,

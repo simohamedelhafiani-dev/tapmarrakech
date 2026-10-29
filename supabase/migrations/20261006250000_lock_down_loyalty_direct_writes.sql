@@ -28,11 +28,27 @@ on public.loyalty_notification_campaigns from anon, authenticated;
 
 
 -- Legacy public Wi-Fi endpoint exposed the establishment password; no current app route uses it.
-revoke execute on function public.get_public_wifi(uuid) from public, anon, authenticated;
+
 
 
 -- Legacy public registration wrapper is no longer used; v2 is the supported enrollment path.
-revoke execute on function public.register_public_loyalty_customer_for_enrollment(uuid, text, text, text, date) from public, anon, authenticated;
+
 
 -- Legacy duplicate transaction-history endpoint is not used by the current public card.
-revoke execute on function public.get_public_loyalty_transactions(uuid) from public, anon, authenticated;
+
+
+
+-- Retired legacy RPCs may be absent from a fresh reconstruction.
+DO $migration$
+BEGIN
+  IF to_regprocedure('public.get_public_wifi(uuid)') IS NOT NULL THEN
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.get_public_wifi(uuid) FROM PUBLIC, anon, authenticated';
+  END IF;
+  IF to_regprocedure('public.register_public_loyalty_customer_for_enrollment(uuid,text,text,text,date)') IS NOT NULL THEN
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.register_public_loyalty_customer_for_enrollment(uuid,text,text,text,date) FROM PUBLIC, anon, authenticated';
+  END IF;
+  IF to_regprocedure('public.get_public_loyalty_transactions(uuid)') IS NOT NULL THEN
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.get_public_loyalty_transactions(uuid) FROM PUBLIC, anon, authenticated';
+  END IF;
+END
+$migration$;

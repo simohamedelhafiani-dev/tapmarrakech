@@ -40,8 +40,7 @@ CREATE INDEX IF NOT EXISTS menu_items_establishment_category_order_idx
 CREATE INDEX IF NOT EXISTS menu_items_active_idx
   ON public.menu_items(establishment_id, active);
 
--- The original profiles table may predate role-based admin policies. Ensure
--- fresh local/test databases have the column used by the admin policies.
+-- Admin policies rely on this role field on fresh installations.
 ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS role text NOT NULL DEFAULT 'user';
 

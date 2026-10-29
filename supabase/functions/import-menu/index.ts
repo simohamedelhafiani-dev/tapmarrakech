@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { parseMenuJson } from '../_shared/menuParser.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -199,7 +200,9 @@ Deno.serve(async (request) => {
             },
           },
           max_output_tokens: Math.min(Math.max(Number(aiSettings.max_output_tokens) || 12000, 2000), 30000),
-          temperature: Math.min(Math.max(Number(aiSettings.temperature) || 0.1, 0), 1),
+          temperature: Number.isFinite(Number(aiSettings.temperature)) && Number(aiSettings.temperature) >= 0 && Number(aiSettings.temperature) <= 2
+            ? Number(aiSettings.temperature)
+            : 0.2,
         }),
       });
 
@@ -214,7 +217,7 @@ Deno.serve(async (request) => {
 
       let menu: any;
       try {
-        menu = JSON.parse(outputText);
+        menu = parseMenuJson(outputText);
       } catch {
         return json({ success: false, error: 'Le résultat IA est inexploitable.' }, 502);
       }

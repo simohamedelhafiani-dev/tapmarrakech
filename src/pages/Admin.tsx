@@ -55,7 +55,7 @@ import EstablishmentPerformanceTable from '@/components/admin/EstablishmentPerfo
 import EstablishmentsSection from '@/components/admin/EstablishmentsSection';
 import ProfileForm from '@/components/admin/ProfileForm';
 import WifiForm from '@/components/admin/WifiForm';
-import GoogleReputationModule from '@/components/admin/GoogleReputationModule';
+import GoogleBusinessAdminSection from '@/components/admin/GoogleBusinessAdminSection';
 import MenuStudio from '@/components/admin/menu/MenuStudio';
 import LoyaltyNotificationsPanel from '@/components/admin/LoyaltyNotificationsPanel';
 import LoyaltyRaffleStudio from '@/components/loyalty/LoyaltyRaffleStudio';
@@ -160,6 +160,7 @@ export default function Admin() {
 
   const sectionFromPath = (pathname: string): AdminSection => {
     const slug = pathname.replace(/^\/admin\/?/, '').split('/')[0];
+    if (slug === 'reviews') return 'ai';
     const validSections: AdminSection[] = [
       'overview', 'establishments', 'responsibles', 'employees', 'reviews',
       'analysis', 'ai', 'analytics', 'reports', 'billing', 'loyalty', 'system',
@@ -171,10 +172,16 @@ export default function Admin() {
     nextSection === 'overview' ? '/admin' : `/admin/${nextSection}`;
 
   const [section, setSection] = useState<AdminSection>(() => sectionFromPath(window.location.pathname));
+  const [aiWorkspaceTab, setAIWorkspaceTab] = useState<'home' | 'engine' | 'prompts' | 'google' | 'menus'>('home');
+  const [selectedMenuEstablishmentId, setSelectedMenuEstablishmentId] = useState('');
 
   useEffect(() => {
     const nextSection = sectionFromPath(location.pathname);
     setSection(nextSection);
+
+    // Preserve the old /admin/reviews deep link while Google reviews live in the AI workspace.
+    const slug = location.pathname.replace(/^\/admin\/?/, '').split('/')[0];
+    if (slug === 'reviews') setAIWorkspaceTab('google');
   }, [location.pathname]);
   const [open, setOpen] = useState(false);
 
@@ -288,7 +295,7 @@ export default function Admin() {
     if (result.establishmentId) setSelectedEstablishmentId(result.establishmentId);
     if (result.type === 'establishment') navigate('/admin/establishments');
     else if (result.type === 'customer') navigate('/admin/loyalty');
-    else navigate('/admin/reviews');
+    else { setAIWorkspaceTab('google'); navigate('/admin/ai'); }
     setSearchQuery('');
     setSearchOpen(false);
   };
@@ -300,7 +307,7 @@ export default function Admin() {
 
     const { data, error } = await supabase
       .from('establishments')
-      .select('id, name, slug, ai_business_type_id, created_at')
+      .select('id, name, slug, created_at')
       .order('created_at', { ascending: false });
 
     console.log(
@@ -315,7 +322,7 @@ export default function Admin() {
       console.error('Erreur établissements:', error);
       setEstablishments([]);
     } else {
-      setEstablishments(data ?? []);
+      setEstablishments((data ?? []).map((row) => ({ ...row, ai_business_type_id: null })));
     }
 
     setLoading(false);
@@ -558,11 +565,6 @@ export default function Admin() {
       icon: UserRound,
     },
     {
-      id: 'reviews',
-      label: 'Avis reçus',
-      icon: MessageSquare,
-    },
-    {
       id: 'analysis',
       label: 'Analyse des avis',
       icon: Brain,
@@ -574,7 +576,7 @@ export default function Admin() {
     },
     {
       id: 'ai',
-      label: 'Configuration IA',
+      label: 'Paramètres automatisation',
       icon: Brain,
     },
     {
@@ -728,10 +730,73 @@ export default function Admin() {
           )}
 
           {section === 'ai' && (
-            <AIConfigurationSection
-              businessTypes={aiBusinessTypes}
-              reload={loadAIBusinessTypes}
-            />
+            <section className="space-y-6">
+              <header className="rounded-3xl border border-[#C9A45C]/20 bg-gradient-to-br from-[#14120e] via-[#0b0b0b] to-[#111111] p-5 sm:p-7">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#C9A45C]/70">Administration centrale</p>
+                    <h2 className="font-display text-3xl text-[#E1C27A] md:text-4xl">Paramètres automatisation</h2>
+                    <p className="mt-2 max-w-2xl text-sm leading-6 text-white/50">Centralisez les avis, les réglages IA et toutes les automatisations dans un tableau de bord unique.</p>
+                  </div>
+                  <span className="inline-flex w-fit items-center gap-2 rounded-full border border-[#C9A45C]/25 bg-[#C9A45C]/5 px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-[#E1C27A]"><Sparkles size={13} /> Centre IA</span>
+                </div>
+              </header>
+
+              {aiWorkspaceTab === 'home' ? (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  <button type="button" onClick={() => setAIWorkspaceTab('engine')} className="group min-h-[190px] rounded-3xl border border-[#C9A45C]/35 bg-gradient-to-br from-[#19150c] via-[#0d0d0d] to-[#080808] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#C9A45C]/75 hover:shadow-[0_20px_45px_rgba(201,164,92,.12)] [transform:perspective(1000px)_rotateX(2deg)]">
+                    <span className="grid h-12 w-12 place-items-center rounded-2xl border border-[#C9A45C]/30 bg-[#C9A45C]/10 text-[#E1C27A]"><Brain size={22} /></span>
+                    <span className="mt-5 block text-lg font-semibold text-[#E1C27A]">Moteur IA global</span>
+                    <span className="mt-2 block text-sm leading-6 text-white/50">Fournisseur, modèle, clé API, température et limites de génération.</span>
+                    <span className="mt-5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#C9A45C]">Ouvrir les paramètres →</span>
+                  </button>
+                  <button type="button" onClick={() => setAIWorkspaceTab('prompts')} className="group min-h-[190px] rounded-3xl border border-[#242424] bg-gradient-to-br from-[#171717] via-[#0d0d0d] to-[#080808] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#C9A45C]/60 hover:shadow-[0_20px_45px_rgba(201,164,92,.1)] [transform:perspective(1000px)_rotateX(2deg)]">
+                    <span className="grid h-12 w-12 place-items-center rounded-2xl border border-white/10 bg-white/5 text-[#E1C27A]"><FileText size={22} /></span>
+                    <span className="mt-5 block text-lg font-semibold text-white">Prompts & fonctionnalités</span>
+                    <span className="mt-2 block text-sm leading-6 text-white/50">Instructions métier et comportements des fonctionnalités IA.</span>
+                    <span className="mt-5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#C9A45C]">Ouvrir les paramètres →</span>
+                  </button>
+                  <button type="button" onClick={() => setAIWorkspaceTab('google')} className="group min-h-[190px] rounded-3xl border border-[#C9A45C]/35 bg-gradient-to-br from-[#19150c] via-[#0d0d0d] to-[#080808] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#C9A45C]/75 hover:shadow-[0_20px_45px_rgba(201,164,92,.12)] [transform:perspective(1000px)_rotateX(2deg)]">
+                    <span className="grid h-12 w-12 place-items-center rounded-2xl border border-[#C9A45C]/30 bg-[#C9A45C]/10 text-[#E1C27A]"><MessageSquare size={22} /></span>
+                    <span className="mt-5 block text-lg font-semibold text-[#E1C27A]">Avis Google & automatisations</span>
+                    <span className="mt-2 block text-sm leading-6 text-white/50">Un seul espace pour connecter Google, gérer les avis, configurer les réponses IA, les langues, les liens et la fréquence de synchronisation.</span>
+                    <span className="mt-5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#C9A45C]">Ouvrir l’espace centralisé →</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-5">
+                  <button type="button" onClick={() => setAIWorkspaceTab('home')} className="inline-flex items-center gap-2 rounded-xl border border-[#242424] bg-[#101010] px-4 py-2.5 text-xs font-semibold text-[#E1C27A] transition hover:border-[#C9A45C]/60"><span aria-hidden="true">←</span> Toutes les options</button>
+                  {aiWorkspaceTab === 'engine' && <AIConfigurationSection view="engine" businessTypes={aiBusinessTypes} reload={loadAIBusinessTypes} />}
+                  {aiWorkspaceTab === 'prompts' && <AIConfigurationSection view="prompts" businessTypes={aiBusinessTypes} reload={loadAIBusinessTypes} />}
+                  {aiWorkspaceTab === 'menus' && (
+                    <section className="space-y-5 rounded-3xl border border-[#242424] bg-[#111111] p-5 sm:p-7">
+                      <div><h3 className="font-display text-2xl text-[#E1C27A]">IA pour les menus</h3><p className="mt-2 text-sm text-white/50">Sélectionnez un établissement pour ouvrir son studio de menus existant.</p></div>
+                      {establishments.length ? (
+                        <div className="space-y-4">
+                          <label className="block max-w-xl text-xs font-semibold text-[#C9A45C]">Établissement
+                            <select value={selectedMenuEstablishmentId} onChange={event => setSelectedMenuEstablishmentId(event.target.value)} className="mt-2 w-full rounded-xl border border-[#242424] bg-[#080808] px-3 py-3 text-sm text-white">
+                              <option value="">Choisir un établissement</option>
+                              {establishments.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}
+                            </select>
+                          </label>
+                          {selectedMenuEstablishmentId && <MenuStudio key={selectedMenuEstablishmentId} establishmentId={selectedMenuEstablishmentId} />}
+                        </div>
+                      ) : <p className="text-sm text-white/50">Créez d’abord un établissement pour configurer son menu.</p>}
+                    </section>
+                  )}
+                  {aiWorkspaceTab === 'google' && (
+                    <div>
+                      <div className="mb-5">
+                        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A45C]/60">Avis et automatisation</p>
+                        <h3 className="font-display text-2xl text-[#E1C27A] md:text-3xl">Avis & Google Business</h3>
+                        <p className="mt-2 max-w-3xl text-sm leading-6 text-white/50">Choisissez une tuile pour afficher uniquement les réglages de cette fonctionnalité.</p>
+                      </div>
+                      <GoogleBusinessAdminSection establishments={establishments} businessTypes={aiBusinessTypes} onEstablishmentCreated={async () => { await Promise.all([loadEstablishments(), reloadEstablishmentList()]); }} legacyReviews={<ReviewsSection establishments={establishments} />} />
+                    </div>
+                  )}
+                </div>
+              )}
+            </section>
           )}
 
           {section === 'reports' && (
@@ -1859,7 +1924,7 @@ function EstablishmentWorkspace({
 
   const tabs: { id: WorkspaceTab; label: string }[] = [
     { id: 'profile', label: 'Profil' }, { id: 'wifi', label: 'Wi-Fi' }, { id: 'menu', label: 'Menu' }, { id: 'promotions', label: 'Promotions' },
-    { id: 'reviews', label: 'Avis' }, { id: 'google', label: 'Google Business' }, { id: 'analytics', label: 'Analytics' }, { id: 'public', label: 'Liens publics' },
+    { id: 'reviews', label: 'Avis' }, { id: 'analytics', label: 'Analytics' }, { id: 'public', label: 'Liens publics' },
   ];
 
   return (
@@ -1933,7 +1998,6 @@ function EstablishmentWorkspace({
       {tab === 'wifi' && <WifiForm establishmentId={establishment.id} />}
 
       {tab === 'menu' && <MenuStudio establishmentId={establishment.id} />}
-      {tab === 'google' && <GoogleReputationModule establishmentId={establishment.id} />}
 
       {editingMenuItemId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#050505]/40 p-4 backdrop-blur-sm">
@@ -4324,9 +4388,11 @@ function AdminAnalyticsCard({
 ========================================================= */
 
 function AIConfigurationSection({
+  view,
   businessTypes,
   reload,
 }: {
+  view: 'engine' | 'prompts';
   businessTypes: AIBusinessType[];
   reload: () => Promise<void>;
 }) {
@@ -4355,7 +4421,8 @@ function AIConfigurationSection({
   }, [businessTypes]);
 
   const saveAISettings = async () => {
-    if (!aiSettings.provider?.trim() || !aiSettings.model?.trim()) return alert('Provider et modèle sont obligatoires.');
+    if (String(aiSettings.provider ?? '').trim().toLowerCase() !== 'openai') return alert('Le moteur IA actuellement pris en charge par les fonctionnalités KELYANI est OpenAI. Sélectionne OpenAI avant d’enregistrer.');
+    if (!aiSettings.model?.trim()) return alert('Le modèle est obligatoire.');
     if (Number(aiSettings.temperature) < 0 || Number(aiSettings.temperature) > 2) return alert('La température doit être entre 0 et 2.');
     if (!Number.isInteger(Number(aiSettings.max_output_tokens)) || Number(aiSettings.max_output_tokens) < 256 || Number(aiSettings.max_output_tokens) > 128000) return alert('Max output tokens invalide.');
     setAISettingsSaving(true);
@@ -4520,27 +4587,31 @@ function AIConfigurationSection({
           </p>
 
           <h2 className="font-display text-3xl text-[#C9A45C] md:text-4xl">
-            Configuration IA
+            {view === 'engine' ? 'Moteur IA global' : 'Prompts et comportements métier'}
           </h2>
 
           <p className="mt-2 max-w-3xl text-sm leading-6 text-[#FFFFFF]/50">
-            Configure les comportements métier de l’IA. Chaque établissement utilise
-            automatiquement le prompt correspondant au type que tu lui attribues.
+            {view === 'engine'
+              ? 'Configure le fournisseur, le modèle et les paramètres partagés par les fonctionnalités IA compatibles.'
+              : 'Gère les prompts des promotions et les comportements métier attribués à chaque type d’établissement.'}
           </p>
         </div>
 
-        <button
-          onClick={() => {
-            resetForm();
-            setShowForm(true);
-          }}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#111111] px-5 py-3 text-sm font-semibold text-[#FFFFFF] transition hover:bg-[#111111]"
-        >
-          <Plus size={16} />
-          Nouveau type
-        </button>
+        {view === 'prompts' && (
+          <button
+            onClick={() => {
+              resetForm();
+              setShowForm(true);
+            }}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#111111] px-5 py-3 text-sm font-semibold text-[#FFFFFF] transition hover:bg-[#111111]"
+          >
+            <Plus size={16} />
+            Nouveau type
+          </button>
+        )}
       </div>
 
+      {view === 'prompts' && (
       <div className="mb-6 rounded-2xl border border-[#C9A45C]/20 bg-[#111111] p-6 shadow-sm">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
@@ -4581,20 +4652,27 @@ function AIConfigurationSection({
         </div>
       </div>
 
+      )}
+
+      {view === 'engine' && (
       <div className="mb-6 rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#C9A45C]">Moteur IA global</p><h3 className="mt-1 text-xl font-semibold text-[#C9A45C]">Provider et modèle utilisés par l’analyse</h3></div><span className={`rounded-full px-3 py-1 text-[10px] font-semibold ${aiSettings.enabled ? 'bg-[#111111] text-[#E1C27A]' : 'bg-[#111111] text-[#E1C27A]'}`}>{aiSettings.enabled ? 'IA ACTIVE' : 'IA DÉSACTIVÉE'}</span></div>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
-          <label className="block"><span className="mb-1 block text-xs font-semibold">Provider / moteur</span><input value={aiSettings.provider ?? ''} onChange={e=>setAISettings((v:any)=>({...v,provider:e.target.value}))} placeholder="openai" className="w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 py-3 text-sm"/></label>
+          <label className="block"><span className="mb-1 block text-xs font-semibold">Provider / moteur</span><select value={String(aiSettings.provider ?? 'openai').toLowerCase()} onChange={e=>setAISettings((v:any)=>({...v,provider:e.target.value}))} className="w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 py-3 text-sm"><option value="openai">OpenAI</option></select><span className="mt-1 block text-xs text-[#FFFFFF]/40">Les fonctionnalités IA connectées à ce moteur utilisent actuellement OpenAI.</span></label>
           <label className="block"><span className="mb-1 block text-xs font-semibold">Modèle</span><input value={aiSettings.model ?? ''} onChange={e=>setAISettings((v:any)=>({...v,model:e.target.value}))} placeholder="gpt-5.6-luna" className="w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 py-3 text-sm"/></label>
           <label className="block"><span className="mb-1 block text-xs font-semibold">Température</span><input type="number" min="0" max="2" step="0.1" value={aiSettings.temperature ?? 0.2} onChange={e=>setAISettings((v:any)=>({...v,temperature:Number(e.target.value)}))} className="w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 py-3 text-sm"/></label>
           <label className="block"><span className="mb-1 block text-xs font-semibold">Max output tokens</span><input type="number" value={aiSettings.max_output_tokens ?? 4000} onChange={e=>setAISettings((v:any)=>({...v,max_output_tokens:Number(e.target.value)}))} className="w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 py-3 text-sm"/></label>
           <label className="block md:col-span-2"><span className="mb-1 block text-xs font-semibold">Clé API <span className="font-normal text-[#FFFFFF]/35">{aiSettings.has_api_key ? '— une clé est déjà enregistrée, vide pour la conserver' : '— aucune clé enregistrée'}</span></span><input type="password" value={aiApiKey} onChange={e=>setAIApiKey(e.target.value)} autoComplete="new-password" className="w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 py-3 text-sm"/></label>
-          <label className="flex items-center gap-3 rounded-xl bg-[#111111] p-4 md:col-span-2"><input type="checkbox" checked={!!aiSettings.enabled} onChange={e=>setAISettings((v:any)=>({...v,enabled:e.target.checked}))}/><span><strong className="block text-sm text-[#C9A45C]">Activer l’IA</strong><span className="text-xs text-[#FFFFFF]/40">Le moteur global est utilisé par l’Edge Function d’analyse des avis.</span></span></label>
+          <label className="flex items-center gap-3 rounded-xl bg-[#111111] p-4 md:col-span-2"><input type="checkbox" checked={!!aiSettings.enabled} onChange={e=>setAISettings((v:any)=>({...v,enabled:e.target.checked}))}/><span><strong className="block text-sm text-[#C9A45C]">Activer l’IA</strong><span className="text-xs text-[#FFFFFF]/40">Le moteur global alimente les fonctionnalités IA compatibles de KELYANI, y compris les réponses Google Business.</span></span></label>
           <label className="block md:col-span-2"><span className="mb-1 block text-xs font-semibold">Instructions système globales</span><textarea rows={5} value={aiSettings.system_instructions ?? ''} onChange={e=>setAISettings((v:any)=>({...v,system_instructions:e.target.value}))} className="w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 py-3 text-sm leading-6"/></label>
         </div>
         <div className="mt-5 flex justify-end"><button onClick={saveAISettings} disabled={aiSettingsSaving} className="rounded-xl bg-[#111111] px-5 py-3 text-sm font-semibold text-[#FFFFFF]">{aiSettingsSaving ? 'Enregistrement...' : 'Enregistrer le moteur IA'}</button></div>
       </div>
 
+      )}
+
+      {view === 'prompts' && (
+        <>
       {showForm && (
         <div className="mb-6 rounded-2xl border border-[#C9A45C]/20 bg-[#111111] p-6 shadow-sm">
           <div className="mb-6 flex items-start justify-between gap-4">
@@ -4779,6 +4857,8 @@ function AIConfigurationSection({
           </div>
         )}
       </div>
+        </>
+      )}
     </div>
   );
 }

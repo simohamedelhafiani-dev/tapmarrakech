@@ -1,6 +1,5 @@
--- Commercial audit: loyalty card design is an admin-only capability.
--- Responsible users may manage loyalty program parameters, but must never be able
--- to publish or modify the loyalty card visual design through the RPC.
+-- Restrict loyalty card design changes to administrators and the responsible user
+-- assigned to the establishment. Employees and public visitors are not authorized.
 create or replace function public.save_loyalty_card_builder_config(
   p_establishment_id uuid,
   p_design_config jsonb,
@@ -11,7 +10,7 @@ create or replace function public.save_loyalty_card_builder_config(
   p_text_color text,
   p_button_color text,
   p_border_radius integer,
-  p_published boolean
+  p_published boolean DEFAULT false
 )
 returns void
 language plpgsql
@@ -20,8 +19,10 @@ set search_path = public
 as $$
 begin
   if auth.uid() is null
-     or not public.is_tapmarrakech_admin()
-     or not public.user_has_establishment_access(p_establishment_id) then
+     or not (
+       public.is_tapmarrakech_admin()
+       or public.is_establishment_responsible(p_establishment_id)
+     ) then
     raise exception 'Not authorized';
   end if;
 
@@ -97,8 +98,10 @@ set search_path = ''
 as $$
 begin
   if auth.uid() is null
-     or not public.is_tapmarrakech_admin()
-     or not public.user_has_establishment_access(p_establishment_id) then
+     or not (
+       public.is_tapmarrakech_admin()
+       or public.is_establishment_responsible(p_establishment_id)
+     ) then
     raise exception 'Not authorized';
   end if;
 

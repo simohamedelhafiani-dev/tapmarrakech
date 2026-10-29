@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS public.loyalty_settings (
   discount_percent numeric,
   discount_valid_days integer NOT NULL DEFAULT 7,
   referral_draft_config jsonb NOT NULL DEFAULT '{"enabled":false,"max_referrals":null,"referee_bonus_type":"POINTS","referee_bonus_value":0,"referrer_bonus_type":"POINTS","referee_bonus_points":0,"referrer_bonus_value":50,"referrer_bonus_points":50}'::jsonb,
-  referral_config jsonb NOT NULL DEFAULT '{"enabled":false,"max_referrals":null,"referee_bonus_type":"POINTS","referee_bonus_value":0,"referrer_bonus_value":50,"referee_bonus_points":0,"referrer_bonus_points":50}'::jsonb,
+  referral_config jsonb NOT NULL DEFAULT '{"enabled":false,"max_referrals":null,"referee_bonus_type":"POINTS","referee_bonus_value":0,"referrer_bonus_type":"POINTS","referee_bonus_points":0,"referrer_bonus_value":50,"referrer_bonus_points":50}'::jsonb,
   discount_points_threshold integer NOT NULL DEFAULT 1000
 );
 

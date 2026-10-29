@@ -31,8 +31,8 @@ DECLARE
 BEGIN
   v_jwt_role := COALESCE(auth.jwt() ->> 'role', '');
 
-  -- Never accept arbitrary role names, even from an administrator.
-  IF NEW.role IS NULL OR NEW.role::text NOT IN ('admin', 'responsible') THEN
+  -- Accept only known roles. The service role or an existing admin may assign employee roles.
+  IF NEW.role IS NULL OR NEW.role::text NOT IN ('admin', 'responsible', 'employee') THEN
     RAISE EXCEPTION 'Invalid profile role'
       USING ERRCODE = '42501';
   END IF;

@@ -390,7 +390,7 @@ export default function PublicReview() {
     setLoyaltyLoading(true);
 
     const { data, error } = await supabase.rpc(
-      'register_public_loyalty_customer_for_enrollment_v2',
+      'register_public_loyalty_customer_for_enrollment_v3',
       {
         p_establishment_id: place.id,
         p_first_name: loyaltyForm.first_name.trim(),
@@ -427,38 +427,29 @@ export default function PublicReview() {
       return;
     }
 
-    const customer = Array.isArray(data) ? data[0] : data;
+    const result = Array.isArray(data) ? data[0] : data;
+    const loyaltyLink = typeof result?.access_token === 'string'
+      ? result.access_token
+      : '';
 
-    if (!customer) {
-      setLoyaltyError(
-        'Impossible de créer votre carte fidélité.'
-      );
+    if (!result || !loyaltyLink || !result.loyalty_number) {
+      setLoyaltyError('La carte a été créée, mais son lien n’a pas pu être confirmé. Contactez l’établissement pour récupérer votre carte.');
       return;
     }
 
-    const { data: linkData, error: linkError } = await supabase.rpc(
-      'get_public_loyalty_link',
-      {
-        p_establishment_id: place.id,
-        p_loyalty_number: customer.loyalty_number,
-        p_phone: loyaltyForm.phone.trim(),
-      }
-    );
-
-    const loyaltyLink = Array.isArray(linkData) ? linkData[0]?.access_token : linkData?.access_token;
-
-    if (linkError || !loyaltyLink) {
-      setLoyaltyCreated(customer);
-      setLoyaltyCardUrl('');
-    } else {
-      const url = new URL('/loyalty/' + loyaltyLink, window.location.origin).toString();
-      setLoyaltyCreated(customer);
-      setLoyaltyCardUrl(url);
-      try {
-        window.localStorage.setItem('tapmarrakech:customer-card-token', String(loyaltyLink));
-      } catch {
-        // Ignore storage restrictions; the permanent link remains available.
-      }
+    const customer = {
+      first_name: String(result.first_name ?? loyaltyForm.first_name.trim()),
+      loyalty_number: String(result.loyalty_number),
+      points_balance: Number(result.points_balance ?? 0),
+      visit_count: Number(result.visit_count ?? 0),
+    };
+    const url = new URL('/loyalty/' + loyaltyLink, window.location.origin).toString();
+    setLoyaltyCreated(customer);
+    setLoyaltyCardUrl(url);
+    try {
+      window.localStorage.setItem('tapmarrakech:customer-card-token', loyaltyLink);
+    } catch {
+      // Ignore storage restrictions; the permanent link remains available.
     }
 
     setShowLoyaltyForm(false);
