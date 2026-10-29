@@ -72,10 +72,17 @@ $function$;
 REVOKE ALL ON FUNCTION public.enforce_profile_role_authority()
   FROM PUBLIC, anon, authenticated;
 
+DROP TRIGGER IF EXISTS enforce_profile_role_authority_insert ON public.profiles;
+DROP TRIGGER IF EXISTS enforce_profile_role_authority_update ON public.profiles;
 DROP TRIGGER IF EXISTS enforce_profile_role_authority ON public.profiles;
-CREATE TRIGGER enforce_profile_role_authority
-  BEFORE INSERT OR UPDATE OF role
-  ON public.profiles
+
+CREATE TRIGGER enforce_profile_role_authority_insert
+  BEFORE INSERT ON public.profiles
+  FOR EACH ROW
+  EXECUTE FUNCTION public.enforce_profile_role_authority();
+
+CREATE TRIGGER enforce_profile_role_authority_update
+  BEFORE UPDATE OF role ON public.profiles
   FOR EACH ROW
   EXECUTE FUNCTION public.enforce_profile_role_authority();
 
