@@ -637,7 +637,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
 
   return (
     <section className="space-y-6">
-      <div className="rounded-[2rem] border border-ink/5 bg-white p-5 shadow-soft md:p-7">
+      <div className="rounded-[2rem] border border-[#D4AF37]/20 bg-[#111111] p-5 shadow-soft md:p-7">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">Fidélité</p>
@@ -645,14 +645,14 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
             <p className="mt-1 text-sm text-ink/45">Structure, Design et Miroir de la carte fidélité existante de l’établissement.</p>
           </div>
           <div className="flex gap-2">
-            <button type="button" onClick={() => void save(false)} disabled={saving} className="rounded-xl border border-forest/20 bg-white px-4 py-3 text-xs font-semibold text-forest">Enregistrer</button>
+            <button type="button" onClick={() => void save(false)} disabled={saving} className="rounded-xl border border-forest/20 bg-[#111111] px-4 py-3 text-xs font-semibold text-forest">Enregistrer</button>
             <button type="button" onClick={() => void save(true)} disabled={saving} className="rounded-xl bg-forest px-5 py-3 text-xs font-semibold text-white">{saving ? 'Publication…' : 'Publier la carte'}</button>
           </div>
         </div>
 
         <div className="mt-6 grid items-stretch gap-6 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)]">
           <div className="space-y-5">
-            <div className="flex items-center gap-2 rounded-2xl border border-ink/10 bg-[#fafaf8] p-1">
+            <div className="flex items-center gap-2 rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-1">
               {(['Structure', 'Acquisition', 'Design'] as const).map(tab => (
                 <button
                   key={tab}
@@ -662,14 +662,14 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                     const targetId = tab === 'Structure' ? 'loyalty-structure' : tab === 'Acquisition' ? 'loyalty-acquisition' : 'loyalty-design';
                     window.requestAnimationFrame(() => document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
                   }}
-                  className={`flex-1 rounded-xl px-3 py-2.5 text-center text-[10px] font-semibold transition ${activeTab === tab ? 'bg-white text-forest shadow-sm' : 'text-ink/35 hover:text-forest'}`}
+                  className={`flex-1 rounded-xl px-3 py-2.5 text-center text-[10px] font-semibold transition ${activeTab === tab ? 'bg-[#111111] text-forest shadow-sm' : 'text-ink/35 hover:text-forest'}`}
                 >
                   {tab}
                 </button>
               ))}
             </div>
 
-            <div id="loyalty-design" className="scroll-mt-6 rounded-2xl border border-ink/10 p-5">
+            <div id="loyalty-design" className="scroll-mt-6 rounded-2xl border border-[#D4AF37]/20 p-5">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Modèles</p>
                 <p className="mt-1 text-xs text-ink/45">Choisis un modèle de départ, puis personnalise-le avec tes couleurs, ton logo et ta photo.</p>
@@ -682,10 +682,10 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                       key={preset.id}
                       type="button"
                       onClick={() => applyPreset(preset)}
-                      className={`overflow-hidden rounded-2xl border text-left transition ${active ? 'border-forest ring-2 ring-forest/10' : 'border-ink/10 hover:border-forest/30'}`}
+                      className={`overflow-hidden rounded-2xl border text-left transition ${active ? 'border-forest ring-2 ring-forest/10' : 'border-[#D4AF37]/20 hover:border-forest/30'}`}
                     >
                       <PresetMiniPreview preset={preset} />
-                      <div className="bg-white p-3">
+                      <div className="bg-[#111111] p-3">
                         <p className="text-xs font-semibold text-forest">{preset.name}</p>
                         <p className="mt-1 text-[9px] leading-4 text-ink/45">{preset.description}</p>
                       </div>
@@ -695,7 +695,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
               </div>
             </div>
 
-            <div className="rounded-2xl border border-ink/10 p-5">
+            <div className="rounded-2xl border border-[#D4AF37]/20 p-5">
               <div className="grid gap-4 sm:grid-cols-2">
                 <AssetPicker title="Logo de l’établissement" description="PNG, JPG ou WEBP · 5 Mo max" value={design.design_config.logo_url || establishment.logo_url} fallback={establishment.logo_url} loading={uploading === 'logo'} inputRef={logoInput} />
                 <AssetPicker title="Photo de fond" description="Une photo qui représente votre établissement" value={design.design_config.background_image_url} loading={uploading === 'photo'} inputRef={photoInput} />
@@ -704,7 +704,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
               <input ref={photoInput} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={e => { const file=e.target.files?.[0]; if(file) void uploadAsset(file,'photo'); e.currentTarget.value=''; }} />
               <input ref={wallpapersInput} type="file" accept="image/png,image/jpeg,image/webp" multiple className="hidden" onChange={e => { void uploadWallpapers(e.target.files); e.currentTarget.value=''; }} />
 
-              <div className="mt-5 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
+              <div className="mt-5 rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Bibliothèque de wallpapers</p>
@@ -732,7 +732,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                     </button>
                   ))}
                   {!design.design_config.background_image_url && !((design.design_config as LoyaltyDesignConfig & { wallpaper_library?: string[] }).wallpaper_library || []).length && (
-                    <div className="col-span-full rounded-xl border border-dashed border-ink/10 px-4 py-5 text-center text-[10px] text-ink/35">Aucun wallpaper ajouté.</div>
+                    <div className="col-span-full rounded-xl border border-dashed border-[#D4AF37]/20 px-4 py-5 text-center text-[10px] text-ink/35">Aucun wallpaper ajouté.</div>
                   )}
                 </div>
               </div>
@@ -740,7 +740,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
               <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {([['Couleur principale','primary_color'],['Couleur secondaire','secondary_color'],['Fond','background_color'],['Texte','text_color']] as const).map(([label,key]) => (
                   <label key={key} className="text-[10px] font-semibold uppercase tracking-wide text-ink/40">{label}
-                    <div className="mt-1 flex items-center gap-2 rounded-xl border border-ink/10 bg-white p-2"><input type="color" value={design[key]} onChange={e => setDesign(d => ({ ...d, [key]: e.target.value, published: false }))} className="h-8 w-8 cursor-pointer rounded-lg border-0 bg-transparent p-0" /><span className="text-[10px] text-ink/50">{design[key]}</span></div>
+                    <div className="mt-1 flex items-center gap-2 rounded-xl border border-[#D4AF37]/20 bg-[#111111] p-2"><input type="color" value={design[key]} onChange={e => setDesign(d => ({ ...d, [key]: e.target.value, published: false }))} className="h-8 w-8 cursor-pointer rounded-lg border-0 bg-transparent p-0" /><span className="text-[10px] text-ink/50">{design[key]}</span></div>
                   </label>
                 ))}
               </div>
@@ -755,11 +755,11 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                </div>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                <label className="block text-xs font-medium text-ink/50">Titre<input value={design.design_config.front_title} onChange={e => updateConfig({front_title:e.target.value})} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm"/></label>
-                <label className="block text-xs font-medium text-ink/50">Sous-titre<input value={design.design_config.front_subtitle} onChange={e => updateConfig({front_subtitle:e.target.value})} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm"/></label>
+                <label className="block text-xs font-medium text-ink/50">Titre<input value={design.design_config.front_title} onChange={e => updateConfig({front_title:e.target.value})} className="mt-1 w-full rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-3 py-2.5 text-sm"/></label>
+                <label className="block text-xs font-medium text-ink/50">Sous-titre<input value={design.design_config.front_subtitle} onChange={e => updateConfig({front_subtitle:e.target.value})} className="mt-1 w-full rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-3 py-2.5 text-sm"/></label>
               </div>
 
-              <div id="loyalty-structure" className="scroll-mt-6 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
+              <div id="loyalty-structure" className="scroll-mt-6 rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-4">
                 <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Structure</p>
                 <p className="mt-1 text-xs text-ink/45">Les réglages ci-dessous pilotent le programme de fidélité déjà utilisé par cet établissement.</p>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -772,7 +772,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                       step="1"
                       value={stampGoal}
                       onChange={e => setStampGoal(e.target.value.replace(/\\D/g, '').slice(0, 3))}
-                      className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm text-ink outline-none"
+                      className="mt-1 w-full rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-3 py-2.5 text-sm text-ink outline-none"
                     />
                     <span className="mt-1 block text-[10px] text-ink/35">Ex. 6, 8 ou 10 cases. Le maximum est de 10 tampons.</span>
                   </label>
@@ -782,7 +782,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                       value={stampRewardName}
                       onChange={e => setStampRewardName(e.target.value)}
                       disabled={cardMode !== 'STAMP'}
-                      className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm text-ink outline-none disabled:opacity-40"
+                      className="mt-1 w-full rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-3 py-2.5 text-sm text-ink outline-none disabled:opacity-40"
                       placeholder="Cadeau fidélité"
                     />
                   </label>
@@ -791,19 +791,19 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                 {cardMode === 'POINTS_DISCOUNT' && (
                   <div className="mt-4 grid gap-3 sm:grid-cols-3">
                     <label className="text-xs font-medium text-ink/50">Seuil de points
-                      <div className="mt-1 flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-3 py-2.5">
+                      <div className="mt-1 flex items-center gap-2 rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-3 py-2.5">
                         <input type="number" min="1" value={discountPointsThreshold} onChange={e => setDiscountPointsThreshold(e.target.value)} className="w-full bg-transparent text-sm text-ink outline-none" />
                         <span className="text-[10px] font-semibold text-ink/35">pts</span>
                       </div>
                     </label>
                     <label className="text-xs font-medium text-ink/50">Réduction
-                      <div className="mt-1 flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-3 py-2.5">
+                      <div className="mt-1 flex items-center gap-2 rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-3 py-2.5">
                         <input type="number" min="1" max="100" value={discountPercent} onChange={e => setDiscountPercent(e.target.value)} className="w-full bg-transparent text-sm text-ink outline-none" />
                         <span className="text-[10px] font-semibold text-ink/35">%</span>
                       </div>
                     </label>
                     <label className="text-xs font-medium text-ink/50">Validité
-                      <div className="mt-1 flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-3 py-2.5">
+                      <div className="mt-1 flex items-center gap-2 rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-3 py-2.5">
                         <input type="number" min="1" max="365" value={discountValidDays} onChange={e => setDiscountValidDays(e.target.value)} className="w-full bg-transparent text-sm text-ink outline-none" />
                         <span className="text-[10px] font-semibold text-ink/35">jours</span>
                       </div>
@@ -811,7 +811,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                   </div>
                 )}
 
-                <div className="mt-3 rounded-xl border border-forest/10 bg-white p-3 text-[10px] text-ink/45">
+                <div className="mt-3 rounded-xl border border-forest/10 bg-[#111111] p-3 text-[10px] text-ink/45">
                   Exemple : 250 MAD = {Math.floor(Math.max(0, Number(pointsPerCurrency) || 0) * 250)} points.
                 </div>
               </div>
@@ -831,11 +831,11 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                 </div>
 
                 <div className="mt-4 grid gap-4 md:grid-cols-[auto_1fr] md:items-center">
-                  <div className="mx-auto flex h-[230px] w-[230px] items-center justify-center rounded-2xl bg-white p-3">
+                  <div className="mx-auto flex h-[230px] w-[230px] items-center justify-center rounded-2xl bg-[#111111] p-3">
                     {masterQrDataUrl ? (
                       <img src={masterQrDataUrl} alt="QR Code maître d'inscription" className="h-full w-full rounded-xl" />
                     ) : (
-                      <div className="h-full w-full animate-pulse rounded-xl bg-[#eef0ed]" />
+                      <div className="h-full w-full animate-pulse rounded-xl bg-[#111111]" />
                     )}
                   </div>
 
@@ -861,7 +861,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                 </div>
               </div>
 
-              <div id="loyalty-acquisition" className="mt-4 scroll-mt-6 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
+              <div id="loyalty-acquisition" className="mt-4 scroll-mt-6 rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-4">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Acquisition · Parrainage</p>
@@ -881,21 +881,21 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                     <p className="mt-1 text-2xl font-bold text-forest">{referralAcquiredCount}</p>
                     <p className="mt-1 text-[10px] text-ink/45">{referralAcquiredCount === 1 ? "client a été acquis via parrainage" : "clients ont été acquis via parrainage"}</p>
                   </div>
-                  <div className="rounded-2xl border border-ink/10 bg-white p-4">
+                  <div className="rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-4">
                     <p className="text-[9px] font-semibold uppercase tracking-[.16em] text-ink/40">Limite par parrain</p>
                     <p className="mt-1 text-lg font-semibold text-forest">
                       {referralDraft.max_referrals === null ? 'Illimitée' : `${referralDraft.max_referrals} parrainages`}
                     </p>
                     <p className="mt-1 text-[10px] text-ink/45">contrôlée côté serveur</p>
                   </div>
-                  <div className="rounded-2xl border border-ink/10 bg-white p-4">
+                  <div className="rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-4">
                     <p className="text-[9px] font-semibold uppercase tracking-[.16em] text-ink/40">Boucle</p>
                     <p className="mt-1 text-lg font-semibold text-forest">QR automatique</p>
                     <p className="mt-1 text-[10px] text-ink/45">le nouveau client peut parrainer à son tour</p>
                   </div>
                 </div>
 
-                <div className="mt-4 rounded-2xl border border-ink/10 bg-white p-4">
+                <div className="mt-4 rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-4">
                   <label className="flex items-center gap-3 text-xs font-medium text-ink/60">
                     <input
                       type="checkbox"
@@ -907,7 +907,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                   </label>
 
                   <div className="mt-5 grid gap-4 lg:grid-cols-2">
-                    <div className="rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
+                    <div className="rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-4">
                       <p className="text-xs font-semibold text-forest">Récompense du parrain</p>
                       <p className="mt-1 text-[10px] text-ink/40">Ce que reçoit le client qui invite.</p>
 
@@ -919,7 +919,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                             ...draft,
                             referrer_bonus_type: e.target.value as LoyaltyReferralBonusType,
                           }))}
-                          className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm text-ink"
+                          className="mt-1 w-full rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-3 py-2.5 text-sm text-ink"
                         >
                           <option value="POINTS">Points</option>
                           <option value="STAMP">Stamps</option>
@@ -929,7 +929,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
 
                       <label className="mt-3 block text-xs font-medium text-ink/50">
                         Valeur du bonus
-                        <div className="mt-1 flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-3 py-2.5">
+                        <div className="mt-1 flex items-center gap-2 rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-3 py-2.5">
                           <input
                             type="number"
                             min="0"
@@ -946,7 +946,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                       </label>
                     </div>
 
-                    <div className="rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
+                    <div className="rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-4">
                       <p className="text-xs font-semibold text-forest">Bonus du filleul</p>
                       <p className="mt-1 text-[10px] text-ink/40">Ce que reçoit le nouveau client à son inscription.</p>
 
@@ -958,7 +958,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                             ...draft,
                             referee_bonus_type: e.target.value as LoyaltyReferralBonusType,
                           }))}
-                          className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm text-ink"
+                          className="mt-1 w-full rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-3 py-2.5 text-sm text-ink"
                         >
                           <option value="POINTS">Points</option>
                           <option value="STAMP">Stamps</option>
@@ -968,7 +968,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
 
                       <label className="mt-3 block text-xs font-medium text-ink/50">
                         Valeur du bonus
-                        <div className="mt-1 flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-3 py-2.5">
+                        <div className="mt-1 flex items-center gap-2 rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-3 py-2.5">
                           <input
                             type="number"
                             min="0"
@@ -986,10 +986,10 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                     </div>
                   </div>
 
-                  <div className="mt-4 rounded-2xl border border-gold/15 bg-[#fbf7ed] p-4">
+                  <div className="mt-4 rounded-2xl border border-gold/15 bg-[#111111] p-4">
                     <label className="block text-xs font-medium text-ink/50">
                       Limite de parrainages par client
-                      <div className="mt-1 flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-3 py-2.5">
+                      <div className="mt-1 flex items-center gap-2 rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-3 py-2.5">
                         <input
                           type="number"
                           min="0"
@@ -1024,7 +1024,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                       type="button"
                       disabled={referralSaving}
                       onClick={() => void saveReferralDraftOnly()}
-                      className="rounded-xl border border-ink/10 bg-white px-4 py-3 text-xs font-semibold text-forest disabled:opacity-50"
+                      className="rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-4 py-3 text-xs font-semibold text-forest disabled:opacity-50"
                     >
                       {referralSaving ? 'Enregistrement...' : 'Enregistrer le brouillon'}
                     </button>
@@ -1039,46 +1039,46 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                   </div>
                 </div>
               </div>
-              <div id="loyalty-content" className="mt-5 scroll-mt-6 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
+              <div id="loyalty-content" className="mt-5 scroll-mt-6 rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-4">
                 <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Contenu de la carte</p>
                 <p className="mt-1 text-[10px] text-ink/45">Modifie les avantages et les offres affichés au client.</p>
                 <p className="mt-4 text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Avantages & offres</p>
                 <p className="mt-1 text-[10px] text-ink/45">Ces contenus sont enregistrés dans la configuration de la carte et affichés au client.</p>
                 <div className="mt-3 grid gap-3 sm:grid-cols-3">
                   {(design.design_config.benefits || []).slice(0,3).map((benefit, index) => (
-                    <div key={index} className="rounded-xl border border-ink/10 bg-white p-3">
+                    <div key={index} className="rounded-xl border border-[#D4AF37]/20 bg-[#111111] p-3">
                       <input value={benefit.title} onChange={e => {
                         const benefits = [...(design.design_config.benefits || [])];
                         benefits[index] = { ...benefits[index], title: e.target.value };
                         updateConfig({ benefits });
-                      }} placeholder="Titre avantage" className="w-full rounded-lg border border-ink/10 px-2.5 py-2 text-xs" />
+                      }} placeholder="Titre avantage" className="w-full rounded-lg border border-[#D4AF37]/20 px-2.5 py-2 text-xs" />
                       <input value={benefit.description || ''} onChange={e => {
                         const benefits = [...(design.design_config.benefits || [])];
                         benefits[index] = { ...benefits[index], description: e.target.value };
                         updateConfig({ benefits });
-                      }} placeholder="Description" className="mt-2 w-full rounded-lg border border-ink/10 px-2.5 py-2 text-[10px]" />
+                      }} placeholder="Description" className="mt-2 w-full rounded-lg border border-[#D4AF37]/20 px-2.5 py-2 text-[10px]" />
                     </div>
                   ))}
                 </div>
                 <div className="mt-3">
                   {(design.design_config.offers || []).slice(0,2).map((offer, index) => (
-                    <div key={index} className="mb-2 rounded-xl border border-ink/10 bg-white p-3">
+                    <div key={index} className="mb-2 rounded-xl border border-[#D4AF37]/20 bg-[#111111] p-3">
                       <div className="grid gap-2 sm:grid-cols-3">
                         <input value={offer.eyebrow || ''} onChange={e => {
                           const offers = [...(design.design_config.offers || [])];
                           offers[index] = { ...offers[index], eyebrow: e.target.value };
                           updateConfig({ offers });
-                        }} placeholder="Label" className="rounded-lg border border-ink/10 px-2.5 py-2 text-[10px]" />
+                        }} placeholder="Label" className="rounded-lg border border-[#D4AF37]/20 px-2.5 py-2 text-[10px]" />
                         <input value={offer.title} onChange={e => {
                           const offers = [...(design.design_config.offers || [])];
                           offers[index] = { ...offers[index], title: e.target.value };
                           updateConfig({ offers });
-                        }} placeholder="Titre offre" className="rounded-lg border border-ink/10 px-2.5 py-2 text-xs" />
+                        }} placeholder="Titre offre" className="rounded-lg border border-[#D4AF37]/20 px-2.5 py-2 text-xs" />
                         <input value={offer.description || ''} onChange={e => {
                           const offers = [...(design.design_config.offers || [])];
                           offers[index] = { ...offers[index], description: e.target.value };
                           updateConfig({ offers });
-                        }} placeholder="Description" className="rounded-lg border border-ink/10 px-2.5 py-2 text-[10px]" />
+                        }} placeholder="Description" className="rounded-lg border border-[#D4AF37]/20 px-2.5 py-2 text-[10px]" />
                       </div>
                     </div>
                   ))}
@@ -1088,7 +1088,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 <label className="text-xs text-ink/50">Coins arrondis <span className="float-right">{design.border_radius}px</span><input type="range" min="12" max="36" value={design.border_radius} onChange={e=>setDesign(d=>({...d,border_radius:Number(e.target.value),published:false}))} className="mt-3 w-full"/></label>
-                <label className="text-xs text-ink/50">Style des tampons<select disabled={cardMode !== 'STAMP'} value={design.design_config.stamp_style} onChange={e=>updateConfig({stamp_style:e.target.value as LoyaltyDesignConfig['stamp_style']})} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 disabled:opacity-40"><option value="circles">Cercles</option><option value="squares">Carrés</option><option value="stars">Étoiles</option><option value="hearts">Cœurs</option></select></label>
+                <label className="text-xs text-ink/50">Style des tampons<select disabled={cardMode !== 'STAMP'} value={design.design_config.stamp_style} onChange={e=>updateConfig({stamp_style:e.target.value as LoyaltyDesignConfig['stamp_style']})} className="mt-1 w-full rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-3 py-2.5 disabled:opacity-40"><option value="circles">Cercles</option><option value="squares">Carrés</option><option value="stars">Étoiles</option><option value="hearts">Cœurs</option></select></label>
               </div>
             </div>
           </div>
@@ -1096,7 +1096,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
           <div id="loyalty-preview" className="scroll-mt-6 flex min-h-[78vh] flex-col overflow-hidden rounded-[32px] border border-white/70 bg-[linear-gradient(145deg,#f8faf8_0%,#eef2ef_48%,#e5eae6_100%)] p-5 shadow-[0_24px_70px_rgba(23,61,50,0.10)] sm:p-7">
             <div className="flex items-center justify-between">
               <div><p className="text-[10px] font-bold uppercase tracking-[.16em] text-gold">Aperçu en temps réel</p><p className="mt-1 text-xs text-ink/45">Voici exactement ce que vos clients verront.</p></div>
-              <span className="rounded-full bg-white px-3 py-1.5 text-[10px] font-semibold text-forest shadow-sm">Client</span>
+              <span className="rounded-full bg-[#111111] px-3 py-1.5 text-[10px] font-semibold text-forest shadow-sm">Client</span>
             </div>
             <div className="mt-6 flex min-h-0 w-full flex-1 flex-col items-center justify-center">
 
@@ -1110,7 +1110,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                 <LoyaltyPreview config={visualExperience} />
               </div>
 
-              <div className="mt-4 rounded-[22px] border border-ink/10 bg-white p-4 shadow-sm">
+              <div className="mt-4 rounded-[22px] border border-[#D4AF37]/20 bg-[#111111] p-4 shadow-sm">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-[9px] font-bold uppercase tracking-[.18em] text-gold">Parrainage</p>
@@ -1133,7 +1133,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
 
               {referralInviteOpen && (
                 <div className="fixed inset-0 z-[130] grid place-items-center bg-black/60 p-4" onClick={() => !referralGenerating && setReferralInviteOpen(false)}>
-                  <div className="w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+                  <div className="w-full max-w-md rounded-[28px] bg-[#111111] p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="text-[9px] font-bold uppercase tracking-[.2em] text-gold">Invitation fidélité</p>
@@ -1156,26 +1156,26 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                       </div>
                     ) : (
                       <>
-                        <div className="mt-5 rounded-2xl border border-forest/10 bg-[#f7f7f3] p-5 text-center">
+                        <div className="mt-5 rounded-2xl border border-forest/10 bg-[#111111] p-5 text-center">
                           <p className="text-[9px] font-semibold uppercase tracking-[.18em] text-ink/40">Ton code unique</p>
                           <p className="mt-2 text-3xl font-bold tracking-[.18em] text-forest">{referralCode || '—'}</p>
                         </div>
 
-                        <div className="mt-4 rounded-2xl border border-ink/10 bg-white p-4">
+                        <div className="mt-4 rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-4">
                           <p className="text-[9px] font-semibold uppercase tracking-[.16em] text-ink/40">Lien de partage</p>
-                          <div className="mt-2 flex items-center gap-2 rounded-xl bg-[#f7f7f3] px-3 py-2.5">
+                          <div className="mt-2 flex items-center gap-2 rounded-xl bg-[#111111] px-3 py-2.5">
                             <Link2 size={15} className="shrink-0 text-ink/35" />
                             <p className="min-w-0 flex-1 truncate text-[10px] text-ink/50">{referralCode ? referralShareUrl(referralCode) : '—'}</p>
                           </div>
                         </div>
 
-                        <div className="mt-4 rounded-2xl border border-gold/15 bg-[#fbf7ed] p-4">
+                        <div className="mt-4 rounded-2xl border border-gold/15 bg-[#111111] p-4">
                           <p className="text-[9px] font-semibold uppercase tracking-[.16em] text-gold">Message prêt à partager</p>
                           <p className="mt-2 text-xs leading-5 text-ink/55">{referralCode ? referralMessage(referralCode) : '—'}</p>
                         </div>
 
                         <div className="mt-4 grid grid-cols-2 gap-2">
-                          <button type="button" onClick={() => void copyReferralMessage()} className="inline-flex items-center justify-center gap-2 rounded-xl border border-forest/15 bg-white px-3 py-3 text-xs font-semibold text-forest">
+                          <button type="button" onClick={() => void copyReferralMessage()} className="inline-flex items-center justify-center gap-2 rounded-xl border border-forest/15 bg-[#111111] px-3 py-3 text-xs font-semibold text-forest">
                             <Share2 size={15} />
                             {referralCopied ? 'Copié !' : 'Copier'}
                           </button>
@@ -1216,7 +1216,7 @@ function PresetMiniPreview({ preset }: { preset: LoyaltyPreset }) {
 
   if (preset.id === 'editorial') {
     return (
-      <div className={base + ' bg-[#F4EDE1] text-[#2B241D]'}>
+      <div className={base + ' bg-[#111111] text-[#2B241D]'}>
         <div className="absolute inset-x-4 top-4 border-t border-[#2B241D]/20" />
         <div className="absolute left-4 top-7">
           <p className="text-[7px] uppercase tracking-[.3em] opacity-45">MEMBERSHIP</p>
@@ -1277,9 +1277,9 @@ function PresetMiniPreview({ preset }: { preset: LoyaltyPreset }) {
   }
 
   return (
-    <div className={base + ' bg-[#F2EEE6] text-[#1B1A18]'}>
+    <div className={base + ' bg-[#111111] text-[#1B1A18]'}>
       <div className="absolute inset-x-4 top-4 flex items-center justify-between">
-        <div className="flex items-center gap-2"><span className="h-7 w-7 rounded-lg border border-black/10 bg-white" /><span className="text-[8px] font-semibold">ESTABLISHMENT</span></div>
+        <div className="flex items-center gap-2"><span className="h-7 w-7 rounded-lg border border-black/10 bg-[#111111]" /><span className="text-[8px] font-semibold">ESTABLISHMENT</span></div>
         <span className="text-[6px] uppercase tracking-[.2em] opacity-45">PRIVILEGE</span>
       </div>
       <div className="absolute bottom-4 left-4 right-4">
@@ -1293,11 +1293,11 @@ function PresetMiniPreview({ preset }: { preset: LoyaltyPreset }) {
 function AssetPicker({ title, description, value, fallback, loading, inputRef }: { title: string; description: string; value?: string | null; fallback?: string | null; loading: boolean; inputRef: React.RefObject<HTMLInputElement | null> }) {
   const image = value || fallback;
   return (
-    <button type="button" onClick={() => inputRef.current?.click()} className="group overflow-hidden rounded-2xl border border-dashed border-ink/15 bg-[#fafaf8] text-left">
+    <button type="button" onClick={() => inputRef.current?.click()} className="group overflow-hidden rounded-2xl border border-dashed border-[#D4AF37]/20 bg-[#111111] text-left">
       <div className="flex min-h-[150px] items-center justify-center p-4">
         {image ? <img src={image} alt="" className="h-[120px] w-full rounded-xl object-cover" /> : <div className="text-center text-ink/35"><ImagePlus className="mx-auto" size={28}/><p className="mt-2 text-xs font-semibold">Importer une image</p></div>}
       </div>
-      <div className="flex items-center justify-between border-t border-ink/10 bg-white px-3 py-3">
+      <div className="flex items-center justify-between border-t border-[#D4AF37]/20 bg-[#111111] px-3 py-3">
         <div><p className="text-xs font-semibold text-forest">{title}</p><p className="mt-1 text-[10px] text-ink/40">{description}</p></div>
         {loading ? <Loader2 className="animate-spin text-gold" size={18}/> : <Upload size={16} className="text-ink/35"/>}
       </div>
@@ -1307,8 +1307,8 @@ function AssetPicker({ title, description, value, fallback, loading, inputRef }:
 
 function ModeButton({ active, icon, title, description, onClick }: { active: boolean; icon: React.ReactNode; title: string; description: string; onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} className={`flex items-center gap-3 rounded-2xl border p-4 text-left transition ${active ? 'border-forest bg-forest/[0.04] ring-2 ring-forest/10' : 'border-ink/10 bg-white hover:border-forest/30'}`}>
-      <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${active ? 'bg-forest text-white' : 'bg-[#f7f7f3] text-ink/45'}`}>{icon}</span>
+    <button type="button" onClick={onClick} className={`flex items-center gap-3 rounded-2xl border p-4 text-left transition ${active ? 'border-forest bg-forest/[0.04] ring-2 ring-forest/10' : 'border-[#D4AF37]/20 bg-[#111111] hover:border-forest/30'}`}>
+      <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${active ? 'bg-forest text-white' : 'bg-[#111111] text-ink/45'}`}>{icon}</span>
       <span><span className="block text-sm font-semibold text-forest">{title}</span><span className="mt-1 block text-[10px] leading-4 text-ink/45">{description}</span></span>
       <span className={`ml-auto h-4 w-4 rounded-full border-2 ${active ? 'border-forest bg-forest' : 'border-ink/25'}`}>{active && <Check size={11} className="m-auto text-white" />}</span>
     </button>
