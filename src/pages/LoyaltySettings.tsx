@@ -347,7 +347,7 @@ export default function LoyaltySettings() {
       {establishments.length > 1 && (
         <section className="rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-6 shadow-soft md:p-8">
         <div className="flex items-start gap-4">
-          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#e5eee9] text-forest">
+          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#111111] text-[#D4AF37]">
             <Settings2 size={20} />
           </div>
 
@@ -386,7 +386,7 @@ export default function LoyaltySettings() {
       <section className="mt-6 rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-6 shadow-soft md:p-8">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-start gap-4">
-            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#e5eee9] text-forest">
+            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#111111] text-[#D4AF37]">
               <Star size={20} />
             </div>
 
@@ -426,7 +426,7 @@ export default function LoyaltySettings() {
       {/* ATTRIBUTION DES POINTS */}
       <section className="mt-6 rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-6 shadow-soft md:p-8">
         <div className="flex items-start gap-4">
-          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#f4ead3] text-gold">
+          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#111111] text-[#D4AF37]">
             <Coins size={20} />
           </div>
 
@@ -503,7 +503,7 @@ export default function LoyaltySettings() {
       <section className="mt-6 rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-6 shadow-soft md:p-8">
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div className="flex items-start gap-4">
-            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#e5eee9] text-forest">
+            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#111111] text-[#D4AF37]">
               <Gift size={20} />
             </div>
 
@@ -554,7 +554,7 @@ export default function LoyaltySettings() {
               >
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div className="flex items-start gap-4">
-                    <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#f4ead3] text-gold">
+                    <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#111111] text-[#D4AF37]">
                       <Gift size={19} />
                     </div>
 
@@ -567,7 +567,7 @@ export default function LoyaltySettings() {
                         <span
                           className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
                             reward.active
-                              ? 'bg-[#e5eee9] text-forest'
+                              ? 'bg-[#111111] text-[#D4AF37]'
                               : 'bg-ink/10 text-ink/40'
                           }`}
                         >
