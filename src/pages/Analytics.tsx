@@ -139,7 +139,7 @@ export default function Analytics() {
       </div>
 
       {establishments.length > 1 && (
-        <div className="mb-6 rounded-2xl border border-ink/5 bg-white p-5 shadow-soft">
+        <div className="mb-6 rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-5 shadow-soft">
           <label className="text-xs font-medium text-ink/50">
             Établissement
           </label>
@@ -147,7 +147,7 @@ export default function Analytics() {
           <select
             value={establishmentId}
             onChange={e => setEstablishmentId(e.target.value)}
-            className="mt-2 w-full max-w-md rounded-xl border border-ink/10 bg-[#fafaf7] px-4 py-3 text-sm text-ink outline-none"
+            className="mt-2 w-full max-w-md rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-4 py-3 text-sm text-ink outline-none"
           >
             {establishments.map(establishment => (
               <option key={establishment.id} value={establishment.id}>
@@ -192,7 +192,7 @@ export default function Analytics() {
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-        <section className="rounded-2xl border border-ink/5 bg-white p-6 shadow-soft">
+        <section className="rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-6 shadow-soft">
           <h2 className="font-display text-xl text-forest">Volume d’avis</h2>
           <p className="mt-1 text-xs text-ink/45">
             Évolution sur les 8 dernières semaines
@@ -235,7 +235,7 @@ export default function Analytics() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-ink/5 bg-white p-6 shadow-soft">
+        <section className="rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-6 shadow-soft">
           <h2 className="font-display text-xl text-forest">
             Répartition des notes
           </h2>
@@ -333,7 +333,7 @@ function Metric({
   detail: string;
 }) {
   return (
-    <div className="rounded-2xl border border-ink/5 bg-white p-5 shadow-soft">
+    <div className="rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-5 shadow-soft">
       <Icon size={18} className="text-gold" />
       <p className="mt-5 text-xs text-ink/45">{label}</p>
       <p className="mt-1 font-display text-3xl text-forest">{value}</p>
@@ -354,7 +354,7 @@ function InfoCard({
   detail: string;
 }) {
   return (
-    <div className="flex items-center gap-4 rounded-2xl border border-ink/5 bg-white p-5 shadow-soft">
+    <div className="flex items-center gap-4 rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-5 shadow-soft">
       <div className="grid h-11 w-11 place-items-center rounded-xl bg-[#e5eee9] text-forest">
         <Icon size={19} />
       </div>
