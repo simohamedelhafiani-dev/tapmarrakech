@@ -1,12 +1,30 @@
--- Legacy employee-code/session RPCs are no longer used by the current app.
--- Keep the functions in place for compatibility, but prevent anonymous/public
--- execution so old entry points cannot be used as an unauthenticated API.
-revoke execute on function public.login_employee_with_code(uuid, text) from anon, public;
-revoke execute on function public.login_employee_with_code_only(text) from anon, public;
-revoke execute on function public.verify_employee_access_code(uuid, text) from anon, public;
-revoke execute on function public.verify_employee_session(text) from anon, public;
-revoke execute on function public.get_employee_loyalty_card_config(text) from anon, public;
-revoke execute on function public.add_loyalty_stamp_by_employee(text, uuid) from anon, public;
-revoke execute on function public.redeem_loyalty_discount_by_employee(text, uuid, numeric, text, text) from anon, public;
-revoke execute on function public.redeem_loyalty_stamp_reward_by_employee(text, uuid) from anon, public;
-revoke execute on function public.logout_employee(text) from anon, public;
+-- Restrict legacy employee RPCs from anonymous/public clients without removing
+-- the current employee-login Edge Function's service_role access.
+-- Employee login currently calls login_employee_with_code_only(text) via the
+-- employee-login Edge Function using the service-role client; keep that grant explicit.
+do $$
+declare
+  v_signature text;
+  v_signatures constant text[] := array[
+    'public.login_employee_with_code(uuid,text)',
+    'public.login_employee_with_code_only(text)',
+    'public.verify_employee_access_code(uuid,text)',
+    'public.verify_employee_session(text)',
+    'public.get_employee_loyalty_card_config(text)',
+    'public.add_loyalty_stamp_by_employee(text,uuid)',
+    'public.redeem_loyalty_discount_by_employee(text,uuid,numeric,text,text)',
+    'public.redeem_loyalty_stamp_reward_by_employee(text,uuid)',
+    'public.logout_employee(text)'
+  ];
+begin
+  foreach v_signature in array v_signatures loop
+    if to_regprocedure(v_signature) is not null then
+      execute format('revoke execute on function %s from anon, public', to_regprocedure(v_signature));
+    end if;
+  end loop;
+
+  if to_regprocedure('public.login_employee_with_code_only(text)') is not null then
+    grant execute on function public.login_employee_with_code_only(text) to service_role;
+  end if;
+end;
+$$;

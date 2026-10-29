@@ -1,6 +1,7 @@
 -- KELYANI: review bonuses, satisfaction feedback and WhatsApp/review context
 
 alter table public.establishments add column if not exists tripadvisor_review_url text;
+alter table public.establishments add column if not exists whatsapp_number text;
 
 create table if not exists public.customer_reviews_claims (id uuid primary key default gen_random_uuid(), customer_id uuid not null references public.loyalty_customers(id) on delete cascade, establishment_id uuid not null references public.establishments(id) on delete cascade, platform text not null check (platform in ('google','tripadvisor')), claimed_at timestamptz not null default timezone('utc', now()), points_awarded integer not null default 0 check (points_awarded >= 0));
 create unique index if not exists customer_reviews_claims_customer_platform on public.customer_reviews_claims(customer_id, platform);

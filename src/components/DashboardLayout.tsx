@@ -37,6 +37,12 @@ const links = [
     feature: null,
   },
   {
+    to: '/dashboard/assistant-ia',
+    label: 'Assistant IA',
+    icon: BrainCircuit,
+    feature: null,
+  },
+  {
     to: '/dashboard/reviews',
     label: 'Avis reçus',
     icon: MessageSquare,
@@ -47,12 +53,6 @@ const links = [
     label: 'Analytics',
     icon: BarChart3,
     feature: 'analytics' as const,
-  },
-  {
-    to: '/dashboard/assistant-ia',
-    label: 'Assistant IA',
-    icon: BrainCircuit,
-    feature: null,
   },
   {
     to: '/dashboard/menu',

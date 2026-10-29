@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -103,14 +103,27 @@ async function sha256(value: string): Promise<string> {
     .join('');
 }
 
+type PublicReviewRateLimitRpc = (
+  functionName: 'consume_public_review_rate_limit',
+  args: {
+    p_key_hash: string;
+    p_limit: number;
+    p_window_seconds: number;
+  }
+) => PromiseLike<{ data: unknown; error: unknown | null }>;
+
 async function consumeRateLimit(
-  serviceClient: ReturnType<typeof createClient>,
+  serviceClient: SupabaseClient<any, 'public', 'public', any, any>,
   key: string,
   limit: number
 ) {
   const keyHash = await sha256(key);
 
-  const { data, error } = await serviceClient.rpc(
+  // The repository does not ship generated Database types for this RPC. Keep the
+  // function name and parameter contract explicitly typed instead of using the
+  // generic ReturnType<typeof createClient>, which collapses its schema to never.
+  const consumeRateLimitRpc = serviceClient.rpc as unknown as PublicReviewRateLimitRpc;
+  const { data, error } = await consumeRateLimitRpc(
     'consume_public_review_rate_limit',
     {
       p_key_hash: keyHash,

@@ -1,5 +1,11 @@
 name: CI
 
+# Avoid booting multiple heavyweight local Supabase stacks for successive pushes
+# to the same pull request. The newest commit supersedes earlier validation runs.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [main]
@@ -32,6 +38,7 @@ jobs:
       - name: Build
         run: npm run build
 
+
   database-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -43,15 +50,32 @@ jobs:
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 2.122.0
 
-      # This repository currently stores migrations/tests without a committed
-      # local config.toml. Generate the standard local config in the CI workspace.
       - name: Initialize local Supabase config
         run: supabase init --force
 
+      # pgTAP tests exclude the Supabase API/service containers; only PostgreSQL
+      # is needed for local migrations and SQL tests.
+      - name: Preload PostgreSQL image from GHCR
+        timeout-minutes: 3
+        run: |
+          timeout 120s docker pull "ghcr.io/supabase/postgres:17.11.0.006"
+          docker tag "ghcr.io/supabase/postgres:17.11.0.006" "public.ecr.aws/supabase/postgres:17.11.0.006"
+
       - name: Start local Supabase stack
-        run: supabase start
+        # Tests only need the local Postgres schema. Keep the standard stack
+        # config but exclude service containers not required by pgTAP.
+        run: timeout 300s supabase start --exclude edge-runtime,gotrue,imgproxy,kong,logflare,mailpit,postgres-meta,postgrest,realtime,storage-api,studio,supavisor,vector
+
+      # Supabase CLI pulls pg_prove from public ECR, which has intermittently
+      # returned anonymous data-limit throttles. Preload the same public image
+      # from GHCR (confirmed available in CI logs) and alias it to the expected tag.
+      - name: Preload pgTAP image from GHCR
+        timeout-minutes: 3
+        run: |
+          timeout 120s docker pull ghcr.io/supabase/pg_prove:3.36
+          docker tag ghcr.io/supabase/pg_prove:3.36 public.ecr.aws/supabase/pg_prove:3.36
 
       - name: Run pgTAP database tests
         run: supabase test db
@@ -59,3 +83,42 @@ jobs:
       - name: Stop local Supabase stack
         if: always()
         run: supabase stop --no-backup
+
+  edge-function-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.1.4
+
+      - name: Test Edge Function authorization parsing
+        run: deno test supabase/functions/_shared/
+
+      - name: Type-check Supabase Edge Functions
+        run: |
+          deno check --no-lock --node-modules-dir=auto \
+            supabase/functions/admin-update-staff-account/index.ts \
+            supabase/functions/analyze-reviews/index.ts \
+            supabase/functions/create-employee/index.ts \
+            supabase/functions/create-staff-account/index.ts \
+            supabase/functions/design-menu/index.ts \
+            supabase/functions/employee-login/index.ts \
+            supabase/functions/generate-brand-palette/index.ts \
+            supabase/functions/generate-loyalty-template/index.ts \
+            supabase/functions/generate-promotion-image/index.ts \
+            supabase/functions/google-business-admin-dashboard/index.ts \
+            supabase/functions/google-business-oauth/index.ts \
+            supabase/functions/google-business-reply/index.ts \
+            supabase/functions/google-business-sync-access-test/index.ts \
+            supabase/functions/google-business-sync/index.ts \
+            supabase/functions/google-business-webhook/index.ts \
+            supabase/functions/import-menu/index.ts \
+            supabase/functions/send-loyalty-notification-push/index.ts \
+            supabase/functions/send-promotion-push/index.ts \
+            supabase/functions/submit-public-review/index.ts
