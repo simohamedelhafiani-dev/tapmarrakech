@@ -674,3 +674,81 @@ table {
   .kelyani-float-review { right:6px;top:15%; }
   .kelyani-float-chip { max-width:calc(100% - 12px); }
 }
+
+
+/* Final global luxe normalization — screen UI only.
+   Print output and actual QR image pixels remain untouched. */
+@media screen {
+  :root, body, #root {
+    color: var(--kelyani-text);
+    background-color: var(--kelyani-bg);
+  }
+
+  [class~="bg-white"]:not(img):not(svg),
+  [class~="bg-gray-50"]:not(img):not(svg),
+  [class~="bg-gray-100"]:not(img):not(svg),
+  [class~="bg-slate-50"]:not(img):not(svg),
+  [class~="bg-slate-100"]:not(img):not(svg),
+  [class~="bg-zinc-50"]:not(img):not(svg),
+  [class~="bg-zinc-100"]:not(img):not(svg),
+  [class~="bg-neutral-50"]:not(img):not(svg),
+  [class~="bg-neutral-100"]:not(img):not(svg),
+  [class~="bg-stone-50"]:not(img):not(svg),
+  [class~="bg-stone-100"]:not(img):not(svg),
+  [class~="bg-[#fffdf9]"]:not(img):not(svg),
+  [class~="bg-[#fffdf8]"]:not(img):not(svg),
+  [class~="bg-[#fffdf7]"]:not(img):not(svg),
+  [class~="bg-[#faf9f6]"]:not(img):not(svg),
+  [class~="bg-[#f5f1e8]"]:not(img):not(svg),
+  [class~="bg-[#f5f0e7]"]:not(img):not(svg),
+  [class~="bg-[#f0ece2]"]:not(img):not(svg),
+  [class~="bg-[#f3eee2]"]:not(img):not(svg),
+  [class~="bg-[#f7f3ea]"]:not(img):not(svg),
+  [class~="bg-[#ebe7de]"]:not(img):not(svg),
+  [class~="bg-[#eee9df]"]:not(img):not(svg),
+  [class~="bg-[#f4ede1]"]:not(img):not(svg),
+  [class~="bg-[#f2eee6]"]:not(img):not(svg) {
+    background-color: var(--kelyani-panel) !important;
+  }
+
+  [class~="text-black"],
+  [class~="text-gray-900"],
+  [class~="text-gray-800"],
+  [class~="text-slate-900"],
+  [class~="text-slate-800"],
+  [class~="text-zinc-900"],
+  [class~="text-stone-900"],
+  [class~="text-ink"] {
+    color: var(--kelyani-text) !important;
+  }
+
+  [class~="border-gray-100"],
+  [class~="border-gray-200"],
+  [class~="border-gray-300"],
+  [class~="border-slate-100"],
+  [class~="border-slate-200"],
+  [class~="border-zinc-100"],
+  [class~="border-zinc-200"],
+  [class~="border-stone-100"],
+  [class~="border-stone-200"] {
+    border-color: var(--kelyani-border) !important;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea,
+  select {
+    color: var(--kelyani-text);
+    background-color: var(--kelyani-panel) !important;
+    border-color: var(--kelyani-border);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--kelyani-muted);
+  }
+
+  option {
+    color: var(--kelyani-text);
+    background-color: var(--kelyani-panel);
+  }
+}
