@@ -1,12 +1,12 @@
 export const WALLET_TEMPLATES = {
-  'onyx-black': { id: 'onyx-black', name: 'Onyx Black', primary: '#181818', accent: '#D7D7D7', background: '#070707', text: '#FFFFFF' },
-  'royal-gold': { id: 'royal-gold', name: 'Royal Gold', primary: '#3A2A12', accent: '#E7C66A', background: '#120C05', text: '#FFF9E8' },
-  'deep-ocean': { id: 'deep-ocean', name: 'Deep Ocean', primary: '#123B4A', accent: '#8ED9E8', background: '#071B22', text: '#F2FCFF' },
-  'minimal-white': { id: 'minimal-white', name: 'Minimal Onyx', primary: '#181818', accent: '#D4AF37', background: '#0D0D0D', text: '#F5F5DC' },
-  'emerald-luxe': { id: 'emerald-luxe', name: 'Emerald Luxe', primary: '#123D2B', accent: '#C8E6B8', background: '#071D14', text: '#F5FFF8' },
-  'burgundy': { id: 'burgundy', name: 'Burgundy', primary: '#4A1725', accent: '#F0B8C5', background: '#210A11', text: '#FFF4F6' },
-  'midnight-blue': { id: 'midnight-blue', name: 'Midnight Blue', primary: '#172A52', accent: '#AFC7FF', background: '#080F22', text: '#F5F8FF' },
-  'sandstone': { id: 'sandstone', name: 'Sandstone', primary: '#8A6848', accent: '#FFF0D4', background: '#332619', text: '#FFF9EF' },
+  'onyx-black': { id: 'onyx-black', name: 'Onyx Black', primary: '#111111', accent: '#D4AF37', background: '#0D0D0D', text: '#F5F5DC' },
+  'royal-gold': { id: 'royal-gold', name: 'Royal Gold', primary: '#111111', accent: '#D4AF37', background: '#0D0D0D', text: '#F5F5DC' },
+  'deep-ocean': { id: 'deep-ocean', name: 'Deep Ocean', primary: '#111111', accent: '#D4AF37', background: '#0D0D0D', text: '#F5F5DC' },
+  'minimal-white': { id: 'minimal-white', name: 'Minimal Onyx', primary: '#111111', accent: '#D4AF37', background: '#0D0D0D', text: '#F5F5DC' },
+  'emerald-luxe': { id: 'emerald-luxe', name: 'Emerald Luxe', primary: '#111111', accent: '#D4AF37', background: '#0D0D0D', text: '#F5F5DC' },
+  'burgundy': { id: 'burgundy', name: 'Burgundy', primary: '#111111', accent: '#D4AF37', background: '#0D0D0D', text: '#F5F5DC' },
+  'midnight-blue': { id: 'midnight-blue', name: 'Midnight Blue', primary: '#111111', accent: '#D4AF37', background: '#0D0D0D', text: '#F5F5DC' },
+  'sandstone': { id: 'sandstone', name: 'Sandstone', primary: '#111111', accent: '#D4AF37', background: '#0D0D0D', text: '#F5F5DC' },
 } as const;
 
 import { useEffect, useMemo, useState } from 'react';
@@ -476,7 +476,7 @@ export function LoyaltyCardVisual({
           </div>
         )}
         <div style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <div style={{ width: '25cqw', maxWidth: '25cqw', aspectRatio: '1', flex: '0 0 auto', padding: '1.5cqw', boxSizing: 'border-box', borderRadius: '3.5cqw', background: '#fff', display: 'grid', placeItems: 'center', boxShadow: '0 12px 28px rgba(0,0,0,.28)' }}>
+          <div style={{ width: '25cqw', maxWidth: '25cqw', aspectRatio: '1', flex: '0 0 auto', padding: '1.5cqw', boxSizing: 'border-box', borderRadius: '3.5cqw', background: '#0D0D0D', display: 'grid', placeItems: 'center', boxShadow: '0 12px 28px rgba(0,0,0,.28)' }}>
             {showQr && qr ? <img src={qr} alt="QR Code fidélité" style={{ width: '100%', height: '100%', display: 'block' }} /> : <div style={{ width: '100%', aspectRatio: '1' }} />}
           </div>
           <div style={{ marginTop: '1.2cqw', fontSize: '2.5cqw', letterSpacing: '.12em', textTransform: 'uppercase', opacity: .5 }}>{card.customerName || 'Client'}</div>
