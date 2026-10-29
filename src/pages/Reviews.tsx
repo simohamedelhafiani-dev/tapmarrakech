@@ -487,7 +487,7 @@ export default function Reviews() {
                 </p>
               </div>
 
-              <div className="rounded-2xl bg-white/10 px-6 py-4 text-center">
+              <div className="rounded-2xl bg-gold/10 px-6 py-4 text-center">
                 <p className="text-xs uppercase tracking-wider text-white/50">
                   Satisfaction
                 </p>
