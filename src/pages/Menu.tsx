@@ -506,7 +506,7 @@ export default function Menu() {
 
   if (errorMessage && establishments.length === 0) {
     return (
-      <div className="rounded-3xl border border-red-200 bg-red-50 p-8 text-red-700">
+      <div className="rounded-3xl border border-red-400/20 bg-red-950/30 p-8 text-red-300">
         <p className="font-semibold">Impossible de charger le menu.</p>
         <p className="mt-2 text-sm">{errorMessage}</p>
       </div>
@@ -611,7 +611,7 @@ export default function Menu() {
       </section>
 
       {errorMessage && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
+        <div className="rounded-2xl border border-red-400/20 bg-red-950/30 px-5 py-4 text-sm text-red-300">
           {errorMessage}
         </div>
       )}
@@ -752,7 +752,7 @@ export default function Menu() {
                 </div>
 
                 {expanded && (
-                  <div className="border-t border-[#242424]/5 bg-[#fbfbf8] p-4 md:p-6">
+                  <div className="border-t border-[#242424]/5 bg-[var(--kelyani-panel)] p-4 md:p-6">
                     {categoryItems.length === 0 ? (
                       <div className="rounded-2xl border border-dashed border-[#242424]/10 bg-[#111111] p-8 text-center">
                         <p className="text-sm text-[#F5F5DC]/45">
