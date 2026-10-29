@@ -3028,7 +3028,7 @@ function StaffRow({
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <span className="rounded-full bg-[#f4ead3] px-3 py-1.5 text-[10px] font-semibold text-[#C9A45C]">
+        <span className="rounded-full bg-[#111111] px-3 py-1.5 text-[10px] font-semibold text-[#C9A45C]">
           {member.role === 'MANAGER'
             ? 'RESPONSABLE'
             : 'EMPLOYÉ'}
@@ -4373,7 +4373,7 @@ function AdminAnalyticsCard({
     <div className="rounded-2xl border border-[#242424]/10 bg-[#111111] p-5">
       <div className="flex items-center justify-between gap-4">
         <p className="text-xs font-medium text-[#FFFFFF]/45">{label}</p>
-        <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#f4ead3] text-[#C9A45C]">
+        <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#111111] text-[#C9A45C]">
           <Icon size={17} />
         </div>
       </div>
