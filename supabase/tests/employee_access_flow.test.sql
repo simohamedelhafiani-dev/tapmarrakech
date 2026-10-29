@@ -29,6 +29,14 @@ ON CONFLICT (id) DO UPDATE
 SET email = EXCLUDED.email,
     name = EXCLUDED.name;
 
+-- Employee profiles are provisioned by the trusted server-side employee flow.
+-- The role-authority trigger must allow this trusted claim, but not public signup.
+select set_config('request.jwt.claims', '{"role":"service_role"}', true);
+update public.profiles
+set role = 'employee'
+where name = 'Employee flow test';
+select set_config('request.jwt.claims', '{}', true);
+
 insert into public.establishments (user_id, name, slug)
 select p.id, 'Employee access flow test', 'employee-flow-' || replace(gen_random_uuid()::text, '-', '')
 from public.profiles p
