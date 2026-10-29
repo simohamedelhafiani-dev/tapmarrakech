@@ -101,7 +101,7 @@ export default function Admin() {
     'Vue d’ensemble';
 
   return (
-    <div className="min-h-screen bg-[#f7f7f3] text-ink">
+    <div className="min-h-screen bg-[#111111] text-[#F5F5DC]">
       {open && (
         <button
           aria-label="Fermer le menu"
@@ -112,7 +112,7 @@ export default function Admin() {
 
       {/* SIDEBAR */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-[270px] flex-col bg-forest px-5 py-6 text-white transition-transform lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 flex w-[270px] flex-col bg-[#D4AF37] px-5 py-6 text-white transition-transform lg:translate-x-0 ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -143,8 +143,8 @@ export default function Admin() {
               }}
               className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm transition ${
                 section === id
-                  ? 'bg-white text-forest shadow-lg'
-                  : 'text-white/65 hover:bg-white/10 hover:text-white'
+                  ? 'bg-[#111111] text-[#D4AF37] shadow-lg'
+                  : 'text-white/65 hover:bg-[#111111]/10 hover:text-white'
               }`}
             >
               <Icon size={18} strokeWidth={1.8} />
@@ -155,7 +155,7 @@ export default function Admin() {
 
         <div className="mt-auto border-t border-white/10 pt-5">
           <div className="mb-4 flex items-center gap-3 px-2">
-            <div className="grid h-9 w-9 place-items-center rounded-full bg-gold font-semibold text-forest">
+            <div className="grid h-9 w-9 place-items-center rounded-full bg-gold font-semibold text-[#D4AF37]">
               {user?.email?.[0]?.toUpperCase()}
             </div>
 
@@ -172,7 +172,7 @@ export default function Admin() {
 
           <button
             onClick={logout}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm text-white/60 transition hover:bg-white/10 hover:text-white"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm text-white/60 transition hover:bg-[#111111]/10 hover:text-white"
           >
             <LogOut size={17} />
             Se déconnecter
@@ -182,20 +182,20 @@ export default function Admin() {
 
       {/* CONTENT */}
       <div className="lg:pl-[270px]">
-        <header className="sticky top-0 z-20 flex h-[76px] items-center justify-between border-b border-ink/5 bg-[#f7f7f3]/90 px-5 backdrop-blur md:px-10">
+        <header className="sticky top-0 z-20 flex h-[76px] items-center justify-between border-b border-[#D4AF37]/20 bg-[#111111]/90 px-5 backdrop-blur md:px-10">
           <button
             onClick={() => setOpen(true)}
-            className="text-ink lg:hidden"
+            className="text-[#F5F5DC] lg:hidden"
           >
             <Menu />
           </button>
 
           <div>
-            <p className="text-xs text-ink/40">
+            <p className="text-xs text-[#F5F5DC]/40">
               Administration TapMarrakech
             </p>
 
-            <h1 className="text-sm font-semibold text-ink">
+            <h1 className="text-sm font-semibold text-[#F5F5DC]">
               {currentLabel}
             </h1>
           </div>
@@ -261,15 +261,15 @@ function Overview({
   return (
     <div>
       <div className="mb-8">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#D4AF37]/50">
           Administration
         </p>
 
-        <h2 className="font-display text-3xl text-forest md:text-4xl">
+        <h2 className="font-display text-3xl text-[#D4AF37] md:text-4xl">
           Bienvenue dans votre espace Admin
         </h2>
 
-        <p className="mt-2 max-w-2xl text-sm text-ink/50">
+        <p className="mt-2 max-w-2xl text-sm text-[#F5F5DC]/50">
           Gérez les établissements, les responsables et les employés
           de TapMarrakech depuis un seul espace.
         </p>
@@ -295,17 +295,17 @@ function Overview({
         />
       </div>
 
-      <div className="mt-8 rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
-        <h3 className="text-sm font-semibold text-ink">
+      <div className="mt-8 rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-6 shadow-sm">
+        <h3 className="text-sm font-semibold text-[#F5F5DC]">
           Établissements récents
         </h3>
 
         {loading ? (
-          <p className="mt-5 text-sm text-ink/40">
+          <p className="mt-5 text-sm text-[#F5F5DC]/40">
             Chargement...
           </p>
         ) : establishments.length === 0 ? (
-          <p className="mt-5 text-sm text-ink/40">
+          <p className="mt-5 text-sm text-[#F5F5DC]/40">
             Aucun établissement pour le moment.
           </p>
         ) : (
@@ -313,10 +313,10 @@ function Overview({
             {establishments.slice(0, 5).map((establishment) => (
               <div
                 key={establishment.id}
-                className="flex items-center justify-between rounded-xl bg-[#f7f7f3] px-4 py-3"
+                className="flex items-center justify-between rounded-xl bg-[#111111] px-4 py-3"
               >
                 <div className="flex items-center gap-3">
-                  <div className="grid h-9 w-9 place-items-center rounded-lg bg-forest text-white">
+                  <div className="grid h-9 w-9 place-items-center rounded-lg bg-[#D4AF37] text-white">
                     <Building2 size={17} />
                   </div>
 
@@ -325,7 +325,7 @@ function Overview({
                       {establishment.name}
                     </p>
 
-                    <p className="text-xs text-ink/40">
+                    <p className="text-xs text-[#F5F5DC]/40">
                       /{establishment.slug}
                     </p>
                   </div>
@@ -363,22 +363,22 @@ function EstablishmentsSection({
     <div>
       <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#D4AF37]/50">
             Gestion
           </p>
 
-          <h2 className="font-display text-3xl text-forest md:text-4xl">
+          <h2 className="font-display text-3xl text-[#D4AF37] md:text-4xl">
             Établissements
           </h2>
 
-          <p className="mt-2 text-sm text-ink/50">
+          <p className="mt-2 text-sm text-[#F5F5DC]/50">
             Gérez les commerces présents sur TapMarrakech.
           </p>
         </div>
 
         <button
           onClick={() => setShowForm(true)}
-          className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white transition hover:bg-forest-light"
+          className="rounded-xl bg-[#D4AF37] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#D4AF37]-light"
         >
           + Ajouter un établissement
         </button>
@@ -391,19 +391,19 @@ function EstablishmentsSection({
         />
       )}
 
-      <div className="overflow-hidden rounded-2xl border border-ink/5 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-[#D4AF37]/20 bg-[#111111] shadow-sm">
         {loading ? (
-          <div className="p-8 text-sm text-ink/40">
+          <div className="p-8 text-sm text-[#F5F5DC]/40">
             Chargement...
           </div>
         ) : establishments.length === 0 ? (
           <div className="p-10 text-center">
             <Building2
               size={35}
-              className="mx-auto text-ink/20"
+              className="mx-auto text-[#F5F5DC]/20"
             />
 
-            <p className="mt-4 text-sm text-ink/50">
+            <p className="mt-4 text-sm text-[#F5F5DC]/50">
               Aucun établissement créé.
             </p>
           </div>
@@ -415,7 +415,7 @@ function EstablishmentsSection({
                 className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between"
               >
                 <div className="flex items-center gap-4">
-                  <div className="grid h-11 w-11 place-items-center rounded-xl bg-forest text-white">
+                  <div className="grid h-11 w-11 place-items-center rounded-xl bg-[#D4AF37] text-white">
                     <Building2 size={19} />
                   </div>
 
@@ -424,7 +424,7 @@ function EstablishmentsSection({
                       {establishment.name}
                     </h3>
 
-                    <p className="mt-1 text-xs text-ink/40">
+                    <p className="mt-1 text-xs text-[#F5F5DC]/40">
                       Slug : {establishment.slug}
                     </p>
                   </div>
@@ -437,7 +437,7 @@ function EstablishmentsSection({
                         `${window.location.origin}/c/${establishment.slug}`
                       )
                     }
-                    className="rounded-lg border border-ink/10 px-3 py-2 text-xs font-medium transition hover:bg-[#f7f7f3]"
+                    className="rounded-lg border border-[#D4AF37]/20 px-3 py-2 text-xs font-medium transition hover:bg-[#111111]"
                   >
                     🔗 Copier le lien
                   </button>
@@ -518,14 +518,14 @@ function CreateEstablishmentForm({
   };
 
   return (
-    <div className="mb-6 rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
+    <div className="mb-6 rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-6 shadow-sm">
       <div className="mb-5 flex items-center justify-between">
         <div>
           <h3 className="text-base font-semibold">
             Nouvel établissement
           </h3>
 
-          <p className="mt-1 text-xs text-ink/40">
+          <p className="mt-1 text-xs text-[#F5F5DC]/40">
             Créez d’abord l’établissement. Nous ajouterons ensuite son
             responsable et ses employés.
           </p>
@@ -533,7 +533,7 @@ function CreateEstablishmentForm({
 
         <button
           onClick={close}
-          className="text-ink/40 hover:text-ink"
+          className="text-[#F5F5DC]/40 hover:text-[#F5F5DC]"
         >
           <X size={20} />
         </button>
@@ -549,7 +549,7 @@ function CreateEstablishmentForm({
             value={name}
             onChange={(e) => handleNameChange(e.target.value)}
             placeholder="Ex : Restaurant Atlas"
-            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none transition focus:border-forest"
+            className="w-full rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-4 py-3 text-sm outline-none transition focus:border-forest"
           />
         </div>
 
@@ -562,7 +562,7 @@ function CreateEstablishmentForm({
             value={slug}
             onChange={(e) => setSlug(generateSlug(e.target.value))}
             placeholder="restaurant-atlas"
-            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none transition focus:border-forest"
+            className="w-full rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-4 py-3 text-sm outline-none transition focus:border-forest"
           />
         </div>
       </div>
@@ -570,7 +570,7 @@ function CreateEstablishmentForm({
       <div className="mt-5 flex justify-end gap-3">
         <button
           onClick={close}
-          className="rounded-xl border border-ink/10 px-5 py-3 text-sm font-medium"
+          className="rounded-xl border border-[#D4AF37]/20 px-5 py-3 text-sm font-medium"
         >
           Annuler
         </button>
@@ -578,7 +578,7 @@ function CreateEstablishmentForm({
         <button
           onClick={create}
           disabled={saving}
-          className="rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+          className="rounded-xl bg-[#D4AF37] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
         >
           {saving ? 'Création...' : 'Créer l’établissement'}
         </button>
@@ -602,18 +602,18 @@ function StatCard({
   value: string | number;
 }) {
   return (
-    <div className="rounded-2xl border border-ink/5 bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-6 shadow-sm">
       <div className="flex items-center justify-between">
-        <div className="grid h-10 w-10 place-items-center rounded-xl bg-forest/10 text-forest">
+        <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]">
           <Icon size={19} />
         </div>
 
-        <span className="text-2xl font-semibold text-forest">
+        <span className="text-2xl font-semibold text-[#D4AF37]">
           {value}
         </span>
       </div>
 
-      <p className="mt-5 text-xs font-medium text-ink/50">
+      <p className="mt-5 text-xs font-medium text-[#F5F5DC]/50">
         {label}
       </p>
     </div>
@@ -637,17 +637,17 @@ function EmptySection({
   return (
     <div>
       <div className="mb-8">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#D4AF37]/50">
           Administration
         </p>
 
-        <h2 className="font-display text-3xl text-forest md:text-4xl">
+        <h2 className="font-display text-3xl text-[#D4AF37] md:text-4xl">
           {title}
         </h2>
       </div>
 
-      <div className="rounded-2xl border border-ink/5 bg-white p-12 text-center shadow-sm">
-        <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-forest/10 text-forest">
+      <div className="rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-12 text-center shadow-sm">
+        <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#D4AF37]/10 text-[#D4AF37]">
           <Icon size={25} />
         </div>
 
@@ -655,7 +655,7 @@ function EmptySection({
           {title}
         </h3>
 
-        <p className="mx-auto mt-2 max-w-md text-sm text-ink/45">
+        <p className="mx-auto mt-2 max-w-md text-sm text-[#F5F5DC]/45">
           {description}
         </p>
       </div>
