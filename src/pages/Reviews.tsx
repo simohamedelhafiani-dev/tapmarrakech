@@ -444,7 +444,7 @@ export default function Reviews() {
 
       {/* ERREUR IA */}
       {aiError && (
-        <div className="mb-5 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div className="mb-5 flex items-start gap-3 rounded-2xl border border-red-400/20 bg-red-950/30 p-4 text-sm text-red-300">
           <AlertTriangle
             size={18}
             className="mt-0.5 shrink-0"
@@ -464,7 +464,7 @@ export default function Reviews() {
 
       {/* ANALYSE IA */}
       {aiAnalysis && (
-        <div className="mb-7 overflow-hidden rounded-3xl border border-ink/5 bg-white shadow-soft">
+        <div className="mb-7 overflow-hidden rounded-3xl border border-[var(--kelyani-border)] bg-[var(--kelyani-panel)] shadow-soft">
           {/* ENTÊTE IA */}
           <div className="bg-forest p-6 text-white md:p-8">
             <div className="flex flex-col justify-between gap-5 md:flex-row md:items-center">
@@ -504,8 +504,8 @@ export default function Reviews() {
 
           {/* STATISTIQUES */}
           {aiStatistics && (
-            <div className="grid border-b border-ink/5 md:grid-cols-4">
-              <div className="p-5 md:border-r border-ink/5">
+            <div className="grid border-b border-[var(--kelyani-border)] md:grid-cols-4">
+              <div className="p-5 md:border-r border-[var(--kelyani-border)]">
                 <p className="text-xs text-ink/40">
                   Avis analysés
                 </p>
@@ -515,7 +515,7 @@ export default function Reviews() {
                 </p>
               </div>
 
-              <div className="p-5 md:border-r border-ink/5">
+              <div className="p-5 md:border-r border-[var(--kelyani-border)]">
                 <p className="text-xs text-ink/40">
                   Note moyenne
                 </p>
@@ -525,7 +525,7 @@ export default function Reviews() {
                 </p>
               </div>
 
-              <div className="p-5 md:border-r border-ink/5">
+              <div className="p-5 md:border-r border-[var(--kelyani-border)]">
                 <p className="text-xs text-ink/40">
                   Avis positifs
                 </p>
@@ -549,7 +549,7 @@ export default function Reviews() {
 
           {/* RÉSUMÉ */}
           <div className="p-6 md:p-8">
-            <div className="rounded-2xl bg-[#f7f7f3] p-5">
+            <div className="rounded-2xl bg-[var(--kelyani-panel)] p-5">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
                 Synthèse
               </p>
@@ -559,7 +559,7 @@ export default function Reviews() {
               </p>
 
               <div className="mt-4 flex flex-wrap gap-2">
-                <span className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-forest shadow-sm">
+                <span className="rounded-full bg-[var(--kelyani-panel)] px-3 py-1.5 text-xs font-semibold text-forest shadow-sm">
                   Sentiment :{' '}
                   {aiAnalysis.sentiment}
                 </span>
@@ -568,7 +568,7 @@ export default function Reviews() {
 
             {/* POINTS FORTS / FAIBLES */}
             <div className="mt-5 grid gap-5 md:grid-cols-2">
-              <div className="rounded-2xl border border-ink/5 p-5">
+              <div className="rounded-2xl border border-[var(--kelyani-border)] p-5">
                 <div className="flex items-center gap-2">
                   <CheckCircle2
                     size={18}
@@ -602,11 +602,11 @@ export default function Reviews() {
                 )}
               </div>
 
-              <div className="rounded-2xl border border-ink/5 p-5">
+              <div className="rounded-2xl border border-[var(--kelyani-border)] p-5">
                 <div className="flex items-center gap-2">
                   <AlertTriangle
                     size={18}
-                    className="text-[#a15c50]"
+                    className="text-red-300"
                   />
 
                   <h3 className="font-semibold text-forest">
@@ -638,7 +638,7 @@ export default function Reviews() {
             </div>
 
             {/* PROBLÈMES RÉCURRENTS */}
-            <div className="mt-5 rounded-2xl border border-ink/5 p-5">
+            <div className="mt-5 rounded-2xl border border-[var(--kelyani-border)] p-5">
               <div className="flex items-center gap-2">
                 <Target
                   size={18}
@@ -656,7 +656,7 @@ export default function Reviews() {
                     (issue, index) => (
                       <div
                         key={index}
-                        className="rounded-xl bg-[#f7f7f3] p-4"
+                        className="rounded-xl bg-[var(--kelyani-panel)] p-4"
                       >
                         <div className="flex flex-col justify-between gap-2 md:flex-row">
                           <p className="font-semibold text-forest">
@@ -664,11 +664,11 @@ export default function Reviews() {
                           </p>
 
                           <div className="flex flex-wrap gap-2">
-                            <span className="rounded-full bg-white px-2.5 py-1 text-[11px] text-ink/55">
+                            <span className="rounded-full bg-[var(--kelyani-panel)] px-2.5 py-1 text-[11px] text-ink/55">
                               {issue.frequency}
                             </span>
 
-                            <span className="rounded-full bg-[#f4e4e1] px-2.5 py-1 text-[11px] font-semibold text-[#a15c50]">
+                            <span className="rounded-full bg-red-400/10 px-2.5 py-1 text-[11px] font-semibold text-red-300">
                               Priorité {issue.priority}
                             </span>
                           </div>
@@ -690,7 +690,7 @@ export default function Reviews() {
             </div>
 
             {/* RECOMMANDATIONS */}
-            <div className="mt-5 rounded-2xl bg-[#f7f7f3] p-5">
+            <div className="mt-5 rounded-2xl bg-[var(--kelyani-panel)] p-5">
               <div className="flex items-center gap-2">
                 <Lightbulb
                   size={18}
@@ -708,7 +708,7 @@ export default function Reviews() {
                     (recommendation, index) => (
                       <div
                         key={index}
-                        className="rounded-xl bg-white p-4 shadow-sm"
+                        className="rounded-xl bg-[var(--kelyani-panel)] p-4 shadow-sm"
                       >
                         <div className="flex gap-3">
                           <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-forest text-xs font-semibold text-white">
@@ -721,7 +721,7 @@ export default function Reviews() {
                                 {recommendation.action}
                               </p>
 
-                              <span className="rounded-full bg-[#f4ead3] px-2.5 py-1 text-[11px] font-semibold text-[#8b6b2c]">
+                              <span className="rounded-full bg-[var(--kelyani-gold)]/10 px-2.5 py-1 text-[11px] font-semibold text-[#E7C96B]">
                                 {recommendation.priority}
                               </span>
                             </div>
@@ -776,7 +776,7 @@ export default function Reviews() {
       </section>
 
       {/* FILTRES */}
-      <div className="rounded-2xl border border-ink/5 bg-white p-4 shadow-soft">
+      <div className="rounded-2xl border border-[var(--kelyani-border)] bg-[var(--kelyani-panel)] p-4 shadow-soft">
         <div className="flex flex-col gap-3 md:flex-row">
           <div className="relative flex-1">
             <Search
@@ -790,7 +790,7 @@ export default function Reviews() {
                 setSearch(e.target.value)
               }
               placeholder="Rechercher dans les avis…"
-              className="w-full rounded-xl border border-ink/10 bg-[#fbfaf7] py-3 pl-10 pr-3 text-sm outline-none focus:ring-2 focus:ring-gold"
+              className="w-full rounded-xl border border-[var(--kelyani-border)] bg-[var(--kelyani-panel)] py-3 pl-10 pr-3 text-sm outline-none focus:ring-2 focus:ring-gold"
             />
           </div>
 
@@ -800,7 +800,7 @@ export default function Reviews() {
               onChange={(e) =>
                 setStatus(e.target.value)
               }
-              className="rounded-xl border border-ink/10 bg-[#fbfaf7] px-3 py-3 text-xs outline-none"
+              className="rounded-xl border border-[var(--kelyani-border)] bg-[var(--kelyani-panel)] px-3 py-3 text-xs outline-none"
             >
               <option>Tous</option>
               <option>Nouveau</option>
@@ -813,7 +813,7 @@ export default function Reviews() {
               onChange={(e) =>
                 setRating(e.target.value)
               }
-              className="rounded-xl border border-ink/10 bg-[#fbfaf7] px-3 py-3 text-xs outline-none"
+              className="rounded-xl border border-[var(--kelyani-border)] bg-[var(--kelyani-panel)] px-3 py-3 text-xs outline-none"
             >
               <option value="Tous">
                 Toutes les notes
@@ -844,7 +844,7 @@ export default function Reviews() {
         {filtered.map((review) => (
           <div
             key={review.id}
-            className="rounded-2xl border border-ink/5 bg-white p-5 shadow-soft"
+            className="rounded-2xl border border-[var(--kelyani-border)] bg-[var(--kelyani-panel)] p-5 shadow-soft"
           >
             <div className="flex flex-col justify-between gap-3 sm:flex-row">
               <div className="flex items-center gap-3">
@@ -869,7 +869,7 @@ export default function Reviews() {
                 'Avis positif sans commentaire.'}
             </p>
 
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-ink/5 pt-3">
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--kelyani-border)] pt-3">
               <div className="text-xs text-ink/45">
                 {review.name || 'Client anonyme'}
 
@@ -882,17 +882,17 @@ export default function Reviews() {
 
               <span className={`rounded-lg px-3 py-2 text-xs font-semibold ${
                 review.status === 'Nouveau'
-                  ? 'bg-[#f4e4e1] text-[#a15c50]'
+                  ? 'bg-red-400/10 text-red-300'
                   : review.status === 'En cours'
-                    ? 'bg-[#f4ead3] text-[#8b6b2c]'
-                    : 'bg-[#e5eee9] text-forest'
+                    ? 'bg-[var(--kelyani-gold)]/10 text-[#E7C96B]'
+                    : 'bg-emerald-400/10 text-forest'
               }`}>{review.status}</span>
             </div>
           </div>
         ))}
 
         {!filtered.length && (
-          <div className="rounded-2xl border border-dashed border-ink/15 py-20 text-center text-sm text-ink/40">
+          <div className="rounded-2xl border border-dashed border-[var(--kelyani-border)] py-20 text-center text-sm text-ink/40">
             Aucun avis ne correspond à vos filtres.
           </div>
         )}
