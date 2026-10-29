@@ -7,21 +7,27 @@ create temporary table employee_access_fixture (
   establishment_id uuid not null
 ) on commit drop;
 
-insert into auth.users (
-  id, aud, role, email, encrypted_password, email_confirmed_at,
-  raw_app_meta_data, raw_user_meta_data, created_at, updated_at
-)
-values (
-  gen_random_uuid(), 'authenticated', 'authenticated',
-  'employee-flow-' || replace(gen_random_uuid()::text, '-', '') || '@test.invalid',
-  '', now(), '{}'::jsonb, '{}'::jsonb, now(), now()
-);
+-- The auth user and its profile are created atomically below to avoid
+-- conflicting with the on_auth_user_created profile trigger.
 
-insert into public.profiles (id, email, name, role)
-select u.id, u.email, 'Employee flow test', 'employee'
-from auth.users u
-where u.email like 'employee-flow-%@test.invalid'
-  and not exists (select 1 from employee_access_fixture);
+WITH inserted_user AS (
+  INSERT INTO auth.users (
+    id, aud, role, email, encrypted_password, email_confirmed_at,
+    raw_app_meta_data, raw_user_meta_data, created_at, updated_at
+  )
+  VALUES (
+    gen_random_uuid(), 'authenticated', 'authenticated',
+    'employee-flow-' || replace(gen_random_uuid()::text, '-', '') || '@test.invalid',
+    '', now(), '{}'::jsonb, '{}'::jsonb, now(), now()
+  )
+  RETURNING id, email
+)
+INSERT INTO public.profiles (id, email, name)
+SELECT id, email, 'Employee flow test'
+FROM inserted_user
+ON CONFLICT (id) DO UPDATE
+SET email = EXCLUDED.email,
+    name = EXCLUDED.name;
 
 insert into public.establishments (user_id, name, slug)
 select p.id, 'Employee access flow test', 'employee-flow-' || replace(gen_random_uuid()::text, '-', '')
