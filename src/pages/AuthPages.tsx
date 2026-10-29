@@ -125,7 +125,7 @@ export function Register() {
         setError('Le compte est créé mais le profil n’a pas pu être enregistré.');
         return;
       }
-      navigate('/dashboard');
+      navigate('/dashboard/onboarding');
       return;
     }
     setPendingVerification(true);
@@ -155,7 +155,7 @@ export function Register() {
       setError('Adresse confirmée, mais le profil n’a pas pu être enregistré. Réessayez de vous connecter.');
       return;
     }
-    navigate('/dashboard');
+    navigate('/dashboard/onboarding');
   };
 
   const resendCode = async () => {
@@ -326,7 +326,7 @@ export function EmailConfirmation() {
           <form onSubmit={resend} className="mt-5 space-y-3">
             <Field icon={Mail} type="email" required placeholder="Adresse email utilisée à l’inscription" value={email} onChange={e => setEmail(e.target.value)} />
             {message && <p role="status" className="text-sm text-white/65">{message}</p>}
-            <button disabled={resending} className="w-full rounded-xl bg-[#D4AF37] py-3 text-sm font-semibold text-white disabled:opacity-50">{resending ? 'Envoi…' : 'Renvoyer l’e-mail de confirmation'}</button>
+            <button disabled={resending} className="w-full rounded-xl bg-[#D4AF37] py-3 text-sm font-semibold text-[#0D0D0D] disabled:opacity-50">{resending ? 'Envoi…' : 'Renvoyer l’e-mail de confirmation'}</button>
           </form>
           <Link to="/login" className="mt-5 block text-center text-xs text-gold">Retour à la connexion</Link>
         </div>
