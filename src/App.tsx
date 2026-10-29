@@ -28,6 +28,7 @@ import AdminOverview from '@/pages/AdminOverview';
 import AdminOverviewV2 from '@/pages/AdminOverviewV2';
 import AdminStatCardTest from '@/pages/AdminStatCardTest';
 import LoyaltyScanner from '@/pages/LoyaltyScanner';
+import AssistantIA from '@/pages/AssistantIA';
 
 type EstablishmentRow = {
   id: string;
@@ -215,6 +216,7 @@ function App() {
           <Route element={<ProtectedRoute allowedRoles={['responsible']} />}>
             <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard/assistant-ia" element={<AssistantIA />} />
               <Route
                 path="/dashboard/reviews"
                 element={
