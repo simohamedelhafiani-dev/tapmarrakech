@@ -462,7 +462,7 @@ export default function PublicReview() {
 
   if (loading) {
     return (
-      <div className="grid min-h-screen place-items-center bg-[#f5f0e7]">
+      <div className="grid min-h-screen place-items-center bg-[#0D0D0D]">
         <div className="h-9 w-9 animate-spin rounded-full border-2 border-forest border-t-transparent" />
       </div>
     );
@@ -470,7 +470,7 @@ export default function PublicReview() {
 
   if (!place) {
     return (
-      <div className="grid min-h-screen place-items-center bg-[#f5f0e7] px-6 text-center">
+      <div className="grid min-h-screen place-items-center bg-[#0D0D0D] px-6 text-center">
         <div>
           <p className="font-display text-3xl text-forest">
             Établissement introuvable
@@ -522,8 +522,8 @@ export default function PublicReview() {
       : '';
 
   return (
-    <div className="min-h-screen bg-[#f5f0e7] text-ink">
-      <div className="mx-auto min-h-screen w-full max-w-[520px] overflow-hidden bg-[#f5f0e7] pb-24 shadow-2xl">
+    <div className="min-h-screen bg-[#0D0D0D] text-ink">
+      <div className="mx-auto min-h-screen w-full max-w-[520px] overflow-hidden bg-[#0D0D0D] pb-24 shadow-2xl">
 
         {/* =====================================================
             HOME
@@ -957,7 +957,7 @@ export default function PublicReview() {
                         })
                       }
                       placeholder="Que pouvons-nous améliorer ?"
-                      className="w-full resize-none rounded-2xl border border-[#D4AF37]/20 bg-[#faf9f6] p-4 text-sm outline-none focus:border-forest"
+                      className="w-full resize-none rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-4 text-sm outline-none focus:border-forest"
                     />
 
                     <div
@@ -991,7 +991,7 @@ export default function PublicReview() {
                           })
                         }
                         placeholder="Nom"
-                        className="rounded-2xl border border-[#D4AF37]/20 bg-[#faf9f6] p-3.5 text-sm outline-none focus:border-forest"
+                        className="rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-3.5 text-sm outline-none focus:border-forest"
                       />
 
                       <input
@@ -1003,7 +1003,7 @@ export default function PublicReview() {
                           })
                         }
                         placeholder="Téléphone"
-                        className="rounded-2xl border border-[#D4AF37]/20 bg-[#faf9f6] p-3.5 text-sm outline-none focus:border-forest"
+                        className="rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-3.5 text-sm outline-none focus:border-forest"
                       />
                     </div>
 
@@ -1058,7 +1058,7 @@ export default function PublicReview() {
             </div>
 
             {loyaltyCreated ? (
-              <section className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto bg-[#f5f0e7]/95 px-4 py-6 backdrop-blur-sm">
+              <section className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto bg-[#0D0D0D]/95 px-4 py-6 backdrop-blur-sm">
                 <div className="w-full max-w-[420px]">
                   <div className="relative overflow-hidden rounded-[32px] bg-forest p-7 text-white shadow-2xl">
                     <div className="absolute -right-10 -top-10 h-36 w-36 rounded-full bg-gold/10 blur-2xl" />
@@ -1259,7 +1259,7 @@ export default function PublicReview() {
       ===================================================== */}
       {showLoyaltyForm && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink/50 p-0 backdrop-blur-sm">
-          <div className="w-full max-w-[520px] rounded-t-[34px] bg-[#fffdf9] p-6 pb-8 shadow-2xl">
+          <div className="w-full max-w-[520px] rounded-t-[34px] bg-[#111111] p-6 pb-8 shadow-2xl">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-gold">
@@ -1501,42 +1501,42 @@ function AIPremiumMenu({
 
   const palette = wallpaper
     ? {
-        page: 'bg-[#f0ece2] text-white',
-        body: 'bg-[#f0ece2]',
+        page: 'bg-[#0D0D0D] text-[#F5F5DC]',
+        body: 'bg-[#0D0D0D]',
         muted: 'text-white/65',
         accent: 'text-gold',
         line: 'border-white/15',
         card: 'bg-black/35 border-white/15',
-        product: 'text-white',
+        product: 'text-[#F5F5DC]',
       }
     : style === 'dark'
       ? {
-          page: 'bg-[#102b24] text-white',
-          body: 'bg-[#102b24]',
+          page: 'bg-[#0D0D0D] text-[#F5F5DC]',
+          body: 'bg-[#0D0D0D]',
           muted: 'text-white/55',
           accent: 'text-gold',
           line: 'border-white/10',
           card: 'bg-white/[0.055] border-white/10',
-          product: 'text-white',
+          product: 'text-[#F5F5DC]',
         }
       : style === 'luxury'
         ? {
-            page: 'bg-[#f3eee2] text-forest',
-            body: 'bg-[#f3eee2]',
+            page: 'bg-[#0D0D0D] text-[#F5F5DC]',
+            body: 'bg-[#0D0D0D]',
             muted: 'text-ink/55',
             accent: 'text-gold',
             line: 'border-gold/20',
-            card: 'bg-[#fffdf7] border-gold/15',
-            product: 'text-forest',
+            card: 'bg-[#111111] border-gold/15',
+            product: 'text-[#F5F5DC]',
           }
         : {
-              page: 'bg-[#f0ece2] text-forest',
-              body: 'bg-[#f0ece2]',
+              page: 'bg-[#0D0D0D] text-[#F5F5DC]',
+              body: 'bg-[#0D0D0D]',
               muted: 'text-ink/55',
               accent: 'text-gold',
               line: 'border-forest/10',
-              card: 'bg-[#fffdf8] border-[#D4AF37]/20',
-              product: 'text-forest',
+              card: 'bg-[#111111] border-[#D4AF37]/20',
+              product: 'text-[#F5F5DC]',
             };
 
   const scrollToSection = (index: number) => {
@@ -1868,7 +1868,7 @@ function MenuTemplate({
   const navigationControls = navigation !== 'scroll' ? (
     <div className="mt-5 mb-7">
       {navigation === 'app' ? (
-        <div className="sticky top-0 z-30 -mx-2 flex gap-2 overflow-x-auto bg-[#fffdf9]/95 px-2 py-2 pb-3 backdrop-blur-md">
+        <div className="sticky top-0 z-30 -mx-2 flex gap-2 overflow-x-auto bg-[#111111]/95 px-2 py-2 pb-3 backdrop-blur-md">
           {visible.map(category => (
             <button
               key={category.id}
@@ -2193,7 +2193,7 @@ function WifiActionRow({
 
       {open && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-ink/50 px-4 py-6 backdrop-blur-sm">
-          <div className="w-full max-w-[380px] rounded-[30px] bg-[#fffdf9] p-6 shadow-2xl">
+          <div className="w-full max-w-[380px] rounded-[30px] bg-[#111111] p-6 shadow-2xl">
             <button
               type="button"
               onClick={() => setOpen(false)}
