@@ -72,7 +72,7 @@ export default function SubscriptionGuard({
   if (loadError) {
     return (
       <div
-        className="rounded-2xl border border-red-200 bg-white p-6 text-center"
+        className="rounded-2xl border border-red-200 bg-[#111111] p-6 text-center"
         role="alert"
       >
         <h3 className="text-sm font-semibold text-ink">
@@ -95,8 +95,8 @@ export default function SubscriptionGuard({
   if (!planHasFeature(access, feature)) {
     return (
       fallback ?? (
-        <div className="rounded-2xl border border-ink/10 bg-white p-6 text-center">
-          <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#f5f0df] text-forest">
+        <div className="rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-6 text-center">
+          <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#111111] text-forest">
             🔒
           </div>
 
