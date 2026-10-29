@@ -116,7 +116,7 @@ export default function MenuConfigurator({
                 onClick={() => onChange({ template: template.id })}
                 className={[
                   'rounded-2xl border p-3 text-left transition',
-                  active ? 'border-gold bg-gold/10 ring-1 ring-gold/20' : 'border-ink/8 bg-[#fafaf7] hover:border-forest/20',
+                  active ? 'border-gold bg-gold/10 ring-1 ring-gold/20' : 'border-[#D4AF37]/20 bg-[#111111] hover:border-forest/20',
                 ].join(' ')}
               >
                 <div className={`mb-3 min-h-[86px] overflow-hidden rounded-xl border p-2.5 ${['dark', 'onyx', 'royal-gold', 'deep-ocean'].includes(template.family) ? 'border-white/10 bg-[#111111] text-white' : 'border-black/5 bg-[#f7f3ea] text-forest'}`}>
@@ -177,8 +177,8 @@ export default function MenuConfigurator({
             onChange({ aiDesign: { ...ai, hero: nextHero } });
           };
           return <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <label className="block"><span className="mb-1 block text-[10px] font-medium text-forest">Titre principal</span><input type="text" maxLength={70} value={typeof hero.title === 'string' ? hero.title : ''} placeholder={establishmentName || 'Nom de votre établissement'} disabled={publishing} onChange={event => updateHero('title', event.target.value)} className="w-full rounded-xl border border-ink/10 bg-[#fafaf7] px-3 py-2.5 text-xs text-forest outline-none focus:border-gold"/></label>
-            <label className="block"><span className="mb-1 block text-[10px] font-medium text-forest">Sous-titre</span><input type="text" maxLength={100} value={typeof hero.subtitle === 'string' ? hero.subtitle : ''} placeholder="Notre carte" disabled={publishing} onChange={event => updateHero('subtitle', event.target.value)} className="w-full rounded-xl border border-ink/10 bg-[#fafaf7] px-3 py-2.5 text-xs text-forest outline-none focus:border-gold"/></label>
+            <label className="block"><span className="mb-1 block text-[10px] font-medium text-forest">Titre principal</span><input type="text" maxLength={70} value={typeof hero.title === 'string' ? hero.title : ''} placeholder={establishmentName || 'Nom de votre établissement'} disabled={publishing} onChange={event => updateHero('title', event.target.value)} className="w-full rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-3 py-2.5 text-xs text-forest outline-none focus:border-gold"/></label>
+            <label className="block"><span className="mb-1 block text-[10px] font-medium text-forest">Sous-titre</span><input type="text" maxLength={100} value={typeof hero.subtitle === 'string' ? hero.subtitle : ''} placeholder="Notre carte" disabled={publishing} onChange={event => updateHero('subtitle', event.target.value)} className="w-full rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-3 py-2.5 text-xs text-forest outline-none focus:border-gold"/></label>
           </div>;
         })()}
       </div>
@@ -190,7 +190,7 @@ export default function MenuConfigurator({
         </div>
         <div className="mt-4 rounded-xl border border-gold/20 bg-gradient-to-r from-gold/10 to-transparent p-3">
           <div className="flex items-center gap-3">
-            {logoUrl ? <img src={logoUrl} alt="Logo de l’établissement" className="h-11 w-11 rounded-lg border border-ink/10 bg-white object-contain p-1" /> : <div className="grid h-11 w-11 place-items-center rounded-lg border border-dashed border-ink/15 bg-white text-white/30"><ImagePlus size={18}/></div>}
+            {logoUrl ? <img src={logoUrl} alt="Logo de l’établissement" className="h-11 w-11 rounded-lg border border-[#D4AF37]/20 bg-[#111111] object-contain p-1" /> : <div className="grid h-11 w-11 place-items-center rounded-lg border border-dashed border-[#D4AF37]/20 bg-[#111111] text-white/30"><ImagePlus size={18}/></div>}
             <div className="min-w-0 flex-1">
               <p className="text-xs font-semibold text-forest">Palette de marque par IA</p>
               <p className="mt-1 text-[10px] leading-4 text-white/45">{logoUrl ? 'Analyse le logo et propose 4 couleurs harmonisées, avec un contraste lisible.' : 'Ajoute d’abord le logo dans les informations de ton établissement.'}</p>
@@ -313,7 +313,7 @@ export default function MenuConfigurator({
         {error && <div className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-[11px] text-red-700">{error}</div>}
 
         {draft.wallpaperUrl ? (
-          <div className="relative mt-3 overflow-hidden rounded-2xl border border-ink/10">
+          <div className="relative mt-3 overflow-hidden rounded-2xl border border-[#D4AF37]/20">
             <img src={draft.wallpaperUrl} alt="" className="aspect-[3/4] w-full object-cover" />
             <button
               type="button"
@@ -335,7 +335,7 @@ export default function MenuConfigurator({
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={publishing}
-            className="mt-3 flex aspect-[3/4] w-full flex-col items-center justify-center rounded-2xl border border-dashed border-ink/10 bg-[#fafaf7] text-center"
+            className="mt-3 flex aspect-[3/4] w-full flex-col items-center justify-center rounded-2xl border border-dashed border-[#D4AF37]/20 bg-[#111111] text-center"
           >
             <ImagePlus size={24} className="text-gold" />
             <span className="mt-2 text-xs font-semibold text-forest">Aucun wallpaper</span>
