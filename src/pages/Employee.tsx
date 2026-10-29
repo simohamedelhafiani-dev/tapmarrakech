@@ -1020,7 +1020,7 @@ export default function Employee() {
 
   if (loginLoading) {
     return (
-      <div className="min-h-screen grid place-items-center bg-[#f7f7f3]">
+      <div className="min-h-screen grid place-items-center bg-[#111111]">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
       </div>
     );
@@ -1028,9 +1028,9 @@ export default function Employee() {
 
   if (!session) {
     return (
-      <div className="min-h-screen bg-[#f7f7f3] px-4 py-8">
+      <div className="min-h-screen bg-[#111111] px-4 py-8">
         <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md items-center justify-center">
-          <div className="w-full rounded-[2rem] border border-ink/5 bg-white p-7 shadow-2xl md:p-9">
+          <div className="w-full rounded-[2rem] border border-[#D4AF37]/20 bg-[#111111] p-7 shadow-2xl md:p-9">
             <div className="mb-8 text-center">
               <div className="mb-4 flex justify-center">
                 <img
@@ -1062,7 +1062,7 @@ export default function Employee() {
                   if (e.key === 'Enter') loginEmployee();
                 }}
                 placeholder="Code de connexion"
-                className="w-full rounded-2xl border border-ink/10 bg-[#f7f7f3] py-4 pl-12 pr-4 text-center text-lg tracking-[0.25em] outline-none focus:border-forest"
+                className="w-full rounded-2xl border border-[#D4AF37]/20 bg-[#111111] py-4 pl-12 pr-4 text-center text-lg tracking-[0.25em] outline-none focus:border-forest"
               />
             </div>
 
@@ -1091,19 +1091,19 @@ export default function Employee() {
 
   if (loading) {
     return (
-      <div className="min-h-screen grid place-items-center bg-[#f7f7f3]">
+      <div className="min-h-screen grid place-items-center bg-[#111111]">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f7f3] p-4 md:p-8">
+    <div className="min-h-screen bg-[#111111] p-4 md:p-8">
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 flex justify-center">
-          <div className="flex items-center gap-3 rounded-2xl border border-ink/5 bg-white px-5 py-3 shadow-sm">
+          <div className="flex items-center gap-3 rounded-2xl border border-[#D4AF37]/20 bg-[#111111] px-5 py-3 shadow-sm">
             {establishmentLogoUrl ? (
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-ink/10 bg-white p-1.5">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[#D4AF37]/20 bg-[#111111] p-1.5">
                 <img
                   src={establishmentLogoUrl}
                   alt={`Logo ${session.establishment_name}`}
@@ -1111,7 +1111,7 @@ export default function Employee() {
                 />
               </div>
             ) : (
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border border-ink/10 bg-white text-forest">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border border-[#D4AF37]/20 bg-[#111111] text-forest">
                 <Building2 size={24} />
               </div>
             )}
@@ -1158,7 +1158,7 @@ export default function Employee() {
             {scannerReady && (
               <button
                 onClick={installEmployeeScanner}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-forest/15 bg-white px-4 py-3 text-sm font-semibold text-forest transition hover:bg-forest/5"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-forest/15 bg-[#111111] px-4 py-3 text-sm font-semibold text-forest transition hover:bg-forest/5"
               >
                 <WalletCards size={17} />
                 Installer sur le téléphone
@@ -1167,7 +1167,7 @@ export default function Employee() {
 
             <button
               onClick={logoutEmployee}
-              className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+              className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-[#111111] px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
             >
               <LogOut size={17} />
               Déconnexion
@@ -1191,7 +1191,7 @@ export default function Employee() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="N° fidélité, téléphone, prénom ou nom..."
-              className="w-full rounded-2xl border border-ink/10 bg-white py-4 pl-12 pr-4 text-sm outline-none focus:border-forest"
+              className="w-full rounded-2xl border border-[#D4AF37]/20 bg-[#111111] py-4 pl-12 pr-4 text-sm outline-none focus:border-forest"
             />
           </div>
 
@@ -1204,7 +1204,7 @@ export default function Employee() {
           </button>
         </div>
 
-        <div className="mb-6 rounded-2xl border border-ink/5 bg-white p-4 shadow-sm">
+        <div className="mb-6 rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-4 shadow-sm">
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-xs text-ink/40">Programme fidélité</p>
@@ -1218,7 +1218,7 @@ export default function Employee() {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-ink/5 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-2xl border border-[#D4AF37]/20 bg-[#111111] shadow-sm">
           {filteredCustomers.length === 0 ? (
             <div className="p-12 text-center">
               <User size={38} className="mx-auto text-ink/20" />
@@ -1258,7 +1258,7 @@ export default function Employee() {
                   </div>
 
                   <div className="flex flex-wrap items-center gap-3">
-                    <div className="rounded-xl bg-[#f7f7f3] px-4 py-2 text-center">
+                    <div className="rounded-xl bg-[#111111] px-4 py-2 text-center">
                       <p className="text-[10px] uppercase tracking-wide text-ink/40">
                         {isStampProgram ? 'Tampons' : 'Points'}
                       </p>
@@ -1269,7 +1269,7 @@ export default function Employee() {
 
                     {isStampProgram ? (
                       <>
-                        <button onClick={() => void addStamp(customer)} disabled={saving} className="inline-flex items-center gap-2 rounded-xl border border-gold/30 bg-white px-4 py-2.5 text-xs font-semibold text-forest hover:bg-gold/5 disabled:opacity-50">
+                        <button onClick={() => void addStamp(customer)} disabled={saving} className="inline-flex items-center gap-2 rounded-xl border border-gold/30 bg-[#111111] px-4 py-2.5 text-xs font-semibold text-forest hover:bg-gold/5 disabled:opacity-50">
                           <Gift size={16} />
                           Ajouter un tampon
                         </button>
@@ -1295,7 +1295,7 @@ export default function Employee() {
 
                     <button
                       onClick={() => openEditCustomer(customer)}
-                      className="inline-flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-4 py-2.5 text-xs font-semibold text-ink/60 hover:border-forest/20 hover:text-forest"
+                      className="inline-flex items-center gap-2 rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-4 py-2.5 text-xs font-semibold text-ink/60 hover:border-forest/20 hover:text-forest"
                     >
                       <Pencil size={16} />
                       Modifier
@@ -1303,7 +1303,7 @@ export default function Employee() {
 
                     <button
                       onClick={() => setShowCard(customer)}
-                      className="inline-flex items-center gap-2 rounded-xl border border-gold/30 bg-white px-4 py-2.5 text-xs font-semibold text-forest hover:bg-gold/5"
+                      className="inline-flex items-center gap-2 rounded-xl border border-gold/30 bg-[#111111] px-4 py-2.5 text-xs font-semibold text-forest hover:bg-gold/5"
                     >
                       <CreditCard size={16} />
                       Carte
@@ -1327,7 +1327,7 @@ export default function Employee() {
       {showInstallHelp && (
         <Modal title="Installer le scanner" onClose={() => setShowInstallHelp(false)}>
           <div className="space-y-4 text-sm text-ink/60">
-            <div className="rounded-2xl bg-[#f7f7f3] p-4">
+            <div className="rounded-2xl bg-[#111111] p-4">
               <p className="font-semibold text-forest">Scanner fidélité</p>
               <p className="mt-1 leading-6">Ce raccourci est lié à cet établissement et ouvrira directement le scanner.</p>
             </div>
@@ -1392,7 +1392,7 @@ export default function Employee() {
             if (!saving) setEditCustomer(null);
           }}
         >
-          <div className="mb-5 rounded-2xl bg-[#f7f7f3] p-4">
+          <div className="mb-5 rounded-2xl bg-[#111111] p-4">
             <p className="text-xs text-ink/40">Numéro de fidélité</p>
             <p className="mt-1 text-xl font-bold tracking-wider text-forest">
               {editCustomer.loyalty_number}
@@ -1459,10 +1459,10 @@ export default function Employee() {
               }}
             />
             {loyaltyProgram.program_type === 'STAMP' && <button disabled={saving} onClick={() => void addStamp(showCard)} className="w-full rounded-xl bg-gold py-3.5 text-xs font-bold text-forest disabled:opacity-50">+ Ajouter 1 tampon</button>}
-            {showCardLink && <button onClick={async () => { await navigator.clipboard.writeText(showCardLink); alert('Lien de la carte copié.'); }} className="w-full rounded-xl border border-ink/10 bg-white py-3 text-xs font-semibold text-forest">Copier le lien client</button>}
+            {showCardLink && <button onClick={async () => { await navigator.clipboard.writeText(showCardLink); alert('Lien de la carte copié.'); }} className="w-full rounded-xl border border-[#D4AF37]/20 bg-[#111111] py-3 text-xs font-semibold text-forest">Copier le lien client</button>}
             <div className="flex gap-3">
               <button onClick={() => printLoyaltyCard(showCard)} className="flex-1 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white">Imprimer / PDF</button>
-              <button onClick={() => setShowCard(null)} className="rounded-xl border border-ink/10 px-5 py-3.5 text-sm font-semibold">Fermer</button>
+              <button onClick={() => setShowCard(null)} className="rounded-xl border border-[#D4AF37]/20 px-5 py-3.5 text-sm font-semibold">Fermer</button>
             </div>
           </div>
         </Modal>
@@ -1514,11 +1514,11 @@ export default function Employee() {
             value={manualCustomerSearch}
             onChange={e => setManualCustomerSearch(e.target.value)}
             placeholder="N° fidélité, téléphone, nom..."
-            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+            className="w-full rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-forest"
           />
 
           {manualMatches.length > 0 && (
-            <div className="mt-2 overflow-hidden rounded-xl border border-ink/5">
+            <div className="mt-2 overflow-hidden rounded-xl border border-[#D4AF37]/20">
               {manualMatches.map(customer => (
                 <button
                   key={customer.id}
@@ -1534,7 +1534,7 @@ export default function Employee() {
                     }
                     setManualCustomerSearch('');
                   }}
-                  className="flex w-full items-center justify-between border-b border-ink/5 bg-white px-4 py-3 text-left last:border-0 hover:bg-[#f7f7f3]"
+                  className="flex w-full items-center justify-between border-b border-[#D4AF37]/20 bg-[#111111] px-4 py-3 text-left last:border-0 hover:bg-[#111111]"
                 >
                   <span>
                     <span className="block text-sm font-semibold text-forest">{customer.first_name} {customer.last_name ?? ''}</span>
@@ -1567,13 +1567,13 @@ export default function Employee() {
             }
           }}
         >
-          <div className="rounded-2xl bg-[#f7f7f3] p-4">
+          <div className="rounded-2xl bg-[#111111] p-4">
             <p className="font-semibold text-forest">
               {showPoints.first_name} {showPoints.last_name ?? ''}
             </p>
             <p className="mt-1 text-xs text-ink/45">{showPoints.phone}</p>
             <p className="mt-1 text-xs font-medium text-forest/60">N° fidélité : {showPoints.loyalty_number}</p>
-            <div className="mt-4 flex items-center justify-between border-t border-ink/5 pt-3">
+            <div className="mt-4 flex items-center justify-between border-t border-[#D4AF37]/20 pt-3">
               <span className="text-xs text-ink/45">Solde actuel</span>
               <span className="font-bold text-forest">
                 {showPoints.points_balance} points
@@ -1644,7 +1644,7 @@ export default function Employee() {
             }
           }}
         >
-          <div className="rounded-2xl bg-[#f7f7f3] p-4">
+          <div className="rounded-2xl bg-[#111111] p-4">
             <p className="text-xs text-ink/40">Client</p>
             <p className="mt-1 font-semibold text-forest">
               {showDiscount.first_name} {showDiscount.last_name ?? ''}
@@ -1692,7 +1692,7 @@ export default function Employee() {
                     className={`rounded-xl border px-3 py-2.5 text-xs font-semibold ${
                       discountPaymentMethod === value
                         ? 'border-forest bg-forest/5 text-forest'
-                        : 'border-ink/10 text-ink/50'
+                        : 'border-[#D4AF37]/20 text-ink/50'
                     }`}
                   >
                     {label}
@@ -1740,14 +1740,14 @@ export default function Employee() {
         >
           <div className="grid gap-5 md:grid-cols-[1fr_1fr]">
             <div>
-              <div className="rounded-2xl bg-[#f7f7f3] p-4">
+              <div className="rounded-2xl bg-[#111111] p-4">
                 <p className="text-xs text-ink/40">Client</p>
                 <p className="mt-1 font-semibold text-forest">
                   {showRewards.first_name} {showRewards.last_name ?? ''}
                 </p>
                 <p className="mt-1 text-xs text-ink/45">{showRewards.phone}</p>
                 <p className="mt-1 text-xs font-medium text-forest/60">N° fidélité : {showRewards.loyalty_number}</p>
-                <div className="mt-4 flex items-center justify-between border-t border-ink/5 pt-3">
+                <div className="mt-4 flex items-center justify-between border-t border-[#D4AF37]/20 pt-3">
                   <span className="text-xs text-ink/45">Solde</span>
                   <span className="font-bold text-forest">
                     {showRewards.points_balance} points
@@ -1757,7 +1757,7 @@ export default function Employee() {
 
               <div className="mt-4 space-y-2">
                 {rewards.length === 0 ? (
-                  <div className="rounded-xl border border-ink/5 p-5 text-center text-sm text-ink/45">
+                  <div className="rounded-xl border border-[#D4AF37]/20 p-5 text-center text-sm text-ink/45">
                     Aucune récompense active.
                   </div>
                 ) : (
@@ -1773,7 +1773,7 @@ export default function Employee() {
                         className={`w-full rounded-xl border p-4 text-left transition ${
                           selectedReward?.id === reward.id
                             ? 'border-forest bg-forest/5'
-                            : 'border-ink/10 bg-white'
+                            : 'border-[#D4AF37]/20 bg-[#111111]'
                         } ${!available ? 'cursor-not-allowed opacity-40' : 'hover:border-forest/30'}`}
                       >
                         <div className="flex items-center justify-between gap-3">
@@ -1787,7 +1787,7 @@ export default function Employee() {
                               </p>
                             )}
                           </div>
-                          <span className="shrink-0 rounded-lg bg-[#f7f7f3] px-2.5 py-1 text-xs font-semibold text-forest">
+                          <span className="shrink-0 rounded-lg bg-[#111111] px-2.5 py-1 text-xs font-semibold text-forest">
                             {reward.points_required} pts
                           </span>
                         </div>
@@ -1798,7 +1798,7 @@ export default function Employee() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-ink/5 bg-white p-5">
+            <div className="rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-5">
               {!selectedReward ? (
                 <div className="grid min-h-[280px] place-items-center text-center">
                   <div>
@@ -1864,7 +1864,7 @@ export default function Employee() {
                             className={`rounded-xl border px-2 py-2.5 text-xs font-semibold ${
                               paymentMethod === value
                                 ? 'border-forest bg-forest/5 text-forest'
-                                : 'border-ink/10 text-ink/50'
+                                : 'border-[#D4AF37]/20 text-ink/50'
                             }`}
                           >
                             <WalletCards size={14} className="mx-auto mb-1" />
@@ -1908,7 +1908,7 @@ function Modal({
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-4">
       <div
-        className={`max-h-[92vh] w-full overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl ${
+        className={`max-h-[92vh] w-full overflow-y-auto rounded-3xl bg-[#111111] p-6 shadow-2xl ${
           wide ? 'max-w-4xl' : 'max-w-md'
         }`}
       >
@@ -1916,7 +1916,7 @@ function Modal({
           <h2 className="font-display text-2xl text-forest">{title}</h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-2 text-ink/40 hover:bg-[#f7f7f3]"
+            className="rounded-lg p-2 text-ink/40 hover:bg-[#111111]"
           >
             <X size={20} />
           </button>
@@ -1956,7 +1956,7 @@ function Field({
           value={value}
           onChange={e => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full rounded-xl border border-ink/10 bg-white py-3 pl-10 pr-3 text-sm outline-none focus:border-forest"
+          className="w-full rounded-xl border border-[#D4AF37]/20 bg-[#111111] py-3 pl-10 pr-3 text-sm outline-none focus:border-forest"
         />
       </div>
     </div>
