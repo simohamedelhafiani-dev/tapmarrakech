@@ -190,13 +190,13 @@ function TemplateVisualPreview({ template, compact = false }: { template: Templa
   if (template.kind === 'menu') {
     const theme = c.theme || {};
     return (
-      <div className={`overflow-hidden rounded-[24px] bg-white shadow-xl ${compact ? 'h-[190px]' : ''}`} style={{ background: theme.background || '#F7F3EA' }}>
+      <div className={`overflow-hidden rounded-[24px] bg-[#111111] shadow-xl ${compact ? 'h-[190px]' : ''}`} style={{ background: theme.background || '#F7F3EA' }}>
         <div className={`relative p-6 ${compact ? 'h-[105px]' : 'h-44'}`} style={{ background: c.background_image_url ? `linear-gradient(#173F35aa,#173F35aa),url(${c.background_image_url}) center/cover` : theme.primary || '#173F35' }}>
           <p className="text-[9px] uppercase tracking-[.28em]" style={{ color: theme.accent || '#C9A45C' }}>LA CARTE</p>
           <h4 className={`mt-2 font-serif text-white ${compact ? 'text-xl' : 'text-3xl'}`}>Maison & saveurs</h4>
         </div>
         <div className={`grid gap-2 p-4 ${compact ? 'grid-cols-2' : 'sm:grid-cols-2'}`}>
-          {['Entrées','Plats','Desserts','Boissons'].map(item => <div key={item} className="rounded-xl border border-black/10 bg-white p-3"><p className="text-xs font-semibold" style={{ color: theme.primary || '#173F35' }}>{item}</p><p className="mt-1 text-[9px] text-black/40">Sélection de la maison</p>{!compact && <p className="mt-2 text-xs font-semibold">À partir de 85 MAD</p>}</div>)}
+          {['Entrées','Plats','Desserts','Boissons'].map(item => <div key={item} className="rounded-xl border border-black/10 bg-[#111111] p-3"><p className="text-xs font-semibold" style={{ color: theme.primary || '#173F35' }}>{item}</p><p className="mt-1 text-[9px] text-[#F5F5DC]/40">Sélection de la maison</p>{!compact && <p className="mt-2 text-xs font-semibold">À partir de 85 MAD</p>}</div>)}
         </div>
       </div>
     );
@@ -204,7 +204,7 @@ function TemplateVisualPreview({ template, compact = false }: { template: Templa
 
   const theme = c.theme || {};
   return (
-    <div className={`overflow-hidden rounded-[24px] bg-white shadow-xl ${compact ? 'h-[190px]' : ''}`}>
+    <div className={`overflow-hidden rounded-[24px] bg-[#111111] shadow-xl ${compact ? 'h-[190px]' : ''}`}>
       <div className={`p-6 ${compact ? 'h-[105px]' : 'h-44'}`} style={{ background: theme.primary || '#173F35' }}>
         <p className="text-[9px] uppercase tracking-[.28em]" style={{ color: theme.accent || '#C9A45C' }}>EXPÉRIENCE CLIENT</p>
         <h4 className={`mt-3 font-serif text-white ${compact ? 'text-xl' : 'text-3xl'}`}>Votre établissement</h4>
@@ -609,11 +609,11 @@ export default function Templates() {
         </button>
       </div>
 
-      <div className="flex gap-2 rounded-2xl border border-ink/10 bg-white p-2 shadow-sm">
+      <div className="flex gap-2 rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-2 shadow-sm">
         <button
           onClick={() => setKind('page')}
           className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold ${
-            kind === 'page' ? 'bg-forest text-white' : 'text-ink/50 hover:bg-[#f7f7f3]'
+            kind === 'page' ? 'bg-forest text-white' : 'text-ink/50 hover:bg-[#111111]'
           }`}
         >
           <LayoutTemplate size={17} />
@@ -622,20 +622,20 @@ export default function Templates() {
         <button
           onClick={() => setKind('menu')}
           className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold ${
-            kind === 'menu' ? 'bg-forest text-white' : 'text-ink/50 hover:bg-[#f7f7f3]'
+            kind === 'menu' ? 'bg-forest text-white' : 'text-ink/50 hover:bg-[#111111]'
           }`}
         >
           <Menu size={17} />
           Menus
         </button>
-        <button onClick={() => setKind('loyalty')} className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold ${kind === 'loyalty' ? 'bg-forest text-white' : 'text-ink/50 hover:bg-[#f7f7f3]'}`}>
+        <button onClick={() => setKind('loyalty')} className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold ${kind === 'loyalty' ? 'bg-forest text-white' : 'text-ink/50 hover:bg-[#111111]'}`}>
           <Star size={17} />
           Fidélité
         </button>
       </div>
 
       {(editing || name) && (
-        <section className="rounded-2xl border border-gold/20 bg-white p-6 shadow-sm">
+        <section className="rounded-2xl border border-gold/20 bg-[#111111] p-6 shadow-sm">
           <div className="mb-6 flex items-start justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
@@ -647,7 +647,7 @@ export default function Templates() {
             </div>
             <button
               onClick={resetForm}
-              className="rounded-xl border border-ink/10 p-2 text-ink/45 hover:bg-[#f7f7f3]"
+              className="rounded-xl border border-[#D4AF37]/20 p-2 text-ink/45 hover:bg-[#111111]"
             >
               <X size={17} />
             </button>
@@ -659,7 +659,7 @@ export default function Templates() {
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+                className="w-full rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-forest"
               />
             </div>
 
@@ -674,7 +674,7 @@ export default function Templates() {
                   const preset = nextKind === 'page' ? PAGE_PRESETS[0] : nextKind === 'menu' ? MENU_PRESETS[0] : LOYALTY_PRESETS[0];
                   setConfigText(prettyJson(preset.config));
                 }}
-                className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none"
+                className="w-full rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-4 py-3 text-sm outline-none"
               >
                 <option value="page">Page publique</option>
                 <option value="menu">Menu</option>
@@ -687,7 +687,7 @@ export default function Templates() {
                 rows={3}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+                className="w-full rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-forest"
               />
             </div>
 
@@ -697,7 +697,7 @@ export default function Templates() {
                 value={thumbnailUrl}
                 onChange={(e) => setThumbnailUrl(e.target.value)}
                 placeholder="https://..."
-                className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+                className="w-full rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-forest"
               />
             </div>
 
@@ -709,7 +709,7 @@ export default function Templates() {
                     <button
                       key={preset.label}
                       onClick={() => setConfigText(prettyJson(preset.config))}
-                      className="rounded-lg border border-ink/10 px-3 py-1.5 text-[11px] font-semibold text-ink/60 hover:bg-[#f7f7f3]"
+                      className="rounded-lg border border-[#D4AF37]/20 px-3 py-1.5 text-[11px] font-semibold text-ink/60 hover:bg-[#111111]"
                     >
                       Preset {preset.label}
                     </button>
@@ -720,14 +720,14 @@ export default function Templates() {
                 rows={18}
                 value={configText}
                 onChange={(e) => setConfigText(e.target.value)}
-                className="w-full rounded-xl border border-ink/10 bg-[#171c19] px-4 py-3 font-mono text-xs leading-5 text-white outline-none focus:border-gold"
+                className="w-full rounded-xl border border-[#D4AF37]/20 bg-[#171c19] px-4 py-3 font-mono text-xs leading-5 text-white outline-none focus:border-gold"
               />
               <p className="mt-2 text-[11px] text-ink/35">
                 Cette configuration définit la présentation. Le contenu de chaque établissement reste indépendant du template.
               </p>
             </div>
 
-            <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-[#f7f7f3] p-4">
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-[#111111] p-4">
               <input
                 type="checkbox"
                 checked={active}
@@ -740,7 +740,7 @@ export default function Templates() {
               </span>
             </label>
 
-            <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-[#f7f7f3] p-4">
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-[#111111] p-4">
               <input
                 type="checkbox"
                 checked={isDefault}
@@ -757,7 +757,7 @@ export default function Templates() {
           <div className="mt-6 flex justify-end gap-3">
             <button
               onClick={resetForm}
-              className="rounded-xl border border-ink/10 px-5 py-3 text-sm font-semibold text-ink/55 hover:bg-[#f7f7f3]"
+              className="rounded-xl border border-[#D4AF37]/20 px-5 py-3 text-sm font-semibold text-ink/55 hover:bg-[#111111]"
             >
               Annuler
             </button>
@@ -783,15 +783,15 @@ export default function Templates() {
         </div>
 
         {loading ? (
-          <div className="rounded-2xl border border-ink/10 bg-white p-8 text-center text-sm text-ink/40">Chargement...</div>
+          <div className="rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-8 text-center text-sm text-ink/40">Chargement...</div>
         ) : filteredTemplates.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-ink/15 bg-white p-10 text-center">
+          <div className="rounded-2xl border border-dashed border-[#D4AF37]/20 bg-[#111111] p-10 text-center">
             <p className="text-sm font-semibold text-forest">Aucun template</p>
             <p className="mt-1 text-xs text-ink/40">Crée ton premier template.</p>
           </div>
         ) : (
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(430px,.95fr)]">
-            <div className="rounded-[24px] border border-ink/10 bg-white p-5 shadow-sm">
+            <div className="rounded-[24px] border border-[#D4AF37]/20 bg-[#111111] p-5 shadow-sm">
               <div className="mb-4 flex items-center justify-between">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">Modèles</p>
@@ -810,10 +810,10 @@ export default function Templates() {
                       key={template.id}
                       type="button"
                       onClick={() => { setSelectedTemplate(template); setEditorTab('preview'); }}
-                      className={`overflow-hidden rounded-2xl border text-left transition ${selected ? 'border-forest ring-2 ring-forest/10' : 'border-ink/10 hover:border-forest/30'}`}
+                      className={`overflow-hidden rounded-2xl border text-left transition ${selected ? 'border-forest ring-2 ring-forest/10' : 'border-[#D4AF37]/20 hover:border-forest/30'}`}
                     >
                       <TemplateVisualPreview template={template} compact />
-                      <div className="border-t border-ink/10 bg-white p-3">
+                      <div className="border-t border-[#D4AF37]/20 bg-[#111111] p-3">
                         <div className="flex items-start justify-between gap-2">
                           <div>
                             <p className="text-sm font-semibold text-forest">{template.name}</p>
@@ -829,8 +829,8 @@ export default function Templates() {
             </div>
 
             {selectedTemplate && (
-              <div className="overflow-hidden rounded-[24px] border border-ink/10 bg-white shadow-sm">
-                <div className="flex items-center justify-between border-b border-ink/10 px-5 py-4">
+              <div className="overflow-hidden rounded-[24px] border border-[#D4AF37]/20 bg-[#111111] shadow-sm">
+                <div className="flex items-center justify-between border-b border-[#D4AF37]/20 px-5 py-4">
                   <div>
                     <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">Aperçu en temps réel</p>
                     <h3 className="mt-1 font-display text-xl text-forest">{selectedTemplate.name}</h3>
@@ -841,26 +841,26 @@ export default function Templates() {
                   </span>
                 </div>
 
-                <div className="min-h-[500px] bg-[#f7f7f3] p-5">
+                <div className="min-h-[500px] bg-[#111111] p-5">
                   <div className="mx-auto max-w-[470px]">
                     <TemplateVisualPreview template={selectedTemplate} />
                   </div>
                 </div>
 
-                <div className="border-t border-ink/10 p-5">
-                  <div className="mb-4 flex rounded-xl bg-[#f7f7f3] p-1">
-                    <button onClick={() => setEditorTab('preview')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab === 'preview' ? 'bg-white text-forest shadow-sm' : 'text-ink/45'}`}>Aperçu</button>
-                    <button onClick={() => setEditorTab('design')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab === 'design' ? 'bg-white text-forest shadow-sm' : 'text-ink/45'}`}>Modifier</button>
+                <div className="border-t border-[#D4AF37]/20 p-5">
+                  <div className="mb-4 flex rounded-xl bg-[#111111] p-1">
+                    <button onClick={() => setEditorTab('preview')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab === 'preview' ? 'bg-[#111111] text-forest shadow-sm' : 'text-ink/45'}`}>Aperçu</button>
+                    <button onClick={() => setEditorTab('design')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab === 'design' ? 'bg-[#111111] text-forest shadow-sm' : 'text-ink/45'}`}>Modifier</button>
                   </div>
 
                   {editorTab === 'design' ? (
                     <div className="space-y-4">
                       <div className="grid gap-3 sm:grid-cols-2">
                         <label className="text-xs font-semibold text-ink/55">Nom
-                          <input value={selectedTemplate.name} onChange={e => { const next={...selectedTemplate,name:e.target.value}; setSelectedTemplate(next); setName(e.target.value); }} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm"/>
+                          <input value={selectedTemplate.name} onChange={e => { const next={...selectedTemplate,name:e.target.value}; setSelectedTemplate(next); setName(e.target.value); }} className="mt-1 w-full rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-3 py-2.5 text-sm"/>
                         </label>
                         <label className="text-xs font-semibold text-ink/55">Rayon
-                          <input type="number" min="0" max="40" value={Number(selectedTemplate.config?.radius || 24)} onChange={e => { const config={...selectedTemplate.config,radius:Number(e.target.value)}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm"/>
+                          <input type="number" min="0" max="40" value={Number(selectedTemplate.config?.radius || 24)} onChange={e => { const config={...selectedTemplate.config,radius:Number(e.target.value)}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 w-full rounded-xl border border-[#D4AF37]/20 bg-[#111111] px-3 py-2.5 text-sm"/>
                         </label>
                       </div>
 
@@ -869,15 +869,15 @@ export default function Templates() {
                           <div className="grid grid-cols-2 gap-3">
                             {['primary','secondary','background','text'].map(key => (
                               <label key={key} className="text-xs font-semibold text-ink/55">{key}
-                                <input type="color" value={String(selectedTemplate.config?.[key] || '#173D32')} onChange={e => { const config={...selectedTemplate.config,[key]:e.target.value}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 h-10 w-full cursor-pointer rounded-lg border border-ink/10"/>
+                                <input type="color" value={String(selectedTemplate.config?.[key] || '#173D32')} onChange={e => { const config={...selectedTemplate.config,[key]:e.target.value}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 h-10 w-full cursor-pointer rounded-lg border border-[#D4AF37]/20"/>
                               </label>
                             ))}
                           </div>
                           <label className="text-xs font-semibold text-ink/55">Titre
-                            <input value={String(selectedTemplate.config?.title || '')} onChange={e => { const config={...selectedTemplate.config,title:e.target.value}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"/>
+                            <input value={String(selectedTemplate.config?.title || '')} onChange={e => { const config={...selectedTemplate.config,title:e.target.value}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 w-full rounded-xl border border-[#D4AF37]/20 px-3 py-2.5 text-sm"/>
                           </label>
                           <label className="text-xs font-semibold text-ink/55">Sous-titre
-                            <textarea rows={2} value={String(selectedTemplate.config?.subtitle || '')} onChange={e => { const config={...selectedTemplate.config,subtitle:e.target.value}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"/>
+                            <textarea rows={2} value={String(selectedTemplate.config?.subtitle || '')} onChange={e => { const config={...selectedTemplate.config,subtitle:e.target.value}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 w-full rounded-xl border border-[#D4AF37]/20 px-3 py-2.5 text-sm"/>
                           </label>
                         </>
                       )}
@@ -886,7 +886,7 @@ export default function Templates() {
                         <div className="grid grid-cols-2 gap-3">
                           {['primary','accent','background'].map(key => (
                             <label key={key} className="text-xs font-semibold text-ink/55">{key}
-                              <input type="color" value={String(selectedTemplate.config?.theme?.[key] || (key === 'primary' ? '#173F35' : key === 'accent' ? '#C9A45C' : '#F7F3EA'))} onChange={e => { const config={...selectedTemplate.config,theme:{...(selectedTemplate.config?.theme || {}),[key]:e.target.value}}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 h-10 w-full cursor-pointer rounded-lg border border-ink/10"/>
+                              <input type="color" value={String(selectedTemplate.config?.theme?.[key] || (key === 'primary' ? '#173F35' : key === 'accent' ? '#C9A45C' : '#F7F3EA'))} onChange={e => { const config={...selectedTemplate.config,theme:{...(selectedTemplate.config?.theme || {}),[key]:e.target.value}}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 h-10 w-full cursor-pointer rounded-lg border border-[#D4AF37]/20"/>
                             </label>
                           ))}
                         </div>
@@ -899,14 +899,14 @@ export default function Templates() {
 
                       <div className="flex gap-2">
                         <button onClick={() => void saveVisualEditor()} className="flex-1 rounded-xl bg-forest px-4 py-3 text-sm font-semibold text-white">Enregistrer les modifications</button>
-                        <button onClick={() => void startEdit(selectedTemplate)} className="rounded-xl border border-ink/10 px-4 py-3 text-sm font-semibold text-ink/55">Ouvrir l'éditeur complet</button>
+                        <button onClick={() => void startEdit(selectedTemplate)} className="rounded-xl border border-[#D4AF37]/20 px-4 py-3 text-sm font-semibold text-ink/55">Ouvrir l'éditeur complet</button>
                       </div>
                     </div>
                   ) : (
                     <div className="flex flex-wrap gap-2">
                       <button onClick={() => setEditorTab('design')} className="rounded-xl bg-forest px-4 py-3 text-xs font-semibold text-white"><Pencil size={14} className="mr-1 inline"/> Modifier le template</button>
-                      <button onClick={() => void startEdit(selectedTemplate)} className="rounded-xl border border-ink/10 px-4 py-3 text-xs font-semibold text-ink/55">Éditeur avancé</button>
-                      <button onClick={() => void duplicate(selectedTemplate)} className="rounded-xl border border-ink/10 px-4 py-3 text-xs font-semibold text-ink/55"><Copy size={14} className="mr-1 inline"/> Dupliquer</button>
+                      <button onClick={() => void startEdit(selectedTemplate)} className="rounded-xl border border-[#D4AF37]/20 px-4 py-3 text-xs font-semibold text-ink/55">Éditeur avancé</button>
+                      <button onClick={() => void duplicate(selectedTemplate)} className="rounded-xl border border-[#D4AF37]/20 px-4 py-3 text-xs font-semibold text-ink/55"><Copy size={14} className="mr-1 inline"/> Dupliquer</button>
                     </div>
                   )}
                 </div>
@@ -918,13 +918,13 @@ export default function Templates() {
 
       {previewing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/70 p-4">
-          <div className="max-h-[94vh] w-full max-w-6xl overflow-hidden rounded-[28px] bg-[#f7f7f3] shadow-2xl">
-            <div className="flex items-center justify-between border-b border-ink/10 bg-white px-6 py-4">
+          <div className="max-h-[94vh] w-full max-w-6xl overflow-hidden rounded-[28px] bg-[#111111] shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[#D4AF37]/20 bg-[#111111] px-6 py-4">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">Studio template</p>
                 <h3 className="font-display text-2xl text-forest">{previewing.name}</h3>
               </div>
-              <button onClick={() => setPreviewing(null)} className="rounded-xl border border-ink/10 p-2"><X size={18}/></button>
+              <button onClick={() => setPreviewing(null)} className="rounded-xl border border-[#D4AF37]/20 p-2"><X size={18}/></button>
             </div>
             <div className="grid max-h-[calc(94vh-80px)] overflow-auto lg:grid-cols-[minmax(0,1fr)_380px]">
               <div className="flex min-h-[620px] items-center justify-center bg-[#ebe7de] p-6 md:p-10">
@@ -952,34 +952,34 @@ export default function Templates() {
                     />
                   </div>
                 ) : (
-                  <div className="w-full max-w-[520px] overflow-hidden rounded-[28px] bg-white shadow-xl">
+                  <div className="w-full max-w-[520px] overflow-hidden rounded-[28px] bg-[#111111] shadow-xl">
                     <div className="h-40 p-7" style={{ background: previewing.config?.background_image_url ? `linear-gradient(#173d32aa,#173d32aa),url(${previewing.config.background_image_url}) center/cover` : String(previewing.config?.theme?.background || '#F3EEE2') }}>
                       <p className="text-xs uppercase tracking-[.25em]" style={{ color: String(previewing.config?.theme?.accent || '#C9A45C') }}>La carte</p>
                       <h4 className="mt-3 text-3xl font-semibold" style={{ color: String(previewing.config?.theme?.primary || '#173D35') }}>Maison & saveurs</h4>
                     </div>
                     <div className="grid gap-3 p-6 sm:grid-cols-2">
-                      {['Entrées','Plats','Desserts','Boissons'].map((x) => <div key={x} className="rounded-2xl border border-ink/10 p-4"><p className="font-semibold text-forest">{x}</p><p className="mt-2 text-xs text-ink/40">Sélection de la maison</p><p className="mt-3 text-sm font-semibold">À partir de 85 MAD</p></div>)}
+                      {['Entrées','Plats','Desserts','Boissons'].map((x) => <div key={x} className="rounded-2xl border border-[#D4AF37]/20 p-4"><p className="font-semibold text-forest">{x}</p><p className="mt-2 text-xs text-ink/40">Sélection de la maison</p><p className="mt-3 text-sm font-semibold">À partir de 85 MAD</p></div>)}
                     </div>
                   </div>
                 )}
               </div>
-              <aside className="border-l border-ink/10 bg-white p-6">
-                <div className="mb-5 flex rounded-xl bg-[#f7f7f3] p-1">
-                  <button onClick={() => setEditorTab('preview')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab==='preview'?'bg-white text-forest shadow-sm':'text-ink/45'}`}>Aperçu</button>
-                  <button onClick={() => setEditorTab('design')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab==='design'?'bg-white text-forest shadow-sm':'text-ink/45'}`}>Modifier</button>
+              <aside className="border-l border-[#D4AF37]/20 bg-[#111111] p-6">
+                <div className="mb-5 flex rounded-xl bg-[#111111] p-1">
+                  <button onClick={() => setEditorTab('preview')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab==='preview'?'bg-[#111111] text-forest shadow-sm':'text-ink/45'}`}>Aperçu</button>
+                  <button onClick={() => setEditorTab('design')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab==='design'?'bg-[#111111] text-forest shadow-sm':'text-ink/45'}`}>Modifier</button>
                 </div>
                 {editorTab === 'design' ? (
                   <div className="space-y-5">
                     <div>
                       <label className="mb-2 block text-xs font-semibold">Titre</label>
-                      <input value={String(previewing.config?.title || '')} onChange={e => { const config={...previewing.config,title:e.target.value}; setPreviewing({...previewing,config}); setConfigText(prettyJson(config)); }} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"/>
+                      <input value={String(previewing.config?.title || '')} onChange={e => { const config={...previewing.config,title:e.target.value}; setPreviewing({...previewing,config}); setConfigText(prettyJson(config)); }} className="w-full rounded-xl border border-[#D4AF37]/20 px-3 py-2.5 text-sm"/>
                     </div>
                     <div>
                       <label className="mb-2 block text-xs font-semibold">Sous-titre</label>
-                      <textarea value={String(previewing.config?.subtitle || '')} onChange={e => { const config={...previewing.config,subtitle:e.target.value}; setPreviewing({...previewing,config}); setConfigText(prettyJson(config)); }} rows={3} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"/>
+                      <textarea value={String(previewing.config?.subtitle || '')} onChange={e => { const config={...previewing.config,subtitle:e.target.value}; setPreviewing({...previewing,config}); setConfigText(prettyJson(config)); }} rows={3} className="w-full rounded-xl border border-[#D4AF37]/20 px-3 py-2.5 text-sm"/>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                      {['primary','secondary','background','text'].map(key => <label key={key} className="text-xs font-semibold">{key}<input type="color" value={String(previewing.config?.[key] || '#173D32')} onChange={e=>{const config={...previewing.config,[key]:e.target.value};setPreviewing({...previewing,config});setConfigText(prettyJson(config));}} className="mt-2 h-10 w-full cursor-pointer rounded-lg border border-ink/10"/></label>)}
+                      {['primary','secondary','background','text'].map(key => <label key={key} className="text-xs font-semibold">{key}<input type="color" value={String(previewing.config?.[key] || '#173D32')} onChange={e=>{const config={...previewing.config,[key]:e.target.value};setPreviewing({...previewing,config});setConfigText(prettyJson(config));}} className="mt-2 h-10 w-full cursor-pointer rounded-lg border border-[#D4AF37]/20"/></label>)}
                     </div>
                     <div>
                       <label className="mb-2 block text-xs font-semibold">Wallpaper</label>
@@ -994,7 +994,7 @@ export default function Templates() {
                 ) : (
                   <div className="space-y-4 text-sm text-ink/55">
                     <p>Tu peux sélectionner ce template, voir son rendu réel, modifier ses couleurs, son texte et ajouter un wallpaper.</p>
-                    <div className="rounded-2xl bg-[#f7f7f3] p-4"><p className="text-xs font-semibold text-forest">Template global</p><p className="mt-1 text-xs">Les modifications faites ici deviennent disponibles pour les établissements qui utilisent ce template.</p></div>
+                    <div className="rounded-2xl bg-[#111111] p-4"><p className="text-xs font-semibold text-forest">Template global</p><p className="mt-1 text-xs">Les modifications faites ici deviennent disponibles pour les établissements qui utilisent ce template.</p></div>
                     <button onClick={()=>setEditorTab('design')} className="w-full rounded-xl bg-forest px-4 py-3 text-sm font-semibold text-white">Modifier le design</button>
                   </div>
                 )}
