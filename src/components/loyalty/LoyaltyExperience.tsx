@@ -352,7 +352,7 @@ export function LoyaltyFooter({ config }: { config: LoyaltyExperienceConfig }) {
 
   return <>
     <div className="mt-5 grid grid-cols-2 gap-2">
-      <button type="button" onClick={() => setOpen(true)} className="flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-[10px] font-semibold shadow-sm"><QrCode size={15}/> Présenter ma carte</button>
+      <button type="button" onClick={() => setOpen(true)} className="flex items-center justify-center gap-2 rounded-2xl border border-[#D4AF37]/20 bg-[#111111] px-4 py-3 text-[10px] font-semibold text-[#F5F5DC] shadow-sm"><QrCode size={15}/> Présenter ma carte</button>
       <button type="button" onClick={() => window.alert('Utilisez le menu de votre navigateur pour ajouter cette carte à votre écran d’accueil.')} className="flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-[10px] font-semibold text-white shadow-sm" style={{background:config.primaryColor}}><WalletCards size={15}/> Ajouter au téléphone</button>
     </div>
     {open && <div className="fixed inset-0 z-50 grid place-items-end bg-black/45 p-3 sm:place-items-center sm:p-6" role="dialog" aria-modal="true">
@@ -586,27 +586,27 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
 
   if (template === 'editorial') {
     return (
-      <div className="relative mx-auto w-full max-w-[430px] overflow-hidden text-[#17130f] shadow-[0_30px_90px_rgba(0,0,0,.28)]" style={{ borderRadius: config.borderRadius ?? 30 }}>
+      <div className="relative mx-auto w-full max-w-[430px] overflow-hidden text-[#F5F5DC] shadow-[0_30px_90px_rgba(0,0,0,.28)]" style={{ borderRadius: config.borderRadius ?? 30 }}>
         {background}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#fff9ed]/20 via-[#f8f0e3]/10 to-[#f7efe2]/88" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0D0D0D]/55 via-[#111111]/70 to-[#050505]/95" />
         <div className="relative z-10 flex h-full flex-col p-7 sm:p-8">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
-              {config.logoUrl ? <img src={config.logoUrl} alt="" className="h-11 w-11 rounded-xl bg-white/85 object-contain p-1.5 shadow" /> : <div className="grid h-11 w-11 place-items-center rounded-xl border border-black/10 bg-white/45 text-[10px] font-semibold">{establishment.slice(0,2).toUpperCase()}</div>}
+              {config.logoUrl ? <img src={config.logoUrl} alt="" className="h-11 w-11 rounded-xl bg-white/85 object-contain p-1.5 shadow" /> : <div className="grid h-11 w-11 place-items-center rounded-xl border border-[#D4AF37]/20 bg-[#111111]/80 text-[10px] font-semibold text-[#F5F5DC]">{establishment.slice(0,2).toUpperCase()}</div>}
               <div><p className="font-serif text-xl tracking-[-.03em]">{establishment}</p><p className="mt-1 text-[8px] uppercase tracking-[.3em] opacity-50">PRIVATE MEMBERSHIP</p></div>
             </div>
-            <span className="rounded-full border border-black/15 bg-white/25 px-3 py-1.5 text-[8px] uppercase tracking-[.2em] backdrop-blur-md">Gold</span>
+            <span className="rounded-full border border-[#D4AF37]/25 bg-[#111111]/75 px-3 py-1.5 text-[8px] uppercase tracking-[.2em] backdrop-blur-md">Gold</span>
           </div>
           <div className="mt-auto">
             <p className="text-[9px] uppercase tracking-[.25em] opacity-50">Bonjour, {member}</p>
             <h1 className="mt-2 max-w-[320px] font-serif text-[40px] leading-[.94] tracking-[-.05em]">{title}</h1>
             <p className="mt-3 max-w-[280px] text-[10px] leading-5 opacity-65">{subtitle}</p>
-            <div className="mt-4 rounded-[22px] border border-white/45 bg-white/30 p-4 shadow-lg backdrop-blur-xl">
+            <div className="mt-4 rounded-[22px] border border-[#D4AF37]/20 bg-[#111111]/80 p-4 shadow-lg backdrop-blur-xl">
               <div className="flex items-end justify-between"><div><p className="text-[8px] uppercase tracking-[.2em] opacity-50">Votre solde</p><p className="mt-1 text-2xl font-semibold">{config.type === 'STAMP' ? visits + ' / ' + visitGoal : points.toLocaleString('fr-FR') + ' pts'}</p></div><p className="font-serif text-lg">→</p></div>
               {config.type === 'STAMP' ? stampBlock : <div className="mt-3 h-1 overflow-hidden rounded-full bg-black/10"><div className="h-full rounded-full" style={{ width: progress + '%', background: config.primaryColor }} /></div>}
             </div>
-            {benefits.length > 0 && <div className="mt-5"><p className="text-[8px] font-bold uppercase tracking-[.2em] opacity-45">Vos avantages exclusifs</p><div className="mt-1.5 grid grid-cols-3 gap-1.5">{benefits.map((b,i) => <div key={b.title+i} className="rounded-[16px] border border-white/45 bg-white/25 p-3 backdrop-blur-xl"><p className="text-[10px] font-semibold">{b.title}</p><p className="mt-1 line-clamp-2 text-[8px] leading-3.5 opacity-55">{b.description}</p></div>)}</div></div>}
-            {offers.length > 0 && <div className="mt-4 rounded-[18px] border border-white/45 bg-white/25 p-4 backdrop-blur-xl"><p className="text-[8px] uppercase tracking-[.18em] opacity-45">{offers[0].eyebrow || 'Offre du moment'}</p><p className="mt-1 text-lg font-semibold">{offers[0].title}</p>{offers[0].description && <p className="mt-1 text-[9px] opacity-55">{offers[0].description}</p>}</div>}\n            <div className="mt-5 flex flex-col items-center"><div className="h-[92px] w-[92px]">{actionBlock}</div><p className="mt-2 text-center text-[8px] uppercase tracking-[.16em] opacity-50">{actionCaption}</p><p className="mt-2 text-[9px] opacity-55">{member}</p></div>
+            {benefits.length > 0 && <div className="mt-5"><p className="text-[8px] font-bold uppercase tracking-[.2em] opacity-45">Vos avantages exclusifs</p><div className="mt-1.5 grid grid-cols-3 gap-1.5">{benefits.map((b,i) => <div key={b.title+i} className="rounded-[16px] border border-[#D4AF37]/20 bg-[#111111]/70 p-3 backdrop-blur-xl"><p className="text-[10px] font-semibold">{b.title}</p><p className="mt-1 line-clamp-2 text-[8px] leading-3.5 opacity-55">{b.description}</p></div>)}</div></div>}
+            {offers.length > 0 && <div className="mt-4 rounded-[18px] border border-[#D4AF37]/20 bg-[#111111]/70 p-4 backdrop-blur-xl"><p className="text-[8px] uppercase tracking-[.18em] opacity-45">{offers[0].eyebrow || 'Offre du moment'}</p><p className="mt-1 text-lg font-semibold">{offers[0].title}</p>{offers[0].description && <p className="mt-1 text-[9px] opacity-55">{offers[0].description}</p>}</div>}\n            <div className="mt-5 flex flex-col items-center"><div className="h-[92px] w-[92px]">{actionBlock}</div><p className="mt-2 text-center text-[8px] uppercase tracking-[.16em] opacity-50">{actionCaption}</p><p className="mt-2 text-[9px] opacity-55">{member}</p></div>
           </div>
         </div>
       </div>
@@ -661,12 +661,12 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
 
   if (template === 'apple-wallet') {
     return (
-      <div className="relative mx-auto w-full max-w-[430px] overflow-hidden text-[#1b1a18] shadow-[0_30px_90px_rgba(0,0,0,.22)]" style={{ borderRadius: config.borderRadius ?? 28 }}>
-        {background}<div className="absolute inset-0 bg-gradient-to-b from-white/35 via-white/50 to-[#f4f0e8]/88" />
-        <div className="relative z-10 flex h-full flex-col p-7"><div className="flex items-start justify-between"><div className="flex items-center gap-3">{config.logoUrl ? <img src={config.logoUrl} alt="" className="h-11 w-11 rounded-xl bg-white/80 object-contain p-1.5 shadow" /> : <div className="grid h-11 w-11 place-items-center rounded-xl border border-black/10 bg-white/50 text-[10px] font-bold">{establishment.slice(0,2).toUpperCase()}</div>}<div><p className="text-sm font-semibold">{establishment}</p><p className="mt-1 text-[8px] uppercase tracking-[.24em] opacity-45">PREMIUM MEMBER</p></div></div><p className="text-[9px] uppercase tracking-[.2em] opacity-45">PRIVILEGE</p></div>
+      <div className="relative mx-auto w-full max-w-[430px] overflow-hidden text-[#F5F5DC] shadow-[0_30px_90px_rgba(0,0,0,.22)]" style={{ borderRadius: config.borderRadius ?? 28 }}>
+        {background}<div className="absolute inset-0 bg-gradient-to-b from-[#0D0D0D]/55 via-[#111111]/75 to-[#050505]/95" />
+        <div className="relative z-10 flex h-full flex-col p-7"><div className="flex items-start justify-between"><div className="flex items-center gap-3">{config.logoUrl ? <img src={config.logoUrl} alt="" className="h-11 w-11 rounded-xl bg-[#111111] object-contain p-1.5 shadow" /> : <div className="grid h-11 w-11 place-items-center rounded-xl border border-[#D4AF37]/20 bg-[#111111]/80 text-[10px] font-bold text-[#F5F5DC]">{establishment.slice(0,2).toUpperCase()}</div>}<div><p className="text-sm font-semibold">{establishment}</p><p className="mt-1 text-[8px] uppercase tracking-[.24em] opacity-45">PREMIUM MEMBER</p></div></div><p className="text-[9px] uppercase tracking-[.2em] opacity-45">PRIVILEGE</p></div>
           <div className="mt-auto"><p className="text-[9px] uppercase tracking-[.22em] opacity-45">Bonjour, {member}</p><p className="mt-2 font-serif text-[38px] leading-[.95] tracking-[-.045em]">{title}</p><p className="mt-3 max-w-[280px] text-[10px] leading-5 opacity-60">{subtitle}</p>
             <div className="mt-6 border-t border-black/10 pt-4"><div className="flex justify-between text-[8px] uppercase tracking-[.18em] opacity-45"><span>Votre fidélité</span><span>{Math.round(progress)}%</span></div>{config.type === 'STAMP' ? stampBlock : <div className="mt-3 h-1 overflow-hidden rounded-full bg-black/10"><div className="h-full rounded-full" style={{ width: progress + '%', background: config.primaryColor }} /></div>}</div>
-            {benefits.length > 0 && <div className="mt-5"><p className="text-[8px] font-bold uppercase tracking-[.2em] opacity-45">Vos avantages exclusifs</p><div className="mt-2 grid grid-cols-3 gap-2">{benefits.map((b,i)=><div key={b.title+i} className="rounded-[15px] border border-black/10 bg-white/35 p-3 backdrop-blur-md"><p className="text-[10px] font-semibold">{b.title}</p><p className="mt-1 line-clamp-2 text-[8px] leading-3.5 opacity-55">{b.description}</p></div>)}</div></div>}
+            {benefits.length > 0 && <div className="mt-5"><p className="text-[8px] font-bold uppercase tracking-[.2em] opacity-45">Vos avantages exclusifs</p><div className="mt-2 grid grid-cols-3 gap-2">{benefits.map((b,i)=><div key={b.title+i} className="rounded-[15px] border border-[#D4AF37]/20 bg-[#111111]/70 p-3 backdrop-blur-md"><p className="text-[10px] font-semibold">{b.title}</p><p className="mt-1 line-clamp-2 text-[8px] leading-3.5 opacity-55">{b.description}</p></div>)}</div></div>}
             <div className="mt-5 flex flex-col items-center"><div className="h-[92px] w-[92px]">{actionBlock}</div><p className="mt-2 text-center text-[8px] uppercase tracking-[.16em] opacity-50">{actionCaption}</p><p className="mt-2 text-[9px] opacity-55">{member}</p></div>
           </div>
         </div>
