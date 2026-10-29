@@ -119,6 +119,25 @@ Deno.serve(async (request) => {
 
     if (accessError || !establishment) return json({ success: false, error: 'Accès à cet établissement refusé.' }, 403);
 
+
+    // Enforce the menu entitlement server-side, including subscription expiry.
+    const { data: subscriptionData, error: subscriptionError } = await userClient.rpc(
+      'get_responsible_subscription_card',
+      { p_establishment_id: establishmentId }
+    );
+    if (subscriptionError || !subscriptionData || typeof subscriptionData !== 'object' || Array.isArray(subscriptionData)) {
+      console.error('Subscription access lookup failed', subscriptionError);
+      return json({ success: false, error: 'Impossible de vérifier les droits de l’abonnement.' }, 403);
+    }
+    const subscription = subscriptionData as Record<string, unknown>;
+    const status = String(subscription.subscription_status ?? '').toLowerCase();
+    const end = subscription.current_period_end ? new Date(String(subscription.current_period_end)).getTime() : null;
+    const features = Array.isArray(subscription.features) ? subscription.features.map((x) => String(x).trim().toLowerCase()) : [];
+    const expired = end !== null && Number.isFinite(end) && end <= Date.now();
+    if (!['active', 'trial'].includes(status) || expired || !features.includes('menu')) {
+      return json({ success: false, error: 'La conception IA du menu n’est pas incluse dans votre abonnement actif.' }, 403);
+    }
+
     const serviceClient = createClient(supabaseUrl, serviceKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     });

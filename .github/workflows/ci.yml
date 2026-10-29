@@ -1,5 +1,9 @@
 name: CI
 
+permissions:
+  contents: read
+  packages: read
+
 # Avoid booting multiple heavyweight local Supabase stacks for successive pushes
 # to the same pull request. The newest commit supersedes earlier validation runs.
 concurrency:
@@ -54,6 +58,12 @@ jobs:
 
       - name: Initialize local Supabase config
         run: supabase init --force
+
+      # Authenticate before pulling public Supabase images to avoid anonymous registry data limits.
+      - name: Authenticate to GHCR
+        env:
+          GHCR_TOKEN: ${{ github.token }}
+        run: echo "$GHCR_TOKEN" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       # pgTAP tests exclude the Supabase API/service containers; only PostgreSQL
       # is needed for local migrations and SQL tests.
