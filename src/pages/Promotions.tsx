@@ -292,7 +292,7 @@ export default function Promotions() {
           <select
             value={establishmentId}
             onChange={(event) => setEstablishmentId(event.target.value)}
-            className="rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white outline-none"
+            className="rounded-xl border border-white/15 bg-gold/10 px-4 py-3 text-sm text-white outline-none"
           >
             {establishments.map((establishment) => (
               <option key={establishment.id} value={establishment.id} className="text-ink">
