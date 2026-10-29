@@ -542,8 +542,8 @@ export default function Menu() {
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {menuTemplates.map((template) => (
               <button key={template.id} type="button" onClick={() => void saveTemplate(template.id)} className={`rounded-2xl border p-4 text-left transition ${selectedTemplateId === template.id ? 'border-gold ring-2 ring-gold/15' : 'border-[#242424]/10 hover:border-gold/40'}`}>
-                <div className={`h-20 rounded-xl p-3 ${template.key === 'dark' ? 'bg-[#102B24]' : template.key === 'luxury' ? 'bg-[#F7F3EA]' : template.key === 'cards' ? 'bg-[#111111] border border-[#242424]/10' : 'bg-[#F3EEE2]'}`}>
-                  <div className={`h-2 w-16 rounded-full ${template.key === 'dark' ? 'bg-gold' : 'bg-[#C9A45C]'}`} />
+                <div className={`h-20 rounded-xl p-3 ${template.key === 'dark' ? 'bg-[var(--kelyani-bg)]' : template.key === 'luxury' ? 'bg-[var(--kelyani-panel-raised)]' : template.key === 'cards' ? 'bg-[#111111] border border-[#242424]/10' : 'bg-[var(--kelyani-panel-raised)]'}`}>
+                  <div className={`h-2 w-16 rounded-full ${template.key === 'dark' ? 'bg-gold' : 'bg-[var(--kelyani-gold)]'}`} />
                   <div className={`mt-3 h-2 w-3/4 rounded-full ${template.key === 'dark' ? 'bg-[#111111]/20' : 'bg-ink/10'}`} />
                   <div className={`mt-2 h-2 w-1/2 rounded-full ${template.key === 'dark' ? 'bg-[#111111]/10' : 'bg-ink/5'}`} />
                 </div>
