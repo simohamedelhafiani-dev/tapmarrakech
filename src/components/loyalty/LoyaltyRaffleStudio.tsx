@@ -351,7 +351,7 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 function Toggle({ label, checked, onChange }: { label: string; checked: boolean; onChange: (value: boolean) => void }) {
   return <button type="button" onClick={() => onChange(!checked)} className={`flex min-h-12 items-center justify-between gap-3 rounded-xl border px-3 py-3 text-left ${checked ? 'border-[#C9A45C]/35 bg-[#C9A45C]/5' : 'border-[#242424]/10 bg-[#111111]'}`}>
     <span className="text-[10px] font-semibold text-[#E1C27A]">{label}</span>
-    <span className={`h-5 w-9 rounded-full p-0.5 transition ${checked ? 'bg-[#C9A45C]' : 'bg-[#242424]'}`}><span className={`block h-4 w-4 rounded-full bg-white transition ${checked ? 'translate-x-4' : ''}`} /></span>
+    <span className={`h-5 w-9 rounded-full p-0.5 transition ${checked ? 'bg-[#C9A45C]' : 'bg-[#242424]'}`}><span className={`block h-4 w-4 rounded-full bg-[#111111] transition ${checked ? 'translate-x-4' : ''}`} /></span>
   </button>;
 }
 
