@@ -6,13 +6,13 @@ export default function AdminStatCardTest() {
   const { status, data, error } = useAdminOverviewStats(30);
 
   return (
-    <main className="min-h-screen bg-[#F6F7F5] px-6 py-10 text-[#111827]">
+    <main className="min-h-screen bg-[#0D0D0D] px-6 py-10 text-[#F5F5DC]">
       <div className="mx-auto max-w-6xl">
         <div className="mb-8">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#173D32]/70">
             Admin Overview
           </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-[-0.03em] text-[#111827]">
+          <h1 className="mt-2 text-3xl font-semibold tracking-[-0.03em] text-[#F5F5DC]">
             StatCard — données réelles
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#6B7280]">
@@ -22,7 +22,7 @@ export default function AdminStatCardTest() {
         </div>
 
         {status === 'error' ? (
-          <div className="mb-6 rounded-2xl border border-[#FECACA] bg-[#FEF2F2] p-5 text-sm text-[#B91C1C]">
+          <div className="mb-6 rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-5 text-sm text-[#F5F5DC]">
             {error}
           </div>
         ) : null}
