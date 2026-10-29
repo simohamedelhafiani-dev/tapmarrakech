@@ -58,7 +58,7 @@ export default function EstablishmentsSection({
 
   return (
     <div className="space-y-7">
-      <div className="relative overflow-hidden rounded-[28px] border border-ink/5 bg-forest p-6 text-white shadow-[0_18px_60px_rgba(23,61,50,0.14)] sm:p-8">
+      <div className="relative overflow-hidden rounded-[28px] border border-[#D4AF37]/20 bg-forest p-6 text-white shadow-[0_18px_60px_rgba(23,61,50,0.14)] sm:p-8">
         <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-gold/10 blur-2xl" />
         <div className="absolute -bottom-24 left-1/3 h-48 w-48 rounded-full bg-white/5 blur-3xl" />
 
@@ -80,7 +80,7 @@ export default function EstablishmentsSection({
           <button
             type="button"
             onClick={onAdd}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-forest transition hover:bg-[#f7f7f3]"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#111111] px-5 py-3 text-sm font-semibold text-forest transition hover:bg-[#111111]"
           >
             <Plus size={16} />
             Ajouter un établissement
@@ -89,7 +89,7 @@ export default function EstablishmentsSection({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded-2xl border border-ink/5 bg-white p-4 shadow-soft">
+        <div className="rounded-2xl border border-[#D4AF37]/20 bg-[#111111] p-4 shadow-soft">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink/35">
               Total
@@ -113,7 +113,7 @@ export default function EstablishmentsSection({
           </p>
         </div>
 
-        <div className="rounded-2xl border border-gold/20 bg-[#fdf9ef] p-4 shadow-soft">
+        <div className="rounded-2xl border border-gold/20 bg-[#111111] p-4 shadow-soft">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink/40">
               Vue
@@ -137,7 +137,7 @@ export default function EstablishmentsSection({
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Rechercher un établissement..."
-            className="h-12 w-full rounded-2xl border border-ink/8 bg-white pl-11 pr-4 text-sm outline-none shadow-sm transition focus:border-forest/25 focus:ring-4 focus:ring-forest/5"
+            className="h-12 w-full rounded-2xl border border-[#D4AF37]/20 bg-[#111111] pl-11 pr-4 text-sm outline-none shadow-sm transition focus:border-forest/25 focus:ring-4 focus:ring-forest/5"
           />
         </div>
 
@@ -156,7 +156,7 @@ export default function EstablishmentsSection({
                 'rounded-xl border px-3 py-2 text-[11px] font-semibold transition',
                 subscriptionFilter === value
                   ? 'border-forest bg-forest text-white'
-                  : 'border-ink/10 bg-white text-ink/55 hover:border-forest/20 hover:text-forest',
+                  : 'border-[#D4AF37]/20 bg-[#111111] text-ink/55 hover:border-forest/20 hover:text-forest',
               ].join(' ')}
             >
               {label}
@@ -177,12 +177,12 @@ export default function EstablishmentsSection({
           {[1, 2, 3, 4].map((item) => (
             <div
               key={item}
-              className="h-52 animate-pulse rounded-[26px] border border-ink/5 bg-white"
+              className="h-52 animate-pulse rounded-[26px] border border-[#D4AF37]/20 bg-[#111111]"
             />
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-ink/10 bg-white p-14 text-center shadow-soft">
+        <div className="rounded-3xl border border-dashed border-[#D4AF37]/20 bg-[#111111] p-14 text-center shadow-soft">
           <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-forest/5 text-forest">
             <Building2 size={24} />
           </div>
