@@ -1064,7 +1064,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                       aria-hidden="true"
                       className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${referral.enabled ? 'bg-[#C9A45C]' : 'bg-[#444444]'}`}
                     >
-                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${referral.enabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-[#111111] shadow transition-transform ${referral.enabled ? 'translate-x-6' : 'translate-x-1'}`} />
                     </span>
                   </button>
                 </div>
