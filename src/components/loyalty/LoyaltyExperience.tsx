@@ -97,7 +97,7 @@ export function LoyaltyHeader({ config }: { config: LoyaltyExperienceConfig }) {
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
             {config.logoUrl ? (
-              <img src={config.logoUrl} alt="" className="h-14 w-14 shrink-0 rounded-2xl bg-white object-contain p-1.5 shadow-lg" />
+              <img src={config.logoUrl} alt="" className="h-14 w-14 shrink-0 rounded-2xl bg-[#111111] object-contain p-1.5 shadow-lg" />
             ) : (
               <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl border border-white/20 bg-white/10 text-sm font-bold">
                 {config.establishmentName.slice(0, 2).toUpperCase()}
@@ -276,7 +276,7 @@ export function LoyaltyReward({ config }: { config: LoyaltyExperienceConfig }) {
         </Section>
 
         {stampClaimQr && <div className="fixed inset-0 z-[100] grid place-items-center bg-black/70 p-4" onClick={closeClaim}>
-          <div className="w-full max-w-sm rounded-[28px] bg-white p-6 text-[#17201c] shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-sm rounded-[28px] bg-[#111111] p-6 text-[#17201c] shadow-2xl" onClick={e => e.stopPropagation()}>
             <p className="text-[9px] font-bold uppercase tracking-[.2em] text-[#D3A84C]">Cadeau fidélité</p>
             <h3 className="mt-1 text-xl font-bold">{reward || 'Cadeau fidélité'}</h3>
             <div className="mt-5 rounded-2xl bg-[#f7f7f3] p-5 text-center"><QRCodeImage value={stampClaimQr}/><p className="mt-3 text-[10px] font-semibold uppercase tracking-[.16em] text-black/45">Présentez ce QR au responsable</p><p className="mt-2 text-[10px] text-black/35">Valable 5 minutes · utilisable une seule fois</p></div>
@@ -309,9 +309,9 @@ export function LoyaltyReward({ config }: { config: LoyaltyExperienceConfig }) {
       ) : null}
 
       {selectedReward && <div className="fixed inset-0 z-[100] grid place-items-center bg-black/70 p-4" onClick={closeClaim}>
-        <div className="w-full max-w-sm rounded-[28px] bg-white p-6 text-[#17201c] shadow-2xl" onClick={e => e.stopPropagation()}>
-          <div className="flex items-start justify-between gap-3"><div><p className="text-[9px] font-bold uppercase tracking-[.2em] text-[#D3A84C]">Récompense</p><h3 className="mt-1 text-xl font-bold">{selectedReward.name}</h3><p className="mt-1 text-xs text-black/45">{selectedReward.points_required} points seront déduits lors de la validation.</p></div><button type="button" onClick={closeClaim} className="rounded-xl p-2 text-black/35"><X size={18}/></button></div>
-          {claiming ? <div className="grid place-items-center py-12"><div className="h-8 w-8 animate-spin rounded-full border-2 border-[#173D32] border-t-transparent"/><p className="mt-3 text-xs text-black/45">Génération du QR…</p></div>
+        <div className="w-full max-w-sm rounded-[28px] bg-[#111111] p-6 text-[#17201c] shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="flex items-start justify-between gap-3"><div><p className="text-[9px] font-bold uppercase tracking-[.2em] text-[#D3A84C]">Récompense</p><h3 className="mt-1 text-xl font-bold">{selectedReward.name}</h3><p className="mt-1 text-xs text-[#F5F5DC]/45">{selectedReward.points_required} points seront déduits lors de la validation.</p></div><button type="button" onClick={closeClaim} className="rounded-xl p-2 text-[#F5F5DC]/35"><X size={18}/></button></div>
+          {claiming ? <div className="grid place-items-center py-12"><div className="h-8 w-8 animate-spin rounded-full border-2 border-[#173D32] border-t-transparent"/><p className="mt-3 text-xs text-[#F5F5DC]/45">Génération du QR…</p></div>
           : claimQr ? <div className="mt-5 rounded-2xl bg-[#f7f7f3] p-5 text-center"><QRCodeImage value={claimQr}/><p className="mt-3 text-[10px] font-semibold uppercase tracking-[.16em] text-black/45">Présentez ce QR au responsable</p><p className="mt-2 text-[10px] text-black/35">Valable 2 minutes · utilisable une seule fois</p></div>
           : claimError ? <div className="mt-5 rounded-2xl bg-red-50 p-4 text-center text-xs text-red-700">{claimError}</div> : null}
           <button type="button" onClick={closeClaim} disabled={claiming} className="mt-4 w-full rounded-xl bg-[#173D32] py-3.5 text-sm font-semibold text-white disabled:opacity-50">Fermer</button>
@@ -324,7 +324,7 @@ export function LoyaltyReward({ config }: { config: LoyaltyExperienceConfig }) {
 function QRCodeImage({ value }: { value: string }) {
   const [src, setSrc] = useState('');
   useEffect(() => { void QRCode.toDataURL(value, { width: 360, margin: 2 }).then(setSrc); }, [value]);
-  return src ? <img src={src} alt="QR de validation" className="mx-auto h-56 w-56 rounded-xl bg-white p-3" /> : <div className="mx-auto h-56 w-56 animate-pulse rounded-xl bg-white/70"/>;
+  return src ? <img src={src} alt="QR de validation" className="mx-auto h-56 w-56 rounded-xl bg-[#111111] p-3" /> : <div className="mx-auto h-56 w-56 animate-pulse rounded-xl bg-white/70"/>;
 }
 export function LoyaltyBenefits({ config }: { config: LoyaltyExperienceConfig }) {
   if (!config.benefits?.length) return null;
@@ -338,7 +338,7 @@ export function LoyaltyOffers({ config }: { config: LoyaltyExperienceConfig }) {
 
 export function LoyaltyHistory({ config }: { config: LoyaltyExperienceConfig }) {
   if (!config.history?.length) return null;
-  return <Section title="Votre activité" eyebrow="Historique"><div className="mt-3 space-y-2">{config.history.slice(0,5).map(h => <div key={h.id} className="flex items-center justify-between rounded-2xl bg-white p-3.5"><div className="flex min-w-0 items-center gap-3"><div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl" style={{background:config.secondaryColor+'20',color:config.primaryColor}}><History size={15}/></div><div className="min-w-0"><p className="truncate text-xs font-medium">{h.title}</p><p className="mt-0.5 text-[10px] opacity-45">{h.date}</p></div></div><span className="ml-3 shrink-0 text-[10px] font-bold" style={{color:h.points && h.points < 0 ? '#b42318' : config.primaryColor}}>{h.points ? (h.points > 0 ? '+' : '') + h.points + ' pts' : 'Visite'}</span></div>)}</div></Section>;
+  return <Section title="Votre activité" eyebrow="Historique"><div className="mt-3 space-y-2">{config.history.slice(0,5).map(h => <div key={h.id} className="flex items-center justify-between rounded-2xl bg-[#111111] p-3.5"><div className="flex min-w-0 items-center gap-3"><div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl" style={{background:config.secondaryColor+'20',color:config.primaryColor}}><History size={15}/></div><div className="min-w-0"><p className="truncate text-xs font-medium">{h.title}</p><p className="mt-0.5 text-[10px] opacity-45">{h.date}</p></div></div><span className="ml-3 shrink-0 text-[10px] font-bold" style={{color:h.points && h.points < 0 ? '#b42318' : config.primaryColor}}>{h.points ? (h.points > 0 ? '+' : '') + h.points + ' pts' : 'Visite'}</span></div>)}</div></Section>;
 }
 
 export function LoyaltyFooter({ config }: { config: LoyaltyExperienceConfig }) {
@@ -356,7 +356,7 @@ export function LoyaltyFooter({ config }: { config: LoyaltyExperienceConfig }) {
       <button type="button" onClick={() => window.alert('Utilisez le menu de votre navigateur pour ajouter cette carte à votre écran d’accueil.')} className="flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-[10px] font-semibold text-white shadow-sm" style={{background:config.primaryColor}}><WalletCards size={15}/> Ajouter au téléphone</button>
     </div>
     {open && <div className="fixed inset-0 z-50 grid place-items-end bg-black/45 p-3 sm:place-items-center sm:p-6" role="dialog" aria-modal="true">
-      <div className="w-full max-w-sm rounded-[28px] bg-white p-5 shadow-2xl">
+      <div className="w-full max-w-sm rounded-[28px] bg-[#111111] p-5 shadow-2xl">
         <div className="flex items-center justify-between"><div><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/40">Présenter ma carte</p><h3 className="mt-1 text-lg font-semibold text-ink">Scannez ce QR code</h3></div><button type="button" onClick={() => setOpen(false)} className="rounded-full bg-ink/5 p-2"><X size={16}/></button></div>
         <div className="mt-5 grid place-items-center rounded-3xl bg-[#f7f7f3] p-5">{qr ? <img src={qr} alt="QR code de fidélité" className="h-64 w-64 rounded-2xl bg-white p-3" /> : <div className="h-64 w-64 animate-pulse rounded-2xl bg-black/5" />}</div>
         <p className="mt-4 text-center text-xs text-ink/45">Présentez votre écran au personnel pour enregistrer votre visite ou votre achat.</p>
@@ -402,7 +402,7 @@ function SectorHero({ config, sector }: { config: LoyaltyExperienceConfig; secto
         <div className="relative flex min-h-[250px] flex-col justify-between p-5 sm:p-6">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">
-              {config.logoUrl ? <img src={config.logoUrl} alt="" className="h-12 w-12 rounded-2xl bg-white object-contain p-1.5 shadow-xl" /> : <div className="grid h-12 w-12 place-items-center rounded-2xl bg-white/15 text-sm font-bold">{config.establishmentName.slice(0,2).toUpperCase()}</div>}
+              {config.logoUrl ? <img src={config.logoUrl} alt="" className="h-12 w-12 rounded-2xl bg-[#111111] object-contain p-1.5 shadow-xl" /> : <div className="grid h-12 w-12 place-items-center rounded-2xl bg-white/15 text-sm font-bold">{config.establishmentName.slice(0,2).toUpperCase()}</div>}
               <div><p className="text-sm font-semibold">{config.establishmentName}</p><p className="mt-1 text-[9px] uppercase tracking-[.2em] opacity-65">{label}</p></div>
             </div>
             <span className="rounded-full border border-white/20 bg-black/15 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-wider backdrop-blur"><Sparkles size={10} className="mr-1 inline" /> Gold</span>
@@ -423,7 +423,7 @@ function SectorHero({ config, sector }: { config: LoyaltyExperienceConfig; secto
         <div className="absolute -right-16 -top-20 h-48 w-48 rounded-full opacity-15" style={{ background: config.secondaryColor }} />
         <div className="relative flex items-center justify-between gap-4">
           <div className="flex min-w-0 items-center gap-3">
-            {config.logoUrl ? <img src={config.logoUrl} alt="" className="h-11 w-11 rounded-xl bg-white object-contain p-1.5" /> : <div className="grid h-11 w-11 place-items-center rounded-xl bg-white/10 text-xs font-bold">{config.establishmentName.slice(0,2).toUpperCase()}</div>}
+            {config.logoUrl ? <img src={config.logoUrl} alt="" className="h-11 w-11 rounded-xl bg-[#111111] object-contain p-1.5" /> : <div className="grid h-11 w-11 place-items-center rounded-xl bg-white/10 text-xs font-bold">{config.establishmentName.slice(0,2).toUpperCase()}</div>}
             <div className="min-w-0"><p className="truncate text-sm font-semibold">{config.establishmentName}</p><p className="mt-1 text-[9px] uppercase tracking-[.2em] opacity-55">{sector === 'cafe' ? 'Coffee club' : 'Club gourmand'}</p></div>
           </div>
           <span className="rounded-full bg-white/10 px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider">Member</span>
@@ -443,7 +443,7 @@ function SectorHero({ config, sector }: { config: LoyaltyExperienceConfig; secto
         <div className="absolute inset-0 bg-black/25" />
         <div className="relative flex min-h-[180px] flex-col justify-between">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">{config.logoUrl && <img src={config.logoUrl} alt="" className="h-11 w-11 rounded-full bg-white object-contain p-1.5" />}<div><p className="text-sm font-semibold">{config.establishmentName}</p><p className="text-[9px] uppercase tracking-[.2em] opacity-60">{sector === 'spa' ? 'Wellness' : 'Beauty'}</p></div></div>
+            <div className="flex items-center gap-3">{config.logoUrl && <img src={config.logoUrl} alt="" className="h-11 w-11 rounded-full bg-[#111111] object-contain p-1.5" />}<div><p className="text-sm font-semibold">{config.establishmentName}</p><p className="text-[9px] uppercase tracking-[.2em] opacity-60">{sector === 'spa' ? 'Wellness' : 'Beauty'}</p></div></div>
             <Star size={19} fill={config.secondaryColor} style={{ color: config.secondaryColor }} />
           </div>
           <div><p className="text-[9px] uppercase tracking-[.22em] opacity-60">Votre statut</p><p className="mt-1 text-3xl font-light tracking-[-.03em]">{config.currentTier || 'Signature'}</p><p className="mt-1 text-xs opacity-70">{config.customerName || 'Client'} · membre privilégié</p></div>
@@ -459,7 +459,7 @@ function SectorHero({ config, sector }: { config: LoyaltyExperienceConfig; secto
         <div className="absolute inset-0 bg-gradient-to-b from-black/5 to-black/25" />
         <div className="relative">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">{config.logoUrl ? <img src={config.logoUrl} alt="" className="h-11 w-11 rounded-xl bg-white object-contain p-1.5" /> : <div className="grid h-11 w-11 place-items-center rounded-xl bg-white/10 text-xs font-bold">{config.establishmentName.slice(0,2).toUpperCase()}</div>}<div><p className="text-sm font-semibold">{config.establishmentName}</p><p className="text-[9px] uppercase tracking-[.2em] opacity-55">{sector === 'hotel' ? 'Guest club' : 'Travel club'}</p></div></div>
+            <div className="flex items-center gap-3">{config.logoUrl ? <img src={config.logoUrl} alt="" className="h-11 w-11 rounded-xl bg-[#111111] object-contain p-1.5" /> : <div className="grid h-11 w-11 place-items-center rounded-xl bg-white/10 text-xs font-bold">{config.establishmentName.slice(0,2).toUpperCase()}</div>}<div><p className="text-sm font-semibold">{config.establishmentName}</p><p className="text-[9px] uppercase tracking-[.2em] opacity-55">{sector === 'hotel' ? 'Guest club' : 'Travel club'}</p></div></div>
             <span className="text-[9px] font-bold uppercase tracking-[.18em]" style={{ color: config.secondaryColor }}>{config.currentTier || 'Gold'}</span>
           </div>
           <div className="mt-12"><p className="text-[9px] uppercase tracking-[.22em] opacity-50">Bienvenue, {config.customerName || 'Client'}</p><p className="mt-1 text-3xl font-semibold tracking-[-.03em]">{config.rewardName || 'Vos privilèges vous attendent'}</p></div>
@@ -476,10 +476,10 @@ function SectorProgress({ config, sector }: { config: LoyaltyExperienceConfig; s
     const current = config.visits ?? 0;
     const goal = Math.max(1, config.visitGoal ?? 8);
     const percent = clamp((current / goal) * 100, 0, 100);
-    return <div className="relative -mt-7 mx-4 rounded-[26px] bg-white p-5 shadow-[0_16px_40px_rgba(0,0,0,.10)]">
-      <div className="flex items-center justify-between"><div><p className="text-[9px] font-bold uppercase tracking-[.2em] text-black/40">Progression</p><p className="mt-1 text-4xl font-bold tracking-tight" style={{ color: config.primaryColor }}>{current}<span className="text-base text-black/25"> / {goal}</span></p></div><div className="grid h-14 w-14 place-items-center rounded-full border-4" style={{ borderColor: config.secondaryColor, background: `conic-gradient(${config.secondaryColor} ${percent}%, #eee ${percent}%)` }}><div className="grid h-9 w-9 place-items-center rounded-full bg-white text-[9px] font-bold">{Math.round(percent)}%</div></div></div>
+    return <div className="relative -mt-7 mx-4 rounded-[26px] bg-[#111111] p-5 shadow-[0_16px_40px_rgba(0,0,0,.10)]">
+      <div className="flex items-center justify-between"><div><p className="text-[9px] font-bold uppercase tracking-[.2em] text-[#F5F5DC]/40">Progression</p><p className="mt-1 text-4xl font-bold tracking-tight" style={{ color: config.primaryColor }}>{current}<span className="text-base text-[#F5F5DC]/25"> / {goal}</span></p></div><div className="grid h-14 w-14 place-items-center rounded-full border-4" style={{ borderColor: config.secondaryColor, background: `conic-gradient(${config.secondaryColor} ${percent}%, #eee ${percent}%)` }}><div className="grid h-9 w-9 place-items-center rounded-full bg-[#111111] text-[9px] font-bold">{Math.round(percent)}%</div></div></div>
       <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-black/7"><div className="h-full rounded-full transition-all duration-700" style={{ width: percent + '%', background: config.secondaryColor }} /></div>
-      <p className="mt-3 text-[10px] text-black/45">{config.progressLabel || `Encore ${Math.max(0, goal-current)} visites avant votre cadeau.`}</p>
+      <p className="mt-3 text-[10px] text-[#F5F5DC]/45">{config.progressLabel || `Encore ${Math.max(0, goal-current)} visites avant votre cadeau.`}</p>
     </div>;
   }
 
@@ -494,7 +494,7 @@ function SectorProgress({ config, sector }: { config: LoyaltyExperienceConfig; s
 
   if (sector === 'hotel' || sector === 'travel') {
     const points = config.pointsBalance ?? 0;
-    return <div className="mx-4 -mt-6 rounded-[24px] border border-white/10 bg-white p-5 shadow-[0_18px_45px_rgba(0,0,0,.12)]"><div className="grid grid-cols-2 gap-4"><div><p className="text-[9px] uppercase tracking-[.18em] text-black/35">{sector === 'hotel' ? 'Points séjour' : 'Points voyage'}</p><p className="mt-1 text-3xl font-semibold" style={{ color: config.primaryColor }}>{points.toLocaleString('fr-FR')}</p></div><div className="border-l border-black/8 pl-4"><p className="text-[9px] uppercase tracking-[.18em] text-black/35">Statut</p><p className="mt-1 text-xl font-semibold">{config.currentTier || 'Gold'}</p></div></div></div>;
+    return <div className="mx-4 -mt-6 rounded-[24px] border border-white/10 bg-[#111111] p-5 shadow-[0_18px_45px_rgba(0,0,0,.12)]"><div className="grid grid-cols-2 gap-4"><div><p className="text-[9px] uppercase tracking-[.18em] text-[#F5F5DC]/35">{sector === 'hotel' ? 'Points séjour' : 'Points voyage'}</p><p className="mt-1 text-3xl font-semibold" style={{ color: config.primaryColor }}>{points.toLocaleString('fr-FR')}</p></div><div className="border-l border-black/8 pl-4"><p className="text-[9px] uppercase tracking-[.18em] text-[#F5F5DC]/35">Statut</p><p className="mt-1 text-xl font-semibold">{config.currentTier || 'Gold'}</p></div></div></div>;
   }
 
   return <div className="px-4"><LoyaltyProgress config={config} /></div>;
@@ -547,7 +547,7 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
   }, [config.qrValue]);
 
   const qrBlock = qr ? (
-    <div className="rounded-[16px] bg-white p-2 shadow-xl">
+    <div className="rounded-[16px] bg-[#111111] p-2 shadow-xl">
       <img src={qr} alt="QR fidélité" className="h-full w-full rounded-[9px]" />
     </div>
   ) : (
@@ -618,9 +618,9 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
       <div className="relative mx-auto w-full max-w-[430px] overflow-hidden text-white shadow-[0_30px_90px_rgba(0,0,0,.35)]" style={{ borderRadius: config.borderRadius ?? 30 }}>
         {background}<div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/10 to-black/72" /><div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_15%,rgba(255,255,255,.18),transparent_28%)]" />
         <div className="relative z-10 flex h-full flex-col p-6 sm:p-7">
-          <div className="flex items-start justify-between"><div className="flex items-center gap-3">{config.logoUrl ? <img src={config.logoUrl} alt="" className="h-11 w-11 rounded-full border border-white/40 bg-white object-contain p-1.5 shadow" /> : <div className="grid h-11 w-11 place-items-center rounded-full border border-white/35 bg-white/15 text-[10px] font-bold">{establishment.slice(0,2).toUpperCase()}</div>}<div><p className="text-[13px] font-semibold">{establishment}</p><p className="mt-0.5 text-[7px] uppercase tracking-[.25em] text-white/60">WELLNESS MEMBERSHIP</p></div></div><span className="text-[9px] uppercase tracking-[.2em] text-white/70">VIP</span></div>
+          <div className="flex items-start justify-between"><div className="flex items-center gap-3">{config.logoUrl ? <img src={config.logoUrl} alt="" className="h-11 w-11 rounded-full border border-white/40 bg-[#111111] object-contain p-1.5 shadow" /> : <div className="grid h-11 w-11 place-items-center rounded-full border border-white/35 bg-white/15 text-[10px] font-bold">{establishment.slice(0,2).toUpperCase()}</div>}<div><p className="text-[13px] font-semibold">{establishment}</p><p className="mt-0.5 text-[7px] uppercase tracking-[.25em] text-white/60">WELLNESS MEMBERSHIP</p></div></div><span className="text-[9px] uppercase tracking-[.2em] text-white/70">VIP</span></div>
           <div className="mt-auto"><p className="text-[9px] uppercase tracking-[.24em] text-white/55">Bonjour, {member}</p><p className="mt-2 max-w-[320px] text-[38px] font-light leading-[.98] tracking-[-.045em]">{title}</p><p className="mt-3 max-w-[285px] text-[10px] leading-5 text-white/70">{subtitle}</p>
-            <div className="mt-6 rounded-[24px] border border-white/25 bg-white/[0.12] p-5 shadow-2xl backdrop-blur-2xl"><div className="flex items-end justify-between"><div><p className="text-[8px] uppercase tracking-[.2em] text-white/55">Votre solde</p><p className="mt-1 text-3xl font-semibold">{config.type === 'STAMP' ? visits + ' / ' + visitGoal : points.toLocaleString('fr-FR') + ' pts'}</p></div><div className="text-right"><p className="text-[8px] uppercase tracking-[.2em] text-white/55">Niveau</p><p className="mt-1 text-sm font-semibold">{config.currentTier || 'Gold'}</p></div></div>{config.type === 'STAMP' ? stampBlock : <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/20"><div className="h-full rounded-full bg-white" style={{ width: progress + '%' }} /></div>}</div>
+            <div className="mt-6 rounded-[24px] border border-white/25 bg-white/[0.12] p-5 shadow-2xl backdrop-blur-2xl"><div className="flex items-end justify-between"><div><p className="text-[8px] uppercase tracking-[.2em] text-white/55">Votre solde</p><p className="mt-1 text-3xl font-semibold">{config.type === 'STAMP' ? visits + ' / ' + visitGoal : points.toLocaleString('fr-FR') + ' pts'}</p></div><div className="text-right"><p className="text-[8px] uppercase tracking-[.2em] text-white/55">Niveau</p><p className="mt-1 text-sm font-semibold">{config.currentTier || 'Gold'}</p></div></div>{config.type === 'STAMP' ? stampBlock : <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/20"><div className="h-full rounded-full bg-[#111111]" style={{ width: progress + '%' }} /></div>}</div>
             {benefits.length > 0 && <div className="mt-5"><p className="text-[8px] font-bold uppercase tracking-[.2em] text-white/55">Vos avantages exclusifs</p><div className="mt-2 grid grid-cols-3 gap-2">{benefits.map((b,i)=><div key={b.title+i} className="rounded-[16px] border border-white/20 bg-white/[0.12] p-3 backdrop-blur-xl"><p className="text-[10px] font-semibold">{b.title}</p><p className="mt-1 line-clamp-2 text-[8px] leading-3.5 text-white/60">{b.description}</p></div>)}</div></div>}
             <div className="mt-5 flex flex-col items-center"><div className="h-[92px] w-[92px]">{actionBlock}</div><p className="mt-2 text-center text-[8px] uppercase tracking-[.16em] text-white/50">{actionCaption}</p><p className="mt-2 text-[9px] text-white/55">{member}</p></div>
           </div>
@@ -648,7 +648,7 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
     return (
       <div className="relative mx-auto w-full max-w-[430px] overflow-hidden text-white shadow-[0_30px_90px_rgba(0,0,0,.3)]" style={{ borderRadius: config.borderRadius ?? 30 }}>
         {background}<div className="absolute inset-0 bg-gradient-to-b from-black/15 via-black/10 to-black/78" />
-        <div className="relative z-10 flex h-full flex-col p-6 sm:p-7"><div className="flex items-center justify-between"><div className="flex items-center gap-3">{config.logoUrl ? <img src={config.logoUrl} alt="" className="h-11 w-11 rounded-xl bg-white object-contain p-1.5" /> : <div className="grid h-11 w-11 place-items-center rounded-xl bg-white/10 text-xs font-bold">{establishment.slice(0,2).toUpperCase()}</div>}<div><p className="font-serif text-xl">{establishment}</p><p className="mt-1 text-[8px] uppercase tracking-[.32em] text-white/65">HOSPITALITY CLUB</p></div></div><span className="rounded-full border border-white/25 bg-black/15 px-3 py-1.5 text-[8px] uppercase tracking-[.2em] backdrop-blur">Gold</span></div>
+        <div className="relative z-10 flex h-full flex-col p-6 sm:p-7"><div className="flex items-center justify-between"><div className="flex items-center gap-3">{config.logoUrl ? <img src={config.logoUrl} alt="" className="h-11 w-11 rounded-xl bg-[#111111] object-contain p-1.5" /> : <div className="grid h-11 w-11 place-items-center rounded-xl bg-white/10 text-xs font-bold">{establishment.slice(0,2).toUpperCase()}</div>}<div><p className="font-serif text-xl">{establishment}</p><p className="mt-1 text-[8px] uppercase tracking-[.32em] text-white/65">HOSPITALITY CLUB</p></div></div><span className="rounded-full border border-white/25 bg-black/15 px-3 py-1.5 text-[8px] uppercase tracking-[.2em] backdrop-blur">Gold</span></div>
           <div className="mt-auto"><p className="text-[9px] uppercase tracking-[.22em] text-white/55">Bonsoir, {member}</p><p className="mt-2 font-serif text-[38px] leading-[.95] tracking-[-.04em]">{title}</p><p className="mt-3 max-w-[280px] text-[10px] leading-5 text-white/70">{subtitle}</p>
             <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-[22px] border border-white/20 bg-white/15"><div className="bg-black/20 p-4 backdrop-blur-md"><p className="text-[8px] uppercase tracking-[.18em] text-white/45">Solde</p><p className="mt-1 text-2xl font-semibold">{config.type === 'STAMP' ? visits + '/' + visitGoal : points.toLocaleString('fr-FR')}</p></div><div className="bg-black/20 p-4 backdrop-blur-md"><p className="text-[8px] uppercase tracking-[.18em] text-white/45">Statut</p><p className="mt-1 text-2xl font-semibold">{config.currentTier || 'Gold'}</p></div></div>
             {benefits.length > 0 && <div className="mt-4 grid grid-cols-3 gap-2">{benefits.map((b,i)=><div key={b.title+i} className="rounded-[15px] border border-white/20 bg-white/[0.12] p-3 backdrop-blur-md"><p className="text-[10px] font-semibold">{b.title}</p><p className="mt-1 line-clamp-2 text-[8px] leading-3.5 text-white/55">{b.description}</p></div>)}</div>}
@@ -682,7 +682,7 @@ function PremiumWalletTemplate({ config }: { config: LoyaltyExperienceConfig }) 
       <div className="relative z-10 flex h-full flex-col p-4 sm:p-5">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            {config.logoUrl ? <img src={config.logoUrl} alt="" className="h-10 w-10 rounded-2xl border border-white/35 bg-white object-contain p-1.5 shadow-xl" /> : <div className="grid h-12 w-12 place-items-center rounded-2xl border border-white/30 bg-white/15 text-[10px] font-bold">{establishment.slice(0,2).toUpperCase()}</div>}
+            {config.logoUrl ? <img src={config.logoUrl} alt="" className="h-10 w-10 rounded-2xl border border-white/35 bg-[#111111] object-contain p-1.5 shadow-xl" /> : <div className="grid h-12 w-12 place-items-center rounded-2xl border border-white/30 bg-white/15 text-[10px] font-bold">{establishment.slice(0,2).toUpperCase()}</div>}
             <div><p className="text-sm font-semibold">{establishment}</p><p className="mt-1 text-[8px] uppercase tracking-[.28em] text-white/55">TABLE PRIVILÉGIÉE</p></div>
           </div>
           <span className="rounded-full border border-white/25 bg-black/20 px-3 py-1.5 text-[8px] font-bold uppercase tracking-[.16em] backdrop-blur-md">✦ GOLD</span>
