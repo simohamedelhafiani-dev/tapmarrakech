@@ -15,14 +15,14 @@ type MenuPreviewProps = {
 };
 
 const palettes = {
-  editorial: { page: 'bg-[#f5f1e8] text-[#24211c]', panel: 'bg-[#fffdf8]', accent: 'text-[#9c7a32]', muted: 'text-[#74776e]', line: 'border-[#24211c]/15', card: 'bg-white' },
+  editorial: { page: 'bg-[#f5f1e8] text-[#24211c]', panel: 'bg-[#fffdf8]', accent: 'text-[#9c7a32]', muted: 'text-[#74776e]', line: 'border-[#24211c]/15', card: 'bg-[#111111]' },
   luxury: { page: 'bg-[#11100d] text-[#f7f0df]', panel: 'bg-[#171510]', accent: 'text-[#d2b46a]', muted: 'text-white/60', line: 'border-[#c8a75d]/30', card: 'bg-[#1b1914]' },
-  cards: { page: 'bg-[#f7f7f3] text-[#24211c]', panel: 'bg-white', accent: 'text-[#a17d31]', muted: 'text-[#777b73]', line: 'border-black/10', card: 'bg-white' },
+  cards: { page: 'bg-[#111111] text-[#24211c]', panel: 'bg-[#111111]', accent: 'text-[#a17d31]', muted: 'text-[#777b73]', line: 'border-black/10', card: 'bg-[#111111]' },
   dark: { page: 'bg-[#0D0D0D] text-white', panel: 'bg-[#111111]', accent: 'text-[#d6b86b]', muted: 'text-white/60', line: 'border-white/15', card: 'bg-white/[0.06]' },
   onyx: { page: 'bg-[#050505] text-white', panel: 'bg-[#101010]', accent: 'text-[#E1C27A]', muted: 'text-white/60', line: 'border-white/15', card: 'bg-white/[0.05]' },
   'royal-gold': { page: 'bg-[#0B0906] text-[#FFF9E8]', panel: 'bg-[#17110A]', accent: 'text-[#E1C27A]', muted: 'text-[#FFF9E8]/60', line: 'border-[#E1C27A]/30', card: 'bg-[#17110A]' },
   'deep-ocean': { page: 'bg-[#06151B] text-[#F2FCFF]', panel: 'bg-[#0A222B]', accent: 'text-[#8ED9E8]', muted: 'text-white/60', line: 'border-[#8ED9E8]/25', card: 'bg-[#0A222B]' },
-  pearl: { page: 'bg-[#F5F1E8] text-[#1B1A17]', panel: 'bg-[#fffdf8]', accent: 'text-[#9A7A3C]', muted: 'text-[#74716a]', line: 'border-[#B59A67]/25', card: 'bg-white' },
+  pearl: { page: 'bg-[#F5F1E8] text-[#1B1A17]', panel: 'bg-[#fffdf8]', accent: 'text-[#9A7A3C]', muted: 'text-[#74716a]', line: 'border-[#B59A67]/25', card: 'bg-[#111111]' },
 } as const;
 
 export default function MenuPreview({
@@ -189,7 +189,7 @@ export default function MenuPreview({
         <div className="absolute inset-0 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" style={{ paddingBottom: activeDraft.navigation === 'app' ? 76 : 20 }}>
           <header className={`relative overflow-hidden ${isLuxuryPilot ? 'px-5 pb-7 pt-10 text-center border-b' : isBrunchPilot ? 'px-4 pb-5 pt-7 text-left' : isSushiPilot ? 'px-4 pb-5 pt-6 border-l-4' : isBeautyPilot ? 'px-5 pb-6 pt-8 text-center' : isStreetPilot ? 'px-4 pb-5 pt-6 border-b-4' : isBoutiquePilot ? 'px-4 pb-5 pt-7 text-center' : isEditorial ? (designVariant % 2 === 0 ? 'px-5 pb-5 pt-8 text-center' : 'px-4 pb-5 pt-8 text-left border-b') : isPriceList ? (designVariant % 2 === 0 ? 'px-4 pb-4 pt-7' : 'px-5 pb-6 pt-5') : isStacked ? 'p-3' : 'px-4 pb-4 pt-5'} ${palette.panel}`} style={{ backgroundColor: activeDraft.wallpaperUrl ? 'transparent' : activeDraft.themeColors.surface, color: activeDraft.themeColors.text, borderColor: activeDraft.themeColors.accent + '55', borderLeftColor: isSushiPilot ? activeDraft.themeColors.accent : undefined, borderBottomColor: isStreetPilot || isLuxuryPilot ? activeDraft.themeColors.accent : undefined }}>
             {isStacked && showPhotos && heroImage && <img src={heroImage} alt="" className="mb-3 h-32 w-full rounded-xl object-cover"/>}
-            {logoUrl && <div className="absolute left-1/2 top-3 z-10 grid h-11 w-11 -translate-x-1/2 place-items-center overflow-hidden rounded-lg border border-black/10 bg-white p-1 shadow-sm"><img src={logoUrl} alt="Logo de l’établissement" className="h-full w-full object-contain" /></div>}
+            {logoUrl && <div className="absolute left-1/2 top-3 z-10 grid h-11 w-11 -translate-x-1/2 place-items-center overflow-hidden rounded-lg border border-black/10 bg-[#111111] p-1 shadow-sm"><img src={logoUrl} alt="Logo de l’établissement" className="h-full w-full object-contain" /></div>}
             <div className={`flex gap-3 ${logoUrl ? 'pt-10' : ''} ${isLuxuryPilot || isBeautyPilot || isBoutiquePilot || isEditorial || isPriceList ? 'flex-col items-center text-center' : isStreetPilot ? 'items-end justify-between' : 'items-center justify-between'}`}>
               <div className={`min-w-0 ${isEditorial || isPriceList ? 'w-full' : 'flex-1'}`}>
                 <p className={`text-[9px] font-bold uppercase tracking-[0.22em] ${palette.accent}`}>{isLuxuryPilot ? 'Une expérience culinaire' : isBrunchPilot ? 'Brunch · Café · Douceur' : isSushiPilot ? '寿司 · Cuisine japonaise' : isBeautyPilot ? 'Rituels & soins' : isStreetPilot ? 'Street food · Fait pour vous' : isBoutiquePilot ? 'Sélection signature' : isService ? 'Prestations & tarifs' : isGrid ? 'Collections' : isEditorial ? 'Menu signature' : isPriceList ? 'La carte' : isStacked ? 'Nos spécialités' : isCompact ? 'Carte rapide' : 'Menu'}</p>
