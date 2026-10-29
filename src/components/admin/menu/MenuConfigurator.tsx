@@ -119,7 +119,7 @@ export default function MenuConfigurator({
                   active ? 'border-gold bg-gold/10 ring-1 ring-gold/20' : 'border-[#D4AF37]/20 bg-[#111111] hover:border-forest/20',
                 ].join(' ')}
               >
-                <div className={`mb-3 min-h-[86px] overflow-hidden rounded-xl border p-2.5 ${['dark', 'onyx', 'royal-gold', 'deep-ocean'].includes(template.family) ? 'border-white/10 bg-[#111111] text-white' : 'border-black/5 bg-[#f7f3ea] text-forest'}`}>
+                <div className={`mb-3 min-h-[86px] overflow-hidden rounded-xl border p-2.5 ${['dark', 'onyx', 'royal-gold', 'deep-ocean'].includes(template.family) ? 'border-white/10 bg-[#111111] text-[#F5F5DC]' : 'border-black/5 bg-[#f7f3ea] text-forest'}`}>
                   {['04_menu_luxe', '17_fine_dining'].includes(template.id) ? (
                     <div className="flex h-[86px] flex-col items-center justify-center bg-[#11100d] px-3 text-center text-[#f7f0df]"><div className="mb-2 h-px w-8 bg-[#d2b46a]" /><div className="font-serif text-[10px] tracking-[0.2em]">MENU SIGNATURE</div><div className="my-2 h-px w-12 bg-[#d2b46a]/60" /><div className="space-y-1"><div className="h-1 w-20 bg-white/50" /><div className="mx-auto h-1 w-12 bg-[#d2b46a]" /><div className="mx-auto h-1 w-16 bg-white/25" /></div></div>
                   ) : template.id === '11_brunch_cafe' ? (
@@ -129,7 +129,7 @@ export default function MenuConfigurator({
                   ) : template.id === '06_beauty_studio' ? (
                     <div className="h-[86px] bg-[#111111] px-3 py-2 text-[#F5F5DC]"><div className="text-center font-serif text-[10px]">Beauty rituals</div><div className="mx-auto my-2 h-px w-8 bg-[#bd8f8b]" />{[0, 1, 2].map(index => <div key={index} className="mb-2 flex items-center justify-between border-b border-[#bd8f8b]/30 pb-1"><div className="h-1 w-2/5 bg-[#694d4a]/30" /><div className="h-1 w-1/6 bg-[#bd8f8b]" /></div>)}</div>
                   ) : ['02_burger_house', '16_tacos'].includes(template.id) ? (
-                    <div className="h-[86px] bg-[#15130f] p-2 text-[#fff6dd]"><div className="font-black uppercase leading-none text-[#f2c94c]">{template.id === '02_burger_house' ? 'BURGER HOUSE' : 'TACOS CLUB'}</div><div className="my-2 h-px w-full bg-[#f2c94c]/60" /><div className="flex items-end justify-between"><div className="space-y-1"><div className="h-1 w-16 bg-white/70" /><div className="h-1 w-10 bg-white/30" /></div><div className="font-black text-[#f2c94c]">89 DH</div></div></div>
+                    <div className="h-[86px] bg-[#15130f] p-2 text-[#fff6dd]"><div className="font-black uppercase leading-none text-[#D4AF37]">{template.id === '02_burger_house' ? 'BURGER HOUSE' : 'TACOS CLUB'}</div><div className="my-2 h-px w-full bg-[#f2c94c]/60" /><div className="flex items-end justify-between"><div className="space-y-1"><div className="h-1 w-16 bg-white/70" /><div className="h-1 w-10 bg-white/30" /></div><div className="font-black text-[#D4AF37]">89 DH</div></div></div>
                   ) : ['25_perfume', '26_jewelry'].includes(template.id) ? (
                     <div className="h-[86px] bg-[#111111] p-2 text-[#F5F5DC]"><div className="mb-2 text-center font-serif text-[9px] tracking-[0.16em]">{template.id === '25_perfume' ? 'PARFUMS' : 'COLLECTION'}</div><div className="grid grid-cols-3 gap-2">{[0, 1, 2].map(index => <div key={index} className="rounded-sm border border-[#b59a67]/50 bg-[#fffaf0] p-1"><div className={`h-7 ${index === 1 ? 'bg-[#c9b17c]/50' : 'bg-[#ded1b6]'}`} /><div className="mt-1 h-1 w-full bg-[#453b2b]/30" /><div className="mt-1 h-1 w-1/2 bg-[#b59a67]" /></div>)}</div></div>
                   ) : template.layout === 'product-grid' || template.layout === 'magazine-grid' ? (
@@ -190,7 +190,7 @@ export default function MenuConfigurator({
         </div>
         <div className="mt-4 rounded-xl border border-gold/20 bg-gradient-to-r from-gold/10 to-transparent p-3">
           <div className="flex items-center gap-3">
-            {logoUrl ? <img src={logoUrl} alt="Logo de l’établissement" className="h-11 w-11 rounded-lg border border-[#D4AF37]/20 bg-[#111111] object-contain p-1" /> : <div className="grid h-11 w-11 place-items-center rounded-lg border border-dashed border-[#D4AF37]/20 bg-[#111111] text-white/30"><ImagePlus size={18}/></div>}
+            {logoUrl ? <img src={logoUrl} alt="Logo de l’établissement" className="h-11 w-11 rounded-lg border border-[#D4AF37]/20 bg-[#111111] object-contain p-1" /> : <div className="grid h-11 w-11 place-items-center rounded-lg border border-dashed border-[#D4AF37]/20 bg-[#111111] text-[#F5F5DC]/30"><ImagePlus size={18}/></div>}
             <div className="min-w-0 flex-1">
               <p className="text-xs font-semibold text-forest">Palette de marque par IA</p>
               <p className="mt-1 text-[10px] leading-4 text-white/45">{logoUrl ? 'Analyse le logo et propose 4 couleurs harmonisées, avec un contraste lisible.' : 'Ajoute d’abord le logo dans les informations de ton établissement.'}</p>
