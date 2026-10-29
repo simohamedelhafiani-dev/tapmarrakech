@@ -790,7 +790,7 @@ export function DashboardLayout() {
                 </div>
                 <button type="button" onClick={() => setJoinQrOpen(false)} className="grid h-9 w-9 place-items-center rounded-full border border-[#242424] text-white/60 hover:text-white"><X size={16} /></button>
               </div>
-              <div className="mx-auto mt-6 w-fit rounded-3xl bg-[#111111] p-4">
+              <div className="mx-auto mt-6 w-fit rounded-3xl bg-white p-4">
                 <img src={joinQrUrl} alt="QR code pour créer une carte fidélité" className="h-64 w-64" />
               </div>
               <p className="mt-5 text-sm font-medium text-white">Scannez pour créer votre carte fidélité</p>
