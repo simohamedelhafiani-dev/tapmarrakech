@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   BarChart3,
+  BrainCircuit,
   Building2,
   Bell,
   Gift,
@@ -33,6 +34,12 @@ const links = [
     label: 'Vue d’ensemble',
     icon: LayoutDashboard,
     end: true,
+    feature: null,
+  },
+  {
+    to: '/dashboard/assistant-ia',
+    label: 'Assistant IA',
+    icon: BrainCircuit,
     feature: null,
   },
   {
