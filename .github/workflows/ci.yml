@@ -57,11 +57,15 @@ jobs:
 
       # pgTAP tests exclude the Supabase API/service containers; only PostgreSQL
       # is needed for local migrations and SQL tests.
-      - name: Preload PostgreSQL image from GHCR
-        timeout-minutes: 3
+      - name: Preload PostgreSQL image (GHCR with ECR fallback)
+        timeout-minutes: 5
         run: |
-          timeout 120s docker pull "ghcr.io/supabase/postgres:17.11.0.006"
-          docker tag "ghcr.io/supabase/postgres:17.11.0.006" "public.ecr.aws/supabase/postgres:17.11.0.006"
+          if timeout 120s docker pull "ghcr.io/supabase/postgres:17.11.0.006"; then
+            docker tag "ghcr.io/supabase/postgres:17.11.0.006" "public.ecr.aws/supabase/postgres:17.11.0.006"
+          else
+            echo "GHCR pull was throttled or unavailable; falling back to public ECR."
+            timeout 120s docker pull "public.ecr.aws/supabase/postgres:17.11.0.006"
+          fi
 
       - name: Start local Supabase stack
         # Tests only need the local Postgres schema. Keep the standard stack
@@ -71,11 +75,15 @@ jobs:
       # Supabase CLI pulls pg_prove from public ECR, which has intermittently
       # returned anonymous data-limit throttles. Preload the same public image
       # from GHCR (confirmed available in CI logs) and alias it to the expected tag.
-      - name: Preload pgTAP image from GHCR
-        timeout-minutes: 3
+      - name: Preload pgTAP image (GHCR with ECR fallback)
+        timeout-minutes: 5
         run: |
-          timeout 120s docker pull ghcr.io/supabase/pg_prove:3.36
-          docker tag ghcr.io/supabase/pg_prove:3.36 public.ecr.aws/supabase/pg_prove:3.36
+          if timeout 120s docker pull ghcr.io/supabase/pg_prove:3.36; then
+            docker tag ghcr.io/supabase/pg_prove:3.36 public.ecr.aws/supabase/pg_prove:3.36
+          else
+            echo "GHCR pull was throttled or unavailable; falling back to public ECR."
+            timeout 120s docker pull public.ecr.aws/supabase/pg_prove:3.36
+          fi
 
       - name: Run pgTAP database tests
         run: supabase test db
