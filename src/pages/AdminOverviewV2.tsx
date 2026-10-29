@@ -13,7 +13,7 @@ export default function AdminOverviewV2() {
   const stats = state.data;
 
   return (
-    <main className="min-h-screen bg-[#f7f7f3] px-6 py-8 text-[#173d32] sm:px-8 lg:px-10">
+    <main className="min-h-screen bg-[#111111] px-6 py-8 text-[#173d32] sm:px-8 lg:px-10">
       <div className="mx-auto max-w-[1500px] space-y-8">
         <section className="relative overflow-hidden rounded-[32px] border border-white/80 bg-white/75 p-8 shadow-[0_20px_60px_rgba(23,61,50,0.08)] backdrop-blur-xl sm:p-10">
           <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[#d3a84c]/10 blur-3xl" />
