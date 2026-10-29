@@ -40,6 +40,11 @@ CREATE INDEX IF NOT EXISTS menu_items_establishment_category_order_idx
 CREATE INDEX IF NOT EXISTS menu_items_active_idx
   ON public.menu_items(establishment_id, active);
 
+-- The original profiles table may predate role-based admin policies. Ensure
+-- fresh local/test databases have the column used by the admin policies.
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS role text NOT NULL DEFAULT 'user';
+
 ALTER TABLE public.menu_categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.menu_items ENABLE ROW LEVEL SECURITY;
 
@@ -81,12 +86,18 @@ CREATE POLICY "menu_categories_responsible_all"
   FOR ALL
   TO authenticated
   USING (
-    public.user_owns_establishment(establishment_id)
-    OR public.is_establishment_responsible(establishment_id)
+    EXISTS (
+      SELECT 1 FROM public.establishments e
+      WHERE e.id = menu_categories.establishment_id
+        AND e.user_id = auth.uid()
+    )
   )
   WITH CHECK (
-    public.user_owns_establishment(establishment_id)
-    OR public.is_establishment_responsible(establishment_id)
+    EXISTS (
+      SELECT 1 FROM public.establishments e
+      WHERE e.id = menu_categories.establishment_id
+        AND e.user_id = auth.uid()
+    )
   );
 
 DROP POLICY IF EXISTS "menu_items_public_select" ON public.menu_items;
@@ -134,12 +145,18 @@ CREATE POLICY "menu_items_responsible_all"
   FOR ALL
   TO authenticated
   USING (
-    public.user_owns_establishment(establishment_id)
-    OR public.is_establishment_responsible(establishment_id)
+    EXISTS (
+      SELECT 1 FROM public.establishments e
+      WHERE e.id = menu_items.establishment_id
+        AND e.user_id = auth.uid()
+    )
   )
   WITH CHECK (
-    public.user_owns_establishment(establishment_id)
-    OR public.is_establishment_responsible(establishment_id)
+    EXISTS (
+      SELECT 1 FROM public.establishments e
+      WHERE e.id = menu_items.establishment_id
+        AND e.user_id = auth.uid()
+    )
   );
 
 CREATE OR REPLACE FUNCTION public.update_menu_updated_at()
