@@ -488,7 +488,7 @@ export default function LoyaltyScanner() {
           <div className="relative overflow-hidden bg-[#050505] p-5 sm:p-6">
             <div className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full border border-[#C9A45C]/10" />
             <div className="relative flex items-center gap-3.5">
-              {context.establishment_logo_url ? <img src={context.establishment_logo_url} alt={context.establishment_name} className="h-12 w-12 shrink-0 rounded-2xl border border-[#C9A45C]/20 bg-white object-contain p-1.5" /> : <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-[#C9A45C]/20 bg-[#C9A45C]/10 text-[#C9A45C]"><Coins size={21} /></div>}
+              {context.establishment_logo_url ? <img src={context.establishment_logo_url} alt={context.establishment_name} className="h-12 w-12 shrink-0 rounded-2xl border border-[#C9A45C]/20 bg-[#111111] object-contain p-1.5" /> : <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-[#C9A45C]/20 bg-[#C9A45C]/10 text-[#C9A45C]"><Coins size={21} /></div>}
               <div className="min-w-0 flex-1"><p className="text-[9px] font-bold uppercase tracking-[.22em] text-[#C9A45C]">KELYANI · Fidélité</p><h1 className="mt-1 truncate text-base font-semibold text-white sm:text-lg">{context.establishment_name}</h1><p className="mt-1 text-[10px] text-white/35">Espace équipe · Scanner</p></div>
               <span className="hidden shrink-0 items-center gap-1.5 rounded-full border border-[#C9A45C]/15 bg-[#C9A45C]/5 px-2.5 py-1.5 text-[9px] font-bold text-[#E1C27A] sm:flex"><span className="h-1.5 w-1.5 rounded-full bg-[#C9A45C]" /> Actif</span>
             </div>
