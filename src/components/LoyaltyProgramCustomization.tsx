@@ -71,7 +71,7 @@ const baseDesign: Design = {
   primary_color: '#0B3327',
   secondary_color: '#D6B15A',
   background_color: '#111111',
-  text_color: '#FFFFFF',
+  text_color: '#F5F5DC',
   button_color: '#173D32',
   border_radius: 24,
   design_config: {
@@ -194,7 +194,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
           primary: c.primary || '#173D32',
           secondary: c.secondary || '#D3A84C',
           background: c.background || '#111111',
-          text: c.text || '#FFFFFF',
+          text: c.text || '#F5F5DC',
           radius: Number(c.radius || 28),
           mode: c.mode === 'STAMP' ? 'STAMP' : c.mode === 'POINTS_DISCOUNT' ? 'POINTS_DISCOUNT' : 'POINTS_REWARD',
           title: c.title || 'Votre fidélité, autrement.',
