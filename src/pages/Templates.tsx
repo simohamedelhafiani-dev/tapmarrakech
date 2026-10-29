@@ -50,7 +50,7 @@ const PAGE_PRESETS = [
       actions: { showCall: true, showWhatsapp: true, showDirections: true, showReviews: true },
       modules: { style: 'cards', showIcons: true },
       navigation: { style: 'bottom' },
-      theme: { primary: '#173F35', accent: '#C9A45C', background: '#F7F3EA', radius: 'xl' },
+      theme: { primary: '#111111', accent: '#D4AF37', background: '#0D0D0D', radius: 'xl' },
     },
   },
   {
@@ -61,18 +61,18 @@ const PAGE_PRESETS = [
       actions: { showCall: true, showWhatsapp: true, showDirections: true, showReviews: true },
       modules: { style: 'list', showIcons: false },
       navigation: { style: 'tabs' },
-      theme: { primary: '#173F35', accent: '#C9A45C', background: '#FFFFFF', radius: 'lg' },
+      theme: { primary: '#111111', accent: '#D4AF37', background: '#0D0D0D', radius: 'lg' },
     },
   },
 ];
 
 const LOYALTY_PRESETS = [
-  { label: 'Obsidian', config: { key: 'obsidian', primary: '#0A0A09', secondary: '#D6B15A', background: '#111111', text: '#FFFFFF', radius: 30, mode: 'QR', title: 'Bon goût. Belles rencontres.', subtitle: 'Votre fidélité mérite une expérience à part.', stampStyle: 'circles' } },
-  { label: 'Editorial', config: { key: 'editorial', primary: '#3B332B', secondary: '#C9A86A', background: '#F4EDE1', text: '#17130F', radius: 30, mode: 'QR', title: 'Des moments qui comptent.', subtitle: 'Une expérience pensée pour vous.', stampStyle: 'circles' } },
-  { label: 'Glass', config: { key: 'glass', primary: '#18372C', secondary: '#D8C28A', background: '#10251E', text: '#FFFFFF', radius: 30, mode: 'QR', title: 'Prendre soin de vous, toujours.', subtitle: 'Vos avantages évoluent avec vous.', stampStyle: 'circles' } },
-  { label: 'Titanium', config: { key: 'titanium', primary: '#11110F', secondary: '#D6B15A', background: '#10100F', text: '#FFFFFF', radius: 26, mode: 'QR', title: 'GOOD FOOD. BETTER PEOPLE.', subtitle: 'Elevate every visit.', stampStyle: 'squares' } },
-  { label: 'Hospitality', config: { key: 'hospitality', primary: '#3A2115', secondary: '#E2B66D', background: '#2B1B13', text: '#FFFFFF', radius: 30, mode: 'QR', title: 'Plus qu’un repas, une expérience.', subtitle: 'Saveurs. Partage. Souvenirs.', stampStyle: 'circles' } },
-  { label: 'Apple Wallet', config: { key: 'apple-wallet', primary: '#403A32', secondary: '#B9975B', background: '#F2EEE6', text: '#1B1A18', radius: 28, mode: 'QR', title: 'Beauty in every detail.', subtitle: 'Vos privilèges, toujours avec vous.', stampStyle: 'circles' } },
+  { label: 'Obsidian', config: { key: 'obsidian', primary: '#111111', secondary: '#D4AF37', background: '#0D0D0D', text: '#F5F5DC', radius: 30, mode: 'QR', title: 'Bon goût. Belles rencontres.', subtitle: 'Votre fidélité mérite une expérience à part.', stampStyle: 'circles' } },
+  { label: 'Editorial', config: { key: 'editorial', primary: '#111111', secondary: '#D4AF37', background: '#0D0D0D', text: '#F5F5DC', radius: 30, mode: 'QR', title: 'Des moments qui comptent.', subtitle: 'Une expérience pensée pour vous.', stampStyle: 'circles' } },
+  { label: 'Glass', config: { key: 'glass', primary: '#111111', secondary: '#D4AF37', background: '#0D0D0D', text: '#F5F5DC', radius: 30, mode: 'QR', title: 'Prendre soin de vous, toujours.', subtitle: 'Vos avantages évoluent avec vous.', stampStyle: 'circles' } },
+  { label: 'Titanium', config: { key: 'titanium', primary: '#111111', secondary: '#D4AF37', background: '#0D0D0D', text: '#F5F5DC', radius: 26, mode: 'QR', title: 'GOOD FOOD. BETTER PEOPLE.', subtitle: 'Elevate every visit.', stampStyle: 'squares' } },
+  { label: 'Hospitality', config: { key: 'hospitality', primary: '#111111', secondary: '#D4AF37', background: '#0D0D0D', text: '#F5F5DC', radius: 30, mode: 'QR', title: 'Plus qu’un repas, une expérience.', subtitle: 'Saveurs. Partage. Souvenirs.', stampStyle: 'circles' } },
+  { label: 'Apple Wallet', config: { key: 'apple-wallet', primary: '#111111', secondary: '#D4AF37', background: '#0D0D0D', text: '#F5F5DC', radius: 28, mode: 'QR', title: 'Beauty in every detail.', subtitle: 'Vos privilèges, toujours avec vous.', stampStyle: 'circles' } },
 ];
 
 const MENU_PRESETS = [
@@ -87,7 +87,7 @@ const MENU_PRESETS = [
       showPrices: true,
       showSearch: false,
       hero: { style: 'typographic', eyebrow: 'La carte', titleStyle: 'display' },
-      theme: { primary: '#173F35', accent: '#C9A45C', background: '#F3EEE2' },
+      theme: { primary: '#111111', accent: '#D4AF37', background: '#0D0D0D' },
     },
   },
   {
@@ -101,7 +101,7 @@ const MENU_PRESETS = [
       showPrices: true,
       showSearch: false,
       hero: { style: 'image', overlay: true },
-      theme: { primary: '#173F35', accent: '#C9A45C', background: '#F7F3EA' },
+      theme: { primary: '#111111', accent: '#D4AF37', background: '#0D0D0D' },
     },
   },
   {
@@ -115,7 +115,7 @@ const MENU_PRESETS = [
       showPrices: true,
       showSearch: false,
       hero: { style: 'image', fullBleed: true },
-      theme: { primary: '#173F35', accent: '#C9A45C', background: '#EBE5D8' },
+      theme: { primary: '#111111', accent: '#D4AF37', background: '#0D0D0D' },
     },
   },
   {
@@ -129,7 +129,7 @@ const MENU_PRESETS = [
       showPrices: true,
       showSearch: false,
       hero: { style: 'dark', accent: 'gold' },
-      theme: { primary: '#102B24', accent: '#C9A45C', background: '#102B24' },
+      theme: { primary: '#111111', accent: '#D4AF37', background: '#0D0D0D' },
     },
   },
 ];
@@ -927,7 +927,7 @@ export default function Templates() {
               <button onClick={() => setPreviewing(null)} className="rounded-xl border border-[#D4AF37]/20 p-2"><X size={18}/></button>
             </div>
             <div className="grid max-h-[calc(94vh-80px)] overflow-auto lg:grid-cols-[minmax(0,1fr)_380px]">
-              <div className="flex min-h-[620px] items-center justify-center bg-[#ebe7de] p-6 md:p-10">
+              <div className="flex min-h-[620px] items-center justify-center bg-[#0D0D0D] p-6 md:p-10">
                 {previewing.kind === 'loyalty' ? (
                   <div className="w-full max-w-[360px]">
                     <LoyaltyCardVisual
