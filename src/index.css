@@ -674,3 +674,104 @@ table {
   .kelyani-float-review { right:6px;top:15%; }
   .kelyani-float-chip { max-width:calc(100% - 12px); }
 }
+
+
+/* KELYANI BRAND ENFORCEMENT — global UI surfaces.
+   Keep the product interface within onyx/black and royal-gold tones.
+   Customer-uploaded images and explicitly customized loyalty-card artwork remain untouched. */
+:root, body, #root {
+  color-scheme: dark;
+  background-color: #0D0D0D;
+}
+#root [class~="bg-white"],
+#root [class~="bg-[#fffdf9]"],
+#root [class~="bg-[#f7f7f3]"],
+#root [class~="bg-[#fafaf7]"],
+#root [class~="bg-[#fdf9ef]"],
+#root [class~="bg-[#fff]"],
+#root [class~="bg-[#ffffff]"],
+#root [class*="bg-red-"],
+#root [class*="bg-rose-"],
+#root [class*="bg-orange-"],
+#root [class*="bg-amber-"],
+#root [class*="bg-yellow-"],
+#root [class*="bg-green-"],
+#root [class*="bg-emerald-"],
+#root [class*="bg-lime-"],
+#root [class*="bg-teal-"],
+#root [class*="bg-cyan-"],
+#root [class*="bg-sky-"],
+#root [class*="bg-blue-"],
+#root [class*="bg-indigo-"],
+#root [class*="bg-violet-"],
+#root [class*="bg-purple-"],
+#root [class*="bg-fuchsia-"],
+#root [class*="bg-pink-"] {
+  background-color: #141414 !important;
+  background-image: none !important;
+}
+#root [class*="text-red-"],
+#root [class*="text-rose-"],
+#root [class*="text-orange-"],
+#root [class*="text-amber-"],
+#root [class*="text-yellow-"],
+#root [class*="text-green-"],
+#root [class*="text-emerald-"],
+#root [class*="text-lime-"],
+#root [class*="text-teal-"],
+#root [class*="text-cyan-"],
+#root [class*="text-sky-"],
+#root [class*="text-blue-"],
+#root [class*="text-indigo-"],
+#root [class*="text-violet-"],
+#root [class*="text-purple-"],
+#root [class*="text-fuchsia-"],
+#root [class*="text-pink-"] {
+  color: #D4AF37 !important;
+}
+#root [class*="border-red-"],
+#root [class*="border-rose-"],
+#root [class*="border-orange-"],
+#root [class*="border-amber-"],
+#root [class*="border-yellow-"],
+#root [class*="border-green-"],
+#root [class*="border-emerald-"],
+#root [class*="border-lime-"],
+#root [class*="border-teal-"],
+#root [class*="border-cyan-"],
+#root [class*="border-sky-"],
+#root [class*="border-blue-"],
+#root [class*="border-indigo-"],
+#root [class*="border-violet-"],
+#root [class*="border-purple-"],
+#root [class*="border-fuchsia-"],
+#root [class*="border-pink-"] {
+  border-color: rgba(212,175,55,.28) !important;
+}
+#root [class*="from-red-"],
+#root [class*="from-green-"],
+#root [class*="from-blue-"],
+#root [class*="from-purple-"],
+#root [class*="via-red-"],
+#root [class*="via-green-"],
+#root [class*="via-blue-"],
+#root [class*="via-purple-"],
+#root [class*="to-red-"],
+#root [class*="to-green-"],
+#root [class*="to-blue-"],
+#root [class*="to-purple-"] {
+  --tw-gradient-from: rgba(212,175,55,.24) var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgba(212,175,55,.02) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+#root input, #root textarea, #root select {
+  color: #F5F5DC;
+  color-scheme: dark;
+}
+#root input::placeholder, #root textarea::placeholder {
+  color: rgba(245,245,220,.42);
+}
+#root option {
+  color: #F5F5DC;
+  background: #141414;
+}
