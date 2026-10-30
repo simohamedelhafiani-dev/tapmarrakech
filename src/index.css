@@ -775,3 +775,27 @@ table {
   color: #F5F5DC;
   background: #141414;
 }
+
+
+/* Normalize legacy light/dark accent surfaces found during the cross-screen audit. */
+#root [class*="bg-[#f"],
+#root [class*="bg-[#F"],
+#root [class*="bg-[#e"],
+#root [class*="bg-[#E"],
+#root [class*="bg-[#a"],
+#root [class*="bg-[#A"],
+#root [class*="bg-[#102B24]"],
+#root [class*="bg-[#180F0F]"] {
+  background-color: #141414 !important;
+  background-image: none !important;
+}
+#root [class*="text-[#a"],
+#root [class*="text-[#8b"],
+#root [class*="text-[#A"],
+#root [class*="text-[#8B"] {
+  color: #D4AF37 !important;
+}
+#root [class*="border-red-"],
+#root [class*="border-amber-"] {
+  border-color: rgba(212,175,55,.28) !important;
+}
