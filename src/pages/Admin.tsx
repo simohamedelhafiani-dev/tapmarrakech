@@ -700,7 +700,9 @@ export default function Admin() {
                 {showCreateEstablishmentForm && (
                   <CreateEstablishmentForm
                     close={() => setShowCreateEstablishmentForm(false)}
-                    reload={reloadEstablishmentList}
+                    reload={async () => {
+                      await Promise.all([reloadEstablishmentList(), loadEstablishments()]);
+                    }}
                     businessTypes={aiBusinessTypes}
                   />
                 )}
