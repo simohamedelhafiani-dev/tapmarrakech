@@ -37,8 +37,7 @@ BEGIN
   END LOOP;
 
   IF to_regclass('public.loyalty_admin_secrets') IS NOT NULL THEN
-    COMMENT ON TABLE public.loyalty_admin_secrets IS
-      'Service-managed secrets; direct anon/authenticated table privileges are revoked.';
+    EXECUTE 'COMMENT ON TABLE public.loyalty_admin_secrets IS ''Service-managed secrets; direct anon/authenticated table privileges are revoked.''';
   END IF;
 END
 $$;
