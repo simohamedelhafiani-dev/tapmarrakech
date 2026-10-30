@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
     if (action === 'list') {
       const [{ data: profiles, error: profilesError }, { data: staff, error: staffError }] = await Promise.all([
         adminClient.from('profiles').select('id, name, email, created_at').eq('role', 'responsible').order('created_at', { ascending: false }),
-        adminClient.from('establishment_staff').select('user_id').eq('role', 'MANAGER'),
+        adminClient.from('establishment_staff').select('user_id').eq('role', 'MANAGER').eq('active', true),
       ]);
       if (profilesError || staffError) return json({ success: false, error: 'Impossible de charger les comptes responsables.', details: profilesError?.message ?? staffError?.message }, 500);
       const assigned = new Set((staff ?? []).map((row) => row.user_id));
