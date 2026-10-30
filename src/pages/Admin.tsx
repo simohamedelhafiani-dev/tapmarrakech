@@ -2483,6 +2483,8 @@ function ResponsiblesSection({
         </select>
       </div>
 
+      <UnassignedResponsiblesPanel establishments={establishments} reload={reload} />
+
       {showForm && (
         <CreateStaffForm
           role="responsible"
@@ -2525,6 +2527,78 @@ function ResponsiblesSection({
         )}
       </div>
     </div>
+  );
+}
+
+function UnassignedResponsiblesPanel({ establishments, reload }: { establishments: Establishment[]; reload: () => Promise<void> }) {
+  const [accounts, setAccounts] = useState<Array<{ id: string; name: string | null; email: string | null; created_at: string }>>([]);
+  const [selected, setSelected] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
+  const [savingId, setSavingId] = useState<string | null>(null);
+  const [error, setError] = useState('');
+
+  const load = async () => {
+    setLoading(true);
+    setError('');
+    const { data, error: invokeError } = await supabase.functions.invoke('admin-manage-responsibles', { body: { action: 'list' } });
+    if (invokeError || !data?.success) {
+      setError(data?.error ?? invokeError?.message ?? 'Impossible de charger les comptes en attente.');
+      setAccounts([]);
+    } else {
+      setAccounts(data.responsibles ?? []);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => { void load(); }, []);
+
+  const assign = async (userId: string) => {
+    const establishmentId = selected[userId] || establishments[0]?.id || '';
+    if (!establishmentId) return;
+    setSavingId(userId);
+    const { data, error: invokeError } = await supabase.functions.invoke('admin-manage-responsibles', { body: { action: 'assign', user_id: userId, establishment_id: establishmentId } });
+    setSavingId(null);
+    if (invokeError || !data?.success) {
+      alert(data?.error ?? invokeError?.message ?? 'Attribution impossible.');
+      return;
+    }
+    await Promise.all([load(), reload()]);
+  };
+
+  return (
+    <section className="mb-6 rounded-3xl border border-[#C9A45C]/25 bg-gradient-to-br from-[#15120c] to-[#0b0b0b] p-5 sm:p-6">
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A45C]/70">Comptes inscrits</p>
+          <h3 className="mt-1 text-lg font-semibold text-[#E1C27A]">Responsables à attribuer</h3>
+          <p className="mt-1 text-xs text-white/45">Les comptes déjà créés qui n’ont pas encore d’établissement apparaissent ici.</p>
+        </div>
+        <button type="button" onClick={() => void load()} disabled={loading} className="rounded-xl border border-[#C9A45C]/25 px-3 py-2 text-xs font-semibold text-[#E1C27A] disabled:opacity-50">
+          {loading ? 'Actualisation…' : 'Actualiser'}
+        </button>
+      </div>
+      {error ? <p className="mt-4 rounded-xl border border-red-500/20 bg-red-500/5 p-3 text-xs text-red-300">{error}</p> :
+        loading ? <p className="mt-4 text-sm text-white/40">Chargement des comptes…</p> :
+        accounts.length === 0 ? <p className="mt-4 rounded-xl border border-white/5 bg-white/[0.02] p-4 text-sm text-white/45">Aucun compte responsable en attente d’attribution.</p> :
+        <div className="mt-4 space-y-3">
+          {accounts.map(account => (
+            <div key={account.id} className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-black/20 p-4 md:flex-row md:items-center md:justify-between">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-white">{account.name || 'Responsable sans nom'}</p>
+                <p className="truncate text-xs text-white/45">{account.email || 'E-mail non renseigné'}</p>
+              </div>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <select value={selected[account.id] ?? establishments[0]?.id ?? ''} onChange={event => setSelected(current => ({ ...current, [account.id]: event.target.value }))} className="min-w-[190px] rounded-xl border border-white/10 bg-[#080808] px-3 py-2.5 text-xs text-white">
+                  {establishments.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}
+                </select>
+                <button type="button" onClick={() => void assign(account.id)} disabled={savingId === account.id || establishments.length === 0} className="rounded-xl bg-[#C9A45C] px-4 py-2.5 text-xs font-bold text-black disabled:opacity-50">
+                  {savingId === account.id ? 'Attribution…' : 'Attribuer'}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>}
+    </section>
   );
 }
 

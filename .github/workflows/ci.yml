@@ -122,6 +122,7 @@ jobs:
         run: |
           deno check --no-lock --node-modules-dir=auto \
             supabase/functions/admin-update-staff-account/index.ts \
+            supabase/functions/admin-manage-responsibles/index.ts \
             supabase/functions/analyze-reviews/index.ts \
             supabase/functions/create-employee/index.ts \
             supabase/functions/create-staff-account/index.ts \
