@@ -60,11 +60,11 @@ export default function EstablishmentsSection({
     <div className="space-y-7">
       <div className="relative overflow-hidden rounded-[28px] border border-ink/5 bg-forest p-6 text-white shadow-[0_18px_60px_rgba(23,61,50,0.14)] sm:p-8">
         <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-gold/10 blur-2xl" />
-        <div className="absolute -bottom-24 left-1/3 h-48 w-48 rounded-full bg-white/5 blur-3xl" />
+        <div className="absolute -bottom-24 left-1/3 h-48 w-48 rounded-full bg-[#141414]/5 blur-3xl" />
 
         <div className="relative flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
           <div>
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/60">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#141414]/5 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/60">
               <Building2 size={12} />
               Portefeuille
             </div>
@@ -80,7 +80,7 @@ export default function EstablishmentsSection({
           <button
             type="button"
             onClick={onAdd}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-forest transition hover:bg-[#f7f7f3]"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#141414] px-5 py-3 text-sm font-semibold text-forest transition hover:bg-[#1A1A1A]"
           >
             <Plus size={16} />
             Ajouter un établissement
@@ -89,7 +89,7 @@ export default function EstablishmentsSection({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded-2xl border border-ink/5 bg-white p-4 shadow-soft">
+        <div className="rounded-2xl border border-ink/5 bg-[#141414] p-4 shadow-soft">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink/35">
               Total
@@ -100,7 +100,7 @@ export default function EstablishmentsSection({
           <p className="mt-1 text-[10px] text-ink/35">établissements gérés</p>
         </div>
 
-        <div className="rounded-2xl border border-forest/10 bg-forest/[0.035] p-4 shadow-soft">
+        <div className="rounded-2xl border border-forest/10 bg-[#141414] p-4 shadow-soft">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-forest/50">
               Abonnements
@@ -113,7 +113,7 @@ export default function EstablishmentsSection({
           </p>
         </div>
 
-        <div className="rounded-2xl border border-gold/20 bg-[#fdf9ef] p-4 shadow-soft">
+        <div className="rounded-2xl border border-gold/20 bg-[#1A1A1A] p-4 shadow-soft">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink/40">
               Vue
@@ -137,7 +137,7 @@ export default function EstablishmentsSection({
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Rechercher un établissement..."
-            className="h-12 w-full rounded-2xl border border-ink/8 bg-white pl-11 pr-4 text-sm outline-none shadow-sm transition focus:border-forest/25 focus:ring-4 focus:ring-forest/5"
+            className="h-12 w-full rounded-2xl border border-ink/8 bg-[#141414] pl-11 pr-4 text-sm outline-none shadow-sm transition focus:border-forest/25 focus:ring-4 focus:ring-forest/5"
           />
         </div>
 
@@ -156,7 +156,7 @@ export default function EstablishmentsSection({
                 'rounded-xl border px-3 py-2 text-[11px] font-semibold transition',
                 subscriptionFilter === value
                   ? 'border-forest bg-forest text-white'
-                  : 'border-ink/10 bg-white text-ink/55 hover:border-forest/20 hover:text-forest',
+                  : 'border-ink/10 bg-[#141414] text-ink/55 hover:border-forest/20 hover:text-forest',
               ].join(' ')}
             >
               {label}
@@ -166,23 +166,23 @@ export default function EstablishmentsSection({
       </div>
 
       {error ? (
-        <div className="rounded-3xl border border-red-100 bg-red-50 p-8 text-center">
-          <p className="text-sm font-semibold text-red-700">
+        <div className="rounded-3xl border border-[#D4AF37]/25 bg-[#141414] p-8 text-center">
+          <p className="text-sm font-semibold text-[#D4AF37]">
             Impossible de charger les établissements.
           </p>
-          <p className="mt-1 text-xs text-red-600/70">{error.message}</p>
+          <p className="mt-1 text-xs text-[#F5F5DC]/60">{error.message}</p>
         </div>
       ) : loading ? (
         <div className="grid gap-4 xl:grid-cols-2">
           {[1, 2, 3, 4].map((item) => (
             <div
               key={item}
-              className="h-52 animate-pulse rounded-[26px] border border-ink/5 bg-white"
+              className="h-52 animate-pulse rounded-[26px] border border-ink/5 bg-[#141414]"
             />
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-ink/10 bg-white p-14 text-center shadow-soft">
+        <div className="rounded-3xl border border-dashed border-ink/10 bg-[#141414] p-14 text-center shadow-soft">
           <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-forest/5 text-forest">
             <Building2 size={24} />
           </div>

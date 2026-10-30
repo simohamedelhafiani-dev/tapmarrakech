@@ -22,7 +22,7 @@ export default function EstablishmentCard({
   const price = formatPrice(subscription?.price_mad ?? null, subscription?.interval ?? null);
 
   return (
-    <article className="group relative overflow-hidden rounded-[26px] border border-ink/6 bg-white p-5 text-left shadow-[0_8px_30px_rgba(15,23,42,0.045)] transition duration-300 hover:-translate-y-1 hover:border-forest/15 hover:shadow-[0_18px_45px_rgba(23,61,50,0.12)] sm:p-6">
+    <article className="group relative overflow-hidden rounded-[26px] border border-ink/6 bg-[#141414] p-5 text-left shadow-[0_8px_30px_rgba(15,23,42,0.045)] transition duration-300 hover:-translate-y-1 hover:border-forest/15 hover:shadow-[0_18px_45px_rgba(23,61,50,0.12)] sm:p-6">
       <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-forest via-forest/70 to-gold opacity-70" />
 
       <div className="flex items-start justify-between gap-4">
@@ -31,12 +31,12 @@ export default function EstablishmentCard({
             <img
               src={establishment.logo_url}
               alt={establishment.name}
-              className="h-14 w-14 shrink-0 rounded-2xl border border-ink/5 bg-[#f7f7f3] object-cover"
+              className="h-14 w-14 shrink-0 rounded-2xl border border-ink/5 bg-[#1A1A1A] object-cover"
             />
           ) : (
-            <div className="relative grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-forest text-white shadow-lg shadow-forest/10">
+            <div className="relative grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[#0D0D0D] text-[#D4AF37] shadow-lg shadow-forest/10">
               <Building2 size={21} strokeWidth={1.8} />
-              <span className="absolute -bottom-1 -right-1 grid h-5 w-5 place-items-center rounded-full border-2 border-white bg-gold">
+              <span className="absolute -bottom-1 -right-1 grid h-5 w-5 place-items-center rounded-full border-2 border-[#D4AF37] bg-gold">
                 <Sparkles size={9} className="text-forest" />
               </span>
             </div>
@@ -62,7 +62,7 @@ export default function EstablishmentCard({
         <button
           type="button"
           onClick={() => onOpen(establishment)}
-          className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-ink/8 bg-[#fafaf7] text-ink/35 transition hover:border-forest/10 hover:bg-forest hover:text-white"
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-ink/8 bg-[#1A1A1A] text-ink/35 transition hover:border-forest/10 hover:bg-forest hover:text-[#F5F5DC]"
           aria-label={`Ouvrir ${establishment.name}`}
         >
           →
@@ -75,9 +75,9 @@ export default function EstablishmentCard({
             className={[
               'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold',
               isActive
-                ? 'bg-forest/7 text-forest'
+                ? 'bg-[#D4AF37]/12 text-[#D4AF37]'
                 : isTrial
-                  ? 'bg-gold/15 text-[#8b6a20]'
+                  ? 'bg-gold/15 text-[#D4AF37]'
                   : 'bg-ink/5 text-ink/55',
             ].join(' ')}
           >
@@ -91,7 +91,7 @@ export default function EstablishmentCard({
           </span>
         )}
 
-        <span className="rounded-full bg-[#f7f7f3] px-2.5 py-1 text-[10px] text-ink/35">
+        <span className="rounded-full bg-[#1A1A1A] px-2.5 py-1 text-[10px] text-ink/35">
           /{establishment.slug}
         </span>
       </div>
