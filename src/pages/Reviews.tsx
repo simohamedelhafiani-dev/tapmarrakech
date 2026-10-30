@@ -464,7 +464,7 @@ export default function Reviews() {
 
       {/* ANALYSE IA */}
       {aiAnalysis && (
-        <div className="mb-7 overflow-hidden rounded-3xl border border-ink/5 bg-white shadow-soft">
+        <div className="mb-7 overflow-hidden rounded-3xl border border-ink/5 bg-[var(--kelyani-panel)] shadow-soft">
           {/* ENTÊTE IA */}
           <div className="bg-forest p-6 text-white md:p-8">
             <div className="flex flex-col justify-between gap-5 md:flex-row md:items-center">
@@ -559,7 +559,7 @@ export default function Reviews() {
               </p>
 
               <div className="mt-4 flex flex-wrap gap-2">
-                <span className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-forest shadow-sm">
+                <span className="rounded-full bg-[var(--kelyani-panel)] px-3 py-1.5 text-xs font-semibold text-forest shadow-sm">
                   Sentiment :{' '}
                   {aiAnalysis.sentiment}
                 </span>
@@ -664,7 +664,7 @@ export default function Reviews() {
                           </p>
 
                           <div className="flex flex-wrap gap-2">
-                            <span className="rounded-full bg-white px-2.5 py-1 text-[11px] text-ink/55">
+                            <span className="rounded-full bg-[var(--kelyani-panel)] px-2.5 py-1 text-[11px] text-ink/55">
                               {issue.frequency}
                             </span>
 
@@ -708,7 +708,7 @@ export default function Reviews() {
                     (recommendation, index) => (
                       <div
                         key={index}
-                        className="rounded-xl bg-white p-4 shadow-sm"
+                        className="rounded-xl bg-[var(--kelyani-panel)] p-4 shadow-sm"
                       >
                         <div className="flex gap-3">
                           <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-forest text-xs font-semibold text-white">
@@ -776,7 +776,7 @@ export default function Reviews() {
       </section>
 
       {/* FILTRES */}
-      <div className="rounded-2xl border border-ink/5 bg-white p-4 shadow-soft">
+      <div className="rounded-2xl border border-ink/5 bg-[var(--kelyani-panel)] p-4 shadow-soft">
         <div className="flex flex-col gap-3 md:flex-row">
           <div className="relative flex-1">
             <Search
@@ -844,7 +844,7 @@ export default function Reviews() {
         {filtered.map((review) => (
           <div
             key={review.id}
-            className="rounded-2xl border border-ink/5 bg-white p-5 shadow-soft"
+            className="rounded-2xl border border-ink/5 bg-[var(--kelyani-panel)] p-5 shadow-soft"
           >
             <div className="flex flex-col justify-between gap-3 sm:flex-row">
               <div className="flex items-center gap-3">
