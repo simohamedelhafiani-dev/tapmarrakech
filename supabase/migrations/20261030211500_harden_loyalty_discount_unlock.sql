@@ -18,31 +18,13 @@ DECLARE
   v_days integer;
   v_customer_establishment uuid;
   v_customer_points integer;
-  v_request_role text;
 BEGIN
   IF p_customer_id IS NULL OR p_establishment_id IS NULL THEN
     RAISE EXCEPTION 'Client ou établissement invalide';
   END IF;
 
-  -- SECURITY DEFINER changes current_user to the function owner. Use the
-  -- request JWT role to distinguish the trusted service_role from client roles.
-  v_request_role := COALESCE(
-    auth.jwt() ->> 'role',
-    current_setting('request.jwt.claim.role', true),
-    ''
-  );
-
-  IF v_request_role <> 'service_role' THEN
-    IF auth.uid() IS NULL
-       OR NOT (
-         public.is_tapmarrakech_admin()
-         OR public.user_has_establishment_access(p_establishment_id)
-       )
-    THEN
-      RAISE EXCEPTION 'Accès non autorisé à cet établissement'
-        USING ERRCODE = '42501';
-    END IF;
-  END IF;
+  -- This helper is trigger-internal. The trigger is fired by the trusted
+  -- points-update paths; direct client EXECUTE is revoked below.
 
   -- Lock and bind the customer to the requested establishment.
   SELECT c.establishment_id, COALESCE(c.points_balance, 0)
@@ -102,7 +84,8 @@ $function$;
 
 -- This function is called only by the SECURITY DEFINER row trigger
 -- public.loyalty_points_discount_unlock_trigger(). Its owner can invoke it;
--- client roles must not call it as a standalone RPC.
+-- client roles must not call it as a standalone RPC. The trigger preserves
+-- the scanner and employee flows, including anonymous scanner requests.
 REVOKE ALL ON FUNCTION public.unlock_loyalty_discount_if_ready(uuid, uuid, integer, integer)
   FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.unlock_loyalty_discount_if_ready(uuid, uuid, integer, integer)
