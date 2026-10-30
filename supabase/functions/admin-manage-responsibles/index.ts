@@ -21,7 +21,7 @@ Deno.serve(async (req) => {
   try {
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) return json({ success: false, error: 'Session administrateur manquante.' }, 401);
-    const token = authHeader.replace(/^Bearer\\s+/i, '');
+    const token = authHeader.replace(/^Bearer\s+/i, '');
     const { data: { user }, error: authError } = await adminClient.auth.getUser(token);
     if (authError || !user) return json({ success: false, error: 'Session invalide.' }, 401);
 
