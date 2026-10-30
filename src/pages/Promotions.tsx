@@ -261,7 +261,7 @@ export default function Promotions() {
 
   if (establishments.length === 0) {
     return (
-      <div className="rounded-3xl border border-ink/10 bg-white p-10 text-center">
+      <div className="rounded-3xl border border-ink/10 bg-[var(--kelyani-panel)] p-10 text-center">
         <Gift className="mx-auto mb-4 text-gold" size={36} />
         <h1 className="text-2xl font-semibold text-forest">Aucun établissement</h1>
         <p className="mt-2 text-sm text-ink/50">
@@ -309,7 +309,7 @@ export default function Promotions() {
         </div>
       )}
 
-      <section className="rounded-3xl border border-ink/10 bg-white p-6 shadow-sm md:p-8">
+      <section className="rounded-3xl border border-ink/10 bg-[var(--kelyani-panel)] p-6 shadow-sm md:p-8">
         <div className="flex items-start gap-4">
           <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gold/10 text-gold">
             <ImageIcon size={19} />
@@ -392,13 +392,13 @@ export default function Promotions() {
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">Publication</p>
             <h2 className="mt-1 text-2xl font-semibold text-forest">Tes promotions</h2>
           </div>
-          <span className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-ink/45 ring-1 ring-ink/5">
+          <span className="rounded-full bg-[var(--kelyani-panel)] px-3 py-1.5 text-xs font-semibold text-ink/45 ring-1 ring-ink/5">
             {promotions.length} promotion{promotions.length > 1 ? 's' : ''}
           </span>
         </div>
 
         {promotions.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-ink/15 bg-white p-10 text-center">
+          <div className="rounded-3xl border border-dashed border-ink/15 bg-[var(--kelyani-panel)] p-10 text-center">
             <Plus className="mx-auto mb-3 text-gold" size={28} />
             <p className="text-sm font-semibold text-forest">Aucune promotion publiée</p>
             <p className="mt-1 text-xs text-ink/45">
@@ -410,7 +410,7 @@ export default function Promotions() {
             {promotions.map((promotion) => (
               <article
                 key={promotion.id}
-                className="overflow-hidden rounded-3xl border border-ink/10 bg-white shadow-sm"
+                className="overflow-hidden rounded-3xl border border-ink/10 bg-[var(--kelyani-panel)] shadow-sm"
               >
                 {promotion.image_url ? (
                   <img
