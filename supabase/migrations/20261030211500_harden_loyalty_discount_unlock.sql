@@ -100,9 +100,10 @@ BEGIN
 END;
 $function$;
 
--- Remove inherited/public access and explicitly retain only authenticated
--- callers (subject to the checks above) and the trusted service role.
+-- This function is called only by the SECURITY DEFINER row trigger
+-- public.loyalty_points_discount_unlock_trigger(). Its owner can invoke it;
+-- client roles must not call it as a standalone RPC.
 REVOKE ALL ON FUNCTION public.unlock_loyalty_discount_if_ready(uuid, uuid, integer, integer)
   FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.unlock_loyalty_discount_if_ready(uuid, uuid, integer, integer)
-  TO authenticated, service_role;
+  TO service_role;
