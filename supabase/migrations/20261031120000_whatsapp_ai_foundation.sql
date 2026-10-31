@@ -82,3 +82,40 @@ alter table public.whatsapp_handoff_requests enable row level security;
 
 -- Deliberately no direct client policies: all access goes through authenticated Edge Functions.
 -- This keeps Vault secret identifiers and message records out of direct PostgREST access.
+
+
+-- Narrow service-role-only wrappers around Vault. No authenticated or anon caller can use these.
+create or replace function public.whatsapp_store_secret(p_secret text, p_name text)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  secret_id uuid;
+begin
+  if p_secret is null or length(p_secret) < 16 then
+    raise exception 'Secret is missing or too short';
+  end if;
+  select vault.create_secret(p_secret, p_name, 'KELYANI WhatsApp integration credential')
+    into secret_id;
+  return secret_id;
+end;
+$$;
+
+create or replace function public.whatsapp_read_secret(p_secret_id uuid)
+returns text
+language sql
+security definer
+set search_path = ''
+stable
+as $$
+  select decrypted_secret
+  from vault.decrypted_secrets
+  where id = p_secret_id;
+$$;
+
+revoke all on function public.whatsapp_store_secret(text, text) from public, anon, authenticated;
+revoke all on function public.whatsapp_read_secret(uuid) from public, anon, authenticated;
+grant execute on function public.whatsapp_store_secret(text, text) to service_role;
+grant execute on function public.whatsapp_read_secret(uuid) to service_role;
