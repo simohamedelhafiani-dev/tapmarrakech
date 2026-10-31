@@ -31,6 +31,36 @@ async function validSignature(rawBody: string, supplied: string) {
   return mismatch === 0;
 }
 
+function messageBody(message: any, type: string): string {
+  switch (type) {
+    case 'text':
+      return String(message.text?.body ?? '');
+    case 'button':
+      return String(message.button?.text ?? '');
+    case 'interactive':
+      return String(message.interactive?.button_reply?.title ?? message.interactive?.list_reply?.title ?? '');
+    case 'image':
+    case 'video':
+    case 'audio':
+    case 'document':
+    case 'sticker':
+      return String(message[type]?.caption ?? message[type]?.filename ?? '');
+    case 'location':
+      return [message.location?.name, message.location?.address,
+        message.location?.latitude, message.location?.longitude].filter(Boolean).join(' — ');
+    case 'contacts':
+      return (message.contacts ?? []).map((contact: any) =>
+        contact.name?.formatted_name ?? contact.phones?.[0]?.phone ?? 'Contact partagé'
+      ).join(', ');
+    case 'reaction':
+      return String(message.reaction?.emoji ?? '');
+    default:
+      return '';
+  }
+}
+
+const deliveryStatuses = new Set(['sent', 'delivered', 'read', 'failed']);
+
 Deno.serve(async (req) => {
   if (req.method === 'GET') {
     const url = new URL(req.url);
@@ -69,7 +99,7 @@ Deno.serve(async (req) => {
         .from('whatsapp_connections')
         .select('id,establishment_id,status')
         .eq('phone_number_id', phoneNumberId)
-        .eq('status', 'active')
+        .in('status', ['active', 'pending'])
         .maybeSingle();
       if (connectionError) {
         console.error('WhatsApp connection lookup failed', connectionError);
@@ -77,10 +107,35 @@ Deno.serve(async (req) => {
       }
       if (!connection) continue;
 
+      // Coexistence can emit messages sent from the WhatsApp Business app as well as
+      // inbound customer messages. Status events are handled independently below.
+      for (const statusEvent of value.statuses ?? []) {
+        const providerMessageId = String(statusEvent.id ?? '');
+        const status = String(statusEvent.status ?? '');
+        if (!providerMessageId || !deliveryStatuses.has(status)) continue;
+        const { error } = await db
+          .from('whatsapp_messages')
+          .update({
+            delivery_status: status,
+            raw_metadata: {
+              status_timestamp: statusEvent.timestamp ?? null,
+              recipient_id: statusEvent.recipient_id ?? null,
+              errors: statusEvent.errors ?? null,
+            },
+          })
+          .eq('provider_message_id', providerMessageId)
+          .eq('establishment_id', connection.establishment_id);
+        if (error) {
+          console.error('WhatsApp delivery status update failed', error);
+          return json({ error: 'status_update_failed' }, 500);
+        }
+      }
+
       const contacts = new Map<string, string>();
       for (const contact of value.contacts ?? []) {
         const phone = String(contact.wa_id ?? '');
-        if (phone) contacts.set(phone, String(contact.profile?.name ?? ''));
+        const name = String(contact.profile?.name ?? '').trim();
+        if (phone && name) contacts.set(phone, name);
       }
 
       for (const message of value.messages ?? []) {
@@ -88,24 +143,28 @@ Deno.serve(async (req) => {
         const providerMessageId = String(message.id ?? '');
         if (!customerPhone || !providerMessageId) continue;
         const messageType = String(message.type ?? 'unknown');
-        const body = messageType === 'text'
-          ? String(message.text?.body ?? '')
-          : messageType === 'button'
-            ? String(message.button?.text ?? '')
-            : messageType === 'interactive'
-              ? String(message.interactive?.button_reply?.title ?? message.interactive?.list_reply?.title ?? '')
-              : '';
+        const body = messageBody(message, messageType);
+        const timestamp = Number(message.timestamp ?? 0);
+        const messageAt = Number.isFinite(timestamp) && timestamp > 0
+          ? new Date(timestamp * 1000).toISOString()
+          : new Date().toISOString();
+        const customerName = contacts.get(customerPhone);
+
+        const conversationPayload: Record<string, unknown> = {
+          establishment_id: connection.establishment_id,
+          connection_id: connection.id,
+          customer_phone: customerPhone,
+          last_message_at: messageAt,
+          updated_at: new Date().toISOString(),
+        };
+        if (customerName) conversationPayload.customer_name = customerName;
 
         const { data: conversation, error: conversationError } = await db
           .from('whatsapp_conversations')
-          .upsert({
-            establishment_id: connection.establishment_id,
-            connection_id: connection.id,
-            customer_phone: customerPhone,
-            customer_name: contacts.get(customerPhone) ?? null,
-            last_message_at: new Date(Number(message.timestamp ?? 0) * 1000).toISOString(),
-            updated_at: new Date().toISOString(),
-          }, { onConflict: 'connection_id,customer_phone' })
+          .upsert(conversationPayload, {
+            onConflict: 'connection_id,customer_phone',
+            defaultToNull: false,
+          })
           .select('id')
           .single();
         if (conversationError || !conversation) {
@@ -121,7 +180,12 @@ Deno.serve(async (req) => {
           message_type: messageType,
           body,
           delivery_status: 'received',
-          raw_metadata: { timestamp: message.timestamp ?? null },
+          raw_metadata: {
+            timestamp: message.timestamp ?? null,
+            context: message.context ?? null,
+            referral: message.referral ?? null,
+            message_from_business_app: Boolean(message.context?.from),
+          },
         }, { onConflict: 'provider_message_id', ignoreDuplicates: true });
         if (messageError) {
           console.error('WhatsApp message insert failed', messageError);
