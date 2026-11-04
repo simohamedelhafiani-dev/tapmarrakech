@@ -898,14 +898,14 @@ export default function Dashboard() {
   const firstName = profileName.trim().split(/\\s+/)[0] || 'à vous';
 
   return (
-    <div className="kelyani-light-dashboard min-h-screen space-y-6 pb-8">
+    <div className="kelyani-midnight-dashboard min-h-screen space-y-6 pb-8">
       <section className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#D4AF37]/10 px-3 py-1.5 text-xs font-semibold text-[#9B7620]">
             <span className="h-1.5 w-1.5 rounded-full bg-[#D4AF37]" />
             Espace professionnel
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight text-[#171717] sm:text-3xl">
+          <h1 className="text-2xl font-semibold tracking-tight text-[#0F172A] sm:text-3xl">
             Bonjour {firstName}, voici vos performances
           </h1>
           <p className="mt-2 text-sm text-[#737373]">
@@ -920,14 +920,14 @@ export default function Dashboard() {
           {places.length > 1 && (
             <label className="text-xs font-medium text-[#737373]">
               Établissement
-              <select value={selectedEstablishmentId ?? ''} onChange={(event) => changeEstablishment(event.target.value)} className="kelyani-light-select mt-1.5 h-11 w-full rounded-xl px-3 text-sm font-semibold text-[#262626]" aria-label="Établissement actif">
+              <select value={selectedEstablishmentId ?? ''} onChange={(event) => changeEstablishment(event.target.value)} className="kelyani-light-select mt-1.5 h-11 w-full rounded-xl px-3 text-sm font-semibold text-[#1E293B]" aria-label="Établissement actif">
                 {places.map((place) => <option key={place.id} value={place.id}>{place.name}</option>)}
               </select>
             </label>
           )}
           {places.length === 1 && <p className="truncate text-sm font-semibold text-[#525252]">{places[0].name}</p>}
           {!isResponsible && (
-            <Link to="/dashboard/establishments" className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#D4AF37] px-4 text-sm font-semibold text-[#171717] shadow-sm transition hover:bg-[#C29B2D]">
+            <Link to="/dashboard/establishments" className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#D4AF37] px-4 text-sm font-semibold text-[#0F172A] shadow-sm transition hover:bg-[#C29B2D]">
               Gérer les établissements <ArrowUpRight size={16} />
             </Link>
           )}
@@ -940,7 +940,7 @@ export default function Dashboard() {
             <p className="text-sm font-medium text-[#737373]">Clients actifs</p>
             <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#A47C19]"><Users size={19} /></span>
           </div>
-          <p className="mt-4 text-3xl font-bold tracking-tight text-[#171717]">{dashboardStatsLoading ? '—' : formatCompactNumber(analytics.activeCustomers)}</p>
+          <p className="mt-4 text-3xl font-bold tracking-tight text-[#0F172A]">{dashboardStatsLoading ? '—' : formatCompactNumber(analytics.activeCustomers)}</p>
           <p className="mt-2 text-xs text-[#737373]">{formatGrowth(analytics.registrationGrowth)} d’inscriptions vs période précédente</p>
         </article>
         <article className="kelyani-light-card rounded-2xl p-4 sm:p-5">
@@ -948,7 +948,7 @@ export default function Dashboard() {
             <p className="text-sm font-medium text-[#737373]">Visites totales</p>
             <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#A47C19]"><Activity size={19} /></span>
           </div>
-          <p className="mt-4 text-3xl font-bold tracking-tight text-[#171717]">{dashboardStatsLoading ? '—' : formatCompactNumber(analytics.visits)}</p>
+          <p className="mt-4 text-3xl font-bold tracking-tight text-[#0F172A]">{dashboardStatsLoading ? '—' : formatCompactNumber(analytics.visits)}</p>
           <p className="mt-2 text-xs text-[#737373]">Visites enregistrées dans le programme</p>
         </article>
         <article className="kelyani-light-card rounded-2xl p-4 sm:p-5">
@@ -956,7 +956,7 @@ export default function Dashboard() {
             <p className="text-sm font-medium text-[#737373]">Taux de rétention</p>
             <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#A47C19]"><Repeat2 size={19} /></span>
           </div>
-          <p className="mt-4 text-3xl font-bold tracking-tight text-[#171717]">{dashboardStatsLoading ? '—' : `${analytics.returningRate.toFixed(1)}%`}</p>
+          <p className="mt-4 text-3xl font-bold tracking-tight text-[#0F172A]">{dashboardStatsLoading ? '—' : `${analytics.returningRate.toFixed(1)}%`}</p>
           <p className="mt-2 text-xs text-[#737373]">{formatCompactNumber(analytics.returningCustomers)} clients revenus au moins deux fois</p>
         </article>
         <article className="kelyani-light-card rounded-2xl p-4 sm:p-5">
@@ -964,7 +964,7 @@ export default function Dashboard() {
             <p className="text-sm font-medium text-[#737373]">Revenu estimé</p>
             <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#A47C19]"><Wallet size={19} /></span>
           </div>
-          <p className="mt-4 text-3xl font-bold tracking-tight text-[#171717]">{dashboardStatsLoading ? '—' : `${formatCompactNumber(analytics.currentRevenue)} DH`}</p>
+          <p className="mt-4 text-3xl font-bold tracking-tight text-[#0F172A]">{dashboardStatsLoading ? '—' : `${formatCompactNumber(analytics.currentRevenue)} DH`}</p>
           <p className="mt-2 text-xs text-[#737373]">Sur les 30 derniers jours</p>
         </article>
       </section>
@@ -974,12 +974,12 @@ export default function Dashboard() {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#A47C19]">Acquisition</p>
-              <h2 className="mt-1 text-lg font-semibold text-[#171717]">Nouveaux clients</h2>
+              <h2 className="mt-1 text-lg font-semibold text-[#0F172A]">Nouveaux clients</h2>
               <p className="mt-1 text-sm text-[#737373]">Inscriptions sur les 30 derniers jours</p>
             </div>
             <div className="rounded-xl bg-[#D4AF37]/10 px-3 py-2 text-right">
               <p className="text-xs text-[#737373]">Total période</p>
-              <p className="text-lg font-bold text-[#171717]">{analytics.currentRegistrations}</p>
+              <p className="text-lg font-bold text-[#0F172A]">{analytics.currentRegistrations}</p>
             </div>
           </div>
           <div className="mt-5 h-64 w-full">
@@ -1003,21 +1003,21 @@ export default function Dashboard() {
 
         <article className="kelyani-light-card rounded-2xl p-4 sm:p-6">
           <div className="flex items-center justify-between gap-3">
-            <div><p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#A47C19]">Accès rapide</p><h2 className="mt-1 text-lg font-semibold text-[#171717]">Gagner du temps</h2></div>
+            <div><p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#A47C19]">Accès rapide</p><h2 className="mt-1 text-lg font-semibold text-[#0F172A]">Gagner du temps</h2></div>
             <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#A47C19]"><ScanLine size={19} /></span>
           </div>
           <div className="mt-5 space-y-3">
-            <Link to="/dashboard/loyalty" className="flex items-center gap-3 rounded-xl bg-[#D4AF37] p-3.5 text-[#171717] transition hover:bg-[#C29B2D]">
+            <Link to="/dashboard/loyalty" className="flex items-center gap-3 rounded-xl bg-[#D4AF37] p-3.5 text-[#0F172A] transition hover:bg-[#C29B2D]">
               <span className="grid h-10 w-10 place-items-center rounded-lg bg-black/10"><UserPlus size={19} /></span>
               <span className="min-w-0 flex-1"><strong className="block text-sm">Ajouter un client</strong><span className="mt-0.5 block text-xs text-black/60">Inscrire un nouveau membre</span></span>
               <ArrowUpRight size={17} />
             </Link>
-            <Link to="/employee" className="flex items-center gap-3 rounded-xl border border-[#EAEAEA] bg-white p-3.5 text-[#262626] transition hover:border-[#D4AF37]/60 hover:bg-[#FFFCF3]">
+            <Link to="/employee" className="flex items-center gap-3 rounded-xl border border-[#EAEAEA] bg-white p-3.5 text-[#1E293B] transition hover:border-[#D4AF37]/60 hover:bg-[#FFFCF3]">
               <span className="grid h-10 w-10 place-items-center rounded-lg bg-[#D4AF37]/10 text-[#A47C19]"><ScanLine size={19} /></span>
               <span className="min-w-0 flex-1"><strong className="block text-sm">Scanner un QR code</strong><span className="mt-0.5 block text-xs text-[#737373]">Valider une visite ou une récompense</span></span>
               <ArrowUpRight size={17} />
             </Link>
-            <Link to="/dashboard/reviews" className="flex items-center gap-3 rounded-xl border border-[#EAEAEA] bg-white p-3.5 text-[#262626] transition hover:border-[#D4AF37]/60 hover:bg-[#FFFCF3]">
+            <Link to="/dashboard/reviews" className="flex items-center gap-3 rounded-xl border border-[#EAEAEA] bg-white p-3.5 text-[#1E293B] transition hover:border-[#D4AF37]/60 hover:bg-[#FFFCF3]">
               <span className="grid h-10 w-10 place-items-center rounded-lg bg-[#D4AF37]/10 text-[#A47C19]"><MessageCircle size={19} /></span>
               <span className="min-w-0 flex-1"><strong className="block text-sm">Gérer les avis</strong><span className="mt-0.5 block text-xs text-[#737373]">Suivre votre réputation Google</span></span>
               <ArrowUpRight size={17} />
@@ -1028,7 +1028,7 @@ export default function Dashboard() {
 
       <section className="kelyani-light-card rounded-2xl p-4 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div><p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#A47C19]">En temps réel</p><h2 className="mt-1 text-lg font-semibold text-[#171717]">Activité récente</h2><p className="mt-1 text-sm text-[#737373]">Les cinq dernières interactions enregistrées</p></div>
+          <div><p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#A47C19]">En temps réel</p><h2 className="mt-1 text-lg font-semibold text-[#0F172A]">Activité récente</h2><p className="mt-1 text-sm text-[#737373]">Les cinq dernières interactions enregistrées</p></div>
           <Link to="/dashboard/loyalty" className="inline-flex items-center gap-1 text-sm font-semibold text-[#9B7620] hover:text-[#73550F]">Voir la fidélité <ArrowUpRight size={15} /></Link>
         </div>
         <div className="mt-4 divide-y divide-[#F0F0F0]">
@@ -1039,7 +1039,7 @@ export default function Dashboard() {
             return (
               <div key={event.id} className="flex items-center gap-3 py-3.5">
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#D4AF37]/10 text-[#A47C19]"><Icon size={17} /></span>
-                <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-[#262626]">{event.title}</p><p className="mt-0.5 truncate text-xs text-[#737373]">{event.detail}</p></div>
+                <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-[#1E293B]">{event.title}</p><p className="mt-0.5 truncate text-xs text-[#737373]">{event.detail}</p></div>
                 <time className="shrink-0 text-[11px] text-[#8A8A8A]">{new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(event.created_at))}</time>
               </div>
             );
