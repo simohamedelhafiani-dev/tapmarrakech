@@ -52,6 +52,7 @@ import RecentActivity from '@/components/admin/RecentActivity';
 import EvolutionCharts from '@/components/admin/EvolutionCharts';
 import RecentLoyaltyCustomers from '@/components/admin/RecentLoyaltyCustomers';
 import EstablishmentPerformanceTable from '@/components/admin/EstablishmentPerformanceTable';
+import RoleAnalyticsVisuals from '@/components/dashboard/RoleAnalyticsVisuals';
 import EstablishmentsSection from '@/components/admin/EstablishmentsSection';
 import ProfileForm from '@/components/admin/ProfileForm';
 import WifiForm from '@/components/admin/WifiForm';
@@ -1176,6 +1177,8 @@ function Overview({
         <AdminMetric icon={Activity} label="Événements" value={globalStats.analyticsEvents.toLocaleString('fr-FR')} detail="activité enregistrée" />
         <AdminMetric icon={CreditCard} label="Paiements ce mois" value={billing.available ? billing.paymentsThisMonth.toLocaleString('fr-FR') : '—'} detail="transactions payées" />
       </section>
+
+      <RoleAnalyticsVisuals role="admin" />
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
         <EvolutionCharts
