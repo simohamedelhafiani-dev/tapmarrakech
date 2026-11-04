@@ -801,47 +801,74 @@ table {
 }
 
 
-/* Modern merchant dashboard: light workspace scoped to the Dashboard page only. */
-.dashboard-depth-shell .kelyani-light-dashboard {
-  color: #171717;
-  background: #F9FAFB;
+
+
+/* KELYANI Midnight Premium — global brand tokens and merchant workspace. */
+:root {
+  --kelyani-navy: #0F172A;
+  --kelyani-navy-soft: #1E293B;
+  --kelyani-accent: #D4AF37;
+  --kelyani-accent-hover: #C29B2D;
+  --kelyani-app-canvas: #F8FAFC;
+  --kelyani-card: #FFFFFF;
+  --kelyani-ink: #0F172A;
+  --kelyani-muted-ink: #64748B;
+  --kelyani-hairline: #E2E8F0;
+}
+.dashboard-depth-shell {
+  background: var(--kelyani-app-canvas) !important;
+  color: var(--kelyani-ink);
+}
+.dashboard-depth-shell .dashboard-depth-topbar {
+  background: rgba(15,23,42,.97) !important;
+  border-color: rgba(255,255,255,.09) !important;
+}
+.dashboard-depth-shell .kelyani-sidebar {
+  background: rgba(15,23,42,.98) !important;
+  border-color: rgba(255,255,255,.10) !important;
+}
+.dashboard-depth-shell .kelyani-sidebar .kelyani-nav-link { border-radius: 12px; }
+.dashboard-depth-shell .kelyani-sidebar .kelyani-nav-link[aria-current="page"] {
+  background: rgba(212,175,55,.14) !important;
+  color: #F2D77A !important;
+}
+.dashboard-depth-shell .kelyani-midnight-dashboard {
+  color: var(--kelyani-ink);
+  background: var(--kelyani-app-canvas);
   border-radius: 24px;
   padding: clamp(16px, 2.2vw, 30px);
   margin: -8px;
 }
-.dashboard-depth-shell .kelyani-light-dashboard .kelyani-light-card {
-  background: #FFFFFF !important;
-  border: 1px solid #EEEEEE !important;
-  box-shadow: 0 1px 3px rgba(0,0,0,.08) !important;
-  transition: box-shadow 180ms ease, border-color 180ms ease, transform 180ms ease !important;
+.dashboard-depth-shell .kelyani-midnight-dashboard .kelyani-light-card {
+  background: var(--kelyani-card) !important;
+  border: 1px solid var(--kelyani-hairline) !important;
+  box-shadow: 0 1px 3px rgba(15,23,42,.07) !important;
+  transition: box-shadow 180ms ease, border-color 180ms ease !important;
 }
-.dashboard-depth-shell .kelyani-light-dashboard .kelyani-light-card:hover {
-  border-color: rgba(180,139,37,.28) !important;
-  box-shadow: 0 5px 18px rgba(0,0,0,.055) !important;
+.dashboard-depth-shell .kelyani-midnight-dashboard .kelyani-light-card:hover {
+  border-color: rgba(212,175,55,.42) !important;
+  box-shadow: 0 8px 24px rgba(15,23,42,.07) !important;
 }
-.dashboard-depth-shell .kelyani-light-dashboard [class~="bg-white"] {
-  background-color: #FFFFFF !important;
-}
-.dashboard-depth-shell .kelyani-light-dashboard .kelyani-light-select {
+.dashboard-depth-shell .kelyani-midnight-dashboard .kelyani-light-select {
   background: #FFFFFF;
-  border: 1px solid #E5E5E5;
-  box-shadow: 0 1px 2px rgba(0,0,0,.04) !important;
+  border: 1px solid var(--kelyani-hairline);
+  color: var(--kelyani-navy);
 }
-.dashboard-depth-shell .kelyani-light-dashboard .kelyani-light-select:focus {
-  border-color: #D4AF37;
-  outline: 2px solid rgba(212,175,55,.16);
+.dashboard-depth-shell .kelyani-midnight-dashboard .kelyani-light-select:focus {
+  border-color: var(--kelyani-accent);
+  outline: 2px solid rgba(212,175,55,.18);
 }
+.dashboard-depth-shell .kelyani-midnight-dashboard h1,
+.dashboard-depth-shell .kelyani-midnight-dashboard h2 { color: var(--kelyani-navy); }
 @media (max-width: 640px) {
-  .dashboard-depth-shell .kelyani-light-dashboard {
+  .dashboard-depth-shell .kelyani-midnight-dashboard {
     border-radius: 18px;
     padding: 14px;
     margin: -4px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .dashboard-depth-shell .kelyani-light-dashboard *,
-  .dashboard-depth-shell .kelyani-light-dashboard *::before,
-  .dashboard-depth-shell .kelyani-light-dashboard *::after {
-    transition-duration: .01ms !important;
-  }
+  .dashboard-depth-shell .kelyani-midnight-dashboard *,
+  .dashboard-depth-shell .kelyani-midnight-dashboard *::before,
+  .dashboard-depth-shell .kelyani-midnight-dashboard *::after { transition-duration: .01ms !important; }
 }
