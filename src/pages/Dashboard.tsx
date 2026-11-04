@@ -30,6 +30,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import type { Establishment, Review } from '@/lib/types';
 import { getMySubscriptionAccess, type SubscriptionAccess } from '@/lib/subscriptionAccess';
 import KelyaniMark from '@/components/brand/KelyaniMark';
+import RoleAnalyticsVisuals from '@/components/dashboard/RoleAnalyticsVisuals';
 
 type LoyaltyCustomer = {
   id: string;
@@ -968,6 +969,8 @@ export default function Dashboard() {
           <p className="mt-2 text-xs text-[#737373]">Sur les {selected.days} derniers jours</p>
         </article>
       </section>
+
+      {role === 'responsible' && <RoleAnalyticsVisuals role="responsible" establishmentIds={places.map((place) => place.id)} />}
 
       <section className="grid gap-4 xl:grid-cols-[minmax(0,1.65fr)_minmax(280px,.8fr)]">
         <article className="kelyani-light-card min-w-0 rounded-2xl p-4 sm:p-6">
