@@ -799,3 +799,116 @@ table {
 #root [class*="border-amber-"] {
   border-color: rgba(212,175,55,.28) !important;
 }
+
+
+/* ================================================================
+   KELYANI — EMERALD POWER GLOBAL THEME
+   Visual-only layer. No application logic, state, hooks or data flows.
+   ================================================================ */
+:root {
+  color-scheme: dark;
+  --kelyani-bg: #0A0A0A;
+  --kelyani-panel: #1A1A1A;
+  --kelyani-panel-raised: #202020;
+  --kelyani-border: rgba(0,255,195,.22);
+  --kelyani-text: #FFFFFF;
+  --kelyani-muted: #B0B0B0;
+  --kelyani-gold: #00FFC3;
+  --kelyani-gold-soft: #75FFE0;
+  --kelyani-emerald: #00FFC3;
+  --kelyani-emerald-soft: #75FFE0;
+  --kelyani-graphite: #1A1A1A;
+}
+html, body, #root { background-color:#0A0A0A !important; color:#FFFFFF; }
+body { color:#FFFFFF; }
+::selection { color:#0A0A0A; background:#00FFC3; }
+:focus-visible { outline:2px solid rgba(0,255,195,.9) !important; outline-offset:3px; }
+
+/* Semantic Tailwind utilities and legacy brand aliases */
+#root .bg-forest, #root .bg-gold, #root .bg-gold-light,
+#root .text-forest, #root .text-gold, #root .text-gold-light,
+#root .border-forest, #root .border-gold,
+#root [class*="bg-[#D4AF37]"], #root [class*="bg-[#C9A45C]"],
+#root [class*="bg-[#E7C96B]"], #root [class*="bg-[#E1C15A]"],
+#root [class*="text-[#D4AF37]"], #root [class*="text-[#C9A45C]"],
+#root [class*="text-[#E7C96B]"], #root [class*="border-[#D4AF37]"],
+#root [class*="border-[#C9A45C]"] { color:#00FFC3 !important; border-color:rgba(0,255,195,.32) !important; }
+#root .bg-forest, #root .bg-gold,
+#root [class*="bg-[#D4AF37]"], #root [class*="bg-[#C9A45C]"],
+#root [class*="bg-[#E7C96B]"], #root [class*="bg-[#E1C15A]"] {
+  background-color:#00FFC3 !important; background-image:linear-gradient(135deg,#75FFE0 0%,#00FFC3 52%,#00B88D 100%) !important;
+}
+#root .text-ink { color:#FFFFFF !important; }
+#root .bg-cream, #root .bg-forest-light, #root .bg-onyx,
+#root .bg-surface, #root .bg-surface-2 { background-color:#1A1A1A !important; }
+#root [class*="bg-[#0D0D0D]"], #root [class*="bg-[#050505]"],
+#root [class*="bg-[#090909]"], #root [class*="bg-[#111111]"] { background-color:#0A0A0A !important; }
+#root [class*="bg-[#171717]"], #root [class*="bg-[#191817]"],
+#root [class*="bg-[#242424]"] { background-color:#1A1A1A !important; }
+
+/* Convert legacy gold/blue accent utilities to luminous emerald.
+   Semantic danger and warning states remain distinct for accessibility. */
+#root [class*="text-blue-"], #root [class*="text-indigo-"],
+#root [class*="text-violet-"], #root [class*="text-purple-"],
+#root [class*="text-teal-"], #root [class*="text-cyan-"],
+#root [class*="text-emerald-"], #root [class*="text-green-"] { color:#00FFC3 !important; }
+#root [class*="border-blue-"], #root [class*="border-indigo-"],
+#root [class*="border-violet-"], #root [class*="border-purple-"],
+#root [class*="border-teal-"], #root [class*="border-cyan-"],
+#root [class*="border-emerald-"], #root [class*="border-green-"] { border-color:rgba(0,255,195,.28) !important; }
+#root [class*="from-[#D4AF37]"], #root [class*="via-[#D4AF37]"],
+#root [class*="to-[#D4AF37]"], #root [class*="from-[#C9A45C]"],
+#root [class*="to-[#E7C96B]"] { --tw-gradient-from:#75FFE0 var(--tw-gradient-from-position) !important; --tw-gradient-to:#00B88D var(--tw-gradient-to-position) !important; --tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to) !important; }
+
+/* Shared surfaces: graphite, thin emerald edge, soft depth */
+#root [class*="rounded-xl"][class*="border"],
+#root [class*="rounded-2xl"][class*="border"],
+#root [class*="rounded-3xl"][class*="border"],
+#root [class*="rounded-[22px]"], #root [class*="rounded-[24px]"],
+#root [class*="rounded-[28px]"] {
+  border-color:rgba(0,255,195,.18) !important;
+  box-shadow:0 16px 42px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.035) !important;
+}
+#root [class*="rounded-xl"] { border-radius:1rem !important; }
+#root [class*="rounded-2xl"], #root [class*="rounded-3xl"] { border-radius:1.25rem !important; }
+#root button[class*="rounded"], #root a[class*="rounded"] { transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease; }
+#root button[class*="rounded"]:hover, #root a[class*="rounded"]:hover { box-shadow:0 12px 32px rgba(0,255,195,.10) !important; }
+#root button[class*="bg-gold"], #root button[class*="bg-forest"],
+#root button[class*="bg-[#D4AF37]"], #root button[class*="bg-[#C9A45C]"] {
+  color:#04130F !important; background:linear-gradient(135deg,#75FFE0,#00FFC3 58%,#00B88D) !important;
+  border:1px solid rgba(117,255,224,.55) !important; border-radius:1rem !important;
+  box-shadow:0 8px 24px rgba(0,255,195,.14) !important;
+}
+#root input, #root textarea, #root select { color:#FFFFFF !important; background-color:#1A1A1A; border-color:rgba(0,255,195,.18); color-scheme:dark; }
+#root input::placeholder, #root textarea::placeholder { color:#B0B0B0 !important; }
+#root option { color:#FFFFFF; background:#1A1A1A; }
+
+/* App navigation and authentication */
+#root .kelyani-sidebar, #root .admin-depth-nav { background:linear-gradient(180deg,#171B1A,#0A0A0A) !important; border-color:rgba(0,255,195,.18) !important; }
+#root .kelyani-nav-link[aria-current="page"], #root .admin-depth-nav .kelyani-nav-link[data-active="true"] {
+  color:#75FFE0 !important; background:linear-gradient(105deg,rgba(0,255,195,.16),rgba(0,255,195,.035)) !important;
+  box-shadow:inset 2px 0 0 #00FFC3,inset 0 0 0 1px rgba(0,255,195,.10) !important;
+}
+#root .kelyani-nav-link[aria-current="page"] svg, #root .admin-depth-nav .kelyani-nav-link[data-active="true"] svg { filter:drop-shadow(0 0 8px rgba(0,255,195,.3)); }
+#root .kelyani-workspace { background-image:radial-gradient(ellipse at 75% 0%,rgba(0,255,195,.045),transparent 38%) !important; }
+
+/* Existing dashboard's scoped embedded theme is overridden without editing JSX. */
+#root .kelyani-cockpit { --kc-gold:#00FFC3 !important; --kc-gold-light:#75FFE0 !important; background:radial-gradient(ellipse at 84% 0%,rgba(0,255,195,.09),transparent 34%),#0A0A0A !important; }
+#root .kelyani-cockpit article, #root .kelyani-cockpit section:first-of-type,
+#root .kelyani-cockpit section:first-of-type [class*=grid]>* {
+  border-color:rgba(0,255,195,.22) !important; background-color:#1A1A1A !important;
+}
+#root .kelyani-cockpit h1 span, #root .kelyani-cockpit .font-display.text-4xl,
+#root .kelyani-cockpit .font-display.text-3xl, #root .kelyani-cockpit article>p.text-xl,
+#root .kelyani-cockpit article>p.text-2xl, #root .kelyani-cockpit article>p.text-\\[28px\\] {
+  background:linear-gradient(115deg,#FFFFFF,#75FFE0 48%,#00B88D) !important; -webkit-background-clip:text !important; background-clip:text !important; color:transparent !important;
+}
+#root .kelyani-cockpit article:hover { border-color:rgba(0,255,195,.42) !important; box-shadow:0 22px 60px rgba(0,0,0,.4),0 0 26px rgba(0,255,195,.06) !important; }
+#root .kelyani-cockpit .recharts-area path { stroke:#00FFC3 !important; }
+#root .kelyani-cockpit .recharts-cartesian-grid line { stroke:rgba(255,255,255,.07) !important; }
+#root .kelyani-cockpit .recharts-tooltip-wrapper > div { background:#1A1A1A !important; border-color:rgba(0,255,195,.28) !important; }
+#root .kelyani-cockpit section:first-of-type { background:radial-gradient(ellipse at 82% 0%,rgba(0,255,195,.13),transparent 42%),linear-gradient(145deg,#1A1F1E,#0A0A0A) !important; }
+
+@media (prefers-reduced-motion:reduce) {
+  #root *, #root *::before, #root *::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
+}
