@@ -3,22 +3,22 @@
 @tailwind components;
 @tailwind utilities;
 :root {
-  color-scheme: dark;
+  color-scheme: light;
   font-family: 'DM Sans', sans-serif;
   color: var(--kelyani-text);
   background: var(--kelyani-bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  --kelyani-bg: #0D0D0D;
-  --kelyani-panel: #111111;
-  --kelyani-panel-raised: #1A1A1A;
-  --kelyani-border: rgba(212, 175, 55, 0.18);
-  --kelyani-text: #F5F5DC;
-  --kelyani-muted: rgba(245,245,220,.55);
+  --kelyani-bg: #F8FAFC;
+  --kelyani-panel: #FFFFFF;
+  --kelyani-panel-raised: #F1F5F9;
+  --kelyani-border: rgba(15, 23, 42, 0.10);
+  --kelyani-text: #0F172A;
+  --kelyani-muted: #64748B;
   --kelyani-gold: #D4AF37;
-  --kelyani-gold-soft: #E7C96B;
+  --kelyani-gold-soft: #F2D77A;
 }
-::selection { color: #0D0D0D; background: #D4AF37; }
+::selection { color: #0F172A; background: #D4AF37; }
 :focus-visible { outline: 2px solid rgba(212,175,55,.8); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
@@ -872,3 +872,19 @@ table {
   .dashboard-depth-shell .kelyani-midnight-dashboard *::before,
   .dashboard-depth-shell .kelyani-midnight-dashboard *::after { transition-duration: .01ms !important; }
 }
+
+.dashboard-depth-shell .dashboard-depth-topbar [class*="bg-[#111111]"],
+.dashboard-depth-shell .dashboard-depth-topbar [class*="bg-[#050505]"],
+.dashboard-depth-shell .dashboard-depth-topbar [class*="bg-[#0B0B0B]"] {
+  background-color: #1E293B !important;
+}
+.dashboard-depth-shell .dashboard-depth-topbar [class*="border-[#242424]"],
+.dashboard-depth-shell .kelyani-sidebar [class*="border-[#242424]"] {
+  border-color: rgba(255,255,255,.11) !important;
+}
+.dashboard-depth-shell .dashboard-depth-topbar input,
+.dashboard-depth-shell .dashboard-depth-topbar select {
+  color: #F8FAFC !important;
+  color-scheme: dark;
+}
+.dashboard-depth-shell .dashboard-depth-topbar input::placeholder { color: rgba(248,250,252,.42) !important; }
