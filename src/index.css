@@ -805,19 +805,21 @@ table {
 
 /* KELYANI Midnight Premium — global brand tokens and merchant workspace. */
 :root {
-  --kelyani-navy: #0F172A;
-  --kelyani-navy-soft: #1E293B;
+  /* KELYANI Luxury & Growth — shared application palette */
+  --kelyani-navy: #121212;
+  --kelyani-navy-soft: #1E1E1E;
   --kelyani-accent: #D4AF37;
-  --kelyani-accent-hover: #C29B2D;
-  --kelyani-app-canvas: #F8FAFC;
-  --kelyani-card: #FFFFFF;
-  --kelyani-ink: #0F172A;
-  --kelyani-muted-ink: #64748B;
-  --kelyani-hairline: #E2E8F0;
+  --kelyani-accent-hover: #E1C15A;
+  --kelyani-app-canvas: #121212;
+  --kelyani-card: #1E1E1E;
+  --kelyani-ink: #F5F5F5;
+  --kelyani-muted-ink: #A7A196;
+  --kelyani-hairline: rgba(245,245,245,.10);
 }
 .dashboard-depth-shell {
-  background: var(--kelyani-app-canvas) !important;
-  color: var(--kelyani-ink);
+  background: #121212 !important;
+  color: #F5F5F5;
+  color-scheme: dark;
 }
 .dashboard-depth-shell .dashboard-depth-topbar {
   background: rgba(15,23,42,.97) !important;
@@ -889,6 +891,57 @@ table {
 }
 .dashboard-depth-shell .dashboard-depth-topbar input::placeholder { color: rgba(248,250,252,.42) !important; }
 
+
+/* KELYANI Luxury & Growth — shared visual foundation for every authenticated screen.
+   Visual styles only: no component behavior, data, routes or permissions are changed. */
+.dashboard-depth-shell,
+.dashboard-depth-shell main,
+.dashboard-depth-shell [data-dashboard-content] {
+  background-color: #121212;
+  color: #F5F5F5;
+}
+.dashboard-depth-shell [class*="bg-white"],
+.dashboard-depth-shell [class*="bg-[#FFFFFF]"],
+.dashboard-depth-shell [class*="bg-[#fff"],
+.dashboard-depth-shell [class*="bg-[#FFF"] {
+  background-color: #1E1E1E !important;
+  background-image: none !important;
+}
+.dashboard-depth-shell [class*="text-forest"],
+.dashboard-depth-shell [class*="text-ink"],
+.dashboard-depth-shell [class*="text-[#0F172A]"],
+.dashboard-depth-shell [class*="text-[#1E293B]"] {
+  color: #F5F5F5 !important;
+}
+.dashboard-depth-shell [class*="text-[#64748B]"],
+.dashboard-depth-shell [class*="text-[#6B7280]"],
+.dashboard-depth-shell [class*="text-[#737373]"] {
+  color: #A7A196 !important;
+}
+.dashboard-depth-shell [class*="border-ink"],
+.dashboard-depth-shell [class*="border-[#E2E8F0]"],
+.dashboard-depth-shell [class*="border-[#E5E7EB]"] {
+  border-color: rgba(212,175,55,.16) !important;
+}
+.dashboard-depth-shell input,
+.dashboard-depth-shell textarea,
+.dashboard-depth-shell select {
+  background-color: #1E1E1E;
+  color: #F5F5F5;
+  border-color: rgba(212,175,55,.22);
+  color-scheme: dark;
+}
+.dashboard-depth-shell input::placeholder,
+.dashboard-depth-shell textarea::placeholder {
+  color: rgba(245,245,245,.42);
+}
+.dashboard-depth-shell button:focus-visible,
+.dashboard-depth-shell a:focus-visible,
+.dashboard-depth-shell input:focus-visible,
+.dashboard-depth-shell select:focus-visible,
+.dashboard-depth-shell textarea:focus-visible {
+  outline-color: #D4AF37;
+}
 
 /* KELYANI Luxury & Growth — dashboard-only visual system.
    Keep data, permissions, routes and existing workflows unchanged. */
