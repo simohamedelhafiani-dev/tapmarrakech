@@ -4,14 +4,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: '#F5F5DC',
-        forest: '#D4AF37',
+        ink: '#F5F5F5',
+        forest: '#121212',
         gold: '#D4AF37',
         'gold-light': '#E7C96B',
-        cream: '#111111',
-        onyx: '#050505',
-        surface: '#111111',
-        'surface-2': '#242424',
+        cream: '#121212',
+        onyx: '#0B0B0B',
+        surface: '#1E1E1E',
+        'surface-2': '#262626',
+        'luxury-bg': '#121212',
+        'luxury-surface': '#1E1E1E',
+        'luxury-muted': '#A0A0A0',
+        'luxury-ivory': '#F5F5F5',
       },
       fontFamily: {
         display: ['Playfair Display', 'serif'],
