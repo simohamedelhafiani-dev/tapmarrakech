@@ -106,7 +106,7 @@ async function generateReply(comment: string, stars: string, language: string, t
         { role: 'user', content: [{ type: 'input_text', text: prompt }] },
       ],
       max_output_tokens: maxOutputTokens,
-      temperature,
+      ...(/^gpt-5(?:[.-]|$)/i.test(model) ? {} : { temperature }),
     }),
   });
   const data = await response.json();
