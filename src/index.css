@@ -3,20 +3,21 @@
 @tailwind components;
 @tailwind utilities;
 :root {
-  color-scheme: light;
+  color-scheme: dark;
   font-family: 'DM Sans', sans-serif;
   color: var(--kelyani-text);
   background: var(--kelyani-bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  --kelyani-bg: #F8FAFC;
-  --kelyani-panel: #FFFFFF;
-  --kelyani-panel-raised: #F1F5F9;
-  --kelyani-border: rgba(15, 23, 42, 0.10);
-  --kelyani-text: #0F172A;
-  --kelyani-muted: #64748B;
+  /* Single source of truth for the Luxury & Growth application theme */
+  --kelyani-bg: #121212;
+  --kelyani-panel: #1E1E1E;
+  --kelyani-panel-raised: #262626;
+  --kelyani-border: rgba(212, 175, 55, 0.16);
+  --kelyani-text: #F5F5F5;
+  --kelyani-muted: #A0A0A0;
   --kelyani-gold: #D4AF37;
-  --kelyani-gold-soft: #F2D77A;
+  --kelyani-gold-soft: #E7C96B;
 }
 ::selection { color: #0F172A; background: #D4AF37; }
 :focus-visible { outline: 2px solid rgba(212,175,55,.8); outline-offset: 3px; }
