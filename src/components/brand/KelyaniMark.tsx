@@ -7,8 +7,8 @@ type KelyaniMarkProps = Omit<ImgHTMLAttributes<HTMLImageElement>, 'src' | 'alt' 
 export default function KelyaniMark({ size = 120, className, ...props }: KelyaniMarkProps) {
   return (
     <img
-      src="/kelyani-final.svg"
-      alt="KELYANI"
+      src="/kelyani-emerald.svg"
+      alt="KELYANI - Logiciel de Fidélisation Client au Maroc"
       width={size}
       height={size}
       className={className}
