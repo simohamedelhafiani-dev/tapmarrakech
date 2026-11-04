@@ -40,7 +40,7 @@ export default function RoleAnalyticsVisuals({ role, establishmentIds = [] }: Ro
         let ids = establishmentIds;
         if (role === 'admin') {
           const [{ data: establishments, error: establishmentsError }, { data: types, error: typesError }] = await Promise.all([
-            supabase.from('establishments').select('id,ai_business_type_id,business_type,created_at'),
+            supabase.from('establishments').select('id,ai_business_type_id,created_at'),
             supabase.from('ai_business_types').select('id,name'),
           ]);
           if (establishmentsError) throw establishmentsError;
@@ -51,7 +51,7 @@ export default function RoleAnalyticsVisuals({ role, establishmentIds = [] }: Ro
           const typeNames = new Map((types ?? []).map(item => [item.id, item.name]));
           const counts = new Map<string, number>();
           rows.forEach(row => {
-            const name = (row.ai_business_type_id && typeNames.get(row.ai_business_type_id)) || row.business_type || 'Non renseigné';
+            const name = (row.ai_business_type_id && typeNames.get(row.ai_business_type_id)) || 'Non renseigné';
             counts.set(name, (counts.get(name) ?? 0) + 1);
           });
           setSectorRows([...counts.entries()].map(([name,value]) => ({name,value})).sort((a,b)=>b.value-a.value));
