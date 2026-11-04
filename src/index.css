@@ -897,9 +897,30 @@ table {
    Visual styles only: no component behavior, data, routes or permissions are changed. */
 .dashboard-depth-shell,
 .dashboard-depth-shell main,
-.dashboard-depth-shell [data-dashboard-content] {
-  background-color: #121212;
+.dashboard-depth-shell [data-dashboard-content],
+.admin-depth-shell {
+  background-color: #121212 !important;
   color: #F5F5F5;
+}
+.admin-depth-shell {
+  --admin-accent: #D4AF37;
+  --admin-surface: #1E1E1E;
+  --admin-muted: #A0A0A0;
+}
+.admin-depth-shell [class*="bg-white"],
+.admin-depth-shell [class*="bg-[#FFFFFF]"],
+.admin-depth-shell [class*="bg-[#fff"],
+.admin-depth-shell [class*="bg-[#FFF"] {
+  background-color: #1E1E1E !important;
+  background-image: none !important;
+}
+.admin-depth-shell [class*="text-[#C9A45C]"],
+.admin-depth-shell [class*="text-[#E1C27A]"] {
+  color: #D4AF37 !important;
+}
+.admin-depth-shell [class*="border-[#C9A45C]"],
+.admin-depth-shell [class*="border-[#E1C27A]"] {
+  border-color: rgba(212,175,55,.28) !important;
 }
 .dashboard-depth-shell [class*="bg-white"],
 .dashboard-depth-shell [class*="bg-[#FFFFFF]"],
