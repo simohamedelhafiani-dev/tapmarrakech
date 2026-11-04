@@ -1,6 +1,28 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { extractBearerToken } from '../_shared/auth.ts';
-import { withTransientPostgrestJwtRetry } from '../_shared/retryFetch.ts';
+
+function extractBearerToken(authorization: string | null): string | null {
+  const value = authorization?.trim();
+  if (!value) return null;
+  const match = /^Bearer\\s+(\\S+)$/i.exec(value);
+  return match?.[1] ?? null;
+}
+
+function withTransientPostgrestJwtRetry(
+  fetchImpl: typeof fetch = fetch,
+  sleep: (milliseconds: number) => Promise<void> = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds)),
+  maxRetries = 2,
+): typeof fetch {
+  return async (input, init) => {
+    for (let attempt = 0; ; attempt += 1) {
+      const requestInput = input instanceof Request ? input.clone() : input;
+      const response = await fetchImpl(requestInput, init);
+      if (response.status !== 401 || attempt >= maxRetries) return response;
+      const body = await response.clone().text().catch(() => '');
+      if (!body.includes('PGRST303') || !body.includes('JWT issued at future')) return response;
+      await sleep(100 * (attempt + 1));
+    }
+  };
+}
 
 const url = Deno.env.get('SUPABASE_URL')!;
 const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
