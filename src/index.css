@@ -799,3 +799,21 @@ table {
 #root [class*="border-amber-"] {
   border-color: rgba(212,175,55,.28) !important;
 }
+
+
+/* KELYANI Emerald Power — shared identity skin */
+:root{--kelyani-bg:#050505;--kelyani-panel:#121212;--kelyani-panel-raised:#1A1A1A;--kelyani-border:rgba(0,255,195,.22);--kelyani-text:#FFFFFF;--kelyani-muted:#A8A8A8;--kelyani-gold:#00FFC3;--kelyani-gold-soft:#00DFA5;--kelyani-emerald:#00FFC3;--kelyani-cyan:#00E5FF}
+html,body,#root{background:#050505!important;color:#fff}
+::selection{background:rgba(0,255,195,.35);color:#fff}
+:focus-visible{outline:2px solid #00E5FF!important;outline-offset:3px}
+#root [class*="text-[#D4AF37]"],#root [class*="text-[#C9A45C]"],#root [class*="text-[#E1C27A]"],#root [class*="text-[#E4C56A]"],#root [class*="text-[#F5D978]"],#root [class*="text-[#F4D98A]"],#root [class*="text-[#B88724]"],#root [class*="text-gold"],#root [class*="text-forest"]{color:#00FFC3!important}
+#root [class*="bg-[#D4AF37]"],#root [class*="bg-[#C9A45C]"],#root [class*="bg-gold"],#root [class*="bg-forest"]{background-color:#00FFC3!important}
+#root [class*="border-[#D4AF37]"],#root [class*="border-[#C9A45C]"],#root [class*="border-gold"]{border-color:rgba(0,255,195,.35)!important}
+#root [class*="shadow-"][class*="rgba(212,175,55"],#root [class*="shadow-"][class*="rgba(201,164,92"]{--tw-shadow-color:rgba(0,255,195,.22)!important}
+#root [class*="from-[#D4AF37]"],#root [class*="from-[#C9A45C]"]{--tw-gradient-from:#00FFC3 var(--tw-gradient-from-position)!important}
+#root [class*="to-[#E7C96B]"],#root [class*="to-[#E1C27A]"],#root [class*="to-[#A77D35]"]{--tw-gradient-to:#00A982 var(--tw-gradient-to-position)!important}
+#root .kelyani-sidebar,#root .admin-depth-nav{background:rgba(18,18,18,.82)!important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-color:rgba(0,255,195,.18)!important}
+#root [class*="rounded-2xl"][class*="border"],#root [class*="rounded-3xl"][class*="border"]{border-color:rgba(0,255,195,.18)!important}
+#root button[class*="bg-[#D4AF37]"],#root button[class*="bg-[#C9A45C]"],#root button[class*="bg-gold"],#root button[class*="bg-forest"]{background:linear-gradient(120deg,#00FFC3,#00DFA5 58%,#00A982)!important;color:#04110E!important;box-shadow:0 0 24px rgba(0,255,195,.16)!important}
+#root .kelyani-nav-link[aria-current="page"],#root .admin-depth-nav .kelyani-nav-link[data-active="true"]{color:#00FFC3!important;background:rgba(0,255,195,.09)!important;box-shadow:inset 2px 0 #00FFC3!important}
+#root .kelyani-workspace{background-image:radial-gradient(ellipse at 75% 0%,rgba(0,229,255,.035),transparent 36%)}
