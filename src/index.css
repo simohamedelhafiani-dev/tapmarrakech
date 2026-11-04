@@ -799,3 +799,49 @@ table {
 #root [class*="border-amber-"] {
   border-color: rgba(212,175,55,.28) !important;
 }
+
+
+/* Modern merchant dashboard: light workspace scoped to the Dashboard page only. */
+.dashboard-depth-shell .kelyani-light-dashboard {
+  color: #171717;
+  background: #F9FAFB;
+  border-radius: 24px;
+  padding: clamp(16px, 2.2vw, 30px);
+  margin: -8px;
+}
+.dashboard-depth-shell .kelyani-light-dashboard .kelyani-light-card {
+  background: #FFFFFF !important;
+  border: 1px solid #EEEEEE !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08) !important;
+  transition: box-shadow 180ms ease, border-color 180ms ease, transform 180ms ease !important;
+}
+.dashboard-depth-shell .kelyani-light-dashboard .kelyani-light-card:hover {
+  border-color: rgba(180,139,37,.28) !important;
+  box-shadow: 0 5px 18px rgba(0,0,0,.055) !important;
+}
+.dashboard-depth-shell .kelyani-light-dashboard [class~="bg-white"] {
+  background-color: #FFFFFF !important;
+}
+.dashboard-depth-shell .kelyani-light-dashboard .kelyani-light-select {
+  background: #FFFFFF;
+  border: 1px solid #E5E5E5;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04) !important;
+}
+.dashboard-depth-shell .kelyani-light-dashboard .kelyani-light-select:focus {
+  border-color: #D4AF37;
+  outline: 2px solid rgba(212,175,55,.16);
+}
+@media (max-width: 640px) {
+  .dashboard-depth-shell .kelyani-light-dashboard {
+    border-radius: 18px;
+    padding: 14px;
+    margin: -4px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-depth-shell .kelyani-light-dashboard *,
+  .dashboard-depth-shell .kelyani-light-dashboard *::before,
+  .dashboard-depth-shell .kelyani-light-dashboard *::after {
+    transition-duration: .01ms !important;
+  }
+}
