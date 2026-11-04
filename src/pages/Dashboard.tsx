@@ -898,7 +898,7 @@ export default function Dashboard() {
   const firstName = profileName.trim().split(/\\s+/)[0] || 'à vous';
 
   return (
-    <div className="kelyani-midnight-dashboard min-h-screen space-y-6 pb-8">
+    <div className="kelyani-luxury-dashboard min-h-screen space-y-6 pb-8">
       <section className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#D4AF37]/10 px-3 py-1.5 text-xs font-semibold text-[#9B7620]">
@@ -965,7 +965,7 @@ export default function Dashboard() {
             <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#A47C19]"><Wallet size={19} /></span>
           </div>
           <p className="mt-4 text-3xl font-bold tracking-tight text-[#0F172A]">{dashboardStatsLoading ? '—' : `${formatCompactNumber(analytics.currentRevenue)} DH`}</p>
-          <p className="mt-2 text-xs text-[#737373]">Sur les 30 derniers jours</p>
+          <p className="mt-2 text-xs text-[#737373]">Sur les {selected.days} derniers jours</p>
         </article>
       </section>
 
@@ -991,11 +991,11 @@ export default function Dashboard() {
                     <stop offset="95%" stopColor="#D4AF37" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid stroke="#EDEDED" vertical={false} />
-                <XAxis dataKey="date" axisLine={false} tickLine={false} interval={4} tick={{ fill: '#8A8A8A', fontSize: 11 }} />
+                <CartesianGrid stroke="#38352D" vertical={false} />
+                <XAxis dataKey="date" axisLine={false} tickLine={false} interval={4} tick={{ fill: '#A9A294', fontSize: 11 }} />
                 <YAxis allowDecimals={false} axisLine={false} tickLine={false} width={32} tick={{ fill: '#8A8A8A', fontSize: 11 }} />
-                <Tooltip contentStyle={{ background: '#FFFFFF', border: '1px solid #EEEEEE', borderRadius: 12, color: '#171717', fontSize: 12, boxShadow: '0 8px 24px rgba(0,0,0,.08)' }} />
-                <Area type="monotone" dataKey="inscriptions" name="Nouveaux clients" stroke="#B58B25" strokeWidth={2.5} fill="url(#kelyaniRegistrationsFill)" activeDot={{ r: 4, strokeWidth: 0, fill: '#B58B25' }} />
+                <Tooltip contentStyle={{ background: '#1E1E1E', border: '1px solid rgba(212,175,55,.24)', borderRadius: 14, color: '#F5F5F5', fontSize: 12, boxShadow: '0 8px 24px rgba(0,0,0,.08)' }} />
+                <Area type="monotone" dataKey="inscriptions" name="Nouveaux clients" stroke="#D4AF37" strokeWidth={2.5} fill="url(#kelyaniRegistrationsFill)" activeDot={{ r: 4, strokeWidth: 0, fill: '#B58B25' }} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
