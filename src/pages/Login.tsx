@@ -111,7 +111,7 @@ export default function Login() {
             <div className="flex items-center justify-between">
               <button type="button" onClick={() => navigate('/')} className="group flex items-center gap-4 text-left transition-transform duration-300 hover:-translate-y-0.5 active:translate-y-0" aria-label="KELYANI">
                 <div className="relative shrink-0">
-                  <div className="absolute inset-0 rounded-[18px] bg-[#00FFC3]/10 blur-xl shadow-[0_0_35px_rgba(201,164,92,.08)] transition group-hover:bg-[#00FFC3]/20" />
+                  <div className="absolute inset-0 rounded-[18px] bg-[#00FFC3]/10 blur-xl shadow-[0_0_35px_rgba(0,255,195,.08)] transition group-hover:bg-[#00FFC3]/20" />
                   <KelyaniMark size={72} className="relative" />
                 </div>
                 <div className="leading-none">
@@ -130,7 +130,7 @@ export default function Login() {
             </div>
 
             <div className="relative mt-auto max-w-3xl pb-2 pt-12 lg:pt-8 xl:pt-4">
-              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#00FFC3]/25 bg-[#00FFC3]/[0.06] px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.24em] text-[#00DFA5] shadow-[0_8px_28px_rgba(201,164,92,.08)] backdrop-blur-xl">
+              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#00FFC3]/25 bg-[#00FFC3]/[0.06] px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.24em] text-[#00DFA5] shadow-[0_8px_28px_rgba(0,255,195,.08)] backdrop-blur-xl">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#00FFC3]" />
                 Plateforme client 2026
               </div>
@@ -191,7 +191,7 @@ export default function Login() {
                 </div>
               </div>
               <div className="mt-4 flex max-w-2xl items-center gap-3 rounded-2xl border border-white/[0.055] bg-white/[0.018] px-4 py-3.5">
-                <div className="h-2 w-2 shrink-0 rounded-full bg-[#00FFC3] shadow-[0_0_14px_rgba(201,164,92,.7)]" />
+                <div className="h-2 w-2 shrink-0 rounded-full bg-[#00FFC3] shadow-[0_0_14px_rgba(0,255,195,.7)]" />
                 <p className="text-[11px] leading-5 text-white/45">Une plateforme pensée pour transformer chaque interaction en relation durable.</p>
               </div>
 
@@ -268,7 +268,7 @@ export default function Login() {
                       <button type="button" onClick={() => setShowPassword(value => !value)} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-xl p-2 text-[#F5F5DC]/25 hover:text-[#00FFC3]">{showPassword ? <EyeOff size={16} /> : <Eye size={16} />}</button>
                     </div>
                   </div>
-                  <button onClick={handleLogin} disabled={saving} className="group flex w-full items-center justify-center gap-2 rounded-2xl bg-[#00FFC3] py-3.5 text-sm font-bold text-[#050505] shadow-[0_14px_34px_rgba(201,164,92,.18),inset_0_1px_0_rgba(245,245,220,.22)] transition-all duration-300 hover:bg-[#00DFA5] hover:-translate-y-0.5 hover:shadow-[0_20px_42px_rgba(201,164,92,.24),inset_0_1px_0_rgba(245,245,220,.28)] active:translate-y-0 active:shadow-[0_10px_24px_rgba(201,164,92,.16)] disabled:opacity-50">
+                  <button onClick={handleLogin} disabled={saving} className="group flex w-full items-center justify-center gap-2 rounded-2xl bg-[#00FFC3] py-3.5 text-sm font-bold text-[#050505] shadow-[0_14px_34px_rgba(0,255,195,.18),inset_0_1px_0_rgba(245,245,220,.22)] transition-all duration-300 hover:bg-[#00DFA5] hover:-translate-y-0.5 hover:shadow-[0_20px_42px_rgba(0,255,195,.24),inset_0_1px_0_rgba(245,245,220,.28)] active:translate-y-0 active:shadow-[0_10px_24px_rgba(0,255,195,.16)] disabled:opacity-50">
                     {saving ? 'Connexion…' : 'Entrer dans KELYANI'} {!saving && <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />}
                   </button>
                 </div>
