@@ -1138,3 +1138,125 @@ html, body, #root { background: #121212 !important; color: #F5F5F5; }
 }
 #root :focus-visible { outline-color: #D4AF37 !important; }
 ::selection { color: #121212; background: #D4AF37; }
+
+/* KELYANI COCKPIT — luxury glass interface, strict five-color palette */
+.dashboard-depth-shell .kelyani-cockpit {
+  --cockpit-bg: #121212;
+  --cockpit-panel: rgba(30,30,30,.72);
+  --cockpit-gold: #D4AF37;
+  --cockpit-ivory: #F5F5F5;
+  --cockpit-muted: #A0A0A0;
+  color: var(--cockpit-ivory);
+  background:
+    radial-gradient(ellipse at 82% 2%, rgba(212,175,55,.085), transparent 32%),
+    radial-gradient(ellipse at 5% 38%, rgba(245,245,245,.025), transparent 28%),
+    #121212 !important;
+  border: 1px solid rgba(212,175,55,.16);
+  border-radius: 30px;
+  padding: clamp(16px,2.2vw,32px);
+  margin: -8px;
+}
+.kelyani-cockpit .cockpit-hero {
+  min-height: 310px;
+  padding: clamp(24px,4vw,52px);
+  border: 1px solid rgba(212,175,55,.38);
+  border-radius: 28px;
+  background: linear-gradient(125deg,rgba(30,30,30,.92),rgba(18,18,18,.76));
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 0 rgba(245,245,245,.07), 0 28px 80px rgba(18,18,18,.48);
+}
+.kelyani-cockpit .cockpit-hero:after {
+  content:""; position:absolute; inset:0; pointer-events:none; border-radius:inherit;
+  background: linear-gradient(115deg,rgba(245,245,245,.035),transparent 42%,rgba(212,175,55,.055));
+}
+.kelyani-cockpit .cockpit-hero-orbit { position:absolute; border:1px solid rgba(212,175,55,.16); border-radius:50%; pointer-events:none; }
+.kelyani-cockpit .cockpit-orbit-one { width:390px;height:390px;right:-80px;top:-190px;box-shadow:0 0 90px rgba(212,175,55,.045),inset 0 0 50px rgba(212,175,55,.035); }
+.kelyani-cockpit .cockpit-orbit-two { width:270px;height:270px;right:-20px;top:-130px;border-color:rgba(245,245,245,.12); }
+.kelyani-cockpit .cockpit-eyebrow,.kelyani-cockpit .cockpit-section-kicker {
+  color:#D4AF37;font-size:9px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;
+}
+.kelyani-cockpit .cockpit-eyebrow { display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid rgba(212,175,55,.25);border-radius:999px;background:rgba(212,175,55,.055); }
+.kelyani-cockpit .cockpit-live-dot { width:7px;height:7px;display:inline-block;border-radius:50%;background:#D4AF37;box-shadow:0 0 12px rgba(212,175,55,.7);animation:cockpitPulse 2s ease-in-out infinite; }
+@keyframes cockpitPulse { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(212,175,55,.35)}50%{opacity:.62;box-shadow:0 0 0 6px rgba(212,175,55,0)} }
+.kelyani-cockpit .cockpit-display { font-family:'Playfair Display',serif;color:#F5F5F5; }
+.kelyani-cockpit .cockpit-gold-type,.kelyani-cockpit .cockpit-kpi-value {
+  background:linear-gradient(105deg,#D4AF37 0%,#F5F5F5 52%,#D4AF37 100%);
+  background-clip:text;-webkit-background-clip:text;color:transparent !important;
+}
+.kelyani-cockpit .cockpit-separator { width:3px;height:3px;border-radius:50%;background:#D4AF37; }
+.kelyani-cockpit .cockpit-field-label { color:#A0A0A0;font-size:9px;font-weight:700;letter-spacing:.18em; }
+.kelyani-cockpit .cockpit-select { min-height:46px;padding:0 14px;border:1px solid rgba(212,175,55,.3);border-radius:13px;background:rgba(30,30,30,.8);color:#F5F5F5;font-size:12px;outline:none; }
+.kelyani-cockpit .cockpit-location { display:flex;align-items:center;gap:12px;padding:12px 14px; }
+.kelyani-cockpit .cockpit-location-mark { display:grid;place-items:center;width:38px;height:38px;border:1px solid rgba(212,175,55,.35);border-radius:12px;color:#D4AF37; }
+.kelyani-cockpit .cockpit-location-mark svg { width:20px;height:20px; }
+.kelyani-cockpit .cockpit-location small,.kelyani-cockpit .cockpit-location strong { display:block; }
+.kelyani-cockpit .cockpit-location small { color:#A0A0A0;font-size:8px;letter-spacing:.16em; }
+.kelyani-cockpit .cockpit-location strong { margin-top:4px;color:#F5F5F5;font-size:12px; }
+.kelyani-cockpit .cockpit-primary-action { display:flex;align-items:center;justify-content:center;gap:9px;min-height:46px;padding:0 16px;border-radius:13px;background:#D4AF37;color:#121212;font-size:12px;font-weight:700;transition:transform .2s ease,filter .2s ease; }
+.kelyani-cockpit .cockpit-primary-action:hover { transform:translateY(-2px);filter:brightness(1.06); }
+.kelyani-cockpit .cockpit-status { display:flex;align-items:center;gap:8px;color:#A0A0A0;font-size:8px;letter-spacing:.13em; }
+.kelyani-cockpit .cockpit-glass {
+  border:1px solid rgba(212,175,55,.28);
+  background:linear-gradient(145deg,rgba(30,30,30,.82),rgba(30,30,30,.58));
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  box-shadow:inset 0 1px 0 rgba(245,245,245,.045),0 18px 48px rgba(18,18,18,.34);
+  transition:border-color .22s ease,transform .22s ease,box-shadow .22s ease;
+}
+.kelyani-cockpit .cockpit-glass:hover { border-color:rgba(212,175,55,.52);box-shadow:inset 0 1px 0 rgba(245,245,245,.06),0 22px 54px rgba(18,18,18,.42),0 0 26px rgba(212,175,55,.045); }
+.kelyani-cockpit .cockpit-kpi { position:relative;min-height:176px;overflow:hidden;border-radius:22px;padding:22px; }
+.kelyani-cockpit .cockpit-kpi:after { content:"";position:absolute;width:130px;height:130px;right:-70px;bottom:-80px;border:1px solid rgba(212,175,55,.2);border-radius:50%;box-shadow:0 0 0 15px rgba(212,175,55,.018),0 0 0 30px rgba(212,175,55,.012); }
+.kelyani-cockpit .cockpit-kpi-head { display:flex;align-items:center;justify-content:space-between;color:#A0A0A0;font-size:9px;font-weight:700;letter-spacing:.17em; }
+.kelyani-cockpit .cockpit-kpi-head svg { color:#D4AF37; }
+.kelyani-cockpit .cockpit-kpi-value { margin-top:23px;font-family:'Playfair Display',serif;font-size:clamp(38px,4vw,54px);line-height:1;font-weight:500;letter-spacing:-.045em; }
+.kelyani-cockpit .cockpit-kpi-value small { font-family:'DM Sans',sans-serif;font-size:13px;letter-spacing:.05em; }
+.kelyani-cockpit .cockpit-kpi-foot { display:flex;flex-wrap:wrap;gap:7px;margin-top:13px;color:#A0A0A0;font-size:10px; }
+.kelyani-cockpit .cockpit-kpi-accent { color:#D4AF37;font-weight:700; }
+.kelyani-cockpit .cockpit-kpi-index { position:absolute;right:20px;bottom:17px;color:rgba(160,160,160,.52);font-size:8px;letter-spacing:.15em; }
+.kelyani-cockpit .cockpit-kpi-featured { background:linear-gradient(145deg,rgba(212,175,55,.13),rgba(30,30,30,.74)); }
+.kelyani-cockpit .cockpit-chart-card,.kelyani-cockpit .cockpit-retention-card,.kelyani-cockpit .cockpit-feed,.kelyani-cockpit .cockpit-actions { border-radius:24px;padding:clamp(18px,2.1vw,28px); }
+.kelyani-cockpit .cockpit-card-title { margin-top:7px;color:#F5F5F5;font-family:'Playfair Display',serif;font-size:22px;font-weight:500;letter-spacing:-.02em; }
+.kelyani-cockpit .cockpit-period-switch { display:flex;flex-wrap:wrap;gap:4px;padding:4px;border:1px solid rgba(212,175,55,.17);border-radius:12px;background:rgba(18,18,18,.6); }
+.kelyani-cockpit .cockpit-period-switch button { padding:7px 10px;border-radius:8px;color:#A0A0A0;font-size:9px;transition:background .18s ease,color .18s ease; }
+.kelyani-cockpit .cockpit-period-switch button.is-active { background:rgba(212,175,55,.16);color:#D4AF37;box-shadow:inset 0 0 0 1px rgba(212,175,55,.24); }
+.kelyani-cockpit .cockpit-chart-total { color:#F5F5F5;font-family:'Playfair Display',serif;font-size:32px; }
+.kelyani-cockpit .cockpit-gauge-wrap { display:grid;place-items:center;padding:14px 0 8px; }
+.kelyani-cockpit .cockpit-gauge { width:min(100%,230px);overflow:visible; }
+.kelyani-cockpit .cockpit-gauge-progress { transition:stroke-dashoffset 1.2s cubic-bezier(.2,.75,.25,1);filter:drop-shadow(0 0 7px rgba(212,175,55,.28)); }
+.kelyani-cockpit .cockpit-gauge-value { fill:#F5F5F5;font-family:'Playfair Display',serif;font-size:31px; }
+.kelyani-cockpit .cockpit-gauge-label { fill:#A0A0A0;font-family:'DM Sans',sans-serif;font-size:8px;letter-spacing:2px; }
+.kelyani-cockpit .cockpit-gauge-legend { display:flex;align-items:center;justify-content:space-between;padding:12px 2px;border-top:1px solid rgba(212,175,55,.12);color:#A0A0A0;font-size:9px;letter-spacing:.12em; }
+.kelyani-cockpit .cockpit-gauge-legend strong { color:#F5F5F5;font-size:13px;letter-spacing:0; }
+.kelyani-cockpit .cockpit-feed-live { display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid rgba(212,175,55,.22);border-radius:999px;color:#D4AF37;font-size:8px;letter-spacing:.13em; }
+.kelyani-cockpit .cockpit-feed-row { display:flex;align-items:center;gap:13px;padding:15px 2px; }
+.kelyani-cockpit .cockpit-feed-icon { position:relative;display:grid;place-items:center;width:38px;height:38px;flex:none;border:1px solid rgba(212,175,55,.22);border-radius:13px;background:rgba(212,175,55,.055);color:#D4AF37; }
+.kelyani-cockpit .cockpit-feed-icon i { position:absolute;right:-2px;top:-2px;width:8px;height:8px;border:2px solid #1E1E1E;border-radius:50%;background:#D4AF37;box-shadow:0 0 9px rgba(212,175,55,.55); }
+.kelyani-cockpit .cockpit-action-link { display:flex;align-items:center;gap:12px;padding:13px;border:1px solid rgba(212,175,55,.16);border-radius:15px;background:rgba(18,18,18,.44);color:#F5F5F5;transition:transform .2s ease,border-color .2s ease,background .2s ease; }
+.kelyani-cockpit .cockpit-action-link:hover { transform:translateX(3px);border-color:rgba(212,175,55,.45);background:rgba(212,175,55,.055); }
+.kelyani-cockpit .cockpit-action-link>span:nth-child(2) { min-width:0;flex:1; }
+.kelyani-cockpit .cockpit-action-link strong,.kelyani-cockpit .cockpit-action-link small { display:block; }
+.kelyani-cockpit .cockpit-action-link strong { color:#F5F5F5;font-size:12px;font-weight:600; }
+.kelyani-cockpit .cockpit-action-link small { margin-top:4px;color:#A0A0A0;font-size:10px; }
+.kelyani-cockpit .cockpit-action-link>svg:last-child { color:#D4AF37; }
+.kelyani-cockpit .cockpit-action-icon { display:grid;place-items:center;width:38px;height:38px;flex:none;border:1px solid rgba(212,175,55,.25);border-radius:12px;color:#D4AF37; }
+.kelyani-cockpit .cockpit-action-primary { background:rgba(212,175,55,.09);border-color:rgba(212,175,55,.34); }
+.kelyani-cockpit .cockpit-actions-footer { display:flex;align-items:center;justify-content:space-between;margin-top:25px;padding-top:17px;border-top:1px solid rgba(212,175,55,.14); }
+.kelyani-cockpit .cockpit-actions-footer span { color:#A0A0A0;font-size:8px;letter-spacing:.2em; }
+.kelyani-cockpit .cockpit-actions-footer strong { color:#F5F5F5;font-size:10px;letter-spacing:.14em; }
+.kelyani-cockpit .cockpit-actions-footer em { color:#D4AF37;font-style:normal; }
+@media(max-width:640px) {
+ .dashboard-depth-shell .kelyani-cockpit { margin:-4px;padding:14px;border-radius:20px; }
+ .kelyani-cockpit .cockpit-hero { min-height:unset;padding:22px 18px;border-radius:21px; }
+ .kelyani-cockpit .cockpit-hero-orbit { opacity:.5; }
+ .kelyani-cockpit .cockpit-kpi { min-height:150px;padding:17px;border-radius:18px; }
+ .kelyani-cockpit .cockpit-kpi-value { margin-top:18px;font-size:38px; }
+ .kelyani-cockpit .cockpit-card-title { font-size:20px; }
+ .kelyani-cockpit .cockpit-period-switch { width:100%;justify-content:space-between; }
+ .kelyani-cockpit .cockpit-period-switch button { padding:7px 8px; }
+ .kelyani-cockpit .cockpit-feed-row { gap:9px; }
+ .kelyani-cockpit .cockpit-feed-row time { font-size:9px; }
+}
+@media(prefers-reduced-motion:reduce) {
+ .kelyani-cockpit .cockpit-live-dot,.kelyani-cockpit .cockpit-gauge-progress { animation:none;transition:none; }
+ .kelyani-cockpit * { scroll-behavior:auto !important; }
+}
