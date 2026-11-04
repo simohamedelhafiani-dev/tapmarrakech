@@ -1093,3 +1093,48 @@ table {
     animation-duration: .01ms !important;
   }
 }
+
+
+/* KELYANI STRICT BRAND PALETTE — final visual authority.
+   Allowed visible colors only: #121212, #1E1E1E, #D4AF37, #F5F5F5, #A0A0A0.
+   Overrides legacy component color utilities without changing behavior. */
+:root {
+  color-scheme: dark;
+  --kelyani-bg: #121212;
+  --kelyani-panel: #1E1E1E;
+  --kelyani-panel-raised: #1E1E1E;
+  --kelyani-border: rgba(212,175,55,.22);
+  --kelyani-text: #F5F5F5;
+  --kelyani-muted: #A0A0A0;
+  --kelyani-gold: #D4AF37;
+  --kelyani-gold-soft: #D4AF37;
+  --kelyani-navy: #121212;
+  --kelyani-navy-soft: #1E1E1E;
+  --kelyani-accent: #D4AF37;
+  --kelyani-accent-hover: #D4AF37;
+  --kelyani-app-canvas: #121212;
+  --kelyani-card: #1E1E1E;
+  --kelyani-ink: #F5F5F5;
+  --kelyani-muted-ink: #A0A0A0;
+  --kelyani-hairline: rgba(212,175,55,.22);
+}
+html, body, #root { background: #121212 !important; color: #F5F5F5; }
+#root [class*="bg-"] { background-color: #1E1E1E !important; background-image: none !important; }
+#root [class*="bg-gold"], #root [class*="bg-[#D4AF37]"] { background-color: #D4AF37 !important; }
+#root [class*="text-gold"], #root [class*="text-forest"], #root [class*="text-[#D4AF37]"] { color: #D4AF37 !important; }
+#root [class*="text-ink"], #root [class*="text-white"], #root [class*="text-[#0F172A]"], #root [class*="text-[#1E293B]"], #root [class*="text-[#F5F5DC]"] { color: #F5F5F5 !important; }
+#root [class*="text-[#737373]"], #root [class*="text-[#64748B]"], #root [class*="text-[#A7A196]"] { color: #A0A0A0 !important; }
+#root [class*="border-"] { border-color: rgba(212,175,55,.22); }
+#root input, #root textarea, #root select, #root option {
+  background-color: #1E1E1E !important; color: #F5F5F5 !important;
+  border-color: rgba(212,175,55,.22) !important; color-scheme: dark;
+}
+#root input::placeholder, #root textarea::placeholder { color: #A0A0A0 !important; }
+#root button[class*="bg-"]:not([class*="bg-gold"]), #root a[class*="bg-"]:not([class*="bg-gold"]) {
+  background-color: #1E1E1E !important; color: #F5F5F5 !important;
+}
+#root button[class*="bg-gold"], #root a[class*="bg-gold"], #root button[class*="bg-[#D4AF37]"], #root a[class*="bg-[#D4AF37]"] {
+  background-color: #D4AF37 !important; color: #121212 !important;
+}
+#root :focus-visible { outline-color: #D4AF37 !important; }
+::selection { color: #121212; background: #D4AF37; }
