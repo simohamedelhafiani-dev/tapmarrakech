@@ -814,24 +814,30 @@ export default function Dashboard() {
 
   const registrationChart = useMemo(() => {
     const today = new Date();
-    const startDate = new Date(today);
-    startDate.setDate(today.getDate() - 29);
-    startDate.setHours(0, 0, 0, 0);
-    return Array.from({ length: 30 }, (_, index) => {
-      const day = new Date(startDate);
-      day.setDate(startDate.getDate() + index);
-      const nextDay = new Date(day);
-      nextDay.setDate(day.getDate() + 1);
+    const bucketDays = Math.max(1, Math.ceil(selected.days / 7));
+    const rangeStart = new Date(today);
+    rangeStart.setDate(today.getDate() - selected.days);
+    rangeStart.setHours(0, 0, 0, 0);
+
+    return Array.from({ length: 7 }, (_, index) => {
+      const start = new Date(rangeStart);
+      start.setDate(rangeStart.getDate() + index * bucketDays);
+      const end = new Date(start);
+      end.setDate(start.getDate() + bucketDays);
+
       const count = loyaltyCustomers.filter((customer) => {
         const createdAt = new Date(customer.created_at);
-        return createdAt >= day && createdAt < nextDay;
+        return createdAt >= start && createdAt < end;
       }).length;
+
       return {
-        date: day.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }),
+        date: selected.days <= 7
+          ? start.toLocaleDateString('fr-FR', { weekday: 'short' })
+          : start.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }),
         inscriptions: count,
       };
     });
-  }, [loyaltyCustomers]);
+  }, [loyaltyCustomers, selected.days]);
 
   const recentActivity = useMemo(() => [
     ...loyaltyCustomers.map((customer) => ({
@@ -946,7 +952,7 @@ export default function Dashboard() {
         </article>
         <article className="cockpit-glass cockpit-kpi">
           <div className="cockpit-kpi-head"><span>REVENU ESTIMÉ</span><Wallet size={17}/></div>
-          <div className="cockpit-kpi-value">{dashboardStatsLoading?'—':`${formatCompactNumber(analytics.currentRevenue)} <small>DH</small>`}</div>
+          <div className="cockpit-kpi-value">{dashboardStatsLoading ? '—' : <>{formatCompactNumber(analytics.currentRevenue)} <small>DH</small></>}</div>
           <div className="cockpit-kpi-foot"><span>Sur les {selected.days} derniers jours</span></div>
           <div className="cockpit-kpi-index">04 / 04</div>
         </article>
@@ -955,7 +961,7 @@ export default function Dashboard() {
       <section className="grid gap-4 2xl:grid-cols-[minmax(0,1.65fr)_minmax(300px,.72fr)]">
         <article className="cockpit-glass cockpit-chart-card min-w-0">
           <div className="flex flex-wrap items-start justify-between gap-4">
-            <div><div className="cockpit-section-kicker">PERFORMANCE · ACQUISITION</div><h2 className="cockpit-card-title">La dynamique de votre clientèle</h2><p className="mt-2 text-xs text-[#A0A0A0]">Nouvelles inscriptions sur les 30 derniers jours</p></div>
+            <div><div className="cockpit-section-kicker">PERFORMANCE · ACQUISITION</div><h2 className="cockpit-card-title">La dynamique de votre clientèle</h2><p className="mt-2 text-xs text-[#A0A0A0]">Nouvelles inscriptions sur la période sélectionnée</p></div>
             <div className="cockpit-period-switch" role="group" aria-label="Période du tableau de bord">
               {ranges.map(range=><button key={range.key} type="button" onClick={()=>setPeriod(range.key)} className={period===range.key?'is-active':''}>{range.label.replace(' derniers jours','').replace(' mois','M').replace(' jours','J')}</button>)}
             </div>
@@ -966,7 +972,7 @@ export default function Dashboard() {
               <AreaChart data={registrationChart} margin={{top:14,right:8,left:-22,bottom:0}}>
                 <defs><linearGradient id="kelyaniCockpitArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#D4AF37" stopOpacity={.38}/><stop offset="100%" stopColor="#F5F5F5" stopOpacity={.015}/></linearGradient></defs>
                 <CartesianGrid stroke="#D4AF37" strokeOpacity={.12} vertical={false}/>
-                <XAxis dataKey="date" axisLine={false} tickLine={false} interval={4} tick={{fill:'#A0A0A0',fontSize:10}}/>
+                <XAxis dataKey="date" axisLine={false} tickLine={false} interval={0} tick={{fill:'#A0A0A0',fontSize:10}}/>
                 <YAxis allowDecimals={false} axisLine={false} tickLine={false} width={32} tick={{fill:'#A0A0A0',fontSize:10}}/>
                 <Tooltip contentStyle={{background:'#1E1E1E',border:'1px solid rgba(212,175,55,.45)',borderRadius:14,color:'#F5F5F5',fontSize:12}}/>
                 <Area type="monotone" dataKey="inscriptions" name="Nouveaux clients" stroke="#D4AF37" strokeWidth={3} fill="url(#kelyaniCockpitArea)" activeDot={{r:5,fill:'#F5F5F5',stroke:'#D4AF37',strokeWidth:2}} isAnimationActive animationDuration={1200} animationEasing="ease-out"/>
