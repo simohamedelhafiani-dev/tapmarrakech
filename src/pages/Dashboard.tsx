@@ -1,24 +1,25 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
+  Activity,
   ArrowUpRight,
+  CalendarDays,
   Heart,
   Menu,
   MessageCircle,
-  Users,
+  Repeat2,
+  ScanLine,
   Star,
   TrendingDown,
   TrendingUp,
+  UserPlus,
+  Users,
+  Wallet,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
   Area,
   AreaChart,
-  Bar,
-  BarChart,
   CartesianGrid,
-  Cell,
-  Pie,
-  PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -27,7 +28,6 @@ import {
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Establishment, Review } from '@/lib/types';
-import { Stars } from '@/components/Stars';
 import { getMySubscriptionAccess, type SubscriptionAccess } from '@/lib/subscriptionAccess';
 import KelyaniMark from '@/components/brand/KelyaniMark';
 
@@ -844,147 +844,208 @@ export default function Dashboard() {
     );
   }
 
+  const registrationChart = useMemo(() => {
+    const today = new Date();
+    const startDate = new Date(today);
+    startDate.setDate(today.getDate() - 29);
+    startDate.setHours(0, 0, 0, 0);
+    return Array.from({ length: 30 }, (_, index) => {
+      const day = new Date(startDate);
+      day.setDate(startDate.getDate() + index);
+      const nextDay = new Date(day);
+      nextDay.setDate(day.getDate() + 1);
+      const count = loyaltyCustomers.filter((customer) => {
+        const createdAt = new Date(customer.created_at);
+        return createdAt >= day && createdAt < nextDay;
+      }).length;
+      return {
+        date: day.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }),
+        inscriptions: count,
+      };
+    });
+  }, [loyaltyCustomers]);
+
+  const recentActivity = useMemo(() => [
+    ...loyaltyCustomers.map((customer) => ({
+      id: `customer-${customer.id}`,
+      kind: 'customer' as const,
+      title: 'Nouveau client inscrit',
+      detail: [customer.first_name, customer.last_name].filter(Boolean).join(' ') || 'Un client a rejoint votre programme',
+      created_at: customer.created_at,
+    })),
+    ...loyaltyTransactions.map((transaction) => {
+      const customer = loyaltyCustomers.find((item) => item.id === transaction.customer_id);
+      const name = [customer?.first_name, customer?.last_name].filter(Boolean).join(' ');
+      return {
+        id: `visit-${transaction.id}`,
+        kind: 'visit' as const,
+        title: 'Visite fidélité enregistrée',
+        detail: name || 'Un client a validé une visite',
+        created_at: transaction.created_at,
+      };
+    }),
+    ...reviews.map((review) => ({
+      id: `review-${review.id}`,
+      kind: 'review' as const,
+      title: 'Nouvel avis reçu',
+      detail: review.name || 'Un client a partagé son expérience',
+      created_at: review.created_at,
+    })),
+  ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 5), [loyaltyCustomers, loyaltyTransactions, reviews]);
+
+  const formatCompactNumber = (value: number) => new Intl.NumberFormat('fr-FR', { notation: 'compact', maximumFractionDigits: 1 }).format(value);
+  const formatGrowth = (value: number) => `${value > 0 ? '+' : ''}${value.toFixed(1)}%`;
+  const firstName = profileName.trim().split(/\\s+/)[0] || 'à vous';
+
   return (
-    <div className="min-h-screen space-y-6 pb-8 text-white">
-      <section className="relative isolate overflow-hidden rounded-[28px] border border-[#C9A45C]/20 bg-[radial-gradient(ellipse_at_top_right,rgba(201,164,92,0.13),transparent_42%),linear-gradient(135deg,#151515_0%,#090909_62%,#111111_100%)] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:rounded-[32px] sm:p-8 lg:p-9">
-        <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full border border-[#C9A45C]/15" /><div className="pointer-events-none absolute -bottom-36 left-[38%] h-72 w-72 rounded-full bg-[#C9A45C]/[0.035] blur-3xl" />
-        <div className="relative z-10">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-            <div className="min-w-0">
-              <div className="mb-4 flex items-center gap-3">
-                {selectedEstablishment?.logo_url ? <img src={selectedEstablishment.logo_url} alt={selectedEstablishment.name} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = '/kelyani-final.svg'; }} className="h-12 w-12 rounded-xl border border-[#242424] bg-[#050505] object-contain p-1" /> : <div className="grid h-12 w-12 place-items-center rounded-xl border border-[#242424] bg-[#050505]"><KelyaniMark size={28} /></div>}
-                <div className="min-w-0 leading-none">
-                  <p className="max-w-[260px] truncate text-lg font-semibold text-white">{selectedEstablishment?.name || 'Votre établissement'}</p>
-                  <p className="mt-1 text-[7px] font-semibold uppercase tracking-[.22em] text-[#C9A45C]/60">ESPACE ÉTABLISSEMENT · KELYANI</p>
-                </div>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full border border-[#C9A45C]/20 bg-[#C9A45C]/[0.06] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-[#E1C27A]">{roleLabel}</span>
-                {establishmentName && <span className="truncate rounded-full border border-[#242424] bg-[#050505] px-2.5 py-1 text-[9px] font-semibold text-[#F5F5DC]/45">{establishmentName}</span>}
-              </div>
-              <h1 className="mt-4 max-w-3xl font-display text-3xl leading-[1.02] tracking-[-0.035em] text-white sm:text-5xl">Faites de chaque client <span className="text-[#C9A45C]">un client régulier.</span></h1>
-              <p className="mt-3 max-w-xl text-sm leading-6 text-[#F5F5DC]/40">Bonjour {profileName || 'à vous'}. Votre activité, vos clients et vos avis — réunis dans une interface simple.</p>
-            </div>
-            <div className="flex w-full flex-col gap-2 sm:w-auto">
-              {places.length > 0 && <select value={selectedEstablishmentId ?? ''} onChange={(event) => changeEstablishment(event.target.value)} className="h-11 min-w-[210px] rounded-2xl border border-[#242424] bg-[#050505] px-3 text-xs font-semibold text-white outline-none focus:border-[#C9A45C]/55" aria-label="Établissement actif">{places.map((place) => <option className="bg-[#111111]" key={place.id} value={place.id}>{place.name}</option>)}</select>}
-              {!isResponsible && <Link to="/dashboard/establishments" className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-[#C9A45C] px-4 text-xs font-bold text-[#050505] hover:bg-[#E1C27A]">Gérer les établissements <ArrowUpRight size={15} /></Link>}
-            </div>
+    <div className="kelyani-light-dashboard min-h-screen space-y-6 pb-8">
+      <section className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#D4AF37]/10 px-3 py-1.5 text-xs font-semibold text-[#9B7620]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#D4AF37]" />
+            Espace professionnel
           </div>
-          <div className="mt-8 grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
-            {[
-              { label: 'Avis', value: dashboardStatsLoading ? '—' : String(dashboardStats?.reviews_count ?? 0), icon: MessageCircle },
-              { label: 'Note', value: dashboardStatsLoading ? '—' : String((dashboardStats?.average_rating ?? 0).toFixed(1)), icon: Star },
-              { label: 'Clients', value: dashboardStatsLoading ? '—' : String(dashboardStats?.loyalty_customers_count ?? loyaltyCustomers.length), icon: Users },
-              { label: 'Retour', value: dashboardStatsLoading ? '—' : String(analytics.returningRate.toFixed(0)) + '%', icon: TrendingUp },
-            ].map(({ label, value, icon: Icon }) => <div key={label} className="group rounded-2xl border border-white/[0.07] bg-black/35 px-3.5 py-4 transition duration-200 hover:border-[#C9A45C]/25 hover:bg-black/50 sm:px-4 sm:py-5"><Icon size={15} className="text-[#C9A45C]" /><p className="mt-3 text-2xl font-semibold tracking-tight text-white sm:text-[28px]">{value}</p><p className="mt-1 text-[9px] font-semibold uppercase tracking-[0.15em] text-[#F5F5DC]/40">{label}</p></div>)}
-          </div>
+          <h1 className="text-2xl font-semibold tracking-tight text-[#171717] sm:text-3xl">
+            Bonjour {firstName}, voici vos performances
+          </h1>
+          <p className="mt-2 text-sm text-[#737373]">
+            Retrouvez en un coup d’œil la fidélité et l’activité de votre établissement.
+          </p>
+          <p className="mt-2 flex items-center gap-2 text-xs font-medium text-[#8A8A8A]">
+            <CalendarDays size={14} />
+            {new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date())}
+          </p>
+        </div>
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-[230px]">
+          {places.length > 1 && (
+            <label className="text-xs font-medium text-[#737373]">
+              Établissement
+              <select value={selectedEstablishmentId ?? ''} onChange={(event) => changeEstablishment(event.target.value)} className="kelyani-light-select mt-1.5 h-11 w-full rounded-xl px-3 text-sm font-semibold text-[#262626]" aria-label="Établissement actif">
+                {places.map((place) => <option key={place.id} value={place.id}>{place.name}</option>)}
+              </select>
+            </label>
+          )}
+          {places.length === 1 && <p className="truncate text-sm font-semibold text-[#525252]">{places[0].name}</p>}
+          {!isResponsible && (
+            <Link to="/dashboard/establishments" className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#D4AF37] px-4 text-sm font-semibold text-[#171717] shadow-sm transition hover:bg-[#C29B2D]">
+              Gérer les établissements <ArrowUpRight size={16} />
+            </Link>
+          )}
         </div>
       </section>
 
-      <section aria-label="Indicateurs de performance" className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:grid-cols-4">
-        {[
-          { label: 'Chiffre d’affaires', value: dashboardStatsLoading ? '—' : `${analytics.currentRevenue.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} DH`, detail: 'sur la période', icon: TrendingUp },
-          { label: 'Visites clients', value: dashboardStatsLoading ? '—' : analytics.visits.toLocaleString('fr-FR'), detail: 'activité fidélité', icon: Users },
-          { label: 'Clients actifs', value: dashboardStatsLoading ? '—' : analytics.activeCustomers.toLocaleString('fr-FR'), detail: `${analytics.activeRate.toFixed(0)}% de la base`, icon: Star },
-          { label: 'Points utilisés', value: dashboardStatsLoading ? '—' : analytics.pointsRedeemed.toLocaleString('fr-FR'), detail: 'points consommés', icon: TrendingDown },
-        ].map(({ label, value, detail, icon: Icon }) => (
-          <article key={label} className="rounded-2xl border border-white/[0.07] bg-[#101010] p-4 transition hover:border-[#C9A45C]/25 sm:rounded-[22px] sm:p-5">
-            <div className="flex items-center justify-between gap-2"><span className="text-[9px] font-semibold uppercase tracking-[0.13em] text-[#F5F5DC]/40 sm:text-[10px]">{label}</span><span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[#C9A45C]/[0.09] text-[#C9A45C]"><Icon size={15} /></span></div>
-            <p className="mt-4 text-xl font-semibold tracking-tight text-white sm:text-2xl">{value}</p>
-            <p className="mt-1 text-[10px] text-[#F5F5DC]/35">{detail}</p>
-          </article>
-        ))}
+      <section aria-label="Indicateurs clés" className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <article className="kelyani-light-card rounded-2xl p-4 sm:p-5">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-[#737373]">Clients actifs</p>
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#A47C19]"><Users size={19} /></span>
+          </div>
+          <p className="mt-4 text-3xl font-bold tracking-tight text-[#171717]">{dashboardStatsLoading ? '—' : formatCompactNumber(analytics.activeCustomers)}</p>
+          <p className="mt-2 text-xs text-[#737373]">{formatGrowth(analytics.registrationGrowth)} d’inscriptions vs période précédente</p>
+        </article>
+        <article className="kelyani-light-card rounded-2xl p-4 sm:p-5">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-[#737373]">Visites totales</p>
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#A47C19]"><Activity size={19} /></span>
+          </div>
+          <p className="mt-4 text-3xl font-bold tracking-tight text-[#171717]">{dashboardStatsLoading ? '—' : formatCompactNumber(analytics.visits)}</p>
+          <p className="mt-2 text-xs text-[#737373]">Visites enregistrées dans le programme</p>
+        </article>
+        <article className="kelyani-light-card rounded-2xl p-4 sm:p-5">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-[#737373]">Taux de rétention</p>
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#A47C19]"><Repeat2 size={19} /></span>
+          </div>
+          <p className="mt-4 text-3xl font-bold tracking-tight text-[#171717]">{dashboardStatsLoading ? '—' : `${analytics.returningRate.toFixed(1)}%`}</p>
+          <p className="mt-2 text-xs text-[#737373]">{formatCompactNumber(analytics.returningCustomers)} clients revenus au moins deux fois</p>
+        </article>
+        <article className="kelyani-light-card rounded-2xl p-4 sm:p-5">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-[#737373]">Revenu estimé</p>
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#A47C19]"><Wallet size={19} /></span>
+          </div>
+          <p className="mt-4 text-3xl font-bold tracking-tight text-[#171717]">{dashboardStatsLoading ? '—' : `${formatCompactNumber(analytics.currentRevenue)} DH`}</p>
+          <p className="mt-2 text-xs text-[#737373]">Sur les 30 derniers jours</p>
+        </article>
       </section>
 
-      <section aria-label="Analyses visuelles" className="grid gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(280px,.7fr)]">
-        <article className="overflow-hidden rounded-[24px] border border-white/[0.07] bg-[radial-gradient(ellipse_at_top_left,rgba(201,164,92,0.08),transparent_48%),linear-gradient(145deg,#141414,#090909)] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.2)] sm:rounded-[28px] sm:p-6 lg:p-7">
+      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.65fr)_minmax(280px,.8fr)]">
+        <article className="kelyani-light-card min-w-0 rounded-2xl p-4 sm:p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
-            <div><p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#C9A45C]">Tendance</p><h2 className="mt-1 text-lg font-semibold text-white sm:text-xl">Évolution des avis</h2><p className="mt-1 text-xs text-[#F5F5DC]/35">Avis positifs et avis à surveiller sur la période choisie</p></div>
-            <div className="flex flex-wrap gap-3 pt-1"><span className="flex items-center gap-1.5 text-[10px] text-[#F5F5DC]/55"><span className="h-2 w-2 rounded-full bg-[#C9A45C]" />Positifs</span><span className="flex items-center gap-1.5 text-[10px] text-[#F5F5DC]/55"><span className="h-2 w-2 rounded-full bg-[#82796B]" />À surveiller</span></div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#A47C19]">Acquisition</p>
+              <h2 className="mt-1 text-lg font-semibold text-[#171717]">Nouveaux clients</h2>
+              <p className="mt-1 text-sm text-[#737373]">Inscriptions sur les 30 derniers jours</p>
+            </div>
+            <div className="rounded-xl bg-[#D4AF37]/10 px-3 py-2 text-right">
+              <p className="text-xs text-[#737373]">Total période</p>
+              <p className="text-lg font-bold text-[#171717]">{analytics.currentRegistrations}</p>
+            </div>
           </div>
-          <div className="mt-5 h-56 sm:h-64">
-            <ResponsiveContainer width="100%" height="100%"><AreaChart data={chart} margin={{ top: 8, right: 4, left: -22, bottom: 0 }}>
-              <defs><linearGradient id="kelyaniPositiveFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#C9A45C" stopOpacity={0.28} /><stop offset="95%" stopColor="#C9A45C" stopOpacity={0.01} /></linearGradient><linearGradient id="kelyaniNegativeFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#82796B" stopOpacity={0.22} /><stop offset="95%" stopColor="#82796B" stopOpacity={0.01} /></linearGradient></defs>
-              <CartesianGrid stroke="#FFFFFF" strokeOpacity={0.06} vertical={false} />
-              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#F5F5DC', opacity: 0.42, fontSize: 10 }} />
-              <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{ fill: '#F5F5DC', opacity: 0.32, fontSize: 9 }} width={28} />
-              <Tooltip contentStyle={{ background: '#111111', border: '1px solid #34302A', borderRadius: 14, color: '#fff', fontSize: 12 }} />
-              <Area type="monotone" dataKey="positive" name="Avis positifs" stroke="#C9A45C" strokeWidth={2.5} fill="url(#kelyaniPositiveFill)" activeDot={{ r: 4, strokeWidth: 0 }} />
-              <Area type="monotone" dataKey="negative" name="Avis à surveiller" stroke="#82796B" strokeWidth={2} fill="url(#kelyaniNegativeFill)" activeDot={{ r: 4, strokeWidth: 0 }} />
-            </AreaChart></ResponsiveContainer>
-          </div>
-          <div className="mt-4 grid grid-cols-3 gap-2 border-t border-white/[0.07] pt-4">
-            <div><p className="text-[9px] uppercase tracking-wider text-[#F5F5DC]/35">Total avis</p><p className="mt-1 text-lg font-semibold text-white">{reviews.length.toLocaleString('fr-FR')}</p></div>
-            <div><p className="text-[9px] uppercase tracking-wider text-[#F5F5DC]/35">Positifs</p><p className="mt-1 text-lg font-semibold text-[#D9B76B]">{reviews.filter((review) => review.rating >= 4).length.toLocaleString('fr-FR')}</p></div>
-            <div><p className="text-[9px] uppercase tracking-wider text-[#F5F5DC]/35">À surveiller</p><p className="mt-1 text-lg font-semibold text-[#C7BBA7]">{reviews.filter((review) => review.rating <= 3).length.toLocaleString('fr-FR')}</p></div>
+          <div className="mt-5 h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={registrationChart} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="kelyaniRegistrationsFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#D4AF37" stopOpacity={0.28} />
+                    <stop offset="95%" stopColor="#D4AF37" stopOpacity={0.02} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid stroke="#EDEDED" vertical={false} />
+                <XAxis dataKey="date" axisLine={false} tickLine={false} interval={4} tick={{ fill: '#8A8A8A', fontSize: 11 }} />
+                <YAxis allowDecimals={false} axisLine={false} tickLine={false} width={32} tick={{ fill: '#8A8A8A', fontSize: 11 }} />
+                <Tooltip contentStyle={{ background: '#FFFFFF', border: '1px solid #EEEEEE', borderRadius: 12, color: '#171717', fontSize: 12, boxShadow: '0 8px 24px rgba(0,0,0,.08)' }} />
+                <Area type="monotone" dataKey="inscriptions" name="Nouveaux clients" stroke="#B58B25" strokeWidth={2.5} fill="url(#kelyaniRegistrationsFill)" activeDot={{ r: 4, strokeWidth: 0, fill: '#B58B25' }} />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </article>
-        <article className="flex flex-col overflow-hidden rounded-[24px] border border-white/[0.07] bg-[linear-gradient(145deg,#141414,#090909)] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.2)] sm:rounded-[28px] sm:p-6 lg:p-7">
-          <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#C9A45C]">Réputation</p><h2 className="mt-1 text-lg font-semibold text-white sm:text-xl">Répartition des avis</h2><p className="mt-1 text-xs text-[#F5F5DC]/35">Lecture rapide de la satisfaction client</p>
-          <div className="relative mx-auto mt-3 h-52 w-full max-w-[280px]">
-            <ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={[{ name: 'Positifs', value: reviews.filter((review) => review.rating >= 4).length }, { name: 'À surveiller', value: reviews.filter((review) => review.rating <= 3).length }]} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius="67%" outerRadius="88%" paddingAngle={reviews.length ? 4 : 0} stroke="none" startAngle={90} endAngle={-270}>{[{ color: '#C9A45C' }, { color: '#5C554B' }].map((item, index) => <Cell key={index} fill={item.color} />)}</Pie><Tooltip contentStyle={{ background: '#111111', border: '1px solid #34302A', borderRadius: 12, color: '#fff', fontSize: 12 }} /></PieChart></ResponsiveContainer>
-            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center"><span className="font-display text-4xl font-semibold text-white">{reviews.length ? Math.round((reviews.filter((review) => review.rating >= 4).length / reviews.length) * 100) : 0}%</span><span className="mt-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-[#F5F5DC]/40">positifs</span></div>
+
+        <article className="kelyani-light-card rounded-2xl p-4 sm:p-6">
+          <div className="flex items-center justify-between gap-3">
+            <div><p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#A47C19]">Accès rapide</p><h2 className="mt-1 text-lg font-semibold text-[#171717]">Gagner du temps</h2></div>
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#A47C19]"><ScanLine size={19} /></span>
           </div>
-          <div className="mt-auto space-y-3">
-            <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-3"><span className="flex items-center gap-2 text-xs text-[#F5F5DC]/60"><span className="h-2.5 w-2.5 rounded-full bg-[#C9A45C]" />Avis positifs (4–5★)</span><strong className="text-sm text-white">{reviews.filter((review) => review.rating >= 4).length}</strong></div>
-            <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-3"><span className="flex items-center gap-2 text-xs text-[#F5F5DC]/60"><span className="h-2.5 w-2.5 rounded-full bg-[#5C554B]" />Avis à surveiller (1–3★)</span><strong className="text-sm text-white">{reviews.filter((review) => review.rating <= 3).length}</strong></div>
+          <div className="mt-5 space-y-3">
+            <Link to="/dashboard/loyalty" className="flex items-center gap-3 rounded-xl bg-[#D4AF37] p-3.5 text-[#171717] transition hover:bg-[#C29B2D]">
+              <span className="grid h-10 w-10 place-items-center rounded-lg bg-black/10"><UserPlus size={19} /></span>
+              <span className="min-w-0 flex-1"><strong className="block text-sm">Ajouter un client</strong><span className="mt-0.5 block text-xs text-black/60">Inscrire un nouveau membre</span></span>
+              <ArrowUpRight size={17} />
+            </Link>
+            <Link to="/employee" className="flex items-center gap-3 rounded-xl border border-[#EAEAEA] bg-white p-3.5 text-[#262626] transition hover:border-[#D4AF37]/60 hover:bg-[#FFFCF3]">
+              <span className="grid h-10 w-10 place-items-center rounded-lg bg-[#D4AF37]/10 text-[#A47C19]"><ScanLine size={19} /></span>
+              <span className="min-w-0 flex-1"><strong className="block text-sm">Scanner un QR code</strong><span className="mt-0.5 block text-xs text-[#737373]">Valider une visite ou une récompense</span></span>
+              <ArrowUpRight size={17} />
+            </Link>
+            <Link to="/dashboard/reviews" className="flex items-center gap-3 rounded-xl border border-[#EAEAEA] bg-white p-3.5 text-[#262626] transition hover:border-[#D4AF37]/60 hover:bg-[#FFFCF3]">
+              <span className="grid h-10 w-10 place-items-center rounded-lg bg-[#D4AF37]/10 text-[#A47C19]"><MessageCircle size={19} /></span>
+              <span className="min-w-0 flex-1"><strong className="block text-sm">Gérer les avis</strong><span className="mt-0.5 block text-xs text-[#737373]">Suivre votre réputation Google</span></span>
+              <ArrowUpRight size={17} />
+            </Link>
           </div>
         </article>
       </section>
 
-      <section aria-label="Performance du programme de fidélité" className="space-y-4">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div><p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#C9A45C]">Customer intelligence</p><h2 className="mt-1 text-xl font-semibold tracking-tight text-white sm:text-2xl">La fidélité, en un regard</h2><p className="mt-1 text-xs text-[#F5F5DC]/40">Engagement, circulation des points et retour des clients</p></div>
-          <span className="rounded-full border border-[#C9A45C]/20 bg-[#C9A45C]/[0.06] px-3 py-1.5 text-[9px] font-semibold uppercase tracking-wider text-[#E1C27A]">{selected.label}</span>
+      <section className="kelyani-light-card rounded-2xl p-4 sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div><p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#A47C19]">En temps réel</p><h2 className="mt-1 text-lg font-semibold text-[#171717]">Activité récente</h2><p className="mt-1 text-sm text-[#737373]">Les cinq dernières interactions enregistrées</p></div>
+          <Link to="/dashboard/loyalty" className="inline-flex items-center gap-1 text-sm font-semibold text-[#9B7620] hover:text-[#73550F]">Voir la fidélité <ArrowUpRight size={15} /></Link>
         </div>
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(280px,.75fr)]">
-          <article className="overflow-hidden rounded-[24px] border border-white/[0.07] bg-[radial-gradient(ellipse_at_top_left,rgba(201,164,92,0.08),transparent_48%),linear-gradient(145deg,#141414,#090909)] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.2)] sm:rounded-[28px] sm:p-6">
-            <div className="flex items-start justify-between gap-3"><div><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#C9A45C]">Économie de fidélité</p><h3 className="mt-1 text-base font-semibold text-white sm:text-lg">Points gagnés vs utilisés</h3><p className="mt-1 text-xs text-[#F5F5DC]/35">Comprendre comment les récompenses circulent</p></div><div className="rounded-xl border border-[#C9A45C]/15 bg-[#C9A45C]/[0.08] p-2 text-[#C9A45C]"><Heart size={17} /></div></div>
-            <div className="mt-5 h-56 sm:h-64">
-              <ResponsiveContainer width="100%" height="100%"><BarChart data={[{ name: 'Points', gagnés: analytics.pointsEarned, utilisés: analytics.pointsRedeemed }]} barGap={18} barCategoryGap="35%" margin={{ top: 8, right: 4, left: -18, bottom: 0 }}>
-                <defs><linearGradient id="kelyaniPointsEarned" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#E1C27A" /><stop offset="100%" stopColor="#9B7737" /></linearGradient><linearGradient id="kelyaniPointsUsed" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#81796B" /><stop offset="100%" stopColor="#49443C" /></linearGradient></defs>
-                <CartesianGrid stroke="#FFFFFF" strokeOpacity={0.06} vertical={false} />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#F5F5DC', opacity: 0.4, fontSize: 10 }} />
-                <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{ fill: '#F5F5DC', opacity: 0.3, fontSize: 9 }} width={36} />
-                <Tooltip contentStyle={{ background: '#111111', border: '1px solid #34302A', borderRadius: 14, color: '#fff', fontSize: 12 }} />
-                <Bar dataKey="gagnés" name="Points gagnés" fill="url(#kelyaniPointsEarned)" radius={[8,8,0,0]} maxBarSize={70} />
-                <Bar dataKey="utilisés" name="Points utilisés" fill="url(#kelyaniPointsUsed)" radius={[8,8,0,0]} maxBarSize={70} />
-              </BarChart></ResponsiveContainer>
-            </div>
-            <div className="grid grid-cols-2 gap-3 border-t border-white/[0.07] pt-4">
-              <div className="rounded-xl bg-white/[0.025] p-3"><p className="flex items-center gap-2 text-[10px] text-[#F5F5DC]/45"><span className="h-2 w-2 rounded-full bg-[#C9A45C]" />Points gagnés</p><p className="mt-2 text-xl font-semibold text-white">{analytics.pointsEarned.toLocaleString('fr-FR')}</p></div>
-              <div className="rounded-xl bg-white/[0.025] p-3"><p className="flex items-center gap-2 text-[10px] text-[#F5F5DC]/45"><span className="h-2 w-2 rounded-full bg-[#81796B]" />Points utilisés</p><p className="mt-2 text-xl font-semibold text-white">{analytics.pointsRedeemed.toLocaleString('fr-FR')}</p></div>
-            </div>
-          </article>
-          <article className="flex flex-col overflow-hidden rounded-[24px] border border-white/[0.07] bg-[linear-gradient(145deg,#141414,#090909)] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.2)] sm:rounded-[28px] sm:p-6">
-            <div className="flex items-start justify-between gap-3"><div><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#C9A45C]">Engagement client</p><h3 className="mt-1 text-base font-semibold text-white sm:text-lg">Clients actifs</h3><p className="mt-1 text-xs text-[#F5F5DC]/35">Part de la base active sur la période</p></div><div className="rounded-xl border border-[#C9A45C]/15 bg-[#C9A45C]/[0.08] p-2 text-[#C9A45C]"><Users size={17} /></div></div>
-            <div className="relative mx-auto mt-3 h-48 w-full max-w-[250px]">
-              <ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={[{ name: 'Actifs', value: Math.min(analytics.activeCustomers, loyaltyCustomers.length) }, { name: 'Autres clients', value: Math.max(0, loyaltyCustomers.length - analytics.activeCustomers) }]} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius="66%" outerRadius="88%" paddingAngle={loyaltyCustomers.length ? 4 : 0} stroke="none" startAngle={90} endAngle={-270}><Cell fill="#C9A45C" /><Cell fill="#403A32" /></Pie><Tooltip contentStyle={{ background: '#111111', border: '1px solid #34302A', borderRadius: 12, color: '#fff', fontSize: 12 }} /></PieChart></ResponsiveContainer>
-              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center"><span className="font-display text-4xl font-semibold text-white">{analytics.activeRate.toFixed(0)}%</span><span className="mt-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-[#F5F5DC]/40">actifs</span></div>
-            </div>
-            <div className="mt-auto space-y-3">
-              <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-3"><span className="flex items-center gap-2 text-xs text-[#F5F5DC]/60"><span className="h-2.5 w-2.5 rounded-full bg-[#C9A45C]" />Clients actifs</span><strong className="text-sm text-white">{analytics.activeCustomers.toLocaleString('fr-FR')}</strong></div>
-              <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-3"><span className="flex items-center gap-2 text-xs text-[#F5F5DC]/60"><span className="h-2.5 w-2.5 rounded-full bg-[#403A32]" />Clients à réactiver</span><strong className="text-sm text-white">{Math.max(0, loyaltyCustomers.length - analytics.activeCustomers).toLocaleString('fr-FR')}</strong></div>
-              <div className="rounded-xl border border-[#C9A45C]/15 bg-[#C9A45C]/[0.05] p-3.5"><div className="flex items-center justify-between gap-3"><span className="text-[10px] text-[#F5F5DC]/50">Taux de retour</span><strong className="text-sm text-[#E1C27A]">{analytics.returningRate.toFixed(1)}%</strong></div><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/[0.07]"><div className="h-full rounded-full bg-gradient-to-r from-[#9B7737] to-[#E1C27A]" style={{ width: `${Math.min(100, Math.max(0, analytics.returningRate))}%` }} /></div><p className="mt-2 text-[9px] text-[#F5F5DC]/35">{analytics.returningCustomers.toLocaleString('fr-FR')} clients sont revenus au moins deux fois</p></div>
-            </div>
-          </article>
+        <div className="mt-4 divide-y divide-[#F0F0F0]">
+          {recentActivity.length === 0 ? (
+            <div className="py-10 text-center"><div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#D4AF37]/10 text-[#A47C19]"><Activity size={20} /></div><p className="mt-3 text-sm font-semibold text-[#404040]">Votre activité apparaîtra ici</p><p className="mt-1 text-xs text-[#8A8A8A]">Les nouvelles inscriptions, visites et interactions seront affichées automatiquement.</p></div>
+          ) : recentActivity.map((event) => {
+            const Icon = event.kind === 'customer' ? UserPlus : event.kind === 'visit' ? ScanLine : MessageCircle;
+            return (
+              <div key={event.id} className="flex items-center gap-3 py-3.5">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#D4AF37]/10 text-[#A47C19]"><Icon size={17} /></span>
+                <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-[#262626]">{event.title}</p><p className="mt-0.5 truncate text-xs text-[#737373]">{event.detail}</p></div>
+                <time className="shrink-0 text-[11px] text-[#8A8A8A]">{new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(event.created_at))}</time>
+              </div>
+            );
+          })}
         </div>
       </section>
-
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,.75fr)]">
-        <section className="rounded-[24px] border border-white/[0.07] bg-[linear-gradient(145deg,#141414,#0D0D0D)] p-5 shadow-[0_16px_48px_rgba(0,0,0,0.18)] sm:rounded-[28px] sm:p-6 lg:p-7">
-          <div className="flex items-center justify-between gap-3"><div><p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#C9A45C]">Activité</p><h2 className="mt-1 text-lg font-semibold text-white">Votre relation client</h2></div><select value={period} onChange={(event) => setPeriod(event.target.value)} className="h-9 rounded-xl border border-[#242424] bg-[#050505] px-3 text-[10px] font-semibold text-[#F5F5DC]/55 outline-none" aria-label="Période">{ranges.map((range) => <option className="bg-[#111111]" key={range.key} value={range.key}>{range.label}</option>)}</select></div>
-          <div className="mt-6 h-56 sm:h-64"><ResponsiveContainer width="100%" height="100%"><BarChart data={chart} barGap={5}><CartesianGrid stroke="#242424" vertical={false} /><XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#F5F5DC', opacity: 0.3, fontSize: 10 }} /><YAxis axisLine={false} tickLine={false} tick={{ fill: '#F5F5DC', opacity: 0.2, fontSize: 9 }} width={28} /><Tooltip contentStyle={{ background: '#111111', border: '1px solid #242424', borderRadius: 14, color: '#fff' }} /><Bar dataKey="positive" stackId="reviews" fill="#C9A45C" radius={[4,4,0,0]} /><Bar dataKey="negative" stackId="reviews" fill="#6B6254" radius={[4,4,0,0]} /></BarChart></ResponsiveContainer></div>
-        </section>
-        <section className="rounded-[24px] border border-[#242424] bg-[#111111] p-5 sm:p-6">
-          <div className="flex items-center justify-between"><div><p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#C9A45C]">Fidélité</p><h2 className="mt-1 text-lg font-semibold text-white">Clients qui reviennent</h2></div><Heart size={18} className="text-[#C9A45C]" /></div>
-          <div className="mt-6 rounded-2xl border border-[#C9A45C]/15 bg-[linear-gradient(135deg,rgba(201,164,92,0.08),rgba(5,5,5,0.8)_55%)] p-5 sm:p-6"><p className="text-[10px] text-[#F5F5DC]/35">Taux de retour</p><p className="mt-2 font-display text-4xl text-[#E1C27A]">{analytics.returningRate.toFixed(1)}%</p><p className="mt-2 text-xs leading-5 text-[#F5F5DC]/35">{analytics.returningCustomers} clients ont effectué au moins deux visites.</p></div>
-          <div className="mt-3 grid grid-cols-2 gap-2.5"><div className="rounded-2xl bg-[#050505] p-4"><p className="text-[9px] uppercase tracking-[0.14em] text-[#F5F5DC]/25">Visites</p><p className="mt-2 text-xl font-semibold text-white">{dashboardStatsLoading ? '—' : analytics.visits.toLocaleString('fr-FR')}</p></div><div className="rounded-2xl bg-[#050505] p-4"><p className="text-[9px] uppercase tracking-[0.14em] text-[#F5F5DC]/25">Récompenses</p><p className="mt-2 text-xl font-semibold text-white">{redemptionsLoading ? '—' : analytics.currentRedemptions}</p></div></div>
-          <Link to="/dashboard/loyalty" className="mt-3 flex h-10 items-center justify-center gap-2 rounded-xl border border-[#C9A45C]/25 text-[10px] font-bold text-[#E1C27A] hover:bg-[#C9A45C]/10">Ouvrir la fidélité <ArrowUpRight size={14} /></Link>
-        </section>
-      </div>
-
-
     </div>
   );
 }
