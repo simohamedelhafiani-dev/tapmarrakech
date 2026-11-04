@@ -799,3 +799,32 @@ table {
 #root [class*="border-amber-"] {
   border-color: rgba(0,255,195,.28) !important;
 }
+
+
+/* KELYANI — remove legacy gold accents from all rendered app screens.
+   Covers Tailwind arbitrary-color classes, inline SVG paint and brand mark assets. */
+#root [class*="#C9A45C"], #root [class*="#D4AF37"],
+#root [class*="#E1C27A"], #root [class*="#E4C56A"],
+#root [class*="#F5D978"], #root [class*="#F4D98A"],
+#root [class*="#B88724"], #root [class*="#8C6F2D"] {
+  --kelyani-legacy-gold: #00FFC3 !important;
+}
+#root [class*="text-[#C9A45C]"], #root [class*="text-[#D4AF37]"],
+#root [class*="text-[#E1C27A]"], #root [class*="text-[#E4C56A]"],
+#root [class*="text-[#F5D978]"], #root [class*="text-[#F4D98A]"],
+#root [class*="text-[#B88724]"], #root [class*="text-[#8C6F2D]"] { color:#00FFC3 !important; }
+#root [class*="bg-[#C9A45C]"], #root [class*="bg-[#D4AF37]"],
+#root [class*="bg-[#E1C27A]"], #root [class*="bg-[#E4C56A]"],
+#root [class*="bg-[#F5D978]"], #root [class*="bg-[#F4D98A]"],
+#root [class*="bg-[#B88724]"], #root [class*="bg-[#8C6F2D]"] { background-color:rgba(0,255,195,.12) !important; }
+#root [class*="border-[#C9A45C]"], #root [class*="border-[#D4AF37]"],
+#root [class*="border-[#E1C27A]"], #root [class*="border-[#E4C56A]"],
+#root [class*="border-[#F5D978]"], #root [class*="border-[#F4D98A]"] { border-color:rgba(0,255,195,.28) !important; }
+#root [class*="shadow-[0_0_"][class*="rgba(201,164,92"],
+#root [class*="shadow-[0_8px_"][class*="rgba(201,164,92"] { --tw-shadow-color:rgba(0,255,195,.18) !important; }
+#root svg stop[stop-color="#D4AF37"], #root svg stop[stop-color="#C9A45C"],
+#root svg stop[stop-color="#E1C27A"], #root svg stop[stop-color="#E4C56A"],
+#root svg stop[stop-color="#F4D98A"], #root svg stop[stop-color="#B88724"] { stop-color:#00FFC3 !important; }
+#root svg [fill="#D4AF37"], #root svg [fill="#C9A45C"],
+#root svg [fill="#E1C27A"], #root svg [fill="#E4C56A"],
+#root svg [stroke="#D4AF37"], #root svg [stroke="#C9A45C"] { fill:#00FFC3 !important; stroke:#00FFC3 !important; }
