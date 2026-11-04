@@ -309,7 +309,7 @@ Deno.serve(async (req: Request) => {
         for (const review of reviewResult.reviews ?? []) {
           const googleReviewName = String(review.name ?? '');
           const { data: existing, error: existingError } = await db.from('google_business_reviews')
-            .select('id,reply_status,owner_reply,reply_draft')
+            .select('id,reply_status,owner_reply,reply_draft,auto_reply_claimed_at')
             .eq('google_review_name', googleReviewName).maybeSingle();
           if (existingError) throw existingError;
           const { data: savedReview, error: reviewError } = await db.from('google_business_reviews').upsert({
@@ -334,10 +334,15 @@ Deno.serve(async (req: Request) => {
           const afterAutoReplyActivation = !!autoReplyActivatedAt && reviewCreatedAt >= new Date(autoReplyActivatedAt).getTime();
           const threshold = Math.max(1, Math.min(5, Number(replySettings?.auto_reply_min_rating ?? 4)));
           const reviewRating = ratingNumber(review.starRating);
-          // The rating threshold is authoritative for autonomous mode: reviews at or
-          // above the configured threshold auto-publish when auto replies are enabled.
-          // Reviews below the threshold always get a draft for human approval.
-          const shouldAutoPublish = isNewReview && afterAutoReplyActivation && replySettings?.auto_reply_enabled === true &&
+          const retryableGenerationFailure = Boolean(existing && existing.reply_status === 'failed' &&
+            !existing.reply_draft && !existing.auto_reply_claimed_at);
+          const retryableUnprocessedReview = Boolean(existing &&
+            (existing.reply_status == null || existing.reply_status === 'none') &&
+            !existing.owner_reply && !existing.reply_draft && !existing.auto_reply_claimed_at);
+          // Auto-publish only new or safely unprocessed reviews created after activation.
+          // Existing drafts, prior replies, low ratings and ambiguous publish attempts are never auto-published.
+          const shouldAutoPublish = (isNewReview || retryableGenerationFailure || retryableUnprocessedReview) &&
+            afterAutoReplyActivation && replySettings?.auto_reply_enabled === true &&
             replySettings?.require_approval === false && reviewRating >= threshold &&
             !review.reviewReply?.comment && Boolean(review.comment?.trim());
           if (shouldAutoPublish && savedReview) {
