@@ -899,155 +899,123 @@ export default function Dashboard() {
   const firstName = profileName.trim().split(/\\s+/)[0] || 'à vous';
 
   return (
-    <div className="kelyani-luxury-dashboard min-h-screen space-y-6 pb-8">
-      <section className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#D4AF37]/10 px-3 py-1.5 text-xs font-semibold text-[#9B7620]">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#D4AF37]" />
-            Espace professionnel
+    <div className="kelyani-luxury-dashboard kelyani-cockpit min-h-screen space-y-7 pb-10">
+      <header className="cockpit-hero relative overflow-hidden">
+        <div className="cockpit-hero-orbit cockpit-orbit-one" />
+        <div className="cockpit-hero-orbit cockpit-orbit-two" />
+        <div className="relative z-10 flex flex-col justify-between gap-7 xl:flex-row xl:items-end">
+          <div className="max-w-3xl">
+            <div className="cockpit-eyebrow"><span className="cockpit-live-dot" /> KELYANI INTELLIGENCE · ESPACE {roleLabel.toUpperCase()}</div>
+            <p className="mt-7 text-sm tracking-[.18em] text-[#A0A0A0]">BONJOUR {firstName.toUpperCase()}</p>
+            <h1 className="cockpit-display mt-2 text-4xl font-medium leading-[1.08] tracking-tight sm:text-5xl xl:text-6xl">
+              Votre activité,<br /><span className="cockpit-gold-type">en pleine maîtrise.</span>
+            </h1>
+            <p className="mt-5 max-w-xl text-sm leading-7 text-[#A0A0A0]">Une lecture claire de votre performance, de la fidélité et des opportunités à activer.</p>
+            <div className="mt-5 flex flex-wrap items-center gap-3 text-[11px] uppercase tracking-[.13em] text-[#A0A0A0]">
+              <span className="inline-flex items-center gap-2"><CalendarDays size={14} className="text-[#D4AF37]" />{new Intl.DateTimeFormat('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date())}</span>
+              {establishmentName && <><span className="cockpit-separator" /><span className="truncate">{establishmentName}</span></>}
+            </div>
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight text-[#0F172A] sm:text-3xl">
-            Bonjour {firstName}, voici vos performances
-          </h1>
-          <p className="mt-2 text-sm text-[#737373]">
-            Retrouvez en un coup d’œil la fidélité et l’activité de votre établissement.
-          </p>
-          <p className="mt-2 flex items-center gap-2 text-xs font-medium text-[#8A8A8A]">
-            <CalendarDays size={14} />
-            {new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date())}
-          </p>
-        </div>
-        <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-[230px]">
-          {places.length > 1 && (
-            <label className="text-xs font-medium text-[#737373]">
-              Établissement
-              <select value={selectedEstablishmentId ?? ''} onChange={(event) => changeEstablishment(event.target.value)} className="kelyani-light-select mt-1.5 h-11 w-full rounded-xl px-3 text-sm font-semibold text-[#1E293B]" aria-label="Établissement actif">
-                {places.map((place) => <option key={place.id} value={place.id}>{place.name}</option>)}
+          <div className="flex w-full flex-col gap-3 xl:w-[280px]">
+            {places.length > 1 && <label className="cockpit-field-label">ÉTABLISSEMENT
+              <select value={selectedEstablishmentId ?? ''} onChange={(event)=>changeEstablishment(event.target.value)} className="cockpit-select mt-2 w-full" aria-label="Établissement actif">
+                {places.map(place=><option key={place.id} value={place.id}>{place.name}</option>)}
               </select>
-            </label>
-          )}
-          {places.length === 1 && <p className="truncate text-sm font-semibold text-[#525252]">{places[0].name}</p>}
-          {!isResponsible && (
-            <Link to="/dashboard/establishments" className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#D4AF37] px-4 text-sm font-semibold text-[#0F172A] shadow-sm transition hover:bg-[#C29B2D]">
-              Gérer les établissements <ArrowUpRight size={16} />
-            </Link>
-          )}
+            </label>}
+            {places.length === 1 && <div className="cockpit-glass cockpit-location"><span className="cockpit-location-mark"><KelyaniMark /></span><span><small>ÉTABLISSEMENT ACTIF</small><strong>{places[0].name}</strong></span></div>}
+            {!isResponsible && <Link to="/dashboard/establishments" className="cockpit-primary-action">Gérer les établissements <ArrowUpRight size={16}/></Link>}
+            <div className="cockpit-status"><span className="cockpit-live-dot"/> DONNÉES SYNCHRONISÉES · VUE {period.toUpperCase()}</div>
+          </div>
         </div>
-      </section>
+      </header>
 
-      <section aria-label="Indicateurs clés" className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <article className="kelyani-light-card rounded-2xl p-4 sm:p-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-[#737373]">Clients actifs</p>
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#A47C19]"><Users size={19} /></span>
-          </div>
-          <p className="mt-4 text-3xl font-bold tracking-tight text-[#0F172A]">{dashboardStatsLoading ? '—' : formatCompactNumber(analytics.activeCustomers)}</p>
-          <p className="mt-2 text-xs text-[#737373]">{formatGrowth(analytics.registrationGrowth)} d’inscriptions vs période précédente</p>
+      <section aria-label="Indicateurs clés" className="grid grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-4">
+        <article className="cockpit-glass cockpit-kpi">
+          <div className="cockpit-kpi-head"><span>CLIENTS ACTIFS</span><Users size={17}/></div>
+          <div className="cockpit-kpi-value">{dashboardStatsLoading?'—':formatCompactNumber(analytics.activeCustomers)}</div>
+          <div className="cockpit-kpi-foot"><span className="cockpit-kpi-accent">{formatGrowth(analytics.registrationGrowth)}</span><span>vs période précédente</span></div>
+          <div className="cockpit-kpi-index">01 / 04</div>
         </article>
-        <article className="kelyani-light-card rounded-2xl p-4 sm:p-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-[#737373]">Visites totales</p>
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#A47C19]"><Activity size={19} /></span>
-          </div>
-          <p className="mt-4 text-3xl font-bold tracking-tight text-[#0F172A]">{dashboardStatsLoading ? '—' : formatCompactNumber(analytics.visits)}</p>
-          <p className="mt-2 text-xs text-[#737373]">Visites enregistrées dans le programme</p>
+        <article className="cockpit-glass cockpit-kpi">
+          <div className="cockpit-kpi-head"><span>VISITES ENREGISTRÉES</span><Activity size={17}/></div>
+          <div className="cockpit-kpi-value">{dashboardStatsLoading?'—':formatCompactNumber(analytics.visits)}</div>
+          <div className="cockpit-kpi-foot"><span>Volume sur le programme fidélité</span></div>
+          <div className="cockpit-kpi-index">02 / 04</div>
         </article>
-        <article className="kelyani-light-card rounded-2xl p-4 sm:p-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-[#737373]">Taux de rétention</p>
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#A47C19]"><Repeat2 size={19} /></span>
-          </div>
-          <p className="mt-4 text-3xl font-bold tracking-tight text-[#0F172A]">{dashboardStatsLoading ? '—' : `${analytics.returningRate.toFixed(1)}%`}</p>
-          <p className="mt-2 text-xs text-[#737373]">{formatCompactNumber(analytics.returningCustomers)} clients revenus au moins deux fois</p>
+        <article className="cockpit-glass cockpit-kpi cockpit-kpi-featured">
+          <div className="cockpit-kpi-head"><span>RÉTENTION CLIENT</span><Repeat2 size={17}/></div>
+          <div className="cockpit-kpi-value">{dashboardStatsLoading?'—':`${analytics.returningRate.toFixed(1)}%`}</div>
+          <div className="cockpit-kpi-foot"><span>{formatCompactNumber(analytics.returningCustomers)} clients revenus au moins deux fois</span></div>
+          <div className="cockpit-kpi-index">03 / 04</div>
         </article>
-        <article className="kelyani-light-card rounded-2xl p-4 sm:p-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-[#737373]">Revenu estimé</p>
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#A47C19]"><Wallet size={19} /></span>
-          </div>
-          <p className="mt-4 text-3xl font-bold tracking-tight text-[#0F172A]">{dashboardStatsLoading ? '—' : `${formatCompactNumber(analytics.currentRevenue)} DH`}</p>
-          <p className="mt-2 text-xs text-[#737373]">Sur les {selected.days} derniers jours</p>
+        <article className="cockpit-glass cockpit-kpi">
+          <div className="cockpit-kpi-head"><span>REVENU ESTIMÉ</span><Wallet size={17}/></div>
+          <div className="cockpit-kpi-value">{dashboardStatsLoading?'—':`${formatCompactNumber(analytics.currentRevenue)} <small>DH</small>`}</div>
+          <div className="cockpit-kpi-foot"><span>Sur les {selected.days} derniers jours</span></div>
+          <div className="cockpit-kpi-index">04 / 04</div>
         </article>
       </section>
 
-      {role === 'responsible' && <RoleAnalyticsVisuals role="responsible" establishmentIds={places.map((place) => place.id)} />}
-
-      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.65fr)_minmax(280px,.8fr)]">
-        <article className="kelyani-light-card min-w-0 rounded-2xl p-4 sm:p-6">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#A47C19]">Acquisition</p>
-              <h2 className="mt-1 text-lg font-semibold text-[#0F172A]">Nouveaux clients</h2>
-              <p className="mt-1 text-sm text-[#737373]">Inscriptions sur les 30 derniers jours</p>
-            </div>
-            <div className="rounded-xl bg-[#D4AF37]/10 px-3 py-2 text-right">
-              <p className="text-xs text-[#737373]">Total période</p>
-              <p className="text-lg font-bold text-[#0F172A]">{analytics.currentRegistrations}</p>
+      <section className="grid gap-4 2xl:grid-cols-[minmax(0,1.65fr)_minmax(300px,.72fr)]">
+        <article className="cockpit-glass cockpit-chart-card min-w-0">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div><div className="cockpit-section-kicker">PERFORMANCE · ACQUISITION</div><h2 className="cockpit-card-title">La dynamique de votre clientèle</h2><p className="mt-2 text-xs text-[#A0A0A0]">Nouvelles inscriptions sur les 30 derniers jours</p></div>
+            <div className="cockpit-period-switch" role="group" aria-label="Période du tableau de bord">
+              {ranges.map(range=><button key={range.key} type="button" onClick={()=>setPeriod(range.key)} className={period===range.key?'is-active':''}>{range.label.replace(' derniers jours','').replace(' mois','M').replace(' jours','J')}</button>)}
             </div>
           </div>
-          <div className="mt-5 h-64 w-full">
+          <div className="mt-5 flex items-end justify-between gap-3"><div><span className="cockpit-chart-total">{formatCompactNumber(analytics.currentRegistrations)}</span><span className="ml-2 text-xs text-[#A0A0A0]">nouveaux clients</span></div><span className="cockpit-kpi-accent text-xs">{formatGrowth(analytics.registrationGrowth)} sur la période</span></div>
+          <div className="mt-3 h-64 w-full sm:h-[310px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={registrationChart} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="kelyaniRegistrationsFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#D4AF37" stopOpacity={0.28} />
-                    <stop offset="95%" stopColor="#D4AF37" stopOpacity={0.02} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid stroke="#38352D" vertical={false} />
-                <XAxis dataKey="date" axisLine={false} tickLine={false} interval={4} tick={{ fill: '#A9A294', fontSize: 11 }} />
-                <YAxis allowDecimals={false} axisLine={false} tickLine={false} width={32} tick={{ fill: '#8A8A8A', fontSize: 11 }} />
-                <Tooltip contentStyle={{ background: '#1E1E1E', border: '1px solid rgba(212,175,55,.24)', borderRadius: 14, color: '#F5F5F5', fontSize: 12, boxShadow: '0 8px 24px rgba(0,0,0,.08)' }} />
-                <Area type="monotone" dataKey="inscriptions" name="Nouveaux clients" stroke="#D4AF37" strokeWidth={2.5} fill="url(#kelyaniRegistrationsFill)" activeDot={{ r: 4, strokeWidth: 0, fill: '#B58B25' }} />
+              <AreaChart data={registrationChart} margin={{top:14,right:8,left:-22,bottom:0}}>
+                <defs><linearGradient id="kelyaniCockpitArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#D4AF37" stopOpacity={.38}/><stop offset="100%" stopColor="#F5F5F5" stopOpacity={.015}/></linearGradient></defs>
+                <CartesianGrid stroke="#D4AF37" strokeOpacity={.12} vertical={false}/>
+                <XAxis dataKey="date" axisLine={false} tickLine={false} interval={4} tick={{fill:'#A0A0A0',fontSize:10}}/>
+                <YAxis allowDecimals={false} axisLine={false} tickLine={false} width={32} tick={{fill:'#A0A0A0',fontSize:10}}/>
+                <Tooltip contentStyle={{background:'#1E1E1E',border:'1px solid rgba(212,175,55,.45)',borderRadius:14,color:'#F5F5F5',fontSize:12}}/>
+                <Area type="monotone" dataKey="inscriptions" name="Nouveaux clients" stroke="#D4AF37" strokeWidth={3} fill="url(#kelyaniCockpitArea)" activeDot={{r:5,fill:'#F5F5F5',stroke:'#D4AF37',strokeWidth:2}} isAnimationActive animationDuration={1200} animationEasing="ease-out"/>
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </article>
 
-        <article className="kelyani-light-card rounded-2xl p-4 sm:p-6">
-          <div className="flex items-center justify-between gap-3">
-            <div><p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#A47C19]">Accès rapide</p><h2 className="mt-1 text-lg font-semibold text-[#0F172A]">Gagner du temps</h2></div>
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#A47C19]"><ScanLine size={19} /></span>
+        <article className="cockpit-glass cockpit-retention-card">
+          <div className="cockpit-section-kicker">FIDÉLITÉ · RÉTENTION</div><h2 className="cockpit-card-title">Vos clients reviennent</h2><p className="mt-2 text-xs leading-6 text-[#A0A0A0]">Part des clients ayant effectué au moins deux visites.</p>
+          <div className="cockpit-gauge-wrap">
+            <svg viewBox="0 0 220 220" className="cockpit-gauge" role="img" aria-label={`Taux de rétention ${analytics.returningRate.toFixed(1)} pour cent`}>
+              <circle cx="110" cy="110" r="88" fill="none" stroke="#A0A0A0" strokeOpacity=".13" strokeWidth="10"/>
+              <circle cx="110" cy="110" r="88" fill="none" stroke="#D4AF37" strokeWidth="10" strokeLinecap="round" strokeDasharray={552.92} strokeDashoffset={552.92*(1-Math.max(0,Math.min(100,analytics.returningRate))/100)} transform="rotate(-90 110 110)" className="cockpit-gauge-progress"/>
+              <circle cx="110" cy="110" r="72" fill="#121212" fillOpacity=".5" stroke="#D4AF37" strokeOpacity=".15"/>
+              <text x="110" y="105" textAnchor="middle" className="cockpit-gauge-value">{dashboardStatsLoading?'—':analytics.returningRate.toFixed(1)+'%'}</text>
+              <text x="110" y="129" textAnchor="middle" className="cockpit-gauge-label">RÉTENTION</text>
+            </svg>
           </div>
-          <div className="mt-5 space-y-3">
-            <Link to="/dashboard/loyalty" className="flex items-center gap-3 rounded-xl bg-[#D4AF37] p-3.5 text-[#0F172A] transition hover:bg-[#C29B2D]">
-              <span className="grid h-10 w-10 place-items-center rounded-lg bg-black/10"><UserPlus size={19} /></span>
-              <span className="min-w-0 flex-1"><strong className="block text-sm">Ajouter un client</strong><span className="mt-0.5 block text-xs text-black/60">Inscrire un nouveau membre</span></span>
-              <ArrowUpRight size={17} />
-            </Link>
-            <Link to="/employee" className="flex items-center gap-3 rounded-xl border border-[#EAEAEA] bg-white p-3.5 text-[#1E293B] transition hover:border-[#D4AF37]/60 hover:bg-[#FFFCF3]">
-              <span className="grid h-10 w-10 place-items-center rounded-lg bg-[#D4AF37]/10 text-[#A47C19]"><ScanLine size={19} /></span>
-              <span className="min-w-0 flex-1"><strong className="block text-sm">Scanner un QR code</strong><span className="mt-0.5 block text-xs text-[#737373]">Valider une visite ou une récompense</span></span>
-              <ArrowUpRight size={17} />
-            </Link>
-            <Link to="/dashboard/reviews" className="flex items-center gap-3 rounded-xl border border-[#EAEAEA] bg-white p-3.5 text-[#1E293B] transition hover:border-[#D4AF37]/60 hover:bg-[#FFFCF3]">
-              <span className="grid h-10 w-10 place-items-center rounded-lg bg-[#D4AF37]/10 text-[#A47C19]"><MessageCircle size={19} /></span>
-              <span className="min-w-0 flex-1"><strong className="block text-sm">Gérer les avis</strong><span className="mt-0.5 block text-xs text-[#737373]">Suivre votre réputation Google</span></span>
-              <ArrowUpRight size={17} />
-            </Link>
-          </div>
+          <div className="cockpit-gauge-legend"><span>CLIENTS FIDÉLISÉS</span><strong>{formatCompactNumber(analytics.returningCustomers)}</strong></div>
+          <div className="cockpit-gauge-legend"><span>CLIENTS ACTIFS</span><strong>{formatCompactNumber(analytics.activeCustomers)}</strong></div>
         </article>
       </section>
 
-      <section className="kelyani-light-card rounded-2xl p-4 sm:p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div><p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#A47C19]">En temps réel</p><h2 className="mt-1 text-lg font-semibold text-[#0F172A]">Activité récente</h2><p className="mt-1 text-sm text-[#737373]">Les cinq dernières interactions enregistrées</p></div>
-          <Link to="/dashboard/loyalty" className="inline-flex items-center gap-1 text-sm font-semibold text-[#9B7620] hover:text-[#73550F]">Voir la fidélité <ArrowUpRight size={15} /></Link>
-        </div>
-        <div className="mt-4 divide-y divide-[#F0F0F0]">
-          {recentActivity.length === 0 ? (
-            <div className="py-10 text-center"><div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#D4AF37]/10 text-[#A47C19]"><Activity size={20} /></div><p className="mt-3 text-sm font-semibold text-[#404040]">Votre activité apparaîtra ici</p><p className="mt-1 text-xs text-[#8A8A8A]">Les nouvelles inscriptions, visites et interactions seront affichées automatiquement.</p></div>
-          ) : recentActivity.map((event) => {
-            const Icon = event.kind === 'customer' ? UserPlus : event.kind === 'visit' ? ScanLine : MessageCircle;
-            return (
-              <div key={event.id} className="flex items-center gap-3 py-3.5">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#D4AF37]/10 text-[#A47C19]"><Icon size={17} /></span>
-                <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-[#1E293B]">{event.title}</p><p className="mt-0.5 truncate text-xs text-[#737373]">{event.detail}</p></div>
-                <time className="shrink-0 text-[11px] text-[#8A8A8A]">{new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(event.created_at))}</time>
-              </div>
-            );
-          })}
-        </div>
+      {isResponsible && <RoleAnalyticsVisuals role="responsible" establishmentIds={places.map(place=>place.id)}/>}
+
+      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(300px,.8fr)]">
+        <article className="cockpit-glass cockpit-feed">
+          <div className="flex items-start justify-between gap-4"><div><div className="cockpit-section-kicker">LIVE · ACTIVITÉ</div><h2 className="cockpit-card-title">Flux d’événements</h2><p className="mt-2 text-xs text-[#A0A0A0]">Les dernières interactions de votre établissement</p></div><span className="cockpit-feed-live"><span className="cockpit-live-dot"/> EN DIRECT</span></div>
+          <div className="mt-5 divide-y divide-[#D4AF37]/10">
+            {recentActivity.length===0?<div className="py-12 text-center"><Activity size={24} className="mx-auto text-[#D4AF37]"/><p className="mt-3 text-sm text-[#F5F5F5]">Votre flux prend vie ici</p><p className="mt-1 text-xs text-[#A0A0A0]">Les inscriptions, visites et avis apparaîtront automatiquement.</p></div>:recentActivity.map(event=>{
+              const Icon=event.kind==='customer'?UserPlus:event.kind==='visit'?ScanLine:MessageCircle;
+              return <div key={event.id} className="cockpit-feed-row"><span className="cockpit-feed-icon"><Icon size={16}/><i/></span><div className="min-w-0 flex-1"><p className="truncate text-sm font-medium text-[#F5F5F5]">{event.title}</p><p className="mt-1 truncate text-xs text-[#A0A0A0]">{event.detail}</p></div><time className="shrink-0 text-[10px] text-[#A0A0A0]">{new Intl.DateTimeFormat('fr-FR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}).format(new Date(event.created_at))}</time></div>
+            })}
+          </div>
+        </article>
+        <article className="cockpit-glass cockpit-actions">
+          <div className="cockpit-section-kicker">VOTRE ESPACE · RACCOURCIS</div><h2 className="cockpit-card-title">Passez à l’action</h2><p className="mt-2 text-xs leading-6 text-[#A0A0A0]">Les outils essentiels, toujours à portée de main.</p>
+          <div className="mt-5 space-y-3">
+            <Link to="/dashboard/loyalty" className="cockpit-action-link cockpit-action-primary"><span className="cockpit-action-icon"><UserPlus size={18}/></span><span><strong>Ajouter un client</strong><small>Développer votre communauté</small></span><ArrowUpRight size={17}/></Link>
+            <Link to="/employee" className="cockpit-action-link"><span className="cockpit-action-icon"><ScanLine size={18}/></span><span><strong>Scanner une visite</strong><small>Enregistrer une interaction</small></span><ArrowUpRight size={17}/></Link>
+            <Link to="/dashboard/reviews" className="cockpit-action-link"><span className="cockpit-action-icon"><MessageCircle size={18}/></span><span><strong>Gérer les avis</strong><small>Soigner votre réputation</small></span><ArrowUpRight size={17}/></Link>
+          </div>
+          <div className="cockpit-actions-footer"><span>PROPULSÉ PAR</span><strong>KELYANI <em>INTELLIGENCE</em></strong></div>
+        </article>
       </section>
     </div>
   );
