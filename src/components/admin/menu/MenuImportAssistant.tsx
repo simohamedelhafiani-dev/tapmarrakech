@@ -188,7 +188,7 @@ export default function MenuImportAssistant({ establishmentId, categories, items
             <div><h4 className="text-sm font-semibold">Vérifier l’extraction</h4><p className="mt-1 text-[10px] text-white/40">{draft.categories.length} catégories · {productCount} produits détectés</p></div>
             <button type="button" onClick={() => setDraft(null)} className="text-xs text-white/40 underline">Annuler</button>
           </div>
-          <p className="rounded-xl bg-amber-400/10 p-3 text-[11px] leading-5 text-amber-100/80">Vérifie les prix avant l’enregistrement. Un prix absent ou illisible peut être extrait à 0.</p>
+          <p className="rounded-xl bg-blue-400/10 p-3 text-[11px] leading-5 text-blue-100/80">Vérifie les prix avant l’enregistrement. Un prix absent ou illisible peut être extrait à 0.</p>
           {draft.categories.map((category, categoryIndex) => (
             <div key={categoryIndex} className="rounded-2xl border border-white/10 p-3 sm:p-4">
               <div className="flex items-start gap-2">
