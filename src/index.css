@@ -228,7 +228,7 @@ table {
 }
 
 .dashboard-depth-shell .text-forest {
-  color: #e1c27a !important;
+  color: #65A5FF !important;
 }
 
 .dashboard-depth-shell .bg-forest {
@@ -915,11 +915,11 @@ table {
   background-image: none !important;
 }
 .admin-depth-shell [class*="text-[#C9A45C]"],
-.admin-depth-shell [class*="text-[#E1C27A]"] {
+.admin-depth-shell [class*="text-[#65A5FF]"] {
   color: #246BFD !important;
 }
 .admin-depth-shell [class*="border-[#C9A45C]"],
-.admin-depth-shell [class*="border-[#E1C27A]"] {
+.admin-depth-shell [class*="border-[#65A5FF]"] {
   border-color: rgba(36,107,253,.28) !important;
 }
 .dashboard-depth-shell [class*="bg-white"],
