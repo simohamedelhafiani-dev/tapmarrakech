@@ -137,6 +137,7 @@ jobs:
             supabase/functions/google-business-sync-access-test/index.ts \
             supabase/functions/google-business-sync/index.ts \
             supabase/functions/google-business-webhook/index.ts \
+            supabase/functions/whatsapp-webhook/index.ts \
             supabase/functions/import-menu/index.ts \
             supabase/functions/send-loyalty-notification-push/index.ts \
             supabase/functions/send-promotion-push/index.ts \
