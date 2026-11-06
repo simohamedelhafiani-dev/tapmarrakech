@@ -112,13 +112,13 @@ export default function AdminOverview() {
     <section className="min-h-full bg-[#080808] text-white px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1500px] space-y-6">
         <header className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#111111]/95 p-6 shadow-[0_20px_60px_rgba(23,61,50,0.08)] backdrop-blur-xl sm:p-8">
-          <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-[#D3A84C]/10 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-24 -left-20 h-64 w-64 rounded-full bg-[#0D0D0D]/10 blur-3xl" />
+          <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-[#3B82F6]/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-24 -left-20 h-64 w-64 rounded-full bg-[#3B82F6]/10 blur-3xl" />
 
           <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#D4AF37]/[0.08] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#D4AF37]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#D4AF37]" />
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#3B82F6]/[0.08] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#3B82F6]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#3B82F6]" />
                 Administration
               </div>
 
@@ -132,11 +132,11 @@ export default function AdminOverview() {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="rounded-2xl border border-white/10 bg-[#0D0D0D] px-4 py-3 text-right shadow-sm">
+              <div className="rounded-2xl border border-white/10 bg-[#3B82F6] px-4 py-3 text-right shadow-sm">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/40">
                   Période
                 </p>
-                <p className="mt-1 text-sm font-semibold text-[#D4AF37]">
+                <p className="mt-1 text-sm font-semibold text-[#3B82F6]">
                   {stats.periodDays} derniers jours
                 </p>
               </div>
@@ -172,7 +172,7 @@ export default function AdminOverview() {
                 ? 'Chargement…'
                 : `${formatPercent(reviewPositiveRate)} d’avis positifs`
             }
-            accent="gold"
+            accent="blue"
             icon="★"
           />
 
@@ -216,7 +216,7 @@ export default function AdminOverview() {
                   Activité du programme
                 </h2>
               </div>
-              <div className="rounded-xl bg-[#D4AF37]/[0.08] px-3 py-2 text-xs font-semibold text-[#D4AF37]">
+              <div className="rounded-xl bg-[#3B82F6]/[0.08] px-3 py-2 text-xs font-semibold text-[#3B82F6]">
                 {loading ? '—' : `${formatNumber(stats.visitsTotal)} visites`}
               </div>
             </div>
@@ -259,7 +259,7 @@ export default function AdminOverview() {
                     Points actuellement détenus par les clients
                   </p>
                 </div>
-                <p className="text-xl font-semibold tracking-tight text-[#D4AF37]">
+                <p className="text-xl font-semibold tracking-tight text-[#3B82F6]">
                   {loading
                     ? '—'
                     : formatNumber(stats.pointsBalanceTotal)}
@@ -268,7 +268,7 @@ export default function AdminOverview() {
             </div>
           </section>
 
-          <section className="rounded-[26px] border border-white/10 bg-[#0D0D0D] p-6 text-white shadow-[0_18px_50px_rgba(23,61,50,0.18)] sm:p-7">
+          <section className="rounded-[26px] border border-white/10 bg-[#3B82F6] p-6 text-white shadow-[0_18px_50px_rgba(23,61,50,0.18)] sm:p-7">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/45">
@@ -278,7 +278,7 @@ export default function AdminOverview() {
                   Revenus & transactions
                 </h2>
               </div>
-              <div className="grid h-10 w-10 place-items-center rounded-xl bg-white/10 text-[#D4AF37]">
+              <div className="grid h-10 w-10 place-items-center rounded-xl bg-white/10 text-[#3B82F6]">
                 DH
               </div>
             </div>
@@ -386,15 +386,15 @@ function MetricCard({
   label: string;
   value: string;
   detail: string;
-  accent: 'forest' | 'gold' | 'violet' | 'indigo';
+  accent: 'forest' | 'blue' | 'violet' | 'indigo';
   icon: string;
   testId?: string;
 }) {
   const accentClasses = {
-    forest: 'bg-[#0D0D0D]/[0.07] text-[#D4AF37]',
-    gold: 'bg-[#D3A84C]/[0.14] text-[#D4AF37]',
-    violet: 'bg-[#8B5CF6]/[0.10] text-[#D4AF37]',
-    indigo: 'bg-[#6366F1]/[0.10] text-[#D4AF37]',
+    forest: 'bg-[#3B82F6]/[0.07] text-[#3B82F6]',
+    gold: 'bg-[#3B82F6]/[0.14] text-[#3B82F6]',
+    violet: 'bg-[#8B5CF6]/[0.10] text-[#3B82F6]',
+    indigo: 'bg-[#6366F1]/[0.10] text-[#3B82F6]',
   };
 
   return (
@@ -426,12 +426,12 @@ function Insight({
   sub: string;
 }) {
   return (
-    <div className="rounded-2xl border border-[#111827]/[0.06] bg-[#0D0D0D] p-4">
+    <div className="rounded-2xl border border-[#111827]/[0.06] bg-[#3B82F6] p-4">
       <p className="text-xs text-white/45">{label}</p>
       <p className="mt-2 text-2xl font-semibold tracking-tight text-white">
         {value}
       </p>
-      <p className="mt-1 text-[11px] font-medium text-[#D4AF37]">{sub}</p>
+      <p className="mt-1 text-[11px] font-medium text-[#3B82F6]">{sub}</p>
     </div>
   );
 }
@@ -470,7 +470,7 @@ function MiniPanel({
         {eyebrow}
       </p>
       <h3 className="mt-2 text-base font-semibold text-white">{title}</h3>
-      <p className="mt-5 text-2xl font-semibold tracking-tight text-[#D4AF37]">
+      <p className="mt-5 text-2xl font-semibold tracking-tight text-[#3B82F6]">
         {value}
       </p>
       <p className="mt-2 text-xs leading-5 text-white/45">{secondary}</p>
