@@ -205,7 +205,7 @@ export default function WifiForm({ establishmentId }: WifiFormProps) {
             type="button"
             onClick={() => void handleSave()}
             disabled={engine.saving || !networkName.trim()}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#246BFD] px-5 py-3 text-sm font-semibold text-[#050505] transition hover:bg-[#246BFD]-light disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#246BFD] px-5 py-3 text-sm font-semibold text-[#050505] transition hover:bg-[#65A5FF] disabled:cursor-not-allowed disabled:opacity-40"
           >
             {engine.saving ? <Loader2 size={16} className="animate-spin" /> : <Wifi size={16} />}
             {engine.saving ? 'Enregistrement…' : 'Enregistrer le Wi-Fi'}
