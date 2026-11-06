@@ -5,7 +5,7 @@ export default {
     extend: {
       colors: {
         ink: '#F5F7FB',
-        forest: '#246BFD',
+        forest: '#080B12',
         gold: '#246BFD',
         'gold-light': '#65A5FF',
         cream: '#111111',
@@ -20,7 +20,7 @@ export default {
       boxShadow: {
         soft: '0 24px 70px rgba(0,0,0,0.34)',
         luxury: '0 30px 90px rgba(0,0,0,0.48)',
-        gold: '0 0 0 1px rgba(201,164,92,.24), 0 18px 50px rgba(201,164,92,.10)',
+        gold: '0 0 0 1px rgba(36,107,253,.24), 0 18px 50px rgba(36,107,253,.10)',
       },
       backgroundImage: {
         'gold-gradient': 'linear-gradient(135deg, #246BFD 0%, #65A5FF 48%, #1D4ED8 100%)',
