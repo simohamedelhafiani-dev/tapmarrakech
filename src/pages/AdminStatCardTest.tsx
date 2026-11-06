@@ -40,7 +40,7 @@ export default function AdminStatCardTest() {
             label="Note moyenne"
             value={data ? data.averageRating.toFixed(2) : '—'}
             icon={Star}
-            iconTone="amber"
+            iconTone="blue"
             hint="Sur 5.00"
           />
 
