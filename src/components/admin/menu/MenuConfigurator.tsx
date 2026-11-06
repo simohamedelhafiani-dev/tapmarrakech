@@ -213,7 +213,7 @@ export default function MenuConfigurator({
               {paletteBusy ? 'Analyse…' : 'Générer'}
             </button>
           </div>
-          {paletteNotice && <p className="mt-3 rounded-lg bg-[#D4AF37]/10 px-3 py-2 text-[10px] leading-4 text-[#D4AF37]">{paletteNotice}</p>}
+          {paletteNotice && <p className="mt-3 rounded-lg bg-[#3B82F6]/10 px-3 py-2 text-[10px] leading-4 text-[#3B82F6]">{paletteNotice}</p>}
         </div>
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {([{key:'background',label:'Arrière-plan'},{key:'surface',label:'Blocs / cartes'},{key:'text',label:'Texte'},{key:'accent',label:'Accent / prix'}] as const).map(color => (
@@ -223,12 +223,12 @@ export default function MenuConfigurator({
             </label>
           ))}
         </div>
-        <button type="button" disabled={publishing} onClick={() => onChange({themeColors:{background:'#F5F1E8',surface:'#FFFDFA',text:'#24211C',accent:'#D4AF37'}})} className="mt-3 rounded-full border border-white/10 bg-[#111111] px-3 py-2 text-[10px] font-semibold text-forest disabled:opacity-50">Réinitialiser les couleurs</button>
+        <button type="button" disabled={publishing} onClick={() => onChange({themeColors:{background:'#3B82F6',surface:'#3B82F6',text:'#3B82F6',accent:'#3B82F6'}})} className="mt-3 rounded-full border border-white/10 bg-[#111111] px-3 py-2 text-[10px] font-semibold text-forest disabled:opacity-50">Réinitialiser les couleurs</button>
       </div>
 
       <div className="rounded-2xl border border-white/10 bg-[#171717] p-4">
         <div className="flex items-center justify-between gap-3"><div><p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-gold">Wallpaper</p><p className="mt-1 text-xs text-white/50">Règle l’intensité du voile sur l’image de fond.</p></div><span className="text-xs font-bold text-forest">{Math.round(draft.overlayOpacity * 100)}%</span></div>
-        <input aria-label="Intensité du voile du wallpaper" type="range" min="0" max="70" step="5" value={Math.round(draft.overlayOpacity * 100)} onChange={event => onChange({overlayOpacity:Number(event.target.value)/100})} disabled={publishing} className="mt-3 w-full accent-[#D4AF37]"/>
+        <input aria-label="Intensité du voile du wallpaper" type="range" min="0" max="70" step="5" value={Math.round(draft.overlayOpacity * 100)} onChange={event => onChange({overlayOpacity:Number(event.target.value)/100})} disabled={publishing} className="mt-3 w-full accent-[#3B82F6]"/>
       </div>
 
       <div className="rounded-2xl border border-gold/15 bg-gold/5 p-4">
