@@ -109,14 +109,10 @@ export default function Login() {
 
           <div className="relative z-10 flex h-full flex-col">
             <div className="flex items-center justify-between">
-              <button type="button" onClick={() => navigate('/')} className="group flex items-center gap-4 text-left transition-transform duration-300 hover:-translate-y-0.5 active:translate-y-0" aria-label="KELYANI">
-                <div className="relative shrink-0">
+              <button type="button" onClick={() => navigate('/')} className="group flex items-center text-left transition-transform duration-300 hover:-translate-y-0.5 active:translate-y-0" aria-label="KELYANI">
+                <div className="relative">
                   <div className="absolute inset-0 rounded-[18px] bg-[#00FFC3]/10 blur-xl shadow-[0_0_35px_rgba(0,255,195,.08)] transition group-hover:bg-[#00FFC3]/20" />
-                  <KelyaniMark size={72} className="relative" />
-                </div>
-                <div className="leading-none">
-                  <p className="font-display text-[22px] font-semibold tracking-[0.07em] text-[#00DFA5]">KELYANI</p>
-                  <p className="mt-2 text-[8px] font-semibold uppercase tracking-[0.28em] text-[#00FFC3]/65">L’art de la relation client</p>
+                  <KelyaniMark size={210} className="relative" />
                 </div>
               </button>
               <label className="inline-flex items-center rounded-full border border-[#242424] bg-[#111111]/80 px-3 py-2 text-[10px] font-semibold text-[#F1F5F4]/65 backdrop-blur-xl shadow-[0_10px_30px_rgba(5,5,5,.35)] transition-all duration-300 hover:border-[#00FFC3]/25 hover:shadow-[0_14px_38px_rgba(5,5,5,.45)]">
