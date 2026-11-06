@@ -28,7 +28,7 @@ type ProfileFormProps = {
 };
 
 const inputClass = (error?: string) =>
-  `w-full rounded-xl border bg-[#111111] px-3 py-3 text-sm outline-none transition focus:border-[#C9A45C]/40 ${error ? 'border-[#242424] focus:border-[#C9A45C]/60' : 'border-[#242424]'}`;
+  `w-full rounded-xl border bg-[#111111] px-3 py-3 text-sm outline-none transition focus:border-[#3B82F6]/40 ${error ? 'border-[#242424] focus:border-[#3B82F6]/60' : 'border-[#242424]'}`;
 
 function Field({
   label,
@@ -61,20 +61,20 @@ function Field({
         autoComplete={autoComplete}
         className={inputClass(error)}
       />
-      {error && <span className="mt-1.5 block text-[11px] font-medium text-[#E1C27A]">{error}</span>}
+      {error && <span className="mt-1.5 block text-[11px] font-medium text-[#3B82F6]">{error}</span>}
     </label>
   );
 }
 
 function slugState(status: SlugStatus, message: string) {
   if (status === 'checking') {
-    return { className: 'text-[#E1C27A]', text: message || 'Vérification de disponibilité…' };
+    return { className: 'text-[#3B82F6]', text: message || 'Vérification de disponibilité…' };
   }
   if (status === 'taken' || status === 'invalid' || status === 'error') {
-    return { className: 'text-[#E1C27A]', text: message || 'Slug invalide.' };
+    return { className: 'text-[#3B82F6]', text: message || 'Slug invalide.' };
   }
   if (status === 'available') {
-    return { className: 'text-[#C9A45C]', text: message || 'Slug disponible.' };
+    return { className: 'text-[#3B82F6]', text: message || 'Slug disponible.' };
   }
   return null;
 }
@@ -94,7 +94,7 @@ export default function ProfileForm({ engine, businessTypes, onSaved }: ProfileF
     return (
       <div className="rounded-3xl border border-[#242424] bg-[#111111] p-8 shadow-[0_12px_40px_rgba(15,23,42,0.045)]">
         <div className="flex items-center gap-3 text-sm text-[#FFFFFF]/45">
-          <Loader2 size={17} className="animate-spin text-[#C9A45C]" />
+          <Loader2 size={17} className="animate-spin text-[#3B82F6]" />
           Chargement du profil…
         </div>
       </div>
@@ -104,12 +104,12 @@ export default function ProfileForm({ engine, businessTypes, onSaved }: ProfileF
   if (engine.error || !profile) {
     return (
       <div className="rounded-3xl border border-[#242424] bg-[#111111] p-8 shadow-[0_12px_40px_rgba(15,23,42,0.045)]">
-        <p className="text-sm font-semibold text-[#E1C27A]">Impossible de charger le profil.</p>
+        <p className="text-sm font-semibold text-[#3B82F6]">Impossible de charger le profil.</p>
         <p className="mt-1 text-xs text-[#FFFFFF]/45">{engine.error?.message ?? 'Profil indisponible.'}</p>
         <button
           type="button"
           onClick={() => void engine.reload()}
-          className="mt-4 rounded-xl bg-[#C9A45C] px-4 py-2.5 text-xs font-semibold text-[#050505]"
+          className="mt-4 rounded-xl bg-[#3B82F6] px-4 py-2.5 text-xs font-semibold text-[#050505]"
         >
           Réessayer
         </button>
@@ -156,10 +156,10 @@ export default function ProfileForm({ engine, businessTypes, onSaved }: ProfileF
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Identité</p>
-            <h3 className="mt-1 text-lg font-semibold text-[#C9A45C]">Informations de l’établissement</h3>
+            <h3 className="mt-1 text-lg font-semibold text-[#3B82F6]">Informations de l’établissement</h3>
             <p className="mt-1 text-xs text-[#FFFFFF]/40">Ces informations alimentent la page publique et les modules de l’établissement.</p>
           </div>
-          <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-[#C9A45C]/5 px-3 py-1.5 text-[10px] font-semibold text-[#C9A45C]">
+          <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-[#3B82F6]/5 px-3 py-1.5 text-[10px] font-semibold text-[#3B82F6]">
             <ShieldCheck size={13} />
             Profil sécurisé
           </span>
@@ -190,7 +190,7 @@ export default function ProfileForm({ engine, businessTypes, onSaved }: ProfileF
               </p>
             )}
             {slugWasChanged && (
-              <div className="mt-2 flex items-start gap-2 rounded-xl border border-[#242424] bg-[#111111] px-3 py-2.5 text-[11px] leading-4 text-[#E1C27A]">
+              <div className="mt-2 flex items-start gap-2 rounded-xl border border-[#242424] bg-[#111111] px-3 py-2.5 text-[11px] leading-4 text-[#3B82F6]">
                 <AlertTriangle size={14} className="mt-0.5 shrink-0" />
                 <span>Attention, modifier le slug changera l’URL publique de votre établissement.</span>
               </div>
@@ -224,7 +224,7 @@ export default function ProfileForm({ engine, businessTypes, onSaved }: ProfileF
               ))}
             </select>
             {showError('ai_business_type_id') && (
-              <span className="mt-1.5 block text-[11px] font-medium text-[#E1C27A]">{showError('ai_business_type_id')}</span>
+              <span className="mt-1.5 block text-[11px] font-medium text-[#3B82F6]">{showError('ai_business_type_id')}</span>
             )}
           </label>
 
@@ -240,7 +240,7 @@ export default function ProfileForm({ engine, businessTypes, onSaved }: ProfileF
             />
             <div className="mt-1.5 flex items-center justify-between gap-3">
               {showError('description') ? (
-                <span className="text-[11px] font-medium text-[#E1C27A]">{showError('description')}</span>
+                <span className="text-[11px] font-medium text-[#3B82F6]">{showError('description')}</span>
               ) : (
                 <span className="text-[11px] text-[#FFFFFF]/35">2000 caractères maximum.</span>
               )}
@@ -255,24 +255,24 @@ export default function ProfileForm({ engine, businessTypes, onSaved }: ProfileF
       <div className="rounded-2xl border border-[#242424] bg-[#111111] p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs font-semibold text-[#C9A45C]">Enregistrement du profil</p>
+            <p className="text-xs font-semibold text-[#3B82F6]">Enregistrement du profil</p>
             <p className="mt-1 text-[11px] text-[#FFFFFF]/40">
               {engine.isDirty ? 'Des modifications non enregistrées sont présentes.' : 'Aucune modification en attente.'}
             </p>
           </div>
           <div className="flex items-center gap-3">
             {saveMessage && (
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#C9A45C]">
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#3B82F6]">
                 <CheckCircle2 size={14} />
                 {saveMessage}
               </span>
             )}
-            {saveError && <span className="max-w-xs text-[11px] font-medium text-[#E1C27A]">{saveError}</span>}
+            {saveError && <span className="max-w-xs text-[11px] font-medium text-[#3B82F6]">{saveError}</span>}
             <button
               type="button"
               disabled={engine.saving || !engine.isDirty || hasBlockingErrors}
               onClick={() => void handleSave()}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#C9A45C] px-5 py-3 text-sm font-semibold text-[#050505] transition hover:bg-[#C9A45C]-light disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#3B82F6] px-5 py-3 text-sm font-semibold text-[#050505] transition hover:bg-[#3B82F6]-light disabled:cursor-not-allowed disabled:opacity-40"
             >
               {engine.saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
               {engine.saving ? 'Enregistrement…' : 'Enregistrer le profil'}
