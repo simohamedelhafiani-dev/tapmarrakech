@@ -982,7 +982,7 @@ export default function Loyalty() {
                           setShowPoints(customer);
                         }}
                         disabled={!programSettings.enabled}
-                        className="rounded-lg bg-[#246BFD] text-[#0D0D0D] px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-[#246BFD] text-[#0D0D0D]-light disabled:cursor-not-allowed disabled:opacity-40"
+                        className="rounded-lg bg-[#246BFD] px-3 py-2 text-[11px] font-semibold text-[#0D0D0D] transition hover:bg-[#65A5FF] disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         Ajouter
                       </button>
