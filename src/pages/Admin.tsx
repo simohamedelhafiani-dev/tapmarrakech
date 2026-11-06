@@ -1161,7 +1161,7 @@ function Overview({
         </div>
       </div></section>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-6">
         <AdminMetric icon={Building2} label="Établissements" value={establishments.length} detail="sur la plateforme" />
         <AdminMetric icon={UserRound} label="Responsables" value={responsibles.length} detail="comptes actifs" />
         <AdminMetric icon={UsersRound} label="Clients fidélisés" value={detailLoading ? '—' : detail.loyaltyCustomers.toLocaleString('fr-FR')} detail="membres enregistrés" />
