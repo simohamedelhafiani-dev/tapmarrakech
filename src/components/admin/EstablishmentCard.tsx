@@ -23,7 +23,7 @@ export default function EstablishmentCard({
 
   return (
     <article className="group relative overflow-hidden rounded-[26px] border border-ink/6 bg-[#141414] p-5 text-left shadow-[0_8px_30px_rgba(15,23,42,0.045)] transition duration-300 hover:-translate-y-1 hover:border-forest/15 hover:shadow-[0_18px_45px_rgba(23,61,50,0.12)] sm:p-6">
-      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-forest via-forest/70 to-gold opacity-70" />
+      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-forest via-forest/70 to-[#3B82F6] opacity-70" />
 
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-center gap-4">
@@ -36,7 +36,7 @@ export default function EstablishmentCard({
           ) : (
             <div className="relative grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[#0D0D0D] text-[#3B82F6] shadow-lg shadow-forest/10">
               <Building2 size={21} strokeWidth={1.8} />
-              <span className="absolute -bottom-1 -right-1 grid h-5 w-5 place-items-center rounded-full border-2 border-[#3B82F6] bg-gold">
+              <span className="absolute -bottom-1 -right-1 grid h-5 w-5 place-items-center rounded-full border-2 border-[#3B82F6] bg-[#686D76]">
                 <Sparkles size={9} className="text-forest" />
               </span>
             </div>
@@ -62,7 +62,7 @@ export default function EstablishmentCard({
         <button
           type="button"
           onClick={() => onOpen(establishment)}
-          className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-ink/8 bg-[#1A1A1A] text-ink/35 transition hover:border-forest/10 hover:bg-forest hover:text-[#F5F5DC]"
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-ink/8 bg-[#1A1A1A] text-ink/35 transition hover:border-forest/10 hover:bg-forest hover:text-[#B0B0B0]"
           aria-label={`Ouvrir ${establishment.name}`}
         >
           →
@@ -77,7 +77,7 @@ export default function EstablishmentCard({
               isActive
                 ? 'bg-[#3B82F6]/12 text-[#3B82F6]'
                 : isTrial
-                  ? 'bg-gold/15 text-[#3B82F6]'
+                  ? 'bg-[#686D76]/15 text-[#3B82F6]'
                   : 'bg-ink/5 text-ink/55',
             ].join(' ')}
           >
