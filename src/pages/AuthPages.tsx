@@ -8,7 +8,7 @@ function AuthShell({ children, title, eyebrow }: { children: React.ReactNode; ti
   return (
     <div className="grid min-h-screen bg-[#0D0D0D] lg:grid-cols-[1fr_1.1fr]">
       <div className="hidden bg-[#0D0D0D] p-12 text-white lg:flex lg:flex-col lg:justify-between border-r border-[#00FFC3]/15">
-        <div className="flex items-center gap-3"><KelyaniMark size={54} /><div className="leading-none"><p className="font-display text-3xl font-semibold italic tracking-[-0.03em] text-white">Kelyani</p><p className="mt-2 text-[8px] font-medium uppercase tracking-[0.2em] text-[#00FFC3]">L’art de la relation client</p></div></div>
+        <div className="flex items-center"><KelyaniMark size={210} /></div>
         <div>
           <p className="mb-5 text-xs font-semibold uppercase tracking-[0.25em] text-[#00FFC3]">La voix de vos clients</p>
           <h2 className="max-w-md font-display text-5xl leading-[1.1] text-[#FFFFFF]">Transformez chaque retour en fidélité.</h2>
@@ -18,7 +18,7 @@ function AuthShell({ children, title, eyebrow }: { children: React.ReactNode; ti
       </div>
       <div className="flex items-center justify-center bg-[#0D0D0D] px-6 py-12">
         <div className="w-full max-w-[420px]">
-          <div className="mb-10 flex items-center gap-2.5 lg:hidden"><KelyaniMark size={42} /><div className="leading-none"><p className="font-display text-2xl font-semibold italic text-white">Kelyani</p><p className="mt-1.5 text-[7px] font-medium uppercase tracking-[0.18em] text-[#00FFC3]">L’art de la relation client</p></div></div>
+          <div className="mb-10 flex items-center lg:hidden"><KelyaniMark size={170} /></div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#00FFC3]">{eyebrow}</p>
           <h1 className="mt-3 font-display text-4xl text-[#00FFC3]">{title}</h1>
           {children}
