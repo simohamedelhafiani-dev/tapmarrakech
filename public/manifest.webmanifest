@@ -9,10 +9,10 @@
   "theme_color": "#0D0D0D",
   "icons": [
     {
-      "src": "/kelyani-official-app-icon.webp",
-      "sizes": "128x128",
-      "type": "image/webp",
-      "purpose": "any maskable"
+      "src": "/Logo%20Kelyani%20en%20d%C3%A9grad%C3%A9%20teal%20et%20vert.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }
