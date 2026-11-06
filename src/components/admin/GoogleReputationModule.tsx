@@ -310,7 +310,7 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
       <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#C9A45C]">Réputation Google</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#3B82F6]">Réputation Google</p>
             <h3 className="mt-1 text-2xl font-semibold text-white">Google Business Profile</h3>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-white/45">
               Connexion, synchronisation et réponses IA sont administrées ici. Le Responsable reste en lecture seule.
@@ -322,19 +322,19 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
                 <span className="inline-flex items-center gap-2 rounded-xl border border-emerald-400/20 bg-emerald-400/5 px-3 py-2 text-xs font-semibold text-emerald-300">
                   <CheckCircle2 size={14} /> Connecté
                 </span>
-                <button type="button" onClick={() => void syncGoogle()} disabled={syncing} className="inline-flex items-center gap-2 rounded-xl bg-[#C9A45C] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50">
+                <button type="button" onClick={() => void syncGoogle()} disabled={syncing} className="inline-flex items-center gap-2 rounded-xl bg-[#3B82F6] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50">
                   <RefreshCw size={14} className={syncing ? 'animate-spin' : ''} /> {syncing ? 'Synchronisation…' : 'Synchroniser'}
                 </button>
               </>
             ) : (
-              <button type="button" onClick={() => void connectGoogle()} disabled={connecting} className="inline-flex items-center gap-2 rounded-xl bg-[#C9A45C] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50">
+              <button type="button" onClick={() => void connectGoogle()} disabled={connecting} className="inline-flex items-center gap-2 rounded-xl bg-[#3B82F6] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50">
                 <Link2 size={14} /> {connecting ? 'Connexion…' : 'Connecter Google'}
               </button>
             )}
           </div>
         </div>
         {connection?.last_sync_at && <p className="mt-4 text-[10px] text-white/30">Dernière synchronisation : {new Date(connection.last_sync_at).toLocaleString('fr-FR')}</p>}
-        {connection?.last_error && <p className="mt-2 text-xs text-amber-300">{connection.last_error}</p>}
+        {connection?.last_error && <p className="mt-2 text-xs text-blue-300">{connection.last_error}</p>}
       </div>
 
       )}
@@ -348,16 +348,16 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
 
       {mode === 'connection' && (
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-2xl border border-[#242424] bg-[#111111] p-5"><p className="text-[10px] uppercase tracking-[0.16em] text-white/35">Avis Google</p><p className="mt-2 text-2xl font-semibold text-[#C9A45C]">{summary.total}</p></div>
-        <div className="rounded-2xl border border-[#242424] bg-[#111111] p-5"><p className="text-[10px] uppercase tracking-[0.16em] text-white/35">Note moyenne</p><p className="mt-2 text-2xl font-semibold text-[#C9A45C]">{summary.average ? summary.average.toFixed(1) : '—'} ★</p></div>
-        <div className="rounded-2xl border border-[#242424] bg-[#111111] p-5"><p className="text-[10px] uppercase tracking-[0.16em] text-white/35">Réponses générées</p><p className="mt-2 text-2xl font-semibold text-[#C9A45C]">{summary.replied}</p></div>
+        <div className="rounded-2xl border border-[#242424] bg-[#111111] p-5"><p className="text-[10px] uppercase tracking-[0.16em] text-white/35">Avis Google</p><p className="mt-2 text-2xl font-semibold text-[#3B82F6]">{summary.total}</p></div>
+        <div className="rounded-2xl border border-[#242424] bg-[#111111] p-5"><p className="text-[10px] uppercase tracking-[0.16em] text-white/35">Note moyenne</p><p className="mt-2 text-2xl font-semibold text-[#3B82F6]">{summary.average ? summary.average.toFixed(1) : '—'} ★</p></div>
+        <div className="rounded-2xl border border-[#242424] bg-[#111111] p-5"><p className="text-[10px] uppercase tracking-[0.16em] text-white/35">Réponses générées</p><p className="mt-2 text-2xl font-semibold text-[#3B82F6]">{summary.replied}</p></div>
       </div>
 
       )}
 
       {mode === 'ai' && (
       <section className="rounded-3xl border border-[#242424] bg-[#111111] p-6">
-        <div className="flex items-center gap-2"><Settings2 size={17} className="text-[#C9A45C]" /><h3 className="font-semibold text-white">Configuration des réponses IA</h3></div>
+        <div className="flex items-center gap-2"><Settings2 size={17} className="text-[#3B82F6]" /><h3 className="font-semibold text-white">Configuration des réponses IA</h3></div>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <label className="flex items-center justify-between rounded-2xl border border-[#242424] bg-[#0b0b0b] p-4">
             <span><span className="block text-sm font-semibold text-white">Réponse automatique</span><span className="mt-1 block text-xs text-white/35">Générer et publier automatiquement les réponses.</span></span>
@@ -372,7 +372,7 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
           <label className="block"><span className="mb-2 block text-xs font-semibold text-white/55">Langue</span><select value={settings.auto_reply_language} onChange={(e) => setSettings((v) => ({ ...v, auto_reply_language: e.target.value }))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white"><option value="auto">Détecter la langue de chaque avis</option><option value="fr">Français</option><option value="en">English</option><option value="ar">العربية</option></select></label>
           <label className="block"><span className="mb-2 block text-xs font-semibold text-white/55">Ton</span><select value={settings.auto_reply_tone} onChange={(e) => setSettings((v) => ({ ...v, auto_reply_tone: e.target.value }))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white"><option value="professional_warm">Professionnel & chaleureux</option><option value="professional">Professionnel</option><option value="friendly">Amical</option><option value="luxury">Premium / luxe</option></select></label>
         </div>
-        <button type="button" onClick={() => void saveSettings('ai')} disabled={saving} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#C9A45C] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50"><Save size={14} /> {saving ? 'Enregistrement…' : 'Enregistrer les paramètres'}</button>
+        <button type="button" onClick={() => void saveSettings('ai')} disabled={saving} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#3B82F6] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50"><Save size={14} /> {saving ? 'Enregistrement…' : 'Enregistrer les paramètres'}</button>
       </section>
 
 
@@ -380,14 +380,14 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
 
       {mode === 'links' && (
       <section className="rounded-3xl border border-[#242424] bg-[#111111] p-6">
-        <div className="flex items-center gap-2"><Sparkles size={17} className="text-[#C9A45C]" /><h3 className="font-semibold text-white">Avis & retour client</h3></div>
+        <div className="flex items-center gap-2"><Sparkles size={17} className="text-[#3B82F6]" /><h3 className="font-semibold text-white">Avis & retour client</h3></div>
         <div className="mt-5 grid gap-4 md:grid-cols-3">
           <label className="block md:col-span-2"><span className="mb-2 block text-xs font-semibold text-white/55">Lien avis Google</span><input value={googleReviewUrl} onChange={(e) => setGoogleReviewUrl(e.target.value)} placeholder="https://g.page/…" className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white" /></label>
           <label className="block md:col-span-2"><span className="mb-2 block text-xs font-semibold text-white/55">Lien avis TripAdvisor</span><input value={tripadvisorReviewUrl} onChange={(e) => setTripadvisorReviewUrl(e.target.value)} placeholder="https://www.tripadvisor.fr/…" className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white" /></label>
           <label className="block"><span className="mb-2 block text-xs font-semibold text-white/55">Bonus questionnaire privé (points)</span><input type="number" min="0" max="10000" step="1" value={feedbackBonus} onChange={(e) => setFeedbackBonus(Math.max(0, Math.floor(Number(e.target.value) || 0)))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white" /><span className="mt-1 block text-[10px] text-white/35">Attribué une seule fois après l’envoi du questionnaire privé.</span></label>
         </div>
         <p className="mt-3 text-[10px] leading-5 text-white/40">Les points configurés ici récompensent uniquement le questionnaire privé de satisfaction, jamais la publication d’un avis Google ou TripAdvisor.</p>
-        <button type="button" onClick={() => void saveSettings('links')} disabled={saving} className="mt-4 inline-flex items-center gap-2 rounded-xl border border-[#C9A45C]/30 px-4 py-2.5 text-xs font-semibold text-[#C9A45C] disabled:opacity-50"><Save size={14} /> Enregistrer les liens et le bonus</button>
+        <button type="button" onClick={() => void saveSettings('links')} disabled={saving} className="mt-4 inline-flex items-center gap-2 rounded-xl border border-[#3B82F6]/30 px-4 py-2.5 text-xs font-semibold text-[#3B82F6] disabled:opacity-50"><Save size={14} /> Enregistrer les liens et le bonus</button>
       </section>
 
 
@@ -395,16 +395,16 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
 
       {mode === 'sync' && (
         <section className="rounded-3xl border border-[#242424] bg-[#111111] p-6">
-          <div className="flex items-center gap-2"><RefreshCw size={17} className="text-[#C9A45C]" /><h3 className="font-semibold text-white">Fréquence de synchronisation</h3></div>
+          <div className="flex items-center gap-2"><RefreshCw size={17} className="text-[#3B82F6]" /><h3 className="font-semibold text-white">Fréquence de synchronisation</h3></div>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-white/45">Définissez à quelle fréquence KELYANI vérifie les nouveaux avis de cet établissement. La synchronisation manuelle reste disponible dans la section de connexion.</p>
           <label className="mt-5 block max-w-xl"><span className="mb-2 block text-xs font-semibold text-white/55">Intervalle de rafraîchissement</span><select value={settings.sync_interval_minutes} onChange={(e) => setSettings((v) => ({ ...v, sync_interval_minutes: Number(e.target.value) }))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white"><option value={5}>Toutes les 5 minutes — flux élevé</option><option value={10}>Toutes les 10 minutes — recommandé</option><option value={15}>Toutes les 15 minutes</option><option value={30}>Toutes les 30 minutes — flux modéré</option><option value={60}>Toutes les heures — flux faible</option></select><p className="mt-2 text-xs text-white/35">Le planificateur vérifie périodiquement les établissements et respecte cet intervalle configuré.</p></label>
-          <button type="button" onClick={() => void saveSettings('sync')} disabled={saving} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#C9A45C] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50"><Save size={14} /> {saving ? 'Enregistrement…' : 'Enregistrer la fréquence'}</button>
+          <button type="button" onClick={() => void saveSettings('sync')} disabled={saving} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#3B82F6] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50"><Save size={14} /> {saving ? 'Enregistrement…' : 'Enregistrer la fréquence'}</button>
         </section>
       )}
 
       {mode === 'ai' || mode === 'links' ? (
       <div className="flex items-start gap-3 rounded-2xl border border-[#242424] bg-[#0b0b0b] p-4 text-xs text-white/40">
-        <Star size={15} className="mt-0.5 shrink-0 text-[#C9A45C]" />
+        <Star size={15} className="mt-0.5 shrink-0 text-[#3B82F6]" />
         <p>Les programmes de fidélité restent indépendants des avis publics. Ne conditionnez jamais une récompense à la publication d’un avis.</p>
       </div>
       ) : null}
