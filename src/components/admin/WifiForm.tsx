@@ -101,7 +101,7 @@ export default function WifiForm({ establishmentId }: WifiFormProps) {
     return (
       <div className="rounded-3xl border border-[#242424] bg-[#111111] p-8 shadow-[0_12px_40px_rgba(15,23,42,0.045)]">
         <div className="flex items-center gap-3 text-sm text-[#FFFFFF]/45">
-          <Loader2 size={17} className="animate-spin text-[#C9A45C]" />
+          <Loader2 size={17} className="animate-spin text-[#246BFD]" />
           Chargement du Wi-Fi…
         </div>
       </div>
@@ -114,12 +114,12 @@ export default function WifiForm({ establishmentId }: WifiFormProps) {
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Connectivité</p>
-            <h3 className="mt-1 text-lg font-semibold text-[#C9A45C]">Wi-Fi client</h3>
+            <h3 className="mt-1 text-lg font-semibold text-[#246BFD]">Wi-Fi client</h3>
             <p className="mt-1 text-xs leading-5 text-[#FFFFFF]/40">
               Configure le réseau qui sera proposé aux clients. Le QR est généré localement à partir des informations saisies.
             </p>
           </div>
-          <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-semibold ${active ? 'bg-[#C9A45C]/5 text-[#C9A45C]' : 'bg-[#242424] text-[#FFFFFF]/45'}`}>
+          <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-semibold ${active ? 'bg-[#246BFD]/5 text-[#246BFD]' : 'bg-[#242424] text-[#FFFFFF]/45'}`}>
             <Wifi size={13} />
             {active ? 'Actif' : 'Désactivé'}
           </span>
@@ -131,7 +131,7 @@ export default function WifiForm({ establishmentId }: WifiFormProps) {
             <input
               value={networkName}
               onChange={(event) => { setNetworkName(event.target.value); setSaveMessage(''); setSaveError(''); }}
-              className="w-full rounded-xl border border-[#242424] bg-[#111111] px-3 py-3 text-sm outline-none focus:border-[#C9A45C]/60"
+              className="w-full rounded-xl border border-[#242424] bg-[#111111] px-3 py-3 text-sm outline-none focus:border-[#246BFD]/60"
               placeholder="Ex. Kissko WiFi"
               autoComplete="off"
             />
@@ -142,7 +142,7 @@ export default function WifiForm({ establishmentId }: WifiFormProps) {
             <select
               value={securityType}
               onChange={(event) => { setSecurityType(event.target.value); setSaveMessage(''); setSaveError(''); }}
-              className="w-full rounded-xl border border-[#242424] bg-[#111111] px-3 py-3 text-sm outline-none focus:border-[#C9A45C]/60"
+              className="w-full rounded-xl border border-[#242424] bg-[#111111] px-3 py-3 text-sm outline-none focus:border-[#246BFD]/60"
             >
               <option value="WPA">WPA / WPA2 / WPA3</option>
               <option value="WEP">WEP</option>
@@ -158,7 +158,7 @@ export default function WifiForm({ establishmentId }: WifiFormProps) {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(event) => { setPassword(event.target.value); setSaveMessage(''); setSaveError(''); }}
-                  className="w-full rounded-xl border border-[#242424] bg-[#111111] px-3 py-3 pr-11 text-sm outline-none focus:border-[#C9A45C]/60"
+                  className="w-full rounded-xl border border-[#242424] bg-[#111111] px-3 py-3 pr-11 text-sm outline-none focus:border-[#246BFD]/60"
                   placeholder="Mot de passe du réseau"
                   autoComplete="off"
                 />
@@ -179,33 +179,33 @@ export default function WifiForm({ establishmentId }: WifiFormProps) {
               type="checkbox"
               checked={active}
               onChange={(event) => { setActive(event.target.checked); setSaveMessage(''); }}
-              className="h-4 w-4 accent-[#C9A45C]"
+              className="h-4 w-4 accent-[#246BFD]"
             />
             <span>
-              <span className="block text-xs font-semibold text-[#C9A45C]">Module Wi-Fi actif</span>
+              <span className="block text-xs font-semibold text-[#246BFD]">Module Wi-Fi actif</span>
               <span className="mt-0.5 block text-[11px] text-[#FFFFFF]/40">Le Wi-Fi peut être affiché sur la page publique.</span>
             </span>
           </label>
 
           {securityType.toUpperCase() !== 'NOPASS' && !password && (
-            <p className="rounded-xl border border-[#242424] bg-[#111111] px-3 py-2.5 text-[11px] leading-4 text-[#E1C27A]">
+            <p className="rounded-xl border border-[#242424] bg-[#111111] px-3 py-2.5 text-[11px] leading-4 text-[#65A5FF]">
               Aucun mot de passe n’est renseigné. Le QR pourra être généré, mais le téléphone ne pourra pas s’authentifier sur un réseau protégé.
             </p>
           )}
 
           {saveMessage && (
-            <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#C9A45C]">
+            <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#246BFD]">
               <CheckCircle2 size={14} />
               {saveMessage}
             </p>
           )}
-          {saveError && <p className="rounded-xl bg-[#111111] px-3 py-2.5 text-[11px] text-[#E1C27A]">{saveError}</p>}
+          {saveError && <p className="rounded-xl bg-[#111111] px-3 py-2.5 text-[11px] text-[#65A5FF]">{saveError}</p>}
 
           <button
             type="button"
             onClick={() => void handleSave()}
             disabled={engine.saving || !networkName.trim()}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#C9A45C] px-5 py-3 text-sm font-semibold text-[#050505] transition hover:bg-[#C9A45C]-light disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#246BFD] px-5 py-3 text-sm font-semibold text-[#050505] transition hover:bg-[#246BFD]-light disabled:cursor-not-allowed disabled:opacity-40"
           >
             {engine.saving ? <Loader2 size={16} className="animate-spin" /> : <Wifi size={16} />}
             {engine.saving ? 'Enregistrement…' : 'Enregistrer le Wi-Fi'}
@@ -213,7 +213,7 @@ export default function WifiForm({ establishmentId }: WifiFormProps) {
         </div>
       </div>
 
-      <div className="rounded-3xl border border-[#242424] bg-[#C9A45C] p-6 text-[#050505] shadow-[0_12px_40px_rgba(23,61,50,0.12)]">
+      <div className="rounded-3xl border border-[#242424] bg-[#246BFD] p-6 text-[#050505] shadow-[0_12px_40px_rgba(23,61,50,0.12)]">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Accès instantané</p>
@@ -240,7 +240,7 @@ export default function WifiForm({ establishmentId }: WifiFormProps) {
           type="button"
           onClick={downloadQr}
           disabled={!qrDataUrl}
-          className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gold px-4 py-3 text-sm font-bold text-[#C9A45C] transition hover:bg-gold/90 disabled:cursor-not-allowed disabled:opacity-40"
+          className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gold px-4 py-3 text-sm font-bold text-[#246BFD] transition hover:bg-gold/90 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Download size={16} />
           Télécharger le QR Code
