@@ -686,7 +686,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
             type="button"
             onClick={() => void saveAll(true)}
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#246BFD]-gradient px-4 py-2.5 text-xs font-semibold text-[#050505] shadow-sm transition hover:-translate-y-0.5 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-[#246BFD] to-[#65A5FF] px-4 py-2.5 text-xs font-semibold text-[#050505] shadow-sm transition hover:-translate-y-0.5 disabled:opacity-50"
           >
             <Save size={14} />
             {saving ? '...' : 'Publier'}
@@ -765,7 +765,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                         key={item.id}
                         type="button"
                         onClick={() => setProgram(current => ({ ...current, programType: item.id }))}
-                        className={`rounded-2xl border p-4 text-left transition ${active ? 'border-[#242424] bg-[#246BFD]-gradient/[.04] ring-2 ring-[#246BFD]/15' : 'border-[#242424]/10 hover:border-[#246BFD]/30'}`}
+                        className={`rounded-2xl border p-4 text-left transition ${active ? 'border-[#242424] bg-[#246BFD]/[.04] ring-2 ring-[#246BFD]/15' : 'border-[#242424]/10 hover:border-[#246BFD]/30'}`}
                       >
                         <Icon size={18} className={active ? 'text-[#246BFD]' : 'text-[#FFFFFF]/35'} />
                         <p className="mt-3 text-sm font-semibold text-[#65A5FF]">{item.label}</p>
@@ -1018,7 +1018,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                       Annuler
                     </button>
                   )}
-                  <button type="button" onClick={() => void saveReward()} disabled={rewardSaving} className="inline-flex items-center gap-2 rounded-xl bg-[#246BFD]-gradient px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50">
+                  <button type="button" onClick={() => void saveReward()} disabled={rewardSaving} className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-[#246BFD] to-[#65A5FF] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50">
                     <Gift size={14} />
                     {rewardSaving ? 'Enregistrement...' : rewardDraft.id ? 'Mettre à jour' : 'Ajouter'}
                   </button>
@@ -1224,7 +1224,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   <Field label="Style des tampons">
                     <div className="grid grid-cols-4 gap-2">
                       {(['circles', 'squares', 'stars', 'hearts'] as const).map(style => (
-                        <button key={style} type="button" onClick={() => setDesign(current => ({ ...current, stampStyle: style }))} className={`rounded-xl border px-2 py-2.5 text-[10px] font-semibold capitalize ${design.stampStyle === style ? 'border-[#242424] bg-[#246BFD]-gradient text-[#050505]' : 'border-[#242424]/10 text-[#FFFFFF]/45'}`}>
+                        <button key={style} type="button" onClick={() => setDesign(current => ({ ...current, stampStyle: style }))} className={`rounded-xl border px-2 py-2.5 text-[10px] font-semibold capitalize ${design.stampStyle === style ? 'border-[#242424] bg-gradient-to-br from-[#246BFD] to-[#65A5FF] text-[#050505]' : 'border-[#242424]/10 text-[#FFFFFF]/45'}`}>
                           {style === 'circles' ? 'Ronds' : style === 'squares' ? 'Carrés' : style === 'stars' ? 'Étoiles' : 'Cœurs'}
                         </button>
                       ))}
@@ -1315,7 +1315,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (checked: b
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className={`relative h-7 w-12 shrink-0 rounded-full p-1 transition ${checked ? 'bg-[#246BFD]-gradient' : 'bg-[#111111]/15'}`}
+      className={`relative h-7 w-12 shrink-0 rounded-full p-1 transition ${checked ? 'bg-gradient-to-br from-[#246BFD] to-[#65A5FF]' : 'bg-[#111111]/15'}`}
     >
       <span className={`block h-5 w-5 rounded-full bg-[#111111] shadow-sm transition ${checked ? 'translate-x-5' : 'translate-x-0'}`} />
     </button>
