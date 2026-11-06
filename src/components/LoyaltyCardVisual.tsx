@@ -1,6 +1,6 @@
 export const WALLET_TEMPLATES = {
   'onyx-black': { id: 'onyx-black', name: 'Onyx Black', primary: '#181818', accent: '#D7D7D7', background: '#070707', text: '#FFFFFF' },
-  'royal-gold': { id: 'royal-gold', name: 'Royal Gold', primary: '#3A2A12', accent: '#E7C66A', background: '#120C05', text: '#FFF9E8' },
+  'royal-gold': { id: 'royal-gold', name: 'Electric Blue', primary: '#1D4ED8', accent: '#65A5FF', background: '#080B12', text: '#FFF9E8' },
   'deep-ocean': { id: 'deep-ocean', name: 'Deep Ocean', primary: '#123B4A', accent: '#8ED9E8', background: '#071B22', text: '#F2FCFF' },
   'minimal-white': { id: 'minimal-white', name: 'Minimal White', primary: '#E9ECE8', accent: '#20352C', background: '#F8FAF7', text: '#17231D' },
   'emerald-luxe': { id: 'emerald-luxe', name: 'Emerald Luxe', primary: '#123D2B', accent: '#C8E6B8', background: '#071D14', text: '#F5FFF8' },
