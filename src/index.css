@@ -362,10 +362,10 @@ table {
 .kelyani-live-pill {
   display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(36,107,253,.18);
   border-radius:999px;padding:5px 8px;background:rgba(36,107,253,.055);
-  color:#d4af37;font-size:8px;font-weight:800;letter-spacing:.15em;
+  color:#246BFD;font-size:8px;font-weight:800;letter-spacing:.15em;
 }
 .kelyani-live-pill span,.kelyani-footer-dot {
-  display:inline-block;width:5px;height:5px;border-radius:50%;background:#d4af37;
+  display:inline-block;width:5px;height:5px;border-radius:50%;background:#246BFD;
   box-shadow:0 0 9px rgba(36,107,253,.8);
 }
 .kelyani-dashboard-body { display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:12px 0; }
@@ -408,7 +408,7 @@ table {
 .kelyani-float-icon,.kelyani-loyalty-symbol {
   display:grid;place-items:center;width:29px;height:29px;flex-shrink:0;border-radius:10px;
   background:linear-gradient(145deg,rgba(36,107,253,.23),rgba(36,107,253,.06));
-  color:#e7c96b;border:1px solid rgba(36,107,253,.17);
+  color:#65A5FF;border:1px solid rgba(36,107,253,.17);
 }
 .kelyani-loyalty-symbol { font-family:Georgia,serif;font-size:17px;font-weight:700; }
 .kelyani-float-check { display:grid;place-items:center;width:17px;height:17px;border-radius:50%;background:rgba(82,180,124,.14);color:#7bd9a0!important;font-size:10px!important; }
