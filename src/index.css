@@ -758,3 +758,45 @@ body { background:#050505; color:#FFFFFF; }
   --kelyani-accent:#3B82F6;
   --kelyani-accent-soft:#3B82F6;
 }
+
+
+/* KELYANI typography hierarchy — primary white, secondary silver */
+#root {
+  color: #FFFFFF;
+}
+#root h1,
+#root h2,
+#root h3,
+#root h4,
+#root h5,
+#root h6,
+#root [data-typography="primary"] {
+  color: #FFFFFF;
+}
+#root p,
+#root small,
+#root label,
+#root th,
+#root [data-typography="secondary"] {
+  color: #B0B0B0;
+}
+/* Normalize common muted Tailwind text utilities without overriding semantic accents. */
+#root [class~="text-gray-400"],
+#root [class~="text-gray-500"],
+#root [class~="text-gray-600"],
+#root [class~="text-slate-400"],
+#root [class~="text-slate-500"],
+#root [class~="text-slate-600"],
+#root [class~="text-zinc-400"],
+#root [class~="text-zinc-500"],
+#root [class~="text-neutral-400"],
+#root [class~="text-neutral-500"],
+#root [class~="text-stone-400"],
+#root [class~="text-stone-500"] {
+  color: #B0B0B0 !important;
+}
+#root input::placeholder,
+#root textarea::placeholder {
+  color: #B0B0B0 !important;
+  opacity: .78;
+}
