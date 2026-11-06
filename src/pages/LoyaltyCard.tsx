@@ -1077,7 +1077,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
           <button
             type="button"
             onClick={() => void saveCardOnPhone()}
-            className="mt-4 flex w-full items-center justify-center gap-3 rounded-2xl bg-gold-gradient px-5 py-4 text-sm font-semibold text-[#050505] shadow-gold transition hover:brightness-105"
+            className="mt-4 flex w-full items-center justify-center gap-3 rounded-2xl bg-electric-gradient px-5 py-4 text-sm font-semibold text-[#050505] shadow-electric transition hover:brightness-105"
           >
             <span className="text-lg">▣</span>
             Enregistrer ma carte sur mon téléphone
