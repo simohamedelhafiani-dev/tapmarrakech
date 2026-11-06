@@ -162,13 +162,13 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
     <div className="space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#C9A45C]">CRM client</p>
-          <h3 className="mt-1 text-2xl font-semibold text-[#E1C27A]">Segmentation intelligente</h3>
+          <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#246BFD]">CRM client</p>
+          <h3 className="mt-1 text-2xl font-semibold text-[#65A5FF]">Segmentation intelligente</h3>
           <p className="mt-1 max-w-2xl text-sm text-white/50">Identifiez les clients actifs, ceux à réactiver et les anniversaires à venir à partir des données de fidélité disponibles.</p>
         </div>
         <div className="flex gap-2">
           <button type="button" onClick={() => void load()} disabled={loading} className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2.5 text-xs font-semibold text-white/80 hover:bg-white/5 disabled:opacity-50"><RefreshCw size={14} /> Actualiser</button>
-          <button type="button" onClick={exportCsv} disabled={loading || filtered.length === 0} className="inline-flex items-center gap-2 rounded-xl bg-[#D4AF37] px-3 py-2.5 text-xs font-bold text-black hover:brightness-110 disabled:opacity-40"><Download size={14} /> Exporter CSV ({filtered.length})</button>
+          <button type="button" onClick={exportCsv} disabled={loading || filtered.length === 0} className="inline-flex items-center gap-2 rounded-xl bg-[#246BFD] px-3 py-2.5 text-xs font-bold text-black hover:brightness-110 disabled:opacity-40"><Download size={14} /> Exporter CSV ({filtered.length})</button>
         </div>
       </div>
 
@@ -183,21 +183,21 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
           { label: 'Anniversaires aujourd’hui', value: counts.birthdays, icon: Cake },
         ].map(item => { const Icon = item.icon; return (
           <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[.025] p-4">
-            <div className="flex items-center justify-between gap-2 text-white/45"><span className="text-xs">{item.label}</span><Icon size={15} className="text-[#D4AF37]" /></div>
+            <div className="flex items-center justify-between gap-2 text-white/45"><span className="text-xs">{item.label}</span><Icon size={15} className="text-[#246BFD]" /></div>
             <p className="mt-3 text-2xl font-semibold tabular-nums text-white">{loading ? '—' : item.value}</p>
           </div>
         ); })}
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row">
-        <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Rechercher un nom, téléphone ou email…" className="min-w-0 flex-1 rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none placeholder:text-white/30 focus:border-[#D4AF37]/50" />
+        <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Rechercher un nom, téléphone ou email…" className="min-w-0 flex-1 rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none placeholder:text-white/30 focus:border-[#246BFD]/50" />
         <div className="text-xs self-center text-white/45">{filtered.length} client(s) dans ce segment</div>
       </div>
 
       <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
         {SEGMENTS.map(item => { const Icon = item.icon; const active = segment === item.id; return (
-          <button key={item.id} type="button" onClick={() => setSegment(item.id)} className={'rounded-2xl border p-4 text-left transition ' + (active ? 'border-[#D4AF37]/60 bg-[#D4AF37]/[.08]' : 'border-white/10 bg-white/[.02] hover:border-white/20')}>
-            <div className="flex items-center gap-2"><Icon size={16} className={active ? 'text-[#D4AF37]' : 'text-white/45'} /><span className="text-sm font-semibold text-white">{item.label}</span></div>
+          <button key={item.id} type="button" onClick={() => setSegment(item.id)} className={'rounded-2xl border p-4 text-left transition ' + (active ? 'border-[#246BFD]/60 bg-[#246BFD]/[.08]' : 'border-white/10 bg-white/[.02] hover:border-white/20')}>
+            <div className="flex items-center gap-2"><Icon size={16} className={active ? 'text-[#246BFD]' : 'text-white/45'} /><span className="text-sm font-semibold text-white">{item.label}</span></div>
             <p className="mt-2 text-xs leading-5 text-white/45">{item.hint}</p>
           </button>
         ); })}
@@ -218,7 +218,7 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
                   <td className="px-4 py-3 text-xs text-white/60">{c.birth_day && c.birth_month ? String(c.birth_day).padStart(2, '0') + '/' + String(c.birth_month).padStart(2, '0') : '—'}</td>
                   <td className="px-4 py-3"><div className="flex flex-wrap gap-1">{c.marketing_consent && <span className="rounded-full bg-emerald-400/10 px-2 py-1 text-[10px] text-emerald-200">Marketing</span>}{c.notification_consent && <span className="rounded-full bg-sky-400/10 px-2 py-1 text-[10px] text-sky-200">Notifications</span>}{!c.marketing_consent && !c.notification_consent && <span className="text-xs text-white/30">Aucun</span>}</div></td>
                   <td className="px-4 py-3">
-                    <button type="button" onClick={() => void createRecoveryQr(c)} disabled={recoveryLoadingId !== null} className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-[#D4AF37]/30 px-3 py-2 text-xs font-semibold text-[#E1C27A] transition hover:bg-[#D4AF37]/10 disabled:cursor-not-allowed disabled:opacity-50">
+                    <button type="button" onClick={() => void createRecoveryQr(c)} disabled={recoveryLoadingId !== null} className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-[#246BFD]/30 px-3 py-2 text-xs font-semibold text-[#65A5FF] transition hover:bg-[#246BFD]/10 disabled:cursor-not-allowed disabled:opacity-50">
                       {recoveryLoadingId === c.id ? <Loader2 size={13} className="animate-spin" /> : <QrCode size={13} />}
                       Récupérer
                     </button>
@@ -235,7 +235,7 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
           <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#101010] p-5 shadow-2xl">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#D4AF37]">Carte fidélité</p>
+                <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#246BFD]">Carte fidélité</p>
                 <h3 className="mt-1 text-xl font-semibold text-white">Récupérer la carte</h3>
                 <p className="mt-1 text-sm text-white/50">{recoveryQr.name} · {recoveryQr.phone}</p>
               </div>
@@ -246,7 +246,7 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
             </div>
             <p className="mt-4 text-center text-sm text-white/70">Scannez ce QR code pour récupérer la carte fidélité.</p>
             {recoveryQr.expiresAt && <p className="mt-1 text-center text-xs text-white/40">Lien valable jusqu’au {new Date(recoveryQr.expiresAt).toLocaleString('fr-FR')}</p>}
-            <button type="button" onClick={() => window.print()} className="mt-4 w-full rounded-xl bg-[#D4AF37] px-4 py-3 text-sm font-bold text-black hover:brightness-110">Imprimer le QR code</button>
+            <button type="button" onClick={() => window.print()} className="mt-4 w-full rounded-xl bg-[#246BFD] px-4 py-3 text-sm font-bold text-black hover:brightness-110">Imprimer le QR code</button>
           </div>
         </div>
       )}
