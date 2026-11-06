@@ -272,7 +272,7 @@ export default function ProfileForm({ engine, businessTypes, onSaved }: ProfileF
               type="button"
               disabled={engine.saving || !engine.isDirty || hasBlockingErrors}
               onClick={() => void handleSave()}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#246BFD] px-5 py-3 text-sm font-semibold text-[#050505] transition hover:bg-[#246BFD]-light disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#246BFD] px-5 py-3 text-sm font-semibold text-[#050505] transition hover:bg-[#65A5FF] disabled:cursor-not-allowed disabled:opacity-40"
             >
               {engine.saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
               {engine.saving ? 'Enregistrement…' : 'Enregistrer le profil'}
