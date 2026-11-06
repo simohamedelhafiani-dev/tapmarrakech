@@ -967,3 +967,14 @@ html,body,#root { background:#050505 !important; color:#FFFFFF; }
 #root [class*="rounded-[24px]"],#root [class*="rounded-[28px]"] { border-radius:24px; }
 #root input,#root textarea,#root select { color:#FFFFFF; color-scheme:dark; }
 #root input::placeholder,#root textarea::placeholder { color:#B0B0B0; }
+
+
+/* Neutralize the previous blue trial palette so Emerald Power is the only accent. */
+#root [class*="text-[#3B82F6]"],#root [class*="text-[#2563EB]"],
+#root [class*="text-[#60A5FA]"],#root [class*="text-blue-"] { color:#00FFC3 !important; }
+#root [class*="bg-[#3B82F6]"],#root [class*="bg-[#2563EB]"],
+#root [class*="bg-[#60A5FA]"],#root [class*="bg-blue-"] { background-color:#00FFC3 !important; }
+#root [class*="border-[#3B82F6]"],#root [class*="border-[#2563EB]"],
+#root [class*="border-[#60A5FA]"],#root [class*="border-blue-"] { border-color:rgba(0,255,195,.34) !important; }
+#root [class*="ring-[#3B82F6]"],#root [class*="ring-[#2563EB]"],
+#root [class*="ring-[#60A5FA]"] { --tw-ring-color:rgba(0,255,195,.28) !important; }
