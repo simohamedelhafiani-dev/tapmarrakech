@@ -1039,7 +1039,7 @@ export default function Employee() {
                   className="h-16 w-16 object-contain"
                 />
               </div>
-              <p className="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-gold">
+              <p className="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#3B82F6]">
                 Espace employé
               </p>
               <h1 className="mt-2 font-display text-3xl text-forest">
@@ -1120,7 +1120,7 @@ export default function Employee() {
               <p className="truncate text-base font-semibold text-forest md:text-lg">
                 {session.establishment_name || selectedEstablishmentName}
               </p>
-              <p className="mt-0.5 text-[10px] font-medium uppercase tracking-[0.18em] text-gold">
+              <p className="mt-0.5 text-[10px] font-medium uppercase tracking-[0.18em] text-[#3B82F6]">
                 Établissement
               </p>
             </div>
@@ -1148,7 +1148,7 @@ export default function Employee() {
                   setManualCustomerSearch('');
                   setShowScanner(true);
                 }}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gold px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#686D76] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90"
               >
                 <CreditCard size={17} />
                 Scanner fidélité
@@ -1269,12 +1269,12 @@ export default function Employee() {
 
                     {isStampProgram ? (
                       <>
-                        <button onClick={() => void addStamp(customer)} disabled={saving} className="inline-flex items-center gap-2 rounded-xl border border-gold/30 bg-white px-4 py-2.5 text-xs font-semibold text-forest hover:bg-gold/5 disabled:opacity-50">
+                        <button onClick={() => void addStamp(customer)} disabled={saving} className="inline-flex items-center gap-2 rounded-xl border border-[#3B82F6]/30 bg-white px-4 py-2.5 text-xs font-semibold text-forest hover:bg-[#686D76]/5 disabled:opacity-50">
                           <Gift size={16} />
                           Ajouter un tampon
                         </button>
                         {(customer.stamps_balance ?? 0) >= loyaltyProgram.stamp_goal && (
-                          <button onClick={() => void redeemStampReward(customer)} disabled={saving} className="inline-flex items-center gap-2 rounded-xl bg-gold px-4 py-2.5 text-xs font-semibold text-forest hover:opacity-90 disabled:opacity-50">
+                          <button onClick={() => void redeemStampReward(customer)} disabled={saving} className="inline-flex items-center gap-2 rounded-xl bg-[#686D76] px-4 py-2.5 text-xs font-semibold text-forest hover:opacity-90 disabled:opacity-50">
                             <Gift size={16} />
                             Réclamer récompense
                           </button>
@@ -1303,7 +1303,7 @@ export default function Employee() {
 
                     <button
                       onClick={() => setShowCard(customer)}
-                      className="inline-flex items-center gap-2 rounded-xl border border-gold/30 bg-white px-4 py-2.5 text-xs font-semibold text-forest hover:bg-gold/5"
+                      className="inline-flex items-center gap-2 rounded-xl border border-[#3B82F6]/30 bg-white px-4 py-2.5 text-xs font-semibold text-forest hover:bg-[#686D76]/5"
                     >
                       <CreditCard size={16} />
                       Carte
@@ -1458,7 +1458,7 @@ export default function Employee() {
                 published: true,
               }}
             />
-            {loyaltyProgram.program_type === 'STAMP' && <button disabled={saving} onClick={() => void addStamp(showCard)} className="w-full rounded-xl bg-gold py-3.5 text-xs font-bold text-forest disabled:opacity-50">+ Ajouter 1 tampon</button>}
+            {loyaltyProgram.program_type === 'STAMP' && <button disabled={saving} onClick={() => void addStamp(showCard)} className="w-full rounded-xl bg-[#686D76] py-3.5 text-xs font-bold text-forest disabled:opacity-50">+ Ajouter 1 tampon</button>}
             {showCardLink && <button onClick={async () => { await navigator.clipboard.writeText(showCardLink); alert('Lien de la carte copié.'); }} className="w-full rounded-xl border border-ink/10 bg-white py-3 text-xs font-semibold text-forest">Copier le lien client</button>}
             <div className="flex gap-3">
               <button onClick={() => printLoyaltyCard(showCard)} className="flex-1 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white">Imprimer / PDF</button>
@@ -1540,7 +1540,7 @@ export default function Employee() {
                     <span className="block text-sm font-semibold text-forest">{customer.first_name} {customer.last_name ?? ''}</span>
                     <span className="text-[11px] text-ink/40">{customer.loyalty_number} · {customer.phone}</span>
                   </span>
-                  <span className="text-xs font-semibold text-gold">{customer.points_balance} pts</span>
+                  <span className="text-xs font-semibold text-[#3B82F6]">{customer.points_balance} pts</span>
                 </button>
               ))}
             </div>
@@ -1653,8 +1653,8 @@ export default function Employee() {
             <p className="mt-1 text-xs font-medium text-forest/60">N° fidélité : {showDiscount.loyalty_number}</p>
           </div>
 
-          <div className="mt-5 rounded-2xl border border-gold/20 bg-gold/5 p-4 text-center">
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Réduction active</p>
+          <div className="mt-5 rounded-2xl border border-[#3B82F6]/20 bg-[#686D76]/5 p-4 text-center">
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#3B82F6]">Réduction active</p>
             <p className="mt-1 text-4xl font-bold text-forest">Avantage fidélité</p>
             <p className="mt-2 text-xs text-ink/50">La réduction reste utilisable sur plusieurs achats jusqu’à sa date d’expiration.</p>
           </div>
@@ -1709,7 +1709,7 @@ export default function Employee() {
                 </div>
                 <div className="mt-2 flex items-center justify-between">
                   <span>Réduction</span>
-                  <strong className="text-gold">Calculée automatiquement</strong>
+                  <strong className="text-[#3B82F6]">Calculée automatiquement</strong>
                 </div>
                 <p className="mt-2 text-xs text-ink/45">La carte reste active après cet achat.</p>
               </div>
