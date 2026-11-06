@@ -107,7 +107,7 @@ export default function EstablishmentPerformanceTable({
             <button
               type="button"
               onClick={() => void onRetry()}
-              className="mt-3 inline-flex items-center gap-2 rounded-xl bg-[#246BFD] px-4 py-2.5 text-xs font-semibold text-[#050505] transition hover:bg-[#246BFD]-light"
+              className="mt-3 inline-flex items-center gap-2 rounded-xl bg-[#246BFD] px-4 py-2.5 text-xs font-semibold text-[#050505] transition hover:bg-[#65A5FF]"
             >
               <RefreshCw size={14} />
               Réessayer
