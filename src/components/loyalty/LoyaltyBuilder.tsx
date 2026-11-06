@@ -140,14 +140,14 @@ export default function LoyaltyBuilder({ establishmentId }: Props) {
   );
 
   if (loading) {
-    return <div className="grid min-h-[520px] place-items-center rounded-[28px] bg-white ring-1 ring-ink/5"><Loader2 className="animate-spin text-gold" /></div>;
+    return <div className="grid min-h-[520px] place-items-center rounded-[28px] bg-white ring-1 ring-ink/5"><Loader2 className="animate-spin text-[#3B82F6]" /></div>;
   }
 
   return (
     <section className="rounded-[28px] bg-white p-4 shadow-soft ring-1 ring-ink/5 md:p-6">
       <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold">Fidélité</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#3B82F6]">Fidélité</p>
           <h2 className="mt-1 font-display text-3xl text-forest">Personnaliser la carte fidélité</h2>
           <p className="mt-1 text-sm text-ink/45">Créez une carte unique qui reflète votre établissement.</p>
         </div>
@@ -264,7 +264,7 @@ function BuilderPanel({
                   <button key={option.id} type="button" onClick={() => update({ loyaltyType: option.id })} className={`flex items-center gap-3 rounded-2xl border p-3 text-left ${active ? 'border-forest bg-forest/[0.04] ring-2 ring-forest/10' : 'border-ink/10 hover:border-forest/25'}`}>
                     <span className={`grid h-9 w-9 place-items-center rounded-xl ${active ? 'bg-forest text-white' : 'bg-[#f7f7f3] text-ink/40'}`}><Icon size={18} /></span>
                     <span className="min-w-0"><span className="block text-xs font-semibold text-forest">{option.title}</span><span className="mt-0.5 block text-[9px] leading-4 text-ink/40">{option.description}</span></span>
-                    {active && <Check className="ml-auto shrink-0 text-gold" size={15} />}
+                    {active && <Check className="ml-auto shrink-0 text-[#3B82F6]" size={15} />}
                   </button>
                 );
               })}
@@ -327,7 +327,7 @@ function BuilderPanel({
 
       {activeTab === 'Aperçu' && (
         <div className="mt-4 rounded-2xl bg-[#f7f7f3] p-5 text-center">
-          <Sparkles className="mx-auto text-gold" size={22} />
+          <Sparkles className="mx-auto text-[#3B82F6]" size={22} />
           <p className="mt-3 text-sm font-semibold text-forest">Aperçu côté client</p>
           <p className="mt-1 text-xs text-ink/45">La carte centrale est mise à jour en temps réel à chaque modification.</p>
         </div>
@@ -432,15 +432,15 @@ function AssetButton({ title, image, loading, onClick }: { title: string; image:
       <div className="flex h-28 items-center justify-center p-2">
         {image ? <img src={image} alt="" className="h-full w-full rounded-xl object-cover" /> : <ImagePlus className="text-ink/25" size={25} />}
       </div>
-      <div className="flex items-center justify-between border-t border-ink/8 bg-white px-3 py-2.5"><span className="text-[10px] font-semibold text-forest">{title}</span>{loading ? <Loader2 className="animate-spin text-gold" size={15} /> : <Upload size={14} className="text-ink/35" />}</div>
+      <div className="flex items-center justify-between border-t border-ink/8 bg-white px-3 py-2.5"><span className="text-[10px] font-semibold text-forest">{title}</span>{loading ? <Loader2 className="animate-spin text-[#3B82F6]" size={15} /> : <Upload size={14} className="text-ink/35" />}</div>
     </button>
   );
 }
 
 function Field({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
-  return <label className="block text-xs font-medium text-ink/50">{label}<input value={value} onChange={e => onChange(e.target.value)} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm text-ink outline-none focus:border-gold" /></label>;
+  return <label className="block text-xs font-medium text-ink/50">{label}<input value={value} onChange={e => onChange(e.target.value)} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm text-ink outline-none focus:border-[#3B82F6]" /></label>;
 }
 
 function NumberField({ label, value, min, max, onChange }: { label: string; value: number; min: number; max: number; onChange: (v: number) => void }) {
-  return <label className="block text-xs font-medium text-ink/50">{label}<input type="number" min={min} max={max} value={value} onChange={e => onChange(Math.max(min, Math.min(max, Number(e.target.value) || min)))} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm text-ink outline-none focus:border-gold" /></label>;
+  return <label className="block text-xs font-medium text-ink/50">{label}<input type="number" min={min} max={max} value={value} onChange={e => onChange(Math.max(min, Math.min(max, Number(e.target.value) || min)))} className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm text-ink outline-none focus:border-[#3B82F6]" /></label>;
 }
