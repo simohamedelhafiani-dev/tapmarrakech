@@ -180,10 +180,10 @@ export default function LoyaltyJoin() {
     return (
       <main className="min-h-screen bg-[#f7f7f3] px-4 py-8">
         <div className="mx-auto max-w-md rounded-[2rem] bg-[#111111] p-7 text-center shadow-xl">
-          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#e5eee9] text-[#E1C27A]">
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#e5eee9] text-[#65A5FF]">
             <Gift className="h-6 w-6" />
           </div>
-          <h1 className="mt-5 font-display text-3xl tracking-tight text-[#E1C27A]">Lien d’inscription invalide</h1>
+          <h1 className="mt-5 font-display text-3xl tracking-tight text-[#65A5FF]">Lien d’inscription invalide</h1>
           <p className="mt-2 text-sm leading-6 text-white/45">
             Scannez le QR Code ou la plaque NFC de l’établissement pour rejoindre son programme fidélité.
           </p>
@@ -196,8 +196,8 @@ export default function LoyaltyJoin() {
     return (
       <main className="grid min-h-screen place-items-center bg-[#050505] px-4">
         <div className="text-center">
-          <div className="mx-auto h-9 w-9 animate-spin rounded-full border-2 border-[#D4AF37] border-t-transparent" />
-          <p className="mt-4 text-sm text-[#E1C27A]/55">Préparation de votre inscription…</p>
+          <div className="mx-auto h-9 w-9 animate-spin rounded-full border-2 border-[#246BFD] border-t-transparent" />
+          <p className="mt-4 text-sm text-[#65A5FF]/55">Préparation de votre inscription…</p>
         </div>
       </main>
     );
@@ -210,7 +210,7 @@ export default function LoyaltyJoin() {
           <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-red-50 text-red-600">
             <Gift className="h-6 w-6" />
           </div>
-          <h1 className="mt-5 font-display text-2xl text-[#E1C27A]">Inscription indisponible</h1>
+          <h1 className="mt-5 font-display text-2xl text-[#65A5FF]">Inscription indisponible</h1>
           <p className="mt-2 text-sm leading-6 text-white/45">{error}</p>
         </div>
       </main>
@@ -228,7 +228,7 @@ export default function LoyaltyJoin() {
         <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-[#111111] shadow-luxury">
           <div className="bg-[#111111] px-6 py-7 text-white">
             <div className="flex items-center gap-3">
-              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gold-gradient text-[#E1C27A]">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gold-gradient text-[#65A5FF]">
                 <Gift className="h-5 w-5" />
               </div>
               <div className="min-w-0">
@@ -249,12 +249,12 @@ export default function LoyaltyJoin() {
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/35">Vos coordonnées</p>
               <div className="mt-3 grid grid-cols-2 gap-3">
-                <label className="block text-xs font-semibold text-white/55">Prénom *<input value={firstName} onChange={e => setFirstName(e.target.value)} autoComplete="given-name" autoFocus className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-4 py-3 text-sm outline-none focus:border-[#C9A45C]" placeholder="Prénom" /></label>
-                <label className="block text-xs font-semibold text-white/55">Nom *<input value={lastName} onChange={e => setLastName(e.target.value)} autoComplete="family-name" className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-4 py-3 text-sm outline-none focus:border-[#C9A45C]" placeholder="Nom" /></label>
+                <label className="block text-xs font-semibold text-white/55">Prénom *<input value={firstName} onChange={e => setFirstName(e.target.value)} autoComplete="given-name" autoFocus className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-4 py-3 text-sm outline-none focus:border-[#246BFD]" placeholder="Prénom" /></label>
+                <label className="block text-xs font-semibold text-white/55">Nom *<input value={lastName} onChange={e => setLastName(e.target.value)} autoComplete="family-name" className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-4 py-3 text-sm outline-none focus:border-[#246BFD]" placeholder="Nom" /></label>
               </div>
             </div>
-            <label className="block text-xs font-semibold text-white/55">Téléphone *<input value={phone} onChange={e => setPhone(e.target.value)} autoComplete="tel" inputMode="tel" className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-4 py-3 text-sm outline-none focus:border-[#C9A45C]" placeholder="+212 6 12 34 56 78" /></label>
-            <label className="block text-xs font-semibold text-white/55">Email <span className="font-normal text-white/25">(facultatif)</span><input type="email" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-4 py-3 text-sm outline-none focus:border-[#C9A45C]" placeholder="vous@exemple.com" /></label>
+            <label className="block text-xs font-semibold text-white/55">Téléphone *<input value={phone} onChange={e => setPhone(e.target.value)} autoComplete="tel" inputMode="tel" className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-4 py-3 text-sm outline-none focus:border-[#246BFD]" placeholder="+212 6 12 34 56 78" /></label>
+            <label className="block text-xs font-semibold text-white/55">Email <span className="font-normal text-white/25">(facultatif)</span><input type="email" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-4 py-3 text-sm outline-none focus:border-[#246BFD]" placeholder="vous@exemple.com" /></label>
             <div className="grid grid-cols-2 gap-3">
               <label className="block text-xs font-semibold text-white/55">
                 Jour et mois de naissance <span className="font-normal text-white/25">(facultatif)</span>
@@ -262,7 +262,7 @@ export default function LoyaltyJoin() {
                   <select
                     value={birthDay}
                     onChange={e => setBirthDay(e.target.value)}
-                    className="w-full rounded-xl border border-white/10 bg-[#242424] px-3 py-3 text-sm outline-none focus:border-[#C9A45C]"
+                    className="w-full rounded-xl border border-white/10 bg-[#242424] px-3 py-3 text-sm outline-none focus:border-[#246BFD]"
                   >
                     <option value="">Jour</option>
                     {Array.from(
@@ -282,7 +282,7 @@ export default function LoyaltyJoin() {
                         setBirthDay('');
                       }
                     }}
-                    className="w-full rounded-xl border border-white/10 bg-[#242424] px-3 py-3 text-sm outline-none focus:border-[#C9A45C]"
+                    className="w-full rounded-xl border border-white/10 bg-[#242424] px-3 py-3 text-sm outline-none focus:border-[#246BFD]"
                   >
                     <option value="">Mois</option>
                     {[
@@ -295,20 +295,20 @@ export default function LoyaltyJoin() {
                   </select>
                 </div>
               </label>
-              <label className="block text-xs font-semibold text-white/55">Fréquence de visite<select value={visitFrequency} onChange={e => setVisitFrequency(e.target.value as typeof visitFrequency)} className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-3 py-3 text-sm outline-none focus:border-[#C9A45C]"><option value="">Je ne sais pas</option><option value="WEEKLY">Chaque semaine</option><option value="MONTHLY">Chaque mois</option><option value="OCCASIONAL">Occasionnellement</option></select></label>
+              <label className="block text-xs font-semibold text-white/55">Fréquence de visite<select value={visitFrequency} onChange={e => setVisitFrequency(e.target.value as typeof visitFrequency)} className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-3 py-3 text-sm outline-none focus:border-[#246BFD]"><option value="">Je ne sais pas</option><option value="WEEKLY">Chaque semaine</option><option value="MONTHLY">Chaque mois</option><option value="OCCASIONAL">Occasionnellement</option></select></label>
             </div>
             <div className="rounded-2xl border border-white/10 bg-[#171717] p-4">
               <p className="text-xs font-semibold text-white">Ce qui vous intéresse</p><p className="mt-1 text-[10px] leading-4 text-white/35">Choisissez ce que vous souhaitez recevoir. Cela aide l’établissement à vous envoyer des offres plus pertinentes.</p>
-              <div className="mt-3 flex flex-wrap gap-2">{interestOptions.map((interest) => { const active = interests.includes(interest); return <button key={interest} type="button" onClick={() => setInterests(current => active ? current.filter(item => item !== interest) : [...current, interest])} className={`rounded-full border px-3 py-2 text-[10px] font-semibold transition ${active ? 'border-[#C9A45C] bg-[#C9A45C]/15 text-[#E1C27A]' : 'border-white/10 bg-[#242424] text-white/45 hover:border-[#C9A45C]/40'}`}>{interest}</button>; })}</div>
+              <div className="mt-3 flex flex-wrap gap-2">{interestOptions.map((interest) => { const active = interests.includes(interest); return <button key={interest} type="button" onClick={() => setInterests(current => active ? current.filter(item => item !== interest) : [...current, interest])} className={`rounded-full border px-3 py-2 text-[10px] font-semibold transition ${active ? 'border-[#246BFD] bg-[#246BFD]/15 text-[#65A5FF]' : 'border-white/10 bg-[#242424] text-white/45 hover:border-[#246BFD]/40'}`}>{interest}</button>; })}</div>
             </div>
             <div className="rounded-2xl border border-white/10 bg-[#171717] p-4">
               <p className="text-xs font-semibold text-white">Notifications</p>
-              <label className="mt-3 flex cursor-pointer items-start gap-3 text-[11px] leading-5 text-white/55"><input type="checkbox" checked={notificationConsent} onChange={e => setNotificationConsent(e.target.checked)} className="mt-1 accent-[#C9A45C]" /><span>J’accepte de recevoir des notifications et offres personnalisées.</span></label>
-              {notificationConsent && <label className="mt-3 block text-[10px] font-semibold text-white/45">Canal préféré<select value={preferredChannel} onChange={e => setPreferredChannel(e.target.value as typeof preferredChannel)} className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-3 py-2.5 text-xs text-white outline-none focus:border-[#C9A45C]"><option value="WHATSAPP">WhatsApp</option><option value="SMS">SMS</option><option value="EMAIL">Email</option><option value="PUSH">Notifications téléphone</option></select></label>}
-              <label className="mt-3 flex cursor-pointer items-start gap-3 text-[11px] leading-5 text-white/55"><input type="checkbox" checked={marketingConsent} onChange={e => setMarketingConsent(e.target.checked)} className="mt-1 accent-[#C9A45C]" /><span>J’accepte les communications commerciales et offres promotionnelles.</span></label>
+              <label className="mt-3 flex cursor-pointer items-start gap-3 text-[11px] leading-5 text-white/55"><input type="checkbox" checked={notificationConsent} onChange={e => setNotificationConsent(e.target.checked)} className="mt-1 accent-[#246BFD]" /><span>J’accepte de recevoir des notifications et offres personnalisées.</span></label>
+              {notificationConsent && <label className="mt-3 block text-[10px] font-semibold text-white/45">Canal préféré<select value={preferredChannel} onChange={e => setPreferredChannel(e.target.value as typeof preferredChannel)} className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#242424] px-3 py-2.5 text-xs text-white outline-none focus:border-[#246BFD]"><option value="WHATSAPP">WhatsApp</option><option value="SMS">SMS</option><option value="EMAIL">Email</option><option value="PUSH">Notifications téléphone</option></select></label>}
+              <label className="mt-3 flex cursor-pointer items-start gap-3 text-[11px] leading-5 text-white/55"><input type="checkbox" checked={marketingConsent} onChange={e => setMarketingConsent(e.target.checked)} className="mt-1 accent-[#246BFD]" /><span>J’accepte les communications commerciales et offres promotionnelles.</span></label>
             </div>
             {error && <div className="rounded-xl bg-red-50 px-4 py-3 text-xs leading-5 text-red-700">{error}</div>}
-            <button type="button" onClick={() => void join()} disabled={!canSubmit || loading} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#C9A45C] px-5 py-4 text-sm font-bold text-[#050505] shadow-lg transition hover:bg-[#E1C27A] disabled:cursor-not-allowed disabled:opacity-40">{loading && <Loader2 className="h-4 w-4 animate-spin" />}{loading ? 'Création de votre carte…' : 'Créer ma carte fidélité'}</button>
+            <button type="button" onClick={() => void join()} disabled={!canSubmit || loading} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#246BFD] px-5 py-4 text-sm font-bold text-[#050505] shadow-lg transition hover:bg-[#65A5FF] disabled:cursor-not-allowed disabled:opacity-40">{loading && <Loader2 className="h-4 w-4 animate-spin" />}{loading ? 'Création de votre carte…' : 'Créer ma carte fidélité'}</button>
             <p className="text-center text-[10px] leading-4 text-white/25">Les préférences sont facultatives et servent à personnaliser les communications de l’établissement.</p>
           </div>
         </section>
