@@ -116,7 +116,8 @@ export default function Login() {
                 </div>
                 <div className="leading-none">
                   <p className="font-display text-[22px] font-semibold tracking-[0.07em] text-[#E1C27A]">KELYANI</p>
-                  <p className="mt-2 text-[8px] font-semibold uppercase tracking-[0.28em] text-[#C9A45C]/65">CUSTOMER INTELLIGENCE</p>
+                  <p className="mt-2 text-[8px] font-semibold uppercase tracking-[0.28em] text-[#00FFC3]/75">CUSTOMER INTELLIGENCE</p>
+                  <p className="mt-2 max-w-[270px] text-[10px] leading-4 text-white/65">Transformez vos clients de passage en clients habituels.</p>
                 </div>
               </button>
               <label className="inline-flex items-center rounded-full border border-[#242424] bg-[#111111]/80 px-3 py-2 text-[10px] font-semibold text-[#F5F5DC]/65 backdrop-blur-xl shadow-[0_10px_30px_rgba(5,5,5,.35)] transition-all duration-300 hover:border-[#C9A45C]/25 hover:shadow-[0_14px_38px_rgba(5,5,5,.45)]">
