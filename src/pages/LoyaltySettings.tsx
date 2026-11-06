@@ -636,7 +636,7 @@ export default function LoyaltySettings() {
         <button
           onClick={saveSettings}
           disabled={saving || !establishmentId}
-          className="flex items-center gap-2 rounded-xl bg-gold px-5 py-3 text-xs font-semibold text-forest transition hover:bg-[#d5b878] disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex items-center gap-2 rounded-xl bg-gold px-5 py-3 text-xs font-semibold text-forest transition hover:bg-[#65A5FF] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {saved ? (
             <>
