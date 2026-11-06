@@ -4815,7 +4815,7 @@ function AIConfigurationSection({
                 type="checkbox"
                 checked={active}
                 onChange={(e) => setActive(e.target.checked)}
-                className="h-4 w-4 accent-[#173d32]"
+                className="h-4 w-4 accent-[#080B12]"
               />
               <span>
                 <span className="block text-sm font-semibold text-[#246BFD]">
@@ -5039,17 +5039,17 @@ function PDFReportsSection({ establishments }: { establishments: Establishment[]
 <style>
 @page{size:A4;margin:16mm 15mm 18mm}
 *{box-sizing:border-box}body{margin:0;background:#fff;color:#17241f;font-family:Inter,Arial,Helvetica,sans-serif;font-size:11px;line-height:1.55}
-.page{max-width:800px;margin:auto}.cover{padding:0 0 26px;border-bottom:2px solid #173d32;margin-bottom:24px}
+.page{max-width:800px;margin:auto}.cover{padding:0 0 26px;border-bottom:2px solid #080B12;margin-bottom:24px}
 .brand{display:flex;justify-content:space-between;align-items:center;padding:8px 0 22px;border-bottom:1px solid #e8e5de}
 .brand-logo{display:flex;align-items:center}.brand-logo img{display:block;width:150px;height:auto;max-height:42px;object-fit:contain;object-position:left center}
 .doc-type{font-size:9px;text-transform:uppercase;letter-spacing:2px;color:#8a8b82;font-weight:700}
-h1{font-size:31px;line-height:1.08;letter-spacing:-1.2px;margin:28px 0 8px;color:#173d32} .subtitle{font-size:13px;color:#69716c;margin:0}
-.meta{display:flex;gap:24px;flex-wrap:wrap;margin-top:20px;color:#59625d;font-size:10px}.meta strong{display:block;color:#173d32;font-size:11px;margin-bottom:2px}
-.report-section{margin-top:28px;break-inside:auto}.section-heading{display:flex;align-items:center;gap:9px;border-bottom:1px solid #deddd7;padding-bottom:9px;margin-bottom:13px}.section-heading span{width:4px;height:20px;border-radius:4px;background:#c9a45c}.section-heading h2{font-size:18px;color:#173d32;margin:0}
-.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:12px 0}.kpi{border:1px solid #e8e5de;border-radius:10px;padding:12px;background:#fafaf8;min-height:76px}.kpi-label{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:#7c837e;font-weight:700}.kpi-value{font-size:19px;font-weight:800;color:#173d32;margin-top:5px}.kpi-note{font-size:8px;color:#969b96;margin-top:2px}
-.insight{border-left:3px solid #c9a45c;background:#f7f3ea;padding:12px 14px;margin:15px 0;border-radius:0 8px 8px 0}.insight strong{color:#173d32}.insight p{margin:3px 0 0;color:#626b65}
-.table-wrap{border:1px solid #e4e2db;border-radius:10px;overflow:hidden;margin-top:15px}table{width:100%;border-collapse:collapse}th{background:#173d32;color:#fff;text-align:left;font-size:8px;text-transform:uppercase;letter-spacing:.7px;padding:8px}td{padding:8px;border-bottom:1px solid #eee;font-size:9px;vertical-align:top}tr:last-child td{border-bottom:0}.rating{font-weight:800;color:#173d32}.badge{display:inline-block;padding:2px 6px;border-radius:99px;font-size:8px;font-weight:700}.positive{background:#e8f2ed;color:#276044}.negative{background:#fbebeb;color:#a13b3b}.empty{text-align:center;border:1px dashed #ddd;padding:20px;color:#999;border-radius:9px}
-.footer{margin-top:35px;padding-top:12px;border-top:1px solid #e5e3dc;display:flex;justify-content:space-between;color:#929790;font-size:8px}.conf{color:#173d32;font-weight:700}
+h1{font-size:31px;line-height:1.08;letter-spacing:-1.2px;margin:28px 0 8px;color:#080B12} .subtitle{font-size:13px;color:#69716c;margin:0}
+.meta{display:flex;gap:24px;flex-wrap:wrap;margin-top:20px;color:#59625d;font-size:10px}.meta strong{display:block;color:#080B12;font-size:11px;margin-bottom:2px}
+.report-section{margin-top:28px;break-inside:auto}.section-heading{display:flex;align-items:center;gap:9px;border-bottom:1px solid #deddd7;padding-bottom:9px;margin-bottom:13px}.section-heading span{width:4px;height:20px;border-radius:4px;background:#246BFD}.section-heading h2{font-size:18px;color:#080B12;margin:0}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:12px 0}.kpi{border:1px solid #e8e5de;border-radius:10px;padding:12px;background:#fafaf8;min-height:76px}.kpi-label{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:#7c837e;font-weight:700}.kpi-value{font-size:19px;font-weight:800;color:#080B12;margin-top:5px}.kpi-note{font-size:8px;color:#969b96;margin-top:2px}
+.insight{border-left:3px solid #246BFD;background:#151B26;padding:12px 14px;margin:15px 0;border-radius:0 8px 8px 0}.insight strong{color:#080B12}.insight p{margin:3px 0 0;color:#626b65}
+.table-wrap{border:1px solid #e4e2db;border-radius:10px;overflow:hidden;margin-top:15px}table{width:100%;border-collapse:collapse}th{background:#080B12;color:#fff;text-align:left;font-size:8px;text-transform:uppercase;letter-spacing:.7px;padding:8px}td{padding:8px;border-bottom:1px solid #eee;font-size:9px;vertical-align:top}tr:last-child td{border-bottom:0}.rating{font-weight:800;color:#080B12}.badge{display:inline-block;padding:2px 6px;border-radius:99px;font-size:8px;font-weight:700}.positive{background:#e8f2ed;color:#276044}.negative{background:#fbebeb;color:#a13b3b}.empty{text-align:center;border:1px dashed #ddd;padding:20px;color:#999;border-radius:9px}
+.footer{margin-top:35px;padding-top:12px;border-top:1px solid #e5e3dc;display:flex;justify-content:space-between;color:#929790;font-size:8px}.conf{color:#080B12;font-weight:700}
 @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.no-print{display:none!important}.report-section{break-inside:auto}.table-wrap{break-inside:auto}thead{display:table-header-group}}
 </style></head><body><div class="page">
 <div class="cover"><div class="brand"><div class="brand-logo"><img src="/kelyani-final.svg" alt="KELYANI"></div><div class="doc-type">Rapport de performance</div></div>
