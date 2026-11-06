@@ -4,10 +4,10 @@
   <desc id="desc">Elegant K monogram surrounded by a continuous loyalty cycle with two arrowheads.</desc>
   <defs>
     <linearGradient id="gold" x1="120" y1="90" x2="410" y2="430" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#F4D98A"/>
-      <stop offset=".32" stop-color="#D4AF37"/>
-      <stop offset=".62" stop-color="#B88724"/>
-      <stop offset="1" stop-color="#E1C27A"/>
+      <stop offset="0" stop-color="#00FFC3"/>
+      <stop offset=".32" stop-color="#00FFC3"/>
+      <stop offset=".62" stop-color="#00FFC3"/>
+      <stop offset="1" stop-color="#00FFC3"/>
     </linearGradient>
     <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
       <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#000000" flood-opacity=".42"/>
@@ -30,6 +30,6 @@
     <path d="M226 251 C249 244 269 248 288 266 C310 287 326 316 350 337 C371 355 396 363 425 358 C397 379 365 386 338 378 C308 369 287 344 268 321 C251 300 237 283 226 278 Z"/>
   </g>
 
-  <path d="M177 132 H238" stroke="#F8E7B0" stroke-width="5" stroke-linecap="round" opacity=".72"/>
-  <path d="M200 375 H235" stroke="#8C6F2D" stroke-width="4" stroke-linecap="round" opacity=".8"/>
+  <path d="M177 132 H238" stroke="#00FFC3" stroke-width="5" stroke-linecap="round" opacity=".72"/>
+  <path d="M200 375 H235" stroke="#00FFC3" stroke-width="4" stroke-linecap="round" opacity=".8"/>
 </svg>
