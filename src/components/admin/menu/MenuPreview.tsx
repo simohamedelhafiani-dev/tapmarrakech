@@ -19,8 +19,8 @@ const palettes = {
   luxury: { page: 'bg-[#11100d] text-[#f7f0df]', panel: 'bg-[#171510]', accent: 'text-[#d2b46a]', muted: 'text-white/60', line: 'border-[#c8a75d]/30', card: 'bg-[#1b1914]' },
   cards: { page: 'bg-[#f7f7f3] text-[#24211c]', panel: 'bg-white', accent: 'text-[#a17d31]', muted: 'text-[#777b73]', line: 'border-black/10', card: 'bg-white' },
   dark: { page: 'bg-[#0D0D0D] text-white', panel: 'bg-[#111111]', accent: 'text-[#d6b86b]', muted: 'text-white/60', line: 'border-white/15', card: 'bg-white/[0.06]' },
-  onyx: { page: 'bg-[#050505] text-white', panel: 'bg-[#101010]', accent: 'text-[#E1C27A]', muted: 'text-white/60', line: 'border-white/15', card: 'bg-white/[0.05]' },
-  'royal-gold': { page: 'bg-[#0B0906] text-[#FFF9E8]', panel: 'bg-[#17110A]', accent: 'text-[#E1C27A]', muted: 'text-[#FFF9E8]/60', line: 'border-[#E1C27A]/30', card: 'bg-[#17110A]' },
+  onyx: { page: 'bg-[#050505] text-white', panel: 'bg-[#101010]', accent: 'text-[#65A5FF]', muted: 'text-white/60', line: 'border-white/15', card: 'bg-white/[0.05]' },
+  'royal-gold': { page: 'bg-[#080B12] text-[#F5F7FB]', panel: 'bg-[#151B26]', accent: 'text-[#65A5FF]', muted: 'text-[#F5F7FB]/60', line: 'border-[#65A5FF]/30', card: 'bg-[#151B26]' },
   'deep-ocean': { page: 'bg-[#06151B] text-[#F2FCFF]', panel: 'bg-[#0A222B]', accent: 'text-[#8ED9E8]', muted: 'text-white/60', line: 'border-[#8ED9E8]/25', card: 'bg-[#0A222B]' },
   pearl: { page: 'bg-[#F5F1E8] text-[#1B1A17]', panel: 'bg-[#fffdf8]', accent: 'text-[#9A7A3C]', muted: 'text-[#74716a]', line: 'border-[#B59A67]/25', card: 'bg-white' },
 } as const;
@@ -42,7 +42,7 @@ export default function MenuPreview({
     wallpaperObjectUrl: null,
     wallpaperRemoved: false,
     overlayOpacity: 0.35,
-    themeColors: { background: '#F5F1E8', surface: '#FFFDFA', text: '#24211C', accent: '#D4AF37' },
+    themeColors: { background: '#F5F1E8', surface: '#FFFDFA', text: '#24211C', accent: '#246BFD' },
     aiDesign: null,
   };
   const family = getMenuTemplateFamily(activeDraft.template);
@@ -216,8 +216,8 @@ export default function MenuPreview({
           </section>
         </div>
         {activeDraft.navigation === 'app' && <nav aria-label="Catégories du menu" className={`absolute bottom-0 left-0 right-0 z-20 flex gap-1.5 overflow-x-auto border-t px-2 pt-2 pb-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${palette.panel} ${palette.line}`}>
-          <button type="button" onClick={() => setCategoryId('all')} className={`shrink-0 rounded-full px-3 py-2 text-[9px] font-semibold ${categoryId === 'all' ? 'bg-[#d4af37] text-[#1f3025]' : 'border border-current/15'}`}>Tout</button>
-          {activeCategories.map(category => <button key={category.id} type="button" onClick={() => setCategoryId(category.id)} className={`shrink-0 rounded-full px-3 py-2 text-[9px] font-semibold ${categoryId === category.id ? 'bg-[#d4af37] text-[#1f3025]' : 'border border-current/15'}`}>{category.name}</button>)}
+          <button type="button" onClick={() => setCategoryId('all')} className={`shrink-0 rounded-full px-3 py-2 text-[9px] font-semibold ${categoryId === 'all' ? 'bg-[#246BFD] text-[#080B12]' : 'border border-current/15'}`}>Tout</button>
+          {activeCategories.map(category => <button key={category.id} type="button" onClick={() => setCategoryId(category.id)} className={`shrink-0 rounded-full px-3 py-2 text-[9px] font-semibold ${categoryId === category.id ? 'bg-[#246BFD] text-[#080B12]' : 'border border-current/15'}`}>{category.name}</button>)}
         </nav>}
       </div>
     </div>
