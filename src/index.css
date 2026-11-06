@@ -9,17 +9,16 @@
   background: var(--kelyani-bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  /* Single source of truth for the Luxury & Growth application theme */
-  --kelyani-bg: #121212;
-  --kelyani-panel: #1E1E1E;
-  --kelyani-panel-raised: #262626;
-  --kelyani-border: rgba(36, 107, 253, 0.16);
-  --kelyani-text: #F5F5F5;
-  --kelyani-muted: #A0A0A0;
+  --kelyani-bg: #0D0D0D;
+  --kelyani-panel: #111111;
+  --kelyani-panel-raised: #1A1A1A;
+  --kelyani-border: rgba(36, 107, 253, 0.18);
+  --kelyani-text: #F5F7FB;
+  --kelyani-muted: rgba(167,176,192,.55);
   --kelyani-gold: #246BFD;
   --kelyani-gold-soft: #65A5FF;
 }
-::selection { color: #0F172A; background: #246BFD; }
+::selection { color: #0D0D0D; background: #246BFD; }
 :focus-visible { outline: 2px solid rgba(36,107,253,.8); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
@@ -228,7 +227,7 @@ table {
 }
 
 .dashboard-depth-shell .text-forest {
-  color: #65A5FF !important;
+  color: #e1c27a !important;
 }
 
 .dashboard-depth-shell .bg-forest {
@@ -244,7 +243,7 @@ table {
 }
 
 .dashboard-depth-shell [class*="text-ink/"] {
-  color: rgba(245,245,220,.55) !important;
+  color: rgba(167,176,192,.55) !important;
 }
 
 .dashboard-depth-shell [class*="shadow-soft"] {
@@ -259,7 +258,7 @@ table {
 
 .dashboard-depth-shell input::placeholder,
 .dashboard-depth-shell textarea::placeholder {
-  color: rgba(245,245,220,.3);
+  color: rgba(167,176,192,.3);
 }
 
 
@@ -363,10 +362,10 @@ table {
 .kelyani-live-pill {
   display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(36,107,253,.18);
   border-radius:999px;padding:5px 8px;background:rgba(36,107,253,.055);
-  color:#246BFD;font-size:8px;font-weight:800;letter-spacing:.15em;
+  color:#d4af37;font-size:8px;font-weight:800;letter-spacing:.15em;
 }
 .kelyani-live-pill span,.kelyani-footer-dot {
-  display:inline-block;width:5px;height:5px;border-radius:50%;background:#246BFD;
+  display:inline-block;width:5px;height:5px;border-radius:50%;background:#d4af37;
   box-shadow:0 0 9px rgba(36,107,253,.8);
 }
 .kelyani-dashboard-body { display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:12px 0; }
@@ -409,7 +408,7 @@ table {
 .kelyani-float-icon,.kelyani-loyalty-symbol {
   display:grid;place-items:center;width:29px;height:29px;flex-shrink:0;border-radius:10px;
   background:linear-gradient(145deg,rgba(36,107,253,.23),rgba(36,107,253,.06));
-  color:#65A5FF;border:1px solid rgba(36,107,253,.17);
+  color:#e7c96b;border:1px solid rgba(36,107,253,.17);
 }
 .kelyani-loyalty-symbol { font-family:Georgia,serif;font-size:17px;font-weight:700; }
 .kelyani-float-check { display:grid;place-items:center;width:17px;height:17px;border-radius:50%;background:rgba(82,180,124,.14);color:#7bd9a0!important;font-size:10px!important; }
@@ -766,14 +765,14 @@ table {
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
 }
 #root input, #root textarea, #root select {
-  color: #F5F5DC;
+  color: #F5F7FB;
   color-scheme: dark;
 }
 #root input::placeholder, #root textarea::placeholder {
-  color: rgba(245,245,220,.42);
+  color: rgba(167,176,192,.42);
 }
 #root option {
-  color: #F5F5DC;
+  color: #F5F7FB;
   background: #141414;
 }
 
@@ -802,530 +801,5 @@ table {
 }
 
 
-
-
-/* KELYANI Midnight Premium — global brand tokens and merchant workspace. */
-:root {
-  /* KELYANI Luxury & Growth — shared application palette */
-  --kelyani-navy: #121212;
-  --kelyani-navy-soft: #1E1E1E;
-  --kelyani-accent: #246BFD;
-  --kelyani-accent-hover: #E1C15A;
-  --kelyani-app-canvas: #121212;
-  --kelyani-card: #1E1E1E;
-  --kelyani-ink: #F5F5F5;
-  --kelyani-muted-ink: #A7A196;
-  --kelyani-hairline: rgba(245,245,245,.10);
-}
-.dashboard-depth-shell {
-  background: #121212 !important;
-  color: #F5F5F5;
-  color-scheme: dark;
-}
-.dashboard-depth-shell .dashboard-depth-topbar {
-  background: rgba(15,23,42,.97) !important;
-  border-color: rgba(255,255,255,.09) !important;
-}
-.dashboard-depth-shell .kelyani-sidebar {
-  background: rgba(15,23,42,.98) !important;
-  border-color: rgba(255,255,255,.10) !important;
-}
-.dashboard-depth-shell .kelyani-sidebar .kelyani-nav-link { border-radius: 12px; }
-.dashboard-depth-shell .kelyani-sidebar .kelyani-nav-link[aria-current="page"] {
-  background: rgba(36,107,253,.14) !important;
-  color: #F2D77A !important;
-}
-.dashboard-depth-shell .kelyani-midnight-dashboard {
-  color: var(--kelyani-ink);
-  background: var(--kelyani-app-canvas);
-  border-radius: 24px;
-  padding: clamp(16px, 2.2vw, 30px);
-  margin: -8px;
-}
-.dashboard-depth-shell .kelyani-midnight-dashboard .kelyani-light-card {
-  background: var(--kelyani-card) !important;
-  border: 1px solid var(--kelyani-hairline) !important;
-  box-shadow: 0 1px 3px rgba(15,23,42,.07) !important;
-  transition: box-shadow 180ms ease, border-color 180ms ease !important;
-}
-.dashboard-depth-shell .kelyani-midnight-dashboard .kelyani-light-card:hover {
-  border-color: rgba(36,107,253,.42) !important;
-  box-shadow: 0 8px 24px rgba(15,23,42,.07) !important;
-}
-.dashboard-depth-shell .kelyani-midnight-dashboard .kelyani-light-select {
-  background: #FFFFFF;
-  border: 1px solid var(--kelyani-hairline);
-  color: var(--kelyani-navy);
-}
-.dashboard-depth-shell .kelyani-midnight-dashboard .kelyani-light-select:focus {
-  border-color: var(--kelyani-accent);
-  outline: 2px solid rgba(36,107,253,.18);
-}
-.dashboard-depth-shell .kelyani-midnight-dashboard h1,
-.dashboard-depth-shell .kelyani-midnight-dashboard h2 { color: var(--kelyani-navy); }
-@media (max-width: 640px) {
-  .dashboard-depth-shell .kelyani-midnight-dashboard {
-    border-radius: 18px;
-    padding: 14px;
-    margin: -4px;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .dashboard-depth-shell .kelyani-midnight-dashboard *,
-  .dashboard-depth-shell .kelyani-midnight-dashboard *::before,
-  .dashboard-depth-shell .kelyani-midnight-dashboard *::after { transition-duration: .01ms !important; }
-}
-
-.dashboard-depth-shell .dashboard-depth-topbar [class*="bg-[#111111]"],
-.dashboard-depth-shell .dashboard-depth-topbar [class*="bg-[#050505]"],
-.dashboard-depth-shell .dashboard-depth-topbar [class*="bg-[#0B0B0B]"] {
-  background-color: #1E293B !important;
-}
-.dashboard-depth-shell .dashboard-depth-topbar [class*="border-[#242424]"],
-.dashboard-depth-shell .kelyani-sidebar [class*="border-[#242424]"] {
-  border-color: rgba(255,255,255,.11) !important;
-}
-.dashboard-depth-shell .dashboard-depth-topbar input,
-.dashboard-depth-shell .dashboard-depth-topbar select {
-  color: #F8FAFC !important;
-  color-scheme: dark;
-}
-.dashboard-depth-shell .dashboard-depth-topbar input::placeholder { color: rgba(248,250,252,.42) !important; }
-
-
-/* KELYANI Luxury & Growth — shared visual foundation for every authenticated screen.
-   Visual styles only: no component behavior, data, routes or permissions are changed. */
-.dashboard-depth-shell,
-.dashboard-depth-shell main,
-.dashboard-depth-shell [data-dashboard-content],
-.admin-depth-shell {
-  background-color: #121212 !important;
-  color: #F5F5F5;
-}
-.admin-depth-shell {
-  --admin-accent: #246BFD;
-  --admin-surface: #1E1E1E;
-  --admin-muted: #A0A0A0;
-}
-.admin-depth-shell [class*="bg-white"],
-.admin-depth-shell [class*="bg-[#FFFFFF]"],
-.admin-depth-shell [class*="bg-[#fff"],
-.admin-depth-shell [class*="bg-[#FFF"] {
-  background-color: #1E1E1E !important;
-  background-image: none !important;
-}
-.admin-depth-shell [class*="text-[#C9A45C]"],
-.admin-depth-shell [class*="text-[#65A5FF]"] {
-  color: #246BFD !important;
-}
-.admin-depth-shell [class*="border-[#C9A45C]"],
-.admin-depth-shell [class*="border-[#65A5FF]"] {
-  border-color: rgba(36,107,253,.28) !important;
-}
-.dashboard-depth-shell [class*="bg-white"],
-.dashboard-depth-shell [class*="bg-[#FFFFFF]"],
-.dashboard-depth-shell [class*="bg-[#fff"],
-.dashboard-depth-shell [class*="bg-[#FFF"] {
-  background-color: #1E1E1E !important;
-  background-image: none !important;
-}
-.dashboard-depth-shell [class*="text-forest"],
-.dashboard-depth-shell [class*="text-ink"],
-.dashboard-depth-shell [class*="text-[#0F172A]"],
-.dashboard-depth-shell [class*="text-[#1E293B]"] {
-  color: #F5F5F5 !important;
-}
-.dashboard-depth-shell [class*="text-[#64748B]"],
-.dashboard-depth-shell [class*="text-[#6B7280]"],
-.dashboard-depth-shell [class*="text-[#737373]"] {
-  color: #A7A196 !important;
-}
-.dashboard-depth-shell [class*="border-ink"],
-.dashboard-depth-shell [class*="border-[#E2E8F0]"],
-.dashboard-depth-shell [class*="border-[#E5E7EB]"] {
-  border-color: rgba(36,107,253,.16) !important;
-}
-.dashboard-depth-shell input,
-.dashboard-depth-shell textarea,
-.dashboard-depth-shell select {
-  background-color: #1E1E1E;
-  color: #F5F5F5;
-  border-color: rgba(36,107,253,.22);
-  color-scheme: dark;
-}
-.dashboard-depth-shell input::placeholder,
-.dashboard-depth-shell textarea::placeholder {
-  color: rgba(245,245,245,.42);
-}
-.dashboard-depth-shell button:focus-visible,
-.dashboard-depth-shell a:focus-visible,
-.dashboard-depth-shell input:focus-visible,
-.dashboard-depth-shell select:focus-visible,
-.dashboard-depth-shell textarea:focus-visible {
-  outline-color: #246BFD;
-}
-
-/* KELYANI Luxury & Growth — dashboard-only visual system.
-   Keep data, permissions, routes and existing workflows unchanged. */
-.dashboard-depth-shell {
-  background: #121212 !important;
-  color: #F5F5F5;
-}
-.dashboard-depth-shell .dashboard-depth-topbar,
-.dashboard-depth-shell .kelyani-sidebar {
-  background: #121212 !important;
-  border-color: rgba(36,107,253,.16) !important;
-}
-.dashboard-depth-shell .kelyani-sidebar .kelyani-nav-link {
-  color: rgba(245,245,245,.68) !important;
-  border-radius: 14px;
-  transition: background .18s ease, color .18s ease, border-color .18s ease;
-}
-.dashboard-depth-shell .kelyani-sidebar .kelyani-nav-link:hover {
-  background: rgba(36,107,253,.08) !important;
-  color: #F5F5F5 !important;
-}
-.dashboard-depth-shell .kelyani-sidebar .kelyani-nav-link[aria-current="page"] {
-  color: #65A5FF !important;
-  background: linear-gradient(100deg,rgba(36,107,253,.16),rgba(36,107,253,.045)) !important;
-  box-shadow: inset 2px 0 #246BFD;
-}
-.dashboard-depth-shell .dashboard-depth-topbar input,
-.dashboard-depth-shell .dashboard-depth-topbar select {
-  background: #1E1E1E !important;
-  color: #F5F5F5 !important;
-  border-color: rgba(36,107,253,.18) !important;
-}
-.dashboard-depth-shell .kelyani-luxury-dashboard {
-  --lux-bg: #121212;
-  --lux-card: #1E1E1E;
-  --lux-text: #F5F5F5;
-  --lux-muted: #A7A196;
-  --lux-line: rgba(245,245,245,.09);
-  --lux-gold: #246BFD;
-  color: var(--lux-text) !important;
-  background: var(--lux-bg) !important;
-  border: 1px solid rgba(36,107,253,.10);
-  border-radius: 26px;
-  padding: clamp(18px,2.5vw,34px);
-  margin: -8px;
-}
-.dashboard-depth-shell .kelyani-luxury-dashboard h1,
-.dashboard-depth-shell .kelyani-luxury-dashboard h2,
-.dashboard-depth-shell .kelyani-luxury-dashboard h3,
-.dashboard-depth-shell .kelyani-luxury-dashboard strong {
-  color: #F5F5F5;
-}
-.dashboard-depth-shell .kelyani-luxury-dashboard p,
-.dashboard-depth-shell .kelyani-luxury-dashboard time,
-.dashboard-depth-shell .kelyani-luxury-dashboard label {
-  color: var(--lux-muted);
-}
-.dashboard-depth-shell .kelyani-luxury-dashboard .kelyani-light-card {
-  background: linear-gradient(145deg,#22211F 0%,#1B1B1B 100%) !important;
-  border: 1px solid rgba(36,107,253,.13) !important;
-  border-radius: 22px !important;
-  box-shadow: 0 14px 38px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.025) !important;
-  transition: transform .2s ease,border-color .2s ease,box-shadow .2s ease !important;
-}
-.dashboard-depth-shell .kelyani-luxury-dashboard .kelyani-light-card:hover {
-  border-color: rgba(36,107,253,.32) !important;
-  box-shadow: 0 18px 42px rgba(0,0,0,.3),0 0 24px rgba(36,107,253,.035) !important;
-}
-.dashboard-depth-shell .kelyani-luxury-dashboard [class*="text-[#0F172A]"],
-.dashboard-depth-shell .kelyani-luxury-dashboard [class*="text-[#1E293B]"],
-.dashboard-depth-shell .kelyani-luxury-dashboard [class*="text-[#525252]"],
-.dashboard-depth-shell .kelyani-luxury-dashboard [class*="text-[#404040]"] {
-  color: #F5F5F5 !important;
-}
-.dashboard-depth-shell .kelyani-luxury-dashboard [class*="text-[#737373]"],
-.dashboard-depth-shell .kelyani-luxury-dashboard [class*="text-[#8A8A8A]"] {
-  color: #A7A196 !important;
-}
-.dashboard-depth-shell .kelyani-luxury-dashboard [class*="text-[#A47C19]"],
-.dashboard-depth-shell .kelyani-luxury-dashboard [class*="text-[#9B7620]"] {
-  color: #246BFD !important;
-}
-.dashboard-depth-shell .kelyani-luxury-dashboard [class*="bg-white"],
-.dashboard-depth-shell .kelyani-luxury-dashboard [class*="bg-[#FFFCF3]"] {
-  background: #242321 !important;
-}
-.dashboard-depth-shell .kelyani-luxury-dashboard [class*="border-[#EAEAEA]"],
-.dashboard-depth-shell .kelyani-luxury-dashboard [class*="divide-[#F0F0F0]"] {
-  border-color: rgba(245,245,245,.10) !important;
-}
-.dashboard-depth-shell .kelyani-luxury-dashboard .kelyani-light-select {
-  background: #1E1E1E !important;
-  color: #F5F5F5 !important;
-  border: 1px solid rgba(36,107,253,.24) !important;
-}
-.dashboard-depth-shell .kelyani-luxury-dashboard .kelyani-light-select:focus {
-  outline: 2px solid rgba(36,107,253,.2);
-  border-color: #246BFD !important;
-}
-.dashboard-depth-shell .kelyani-luxury-dashboard a:focus-visible,
-.dashboard-depth-shell .kelyani-luxury-dashboard button:focus-visible,
-.dashboard-depth-shell .kelyani-luxury-dashboard select:focus-visible {
-  outline: 2px solid #246BFD;
-  outline-offset: 3px;
-}
-.dashboard-depth-shell .kelyani-luxury-dashboard .recharts-cartesian-grid line {
-  stroke: rgba(245,245,245,.09);
-}
-.dashboard-depth-shell .kelyani-luxury-dashboard .recharts-tooltip-wrapper {
-  outline: none;
-}
-@media (max-width: 640px) {
-  .dashboard-depth-shell .kelyani-luxury-dashboard {
-    border-radius: 18px;
-    padding: 15px;
-    margin: -4px;
-  }
-  .dashboard-depth-shell .kelyani-luxury-dashboard .kelyani-light-card {
-    border-radius: 18px !important;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .dashboard-depth-shell .kelyani-luxury-dashboard *,
-  .dashboard-depth-shell .kelyani-luxury-dashboard *::before,
-  .dashboard-depth-shell .kelyani-luxury-dashboard *::after {
-    transition-duration: .01ms !important;
-    animation-duration: .01ms !important;
-  }
-}
-
-
-/* KELYANI STRICT BRAND PALETTE — final visual authority.
-   Allowed visible colors only: #121212, #1E1E1E, #246BFD, #F5F5F5, #A0A0A0.
-   Overrides legacy component color utilities without changing behavior. */
-:root {
-  color-scheme: dark;
-  --kelyani-bg: #121212;
-  --kelyani-panel: #1E1E1E;
-  --kelyani-panel-raised: #1E1E1E;
-  --kelyani-border: rgba(36,107,253,.22);
-  --kelyani-text: #F5F5F5;
-  --kelyani-muted: #A0A0A0;
-  --kelyani-gold: #246BFD;
-  --kelyani-gold-soft: #246BFD;
-  --kelyani-navy: #121212;
-  --kelyani-navy-soft: #1E1E1E;
-  --kelyani-accent: #246BFD;
-  --kelyani-accent-hover: #246BFD;
-  --kelyani-app-canvas: #121212;
-  --kelyani-card: #1E1E1E;
-  --kelyani-ink: #F5F5F5;
-  --kelyani-muted-ink: #A0A0A0;
-  --kelyani-hairline: rgba(36,107,253,.22);
-}
-html, body, #root { background: #121212 !important; color: #F5F5F5; }
-#root [class*="bg-"] { background-color: #1E1E1E !important; background-image: none !important; }
-#root [class*="bg-gold"], #root [class*="bg-[#246BFD]"] { background-color: #246BFD !important; }
-#root [class*="text-gold"], #root [class*="text-forest"], #root [class*="text-[#246BFD]"] { color: #246BFD !important; }
-#root [class*="text-ink"], #root [class*="text-white"], #root [class*="text-[#0F172A]"], #root [class*="text-[#1E293B]"], #root [class*="text-[#F5F5DC]"] { color: #F5F5F5 !important; }
-#root [class*="text-[#737373]"], #root [class*="text-[#64748B]"], #root [class*="text-[#A7A196]"] { color: #A0A0A0 !important; }
-#root [class*="border-"] { border-color: rgba(36,107,253,.22); }
-#root input, #root textarea, #root select, #root option {
-  background-color: #1E1E1E !important; color: #F5F5F5 !important;
-  border-color: rgba(36,107,253,.22) !important; color-scheme: dark;
-}
-#root input::placeholder, #root textarea::placeholder { color: #A0A0A0 !important; }
-#root button[class*="bg-"]:not([class*="bg-gold"]), #root a[class*="bg-"]:not([class*="bg-gold"]) {
-  background-color: #1E1E1E !important; color: #F5F5F5 !important;
-}
-#root button[class*="bg-gold"], #root a[class*="bg-gold"], #root button[class*="bg-[#246BFD]"], #root a[class*="bg-[#246BFD]"] {
-  background-color: #246BFD !important; color: #121212 !important;
-}
-#root :focus-visible { outline-color: #246BFD !important; }
-::selection { color: #121212; background: #246BFD; }
-
-
-/* COCKPIT REFINEMENT — prevent KPI overflow and stabilize dashboard columns */
-.dashboard-depth-shell .kelyani-cockpit {
-  width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-}
-.dashboard-depth-shell .kelyani-cockpit *,
-.dashboard-depth-shell .kelyani-cockpit *::before,
-.dashboard-depth-shell .kelyani-cockpit *::after {
-  box-sizing: border-box;
-}
-.dashboard-depth-shell .kelyani-cockpit > header,
-.dashboard-depth-shell .kelyani-cockpit > section,
-.dashboard-depth-shell .kelyani-cockpit article {
-  min-width: 0;
-}
-.dashboard-depth-shell .kelyani-cockpit .cockpit-kpi-value {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: nowrap;
-  gap: 7px;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  font-size: clamp(34px, 3.1vw, 48px);
-  line-height: 1.08;
-}
-.dashboard-depth-shell .kelyani-cockpit .cockpit-kpi-value small {
-  flex: 0 0 auto;
-  font-size: 12px;
-  line-height: 1;
-  color: #246BFD;
-  background: none;
-  -webkit-text-fill-color: #246BFD;
-}
-.dashboard-depth-shell .kelyani-cockpit .cockpit-kpi {
-  min-width: 0;
-}
-.dashboard-depth-shell .kelyani-cockpit .cockpit-hero {
-  min-height: 260px;
-}
-.dashboard-depth-shell .kelyani-cockpit .cockpit-chart-card {
-  min-width: 0;
-}
-.dashboard-depth-shell .kelyani-cockpit .recharts-responsive-container {
-  min-width: 0;
-}
-@media (max-width: 900px) {
-  .dashboard-depth-shell .kelyani-cockpit .cockpit-kpi-value {
-    font-size: clamp(32px, 6vw, 42px);
-  }
-}
-
-/* KELYANI COCKPIT — luxury glass interface, strict five-color palette */
-.dashboard-depth-shell .kelyani-cockpit {
-  --cockpit-bg: #121212;
-  --cockpit-panel: rgba(30,30,30,.72);
-  --cockpit-gold: #246BFD;
-  --cockpit-ivory: #F5F5F5;
-  --cockpit-muted: #A0A0A0;
-  color: var(--cockpit-ivory);
-  background:
-    radial-gradient(ellipse at 82% 2%, rgba(36,107,253,.085), transparent 32%),
-    radial-gradient(ellipse at 5% 38%, rgba(245,245,245,.025), transparent 28%),
-    #121212 !important;
-  border: 1px solid rgba(36,107,253,.16);
-  border-radius: 30px;
-  padding: clamp(16px,2.2vw,32px);
-  margin: -8px;
-}
-.kelyani-cockpit .cockpit-hero {
-  min-height: 310px;
-  padding: clamp(24px,4vw,52px);
-  border: 1px solid rgba(36,107,253,.38);
-  border-radius: 28px;
-  background: linear-gradient(125deg,rgba(30,30,30,.92),rgba(18,18,18,.76));
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  box-shadow: inset 0 1px 0 rgba(245,245,245,.07), 0 28px 80px rgba(18,18,18,.48);
-}
-.kelyani-cockpit .cockpit-hero:after {
-  content:""; position:absolute; inset:0; pointer-events:none; border-radius:inherit;
-  background: linear-gradient(115deg,rgba(245,245,245,.035),transparent 42%,rgba(36,107,253,.055));
-}
-.kelyani-cockpit .cockpit-hero-orbit { position:absolute; border:1px solid rgba(36,107,253,.16); border-radius:50%; pointer-events:none; }
-.kelyani-cockpit .cockpit-orbit-one { width:390px;height:390px;right:-80px;top:-190px;box-shadow:0 0 90px rgba(36,107,253,.045),inset 0 0 50px rgba(36,107,253,.035); }
-.kelyani-cockpit .cockpit-orbit-two { width:270px;height:270px;right:-20px;top:-130px;border-color:rgba(245,245,245,.12); }
-.kelyani-cockpit .cockpit-eyebrow,.kelyani-cockpit .cockpit-section-kicker {
-  color:#246BFD;font-size:9px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;
-}
-.kelyani-cockpit .cockpit-eyebrow { display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid rgba(36,107,253,.25);border-radius:999px;background:rgba(36,107,253,.055); }
-.kelyani-cockpit .cockpit-live-dot { width:7px;height:7px;display:inline-block;border-radius:50%;background:#246BFD;box-shadow:0 0 12px rgba(36,107,253,.7);animation:cockpitPulse 2s ease-in-out infinite; }
-@keyframes cockpitPulse { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(36,107,253,.35)}50%{opacity:.62;box-shadow:0 0 0 6px rgba(36,107,253,0)} }
-.kelyani-cockpit .cockpit-display { font-family:'Playfair Display',serif;color:#F5F5F5; }
-.kelyani-cockpit .cockpit-gold-type,.kelyani-cockpit .cockpit-kpi-value {
-  background:linear-gradient(105deg,#246BFD 0%,#F5F5F5 52%,#246BFD 100%);
-  background-clip:text;-webkit-background-clip:text;color:transparent !important;
-}
-.kelyani-cockpit .cockpit-separator { width:3px;height:3px;border-radius:50%;background:#246BFD; }
-.kelyani-cockpit .cockpit-field-label { color:#A0A0A0;font-size:9px;font-weight:700;letter-spacing:.18em; }
-.kelyani-cockpit .cockpit-select { min-height:46px;padding:0 14px;border:1px solid rgba(36,107,253,.3);border-radius:13px;background:rgba(30,30,30,.8);color:#F5F5F5;font-size:12px;outline:none; }
-.kelyani-cockpit .cockpit-location { display:flex;align-items:center;gap:12px;padding:12px 14px; }
-.kelyani-cockpit .cockpit-location-mark { display:grid;place-items:center;width:38px;height:38px;border:1px solid rgba(36,107,253,.35);border-radius:12px;color:#246BFD; }
-.kelyani-cockpit .cockpit-location-mark svg { width:20px;height:20px; }
-.kelyani-cockpit .cockpit-location small,.kelyani-cockpit .cockpit-location strong { display:block; }
-.kelyani-cockpit .cockpit-location small { color:#A0A0A0;font-size:8px;letter-spacing:.16em; }
-.kelyani-cockpit .cockpit-location strong { margin-top:4px;color:#F5F5F5;font-size:12px; }
-.kelyani-cockpit .cockpit-primary-action { display:flex;align-items:center;justify-content:center;gap:9px;min-height:46px;padding:0 16px;border-radius:13px;background:#246BFD;color:#121212;font-size:12px;font-weight:700;transition:transform .2s ease,filter .2s ease; }
-.kelyani-cockpit .cockpit-primary-action:hover { transform:translateY(-2px);filter:brightness(1.06); }
-.kelyani-cockpit .cockpit-status { display:flex;align-items:center;gap:8px;color:#A0A0A0;font-size:8px;letter-spacing:.13em; }
-.kelyani-cockpit .cockpit-glass {
-  border:1px solid rgba(36,107,253,.28);
-  background:linear-gradient(145deg,rgba(30,30,30,.82),rgba(30,30,30,.58));
-  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
-  box-shadow:inset 0 1px 0 rgba(245,245,245,.045),0 18px 48px rgba(18,18,18,.34);
-  transition:border-color .22s ease,transform .22s ease,box-shadow .22s ease;
-}
-.kelyani-cockpit .cockpit-glass:hover { border-color:rgba(36,107,253,.52);box-shadow:inset 0 1px 0 rgba(245,245,245,.06),0 22px 54px rgba(18,18,18,.42),0 0 26px rgba(36,107,253,.045); }
-.kelyani-cockpit .cockpit-kpi { position:relative;min-height:176px;overflow:hidden;border-radius:22px;padding:22px; }
-.kelyani-cockpit .cockpit-kpi:after { content:"";position:absolute;width:130px;height:130px;right:-70px;bottom:-80px;border:1px solid rgba(36,107,253,.2);border-radius:50%;box-shadow:0 0 0 15px rgba(36,107,253,.018),0 0 0 30px rgba(36,107,253,.012); }
-.kelyani-cockpit .cockpit-kpi-head { display:flex;align-items:center;justify-content:space-between;color:#A0A0A0;font-size:9px;font-weight:700;letter-spacing:.17em; }
-.kelyani-cockpit .cockpit-kpi-head svg { color:#246BFD; }
-.kelyani-cockpit .cockpit-kpi-value { margin-top:23px;font-family:'Playfair Display',serif;font-size:clamp(38px,4vw,54px);line-height:1;font-weight:500;letter-spacing:-.045em; }
-.kelyani-cockpit .cockpit-kpi-value small { font-family:'DM Sans',sans-serif;font-size:13px;letter-spacing:.05em; }
-.kelyani-cockpit .cockpit-kpi-foot { display:flex;flex-wrap:wrap;gap:7px;margin-top:13px;color:#A0A0A0;font-size:10px; }
-.kelyani-cockpit .cockpit-kpi-accent { color:#246BFD;font-weight:700; }
-.kelyani-cockpit .cockpit-kpi-index { position:absolute;right:20px;bottom:17px;color:rgba(160,160,160,.52);font-size:8px;letter-spacing:.15em; }
-.kelyani-cockpit .cockpit-kpi-featured { background:linear-gradient(145deg,rgba(36,107,253,.13),rgba(30,30,30,.74)); }
-.kelyani-cockpit .cockpit-chart-card,.kelyani-cockpit .cockpit-retention-card,.kelyani-cockpit .cockpit-feed,.kelyani-cockpit .cockpit-actions { border-radius:24px;padding:clamp(18px,2.1vw,28px); }
-.kelyani-cockpit .cockpit-card-title { margin-top:7px;color:#F5F5F5;font-family:'Playfair Display',serif;font-size:22px;font-weight:500;letter-spacing:-.02em; }
-.kelyani-cockpit .cockpit-period-switch { display:flex;flex-wrap:wrap;gap:4px;padding:4px;border:1px solid rgba(36,107,253,.17);border-radius:12px;background:rgba(18,18,18,.6); }
-.kelyani-cockpit .cockpit-period-switch button { padding:7px 10px;border-radius:8px;color:#A0A0A0;font-size:9px;transition:background .18s ease,color .18s ease; }
-.kelyani-cockpit .cockpit-period-switch button.is-active { background:rgba(36,107,253,.16);color:#246BFD;box-shadow:inset 0 0 0 1px rgba(36,107,253,.24); }
-.kelyani-cockpit .cockpit-chart-total { color:#F5F5F5;font-family:'Playfair Display',serif;font-size:32px; }
-.kelyani-cockpit .cockpit-gauge-wrap { display:grid;place-items:center;padding:14px 0 8px; }
-.kelyani-cockpit .cockpit-gauge { width:min(100%,230px);overflow:visible; }
-.kelyani-cockpit .cockpit-gauge-progress { transition:stroke-dashoffset 1.2s cubic-bezier(.2,.75,.25,1);filter:drop-shadow(0 0 7px rgba(36,107,253,.28)); }
-.kelyani-cockpit .cockpit-gauge-value { fill:#F5F5F5;font-family:'Playfair Display',serif;font-size:31px; }
-.kelyani-cockpit .cockpit-gauge-label { fill:#A0A0A0;font-family:'DM Sans',sans-serif;font-size:8px;letter-spacing:2px; }
-.kelyani-cockpit .cockpit-gauge-legend { display:flex;align-items:center;justify-content:space-between;padding:12px 2px;border-top:1px solid rgba(36,107,253,.12);color:#A0A0A0;font-size:9px;letter-spacing:.12em; }
-.kelyani-cockpit .cockpit-gauge-legend strong { color:#F5F5F5;font-size:13px;letter-spacing:0; }
-.kelyani-cockpit .cockpit-feed-live { display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid rgba(36,107,253,.22);border-radius:999px;color:#246BFD;font-size:8px;letter-spacing:.13em; }
-.kelyani-cockpit .cockpit-feed-row { display:flex;align-items:center;gap:13px;padding:15px 2px; }
-.kelyani-cockpit .cockpit-feed-icon { position:relative;display:grid;place-items:center;width:38px;height:38px;flex:none;border:1px solid rgba(36,107,253,.22);border-radius:13px;background:rgba(36,107,253,.055);color:#246BFD; }
-.kelyani-cockpit .cockpit-feed-icon i { position:absolute;right:-2px;top:-2px;width:8px;height:8px;border:2px solid #1E1E1E;border-radius:50%;background:#246BFD;box-shadow:0 0 9px rgba(36,107,253,.55); }
-.kelyani-cockpit .cockpit-action-link { display:flex;align-items:center;gap:12px;padding:13px;border:1px solid rgba(36,107,253,.16);border-radius:15px;background:rgba(18,18,18,.44);color:#F5F5F5;transition:transform .2s ease,border-color .2s ease,background .2s ease; }
-.kelyani-cockpit .cockpit-action-link:hover { transform:translateX(3px);border-color:rgba(36,107,253,.45);background:rgba(36,107,253,.055); }
-.kelyani-cockpit .cockpit-action-link>span:nth-child(2) { min-width:0;flex:1; }
-.kelyani-cockpit .cockpit-action-link strong,.kelyani-cockpit .cockpit-action-link small { display:block; }
-.kelyani-cockpit .cockpit-action-link strong { color:#F5F5F5;font-size:12px;font-weight:600; }
-.kelyani-cockpit .cockpit-action-link small { margin-top:4px;color:#A0A0A0;font-size:10px; }
-.kelyani-cockpit .cockpit-action-link>svg:last-child { color:#246BFD; }
-.kelyani-cockpit .cockpit-action-icon { display:grid;place-items:center;width:38px;height:38px;flex:none;border:1px solid rgba(36,107,253,.25);border-radius:12px;color:#246BFD; }
-.kelyani-cockpit .cockpit-action-primary { background:rgba(36,107,253,.09);border-color:rgba(36,107,253,.34); }
-.kelyani-cockpit .cockpit-actions-footer { display:flex;align-items:center;justify-content:space-between;margin-top:25px;padding-top:17px;border-top:1px solid rgba(36,107,253,.14); }
-.kelyani-cockpit .cockpit-actions-footer span { color:#A0A0A0;font-size:8px;letter-spacing:.2em; }
-.kelyani-cockpit .cockpit-actions-footer strong { color:#F5F5F5;font-size:10px;letter-spacing:.14em; }
-.kelyani-cockpit .cockpit-actions-footer em { color:#246BFD;font-style:normal; }
-@media(max-width:640px) {
- .dashboard-depth-shell .kelyani-cockpit { margin:-4px;padding:14px;border-radius:20px; }
- .kelyani-cockpit .cockpit-hero { min-height:unset;padding:22px 18px;border-radius:21px; }
- .kelyani-cockpit .cockpit-hero-orbit { opacity:.5; }
- .kelyani-cockpit .cockpit-kpi { min-height:150px;padding:17px;border-radius:18px; }
- .kelyani-cockpit .cockpit-kpi-value { margin-top:18px;font-size:38px; }
- .kelyani-cockpit .cockpit-card-title { font-size:20px; }
- .kelyani-cockpit .cockpit-period-switch { width:100%;justify-content:space-between; }
- .kelyani-cockpit .cockpit-period-switch button { padding:7px 8px; }
- .kelyani-cockpit .cockpit-feed-row { gap:9px; }
- .kelyani-cockpit .cockpit-feed-row time { font-size:9px; }
-}
-@media(prefers-reduced-motion:reduce) {
- .kelyani-cockpit .cockpit-live-dot,.kelyani-cockpit .cockpit-gauge-progress { animation:none;transition:none; }
- .kelyani-cockpit * { scroll-behavior:auto !important; }
-}
-
-
-/* KELYANI Blue Identity — shared visual tokens, no functional changes */
-:root {
-  --kelyani-bg: #080B12;
-  --kelyani-panel: #151B26;
-  --kelyani-panel-raised: #202A39;
-  --kelyani-border: rgba(101,165,255,.18);
-  --kelyani-text: #F5F7FB;
-  --kelyani-muted: #A7B0C0;
-  --kelyani-gold: #246BFD;
-  --kelyani-gold-soft: #65A5FF;
-}
-::selection { color: #FFFFFF; background: #246BFD; }
-:focus-visible { outline-color: #65A5FF; }
+/* KELYANI Blue Identity tokens */
+:root{--kelyani-bg:#080B12;--kelyani-panel:#151B26;--kelyani-panel-raised:#202A39;--kelyani-border:rgba(101,165,255,.18);--kelyani-text:#F5F7FB;--kelyani-muted:#A7B0C0;--kelyani-gold:#246BFD;--kelyani-gold-soft:#65A5FF;}
