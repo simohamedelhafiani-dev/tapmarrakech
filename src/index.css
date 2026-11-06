@@ -13,7 +13,7 @@
   --kelyani-panel: #121212;
   --kelyani-panel-raised: #1A1A1A;
   --kelyani-border: rgba(0, 255, 195, 0.18);
-  --kelyani-text: #F5F5DC;
+  --kelyani-text: #F1F5F4;
   --kelyani-muted: rgba(245,245,220,.55);
   --kelyani-gold: #00FFC3;
   --kelyani-gold-soft: #00DFA5;
@@ -377,7 +377,7 @@ table {
 .kelyani-kpi-tile>div:first-child,.kelyani-chart-tile>div:first-child {
   color:rgba(255,255,255,.42);font-size:8px;font-weight:800;letter-spacing:.13em;
 }
-.kelyani-kpi-tile strong { font-size:25px;line-height:1;letter-spacing:-.06em;color:#f8f5ec;font-weight:650; }
+.kelyani-kpi-tile strong { font-size:25px;line-height:1;letter-spacing:-.06em;color:#F1F5F4;font-weight:650; }
 .kelyani-kpi-featured { border-color:rgba(0,255,195,.24);background:linear-gradient(145deg,rgba(0,255,195,.12),rgba(0,255,195,.025)); }
 .kelyani-chart-tile { grid-column:1/-1;background:linear-gradient(100deg,rgba(0,255,195,.045),rgba(255,255,255,.012)); }
 .kelyani-dashboard-footer { padding-top:10px;border-top:1px solid rgba(255,255,255,.065);font-size:8px;color:rgba(255,255,255,.34);letter-spacing:.09em; }
@@ -765,14 +765,14 @@ table {
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
 }
 #root input, #root textarea, #root select {
-  color: #F5F5DC;
+  color: #F1F5F4;
   color-scheme: dark;
 }
 #root input::placeholder, #root textarea::placeholder {
   color: rgba(245,245,220,.42);
 }
 #root option {
-  color: #F5F5DC;
+  color: #F1F5F4;
   background: #141414;
 }
 
