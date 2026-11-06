@@ -830,7 +830,8 @@ body { background-color: #050505; color: #FFFFFF; }
   -webkit-text-fill-color: transparent !important;
   background-clip: text !important;
 }
-.bg-gold, .bg-forest { background-color: #3B82F6 !important; }
+.bg-gold { background-color: #3B82F6 !important; }
+.bg-forest { background-color: #050505 !important; }
 .border-gold { border-color: rgba(59,130,246,.62) !important; }
 .kelyani-gold-button {
   color: #FFFFFF !important;
