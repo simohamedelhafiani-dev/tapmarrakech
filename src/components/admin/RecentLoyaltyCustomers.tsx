@@ -41,7 +41,7 @@ export default function RecentLoyaltyCustomers({
     >
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A45C]/45">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#246BFD]/45">
             Fidélité
           </p>
           <h3
@@ -53,7 +53,7 @@ export default function RecentLoyaltyCustomers({
         </div>
 
         {!loading && !error && customers.length > 0 && (
-          <span className="rounded-full bg-[#C9A45C]/5 px-3 py-1.5 text-[10px] font-semibold text-[#C9A45C]">
+          <span className="rounded-full bg-[#246BFD]/5 px-3 py-1.5 text-[10px] font-semibold text-[#246BFD]">
             {customers.length} client{customers.length > 1 ? 's' : ''}
           </span>
         )}
@@ -84,7 +84,7 @@ export default function RecentLoyaltyCustomers({
             <button
               type="button"
               onClick={() => void onRetry()}
-              className="mt-3 inline-flex items-center gap-2 rounded-xl bg-[#C9A45C] px-4 py-2.5 text-xs font-semibold text-[#050505] transition hover:bg-[#C9A45C]-light"
+              className="mt-3 inline-flex items-center gap-2 rounded-xl bg-[#246BFD] px-4 py-2.5 text-xs font-semibold text-[#050505] transition hover:bg-[#246BFD]-light"
             >
               <RefreshCw size={14} />
               Réessayer
@@ -92,7 +92,7 @@ export default function RecentLoyaltyCustomers({
           </div>
         ) : customers.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-[#242424] bg-[#111111] p-8 text-center">
-            <div className="mx-auto grid h-11 w-11 place-items-center rounded-xl bg-[#C9A45C]/5 text-[#C9A45C]">
+            <div className="mx-auto grid h-11 w-11 place-items-center rounded-xl bg-[#246BFD]/5 text-[#246BFD]">
               <UserPlus size={18} />
             </div>
             <p className="mt-3 text-sm font-semibold text-[#FFFFFF]">
@@ -115,7 +115,7 @@ export default function RecentLoyaltyCustomers({
                   key={customer.id}
                   className="flex items-center gap-3 rounded-2xl border border-[#242424] p-3 transition hover:border-[#242424] hover:bg-[#111111]"
                 >
-                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#C9A45C]/10 text-[#C9A45C]">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#246BFD]/10 text-[#246BFD]">
                     <UserPlus size={17} strokeWidth={1.9} />
                   </div>
 
@@ -132,7 +132,7 @@ export default function RecentLoyaltyCustomers({
                   <span
                     className={
                       customer.visit_count > 0
-                        ? 'shrink-0 rounded-full bg-[#C9A45C]/10 px-2.5 py-1.5 text-[10px] font-semibold text-[#C9A45C]'
+                        ? 'shrink-0 rounded-full bg-[#246BFD]/10 px-2.5 py-1.5 text-[10px] font-semibold text-[#246BFD]'
                         : 'shrink-0 rounded-full bg-[#242424] px-2.5 py-1.5 text-[10px] font-medium text-[#FFFFFF]/40'
                     }
                   >
