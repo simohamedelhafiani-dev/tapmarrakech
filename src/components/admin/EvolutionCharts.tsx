@@ -45,7 +45,7 @@ function EvolutionCard({
     <div className="rounded-3xl border border-[#242424] bg-[#111111] p-5 shadow-soft">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A45C]/70">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#246BFD]/70">
             Évolution · 30 jours
           </p>
           <h3 className="mt-1 text-base font-semibold text-[#FFFFFF]">{title}</h3>
@@ -138,7 +138,7 @@ export default function EvolutionCharts({
   return (
     <section aria-label="Évolution de la plateforme">
       <div className="mb-4">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A45C]/70">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#246BFD]/70">
           Tendances
         </p>
         <h2 className="mt-1 text-lg font-semibold text-[#FFFFFF]">
@@ -155,7 +155,7 @@ export default function EvolutionCharts({
           description="Nombre d’avis créés chaque jour."
           data={reviewsData}
           dataKey="reviews"
-          stroke="#C9A45C"
+          stroke="#246BFD"
         />
 
         <EvolutionCard
@@ -163,7 +163,7 @@ export default function EvolutionCharts({
           description="Nombre de pages établissement consultées chaque jour."
           data={scansData}
           dataKey="scans"
-          stroke="#E1C27A"
+          stroke="#65A5FF"
         />
       </div>
     </section>
