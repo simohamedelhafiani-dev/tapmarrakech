@@ -6,8 +6,8 @@ export default {
       colors: {
         ink: '#FFFFFF',
         forest: '#050505',
-        gold: '#00FFC3',
-        'gold-light': '#00DFA5',
+        electric: '#3B82F6',
+        'electric-light': '#60A5FA',
         cream: '#1A1A1A',
         onyx: '#050505',
         surface: '#1A1A1A',
@@ -20,10 +20,10 @@ export default {
       boxShadow: {
         soft: '0 24px 70px rgba(0,0,0,0.42)',
         luxury: '0 30px 90px rgba(0,0,0,0.52)',
-        gold: '0 0 0 1px rgba(0,255,195,.24), 0 18px 50px rgba(0,255,195,.14)',
+        electric: '0 0 0 1px rgba(59,130,246,.24), 0 18px 50px rgba(59,130,246,.14)',
       },
       backgroundImage: {
-        'gold-gradient': 'linear-gradient(135deg, #00FFC3 0%, #00DFA5 48%, #00A982 100%)',
+        'electric-gradient': 'linear-gradient(135deg, #3B82F6 0%, #60A5FA 48%, #2563EB 100%)',
         'glass-gradient': 'linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.025))',
       },
       borderRadius: {
