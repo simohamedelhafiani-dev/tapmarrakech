@@ -268,7 +268,7 @@ export default function Login() {
                       <button type="button" onClick={() => setShowPassword(value => !value)} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-xl p-2 text-[#F5F5DC]/25 hover:text-[#246BFD]">{showPassword ? <EyeOff size={16} /> : <Eye size={16} />}</button>
                     </div>
                   </div>
-                  <button onClick={handleLogin} disabled={saving} className="group flex w-full items-center justify-center gap-2 rounded-2xl bg-[#246BFD] py-3.5 text-sm font-bold text-[#050505] shadow-[0_14px_34px_rgba(201,164,92,.18),inset_0_1px_0_rgba(245,245,220,.22)] transition-all duration-300 hover:bg-[#65A5FF] hover:-translate-y-0.5 hover:shadow-[0_20px_42px_rgba(201,164,92,.24),inset_0_1px_0_rgba(245,245,220,.28)] active:translate-y-0 active:shadow-[0_10px_24px_rgba(201,164,92,.16)] disabled:opacity-50">
+                  <button onClick={handleLogin} disabled={saving} className="group flex w-full items-center justify-center gap-2 rounded-2xl bg-[#246BFD] py-3.5 text-sm font-bold text-[#050505] shadow-[0_14px_34px_rgba(36,107,253,.18),inset_0_1px_0_rgba(245,245,220,.22)] transition-all duration-300 hover:bg-[#65A5FF] hover:-translate-y-0.5 hover:shadow-[0_20px_42px_rgba(36,107,253,.24),inset_0_1px_0_rgba(245,245,220,.28)] active:translate-y-0 active:shadow-[0_10px_24px_rgba(36,107,253,.16)] disabled:opacity-50">
                     {saving ? 'Connexion…' : 'Entrer dans KELYANI'} {!saving && <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />}
                   </button>
                 </div>
