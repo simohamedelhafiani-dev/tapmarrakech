@@ -72,7 +72,7 @@ export default function LoyaltyRecover() {
         <div className="w-full rounded-[32px] border border-[#242424] bg-[#111111] p-7 text-center shadow-[0_30px_100px_rgba(0,0,0,.55)]">
           {status === 'loading' && (
             <>
-              <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-[#C9A45C]/10 text-[#C9A45C]">
+              <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-[#246BFD]/10 text-[#246BFD]">
                 <Loader2 size={28} className="animate-spin" />
               </div>
               <h1 className="mt-6 text-xl font-semibold">Récupération de votre carte</h1>
@@ -82,14 +82,14 @@ export default function LoyaltyRecover() {
 
           {status === 'success' && (
             <>
-              <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-[#C9A45C]/10 text-[#C9A45C]">
+              <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-[#246BFD]/10 text-[#246BFD]">
                 <CheckCircle2 size={30} />
               </div>
               <h1 className="mt-6 text-xl font-semibold">Carte récupérée</h1>
               <p className="mt-2 text-sm leading-6 text-white/45">
                 {firstName ? `Bonjour ${firstName}, votre carte est prête.` : 'Votre carte est prête.'}
               </p>
-              <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-[#242424] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#C9A45C]">
+              <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-[#242424] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#246BFD]">
                 <ShieldCheck size={13} /> Lien sécurisé renouvelé
               </div>
             </>
@@ -102,7 +102,7 @@ export default function LoyaltyRecover() {
               </div>
               <h1 className="mt-6 text-xl font-semibold">QR code invalide</h1>
               <p className="mt-2 text-sm leading-6 text-white/45">Ce QR code a expiré ou a déjà été utilisé. Demandez au responsable d'en générer un nouveau.</p>
-              <Link to="/loyalty" className="mt-6 inline-flex rounded-xl bg-[#C9A45C] px-5 py-3 text-sm font-bold text-[#050505]">Retour</Link>
+              <Link to="/loyalty" className="mt-6 inline-flex rounded-xl bg-[#246BFD] px-5 py-3 text-sm font-bold text-[#050505]">Retour</Link>
             </>
           )}
         </div>
