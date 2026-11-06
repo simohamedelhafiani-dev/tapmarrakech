@@ -240,11 +240,11 @@ export default function LoyaltyNotificationsPanel({ establishmentId, initialView
       <div className="rounded-3xl border border-[#242424] bg-[#111111] p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
-            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#C9A45C]/10 text-[#C9A45C]">
+            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#246BFD]/10 text-[#246BFD]">
               <Bell size={18} />
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#C9A45C]">Communication fidélité</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#246BFD]">Communication fidélité</p>
               <h3 className="mt-1 text-lg font-semibold text-white">Notifications clients</h3>
               <p className="mt-1 text-xs leading-5 text-white/45">
                 Envoyez un message sur la carte et, si le client l’a autorisé, sur l’écran verrouillé du téléphone.
@@ -255,7 +255,7 @@ export default function LoyaltyNotificationsPanel({ establishmentId, initialView
             type="button"
             onClick={() => setOpen(true)}
             disabled={loading || !establishmentId}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#C9A45C] px-4 py-2.5 text-xs font-semibold text-[#0D0D0D] disabled:opacity-40"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#246BFD] px-4 py-2.5 text-xs font-semibold text-[#0D0D0D] disabled:opacity-40"
           >
             <Bell size={15} />
             Nouvelle notification
@@ -263,7 +263,7 @@ export default function LoyaltyNotificationsPanel({ establishmentId, initialView
         </div>
         <div className="mt-4 flex flex-wrap gap-2 text-[11px]">
           <span className="rounded-full bg-white/[0.04] px-3 py-1.5 text-white/55">{customers.length} clients</span>
-          <span className="rounded-full bg-[#C9A45C]/10 px-3 py-1.5 text-[#C9A45C]">{customers.filter(c => c.notification_consent).length} notifications activées</span>
+          <span className="rounded-full bg-[#246BFD]/10 px-3 py-1.5 text-[#246BFD]">{customers.filter(c => c.notification_consent).length} notifications activées</span>
         </div>
       </div>
 
@@ -271,7 +271,7 @@ export default function LoyaltyNotificationsPanel({ establishmentId, initialView
 
       <div ref={historySectionRef} className="scroll-mt-6 rounded-3xl border border-[#242424] bg-[#111111] p-5">
         <div className="mb-4 flex items-center gap-3">
-          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-white/[0.04] text-[#C9A45C]"><History size={17} /></div>
+          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-white/[0.04] text-[#246BFD]"><History size={17} /></div>
           <div>
             <h3 className="text-base font-semibold text-white">Historique des notifications</h3>
             <p className="text-xs text-white/45">Retrouvez les campagnes publiées et renvoyez un Push si nécessaire.</p>
@@ -290,7 +290,7 @@ export default function LoyaltyNotificationsPanel({ establishmentId, initialView
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="text-sm font-semibold text-white">{campaign.title}</p>
-                      <span className="rounded-full bg-[#C9A45C]/10 px-2 py-1 text-[10px] text-[#C9A45C]">{campaign.type}</span>
+                      <span className="rounded-full bg-[#246BFD]/10 px-2 py-1 text-[10px] text-[#246BFD]">{campaign.type}</span>
                     </div>
                     <p className="mt-1 whitespace-pre-wrap text-xs leading-5 text-white/55">{campaign.message}</p>
                     <p className="mt-2 text-[10px] text-white/35">
@@ -310,7 +310,7 @@ export default function LoyaltyNotificationsPanel({ establishmentId, initialView
                       <p className="mt-1 text-[10px] text-white/30">Ce résultat ne confirme pas la réception ni l’affichage sur le téléphone.</p>
                     </div>
                   </div>
-                  <button type="button" onClick={() => void resendNotification(campaign)} disabled={!!resendingId || campaign.status === 'CANCELLED'} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-[#C9A45C]/30 px-3 py-2 text-xs font-semibold text-[#C9A45C] disabled:opacity-40">
+                  <button type="button" onClick={() => void resendNotification(campaign)} disabled={!!resendingId || campaign.status === 'CANCELLED'} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-[#246BFD]/30 px-3 py-2 text-xs font-semibold text-[#246BFD] disabled:opacity-40">
                     <RotateCcw size={13} />{resendingId === campaign.id ? 'Renvoi…' : 'Renvoyer le Push'}
                   </button>
                 </div>
@@ -325,7 +325,7 @@ export default function LoyaltyNotificationsPanel({ establishmentId, initialView
           <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-2xl">
             <div className="mb-6 flex items-start justify-between gap-4">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#C9A45C]">Communication fidélité</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#246BFD]">Communication fidélité</p>
                 <h2 className="mt-1 text-2xl font-semibold text-white">Nouvelle notification</h2>
               </div>
               <button type="button" onClick={() => setOpen(false)} className="grid h-9 w-9 place-items-center rounded-full bg-white/[0.04] text-white/50">
@@ -336,7 +336,7 @@ export default function LoyaltyNotificationsPanel({ establishmentId, initialView
             <div className="space-y-4">
               <div>
                 <label className="text-xs font-medium text-white/55">Ciblage</label>
-                <select value={audience} onChange={e => setAudience(e.target.value as Audience)} className="mt-2 w-full rounded-xl border border-white/10 bg-[#0D0D0D] px-4 py-3 text-sm text-white outline-none focus:border-[#C9A45C]">
+                <select value={audience} onChange={e => setAudience(e.target.value as Audience)} className="mt-2 w-full rounded-xl border border-white/10 bg-[#0D0D0D] px-4 py-3 text-sm text-white outline-none focus:border-[#246BFD]">
                   <option value="ALL">Tous les clients ayant activé les notifications</option>
                   <option value="INTEREST">Par centre d’intérêt</option>
                   <option value="FREQUENCY">Par fréquence de visite</option>
@@ -347,14 +347,14 @@ export default function LoyaltyNotificationsPanel({ establishmentId, initialView
               </div>
 
               {audience === 'INTEREST' && (
-                <select value={interest} onChange={e => setInterest(e.target.value)} className="w-full rounded-xl border border-white/10 bg-[#0D0D0D] px-4 py-3 text-sm text-white outline-none focus:border-[#C9A45C]">
+                <select value={interest} onChange={e => setInterest(e.target.value)} className="w-full rounded-xl border border-white/10 bg-[#0D0D0D] px-4 py-3 text-sm text-white outline-none focus:border-[#246BFD]">
                   <option value="">Sélectionner un centre d’intérêt</option>
                   {interests.map(item => <option key={item} value={item}>{item}</option>)}
                 </select>
               )}
 
               {audience === 'FREQUENCY' && (
-                <select value={frequency} onChange={e => setFrequency(e.target.value)} className="w-full rounded-xl border border-white/10 bg-[#0D0D0D] px-4 py-3 text-sm text-white outline-none focus:border-[#C9A45C]">
+                <select value={frequency} onChange={e => setFrequency(e.target.value)} className="w-full rounded-xl border border-white/10 bg-[#0D0D0D] px-4 py-3 text-sm text-white outline-none focus:border-[#246BFD]">
                   <option value="">Sélectionner une fréquence</option>
                   <option value="WEEKLY">Hebdomadaire</option>
                   <option value="MONTHLY">Mensuelle</option>
@@ -363,18 +363,18 @@ export default function LoyaltyNotificationsPanel({ establishmentId, initialView
               )}
 
               {audience === 'POINTS' && (
-                <input type="number" min="0" value={minPoints} onChange={e => setMinPoints(e.target.value)} placeholder="Minimum de points" className="w-full rounded-xl border border-white/10 bg-[#0D0D0D] px-4 py-3 text-sm text-white outline-none focus:border-[#C9A45C]" />
+                <input type="number" min="0" value={minPoints} onChange={e => setMinPoints(e.target.value)} placeholder="Minimum de points" className="w-full rounded-xl border border-white/10 bg-[#0D0D0D] px-4 py-3 text-sm text-white outline-none focus:border-[#246BFD]" />
               )}
 
               {audience === 'VISITS' && (
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <input type="number" min="0" value={minVisits} onChange={e => setMinVisits(e.target.value)} placeholder="Minimum de visites" className="w-full rounded-xl border border-white/10 bg-[#0D0D0D] px-4 py-3 text-sm text-white outline-none focus:border-[#C9A45C]" />
-                  <input type="number" min="0" value={lastVisitDays} onChange={e => setLastVisitDays(e.target.value)} placeholder="Vu il y a moins de X jours" className="w-full rounded-xl border border-white/10 bg-[#0D0D0D] px-4 py-3 text-sm text-white outline-none focus:border-[#C9A45C]" />
+                  <input type="number" min="0" value={minVisits} onChange={e => setMinVisits(e.target.value)} placeholder="Minimum de visites" className="w-full rounded-xl border border-white/10 bg-[#0D0D0D] px-4 py-3 text-sm text-white outline-none focus:border-[#246BFD]" />
+                  <input type="number" min="0" value={lastVisitDays} onChange={e => setLastVisitDays(e.target.value)} placeholder="Vu il y a moins de X jours" className="w-full rounded-xl border border-white/10 bg-[#0D0D0D] px-4 py-3 text-sm text-white outline-none focus:border-[#246BFD]" />
                 </div>
               )}
 
               {audience === 'CUSTOMER' && (
-                <select value={customerId} onChange={e => setCustomerId(e.target.value)} className="w-full rounded-xl border border-white/10 bg-[#0D0D0D] px-4 py-3 text-sm text-white outline-none focus:border-[#C9A45C]">
+                <select value={customerId} onChange={e => setCustomerId(e.target.value)} className="w-full rounded-xl border border-white/10 bg-[#0D0D0D] px-4 py-3 text-sm text-white outline-none focus:border-[#246BFD]">
                   <option value="">Sélectionner un client</option>
                   {customers.filter(c => c.notification_consent).map(customer => (
                     <option key={customer.id} value={customer.id}>{customer.first_name || 'Client'} · {customer.phone}</option>
@@ -382,22 +382,22 @@ export default function LoyaltyNotificationsPanel({ establishmentId, initialView
                 </select>
               )}
 
-              <div className="rounded-xl border border-[#C9A45C]/15 bg-[#C9A45C]/5 px-4 py-3 text-xs text-white/55">
-                <strong className="text-[#C9A45C]">{eligibleCustomers.length}</strong> client(s) recevront la notification sur leur carte.
+              <div className="rounded-xl border border-[#246BFD]/15 bg-[#246BFD]/5 px-4 py-3 text-xs text-white/55">
+                <strong className="text-[#246BFD]">{eligibleCustomers.length}</strong> client(s) recevront la notification sur leur carte.
               </div>
 
-              <select value={type} onChange={e => setType(e.target.value as NotificationType)} className="w-full rounded-xl border border-white/10 bg-[#0D0D0D] px-4 py-3 text-sm text-white outline-none focus:border-[#C9A45C]">
+              <select value={type} onChange={e => setType(e.target.value as NotificationType)} className="w-full rounded-xl border border-white/10 bg-[#0D0D0D] px-4 py-3 text-sm text-white outline-none focus:border-[#246BFD]">
                 <option value="INFO">Information</option>
                 <option value="OFFER">Offre</option>
                 <option value="REWARD">Récompense</option>
                 <option value="POINTS">Points</option>
               </select>
 
-              <input value={title} onChange={e => setTitle(e.target.value)} maxLength={120} placeholder="Titre" className="w-full rounded-xl border border-white/10 bg-[#0D0D0D] px-4 py-3 text-sm text-white outline-none focus:border-[#C9A45C]" />
-              <textarea value={message} onChange={e => setMessage(e.target.value)} maxLength={1000} rows={5} placeholder="Message qui apparaîtra sur la carte et dans la notification téléphone..." className="w-full resize-none rounded-xl border border-white/10 bg-[#0D0D0D] px-4 py-3 text-sm text-white outline-none focus:border-[#C9A45C]" />
-              <input type="datetime-local" value={expiresAt} onChange={e => setExpiresAt(e.target.value)} className="w-full rounded-xl border border-white/10 bg-[#0D0D0D] px-4 py-3 text-sm text-white outline-none focus:border-[#C9A45C]" />
+              <input value={title} onChange={e => setTitle(e.target.value)} maxLength={120} placeholder="Titre" className="w-full rounded-xl border border-white/10 bg-[#0D0D0D] px-4 py-3 text-sm text-white outline-none focus:border-[#246BFD]" />
+              <textarea value={message} onChange={e => setMessage(e.target.value)} maxLength={1000} rows={5} placeholder="Message qui apparaîtra sur la carte et dans la notification téléphone..." className="w-full resize-none rounded-xl border border-white/10 bg-[#0D0D0D] px-4 py-3 text-sm text-white outline-none focus:border-[#246BFD]" />
+              <input type="datetime-local" value={expiresAt} onChange={e => setExpiresAt(e.target.value)} className="w-full rounded-xl border border-white/10 bg-[#0D0D0D] px-4 py-3 text-sm text-white outline-none focus:border-[#246BFD]" />
 
-              <button type="button" onClick={() => void createNotification()} disabled={saving || !title.trim() || !message.trim()} className="w-full rounded-xl bg-[#C9A45C] px-4 py-3 text-xs font-bold text-[#0D0D0D] disabled:opacity-40">
+              <button type="button" onClick={() => void createNotification()} disabled={saving || !title.trim() || !message.trim()} className="w-full rounded-xl bg-[#246BFD] px-4 py-3 text-xs font-bold text-[#0D0D0D] disabled:opacity-40">
                 {saving ? 'Publication…' : 'Publier la notification'}
               </button>
             </div>
