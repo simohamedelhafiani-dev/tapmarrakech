@@ -687,7 +687,7 @@ table {
 #root [class~="bg-[#fffdf9]"],
 #root [class~="bg-[#f7f7f3]"],
 #root [class~="bg-[#fafaf7]"],
-#root [class~="bg-[#fdf9ef]"],
+#root [class~="bg-[#242424]"],
 #root [class~="bg-[#fff]"],
 #root [class~="bg-[#ffffff]"],
 #root [class*="bg-red-"],
@@ -866,7 +866,7 @@ body { background-color: #050505; color: #FFFFFF; }
 #root [class*="text-[#3B82F6]"], #root [class*="text-[#3B82F6]"],
 #root [class*="text-[#3B82F6]"], #root [class*="text-[#3B82F6]"],
 #root [class*="text-[#60A5FA]"], #root [class*="text-[#60A5FA]"],
-#root [class*="text-[#60A5FA]"], #root [class*="text-[#F0D99A]"] { color: #3B82F6 !important; }
+#root [class*="text-[#60A5FA]"], #root [class*="text-[#60A5FA]"] { color: #3B82F6 !important; }
 #root [class*="bg-[#3B82F6]"], #root [class*="bg-[#3B82F6]"],
 #root [class*="bg-[#3B82F6]"], #root [class*="bg-[#3B82F6]"],
 #root [class*="bg-[#60A5FA]"], #root [class*="bg-[#60A5FA]"],
