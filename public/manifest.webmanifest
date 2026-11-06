@@ -1,7 +1,7 @@
 {
   "name": "KELYANI",
   "short_name": "KELYANI",
-  "description": "Carte fidélité et expérience client KELYANI",
+  "description": "L’art de la relation client",
   "start_url": "/loyalty",
   "scope": "/",
   "display": "standalone",
@@ -9,10 +9,10 @@
   "theme_color": "#0D0D0D",
   "icons": [
     {
-      "src": "/kelyani-final.svg",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "src": "/Logo%20Kelyani%20en%20d%C3%A9grad%C3%A9%20teal%20et%20vert.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }
