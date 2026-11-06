@@ -3,10 +3,10 @@ export type MenuTemplateOption = {
   background: string; surface: string; accent: string; text: string;
 };
 export const MENU_TEMPLATE_CATALOG: MenuTemplateOption[] = [
-  {id:'editorial',name:'Editorial',description:'Mise en page éditoriale premium.',key:'editorial',background:'#F3EEE2',surface:'#FFF9EF',accent:'#C9A45C',text:'#24221D'},
-  {id:'luxury',name:'Luxury',description:'Présentation luxe et élégante.',key:'luxury',background:'#F7F3EA',surface:'#FFFFFF',accent:'#C9A45C',text:'#24221D'},
-  {id:'cards',name:'Cards',description:'Cartes modernes et visuelles.',key:'cards',background:'#F3EEE2',surface:'#FFFFFF',accent:'#C9A45C',text:'#24221D'},
-  {id:'dark',name:'Noir Signature',description:'Univers sombre et accents dorés.',key:'dark',background:'#102B24',surface:'#18382F',accent:'#D4AF37',text:'#FFF9E8'},
+  {id:'editorial',name:'Editorial',description:'Mise en page éditoriale premium.',key:'editorial',background:'#F3EEE2',surface:'#FFF9EF',accent:'#246BFD',text:'#24221D'},
+  {id:'luxury',name:'Luxury',description:'Présentation luxe et élégante.',key:'luxury',background:'#F7F3EA',surface:'#FFFFFF',accent:'#246BFD',text:'#24221D'},
+  {id:'cards',name:'Cards',description:'Cartes modernes et visuelles.',key:'cards',background:'#F3EEE2',surface:'#FFFFFF',accent:'#246BFD',text:'#24221D'},
+  {id:'dark',name:'Noir Signature',description:'Univers sombre et accents bleu électrique.',key:'dark',background:'#080B12',surface:'#151B26',accent:'#246BFD',text:'#FFF9E8'},
   {id:'01-burger-house',name:'Burger House',description:'Noir & orange · Burgers et menus.',key:'dark',background:'#080808',surface:'#171717',accent:'#F6A623',text:'#FFF4DF'},
   {id:'02-food-premium',name:'Le Gourmet',description:'Bleu nuit & corail · Carte food.',key:'cards',background:'#07131D',surface:'#102532',accent:'#FF795E',text:'#F7F3EF'},
   {id:'03-restaurant-chic',name:'Bella Vista',description:'Noir & or · Restaurant chic.',key:'luxury',background:'#080B09',surface:'#171B17',accent:'#D6B56D',text:'#F7F1E5'},
