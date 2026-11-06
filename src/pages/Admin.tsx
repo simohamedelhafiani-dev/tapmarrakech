@@ -746,19 +746,19 @@ export default function Admin() {
 
               {aiWorkspaceTab === 'home' ? (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  <button type="button" onClick={() => setAIWorkspaceTab('engine')} className="group min-h-[190px] rounded-3xl border border-[#246BFD]/35 bg-gradient-to-br from-[#101827] via-[#0d0d0d] to-[#080808] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#246BFD]/75 hover:shadow-[0_20px_45px_rgba(201,164,92,.12)] [transform:perspective(1000px)_rotateX(2deg)]">
+                  <button type="button" onClick={() => setAIWorkspaceTab('engine')} className="group min-h-[190px] rounded-3xl border border-[#246BFD]/35 bg-gradient-to-br from-[#101827] via-[#0d0d0d] to-[#080808] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#246BFD]/75 hover:shadow-[0_20px_45px_rgba(36,107,253,.12)] [transform:perspective(1000px)_rotateX(2deg)]">
                     <span className="grid h-12 w-12 place-items-center rounded-2xl border border-[#246BFD]/30 bg-[#246BFD]/10 text-[#65A5FF]"><Brain size={22} /></span>
                     <span className="mt-5 block text-lg font-semibold text-[#65A5FF]">Moteur IA global</span>
                     <span className="mt-2 block text-sm leading-6 text-white/50">Fournisseur, modèle, clé API, température et limites de génération.</span>
                     <span className="mt-5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#246BFD]">Ouvrir les paramètres →</span>
                   </button>
-                  <button type="button" onClick={() => setAIWorkspaceTab('prompts')} className="group min-h-[190px] rounded-3xl border border-[#242424] bg-gradient-to-br from-[#171717] via-[#0d0d0d] to-[#080808] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#246BFD]/60 hover:shadow-[0_20px_45px_rgba(201,164,92,.1)] [transform:perspective(1000px)_rotateX(2deg)]">
+                  <button type="button" onClick={() => setAIWorkspaceTab('prompts')} className="group min-h-[190px] rounded-3xl border border-[#242424] bg-gradient-to-br from-[#171717] via-[#0d0d0d] to-[#080808] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#246BFD]/60 hover:shadow-[0_20px_45px_rgba(36,107,253,.1)] [transform:perspective(1000px)_rotateX(2deg)]">
                     <span className="grid h-12 w-12 place-items-center rounded-2xl border border-white/10 bg-white/5 text-[#65A5FF]"><FileText size={22} /></span>
                     <span className="mt-5 block text-lg font-semibold text-white">Prompts & fonctionnalités</span>
                     <span className="mt-2 block text-sm leading-6 text-white/50">Instructions métier et comportements des fonctionnalités IA.</span>
                     <span className="mt-5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#246BFD]">Ouvrir les paramètres →</span>
                   </button>
-                  <button type="button" onClick={() => setAIWorkspaceTab('google')} className="group min-h-[190px] rounded-3xl border border-[#246BFD]/35 bg-gradient-to-br from-[#101827] via-[#0d0d0d] to-[#080808] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#246BFD]/75 hover:shadow-[0_20px_45px_rgba(201,164,92,.12)] [transform:perspective(1000px)_rotateX(2deg)]">
+                  <button type="button" onClick={() => setAIWorkspaceTab('google')} className="group min-h-[190px] rounded-3xl border border-[#246BFD]/35 bg-gradient-to-br from-[#101827] via-[#0d0d0d] to-[#080808] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#246BFD]/75 hover:shadow-[0_20px_45px_rgba(36,107,253,.12)] [transform:perspective(1000px)_rotateX(2deg)]">
                     <span className="grid h-12 w-12 place-items-center rounded-2xl border border-[#246BFD]/30 bg-[#246BFD]/10 text-[#65A5FF]"><MessageSquare size={22} /></span>
                     <span className="mt-5 block text-lg font-semibold text-[#65A5FF]">Avis Google & automatisations</span>
                     <span className="mt-2 block text-sm leading-6 text-white/50">Un seul espace pour connecter Google, gérer les avis, configurer les réponses IA, les langues, les liens et la fréquence de synchronisation.</span>
