@@ -389,7 +389,7 @@ table {
 .kelyani-orbit-one { width:190px;height:190px;right:4%;top:-35px;transform:rotateX(68deg) rotateZ(-20deg); }
 .kelyani-orbit-two { width:250px;height:250px;left:5%;bottom:-95px;border-color:rgba(0,255,195,.09);transform:rotateY(67deg) rotateZ(22deg); }
 .kelyani-glow-point {
-  position:absolute;right:15%;top:20px;width:7px;height:7px;border-radius:50%;background:#f4d779;
+  position:absolute;right:15%;top:20px;width:7px;height:7px;border-radius:50%;background:#00E5FF;
   box-shadow:0 0 10px 3px rgba(0,255,195,.45),0 0 28px 8px rgba(0,255,195,.12);
   animation:kelyani-glow-pulse 3s ease-in-out infinite;
 }
@@ -677,7 +677,7 @@ table {
 
 
 /* KELYANI BRAND ENFORCEMENT — global UI surfaces.
-   Keep the product interface within onyx/black and royal-gold tones.
+   Keep the product interface within onyx/black with emerald and cyan accents.
    Customer-uploaded images and explicitly customized loyalty-card artwork remain untouched. */
 :root, body, #root {
   color-scheme: dark;
