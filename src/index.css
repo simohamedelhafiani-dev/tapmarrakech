@@ -9,12 +9,12 @@
   background: var(--kelyani-bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  --kelyani-bg: #0D0D0D;
-  --kelyani-panel: #111111;
-  --kelyani-panel-raised: #1A1A1A;
+  --kelyani-bg: #050505;
+  --kelyani-panel: #686D76;
+  --kelyani-panel-raised: #686D76;
   --kelyani-border: rgba(59,130,246, 0.18);
   --kelyani-text: #FFFFFF;
-  --kelyani-muted: rgba(245,245,220,.55);
+  --kelyani-muted: #B0B0B0;
   --kelyani-accent: #3B82F6;
   --kelyani-accent-soft: #60A5FA;
 }
@@ -697,9 +697,9 @@ body { background:#050505; color:#FFFFFF; }
 .kelyani-panel,
 .kelyani-home-panel-section article,
 .kelyani-home-section article {
-  background:linear-gradient(145deg,rgba(124,128,133,.16),rgba(26,26,26,.96));
-  border:1px solid rgba(59,130,246,.24);
-  box-shadow:0 18px 48px rgba(0,0,0,.42),0 0 22px rgba(59,130,246,.07);
+  background:#686D76;
+  border:1px solid rgba(59,130,246,.42);
+  box-shadow:0 18px 48px rgba(0,0,0,.48),0 0 24px rgba(59,130,246,.16);
 }
 .kelyani-panel:hover,
 .kelyani-home-panel-section article:hover,
@@ -715,8 +715,8 @@ body { background:#050505; color:#FFFFFF; }
   backdrop-filter:blur(14px) saturate(135%);
 }
 .dashboard-depth-shell, .admin-depth-shell {
-  --depth-shadow:0 18px 48px -16px rgba(0,0,0,.64);
-  --depth-shadow-hover:0 26px 62px -18px rgba(0,0,0,.72);
+  --depth-shadow:0 18px 48px -16px rgba(0,0,0,.68),0 0 18px rgba(59,130,246,.12);
+  --depth-shadow-hover:0 26px 62px -18px rgba(0,0,0,.72),0 0 26px rgba(59,130,246,.2);
 }
 .dashboard-depth-shell .text-forest, .admin-depth-shell .text-forest { color:#3B82F6 !important; }
 .dashboard-depth-shell .bg-forest, .admin-depth-shell .bg-forest { background:#050505 !important; }
@@ -730,40 +730,31 @@ body { background:#050505; color:#FFFFFF; }
 .dashboard-depth-shell input::placeholder, .dashboard-depth-shell textarea::placeholder,
 .admin-depth-shell input::placeholder, .admin-depth-shell textarea::placeholder { color:#B0B0B0 !important; }
 
-/* Legacy utility classes are mapped to the new accent until every component is normalized. */
-#root [class*="text-gold"], #root [class*="text-amber-"], #root [class*="text-yellow-"],
-#root [class*="text-[#C9A45C"], #root [class*="text-[#c9a45c"],
-#root [class*="text-[#D4AF37"], #root [class*="text-[#d4af37"],
-#root [class*="text-[#E1C27A"], #root [class*="text-[#e1c27a"],
-#root [class*="text-[#E7C96B"], #root [class*="text-[#e7c96b"],
-#root [class*="text-[#D9B76B"], #root [class*="text-[#d9b76b"],
-#root [class*="text-[#B18425"], #root [class*="text-[#b18425"] { color:#3B82F6 !important; }
-#root [class*="bg-gold"], #root [class*="bg-amber-"], #root [class*="bg-yellow-"],
-#root [class*="bg-[#C9A45C"], #root [class*="bg-[#c9a45c"],
-#root [class*="bg-[#D4AF37"], #root [class*="bg-[#d4af37"],
-#root [class*="bg-[#E1C27A"], #root [class*="bg-[#e1c27a"],
-#root [class*="bg-[#E7C96B"], #root [class*="bg-[#e7c96b"] {
-  background-color:rgba(59,130,246,.14) !important;
-  background-image:none !important;
-}
-#root [class*="border-gold"], #root [class*="border-amber-"], #root [class*="border-yellow-"],
-#root [class*="border-[#C9A45C"], #root [class*="border-[#c9a45c"],
-#root [class*="border-[#D4AF37"], #root [class*="border-[#d4af37"],
-#root [class*="border-[#E1C27A"], #root [class*="border-[#e1c27a"] {
-  border-color:rgba(59,130,246,.38) !important;
-}
-#root [class*="ring-[#C9A45C"], #root [class*="ring-[#D4AF37"],
-#root [class*="ring-[#E1C27A"] { --tw-ring-color:rgba(59,130,246,.3) !important; }
-#root [class*="shadow-[0_"][class*="rgba(201,164,92"],
-#root [class*="shadow-[0_"][class*="rgba(212,175,55"] { --tw-shadow-color:rgba(59,130,246,.2) !important; }
-
 /* Nardo grey signature cards, electric-blue outlines and restrained glow */
 #root [class*="rounded-2xl"][class*="border"],
 #root [class*="rounded-3xl"][class*="border"],
 #root [class*="rounded-[24px]"][class*="border"],
 #root [class*="rounded-[28px]"][class*="border"] {
-  border-color:rgba(59,130,246,.2);
+  background-color:#686D76;
+  border:1px solid rgba(59,130,246,.38);
+  box-shadow:0 16px 38px rgba(0,0,0,.42),0 0 22px rgba(59,130,246,.14);
 }
 #root button[class*="bg-[#3B82F6]"], #root a[class*="bg-[#3B82F6]"] {
   color:#FFFFFF;
+}
+
+
+/* KELYANI hard-reset design tokens */
+:root {
+  --primary:#686D76;
+  --secondary:#050505;
+  --accent:#3B82F6;
+  --kelyani-bg:#050505;
+  --kelyani-panel:#686D76;
+  --kelyani-panel-raised:#686D76;
+  --kelyani-border:rgba(59,130,246,.42);
+  --kelyani-text:#FFFFFF;
+  --kelyani-muted:#B0B0B0;
+  --kelyani-accent:#3B82F6;
+  --kelyani-accent-soft:#3B82F6;
 }
