@@ -16,6 +16,7 @@ export default function KelyaniMark({ size = 120, className, ...props }: Kelyani
         width: size,
         height: size,
         objectFit: 'contain',
+        filter: 'hue-rotate(35deg) saturate(1.25) brightness(1.08)',
         objectPosition: 'center',
         flexShrink: 0,
         display: 'block',
