@@ -28,8 +28,8 @@ const tools = [
 export default function AssistantIA() {
   return (
     <section className="space-y-8">
-      <header className="rounded-3xl border border-[#C9A45C]/20 bg-gradient-to-br from-[#17140D] via-[#0B0B0B] to-[#050505] p-6 sm:p-9">
-        <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#C9A45C]/25 bg-[#C9A45C]/10 px-3 py-1.5 text-xs font-semibold text-[#E1C27A]">
+      <header className="rounded-3xl border border-[#246BFD]/20 bg-gradient-to-br from-[#101827] via-[#0B0B0B] to-[#050505] p-6 sm:p-9">
+        <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#246BFD]/25 bg-[#246BFD]/10 px-3 py-1.5 text-xs font-semibold text-[#65A5FF]">
           <BrainCircuit size={15} /> Espace IA
         </div>
         <h1 className="max-w-2xl font-display text-3xl text-white sm:text-4xl">Votre espace d’outils intelligents</h1>
@@ -41,12 +41,12 @@ export default function AssistantIA() {
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {tools.map(({ to, title, description, icon: Icon, label }) => (
           <article key={to} className="flex min-h-[220px] flex-col rounded-2xl border border-[#242424] bg-[#0B0B0B] p-5">
-            <div className="mb-5 grid h-11 w-11 place-items-center rounded-xl border border-[#C9A45C]/20 bg-[#C9A45C]/10 text-[#E1C27A]">
+            <div className="mb-5 grid h-11 w-11 place-items-center rounded-xl border border-[#246BFD]/20 bg-[#246BFD]/10 text-[#65A5FF]">
               <Icon size={20} />
             </div>
             <h2 className="text-lg font-semibold text-white">{title}</h2>
             <p className="mt-2 flex-1 text-sm leading-6 text-white/50">{description}</p>
-            <Link to={to} className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#E1C27A] hover:text-[#F1D99B]">
+            <Link to={to} className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#65A5FF] hover:text-[#65A5FF]">
               {label} <ArrowUpRight size={16} />
             </Link>
           </article>
