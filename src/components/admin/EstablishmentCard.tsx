@@ -34,9 +34,9 @@ export default function EstablishmentCard({
               className="h-14 w-14 shrink-0 rounded-2xl border border-ink/5 bg-[#1A1A1A] object-cover"
             />
           ) : (
-            <div className="relative grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[#0D0D0D] text-[#D4AF37] shadow-lg shadow-forest/10">
+            <div className="relative grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[#0D0D0D] text-[#3B82F6] shadow-lg shadow-forest/10">
               <Building2 size={21} strokeWidth={1.8} />
-              <span className="absolute -bottom-1 -right-1 grid h-5 w-5 place-items-center rounded-full border-2 border-[#D4AF37] bg-gold">
+              <span className="absolute -bottom-1 -right-1 grid h-5 w-5 place-items-center rounded-full border-2 border-[#3B82F6] bg-gold">
                 <Sparkles size={9} className="text-forest" />
               </span>
             </div>
@@ -75,9 +75,9 @@ export default function EstablishmentCard({
             className={[
               'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold',
               isActive
-                ? 'bg-[#D4AF37]/12 text-[#D4AF37]'
+                ? 'bg-[#3B82F6]/12 text-[#3B82F6]'
                 : isTrial
-                  ? 'bg-gold/15 text-[#D4AF37]'
+                  ? 'bg-gold/15 text-[#3B82F6]'
                   : 'bg-ink/5 text-ink/55',
             ].join(' ')}
           >
