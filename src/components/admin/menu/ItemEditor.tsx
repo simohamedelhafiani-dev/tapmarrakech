@@ -185,7 +185,7 @@ export default function ItemEditor({
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Nom de l’article" className="rounded-xl border border-white/10 bg-[#171717] px-4 py-3 text-sm text-white placeholder:text-white/30" />
             <input value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="Prix (DH)" type="number" min="0" className="rounded-xl border border-white/10 bg-[#171717] px-4 py-3 text-sm text-white placeholder:text-white/30" />
-            <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Description" className="min-h-24 rounded-xl border border-white/10 bg-[#171717] px-4 py-3 text-sm text-white placeholder:text-white/30 focus:border-[#D4AF37] focus:outline-none md:col-span-2" />
+            <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Description" className="min-h-24 rounded-xl border border-white/10 bg-[#171717] px-4 py-3 text-sm text-white placeholder:text-white/30 focus:border-[#246BFD] focus:outline-none md:col-span-2" />
             <select value={formCategoryId} onChange={e => setFormCategoryId(e.target.value)} className="rounded-xl border border-white/10 bg-[#171717] px-4 py-3 text-sm text-white placeholder:text-white/30">
               {activeCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
