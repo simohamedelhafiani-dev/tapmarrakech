@@ -330,7 +330,7 @@ export default function LoyaltySettings() {
     <div>
       {/* HEADER */}
       <div className="mb-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-electric">
           Fidélité
         </p>
 
@@ -345,7 +345,7 @@ export default function LoyaltySettings() {
 
       {/* ÉTABLISSEMENT */}
       {establishments.length > 1 && (
-        <section className="rounded-2xl border border-ink/5 bg-white p-6 shadow-soft md:p-8">
+        <section className="rounded-2xl border border-ink/5 bg-[#1A1A1A] p-6 shadow-soft md:p-8">
         <div className="flex items-start gap-4">
           <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#e5eee9] text-forest">
             <Settings2 size={20} />
@@ -366,7 +366,7 @@ export default function LoyaltySettings() {
           <select
             value={establishmentId}
             onChange={e => setEstablishmentId(e.target.value)}
-            className="w-full rounded-xl border border-ink/10 bg-[#fafaf7] px-4 py-3 text-sm text-ink outline-none focus:border-gold"
+            className="w-full rounded-xl border border-ink/10 bg-[#1A1A1A] px-4 py-3 text-sm text-ink outline-none focus:border-electric"
           >
             {establishments.length === 0 && (
               <option value="">Aucun établissement</option>
@@ -383,7 +383,7 @@ export default function LoyaltySettings() {
       )}
 
       {/* PROGRAMME ACTIF */}
-      <section className="mt-6 rounded-2xl border border-ink/5 bg-white p-6 shadow-soft md:p-8">
+      <section className="mt-6 rounded-2xl border border-ink/5 bg-[#1A1A1A] p-6 shadow-soft md:p-8">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-start gap-4">
             <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#e5eee9] text-forest">
@@ -409,7 +409,7 @@ export default function LoyaltySettings() {
             }`}
           >
             <span
-              className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition ${
+              className={`absolute top-1 h-5 w-5 rounded-full bg-[#1A1A1A] shadow transition ${
                 enabled ? 'left-6' : 'left-1'
               }`}
             />
@@ -424,9 +424,9 @@ export default function LoyaltySettings() {
       </section>
 
       {/* ATTRIBUTION DES POINTS */}
-      <section className="mt-6 rounded-2xl border border-ink/5 bg-white p-6 shadow-soft md:p-8">
+      <section className="mt-6 rounded-2xl border border-ink/5 bg-[#1A1A1A] p-6 shadow-soft md:p-8">
         <div className="flex items-start gap-4">
-          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#f4ead3] text-gold">
+          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#686D76] text-electric">
             <Coins size={20} />
           </div>
 
@@ -450,7 +450,7 @@ export default function LoyaltySettings() {
             <select
               value={currency}
               onChange={e => setCurrency(e.target.value)}
-              className="w-full rounded-xl border border-ink/10 bg-[#fafaf7] px-4 py-3 text-sm outline-none focus:border-gold"
+              className="w-full rounded-xl border border-ink/10 bg-[#1A1A1A] px-4 py-3 text-sm outline-none focus:border-electric"
             >
               <option value="MAD">MAD — Dirham marocain</option>
               <option value="EUR">EUR — Euro</option>
@@ -469,18 +469,18 @@ export default function LoyaltySettings() {
               step="0.1"
               value={pointsPerCurrency}
               onChange={e => setPointsPerCurrency(e.target.value)}
-              className="w-full rounded-xl border border-ink/10 bg-[#fafaf7] px-4 py-3 text-sm outline-none focus:border-gold"
+              className="w-full rounded-xl border border-ink/10 bg-[#1A1A1A] px-4 py-3 text-sm outline-none focus:border-electric"
             />
           </div>
         </div>
 
-        <div className="mt-6 rounded-2xl border border-gold/20 bg-[#fdf9ef] p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-gold">
+        <div className="mt-6 rounded-2xl border border-electric/20 bg-[#242424] p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-electric">
             Exemple
           </p>
 
           <div className="mt-3 flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-full bg-white text-gold">
+            <div className="grid h-10 w-10 place-items-center rounded-full bg-[#1A1A1A] text-electric">
               <Coins size={18} />
             </div>
 
@@ -500,7 +500,7 @@ export default function LoyaltySettings() {
       </section>
 
       {/* RÉCOMPENSES */}
-      <section className="mt-6 rounded-2xl border border-ink/5 bg-white p-6 shadow-soft md:p-8">
+      <section className="mt-6 rounded-2xl border border-ink/5 bg-[#1A1A1A] p-6 shadow-soft md:p-8">
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div className="flex items-start gap-4">
             <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#e5eee9] text-forest">
@@ -550,11 +550,11 @@ export default function LoyaltySettings() {
             {rewards.map(reward => (
               <div
                 key={reward.id}
-                className="rounded-2xl border border-ink/5 bg-[#fafaf7] p-5"
+                className="rounded-2xl border border-ink/5 bg-[#1A1A1A] p-5"
               >
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div className="flex items-start gap-4">
-                    <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#f4ead3] text-gold">
+                    <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#686D76] text-electric">
                       <Gift size={19} />
                     </div>
 
@@ -581,7 +581,7 @@ export default function LoyaltySettings() {
                         </p>
                       )}
 
-                      <p className="mt-2 text-sm font-semibold text-gold">
+                      <p className="mt-2 text-sm font-semibold text-electric">
                         ⭐ {reward.points_required} points
                       </p>
                     </div>
@@ -591,7 +591,7 @@ export default function LoyaltySettings() {
                     <button
                       type="button"
                       onClick={() => toggleReward(reward)}
-                      className="rounded-lg border border-ink/10 bg-white px-3 py-2 text-[11px] font-medium text-ink/60 hover:bg-ink/5"
+                      className="rounded-lg border border-ink/10 bg-[#1A1A1A] px-3 py-2 text-[11px] font-medium text-ink/60 hover:bg-ink/5"
                     >
                       {reward.active ? 'Désactiver' : 'Activer'}
                     </button>
@@ -599,7 +599,7 @@ export default function LoyaltySettings() {
                     <button
                       type="button"
                       onClick={() => openEditReward(reward)}
-                      className="grid h-9 w-9 place-items-center rounded-lg border border-ink/10 bg-white text-ink/50 hover:bg-ink/5"
+                      className="grid h-9 w-9 place-items-center rounded-lg border border-ink/10 bg-[#1A1A1A] text-ink/50 hover:bg-ink/5"
                       title="Modifier"
                     >
                       <Pencil size={15} />
@@ -608,7 +608,7 @@ export default function LoyaltySettings() {
                     <button
                       type="button"
                       onClick={() => deleteReward(reward)}
-                      className="grid h-9 w-9 place-items-center rounded-lg border border-red-100 bg-white text-red-500 hover:bg-red-50"
+                      className="grid h-9 w-9 place-items-center rounded-lg border border-red-100 bg-[#1A1A1A] text-red-500 hover:bg-red-50"
                       title="Supprimer"
                     >
                       <Trash2 size={15} />
@@ -636,7 +636,7 @@ export default function LoyaltySettings() {
         <button
           onClick={saveSettings}
           disabled={saving || !establishmentId}
-          className="flex items-center gap-2 rounded-xl bg-gold px-5 py-3 text-xs font-semibold text-forest transition hover:bg-[#d5b878] disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex items-center gap-2 rounded-xl bg-electric px-5 py-3 text-xs font-semibold text-forest transition hover:bg-[#2563EB] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {saved ? (
             <>
@@ -655,7 +655,7 @@ export default function LoyaltySettings() {
       {/* MODAL RÉCOMPENSE */}
       {showRewardForm && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-5">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+          <div className="w-full max-w-md rounded-2xl bg-[#1A1A1A] p-6 shadow-2xl">
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <h2 className="font-display text-2xl text-forest">
@@ -689,7 +689,7 @@ export default function LoyaltySettings() {
                   value={rewardName}
                   onChange={e => setRewardName(e.target.value)}
                   placeholder="Dessert offert"
-                  className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-gold"
+                  className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-electric"
                 />
               </div>
 
@@ -703,7 +703,7 @@ export default function LoyaltySettings() {
                   onChange={e => setRewardDescription(e.target.value)}
                   placeholder="Un dessert au choix offert."
                   rows={3}
-                  className="mt-2 w-full resize-none rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-gold"
+                  className="mt-2 w-full resize-none rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-electric"
                 />
               </div>
 
@@ -720,9 +720,9 @@ export default function LoyaltySettings() {
                     value={rewardCost}
                     onChange={e => setRewardCost(e.target.value)}
                     placeholder="20"
-                    className="w-full rounded-xl border border-ink/10 px-4 py-3 pr-16 text-sm outline-none focus:border-gold"
+                    className="w-full rounded-xl border border-ink/10 px-4 py-3 pr-16 text-sm outline-none focus:border-electric"
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gold">
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-electric">
                     DH
                   </span>
                 </div>
@@ -745,10 +745,10 @@ export default function LoyaltySettings() {
                     value={rewardPoints}
                     onChange={e => setRewardPoints(e.target.value)}
                     placeholder="500"
-                    className="w-full rounded-xl border border-ink/10 px-4 py-3 pr-20 text-sm outline-none focus:border-gold"
+                    className="w-full rounded-xl border border-ink/10 px-4 py-3 pr-20 text-sm outline-none focus:border-electric"
                   />
 
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gold">
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-electric">
                     points
                   </span>
                 </div>
@@ -763,7 +763,7 @@ export default function LoyaltySettings() {
                   {rewardName.trim() || 'Votre récompense'}
                 </p>
 
-                <p className="mt-1 text-xs text-gold">
+                <p className="mt-1 text-xs text-electric">
                   ⭐ {Number(rewardPoints) || 0} points
                 </p>
                 <p className="mt-1 text-xs text-ink/45">
