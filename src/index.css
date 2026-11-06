@@ -676,305 +676,94 @@ table {
 }
 
 
-/* KELYANI BRAND ENFORCEMENT — global UI surfaces.
-   Keep the product interface within onyx/black and electric-blue tones.
-   Customer-uploaded images and explicitly customized loyalty-card artwork remain untouched. */
-:root, body, #root {
-  color-scheme: dark;
-  background-color: #0D0D0D;
-}
-#root [class~="bg-white"],
-#root [class~="bg-[#fffdf9]"],
-#root [class~="bg-[#f7f7f3]"],
-#root [class~="bg-[#fafaf7]"],
-#root [class~="bg-[#242424]"],
-#root [class~="bg-[#fff]"],
-#root [class~="bg-[#ffffff]"],
-#root [class*="bg-red-"],
-#root [class*="bg-rose-"],
-#root [class*="bg-orange-"],
-#root [class*="bg-blue-"],
-#root [class*="bg-blue-"],
-#root [class*="bg-green-"],
-#root [class*="bg-emerald-"],
-#root [class*="bg-lime-"],
-#root [class*="bg-teal-"],
-#root [class*="bg-cyan-"],
-#root [class*="bg-sky-"],
-#root [class*="bg-blue-"],
-#root [class*="bg-indigo-"],
-#root [class*="bg-violet-"],
-#root [class*="bg-purple-"],
-#root [class*="bg-fuchsia-"],
-#root [class*="bg-pink-"] {
-  background-color: #141414 !important;
-  background-image: none !important;
-}
-#root [class*="text-red-"],
-#root [class*="text-rose-"],
-#root [class*="text-orange-"],
-#root [class*="text-blue-"],
-#root [class*="text-blue-"],
-#root [class*="text-green-"],
-#root [class*="text-emerald-"],
-#root [class*="text-lime-"],
-#root [class*="text-teal-"],
-#root [class*="text-cyan-"],
-#root [class*="text-sky-"],
-#root [class*="text-blue-"],
-#root [class*="text-indigo-"],
-#root [class*="text-violet-"],
-#root [class*="text-purple-"],
-#root [class*="text-fuchsia-"],
-#root [class*="text-pink-"] {
-  color: #3B82F6 !important;
-}
-#root [class*="border-red-"],
-#root [class*="border-rose-"],
-#root [class*="border-orange-"],
-#root [class*="border-blue-"],
-#root [class*="border-blue-"],
-#root [class*="border-green-"],
-#root [class*="border-emerald-"],
-#root [class*="border-lime-"],
-#root [class*="border-teal-"],
-#root [class*="border-cyan-"],
-#root [class*="border-sky-"],
-#root [class*="border-blue-"],
-#root [class*="border-indigo-"],
-#root [class*="border-violet-"],
-#root [class*="border-purple-"],
-#root [class*="border-fuchsia-"],
-#root [class*="border-pink-"] {
-  border-color: rgba(59,130,246,.28) !important;
-}
-#root [class*="from-red-"],
-#root [class*="from-green-"],
-#root [class*="from-blue-"],
-#root [class*="from-purple-"],
-#root [class*="via-red-"],
-#root [class*="via-green-"],
-#root [class*="via-blue-"],
-#root [class*="via-purple-"],
-#root [class*="to-red-"],
-#root [class*="to-green-"],
-#root [class*="to-blue-"],
-#root [class*="to-purple-"] {
-  --tw-gradient-from: rgba(59,130,246,.24) var(--tw-gradient-from-position) !important;
-  --tw-gradient-to: rgba(59,130,246,.02) var(--tw-gradient-to-position) !important;
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
-}
-#root input, #root textarea, #root select {
-  color: #FFFFFF;
-  color-scheme: dark;
-}
-#root input::placeholder, #root textarea::placeholder {
-  color: rgba(245,245,220,.42);
-}
-#root option {
-  color: #FFFFFF;
-  background: #141414;
-}
-
-
-/* Normalize legacy light/dark accent surfaces found during the cross-screen audit. */
-#root [class*="bg-[#f"],
-#root [class*="bg-[#F"],
-#root [class*="bg-[#e"],
-#root [class*="bg-[#E"],
-#root [class*="bg-[#a"],
-#root [class*="bg-[#A"],
-#root [class*="bg-[#102B24]"],
-#root [class*="bg-[#180F0F]"] {
-  background-color: #141414 !important;
-  background-image: none !important;
-}
-#root [class*="text-[#a"],
-#root [class*="text-[#8b"],
-#root [class*="text-[#A"],
-#root [class*="text-[#8B"] {
-  color: #3B82F6 !important;
-}
-#root [class*="border-red-"],
-#root [class*="border-blue-"] {
-  border-color: rgba(59,130,246,.28) !important;
-}
-
-
-/* KELYANI DEEP TECH THEME — visual overrides only.
-   Existing component classes and DOM hooks are intentionally preserved. */
+/* NARDO TECH — single consolidated visual system */
 :root {
   color-scheme: dark;
   --kelyani-bg: #050505;
-  --kelyani-panel: #1A1A1A;
-  --kelyani-panel-raised: #1A1A1A;
+  --kelyani-panel: #686D76;
+  --kelyani-panel-raised: #7C8085;
   --kelyani-border: rgba(59,130,246,.28);
   --kelyani-text: #FFFFFF;
   --kelyani-muted: #B0B0B0;
   --kelyani-accent: #3B82F6;
   --kelyani-accent-soft: #60A5FA;
-  --kelyani-blue: #3B82F6;
-  --kelyani-blue-light: #60A5FA;
 }
-html, body, #root {
-  background-color: #050505;
-  color: #FFFFFF;
-}
-body { background-color: #050505; color: #FFFFFF; }
-::selection { color: #FFFFFF; background: rgba(59,130,246,.42); }
-:focus-visible { outline-color: #3B82F6 !important; }
-.text-electric, .text-forest, .text-gradient-electric { color: #3B82F6 !important; }
-.text-gradient-electric {
-  background-image: linear-gradient(120deg,#60A5FA 0%,#3B82F6 52%,#2563EB 100%) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  background-clip: text !important;
-}
-.bg-electric { background-color: #3B82F6 !important; }
-.bg-forest { background-color: #050505 !important; }
-.border-electric { border-color: rgba(59,130,246,.62) !important; }
-.kelyani-electric-button {
-  color: #FFFFFF !important;
-  background: #3B82F6 !important;
-  border: 1px solid rgba(96,165,250,.72) !important;
-  box-shadow: 0 10px 30px rgba(59,130,246,.20), 0 0 0 1px rgba(96,165,250,.18) inset !important;
-}
-.kelyani-electric-button:hover {
-  background: #2563EB !important;
-  box-shadow: 0 14px 36px rgba(59,130,246,.28) !important;
-}
-.kelyani-home-hero, .kelyani-home-section, .kelyani-home-final,
-.kelyani-home-panel-section { background-color: #050505; }
-.kelyani-panel, .kelyani-home-panel-section article,
+html, body, #root { min-height:100%; background:#050505; color:#FFFFFF; }
+body { background:#050505; color:#FFFFFF; }
+::selection { color:#FFFFFF; background:rgba(59,130,246,.38); }
+:focus-visible { outline:2px solid #3B82F6 !important; outline-offset:3px; }
+
+/* Shared surfaces */
+.kelyani-panel,
+.kelyani-home-panel-section article,
 .kelyani-home-section article {
-  background-color: rgba(26,26,26,.92);
-  border-color: rgba(59,130,246,.22);
-  box-shadow: 0 18px 48px rgba(0,0,0,.42), 0 0 22px rgba(59,130,246,.06);
+  background:linear-gradient(145deg,rgba(124,128,133,.16),rgba(26,26,26,.96));
+  border:1px solid rgba(59,130,246,.24);
+  box-shadow:0 18px 48px rgba(0,0,0,.42),0 0 22px rgba(59,130,246,.07);
 }
-.kelyani-home-panel-section article:hover, .kelyani-home-section article:hover {
-  border-color: rgba(59,130,246,.48);
-  box-shadow: 0 22px 56px rgba(0,0,0,.48), 0 0 26px rgba(59,130,246,.12);
+.kelyani-panel:hover,
+.kelyani-home-panel-section article:hover,
+.kelyani-home-section article:hover {
+  border-color:rgba(59,130,246,.52);
+  box-shadow:0 22px 56px rgba(0,0,0,.48),0 0 26px rgba(59,130,246,.14);
 }
-.kelyani-nav-glass, header, aside, [role="menu"], [role="dialog"],
+.kelyani-nav-glass, [role="menu"], [role="dialog"],
 [data-radix-popper-content-wrapper] > * {
-  background-color: rgba(26,26,26,.78) !important;
-  border-color: rgba(59,130,246,.20) !important;
-  -webkit-backdrop-filter: blur(12px) saturate(140%) !important;
-  backdrop-filter: blur(12px) saturate(140%) !important;
+  background:rgba(20,20,20,.88) !important;
+  border-color:rgba(59,130,246,.22) !important;
+  -webkit-backdrop-filter:blur(14px) saturate(135%);
+  backdrop-filter:blur(14px) saturate(135%);
 }
-/* Brand-colored arbitrary Tailwind utilities: preserve their class names. */
-#root [class*="text-[#3B82F6]"], #root [class*="text-[#3B82F6]"],
-#root [class*="text-[#3B82F6]"], #root [class*="text-[#3B82F6]"],
-#root [class*="text-[#60A5FA]"], #root [class*="text-[#60A5FA]"],
-#root [class*="text-[#60A5FA]"], #root [class*="text-[#60A5FA]"] { color: #3B82F6 !important; }
-#root [class*="bg-[#3B82F6]"], #root [class*="bg-[#3B82F6]"],
-#root [class*="bg-[#3B82F6]"], #root [class*="bg-[#3B82F6]"],
-#root [class*="bg-[#60A5FA]"], #root [class*="bg-[#60A5FA]"],
-#root [class*="bg-[#60A5FA]"] { background-color: #3B82F6 !important; }
-#root [class*="border-[#3B82F6]"], #root [class*="border-[#3B82F6]"],
-#root [class*="border-[#3B82F6]"], #root [class*="border-[#3B82F6]"],
-#root [class*="border-[#60A5FA]"] { border-color: rgba(59,130,246,.55) !important; }
-#root [class*="ring-[#3B82F6]"], #root [class*="ring-[#3B82F6]"],
-#root [class*="ring-[#60A5FA]"] { --tw-ring-color: rgba(59,130,246,.24) !important; }
-#root [class*="shadow-[0_"][class*="rgba(59,130,246"],
-#root [class*="shadow-[0_"][class*="rgba(59,130,246"] {
-  --tw-shadow-color: rgba(59,130,246,.20) !important;
-}
-/* Generous radii on standard card, modal, menu and control surfaces. */
-#root [class*="rounded-xl"], #root [class*="rounded-2xl"],
-#root [class*="rounded-3xl"], #root [class*="rounded-[22px]"],
-#root [class*="rounded-[24px]"], #root [class*="rounded-[28px]"] {
-  border-radius: 24px;
-}
-/* Readable secondary text and consistent dark surfaces. */
-#root input, #root textarea, #root select { color: #FFFFFF; color-scheme: dark; }
-#root input::placeholder, #root textarea::placeholder { color: #B0B0B0; opacity: .78; }
-
-/* Application-specific theme tokens and shell surfaces. */
 .dashboard-depth-shell, .admin-depth-shell {
-  --depth-shadow: 0 18px 48px -16px rgba(0,0,0,.64);
-  --depth-shadow-hover: 0 26px 62px -18px rgba(0,0,0,.72);
+  --depth-shadow:0 18px 48px -16px rgba(0,0,0,.64);
+  --depth-shadow-hover:0 26px 62px -18px rgba(0,0,0,.72);
 }
-.dashboard-depth-shell .text-forest, .admin-depth-shell .text-forest { color: #3B82F6 !important; }
-.dashboard-depth-shell .bg-forest, .admin-depth-shell .bg-forest { background-color: #050505 !important; }
-.dashboard-depth-shell [class*="border-ink/"] { border-color: rgba(59,130,246,.18) !important; }
-.dashboard-depth-shell [class*="text-ink/"] { color: rgba(176,176,176,.92) !important; }
-.dashboard-depth-shell [class*="bg-white"], .admin-depth-shell [class*="bg-white"] { background-color: #1A1A1A !important; }
-.dashboard-depth-shell [class*="rounded-xl"], .dashboard-depth-shell [class*="rounded-2xl"],
-.admin-depth-shell [class*="rounded-xl"], .admin-depth-shell [class*="rounded-2xl"] {
-  border-radius: 24px;
+.dashboard-depth-shell .text-forest, .admin-depth-shell .text-forest { color:#3B82F6 !important; }
+.dashboard-depth-shell .bg-forest, .admin-depth-shell .bg-forest { background:#050505 !important; }
+.dashboard-depth-shell [class*="border-ink/"], .admin-depth-shell [class*="border-ink/"] { border-color:rgba(59,130,246,.22) !important; }
+.dashboard-depth-shell [class*="text-ink/"], .admin-depth-shell [class*="text-ink/"] { color:#B0B0B0 !important; }
+.dashboard-depth-shell [class*="bg-white"], .admin-depth-shell [class*="bg-white"] { background-color:#1A1A1A !important; }
+.dashboard-depth-shell input, .dashboard-depth-shell textarea, .dashboard-depth-shell select,
+.admin-depth-shell input, .admin-depth-shell textarea, .admin-depth-shell select {
+  color:#FFFFFF !important; color-scheme:dark;
 }
+.dashboard-depth-shell input::placeholder, .dashboard-depth-shell textarea::placeholder,
+.admin-depth-shell input::placeholder, .admin-depth-shell textarea::placeholder { color:#B0B0B0 !important; }
 
+/* Legacy utility classes are mapped to the new accent until every component is normalized. */
+#root [class*="text-gold"], #root [class*="text-amber-"], #root [class*="text-yellow-"],
+#root [class*="text-[#C9A45C"], #root [class*="text-[#c9a45c"],
+#root [class*="text-[#D4AF37"], #root [class*="text-[#d4af37"],
+#root [class*="text-[#E1C27A"], #root [class*="text-[#e1c27a"],
+#root [class*="text-[#E7C96B"], #root [class*="text-[#e7c96b"],
+#root [class*="text-[#D9B76B"], #root [class*="text-[#d9b76b"],
+#root [class*="text-[#B18425"], #root [class*="text-[#b18425"] { color:#3B82F6 !important; }
+#root [class*="bg-gold"], #root [class*="bg-amber-"], #root [class*="bg-yellow-"],
+#root [class*="bg-[#C9A45C"], #root [class*="bg-[#c9a45c"],
+#root [class*="bg-[#D4AF37"], #root [class*="bg-[#d4af37"],
+#root [class*="bg-[#E1C27A"], #root [class*="bg-[#e1c27a"],
+#root [class*="bg-[#E7C96B"], #root [class*="bg-[#e7c96b"] {
+  background-color:rgba(59,130,246,.14) !important;
+  background-image:none !important;
+}
+#root [class*="border-gold"], #root [class*="border-amber-"], #root [class*="border-yellow-"],
+#root [class*="border-[#C9A45C"], #root [class*="border-[#c9a45c"],
+#root [class*="border-[#D4AF37"], #root [class*="border-[#d4af37"],
+#root [class*="border-[#E1C27A"], #root [class*="border-[#e1c27a"] {
+  border-color:rgba(59,130,246,.38) !important;
+}
+#root [class*="ring-[#C9A45C"], #root [class*="ring-[#D4AF37"],
+#root [class*="ring-[#E1C27A"] { --tw-ring-color:rgba(59,130,246,.3) !important; }
+#root [class*="shadow-[0_"][class*="rgba(201,164,92"],
+#root [class*="shadow-[0_"][class*="rgba(212,175,55"] { --tw-shadow-color:rgba(59,130,246,.2) !important; }
 
-/* KELYANI Emerald Power — visual-only synchronization layer */
-:root {
-  --kelyani-bg:#050505 !important;
-  --kelyani-panel:#121212 !important;
-  --kelyani-panel-raised:#1A1A1A !important;
-  --kelyani-border:rgba(0,255,195,.20) !important;
-  --kelyani-text:#FFFFFF !important;
-  --kelyani-muted:#B0B0B0 !important;
-  --kelyani-accent:#00FFC3 !important;
-  --kelyani-accent:#00FFC3 !important;
-  --kelyani-accent-2:#00DFA5 !important;
-  --kelyani-accent-deep:#00A982 !important;
-  --kelyani-cyan:#00E5FF !important;
+/* Nardo grey signature cards, electric-blue outlines and restrained glow */
+#root [class*="rounded-2xl"][class*="border"],
+#root [class*="rounded-3xl"][class*="border"],
+#root [class*="rounded-[24px]"][class*="border"],
+#root [class*="rounded-[28px]"][class*="border"] {
+  border-color:rgba(59,130,246,.2);
 }
-html,body,#root { background:#050505 !important; color:#FFFFFF; }
-::selection { background:rgba(0,255,195,.28) !important; color:#FFFFFF !important; }
-:focus-visible { outline-color:#00E5FF !important; }
-.dashboard-depth-shell,.admin-depth-shell,
-.dashboard-depth-shell aside,.admin-depth-shell aside,
-.dashboard-depth-shell [role="dialog"],.admin-depth-shell [role="dialog"],
-#root [class*="bg-[#111111]"],#root [class*="bg-[#1A1A1A]"],
-#root [class*="bg-[#151515]"],#root [class*="bg-[#0E0E0E]"] {
-  --tw-bg-opacity:1;
+#root button[class*="bg-[#3B82F6]"], #root a[class*="bg-[#3B82F6]"] {
+  color:#FFFFFF;
 }
-.dashboard-depth-shell aside,.admin-depth-shell aside,
-.dashboard-depth-shell [role="dialog"],.admin-depth-shell [role="dialog"],
-#root [class*="backdrop-blur"] {
-  backdrop-filter:blur(12px) saturate(135%) !important;
-  -webkit-backdrop-filter:blur(12px) saturate(135%) !important;
-}
-#root [class*="text-[#3B82F6]"],#root [class*="text-[#3B82F6]"],
-#root [class*="text-[#60A5FA]"],#root [class*="text-[#60A5FA]"],
-#root [class*="text-[#60A5FA]"],#root [class*="text-electric"],
-#root [class*="text-blue-"] { color:#00FFC3 !important; }
-#root [class*="bg-[#3B82F6]"],#root [class*="bg-[#3B82F6]"],
-#root [class*="bg-[#60A5FA]"],#root [class*="bg-electric"] { background-color:#00FFC3 !important; }
-#root [class*="border-[#3B82F6]"],#root [class*="border-[#3B82F6]"],
-#root [class*="border-[#60A5FA]"],#root [class*="border-electric"] { border-color:rgba(0,255,195,.34) !important; }
-#root [class*="ring-[#3B82F6]"],#root [class*="ring-[#3B82F6]"],
-#root [class*="ring-[#60A5FA]"] { --tw-ring-color:rgba(0,255,195,.28) !important; }
-#root [class*="shadow-[0_"][class*="rgba(59,130,246"],
-#root [class*="shadow-[0_"][class*="rgba(59,130,246"] { --tw-shadow-color:rgba(0,255,195,.20) !important; }
-.kelyani-electric-button,.kelyani-tech-button,
-#root button[class*="bg-[#3B82F6]"],#root button[class*="bg-[#3B82F6]"] {
-  color:#050505 !important;
-  background:linear-gradient(135deg,#00FFC3 0%,#00DFA5 52%,#00A982 100%) !important;
-  border-color:rgba(0,255,195,.55) !important;
-  box-shadow:0 8px 28px rgba(0,255,195,.18),0 0 22px rgba(0,229,255,.08) !important;
-}
-.kelyani-electric-button:hover,.kelyani-tech-button:hover {
-  background:linear-gradient(135deg,#00E5FF 0%,#00FFC3 52%,#00A982 100%) !important;
-}
-.dashboard-depth-shell .text-forest,.admin-depth-shell .text-forest { color:#00FFC3 !important; }
-.dashboard-depth-shell .bg-forest,.admin-depth-shell .bg-forest { background-color:#050505 !important; }
-.dashboard-depth-shell [class*="border-ink/"] { border-color:rgba(0,255,195,.18) !important; }
-.dashboard-depth-shell [class*="text-ink/"] { color:rgba(176,176,176,.92) !important; }
-#root [class*="rounded-xl"],#root [class*="rounded-2xl"],
-#root [class*="rounded-3xl"],#root [class*="rounded-[22px]"],
-#root [class*="rounded-[24px]"],#root [class*="rounded-[28px]"] { border-radius:24px; }
-#root input,#root textarea,#root select { color:#FFFFFF; color-scheme:dark; }
-#root input::placeholder,#root textarea::placeholder { color:#B0B0B0; }
-
-
-/* Neutralize the previous blue trial palette so Emerald Power is the only accent. */
-#root [class*="text-[#3B82F6]"],#root [class*="text-[#2563EB]"],
-#root [class*="text-[#60A5FA]"],#root [class*="text-blue-"] { color:#00FFC3 !important; }
-#root [class*="bg-[#3B82F6]"],#root [class*="bg-[#2563EB]"],
-#root [class*="bg-[#60A5FA]"],#root [class*="bg-blue-"] { background-color:#00FFC3 !important; }
-#root [class*="border-[#3B82F6]"],#root [class*="border-[#2563EB]"],
-#root [class*="border-[#60A5FA]"],#root [class*="border-blue-"] { border-color:rgba(0,255,195,.34) !important; }
-#root [class*="ring-[#3B82F6]"],#root [class*="ring-[#2563EB]"],
-#root [class*="ring-[#60A5FA]"] { --tw-ring-color:rgba(0,255,195,.28) !important; }
