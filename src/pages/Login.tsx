@@ -116,10 +116,10 @@ export default function Login() {
                 </div>
                 <div className="leading-none">
                   <p className="font-display text-[22px] font-semibold tracking-[0.07em] text-[#00DFA5]">KELYANI</p>
-                  <p className="mt-2 text-[8px] font-semibold uppercase tracking-[0.28em] text-[#00FFC3]/65">Transformez vos clients de passage en clients habituels.</p>
+                  <p className="mt-2 text-[8px] font-semibold uppercase tracking-[0.28em] text-[#00FFC3]/65">L’art de la relation client</p>
                 </div>
               </button>
-              <label className="inline-flex items-center rounded-full border border-[#242424] bg-[#111111]/80 px-3 py-2 text-[10px] font-semibold text-[#F5F5DC]/65 backdrop-blur-xl shadow-[0_10px_30px_rgba(5,5,5,.35)] transition-all duration-300 hover:border-[#00FFC3]/25 hover:shadow-[0_14px_38px_rgba(5,5,5,.45)]">
+              <label className="inline-flex items-center rounded-full border border-[#242424] bg-[#111111]/80 px-3 py-2 text-[10px] font-semibold text-[#F1F5F4]/65 backdrop-blur-xl shadow-[0_10px_30px_rgba(5,5,5,.35)] transition-all duration-300 hover:border-[#00FFC3]/25 hover:shadow-[0_14px_38px_rgba(5,5,5,.45)]">
                 <Globe2 size={14} className="mr-2 text-[#00FFC3]" />
                 <select value={language} onChange={(event) => setLanguage(event.target.value as Language)} aria-label="Language" className="bg-transparent outline-none">
                   <option className="bg-[#111111]" value="fr">FR</option>
@@ -144,7 +144,7 @@ export default function Login() {
                 <span className="block text-[#00FFC3]">un client régulier.</span>
               </h1>
 
-              <p className="mt-6 max-w-xl text-sm leading-6 text-[#F5F5DC]/50 sm:text-base">
+              <p className="mt-6 max-w-xl text-sm leading-6 text-[#F1F5F4]/50 sm:text-base">
                 KELYANI réunit vos avis, votre fidélité et votre expérience client dans un seul espace de pilotage.
               </p>
 
@@ -195,7 +195,7 @@ export default function Login() {
                 <p className="text-[11px] leading-5 text-white/45">Une plateforme pensée pour transformer chaque interaction en relation durable.</p>
               </div>
 
-              <div className="mt-8 hidden items-center gap-4 text-[10px] uppercase tracking-[0.16em] text-[#F5F5DC]/25 lg:flex">
+              <div className="mt-8 hidden items-center gap-4 text-[10px] uppercase tracking-[0.16em] text-[#F1F5F4]/25 lg:flex">
                 <span>Simple</span><span className="h-px w-8 bg-[#242424]" /><span>Rapide</span><span className="h-px w-8 bg-[#242424]" /><span>Orienté client</span>
               </div>
             </div>
@@ -209,7 +209,7 @@ export default function Login() {
               <h2 className="mt-2 font-display text-3xl tracking-[-0.035em] text-white sm:text-4xl">
                 {selectedRole ? 'Bienvenue dans KELYANI' : 'Accédez à votre espace'}
               </h2>
-              <p className="mt-2 text-sm text-[#F5F5DC]/40">
+              <p className="mt-2 text-sm text-[#F1F5F4]/40">
                 {selectedRole ? 'Connectez-vous pour continuer.' : 'Choisissez votre profil pour commencer.'}
               </p>
             </div>
@@ -219,9 +219,9 @@ export default function Login() {
                 <button type="button" onClick={() => selectRole('admin')} className="group flex w-full items-center gap-4 rounded-[24px] border border-white/[0.075] bg-gradient-to-r from-[#151515] to-[#0E0E0E] p-4 text-left shadow-[0_16px_45px_rgba(0,0,0,.28),inset_0_1px_0_rgba(255,255,255,.035)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#00FFC3]/40 hover:from-[#191714] hover:to-[#11100D] hover:shadow-[0_24px_55px_rgba(0,0,0,.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFC3]/60 active:translate-y-0">
                   <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#00FFC3]/10 text-[#00DFA5]"><ShieldCheck size={21} /></div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#F5F5DC]/30">Plateforme</p>
+                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#F1F5F4]/30">Plateforme</p>
                     <p className="mt-1 font-display text-xl text-white">Administrateur</p>
-                    <p className="mt-1 text-xs text-[#F5F5DC]/40">Vue globale et pilotage KELYANI</p>
+                    <p className="mt-1 text-xs text-[#F1F5F4]/40">Vue globale et pilotage KELYANI</p>
                   </div>
                   <ArrowRight size={18} className="text-[#00FFC3] transition-transform group-hover:translate-x-1" />
                 </button>
@@ -229,9 +229,9 @@ export default function Login() {
                 <button type="button" onClick={() => selectRole('responsible')} className="group flex w-full items-center gap-4 rounded-[24px] border border-white/[0.075] bg-gradient-to-r from-[#151515] to-[#0E0E0E] p-4 text-left shadow-[0_16px_45px_rgba(0,0,0,.24),inset_0_1px_0_rgba(255,255,255,.025)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#00FFC3]/40 hover:from-[#191714] hover:to-[#11100D] hover:shadow-[0_24px_55px_rgba(0,0,0,.38)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFC3]/60 active:translate-y-0">
                   <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#00FFC3]/10 text-[#00DFA5]"><UserRound size={21} /></div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#F5F5DC]/30">Établissement</p>
+                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#F1F5F4]/30">Établissement</p>
                     <p className="mt-1 font-display text-xl text-white">Responsable</p>
-                    <p className="mt-1 text-xs text-[#F5F5DC]/40">Clients, avis et fidélité</p>
+                    <p className="mt-1 text-xs text-[#F1F5F4]/40">Clients, avis et fidélité</p>
                   </div>
                   <ArrowRight size={18} className="text-[#00FFC3] transition-transform group-hover:translate-x-1" />
                 </button>
@@ -242,30 +242,30 @@ export default function Login() {
                   <KelyaniMark size={38} />
                   <div>
                     <p className="text-xs font-semibold text-white">{selectedRole === 'admin' ? 'Administrateur' : 'Responsable'}</p>
-                    <p className="text-[10px] text-[#F5F5DC]/35">Connexion sécurisée</p>
+                    <p className="text-[10px] text-[#F1F5F4]/35">Connexion sécurisée</p>
                   </div>
-                  <button type="button" onClick={() => selectRole(null)} className="ml-auto rounded-full border border-[#242424] px-3 py-1.5 text-[9px] font-semibold text-[#F5F5DC]/40 hover:text-[#00DFA5]">Changer</button>
+                  <button type="button" onClick={() => selectRole(null)} className="ml-auto rounded-full border border-[#242424] px-3 py-1.5 text-[9px] font-semibold text-[#F1F5F4]/40 hover:text-[#00DFA5]">Changer</button>
                 </div>
 
                 {error && <div className="mb-4 rounded-2xl border border-[#00FFC3]/20 bg-[#00FFC3]/[0.06] px-4 py-3 text-xs text-[#00DFA5]">{error}</div>}
 
                 <div className="space-y-4">
                   <div>
-                    <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#F5F5DC]/45">{t.email}</label>
+                    <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#F1F5F4]/45">{t.email}</label>
                     <div className="relative">
                       <UserRound size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#00FFC3]/50" />
-                      <input type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }} placeholder={t.emailPlaceholder} className="w-full rounded-2xl border border-[#242424] bg-[#050505] py-3.5 pl-11 pr-4 text-sm text-white outline-none shadow-[inset_0_1px_0_rgba(245,245,220,.025),0_10px_25px_rgba(5,5,5,.28)] transition-all duration-300 placeholder:text-[#F5F5DC]/20 hover:border-[#242424] hover:shadow-[inset_0_1px_0_rgba(245,245,220,.04),0_14px_32px_rgba(5,5,5,.34)] focus:border-[#00FFC3]/55 focus:ring-4 focus:ring-[#00FFC3]/[0.07]" />
+                      <input type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }} placeholder={t.emailPlaceholder} className="w-full rounded-2xl border border-[#242424] bg-[#050505] py-3.5 pl-11 pr-4 text-sm text-white outline-none shadow-[inset_0_1px_0_rgba(245,245,220,.025),0_10px_25px_rgba(5,5,5,.28)] transition-all duration-300 placeholder:text-[#F1F5F4]/20 hover:border-[#242424] hover:shadow-[inset_0_1px_0_rgba(245,245,220,.04),0_14px_32px_rgba(5,5,5,.34)] focus:border-[#00FFC3]/55 focus:ring-4 focus:ring-[#00FFC3]/[0.07]" />
                     </div>
                   </div>
                   <div>
                     <div className="mb-2 flex items-center justify-between">
-                      <label className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#F5F5DC]/45">{t.password}</label>
+                      <label className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#F1F5F4]/45">{t.password}</label>
                       <Link to="/forgot-password" className="text-[10px] font-semibold text-[#00FFC3] hover:underline">{t.forgot}</Link>
                     </div>
                     <div className="relative">
                       <LockKeyhole size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#00FFC3]/50" />
-                      <input type={showPassword ? 'text' : 'password'} autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }} placeholder={t.passwordPlaceholder} className="w-full rounded-2xl border border-[#242424] bg-[#050505] py-3.5 pl-11 pr-11 text-sm text-white outline-none shadow-[inset_0_1px_0_rgba(245,245,220,.025),0_10px_25px_rgba(5,5,5,.28)] transition-all duration-300 placeholder:text-[#F5F5DC]/20 hover:shadow-[inset_0_1px_0_rgba(245,245,220,.04),0_14px_32px_rgba(5,5,5,.34)] focus:border-[#00FFC3]/55 focus:ring-4 focus:ring-[#00FFC3]/[0.07]" />
-                      <button type="button" onClick={() => setShowPassword(value => !value)} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-xl p-2 text-[#F5F5DC]/25 hover:text-[#00FFC3]">{showPassword ? <EyeOff size={16} /> : <Eye size={16} />}</button>
+                      <input type={showPassword ? 'text' : 'password'} autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }} placeholder={t.passwordPlaceholder} className="w-full rounded-2xl border border-[#242424] bg-[#050505] py-3.5 pl-11 pr-11 text-sm text-white outline-none shadow-[inset_0_1px_0_rgba(245,245,220,.025),0_10px_25px_rgba(5,5,5,.28)] transition-all duration-300 placeholder:text-[#F1F5F4]/20 hover:shadow-[inset_0_1px_0_rgba(245,245,220,.04),0_14px_32px_rgba(5,5,5,.34)] focus:border-[#00FFC3]/55 focus:ring-4 focus:ring-[#00FFC3]/[0.07]" />
+                      <button type="button" onClick={() => setShowPassword(value => !value)} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-xl p-2 text-[#F1F5F4]/25 hover:text-[#00FFC3]">{showPassword ? <EyeOff size={16} /> : <Eye size={16} />}</button>
                     </div>
                   </div>
                   <button onClick={handleLogin} disabled={saving} className="group flex w-full items-center justify-center gap-2 rounded-2xl bg-[#00FFC3] py-3.5 text-sm font-bold text-[#050505] shadow-[0_14px_34px_rgba(0,255,195,.18),inset_0_1px_0_rgba(245,245,220,.22)] transition-all duration-300 hover:bg-[#00DFA5] hover:-translate-y-0.5 hover:shadow-[0_20px_42px_rgba(0,255,195,.24),inset_0_1px_0_rgba(245,245,220,.28)] active:translate-y-0 active:shadow-[0_10px_24px_rgba(0,255,195,.16)] disabled:opacity-50">
@@ -274,8 +274,8 @@ export default function Login() {
                 </div>
 
                 <div className="mt-5 flex items-center justify-between border-t border-[#242424] pt-4">
-                  <Link to="/register" className="text-[10px] font-semibold text-[#F5F5DC]/35 hover:text-[#00FFC3]">{t.createAccount}</Link>
-                  <Link to="/forgot-password" className="text-[10px] font-semibold text-[#F5F5DC]/35 hover:text-[#00FFC3]">{t.forgot}</Link>
+                  <Link to="/register" className="text-[10px] font-semibold text-[#F1F5F4]/35 hover:text-[#00FFC3]">{t.createAccount}</Link>
+                  <Link to="/forgot-password" className="text-[10px] font-semibold text-[#F1F5F4]/35 hover:text-[#00FFC3]">{t.forgot}</Link>
                 </div>
               </div>
             )}
@@ -288,16 +288,16 @@ export default function Login() {
                 >
                   <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#00FFC3]/10 text-[#00DFA5]"><UserRound size={21} /></div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#F5F5DC]/30">Nouveau sur KELYANI</p>
+                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#F1F5F4]/30">Nouveau sur KELYANI</p>
                     <p className="mt-1 font-display text-xl text-white">Créer votre compte</p>
-                    <p className="mt-1 text-xs text-[#F5F5DC]/40">Créer votre espace et commencer</p>
+                    <p className="mt-1 text-xs text-[#F1F5F4]/40">Créer votre espace et commencer</p>
                   </div>
                   <ArrowRight size={18} className="text-[#00FFC3] transition-transform group-hover:translate-x-1" />
                 </Link>
               </div>
             )}
 
-            <div className="mt-7 flex items-center justify-center gap-5 text-[9px] uppercase tracking-[0.12em] text-[#F5F5DC]/20">
+            <div className="mt-7 flex items-center justify-center gap-5 text-[9px] uppercase tracking-[0.12em] text-[#F1F5F4]/20">
               <span className="inline-flex items-center gap-1.5"><ShieldCheck size={13} /> Sécurisé</span>
               <span className="inline-flex items-center gap-1.5"><Heart size={13} /> Client d’abord</span>
             </div>
