@@ -136,11 +136,11 @@ export default function Login() {
             {!selectedRole ? (
               <div className="login-v2-roles">
                 {([
-                  { id: 'admin' as const, title: 'Administrateur', desc: 'Pilotage global de la plateforme', Icon: ShieldCheck, code:'01' },
-                  { id: 'responsible' as const, title: 'Responsable', desc: 'Gestion de votre établissement', Icon: UserRound, code:'02' },
-                ]).map(({id,title,desc,Icon,code}) => (
+                  { id: 'admin' as const, title: 'Administrateur', desc: 'Pilotage global de la plateforme', Icon: ShieldCheck },
+                  { id: 'responsible' as const, title: 'Responsable', desc: 'Gestion de votre établissement', Icon: UserRound },
+                ]).map(({id,title,desc,Icon}) => (
                   <button key={id} type="button" onClick={() => selectRole(id)} className="login-v2-role">
-                    <span className="login-v2-role-icon"><Icon size={20}/></span><span className="login-v2-role-copy"><small>PROFIL {code}</small><b>{title}</b><i>{desc}</i></span><ArrowRight className="login-v2-role-arrow" size={19}/>
+                    <span className="login-v2-role-icon"><Icon size={20}/></span><span className="login-v2-role-copy"><b>{title}</b><i>{desc}</i></span><ArrowRight className="login-v2-role-arrow" size={19}/>
                   </button>
                 ))}
                 <Link to="/register" className="login-v2-create"><span>Vous découvrez KELYANI ? <b>Créer un compte</b></span><ArrowRight size={17}/></Link>
