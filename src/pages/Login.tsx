@@ -1,4 +1,5 @@
-import { ArrowRight, Globe2, ShieldCheck, UserRound, LockKeyhole, Eye, EyeOff } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ArrowRight, Globe2, ShieldCheck, UserRound, Eye, EyeOff } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
