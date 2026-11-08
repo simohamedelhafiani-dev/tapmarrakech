@@ -891,9 +891,9 @@ html,body,#root{background:#050505!important;color:#fff}
 [class*="border-gold"], [class*="border-amber"], [class*="border-yellow"] { border-color: rgba(0,217,245,.55) !important; }
 
 
-/* KELYANI app — site-aligned Emerald / Nardo identity, all authenticated and intermediate screens */
+/* Unified palette. Component-specific styles should be authored in their own files,
+   not overridden by broad selectors affecting customer cards and preview artwork. */
 :root {
-  color-scheme: dark;
   --kelyani-bg: #080A0B;
   --kelyani-panel: #343A40;
   --kelyani-panel-raised: #454D54;
@@ -905,85 +905,15 @@ html,body,#root{background:#050505!important;color:#fff}
   --kelyani-gold: #00DFA5;
   --kelyani-gold-soft: #00DFA5;
 }
-html, body, #root {
-  min-height: 100%;
-  background: #080A0B !important;
-  color: #F2F5F6;
-}
-#root {
-  --tw-prose-body: #F2F5F6;
-  --tw-prose-headings: #F2F5F6;
-  --tw-prose-links: #00D9F5;
-}
-/* Blue/cyan typography remains an accent, but always sits on neutral Nardo surfaces. */
-#root [class*="text-blue-"],
-#root [class*="text-sky-"],
-#root [class*="text-cyan-"],
-#root [class*="text-indigo-"] {
-  color: #00D9F5 !important;
-}
-/* No blue-filled panels, badges, tiles, inputs or text containers. */
-#root [class*="bg-blue-"],
-#root [class*="bg-sky-"],
-#root [class*="bg-cyan-"],
-#root [class*="bg-indigo-"],
-/* Blue gradient utilities must not create blue blocks behind text. */
-#root [class*="from-blue-"],
-#root [class*="from-sky-"],
-#root [class*="from-cyan-"],
-#root [class*="from-indigo-"],
-#root [class*="to-blue-"],
-#root [class*="to-sky-"],
-#root [class*="to-cyan-"],
-#root [class*="to-indigo-"] {
-  --tw-gradient-from: #343A40 var(--tw-gradient-from-position) !important;
-  --tw-gradient-to: #343A40 var(--tw-gradient-to-position) !important;
-  --tw-gradient-stops: #343A40, #343A40 !important;
-}
-/* Shared cards, tables, menus, popovers and intermediate states use Nardo grey. */
-#root [class*="rounded"][class*="border"],
-#root [role="dialog"],
-#root [role="menu"],
-#root [role="listbox"] {
-  border-color: rgba(181,190,195,.25);
-}
-#root input, #root textarea, #root select, #root [contenteditable="true"] {
-  background-color: #343A40 !important;
-  color: #F2F5F6 !important;
-  border-color: rgba(181,190,195,.32) !important;
-}
-#root input::placeholder, #root textarea::placeholder {
-  color: #B5BEC3 !important;
-}
-#root option { background: #343A40; color: #F2F5F6; }
-/* Replace legacy warm/yellow muted text with the shared neutral grey. */
-#root [class*="text-ink/"] { color: #B5BEC3 !important; }
-#root [class*="text-gray-"], #root [class*="text-slate-"] { color: #B5BEC3; }
-#root .kelyani-sidebar, #root .admin-depth-nav {
+.kelyani-login,
+.kelyani-login section { background-color: #080A0B !important; background-image: none !important; }
+.kelyani-login section > div > .rounded-2xl,
+.kelyani-login section > div > div > .rounded-2xl,
+.kelyani-login button.rounded-2xl,
+.kelyani-login a.rounded-2xl {
   background: #343A40 !important;
-  border-color: rgba(181,190,195,.25) !important;
+  box-shadow: none !important;
 }
-#root .kelyani-nav-link[aria-current="page"],
-#root .admin-depth-nav .kelyani-nav-link[data-active="true"] {
-  color: #00DFA5 !important;
-  background: rgba(0,223,165,.09) !important;
-}
-
-
-/* Complete Nardo card treatment across app routes and feature screens */
-#root div[class*="rounded"][class*="border"],
-#root section[class*="rounded"][class*="border"],
-#root article[class*="rounded"][class*="border"] {
-  background-color: #343A40;
-  border-color: rgba(181,190,195,.25);
-}
-#root [class~="bg-white"],
-#root [class~="bg-slate-50"],
-#root [class~="bg-slate-100"],
-#root [class~="bg-gray-50"],
-#root [class~="bg-gray-100"],
-#root [class~="bg-zinc-50"],
-#root [class~="bg-zinc-100"] {
-  background-color: #343A40 !important;
-  color: #F2F5F6;
-}
+.kelyani-login input { background: #454D54 !important; color: #F2F5F6 !important; }
+.kelyani-login select { background: #343A40 !important; color: #F2F5F6 !important; }
+.kelyani-login button[class*="bg-[#00DFA5]"] { background: #00DFA5 !important; color: #07110F !important; }
