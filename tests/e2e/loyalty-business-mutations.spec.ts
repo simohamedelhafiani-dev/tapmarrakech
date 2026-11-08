@@ -162,53 +162,74 @@ test('Parcours Client — inscription publique, 3 scans, récompense et assertio
   await manager.auth.signOut();
 });
 
-test('Intrus — scanner d’un autre établissement ne peut pas créditer le client QA', async () => {
+test('Intrus — scanner d’un établissement B ne peut pas créditer un client de A', async () => {
   const manager = stagingClient();
+  const admin = stagingClient();
   const publicClient = stagingClient();
-  const { error: loginError } = await manager.auth.signInWithPassword({
+
+  const { error: managerLoginError } = await manager.auth.signInWithPassword({
     email: process.env.E2E_RESPONSIBLE_EMAIL!,
     password: process.env.E2E_RESPONSIBLE_PASSWORD!,
   });
-  expect(loginError).toBeNull();
+  expect(managerLoginError).toBeNull();
+  const { error: adminLoginError } = await admin.auth.signInWithPassword({
+    email: process.env.E2E_ADMIN_EMAIL!,
+    password: process.env.E2E_ADMIN_PASSWORD!,
+  });
+  expect(adminLoginError).toBeNull();
 
-  const { data: scannerRows, error: scannerError } = await manager.rpc(
+  // The global Admin obtains the legitimate scanner token for establishment B.
+  const { data: scannerRows, error: scannerError } = await admin.rpc(
     'get_or_create_establishment_scanner_link',
     { p_establishment_id: SECOND_ESTABLISHMENT },
   );
-  // If the manager is not assigned to the second establishment, the permission
-  // denial itself is the expected secure outcome; the admin-specific cross-tenant
-  // test is deliberately not simulated by bypassing RLS.
-  if (scannerError) {
-    expect(scannerError.message.toLowerCase()).toMatch(/not authorized|access denied|permission/);
-    await manager.auth.signOut();
-    return;
-  }
+  expect(scannerError, 'Admin doit pouvoir accéder au scanner de B').toBeNull();
   const scanner = Array.isArray(scannerRows) ? scannerRows[0] : scannerRows;
   expect(scanner?.scanner_token).toBeTruthy();
 
-  const { data: customerRows, error: customerError } = await manager
-    .from('loyalty_customers')
-    .select('id')
-    .eq('establishment_id', PRIMARY_ESTABLISHMENT)
-    .limit(1);
-  expect(customerError).toBeNull();
-  expect(customerRows?.length).toBeGreaterThan(0);
+  // Client A is created through the public enrollment path, then asserted via SQL bridge.
+  const unique = Date.now().toString().slice(-8);
+  const { data: enrollmentRows, error: enrollmentError } = await publicClient.rpc(
+    'register_public_loyalty_customer_for_enrollment_v2',
+    {
+      p_establishment_id: PRIMARY_ESTABLISHMENT,
+      p_first_name: `QA-INTRUDER-${unique}`,
+      p_last_name: 'Isolation',
+      p_phone: `+2126${unique}`,
+      p_birth_date: null,
+      p_email: null,
+      p_interests: [],
+      p_marketing_consent: false,
+      p_notification_consent: false,
+      p_preferred_channel: 'NONE',
+      p_visit_frequency: null,
+    },
+  );
+  expect(enrollmentError).toBeNull();
+  const enrollment = Array.isArray(enrollmentRows) ? enrollmentRows[0] : enrollmentRows;
+  const { data: cardRows, error: cardError } = await publicClient.rpc('get_public_loyalty_card', {
+    p_access_token: enrollment.access_token,
+  });
+  expect(cardError).toBeNull();
+  const card = Array.isArray(cardRows) ? cardRows[0] : cardRows;
+  const before = await verify(manager, card.customer_id);
 
-  const customerId = customerRows![0].id;
-  const before = await verify(manager, customerId);
+  // Scanner B tries to award 999 points to customer A. The RPC must reject it.
   const { error: attackError } = await publicClient.rpc('add_loyalty_points_by_scanner', {
     p_scanner_token: scanner.scanner_token,
-    p_customer_id: customerId,
+    p_customer_id: card.customer_id,
     p_amount: 999,
-    p_invoice_number: `QA-INTRUDER-${Date.now()}`,
+    p_invoice_number: `QA-INTRUDER-${unique}`,
     p_description: 'Cross-establishment attack simulation',
   });
   expect(attackError, 'Le scanner B ne doit pas modifier un client de A').not.toBeNull();
-  const after = await verify(manager, customerId);
+
+  // SQL proof that the attempted write produced no balance or transaction change.
+  const after = await verify(manager, card.customer_id);
   expect(after.points_balance).toBe(before.points_balance);
   expect(after.total_points_earned).toBe(before.total_points_earned);
   expect(after.visit_count).toBe(before.visit_count);
   expect(after.transactions).toHaveLength(before.transactions.length);
 
-  await manager.auth.signOut();
+  await Promise.all([manager.auth.signOut(), admin.auth.signOut()]);
 });
