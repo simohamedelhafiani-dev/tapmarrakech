@@ -23,7 +23,9 @@ test('Responsable — connexion et accès au tableau de bord', async ({ page }) 
     process.env.E2E_RESPONSIBLE_PASSWORD!,
   );
   await expect(page).toHaveURL(/\/dashboard(?:$|\/)/, { timeout: 30_000 });
-  await expect(page.getByText(/Tableau de bord|Vue d'ensemble|Bienvenue/i).first()).toBeVisible({ timeout: 30_000 });
+  // Assert the actual navigation item rendered by the Responsable dashboard.
+  await expect(page.getByRole('navigation', { name: 'Navigation principale' }).getByRole('link', { name: 'Vue d’ensemble' })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole('heading', { name: 'Faites de chaque client un client régulier.' })).toBeVisible();
 });
 
 test('Admin — connexion et accès à la console d’administration', async ({ page }) => {
