@@ -278,7 +278,7 @@ export default function MenuDesign() {
               <option
                 key={establishment.id}
                 value={establishment.id}
-                className="text-[#F5F5DC]"
+                className="text-[#B5BEC3]"
               >
                 {establishment.name}
               </option>
@@ -296,7 +296,7 @@ export default function MenuDesign() {
             <h2 className="mt-1 text-xl font-semibold text-forest">
               Wallpapers du menu
             </h2>
-            <p className="mt-1 text-sm text-[#F5F5DC]/45">
+            <p className="mt-1 text-sm text-[#B5BEC3]/45">
               Le wallpaper actif est utilisé sur le menu public.
             </p>
           </div>
@@ -372,7 +372,7 @@ export default function MenuDesign() {
               <p className="mt-3 text-sm font-semibold text-forest">
                 Aucun wallpaper
               </p>
-              <p className="mt-1 text-xs text-[#F5F5DC]/40">
+              <p className="mt-1 text-xs text-[#B5BEC3]/40">
                 Ajoute une image pour commencer.
               </p>
             </div>
@@ -426,7 +426,7 @@ export default function MenuDesign() {
             </div>
           </div>
         ) : (
-          <p className="mt-4 text-sm text-[#F5F5DC]/45">
+          <p className="mt-4 text-sm text-[#B5BEC3]/45">
             Aucun wallpaper actif.
           </p>
         )}

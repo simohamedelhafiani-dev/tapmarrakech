@@ -166,11 +166,11 @@ export default function EstablishmentsSection({
       </div>
 
       {error ? (
-        <div className="rounded-3xl border border-[#D4AF37]/25 bg-[#141414] p-8 text-center">
-          <p className="text-sm font-semibold text-[#D4AF37]">
+        <div className="rounded-3xl border border-[#00DFA5]/25 bg-[#141414] p-8 text-center">
+          <p className="text-sm font-semibold text-[#00DFA5]">
             Impossible de charger les établissements.
           </p>
-          <p className="mt-1 text-xs text-[#F5F5DC]/60">{error.message}</p>
+          <p className="mt-1 text-xs text-[#B5BEC3]/60">{error.message}</p>
         </div>
       ) : loading ? (
         <div className="grid gap-4 xl:grid-cols-2">
