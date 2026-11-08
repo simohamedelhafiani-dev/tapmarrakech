@@ -99,19 +99,28 @@ export default function Login() {
             <h1>La relation client,<br/><span>en mouvement.</span></h1>
             <p>Réputation, fidélité et connaissance client réunies dans une expérience intelligente.</p>
           </div>
-          <div className="login-v2-scene" aria-label="Univers visuel KELYANI">
-            <div className="login-v2-scene-grid"/>
-            <div className="login-v2-ring ring-a"/><div className="login-v2-ring ring-b"/><div className="login-v2-ring ring-c"/>
-            <div className="login-v2-orb">
-              <div className="login-v2-orb-core"/>
-              <div className="login-v2-orb-shine"/>
-              <div className="login-v2-orb-glass"/>
-              <span className="login-v2-orb-mark">K</span>
+          <div className="login-v2-scene login-v2-scene-refined" aria-label="Aperçu de l'expérience KELYANI">
+            <div className="scene-refined-grid"/>
+            <div className="scene-refined-glow"/>
+            <div className="scene-refined-orbit orbit-one"/>
+            <div className="scene-refined-orbit orbit-two"/>
+            <div className="scene-refined-back-card">
+              <div className="scene-back-top"><span>KELYANI</span><span>MEMBER EXPERIENCE</span></div>
+              <div className="scene-back-lines"><i/><i/><i/></div>
+              <div className="scene-back-chip"/>
             </div>
-            <div className="login-v2-float login-v2-float-rating"><span className="float-icon">✦</span><span><small>RÉPUTATION</small><b>4.9 <em>/ 5</em></b><i>★★★★★</i></span></div>
-            <div className="login-v2-float login-v2-float-loyalty"><span className="float-icon">↗</span><span><small>FIDÉLITÉ CLIENT</small><b>+28%</b><i>Engagement en hausse</i></span></div>
-            <div className="login-v2-float login-v2-float-live"><span className="live-dot"/><span>LIVE INTELLIGENCE</span></div>
-            <div className="login-v2-float login-v2-float-customer"><span className="customer-avatar">S</span><span><small>NOUVEAU CLIENT FIDÈLE</small><b>Bienvenue Sarah</b></span><span className="customer-check">✓</span></div>
+            <div className="scene-refined-main-card">
+              <div className="scene-card-top"><span className="scene-card-brand"><b>K</b><span>KELYANI<small>LOYALTY PASS</small></span></span><span className="scene-card-wave">✳</span></div>
+              <div className="scene-card-label">VOTRE FIDÉLITÉ, VALORISÉE</div>
+              <div className="scene-card-name">Sarah M.</div>
+              <div className="scene-card-progress"><span/></div>
+              <div className="scene-card-bottom"><span>MEMBRE PRIVILÈGE</span><b>08 <small>/ 10 VISITES</small></b></div>
+              <div className="scene-card-shine"/>
+            </div>
+            <div className="scene-refined-stat scene-stat-reviews"><span className="scene-stat-icon">✦</span><span><small>AVIS CLIENTS</small><b>4.9 <em>★</em></b><i>Excellente réputation</i></span></div>
+            <div className="scene-refined-stat scene-stat-growth"><span className="scene-stat-icon">↗</span><span><small>CLIENTS FIDÉLISÉS</small><b>+28%</b><i>Engagement en hausse</i></span></div>
+            <div className="scene-refined-notification"><span className="scene-notif-avatar">S</span><span><small>NOUVELLE RÉCOMPENSE</small><b>Sarah a débloqué un cadeau</b></span><span className="scene-notif-check">✓</span></div>
+            <div className="scene-refined-caption"><span/><b>UNE EXPÉRIENCE QUI DONNE ENVIE DE REVENIR</b></div>
           </div>
           <div className="login-v2-bottomline"><span>01 — RELATION</span><span>02 — INTELLIGENCE</span><span>03 — CROISSANCE</span></div>
         </section>
