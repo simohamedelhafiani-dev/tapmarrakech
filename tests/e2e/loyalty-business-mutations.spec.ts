@@ -276,7 +276,7 @@ test('Admin — création établissement, attribution Responsable et accès à s
     await page.getByRole('button', { name: /Entrer dans KELYANI/i }).click();
     await expect(page).toHaveURL(/\/admin(?:$|\/)/, { timeout: 30_000 });
 
-    await page.getByText('Établissements', { exact: true }).first().click();
+    await page.getByRole('button', { name: 'Établissements', exact: true }).click();
     await page.getByRole('button', { name: /Nouvel établissement/i }).click();
     await page.getByPlaceholder('Ex : Restaurant Atlas').fill(name);
     await page.getByPlaceholder('restaurant-atlas').fill(slug);
@@ -336,13 +336,25 @@ test('Admin — création établissement, attribution Responsable et accès à s
     await expect(page.getByRole('navigation', { name: 'Navigation principale' })).toBeVisible();
   } finally {
     // Restore the pre-existing QA Responsable to its original Riad Demo assignment.
-    const { data: restored, error: restoreError } = await admin.functions.invoke('admin-manage-responsibles', {
+    await admin.functions.invoke('admin-manage-responsibles', {
       body: { action: 'assign', user_id: managerProfile.id, establishment_id: PRIMARY_ESTABLISHMENT },
     });
-    assignmentRestored = !restoreError && Boolean(restored?.success);
+
+    // The database is the source of truth: the Edge Function response alone
+    // is not sufficient to certify that the original assignment is restored.
+    const { data: restoredRow, error: restoredQueryError } = await admin
+      .from('establishment_staff')
+      .select('user_id,establishment_id,role,active')
+      .eq('user_id', managerProfile.id)
+      .eq('role', 'MANAGER')
+      .eq('active', true)
+      .maybeSingle();
+    assignmentRestored =
+      !restoredQueryError &&
+      restoredRow?.establishment_id === PRIMARY_ESTABLISHMENT;
     await manager.auth.signOut();
     await admin.auth.signOut();
-    expect(assignmentRestored, 'Le compte Responsable QA doit être restauré sur Riad Demo').toBeTruthy();
+    expect(assignmentRestored, 'Le compte Responsable QA doit être restauré sur Riad Demo (preuve SQL)').toBeTruthy();
   }
 
   expect(createdEstablishmentId).toBeTruthy();
