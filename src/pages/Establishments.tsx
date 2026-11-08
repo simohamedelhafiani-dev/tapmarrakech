@@ -698,11 +698,11 @@ export default function Establishments() {
 
               <div className="rounded-2xl border border-gold/20 bg-[#111111] p-4 text-white">
                 <div className="flex items-start gap-3">
-                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]">
+                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#00DFA5]/10 text-[#00DFA5]">
                     <Bot size={18} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#D4AF37]">Google Business Profile</p>
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#00DFA5]">Google Business Profile</p>
                     <p className="mt-1 text-[11px] text-white/50">Connectez le compte Google qui gère cette fiche pour synchroniser les avis et permettre à KELYANI de répondre automatiquement.</p>
                     <button type="button" onClick={async () => {
                       if (!editing) return;
@@ -712,7 +712,7 @@ export default function Establishments() {
                         return;
                       }
                       window.open(data.authorization_url, '_blank', 'width=600,height=750');
-                    }} className="mt-3 rounded-xl bg-[#D4AF37] px-4 py-2.5 text-[11px] font-bold text-[#0D0D0D]">
+                    }} className="mt-3 rounded-xl bg-[#00DFA5] px-4 py-2.5 text-[11px] font-bold text-[#0D0D0D]">
                       Connecter Google
                     </button>
                   </div>
