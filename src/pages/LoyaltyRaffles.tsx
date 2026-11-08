@@ -92,7 +92,7 @@ function formatDate(value: string | null) {
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.14em] text-[#F5F5DC]/40">
+      <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.14em] text-[#B5BEC3]/40">
         {label}
       </span>
       {children}
@@ -101,7 +101,7 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 }
 
 const inputClass =
-  'w-full rounded-xl border border-[#2A2A2A] bg-[#0B0B0B] px-3.5 py-3 text-sm text-white outline-none transition focus:border-[#C9A45C]/70';
+  'w-full rounded-xl border border-[#2A2A2A] bg-[#0B0B0B] px-3.5 py-3 text-sm text-white outline-none transition focus:border-[#00DFA5]/70';
 const selectClass = inputClass;
 
 export default function LoyaltyRaffles() {
@@ -341,9 +341,9 @@ export default function LoyaltyRaffles() {
     <div className="space-y-6">
       <header className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#C9A45C]">KELYANI · Fidélité</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#00DFA5]">KELYANI · Fidélité</p>
           <h1 className="mt-2 font-display text-4xl text-white">Tombola & niveaux</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#F5F5DC]/45">
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#B5BEC3]/45">
             Classez automatiquement vos clients selon leur fidélité et donnez aux meilleurs profils davantage de chances de gagner.
           </p>
         </div>
@@ -354,7 +354,7 @@ export default function LoyaltyRaffles() {
               {establishments.map((establishment) => <option key={establishment.id} value={establishment.id}>{establishment.name}</option>)}
             </select>
           )}
-          <button type="button" onClick={() => { resetForm(); setShowCreate(true); }} className="inline-flex items-center gap-2 rounded-xl bg-[#C9A45C] px-4 py-2.5 text-xs font-semibold text-[#050505] transition hover:bg-[#E1C27A]">
+          <button type="button" onClick={() => { resetForm(); setShowCreate(true); }} className="inline-flex items-center gap-2 rounded-xl bg-[#00DFA5] px-4 py-2.5 text-xs font-semibold text-[#050505] transition hover:bg-[#00DFA5]">
             <Plus size={15} /> Nouvelle tombola
           </button>
         </div>
@@ -362,27 +362,27 @@ export default function LoyaltyRaffles() {
 
       <div className="grid gap-4 md:grid-cols-3">
         <div className="rounded-2xl border border-[#242424] bg-[#111111] p-5">
-          <p className="text-[10px] uppercase tracking-[0.16em] text-[#F5F5DC]/35">Niveaux actifs</p>
+          <p className="text-[10px] uppercase tracking-[0.16em] text-[#B5BEC3]/35">Niveaux actifs</p>
           <p className="mt-2 text-3xl font-semibold text-white">{tiers.filter((tier) => tier.active).length}</p>
-          <p className="mt-1 text-xs text-[#F5F5DC]/40">Standard → Platinum</p>
+          <p className="mt-1 text-xs text-[#B5BEC3]/40">Standard → Platinum</p>
         </div>
         <div className="rounded-2xl border border-[#242424] bg-[#111111] p-5">
-          <p className="text-[10px] uppercase tracking-[0.16em] text-[#F5F5DC]/35">Tombolas</p>
+          <p className="text-[10px] uppercase tracking-[0.16em] text-[#B5BEC3]/35">Tombolas</p>
           <p className="mt-2 text-3xl font-semibold text-white">{raffles.length}</p>
-          <p className="mt-1 text-xs text-[#F5F5DC]/40">{raffles.filter((raffle) => raffle.status === 'SCHEDULED').length} programmée(s)</p>
+          <p className="mt-1 text-xs text-[#B5BEC3]/40">{raffles.filter((raffle) => raffle.status === 'SCHEDULED').length} programmée(s)</p>
         </div>
         <div className="rounded-2xl border border-[#242424] bg-[#111111] p-5">
-          <p className="text-[10px] uppercase tracking-[0.16em] text-[#F5F5DC]/35">Principe</p>
-          <p className="mt-2 text-3xl font-semibold text-[#E1C27A]">×{Math.max(1, ...tiers.map((tier) => Number(tier.ticket_multiplier) || 1))}</p>
-          <p className="mt-1 text-xs text-[#F5F5DC]/40">maximum de tickets selon le niveau</p>
+          <p className="text-[10px] uppercase tracking-[0.16em] text-[#B5BEC3]/35">Principe</p>
+          <p className="mt-2 text-3xl font-semibold text-[#00DFA5]">×{Math.max(1, ...tiers.map((tier) => Number(tier.ticket_multiplier) || 1))}</p>
+          <p className="mt-1 text-xs text-[#B5BEC3]/40">maximum de tickets selon le niveau</p>
         </div>
       </div>
 
       <div className="flex gap-1 rounded-2xl border border-[#242424] bg-[#0B0B0B] p-1">
-        <button type="button" onClick={() => setTab('raffles')} className={`flex-1 rounded-xl px-4 py-3 text-xs font-semibold transition ${tab === 'raffles' ? 'bg-[#191919] text-[#E1C27A]' : 'text-[#F5F5DC]/40 hover:text-white'}`}>
+        <button type="button" onClick={() => setTab('raffles')} className={`flex-1 rounded-xl px-4 py-3 text-xs font-semibold transition ${tab === 'raffles' ? 'bg-[#191919] text-[#00DFA5]' : 'text-[#B5BEC3]/40 hover:text-white'}`}>
           <Ticket className="mr-2 inline" size={15} /> Tombolas
         </button>
-        <button type="button" onClick={() => setTab('tiers')} className={`flex-1 rounded-xl px-4 py-3 text-xs font-semibold transition ${tab === 'tiers' ? 'bg-[#191919] text-[#E1C27A]' : 'text-[#F5F5DC]/40 hover:text-white'}`}>
+        <button type="button" onClick={() => setTab('tiers')} className={`flex-1 rounded-xl px-4 py-3 text-xs font-semibold transition ${tab === 'tiers' ? 'bg-[#191919] text-[#00DFA5]' : 'text-[#B5BEC3]/40 hover:text-white'}`}>
           <Crown className="mr-2 inline" size={15} /> Niveaux clients
         </button>
       </div>
@@ -392,8 +392,8 @@ export default function LoyaltyRaffles() {
           <div className="mb-6 flex flex-col justify-between gap-3 md:flex-row md:items-end">
             <div>
               <h2 className="text-xl font-semibold text-white">Classification automatique</h2>
-              <p className="mt-1 max-w-2xl text-xs leading-5 text-[#F5F5DC]/40">
-                Un client atteint un niveau lorsque ses points cumulés <strong className="text-[#F5F5DC]/60">ou</strong> ses récompenses récupérées atteignent le seuil. Le niveau le plus élevé atteint est retenu.
+              <p className="mt-1 max-w-2xl text-xs leading-5 text-[#B5BEC3]/40">
+                Un client atteint un niveau lorsque ses points cumulés <strong className="text-[#B5BEC3]/60">ou</strong> ses récompenses récupérées atteignent le seuil. Le niveau le plus élevé atteint est retenu.
               </p>
             </div>
           </div>
@@ -405,13 +405,13 @@ export default function LoyaltyRaffles() {
                 <div key={tier.id} className="rounded-2xl border border-[#242424] bg-[#0B0B0B] p-5">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <div className="grid h-11 w-11 place-items-center rounded-2xl bg-[#C9A45C]/10 text-[#E1C27A]"><MetaIcon size={19} /></div>
+                      <div className="grid h-11 w-11 place-items-center rounded-2xl bg-[#00DFA5]/10 text-[#00DFA5]"><MetaIcon size={19} /></div>
                       <div>
-                        <p className="text-[10px] uppercase tracking-[0.15em] text-[#C9A45C]">{tier.tier_key}</p>
+                        <p className="text-[10px] uppercase tracking-[0.15em] text-[#00DFA5]">{tier.tier_key}</p>
                         <input value={tier.name} onChange={(e) => updateTier(tier.id, { name: e.target.value })} className="mt-1 bg-transparent text-lg font-semibold text-white outline-none" />
                       </div>
                     </div>
-                    <label className="flex items-center gap-2 text-[10px] text-[#F5F5DC]/45">
+                    <label className="flex items-center gap-2 text-[10px] text-[#B5BEC3]/45">
                       <input type="checkbox" checked={tier.active} onChange={(e) => updateTier(tier.id, { active: e.target.checked })} />
                       Actif
                     </label>
@@ -424,7 +424,7 @@ export default function LoyaltyRaffles() {
                     <Field label="Tickets tombola"><input type="number" min="1" max="100" value={tier.ticket_multiplier} onChange={(e) => updateTier(tier.id, { ticket_multiplier: Number(e.target.value) })} className={inputClass} /></Field>
                   </div>
 
-                  <button type="button" disabled={saving} onClick={() => void saveTier(tier)} className="mt-4 inline-flex items-center gap-2 rounded-xl border border-[#C9A45C]/30 px-3 py-2 text-xs font-semibold text-[#E1C27A] hover:bg-[#C9A45C]/10 disabled:opacity-40">
+                  <button type="button" disabled={saving} onClick={() => void saveTier(tier)} className="mt-4 inline-flex items-center gap-2 rounded-xl border border-[#00DFA5]/30 px-3 py-2 text-xs font-semibold text-[#00DFA5] hover:bg-[#00DFA5]/10 disabled:opacity-40">
                     <Save size={14} /> Enregistrer
                   </button>
                 </div>
@@ -436,24 +436,24 @@ export default function LoyaltyRaffles() {
         <section className="space-y-4">
           {raffles.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-[#2A2A2A] bg-[#111111] px-6 py-16 text-center">
-              <Trophy size={30} className="mx-auto text-[#C9A45C]/50" />
+              <Trophy size={30} className="mx-auto text-[#00DFA5]/50" />
               <h2 className="mt-4 text-lg font-semibold text-white">Aucune tombola</h2>
-              <p className="mt-1 text-xs text-[#F5F5DC]/40">Créez votre première tombola fidélité.</p>
+              <p className="mt-1 text-xs text-[#B5BEC3]/40">Créez votre première tombola fidélité.</p>
             </div>
           ) : raffles.map((raffle) => (
             <div key={raffle.id} className="overflow-hidden rounded-3xl border border-[#242424] bg-[#111111]">
               <button type="button" onClick={() => setExpandedRaffle(expandedRaffle === raffle.id ? null : raffle.id)} className="flex w-full items-center justify-between gap-4 p-5 text-left md:p-6">
                 <div className="flex min-w-0 items-center gap-4">
-                  <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#C9A45C]/10 text-[#E1C27A]"><Gift size={20} /></div>
+                  <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#00DFA5]/10 text-[#00DFA5]"><Gift size={20} /></div>
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 className="truncate text-base font-semibold text-white">{raffle.title}</h2>
-                      <span className={`rounded-full px-2 py-1 text-[9px] font-semibold ${raffle.status === 'SCHEDULED' ? 'bg-[#C9A45C]/10 text-[#E1C27A]' : raffle.status === 'DRAWN' ? 'bg-emerald-500/10 text-emerald-300' : 'bg-white/5 text-white/40'}`}>{raffle.status}</span>
+                      <span className={`rounded-full px-2 py-1 text-[9px] font-semibold ${raffle.status === 'SCHEDULED' ? 'bg-[#00DFA5]/10 text-[#00DFA5]' : raffle.status === 'DRAWN' ? 'bg-emerald-500/10 text-emerald-300' : 'bg-white/5 text-white/40'}`}>{raffle.status}</span>
                       {raffle.status === 'SCHEDULED' && raffle.last_draw_fallback_stage === 'EXTENDED_7_DAYS' && (
                         <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-1 text-[9px] font-semibold text-amber-200">Action requise</span>
                       )}
                     </div>
-                    <p className="mt-1 text-xs text-[#F5F5DC]/45">Lot : {raffle.prize_name} · Tirage : {formatDate(raffle.draw_at)}</p>
+                    <p className="mt-1 text-xs text-[#B5BEC3]/45">Lot : {raffle.prize_name} · Tirage : {formatDate(raffle.draw_at)}</p>
                   </div>
                 </div>
                 <ChevronDown size={18} className={`shrink-0 text-white/30 transition ${expandedRaffle === raffle.id ? 'rotate-180' : ''}`} />
@@ -464,13 +464,13 @@ export default function LoyaltyRaffles() {
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                     <div className="rounded-2xl bg-[#0B0B0B] p-4"><p className="text-[9px] uppercase tracking-[0.15em] text-white/30">Participants</p><p className="mt-1 text-2xl font-semibold text-white">{raffle.participant_count}</p></div>
                     <div className="rounded-2xl bg-[#0B0B0B] p-4"><p className="text-[9px] uppercase tracking-[0.15em] text-white/30">Gagnants</p><p className="mt-1 text-2xl font-semibold text-white">{raffle.winner_count}/{raffle.winners_count}</p></div>
-                    <div className="rounded-2xl bg-[#0B0B0B] p-4"><p className="text-[9px] uppercase tracking-[0.15em] text-white/30">Niveau minimum</p><p className="mt-1 text-sm font-semibold text-[#E1C27A]">{tierMeta[raffle.minimum_tier_key]?.label ?? raffle.minimum_tier_key}</p></div>
-                    <div className="rounded-2xl bg-[#0B0B0B] p-4"><p className="text-[9px] uppercase tracking-[0.15em] text-white/30">Tickets</p><p className="mt-1 text-sm font-semibold text-[#E1C27A]">{raffle.ticket_multiplier_mode === 'TIER' ? 'Selon le niveau' : '1 par client'}</p></div>
+                    <div className="rounded-2xl bg-[#0B0B0B] p-4"><p className="text-[9px] uppercase tracking-[0.15em] text-white/30">Niveau minimum</p><p className="mt-1 text-sm font-semibold text-[#00DFA5]">{tierMeta[raffle.minimum_tier_key]?.label ?? raffle.minimum_tier_key}</p></div>
+                    <div className="rounded-2xl bg-[#0B0B0B] p-4"><p className="text-[9px] uppercase tracking-[0.15em] text-white/30">Tickets</p><p className="mt-1 text-sm font-semibold text-[#00DFA5]">{raffle.ticket_multiplier_mode === 'TIER' ? 'Selon le niveau' : '1 par client'}</p></div>
                   </div>
                   {raffle.description && <p className="mt-5 text-sm leading-6 text-white/55">{raffle.description}</p>}
                   {raffle.last_draw_note && (
-                    <div role="status" className={`mt-5 rounded-2xl border p-4 text-sm leading-6 ${raffle.last_draw_fallback_stage === 'EXTENDED_7_DAYS' ? 'border-amber-400/25 bg-amber-400/5 text-amber-100' : 'border-[#C9A45C]/20 bg-[#C9A45C]/5 text-[#F5F5DC]/80'}`}>
-                      <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-[#C9A45C]">
+                    <div role="status" className={`mt-5 rounded-2xl border p-4 text-sm leading-6 ${raffle.last_draw_fallback_stage === 'EXTENDED_7_DAYS' ? 'border-amber-400/25 bg-amber-400/5 text-amber-100' : 'border-[#00DFA5]/20 bg-[#00DFA5]/5 text-[#B5BEC3]/80'}`}>
+                      <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-[#00DFA5]">
                         {raffle.last_draw_fallback_stage === 'EXTENDED_7_DAYS' ? 'Action requise · Responsable' : 'Résultat du tirage'}
                       </p>
                       {raffle.last_draw_note}
@@ -482,8 +482,8 @@ export default function LoyaltyRaffles() {
                       <h3 className="text-xs font-semibold text-white">Historique d’audit du tirage</h3>
                       <div className="mt-3 space-y-3">
                         {drawAudit.map((entry, index) => (
-                          <div key={`${entry.attempted_at}-${index}`} className="border-l border-[#C9A45C]/35 pl-3">
-                            <p className="text-[10px] text-[#E1C27A]">{formatDate(entry.attempted_at)} · {entry.trigger_source === 'MANUAL' ? 'Relance manuelle' : 'Scheduler'} · {entry.fallback_stage}</p>
+                          <div key={`${entry.attempted_at}-${index}`} className="border-l border-[#00DFA5]/35 pl-3">
+                            <p className="text-[10px] text-[#00DFA5]">{formatDate(entry.attempted_at)} · {entry.trigger_source === 'MANUAL' ? 'Relance manuelle' : 'Scheduler'} · {entry.fallback_stage}</p>
                             <p className="mt-1 text-xs leading-5 text-white/60">{entry.note}</p>
                             <p className="mt-1 text-[10px] text-white/35">Pool : {entry.candidate_count} · Gagnants : {entry.winner_count}</p>
                           </div>
@@ -504,7 +504,7 @@ export default function LoyaltyRaffles() {
                           type="button"
                           disabled={Boolean(rerunningRaffleId)}
                           onClick={() => void rerunRaffleDraw(raffle.id)}
-                          className="inline-flex items-center gap-2 rounded-xl border border-[#C9A45C]/35 bg-[#C9A45C]/10 px-3 py-2 text-xs font-semibold text-[#E1C27A] hover:bg-[#C9A45C]/15 disabled:cursor-not-allowed disabled:opacity-40"
+                          className="inline-flex items-center gap-2 rounded-xl border border-[#00DFA5]/35 bg-[#00DFA5]/10 px-3 py-2 text-xs font-semibold text-[#00DFA5] hover:bg-[#00DFA5]/15 disabled:cursor-not-allowed disabled:opacity-40"
                         >
                           <Trophy size={14} /> {rerunningRaffleId === raffle.id ? 'Tirage en cours…' : 'Relancer le tirage'}
                         </button>
@@ -526,7 +526,7 @@ export default function LoyaltyRaffles() {
           <div className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-3xl border border-[#2A2A2A] bg-[#111111] p-6 shadow-[0_30px_100px_rgba(0,0,0,.7)] md:p-7">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A45C]">KELYANI</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#00DFA5]">KELYANI</p>
                 <h2 className="mt-1 text-xl font-semibold text-white">Créer une tombola</h2>
                 <p className="mt-1 text-xs text-white/40">La sélection est faite automatiquement au moment du tirage.</p>
               </div>
@@ -570,7 +570,7 @@ export default function LoyaltyRaffles() {
 
             <div className="mt-6 flex justify-end gap-2">
               <button type="button" onClick={() => setShowCreate(false)} className="rounded-xl border border-[#2A2A2A] px-4 py-2.5 text-xs font-semibold text-white/60 hover:text-white">Annuler</button>
-              <button type="button" disabled={saving} onClick={() => void createRaffle()} className="inline-flex items-center gap-2 rounded-xl bg-[#C9A45C] px-5 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-40"><Check size={14} /> {saving ? 'Création...' : 'Programmer la tombola'}</button>
+              <button type="button" disabled={saving} onClick={() => void createRaffle()} className="inline-flex items-center gap-2 rounded-xl bg-[#00DFA5] px-5 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-40"><Check size={14} /> {saving ? 'Création...' : 'Programmer la tombola'}</button>
             </div>
           </div>
         </div>
