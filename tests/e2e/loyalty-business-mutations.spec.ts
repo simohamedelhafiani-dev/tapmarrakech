@@ -241,3 +241,109 @@ test('Intrus — scanner d’un établissement B ne peut pas créditer un client
 
   await Promise.all([manager.auth.signOut(), admin.auth.signOut()]);
 });
+
+
+test('Admin — création établissement, attribution Responsable et accès à son Dashboard', async ({ page }) => {
+  const admin = stagingClient();
+  const manager = stagingClient();
+  const { error: adminLoginError } = await admin.auth.signInWithPassword({
+    email: process.env.E2E_ADMIN_EMAIL!,
+    password: process.env.E2E_ADMIN_PASSWORD!,
+  });
+  expect(adminLoginError).toBeNull();
+
+  const { data: managerProfile, error: managerProfileError } = await admin
+    .from('profiles')
+    .select('id')
+    .eq('email', process.env.E2E_RESPONSIBLE_EMAIL!)
+    .single();
+  expect(managerProfileError, 'Compte Responsable de test trouvé').toBeNull();
+
+  const suffix = Date.now().toString();
+  const name = `QA E2E Establishment ${suffix}`;
+  const slug = `qa-e2e-establishment-${suffix}`;
+
+  let createdEstablishmentId: string | null = null;
+  let assignmentRestored = false;
+
+  try {
+    // Create the establishment through the actual Admin UI form.
+    page.on('dialog', (dialog) => dialog.accept());
+    await page.goto('/login');
+    await page.getByRole('button', { name: /Administrateur/i }).click();
+    await page.locator('input[type="email"]').fill(process.env.E2E_ADMIN_EMAIL!);
+    await page.locator('input[type="password"]').fill(process.env.E2E_ADMIN_PASSWORD!);
+    await page.getByRole('button', { name: /Entrer dans KELYANI/i }).click();
+    await expect(page).toHaveURL(/\/admin(?:$|\/)/, { timeout: 30_000 });
+
+    await page.getByText('Établissements', { exact: true }).first().click();
+    await page.getByRole('button', { name: /Nouvel établissement/i }).click();
+    await page.getByPlaceholder('Ex : Restaurant Atlas').fill(name);
+    await page.getByPlaceholder('restaurant-atlas').fill(slug);
+
+    const typeSelect = page.locator('select').filter({ has: page.locator('option', { hasText: /restaurant|commerce|salon|café/i }) }).first();
+    await expect(typeSelect).toBeVisible();
+    const typeOption = await typeSelect.locator('option:not([value=""])').first().getAttribute('value');
+    expect(typeOption).toBeTruthy();
+    await typeSelect.selectOption(typeOption!);
+    await page.getByRole('button', { name: 'Créer l’établissement' }).click();
+
+    // SQL/API assertion: persisted establishment row and generated id.
+    const { data: created, error: createdError } = await admin
+      .from('establishments')
+      .select('id,name,slug,ai_business_type_id')
+      .eq('slug', slug)
+      .single();
+    expect(createdError, 'Insertion établissement vérifiée en base').toBeNull();
+    expect(created.name).toBe(name);
+    expect(created.ai_business_type_id).toBeTruthy();
+    createdEstablishmentId = created.id;
+
+    // Assign the existing QA Responsable via the same secured Edge Function as the UI.
+    const { data: assignment, error: assignmentError } = await admin.functions.invoke('admin-manage-responsibles', {
+      body: { action: 'assign', user_id: managerProfile.id, establishment_id: created.id },
+    });
+    expect(assignmentError, 'Edge Function attribution Responsable').toBeNull();
+    expect(assignment?.success).toBeTruthy();
+
+    const { data: staffRow, error: staffError } = await admin
+      .from('establishment_staff')
+      .select('user_id,establishment_id,role,active')
+      .eq('user_id', managerProfile.id)
+      .eq('establishment_id', created.id)
+      .eq('role', 'MANAGER')
+      .eq('active', true)
+      .single();
+    expect(staffError, 'Rattachement Responsable vérifié en base').toBeNull();
+    expect(staffRow.establishment_id).toBe(created.id);
+
+    // The assigned Responsable must resolve the new establishment and reach the Dashboard.
+    const { error: managerLoginError } = await manager.auth.signInWithPassword({
+      email: process.env.E2E_RESPONSIBLE_EMAIL!,
+      password: process.env.E2E_RESPONSIBLE_PASSWORD!,
+    });
+    expect(managerLoginError).toBeNull();
+    const { data: accessible, error: accessibleError } = await manager.rpc('get_my_establishments');
+    expect(accessibleError).toBeNull();
+    expect((accessible ?? []).some((row: { id: string }) => row.id === created.id)).toBeTruthy();
+
+    await page.goto('/login');
+    await page.getByRole('button', { name: /Responsable/i }).click();
+    await page.locator('input[type="email"]').fill(process.env.E2E_RESPONSIBLE_EMAIL!);
+    await page.locator('input[type="password"]').fill(process.env.E2E_RESPONSIBLE_PASSWORD!);
+    await page.getByRole('button', { name: /Entrer dans KELYANI/i }).click();
+    await expect(page).toHaveURL(/\/dashboard(?:$|\/)/, { timeout: 30_000 });
+    await expect(page.getByRole('navigation', { name: 'Navigation principale' })).toBeVisible();
+  } finally {
+    // Restore the pre-existing QA Responsable to its original Riad Demo assignment.
+    const { data: restored, error: restoreError } = await admin.functions.invoke('admin-manage-responsibles', {
+      body: { action: 'assign', user_id: managerProfile.id, establishment_id: PRIMARY_ESTABLISHMENT },
+    });
+    assignmentRestored = !restoreError && Boolean(restored?.success);
+    await manager.auth.signOut();
+    await admin.auth.signOut();
+    expect(assignmentRestored, 'Le compte Responsable QA doit être restauré sur Riad Demo').toBeTruthy();
+  }
+
+  expect(createdEstablishmentId).toBeTruthy();
+});
