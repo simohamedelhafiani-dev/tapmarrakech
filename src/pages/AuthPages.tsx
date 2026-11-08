@@ -87,10 +87,10 @@ export function Login() {
     </form>
     {needsConfirmation && <div className="mt-4 rounded-xl border border-[#00DFA5]/40 bg-[#171717] p-4">
       <p className="text-sm text-white/65">Confirmez votre adresse pour activer votre compte KELYANI.</p>
-      <button type="button" disabled={resending || !email.trim()} onClick={resendConfirmation} className="mt-3 w-full rounded-xl border border-gold px-3 py-2 text-sm font-semibold text-[#00DFA5] disabled:opacity-50">{resending ? 'Envoi…' : 'Renvoyer l’e-mail de confirmation'}</button>
+      <button type="button" disabled={resending || !email.trim()} onClick={resendConfirmation} className="mt-3 w-full rounded-xl border border-[#00DFA5] px-3 py-2 text-sm font-semibold text-[#00DFA5] disabled:opacity-50">{resending ? 'Envoi…' : 'Renvoyer l’e-mail de confirmation'}</button>
       {resendMessage && <p role="status" className="mt-3 text-sm text-white/65">{resendMessage}</p>}
     </div>}
-    <div className="mt-5 flex justify-between text-xs"><Link to="/forgot-password" className="text-[#00DFA5] underline underline-offset-4">Mot de passe oublié ?</Link><Link to="/register" className="font-semibold text-gold">Créer un compte</Link></div>
+    <div className="mt-5 flex justify-between text-xs"><Link to="/forgot-password" className="text-[#00DFA5] underline underline-offset-4">Mot de passe oublié ?</Link><Link to="/register" className="font-semibold text-[#00DFA5]">Créer un compte</Link></div>
   </AuthShell>;
 }
 export function Register() {
@@ -208,7 +208,7 @@ export function Register() {
   </AuthShell>;
 }
 
-export function ForgotPassword() { const [email, setEmail] = useState(''); const [sent, setSent] = useState(false); const [error, setError] = useState(''); const submit = async (e: React.FormEvent) => { e.preventDefault(); setError(''); const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}/reset-password` }); if (resetError) { setError('Impossible d’envoyer le lien. Vérifiez l’adresse email et réessayez.'); return; } setSent(true); }; return <AuthShell eyebrow="Accès sécurisé" title="Réinitialiser l’accès.">{sent ? <div className="mt-9 rounded-2xl bg-[var(--kelyani-panel)] p-5 text-sm text-white/65"><Check className="mb-2 text-forest" />Si un compte correspond à cette adresse, vous recevrez un email avec les instructions.</div> : <form onSubmit={submit} className="mt-9 space-y-4"><Field icon={Mail} type="email" required placeholder="Adresse email" value={email} onChange={e => setEmail(e.target.value)} />{error && <p className="text-sm text-red-400">{error}</p>}<button className="w-full rounded-xl bg-[#00DFA5] py-3.5 text-sm font-semibold text-[#0D0D0D] transition hover:bg-[#00A982]">Recevoir le lien</button><Link to="/login" className="block text-center text-xs text-gold">Retour à la connexion</Link></form>}</AuthShell>; }
+export function ForgotPassword() { const [email, setEmail] = useState(''); const [sent, setSent] = useState(false); const [error, setError] = useState(''); const submit = async (e: React.FormEvent) => { e.preventDefault(); setError(''); const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}/reset-password` }); if (resetError) { setError('Impossible d’envoyer le lien. Vérifiez l’adresse email et réessayez.'); return; } setSent(true); }; return <AuthShell eyebrow="Accès sécurisé" title="Réinitialiser l’accès.">{sent ? <div className="mt-9 rounded-2xl bg-[var(--kelyani-panel)] p-5 text-sm text-white/65"><Check className="mb-2 text-forest" />Si un compte correspond à cette adresse, vous recevrez un email avec les instructions.</div> : <form onSubmit={submit} className="mt-9 space-y-4"><Field icon={Mail} type="email" required placeholder="Adresse email" value={email} onChange={e => setEmail(e.target.value)} />{error && <p className="text-sm text-red-400">{error}</p>}<button className="w-full rounded-xl bg-[#00DFA5] py-3.5 text-sm font-semibold text-[#0D0D0D] transition hover:bg-[#00A982]">Recevoir le lien</button><Link to="/login" className="block text-center text-xs text-[#00DFA5]">Retour à la connexion</Link></form>}</AuthShell>; }
 
 
 export function ResetPassword() {
@@ -333,7 +333,7 @@ export function EmailConfirmation() {
             {message && <p role="status" className="text-sm text-white/65">{message}</p>}
             <button disabled={resending} className="w-full rounded-xl bg-[#00DFA5] py-3 text-sm font-semibold text-[#0D0D0D] disabled:opacity-50">{resending ? 'Envoi…' : 'Renvoyer l’e-mail de confirmation'}</button>
           </form>
-          <Link to="/login" className="mt-5 block text-center text-xs text-gold">Retour à la connexion</Link>
+          <Link to="/login" className="mt-5 block text-center text-xs text-[#00DFA5]">Retour à la connexion</Link>
         </div>
       )}
     </AuthShell>
