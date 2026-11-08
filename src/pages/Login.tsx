@@ -109,12 +109,16 @@ export default function Login() {
               <div className="scene-back-lines"><i/><i/><i/></div>
               <div className="scene-back-chip"/>
             </div>
-            <div className="scene-refined-main-card">
-              <div className="scene-card-top"><span className="scene-card-brand"><b>K</b><span>KELYANI<small>LOYALTY PASS</small></span></span><span className="scene-card-wave">✳</span></div>
-              <div className="scene-card-label">VOTRE FIDÉLITÉ, VALORISÉE</div>
-              <div className="scene-card-name">Sarah M.</div>
-              <div className="scene-card-progress"><span/></div>
-              <div className="scene-card-bottom"><span>MEMBRE PRIVILÈGE</span><b>08 <small>/ 10 VISITES</small></b></div>
+            <div className="scene-refined-main-card scene-loyalty-pass">
+              <div className="loyalty-pass-head">
+                <div className="loyalty-pass-brand"><span className="loyalty-pass-logo">K</span><span><b>KELYANI</b><small>PROGRAMME FIDÉLITÉ</small></span></div>
+                <span className="loyalty-pass-tier">PRIVILÈGE</span>
+              </div>
+              <div className="loyalty-pass-stamp-title">CARTE À TAMPONS</div>
+              <div className="loyalty-pass-count"><b>08</b><span>/ 10</span></div>
+              <div className="loyalty-pass-stamps">{Array.from({length:10},(_,i)=><span key={i} className={i<8?'is-filled':''}>{i<8?'✦':''}</span>)}</div>
+              <div className="loyalty-pass-reward"><span className="loyalty-pass-gift">✧</span><span><small>VOTRE CADEAU</small><b>Une récompense vous attend</b><i>Plus que 2 visites</i></span><span className="loyalty-pass-progress">80%</span></div>
+              <div className="loyalty-pass-foot"><span>MEMBRE FIDÈLE</span><span>UNE VISITE = UN POINT</span></div>
               <div className="scene-card-shine"/>
             </div>
             <div className="scene-refined-stat scene-stat-reviews"><span className="scene-stat-icon">✦</span><span><small>AVIS CLIENTS</small><b>4.9 <em>★</em></b><i>Excellente réputation</i></span></div>
