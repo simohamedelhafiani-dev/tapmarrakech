@@ -45,7 +45,6 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
-import KelyaniMark from '@/components/brand/KelyaniMark';
 import LoyaltyStudio from '@/components/loyalty/LoyaltyStudio';
 import LoyaltyProgramCustomization from '@/components/LoyaltyProgramCustomization';
 import RecentActivity from '@/components/admin/RecentActivity';
@@ -610,7 +609,7 @@ export default function Admin() {
       <header className="admin-depth-topbar sticky top-0 z-50 border-b border-[#242424] bg-[#050505]/95 px-3 py-3 backdrop-blur-2xl sm:px-5">
         <div className="mx-auto flex max-w-[1700px] items-center gap-3">
           <button type="button" onClick={() => navigate('/admin')} className="flex shrink-0 items-center gap-3 text-left" aria-label="KELYANI">
-            <KelyaniMark size={52} />
+            <span className="grid h-10 w-10 place-items-center rounded-xl border border-[#00DFA5]/35 bg-[#00DFA5]/10 text-lg font-bold text-[#00DFA5]">K</span>
           </button>
 
           <div className="relative mx-auto hidden min-w-0 flex-1 max-w-2xl md:block">
@@ -5041,18 +5040,18 @@ function PDFReportsSection({ establishments }: { establishments: Establishment[]
 .doc-type{font-size:9px;text-transform:uppercase;letter-spacing:2px;color:#8a8b82;font-weight:700}
 h1{font-size:31px;line-height:1.08;letter-spacing:-1.2px;margin:28px 0 8px;color:#173d32} .subtitle{font-size:13px;color:#69716c;margin:0}
 .meta{display:flex;gap:24px;flex-wrap:wrap;margin-top:20px;color:#59625d;font-size:10px}.meta strong{display:block;color:#173d32;font-size:11px;margin-bottom:2px}
-.report-section{margin-top:28px;break-inside:auto}.section-heading{display:flex;align-items:center;gap:9px;border-bottom:1px solid #deddd7;padding-bottom:9px;margin-bottom:13px}.section-heading span{width:4px;height:20px;border-radius:4px;background:#c9a45c}.section-heading h2{font-size:18px;color:#173d32;margin:0}
+.report-section{margin-top:28px;break-inside:auto}.section-heading{display:flex;align-items:center;gap:9px;border-bottom:1px solid #deddd7;padding-bottom:9px;margin-bottom:13px}.section-heading span{width:4px;height:20px;border-radius:4px;background:#00DFA5}.section-heading h2{font-size:18px;color:#173d32;margin:0}
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:12px 0}.kpi{border:1px solid #e8e5de;border-radius:10px;padding:12px;background:#fafaf8;min-height:76px}.kpi-label{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:#7c837e;font-weight:700}.kpi-value{font-size:19px;font-weight:800;color:#173d32;margin-top:5px}.kpi-note{font-size:8px;color:#969b96;margin-top:2px}
-.insight{border-left:3px solid #c9a45c;background:#f7f3ea;padding:12px 14px;margin:15px 0;border-radius:0 8px 8px 0}.insight strong{color:#173d32}.insight p{margin:3px 0 0;color:#626b65}
+.insight{border-left:3px solid #00DFA5;background:#e8f7f2;padding:12px 14px;margin:15px 0;border-radius:0 8px 8px 0}.insight strong{color:#173d32}.insight p{margin:3px 0 0;color:#626b65}
 .table-wrap{border:1px solid #e4e2db;border-radius:10px;overflow:hidden;margin-top:15px}table{width:100%;border-collapse:collapse}th{background:#173d32;color:#fff;text-align:left;font-size:8px;text-transform:uppercase;letter-spacing:.7px;padding:8px}td{padding:8px;border-bottom:1px solid #eee;font-size:9px;vertical-align:top}tr:last-child td{border-bottom:0}.rating{font-weight:800;color:#173d32}.badge{display:inline-block;padding:2px 6px;border-radius:99px;font-size:8px;font-weight:700}.positive{background:#e8f2ed;color:#276044}.negative{background:#fbebeb;color:#a13b3b}.empty{text-align:center;border:1px dashed #ddd;padding:20px;color:#999;border-radius:9px}
 .footer{margin-top:35px;padding-top:12px;border-top:1px solid #e5e3dc;display:flex;justify-content:space-between;color:#929790;font-size:8px}.conf{color:#173d32;font-weight:700}
 @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.no-print{display:none!important}.report-section{break-inside:auto}.table-wrap{break-inside:auto}thead{display:table-header-group}}
 </style></head><body><div class="page">
-<div class="cover"><div class="brand"><div class="brand-logo"><img src="/kelyani-final.svg" alt="KELYANI"></div><div class="doc-type">Rapport de performance</div></div>
+<div class="cover"><div class="brand"><div class="brand-logo"><img src="/Logo%20Kelyani%20en%20d%C3%A9grad%C3%A9%20teal%20et%20vert.png" alt="KELYANI"></div><div class="doc-type">Rapport de performance</div></div>
 <h1>${escapeHtml(title)}</h1><p class="subtitle">${escapeHtml(selected.name)}</p>
 <div class="meta"><div><strong>Période</strong>${escapeHtml(periodLabel)}</div><div><strong>Généré le</strong>${generatedAt.toLocaleString('fr-FR')}</div><div><strong>Document</strong>Confidentiel</div></div></div>
 ${body}
-<div class="footer"><span><img src="/kelyani-final.svg" alt="KELYANI" style="height:18px;width:auto;object-fit:contain;display:block" /></span><span class="conf">${escapeHtml(selected.name)} · Document confidentiel</span></div>
+<div class="footer"><span><img src="/Logo%20Kelyani%20en%20d%C3%A9grad%C3%A9%20teal%20et%20vert.png" alt="KELYANI" style="height:18px;width:auto;object-fit:contain;display:block" /></span><span class="conf">${escapeHtml(selected.name)} · Document confidentiel</span></div>
 </div></body></html>`;
 
     const win = window.open('', '_blank', 'width=1000,height=900');
