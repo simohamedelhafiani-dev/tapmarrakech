@@ -1146,9 +1146,9 @@ html,body,#root{background:#050505!important;color:#fff}
   border-color:rgba(0,223,165,.3)!important;
 }
 .dashboard-depth-shell [class*="text-ink/"],
-.dashboard-depth-shell [class*="text-[#F5F5DC]"],
+.dashboard-depth-shell [class*="text-[#B5BEC3]"],
 .admin-depth-shell [class*="text-ink/"],
-.admin-depth-shell [class*="text-[#F5F5DC]"]{color:#B5BEC3!important}
+.admin-depth-shell [class*="text-[#B5BEC3]"]{color:#B5BEC3!important}
 .dashboard-depth-shell [class*="text-forest"],
 .admin-depth-shell [class*="text-forest"]{color:#00DFA5!important}
 .dashboard-depth-shell [class*="border-ink/"],
@@ -1209,11 +1209,11 @@ html,body,#root{background:#050505!important;color:#fff}
 .dashboard-depth-shell [class*="bg-[#00DFA5]"],
 .dashboard-depth-shell [class*="bg-[#00DFA5]"],
 .dashboard-depth-shell [class*="bg-[#00A982]"],
-.dashboard-depth-shell [class*="bg-[#00e5ff]"],
+.dashboard-depth-shell [class*="bg-[#00DFA5]"],
 .admin-depth-shell [class*="bg-[#00DFA5]"],
 .admin-depth-shell [class*="bg-[#00DFA5]"],
 .admin-depth-shell [class*="bg-[#00A982]"],
-.admin-depth-shell [class*="bg-[#00e5ff]"]{
+.admin-depth-shell [class*="bg-[#00DFA5]"]{
   background:#343A40!important;
   background-image:none!important;
 }
