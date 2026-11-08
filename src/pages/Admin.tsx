@@ -1230,10 +1230,10 @@ function AdminMetric({ icon: Icon, label, value, detail }: { icon: typeof Star; 
     <div
       data-kpi-label={label}
       data-kpi-value={String(value)}
-      className="group relative overflow-hidden rounded-2xl border border-white/[0.07] bg-[linear-gradient(145deg,#171717,#0C0C0C)] p-4 shadow-[0_14px_36px_rgba(0,0,0,0.18)] transition duration-200 hover:-translate-y-0.5 hover:border-[#00DFA5]/25 sm:rounded-[22px] sm:p-5"
+      className="group relative overflow-hidden rounded-2xl border border-white/[0.07] bg-[#343A40] p-4 shadow-[0_14px_36px_rgba(0,0,0,0.18)] transition duration-200 hover:-translate-y-0.5 hover:border-[#00DFA5]/25 sm:rounded-[22px] sm:p-5"
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="grid h-10 w-10 place-items-center rounded-xl border border-[#00DFA5]/15 bg-[#00DFA5]/[0.08] text-[#D9B76B]"><Icon size={18} /></div>
+        <div className="grid h-10 w-10 place-items-center rounded-xl border border-[#00DFA5]/15 bg-[#00DFA5]/[0.08] text-[#00DFA5]"><Icon size={18} /></div>
       </div>
       <p className="mt-4 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#FFFFFF]/45">{label}</p>
       <p className="mt-1 text-2xl font-semibold tracking-tight text-white sm:text-[28px]">{value}</p>
