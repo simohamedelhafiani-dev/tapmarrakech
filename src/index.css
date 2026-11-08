@@ -807,11 +807,13 @@ html,body,#root{background:#050505!important;color:#fff}
 ::selection{background:rgba(0,255,195,.35);color:#fff}
 :focus-visible{outline:2px solid #00E5FF!important;outline-offset:3px}
 #root [class*="text-[#00FFC3]"],#root [class*="text-[#00DFA5]"],#root [class*="text-[#00DFA5]"],#root [class*="text-[#00DFA5]"],#root [class*="text-[#00E5FF]"],#root [class*="text-[#00E5FF]"],#root [class*="text-[#00A982]"],#root [class*="text-gold"],#root [class*="text-forest"]{color:#00FFC3!important}
-#root [class*="bg-[#00FFC3]"],#root [class*="bg-[#00DFA5]"],#root [class*="bg-gold"],#root [class*="bg-forest"]{background-color:#00FFC3!important}
+#root [class*="bg-[#00FFC3]"],#root [class*="bg-[#00DFA5]"],#root [class*="bg-gold"]{background-color:#00DFA5!important}
+/* A semantic forest/page background must stay dark, never become an emerald panel. */
+#root [class*="bg-forest"]{background-color:#080A0B!important;background-image:none!important}
 #root [class*="border-[#00FFC3]"],#root [class*="border-[#00DFA5]"],#root [class*="border-gold"]{border-color:rgba(0,255,195,.35)!important}
 #root [class*="shadow-"][class*="rgba(0,255,195"],#root [class*="shadow-"][class*="rgba(0,223,165"]{--tw-shadow-color:rgba(0,255,195,.22)!important}
-#root [class*="from-[#00FFC3]"],#root [class*="from-[#00DFA5]"]{--tw-gradient-from:#00FFC3 var(--tw-gradient-from-position)!important}
-#root [class*="to-[#00DFA5]"],#root [class*="to-[#00DFA5]"],#root [class*="to-[#00A982]"]{--tw-gradient-to:#00A982 var(--tw-gradient-to-position)!important}
+#root [class*="from-[#00FFC3]"],#root [class*="from-[#00DFA5]"]{--tw-gradient-from:rgba(52,58,64,.96) var(--tw-gradient-from-position)!important}
+#root [class*="to-[#00DFA5]"],#root [class*="to-[#00A982]"]{--tw-gradient-to:rgba(8,10,11,.98) var(--tw-gradient-to-position)!important}
 #root .kelyani-sidebar,#root .admin-depth-nav{background:rgba(18,18,18,.82)!important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-color:rgba(0,255,195,.18)!important}
 #root [class*="rounded-2xl"][class*="border"],#root [class*="rounded-3xl"][class*="border"]{border-color:rgba(0,255,195,.18)!important}
 #root button[class*="bg-[#00FFC3]"],#root button[class*="bg-[#00DFA5]"],#root button[class*="bg-gold"],#root button[class*="bg-forest"]{background:linear-gradient(120deg,#00FFC3,#00DFA5 58%,#00A982)!important;color:#04110E!important;box-shadow:0 0 24px rgba(0,255,195,.16)!important}
