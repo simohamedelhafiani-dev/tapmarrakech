@@ -149,6 +149,14 @@ test('Parcours Client — inscription publique, 3 scans, récompense et assertio
   expect(Number(redemption?.new_points_balance)).toBe(0);
   expect(Number(redemption?.points_used)).toBe(3);
 
+  const { data: claimAfterRows, error: claimAfterError } = await publicClient.rpc(
+    'get_public_loyalty_reward_claim',
+    { p_claim_token: claim.claim_token },
+  );
+  expect(claimAfterError, 'Lecture publique de la réclamation après validation').toBeNull();
+  const claimAfter = Array.isArray(claimAfterRows) ? claimAfterRows[0] : claimAfterRows;
+  expect(claimAfter?.status).toBe('REDEEMED');
+
   const finalState = await verify(manager, card.customer_id);
   expect(Number(finalState.points_balance)).toBe(0);
   expect(Number(finalState.total_points_earned)).toBe(3);
