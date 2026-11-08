@@ -927,12 +927,6 @@ html, body, #root {
 #root [class*="bg-sky-"],
 #root [class*="bg-cyan-"],
 #root [class*="bg-indigo-"],
-#root [class*="bg-[#0"],
-#root [class*="bg-[#1"],
-#root [class*="bg-[#2"] {
-  background-color: #343A40 !important;
-  background-image: none !important;
-}
 /* Blue gradient utilities must not create blue blocks behind text. */
 #root [class*="from-blue-"],
 #root [class*="from-sky-"],
