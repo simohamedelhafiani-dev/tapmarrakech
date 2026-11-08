@@ -34,9 +34,9 @@ export default function EstablishmentCard({
               className="h-14 w-14 shrink-0 rounded-2xl border border-ink/5 bg-[#1A1A1A] object-cover"
             />
           ) : (
-            <div className="relative grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[#0D0D0D] text-[#D4AF37] shadow-lg shadow-forest/10">
+            <div className="relative grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[#0D0D0D] text-[#00DFA5] shadow-lg shadow-forest/10">
               <Building2 size={21} strokeWidth={1.8} />
-              <span className="absolute -bottom-1 -right-1 grid h-5 w-5 place-items-center rounded-full border-2 border-[#D4AF37] bg-gold">
+              <span className="absolute -bottom-1 -right-1 grid h-5 w-5 place-items-center rounded-full border-2 border-[#00DFA5] bg-gold">
                 <Sparkles size={9} className="text-forest" />
               </span>
             </div>
@@ -62,7 +62,7 @@ export default function EstablishmentCard({
         <button
           type="button"
           onClick={() => onOpen(establishment)}
-          className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-ink/8 bg-[#1A1A1A] text-ink/35 transition hover:border-forest/10 hover:bg-forest hover:text-[#F5F5DC]"
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-ink/8 bg-[#1A1A1A] text-ink/35 transition hover:border-forest/10 hover:bg-forest hover:text-[#B5BEC3]"
           aria-label={`Ouvrir ${establishment.name}`}
         >
           →
@@ -75,9 +75,9 @@ export default function EstablishmentCard({
             className={[
               'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold',
               isActive
-                ? 'bg-[#D4AF37]/12 text-[#D4AF37]'
+                ? 'bg-[#00DFA5]/12 text-[#00DFA5]'
                 : isTrial
-                  ? 'bg-gold/15 text-[#D4AF37]'
+                  ? 'bg-gold/15 text-[#00DFA5]'
                   : 'bg-ink/5 text-ink/55',
             ].join(' ')}
           >
