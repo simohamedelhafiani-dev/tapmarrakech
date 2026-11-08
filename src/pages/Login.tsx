@@ -106,12 +106,21 @@ export default function Login() {
             <p className="mt-6 max-w-lg text-base leading-7 text-[#B5BEC3]">
               Pilotez vos avis, fidélisez vos clients et développez votre activité depuis un seul espace.
             </p>
-            <div className="mt-10 grid gap-3 sm:grid-cols-3">
-              {['Avis clients', 'Fidélisation', 'Analyses'].map((item) => (
-                <div key={item} className="rounded-xl border border-white/10 bg-[#343A40] px-4 py-4 text-sm font-medium text-[#F2F5F6]">
-                  <span className="mb-3 block h-1 w-7 rounded-full bg-[#00DFA5]" />{item}
+            <div className="kelyani-login-stage mt-12" aria-label="Aperçu de la plateforme KELYANI">
+              <div className="kelyani-orbit kelyani-orbit-one" />
+              <div className="kelyani-orbit kelyani-orbit-two" />
+              <div className="kelyani-float-chip kelyani-chip-review"><span className="kelyani-chip-dot" /> Nouvel avis <strong>5.0 ★</strong></div>
+              <div className="kelyani-float-chip kelyani-chip-loyalty"><span className="kelyani-chip-icon">K</span> Client fidèle <strong>+1 récompense</strong></div>
+              <div className="kelyani-dashboard-card">
+                <div className="kelyani-card-topline"><span className="kelyani-mini-mark">K</span><span><b>KELYANI</b><small> CUSTOMER INTELLIGENCE</small></span><i>● LIVE</i></div>
+                <div className="kelyani-card-heading"><span>Vue d'ensemble</span><small>APERÇU DE VOTRE ACTIVITÉ</small></div>
+                <div className="kelyani-metric-row">
+                  <div className="kelyani-metric"><small>RÉPUTATION</small><strong>4.9 <em>/5</em></strong><span>★★★★★</span></div>
+                  <div className="kelyani-metric kelyani-metric-accent"><small>FIDÉLITÉ</small><strong>+28<em>%</em></strong><span>Clients qui reviennent</span></div>
                 </div>
-              ))}
+                <div className="kelyani-chart-panel"><div><small>ENGAGEMENT CLIENT</small><b>+18.6%</b></div><svg viewBox="0 0 520 90" role="img" aria-label="Courbe de progression"><defs><linearGradient id="kelyaniChartFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="#00DFA5" stopOpacity=".32"/><stop offset="100%" stopColor="#00DFA5" stopOpacity="0"/></linearGradient></defs><path d="M0 72 C35 65 45 44 82 54 S132 32 164 42 S210 18 248 34 S302 15 338 27 S390 10 420 18 S480 4 520 8 L520 90 L0 90Z" fill="url(#kelyaniChartFill)"/><path d="M0 72 C35 65 45 44 82 54 S132 32 164 42 S210 18 248 34 S302 15 338 27 S390 10 420 18 S480 4 520 8" fill="none" stroke="#00DFA5" strokeWidth="2.5"/></svg></div>
+                <div className="kelyani-card-footer"><span>● Données synchronisées</span><span>RÉPUTATION · FIDÉLITÉ · CROISSANCE</span></div>
+              </div>
             </div>
           </div>
           <p className="text-xs text-[#B5BEC3]">KELYANI · L’art de la relation client</p>
