@@ -1,0 +1,214 @@
+import { test, expect } from '@playwright/test';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+
+const STAGING_REF = 'jsllksnmylpxcgqaeidq';
+const PRIMARY_ESTABLISHMENT = '9366af04-bda7-4fb1-a521-8c08868b27ad';
+const SECOND_ESTABLISHMENT = 'aaacb2ac-ef2e-4318-8ec7-01e9f271681c';
+
+function stagingClient() {
+  const url = process.env.E2E_SUPABASE_URL!;
+  expect(new URL(url).hostname).toBe(`${STAGING_REF}.supabase.co`);
+  return createClient(url, process.env.E2E_SUPABASE_ANON_KEY!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}
+
+async function verify(manager: SupabaseClient, customerId: string) {
+  const { data, error } = await manager.rpc('fn_test_verify_loyalty_data', {
+    p_establishment_id: PRIMARY_ESTABLISHMENT,
+    p_customer_id: customerId,
+  });
+  expect(error, 'Pont SQL Staging doit autoriser le Responsable sur son établissement').toBeNull();
+  expect(data?.customer_id).toBe(customerId);
+  expect(data?.establishment_id).toBe(PRIMARY_ESTABLISHMENT);
+  return data as {
+    customer_id: string;
+    establishment_id: string;
+    points_balance: number;
+    total_points_earned: number;
+    total_points_redeemed: number;
+    visit_count: number;
+    transactions: Array<{ id: string; type: string; points: number; amount: number | null }>;
+  };
+}
+
+test('Parcours Client — inscription publique, 3 scans, récompense et assertions SQL après chaque mutation', async () => {
+  const manager = stagingClient();
+  const publicClient = stagingClient();
+
+  const { error: loginError } = await manager.auth.signInWithPassword({
+    email: process.env.E2E_RESPONSIBLE_EMAIL!,
+    password: process.env.E2E_RESPONSIBLE_PASSWORD!,
+  });
+  expect(loginError).toBeNull();
+
+  const { data: establishments, error: accessError } = await manager.rpc('get_my_establishments');
+  expect(accessError).toBeNull();
+  expect((establishments ?? []).some((item: { id: string }) => item.id === PRIMARY_ESTABLISHMENT)).toBeTruthy();
+
+  const { data: scannerRows, error: scannerError } = await manager.rpc(
+    'get_or_create_establishment_scanner_link',
+    { p_establishment_id: PRIMARY_ESTABLISHMENT },
+  );
+  expect(scannerError).toBeNull();
+  const scanner = Array.isArray(scannerRows) ? scannerRows[0] : scannerRows;
+  expect(scanner?.scanner_token).toBeTruthy();
+
+  const unique = Date.now().toString().slice(-8);
+  const phone = `+2126${unique}`;
+  const firstName = `QA-${unique}`;
+
+  // 1) Public loyalty enrollment (the actual public enrollment RPC used by /loyalty/join).
+  const { data: enrollmentRows, error: enrollmentError } = await publicClient.rpc(
+    'register_public_loyalty_customer_for_enrollment_v2',
+    {
+      p_establishment_id: PRIMARY_ESTABLISHMENT,
+      p_first_name: firstName,
+      p_last_name: 'Automation',
+      p_phone: phone,
+      p_birth_date: null,
+      p_email: null,
+      p_interests: [],
+      p_marketing_consent: false,
+      p_notification_consent: false,
+      p_preferred_channel: 'NONE',
+      p_visit_frequency: null,
+    },
+  );
+  expect(enrollmentError, 'Inscription publique').toBeNull();
+  const enrollment = Array.isArray(enrollmentRows) ? enrollmentRows[0] : enrollmentRows;
+  expect(enrollment?.access_token).toBeTruthy();
+
+  const { data: cardRows, error: cardError } = await publicClient.rpc('get_public_loyalty_card', {
+    p_access_token: enrollment.access_token,
+  });
+  expect(cardError).toBeNull();
+  const card = Array.isArray(cardRows) ? cardRows[0] : cardRows;
+  expect(card?.first_name).toBe(firstName);
+  expect(card?.establishment_id).toBe(PRIMARY_ESTABLISHMENT);
+
+  // SQL proof of customer/profile + loyalty card insertion before earning points.
+  const initial = await verify(manager, card.customer_id);
+  expect(initial.points_balance).toBe(0);
+  expect(initial.total_points_earned).toBe(0);
+  expect(initial.visit_count).toBe(0);
+  expect(initial.transactions).toHaveLength(0);
+
+  // 2) Three real scanner RPC calls, each followed by SQL verification.
+  for (let visit = 1; visit <= 3; visit += 1) {
+    const invoice = `QA-${unique}-VISIT-${visit}`;
+    const { data: newBalance, error } = await publicClient.rpc('add_loyalty_points_by_scanner', {
+      p_scanner_token: scanner.scanner_token,
+      p_customer_id: card.customer_id,
+      p_amount: 1,
+      p_invoice_number: invoice,
+      p_description: `Playwright E2E visit ${visit}`,
+    });
+    expect(error, `Scan ${visit} doit réussir`).toBeNull();
+    expect(Number(newBalance)).toBe(visit);
+
+    const state = await verify(manager, card.customer_id);
+    expect(Number(state.points_balance)).toBe(visit);
+    expect(Number(state.total_points_earned)).toBe(visit);
+    expect(Number(state.visit_count)).toBe(visit);
+    expect(state.transactions.filter((tx) => tx.type === 'EARN')).toHaveLength(visit);
+    expect(state.transactions.some((tx) => tx.type === 'EARN' && tx.points === 1)).toBeTruthy();
+  }
+
+  // 3) Create a 3-point gift, claim it from the public loyalty-card token, redeem at scanner.
+  const rewardName = `QA Reward ${unique}`;
+  const { data: rewardId, error: rewardError } = await manager.rpc('create_loyalty_reward', {
+    p_establishment_id: PRIMARY_ESTABLISHMENT,
+    p_name: rewardName,
+    p_description: 'Temporary Playwright Staging fixture',
+    p_points_required: 3,
+    p_reward_type: 'GIFT',
+    p_discount_percent: null,
+    p_discount_max_amount: null,
+  });
+  expect(rewardError, 'Création récompense par Responsable').toBeNull();
+  expect(rewardId).toBeTruthy();
+
+  const { data: claimRows, error: claimError } = await publicClient.rpc('create_public_loyalty_reward_claim', {
+    p_access_token: enrollment.access_token,
+    p_reward_id: rewardId,
+  });
+  expect(claimError, 'Réclamation publique de la récompense').toBeNull();
+  const claim = Array.isArray(claimRows) ? claimRows[0] : claimRows;
+  expect(claim?.claim_token).toBeTruthy();
+  expect(claim?.points_required).toBe(3);
+
+  const { data: redemptionRows, error: redemptionError } = await publicClient.rpc('redeem_loyalty_reward_claim', {
+    p_scanner_token: scanner.scanner_token,
+    p_claim_token: claim.claim_token,
+    p_invoice_amount: null,
+    p_invoice_number: `QA-${unique}-REWARD`,
+  });
+  expect(redemptionError, 'Validation de la récompense au scanner').toBeNull();
+  const redemption = Array.isArray(redemptionRows) ? redemptionRows[0] : redemptionRows;
+  expect(Number(redemption?.new_points_balance)).toBe(0);
+  expect(Number(redemption?.points_used)).toBe(3);
+
+  const finalState = await verify(manager, card.customer_id);
+  expect(Number(finalState.points_balance)).toBe(0);
+  expect(Number(finalState.total_points_earned)).toBe(3);
+  expect(Number(finalState.total_points_redeemed)).toBe(3);
+  expect(Number(finalState.visit_count)).toBe(3);
+  expect(finalState.transactions.filter((tx) => tx.type === 'EARN')).toHaveLength(3);
+  const rewardTransactions = finalState.transactions.filter((tx) => tx.type === 'REDEEM');
+  expect(rewardTransactions).toHaveLength(1);
+  expect(Number(rewardTransactions[0].points)).toBe(-3);
+
+  await manager.auth.signOut();
+});
+
+test('Intrus — scanner d’un autre établissement ne peut pas créditer le client QA', async () => {
+  const manager = stagingClient();
+  const publicClient = stagingClient();
+  const { error: loginError } = await manager.auth.signInWithPassword({
+    email: process.env.E2E_RESPONSIBLE_EMAIL!,
+    password: process.env.E2E_RESPONSIBLE_PASSWORD!,
+  });
+  expect(loginError).toBeNull();
+
+  const { data: scannerRows, error: scannerError } = await manager.rpc(
+    'get_or_create_establishment_scanner_link',
+    { p_establishment_id: SECOND_ESTABLISHMENT },
+  );
+  // If the manager is not assigned to the second establishment, the permission
+  // denial itself is the expected secure outcome; the admin-specific cross-tenant
+  // test is deliberately not simulated by bypassing RLS.
+  if (scannerError) {
+    expect(scannerError.message.toLowerCase()).toMatch(/not authorized|access denied|permission/);
+    await manager.auth.signOut();
+    return;
+  }
+  const scanner = Array.isArray(scannerRows) ? scannerRows[0] : scannerRows;
+  expect(scanner?.scanner_token).toBeTruthy();
+
+  const { data: customerRows, error: customerError } = await manager
+    .from('loyalty_customers')
+    .select('id')
+    .eq('establishment_id', PRIMARY_ESTABLISHMENT)
+    .limit(1);
+  expect(customerError).toBeNull();
+  expect(customerRows?.length).toBeGreaterThan(0);
+
+  const customerId = customerRows![0].id;
+  const before = await verify(manager, customerId);
+  const { error: attackError } = await publicClient.rpc('add_loyalty_points_by_scanner', {
+    p_scanner_token: scanner.scanner_token,
+    p_customer_id: customerId,
+    p_amount: 999,
+    p_invoice_number: `QA-INTRUDER-${Date.now()}`,
+    p_description: 'Cross-establishment attack simulation',
+  });
+  expect(attackError, 'Le scanner B ne doit pas modifier un client de A').not.toBeNull();
+  const after = await verify(manager, customerId);
+  expect(after.points_balance).toBe(before.points_balance);
+  expect(after.total_points_earned).toBe(before.total_points_earned);
+  expect(after.visit_count).toBe(before.visit_count);
+  expect(after.transactions).toHaveLength(before.transactions.length);
+
+  await manager.auth.signOut();
+});
