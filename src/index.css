@@ -1174,3 +1174,44 @@ html,body,#root{background:#050505!important;color:#fff}
 .admin-depth-shell .recharts-cartesian-grid line{stroke:rgba(181,190,195,.14)}
 /* Avoid low-contrast blue text sitting on blue tiles: blue is text-only on Nardo surfaces. */
 .dashboard-depth-shell [class*="text-cyan-"],.admin-depth-shell [class*="text-cyan-"]{color:#00D9F5!important}
+
+
+/* STRICT ACCENT RULE: cyan/blue is NEVER a background or gradient fill. */
+.dashboard-depth-shell [class*="bg-cyan-"],
+.dashboard-depth-shell [class*="bg-sky-"],
+.dashboard-depth-shell [class*="bg-blue-"],
+.dashboard-depth-shell [class*="bg-indigo-"],
+.admin-depth-shell [class*="bg-cyan-"],
+.admin-depth-shell [class*="bg-sky-"],
+.admin-depth-shell [class*="bg-blue-"],
+.admin-depth-shell [class*="bg-indigo-"]{
+  background:#343A40!important;
+  background-image:none!important;
+}
+.dashboard-depth-shell [class*="from-cyan-"],
+.dashboard-depth-shell [class*="to-cyan-"],
+.dashboard-depth-shell [class*="via-cyan-"],
+.dashboard-depth-shell [class*="from-sky-"],
+.dashboard-depth-shell [class*="to-sky-"],
+.dashboard-depth-shell [class*="via-sky-"],
+.admin-depth-shell [class*="from-cyan-"],
+.admin-depth-shell [class*="to-cyan-"],
+.admin-depth-shell [class*="via-cyan-"],
+.admin-depth-shell [class*="from-sky-"],
+.admin-depth-shell [class*="to-sky-"],
+.admin-depth-shell [class*="via-sky-"]{
+  --tw-gradient-from:transparent!important;
+  --tw-gradient-to:transparent!important;
+  --tw-gradient-stops:transparent!important;
+}
+.dashboard-depth-shell [class*="bg-[#00D9F5]"],
+.dashboard-depth-shell [class*="bg-[#00d9f5]"],
+.dashboard-depth-shell [class*="bg-[#00E5FF]"],
+.dashboard-depth-shell [class*="bg-[#00e5ff]"],
+.admin-depth-shell [class*="bg-[#00D9F5]"],
+.admin-depth-shell [class*="bg-[#00d9f5]"],
+.admin-depth-shell [class*="bg-[#00E5FF]"],
+.admin-depth-shell [class*="bg-[#00e5ff]"]{
+  background:#343A40!important;
+  background-image:none!important;
+}
