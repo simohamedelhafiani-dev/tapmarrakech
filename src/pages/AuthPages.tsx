@@ -7,10 +7,10 @@ import KelyaniMark from '@/components/brand/KelyaniMark';
 function AuthShell({ children, title, eyebrow }: { children: React.ReactNode; title: string; eyebrow: string }) {
   return (
     <div className="grid min-h-screen bg-[#0D0D0D] lg:grid-cols-[1fr_1.1fr]">
-      <div className="hidden bg-[#0D0D0D] p-12 text-white lg:flex lg:flex-col lg:justify-between border-r border-[#00FFC3]/15">
+      <div className="hidden bg-[#0D0D0D] p-12 text-white lg:flex lg:flex-col lg:justify-between border-r border-[#00DFA5]/15">
         <div className="flex items-center"><KelyaniMark size={210} /></div>
         <div>
-          <p className="mb-5 text-xs font-semibold uppercase tracking-[0.25em] text-[#00FFC3]">La voix de vos clients</p>
+          <p className="mb-5 text-xs font-semibold uppercase tracking-[0.25em] text-[#00DFA5]">La voix de vos clients</p>
           <h2 className="max-w-md font-display text-5xl leading-[1.1] text-[#FFFFFF]">Transformez chaque retour en fidélité.</h2>
           <p className="mt-6 max-w-sm text-sm leading-7 text-white/55">Une expérience simple pour vos clients. Des insights précieux pour votre établissement.</p>
         </div>
@@ -19,8 +19,8 @@ function AuthShell({ children, title, eyebrow }: { children: React.ReactNode; ti
       <div className="flex items-center justify-center bg-[#0D0D0D] px-6 py-12">
         <div className="w-full max-w-[420px]">
           <div className="mb-10 flex items-center lg:hidden"><KelyaniMark size={170} /></div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#00FFC3]">{eyebrow}</p>
-          <h1 className="mt-3 font-display text-4xl text-[#00FFC3]">{title}</h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#00DFA5]">{eyebrow}</p>
+          <h1 className="mt-3 font-display text-4xl text-[#00DFA5]">{title}</h1>
           {children}
         </div>
       </div>
@@ -29,8 +29,8 @@ function AuthShell({ children, title, eyebrow }: { children: React.ReactNode; ti
 }
 function Field({ icon: Icon, ...props }: { icon: typeof Mail } & React.InputHTMLAttributes<HTMLInputElement>) {
   return <div className="relative">
-    <Icon size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#00FFC3]/65" />
-    <input {...props} className="w-full rounded-xl border border-[#00FFC3]/20 bg-[#171717] py-3 pl-10 pr-3 text-sm text-[#FFFFFF] placeholder:text-white/40 outline-none transition focus:border-[#00FFC3] focus:ring-2 focus:ring-[#00FFC3]/20" />
+    <Icon size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#00DFA5]/65" />
+    <input {...props} className="w-full rounded-xl border border-[#00DFA5]/20 bg-[#171717] py-3 pl-10 pr-3 text-sm text-[#FFFFFF] placeholder:text-white/40 outline-none transition focus:border-[#00DFA5] focus:ring-2 focus:ring-[#00DFA5]/20" />
   </div>;
 }
 export function Login() {
@@ -83,14 +83,14 @@ export function Login() {
       <Field icon={Mail} type="email" required placeholder="Adresse email" value={email} onChange={e => setEmail(e.target.value)} />
       <Field icon={LockKeyhole} type="password" required placeholder="Mot de passe" value={password} onChange={e => setPassword(e.target.value)} />
       {error && <p className="text-sm text-red-400">{error}</p>}
-      <button disabled={busy} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#00FFC3] py-3.5 text-sm font-semibold text-[#0D0D0D] transition hover:bg-[#00E5FF] disabled:opacity-50">{busy ? 'Connexion…' : 'Se connecter'} <ArrowRight size={16} /></button>
+      <button disabled={busy} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#00DFA5] py-3.5 text-sm font-semibold text-[#0D0D0D] transition hover:bg-[#00A982] disabled:opacity-50">{busy ? 'Connexion…' : 'Se connecter'} <ArrowRight size={16} /></button>
     </form>
-    {needsConfirmation && <div className="mt-4 rounded-xl border border-[#00FFC3]/40 bg-[#171717] p-4">
+    {needsConfirmation && <div className="mt-4 rounded-xl border border-[#00DFA5]/40 bg-[#171717] p-4">
       <p className="text-sm text-white/65">Confirmez votre adresse pour activer votre compte KELYANI.</p>
-      <button type="button" disabled={resending || !email.trim()} onClick={resendConfirmation} className="mt-3 w-full rounded-xl border border-gold px-3 py-2 text-sm font-semibold text-[#00FFC3] disabled:opacity-50">{resending ? 'Envoi…' : 'Renvoyer l’e-mail de confirmation'}</button>
+      <button type="button" disabled={resending || !email.trim()} onClick={resendConfirmation} className="mt-3 w-full rounded-xl border border-gold px-3 py-2 text-sm font-semibold text-[#00DFA5] disabled:opacity-50">{resending ? 'Envoi…' : 'Renvoyer l’e-mail de confirmation'}</button>
       {resendMessage && <p role="status" className="mt-3 text-sm text-white/65">{resendMessage}</p>}
     </div>}
-    <div className="mt-5 flex justify-between text-xs"><Link to="/forgot-password" className="text-[#00FFC3] underline underline-offset-4">Mot de passe oublié ?</Link><Link to="/register" className="font-semibold text-gold">Créer un compte</Link></div>
+    <div className="mt-5 flex justify-between text-xs"><Link to="/forgot-password" className="text-[#00DFA5] underline underline-offset-4">Mot de passe oublié ?</Link><Link to="/register" className="font-semibold text-gold">Créer un compte</Link></div>
   </AuthShell>;
 }
 export function Register() {
@@ -186,10 +186,10 @@ export function Register() {
           <Field icon={LockKeyhole} type="text" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} minLength={6} required placeholder="Code de confirmation à 6 chiffres" value={token} onChange={e => setToken(e.target.value.replace(/\D/g, '').slice(0, 6))} />
           {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
           {notice && <p role="status" className="text-sm text-white/65">{notice}</p>}
-          <button disabled={verifying || token.length !== 6} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#00FFC3] py-3.5 text-sm font-semibold text-[#0D0D0D] disabled:opacity-50">{verifying ? 'Vérification…' : 'Confirmer mon adresse'} <ArrowRight size={16} /></button>
+          <button disabled={verifying || token.length !== 6} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#00DFA5] py-3.5 text-sm font-semibold text-[#0D0D0D] disabled:opacity-50">{verifying ? 'Vérification…' : 'Confirmer mon adresse'} <ArrowRight size={16} /></button>
         </form>
-        <button type="button" onClick={resendCode} disabled={resending || !form.email.trim()} className="w-full text-center text-sm font-semibold text-[#00FFC3] disabled:opacity-50">{resending ? 'Envoi…' : 'Renvoyer un code'}</button>
-        {!pendingVerification && <button type="button" onClick={() => { setEnterExistingCode(false); setToken(''); setError(''); setNotice(''); }} className="w-full text-center text-xs text-white/50 hover:text-[#00FFC3]">Retour à la création du compte</button>}
+        <button type="button" onClick={resendCode} disabled={resending || !form.email.trim()} className="w-full text-center text-sm font-semibold text-[#00DFA5] disabled:opacity-50">{resending ? 'Envoi…' : 'Renvoyer un code'}</button>
+        {!pendingVerification && <button type="button" onClick={() => { setEnterExistingCode(false); setToken(''); setError(''); setNotice(''); }} className="w-full text-center text-xs text-white/50 hover:text-[#00DFA5]">Retour à la création du compte</button>}
         <p className="text-center text-xs text-white/40">Vérifiez également vos courriers indésirables.</p>
       </div>
     ) : (
@@ -199,16 +199,16 @@ export function Register() {
           <Field icon={Mail} type="email" required placeholder="Adresse email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
           <Field icon={LockKeyhole} type="password" minLength={8} required placeholder="Mot de passe (8 caractères minimum)" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
           {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
-          <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#00FFC3] py-3.5 text-sm font-semibold text-[#0D0D0D] transition hover:bg-[#00E5FF]">Créer mon compte <ArrowRight size={16} /></button>
+          <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#00DFA5] py-3.5 text-sm font-semibold text-[#0D0D0D] transition hover:bg-[#00A982]">Créer mon compte <ArrowRight size={16} /></button>
         </form>
-        <button type="button" onClick={() => { setEnterExistingCode(true); setPendingVerification(false); setError(''); setNotice(''); setToken(''); }} className="mt-5 w-full text-center text-sm font-semibold text-[#00FFC3] hover:text-[#00E5FF]">J’ai déjà un code de validation</button>
-        <p className="mt-4 text-center text-xs text-white/50">Déjà inscrit ? <Link to="/login" className="font-semibold text-[#00FFC3]">Se connecter</Link></p>
+        <button type="button" onClick={() => { setEnterExistingCode(true); setPendingVerification(false); setError(''); setNotice(''); setToken(''); }} className="mt-5 w-full text-center text-sm font-semibold text-[#00DFA5] hover:text-[#00A982]">J’ai déjà un code de validation</button>
+        <p className="mt-4 text-center text-xs text-white/50">Déjà inscrit ? <Link to="/login" className="font-semibold text-[#00DFA5]">Se connecter</Link></p>
       </>
     )}
   </AuthShell>;
 }
 
-export function ForgotPassword() { const [email, setEmail] = useState(''); const [sent, setSent] = useState(false); const [error, setError] = useState(''); const submit = async (e: React.FormEvent) => { e.preventDefault(); setError(''); const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}/reset-password` }); if (resetError) { setError('Impossible d’envoyer le lien. Vérifiez l’adresse email et réessayez.'); return; } setSent(true); }; return <AuthShell eyebrow="Accès sécurisé" title="Réinitialiser l’accès.">{sent ? <div className="mt-9 rounded-2xl bg-[var(--kelyani-panel)] p-5 text-sm text-white/65"><Check className="mb-2 text-forest" />Si un compte correspond à cette adresse, vous recevrez un email avec les instructions.</div> : <form onSubmit={submit} className="mt-9 space-y-4"><Field icon={Mail} type="email" required placeholder="Adresse email" value={email} onChange={e => setEmail(e.target.value)} />{error && <p className="text-sm text-red-400">{error}</p>}<button className="w-full rounded-xl bg-[#00FFC3] py-3.5 text-sm font-semibold text-[#0D0D0D] transition hover:bg-[#00E5FF]">Recevoir le lien</button><Link to="/login" className="block text-center text-xs text-gold">Retour à la connexion</Link></form>}</AuthShell>; }
+export function ForgotPassword() { const [email, setEmail] = useState(''); const [sent, setSent] = useState(false); const [error, setError] = useState(''); const submit = async (e: React.FormEvent) => { e.preventDefault(); setError(''); const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}/reset-password` }); if (resetError) { setError('Impossible d’envoyer le lien. Vérifiez l’adresse email et réessayez.'); return; } setSent(true); }; return <AuthShell eyebrow="Accès sécurisé" title="Réinitialiser l’accès.">{sent ? <div className="mt-9 rounded-2xl bg-[var(--kelyani-panel)] p-5 text-sm text-white/65"><Check className="mb-2 text-forest" />Si un compte correspond à cette adresse, vous recevrez un email avec les instructions.</div> : <form onSubmit={submit} className="mt-9 space-y-4"><Field icon={Mail} type="email" required placeholder="Adresse email" value={email} onChange={e => setEmail(e.target.value)} />{error && <p className="text-sm text-red-400">{error}</p>}<button className="w-full rounded-xl bg-[#00DFA5] py-3.5 text-sm font-semibold text-[#0D0D0D] transition hover:bg-[#00A982]">Recevoir le lien</button><Link to="/login" className="block text-center text-xs text-gold">Retour à la connexion</Link></form>}</AuthShell>; }
 
 
 export function ResetPassword() {
@@ -258,7 +258,7 @@ export function ResetPassword() {
           <Field icon={LockKeyhole} type="password" minLength={8} required placeholder="Nouveau mot de passe (8 caractères minimum)" value={password} onChange={e => setPassword(e.target.value)} />
           <Field icon={LockKeyhole} type="password" minLength={8} required placeholder="Confirmer le mot de passe" value={confirmation} onChange={e => setConfirmation(e.target.value)} />
           {error && <p className="text-sm text-red-400">{error}</p>}
-          <button disabled={saving} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#00FFC3] py-3.5 text-sm font-semibold text-[#0D0D0D] transition hover:bg-[#00E5FF] disabled:opacity-50">
+          <button disabled={saving} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#00DFA5] py-3.5 text-sm font-semibold text-[#0D0D0D] transition hover:bg-[#00A982] disabled:opacity-50">
             {saving ? 'Mise à jour…' : 'Enregistrer le nouveau mot de passe'} <ArrowRight size={16} />
           </button>
         </form>
@@ -323,7 +323,7 @@ export function EmailConfirmation() {
         <div className="mt-9 rounded-2xl border border-[var(--kelyani-border)] bg-[var(--kelyani-panel)] p-5 text-sm text-white/65">
           <Check className="mb-3 text-forest" />
           Votre adresse e-mail est confirmée. Vous pouvez maintenant vous connecter à KELYANI.
-          <button type="button" onClick={() => navigate('/login')} className="mt-5 w-full rounded-xl bg-[#00FFC3] py-3 font-semibold text-[#0D0D0D]">Se connecter</button>
+          <button type="button" onClick={() => navigate('/login')} className="mt-5 w-full rounded-xl bg-[#00DFA5] py-3 font-semibold text-[#0D0D0D]">Se connecter</button>
         </div>
       ) : (
         <div className="mt-9 rounded-2xl border border-[var(--kelyani-border)] bg-[var(--kelyani-panel)] p-5">
@@ -331,7 +331,7 @@ export function EmailConfirmation() {
           <form onSubmit={resend} className="mt-5 space-y-3">
             <Field icon={Mail} type="email" required placeholder="Adresse email utilisée à l’inscription" value={email} onChange={e => setEmail(e.target.value)} />
             {message && <p role="status" className="text-sm text-white/65">{message}</p>}
-            <button disabled={resending} className="w-full rounded-xl bg-[#00FFC3] py-3 text-sm font-semibold text-[#0D0D0D] disabled:opacity-50">{resending ? 'Envoi…' : 'Renvoyer l’e-mail de confirmation'}</button>
+            <button disabled={resending} className="w-full rounded-xl bg-[#00DFA5] py-3 text-sm font-semibold text-[#0D0D0D] disabled:opacity-50">{resending ? 'Envoi…' : 'Renvoyer l’e-mail de confirmation'}</button>
           </form>
           <Link to="/login" className="mt-5 block text-center text-xs text-gold">Retour à la connexion</Link>
         </div>
