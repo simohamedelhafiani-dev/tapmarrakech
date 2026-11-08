@@ -968,3 +968,22 @@ html, body, #root {
   color: #00DFA5 !important;
   background: rgba(0,223,165,.09) !important;
 }
+
+
+/* Complete Nardo card treatment across app routes and feature screens */
+#root div[class*="rounded"][class*="border"],
+#root section[class*="rounded"][class*="border"],
+#root article[class*="rounded"][class*="border"] {
+  background-color: #343A40;
+  border-color: rgba(181,190,195,.25);
+}
+#root [class~="bg-white"],
+#root [class~="bg-slate-50"],
+#root [class~="bg-slate-100"],
+#root [class~="bg-gray-50"],
+#root [class~="bg-gray-100"],
+#root [class~="bg-zinc-50"],
+#root [class~="bg-zinc-100"] {
+  background-color: #343A40 !important;
+  color: #F2F5F6;
+}
