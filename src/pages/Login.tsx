@@ -95,9 +95,9 @@ export default function Login() {
       <div className="login-v2-layout">
         <section className="login-v2-visual">
           <div className="login-v2-copy">
-            <span className="login-v2-eyebrow"><i/> CUSTOMER EXPERIENCE PLATFORM</span>
-            <h1>La relation client,<br/><span>en mouvement.</span></h1>
-            <p>Réputation, fidélité et connaissance client réunies dans une expérience intelligente.</p>
+            <span className="login-v2-eyebrow"><i/> L’ART DE LA RELATION CLIENT</span>
+            <h1>Chaque client compte.<br/><span>Chaque retour rapporte.</span></h1>
+            <p>KELYANI transforme chaque interaction en une relation durable : valorisez vos avis, récompensez la fidélité et donnez à vos clients une vraie raison de revenir. Plus de visites, plus d’achats répétés, un chiffre d’affaires qui progresse.</p>
           </div>
           <div className="login-v2-scene login-v2-scene-refined" aria-label="Aperçu de l'expérience KELYANI">
             <div className="scene-refined-grid"/>
