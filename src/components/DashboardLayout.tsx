@@ -637,7 +637,7 @@ export function DashboardLayout() {
                         setJoinQrError('Impossible de générer le QR code. Veuillez réessayer.');
                       }
                     }}
-                    className="flex h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#F1F5F4]/70 transition hover:border-[#00FFC3]/60 hover:text-[#00E5FF]"
+                    className="flex h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#F1F5F4]/70 transition hover:border-[#00FFC3]/60 hover:text-[#00DFA5]"
                   >
                     <QrCode size={14} /> <span className="hidden sm:inline">Créer une carte</span>
                   </button>
@@ -645,7 +645,7 @@ export function DashboardLayout() {
                     <button
                       type="button"
                       onClick={() => window.open(scannerUrl, '_blank', 'noopener,noreferrer')}
-                      className="hidden h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#F1F5F4]/70 transition hover:border-[#00FFC3]/60 hover:text-[#00E5FF] sm:flex"
+                      className="hidden h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#F1F5F4]/70 transition hover:border-[#00FFC3]/60 hover:text-[#00DFA5] sm:flex"
                     >
                       <QrCode size={14} /> Scanner
                     </button>
@@ -657,7 +657,7 @@ export function DashboardLayout() {
                 type="button"
                 onClick={refreshApp}
                 disabled={refreshing}
-                className="grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#F1F5F4]/65 transition hover:border-[#00FFC3]/60 hover:text-[#00E5FF] disabled:cursor-wait disabled:opacity-50"
+                className="grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#F1F5F4]/65 transition hover:border-[#00FFC3]/60 hover:text-[#00DFA5] disabled:cursor-wait disabled:opacity-50"
                 aria-label="Actualiser l’application"
                 title="Actualiser"
               >
@@ -676,7 +676,7 @@ export function DashboardLayout() {
                     setNotificationsOpen((value) => !value);
                     if (!notificationsOpen) markNotificationsRead();
                   }}
-                  className="relative grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#F1F5F4]/65 transition hover:border-[#00FFC3]/60 hover:text-[#00E5FF]"
+                  className="relative grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#F1F5F4]/65 transition hover:border-[#00FFC3]/60 hover:text-[#00DFA5]"
                   aria-label="Notifications"
                   aria-expanded={notificationsOpen}
                 >
@@ -747,7 +747,7 @@ export function DashboardLayout() {
               <button
                 type="button"
                 onClick={logout}
-                className="grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#F1F5F4]/60 transition hover:border-[#00FFC3]/60 hover:text-[#00E5FF]"
+                className="grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#F1F5F4]/60 transition hover:border-[#00FFC3]/60 hover:text-[#00DFA5]"
                 aria-label="Déconnexion"
               >
                 <LogOut size={15} />
@@ -847,7 +847,7 @@ export function DashboardLayout() {
                 end={end}
                 className={({ isActive }) => `kelyani-nav-link group flex min-w-[76px] flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 transition-all ${
                   isActive
-                    ? 'bg-[#111111] text-[#00E5FF] shadow-[0_0_24px_rgba(201,164,92,0.10)]'
+                    ? 'bg-[#111111] text-[#00DFA5] shadow-[0_0_24px_rgba(0,223,165,0.10)]'
                     : 'text-[#F1F5F4]/40 hover:bg-[#111111] hover:text-[#F1F5F4]'
                 }`}
               >
