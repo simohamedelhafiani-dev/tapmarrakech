@@ -817,3 +817,75 @@ html,body,#root{background:#050505!important;color:#fff}
 #root button[class*="bg-[#00FFC3]"],#root button[class*="bg-[#00DFA5]"],#root button[class*="bg-gold"],#root button[class*="bg-forest"]{background:linear-gradient(120deg,#00FFC3,#00DFA5 58%,#00A982)!important;color:#04110E!important;box-shadow:0 0 24px rgba(0,255,195,.16)!important}
 #root .kelyani-nav-link[aria-current="page"],#root .admin-depth-nav .kelyani-nav-link[data-active="true"]{color:#00FFC3!important;background:rgba(0,255,195,.09)!important;box-shadow:inset 2px 0 #00FFC3!important}
 #root .kelyani-workspace{background-image:radial-gradient(ellipse at 75% 0%,rgba(0,229,255,.035),transparent 36%)}
+
+
+/* KELYANI Emerald + Nardo workspace system — final surface normalization */
+:root {
+  --kelyani-bg: #080A0B;
+  --kelyani-panel: #343A40;
+  --kelyani-panel-raised: #454D54;
+  --kelyani-border: rgba(170,183,190,.24);
+  --kelyani-text: #F2F5F6;
+  --kelyani-muted: #B5BEC3;
+  --kelyani-accent: #00DFA5;
+  --kelyani-accent-cyan: #00D9F5;
+  --kelyani-gold: var(--kelyani-accent);
+  --kelyani-gold-soft: var(--kelyani-accent);
+}
+.dashboard-depth-shell,
+.admin-depth-shell {
+  --kelyani-panel: #343A40;
+  --kelyani-panel-raised: #454D54;
+  --kelyani-border: rgba(170,183,190,.24);
+  --kelyani-muted: #B5BEC3;
+}
+.dashboard-depth-shell [class*="rounded-xl"],
+.dashboard-depth-shell [class*="rounded-2xl"],
+.dashboard-depth-shell [class*="rounded-3xl"],
+.dashboard-depth-shell [class*="rounded-[22px]"],
+.dashboard-depth-shell [class*="rounded-[24px]"],
+.dashboard-depth-shell [class*="rounded-[28px]"],
+.admin-depth-shell [class*="rounded-xl"],
+.admin-depth-shell [class*="rounded-2xl"],
+.admin-depth-shell [class*="rounded-3xl"],
+.admin-depth-shell [class*="rounded-[22px]"],
+.admin-depth-shell [class*="rounded-[24px]"],
+.admin-depth-shell [class*="rounded-[28px]"] {
+  background-color: #343A40;
+  border-color: rgba(170,183,190,.24);
+}
+.dashboard-depth-shell [class~="bg-white"],
+.dashboard-depth-shell [class~="bg-[#fffdf9]"],
+.dashboard-depth-shell [class~="bg-[#f7f7f3]"],
+.admin-depth-shell [class~="bg-white"],
+.admin-depth-shell [class~="bg-[#fffdf9]"],
+.admin-depth-shell [class~="bg-[#f7f7f3]"] {
+  background-color: #343A40 !important;
+}
+.dashboard-depth-shell input,
+.dashboard-depth-shell textarea,
+.dashboard-depth-shell select,
+.admin-depth-shell input,
+.admin-depth-shell textarea,
+.admin-depth-shell select,
+.dashboard-depth-shell [contenteditable="true"],
+.admin-depth-shell [contenteditable="true"] {
+  background-color: #343A40 !important;
+  color: #F2F5F6 !important;
+  border-color: rgba(170,183,190,.30) !important;
+}
+.dashboard-depth-shell input::placeholder,
+.dashboard-depth-shell textarea::placeholder,
+.admin-depth-shell input::placeholder,
+.admin-depth-shell textarea::placeholder {
+  color: #B5BEC3 !important;
+}
+.dashboard-depth-shell [class*="text-ink/"],
+.admin-depth-shell [class*="text-ink/"] { color: #B5BEC3 !important; }
+/* Keep old semantic utility classes functional without retaining any gold hue. */
+[class*="text-gold"], [class*="text-amber"], [class*="text-yellow"] { color: #00DFA5 !important; }
+[class*="bg-gold"], [class*="bg-amber"], [class*="bg-yellow"] {
+  background-color: #00DFA5 !important;
+  color: #07110F !important;
+}
+[class*="border-gold"], [class*="border-amber"], [class*="border-yellow"] { border-color: rgba(0,217,245,.55) !important; }
