@@ -114,7 +114,7 @@ export default function AdminOverviewV2() {
             }
             detail="Interactions enregistrées"
             icon="↗"
-            iconClass="bg-[#454D54] text-[#00D9F5]"
+            iconClass="bg-[#454D54] text-[#00DFA5]"
           />
         </section>
 
