@@ -14,12 +14,12 @@
   --kelyani-panel-raised: #1A1A1A;
   --kelyani-border: rgba(0, 255, 195, 0.18);
   --kelyani-text: #F1F5F4;
-  --kelyani-muted: rgba(245,245,220,.55);
-  --kelyani-gold: #00FFC3;
+  --kelyani-muted: #B5BEC3;
+  --kelyani-gold: #00DFA5;
   --kelyani-gold-soft: #00DFA5;
 }
-::selection { color: #050505; background: #00FFC3; }
-:focus-visible { outline: 2px solid rgba(0,255,195,.8); outline-offset: 3px; }
+::selection { color: #050505; background: #00DFA5; }
+:focus-visible { outline: 2px solid rgba(0,223,165,.8); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
@@ -362,7 +362,7 @@ table {
 .kelyani-live-pill {
   display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(0,255,195,.18);
   border-radius:999px;padding:5px 8px;background:rgba(0,255,195,.055);
-  color:#00FFC3;font-size:8px;font-weight:800;letter-spacing:.15em;
+  color:#00DFA5;font-size:8px;font-weight:800;letter-spacing:.15em;
 }
 .kelyani-live-pill span,.kelyani-footer-dot {
   display:inline-block;width:5px;height:5px;border-radius:50%;background:#00FFC3;
@@ -389,7 +389,7 @@ table {
 .kelyani-orbit-one { width:190px;height:190px;right:4%;top:-35px;transform:rotateX(68deg) rotateZ(-20deg); }
 .kelyani-orbit-two { width:250px;height:250px;left:5%;bottom:-95px;border-color:rgba(0,255,195,.09);transform:rotateY(67deg) rotateZ(22deg); }
 .kelyani-glow-point {
-  position:absolute;right:15%;top:20px;width:7px;height:7px;border-radius:50%;background:#00E5FF;
+  position:absolute;right:15%;top:20px;width:7px;height:7px;border-radius:50%;background:#00D9F5;
   box-shadow:0 0 10px 3px rgba(0,255,195,.45),0 0 28px 8px rgba(0,255,195,.12);
   animation:kelyani-glow-pulse 3s ease-in-out infinite;
 }
@@ -1064,3 +1064,113 @@ html,body,#root{background:#050505!important;color:#fff}
 @media(max-width:820px){.scene-refined-main-card.scene-loyalty-pass{width:246px;height:336px;padding:16px 15px}.loyalty-pass-stamp-title{margin-top:19px}.loyalty-pass-count b{font-size:42px}.loyalty-pass-stamps{gap:7px 8px}.loyalty-pass-reward{margin-top:12px}}
 @media(max-width:480px){.scene-refined-main-card.scene-loyalty-pass{width:215px;height:300px;padding:13px 12px;border-radius:18px}.loyalty-pass-logo{width:31px;height:31px;font-size:20px}.loyalty-pass-brand b{font-size:9px}.loyalty-pass-brand small{font-size:5px}.loyalty-pass-tier{font-size:6px;padding:5px 7px}.loyalty-pass-stamp-title{margin-top:16px;font-size:8px}.loyalty-pass-count b{font-size:37px}.loyalty-pass-count span{font-size:15px}.loyalty-pass-stamps{gap:6px 7px;padding:0 5px}.loyalty-pass-stamps span{border-radius:7px;font-size:13px}.loyalty-pass-reward{margin-top:10px;padding:8px;gap:7px}.loyalty-pass-gift{width:25px;height:25px;font-size:18px}.loyalty-pass-reward b{font-size:8px}.loyalty-pass-reward i{font-size:6px}.loyalty-pass-foot{margin-top:9px;font-size:5px}}
 @media(prefers-reduced-motion:reduce){.scene-refined-main-card.scene-loyalty-pass{animation:none!important}}
+
+
+/* KELYANI unified application system — applies to every authenticated screen */
+:root{
+  color-scheme:dark;
+  --kelyani-bg:#080A0B;
+  --kelyani-panel:#343A40;
+  --kelyani-panel-raised:#454D54;
+  --kelyani-border:rgba(181,190,195,.16);
+  --kelyani-text:#F2F5F6;
+  --kelyani-muted:#B5BEC3;
+  --kelyani-gold:#00DFA5;
+  --kelyani-gold-soft:#00DFA5;
+  --kelyani-emerald:#00DFA5;
+  --kelyani-cyan:#00D9F5;
+}
+.dashboard-depth-shell,.admin-depth-shell{
+  color:#F2F5F6!important;
+  background:
+    radial-gradient(ellipse at 78% 0%,rgba(0,223,165,.055),transparent 34%),
+    #080A0B!important;
+  --app-primary:#00DFA5!important;
+  --app-primary-hover:#00D9F5!important;
+  --app-accent:#00DFA5!important;
+}
+.dashboard-depth-shell .kelyani-workspace,
+.admin-depth-shell .kelyani-workspace{background:transparent!important}
+.dashboard-depth-shell [class~="bg-white"],
+.dashboard-depth-shell [class~="bg-gray-50"],
+.dashboard-depth-shell [class~="bg-slate-50"],
+.dashboard-depth-shell [class~="bg-[#fffdf9]"],
+.dashboard-depth-shell [class~="bg-[#f7f7f3]"],
+.admin-depth-shell [class~="bg-white"],
+.admin-depth-shell [class~="bg-gray-50"],
+.admin-depth-shell [class~="bg-slate-50"]{
+  background-color:#343A40!important;
+  border-color:rgba(181,190,195,.16)!important;
+}
+.dashboard-depth-shell [class*="bg-blue-"],
+.dashboard-depth-shell [class*="bg-indigo-"],
+.dashboard-depth-shell [class*="bg-sky-"],
+.admin-depth-shell [class*="bg-blue-"],
+.admin-depth-shell [class*="bg-indigo-"],
+.admin-depth-shell [class*="bg-sky-"]{
+  background-color:rgba(69,77,84,.88)!important;
+}
+.dashboard-depth-shell [class*="text-blue-"],
+.dashboard-depth-shell [class*="text-indigo-"],
+.dashboard-depth-shell [class*="text-sky-"],
+.admin-depth-shell [class*="text-blue-"],
+.admin-depth-shell [class*="text-indigo-"],
+.admin-depth-shell [class*="text-sky-"]{
+  color:#00D9F5!important;
+}
+.dashboard-depth-shell [class*="border-blue-"],
+.dashboard-depth-shell [class*="border-indigo-"],
+.dashboard-depth-shell [class*="border-sky-"],
+.admin-depth-shell [class*="border-blue-"],
+.admin-depth-shell [class*="border-indigo-"],
+.admin-depth-shell [class*="border-sky-"]{
+  border-color:rgba(0,217,245,.28)!important;
+}
+/* Legacy gold utility classes and hard-coded admin accents now resolve to emerald. */
+.dashboard-depth-shell [class*="gold"],
+.dashboard-depth-shell [class*="amber"],
+.dashboard-depth-shell [class*="yellow"],
+.admin-depth-shell [class*="gold"],
+.admin-depth-shell [class*="amber"],
+.admin-depth-shell [class*="yellow"],
+.admin-depth-shell [class*="C9A45C"],
+.admin-depth-shell [class*="E1C27A"],
+.admin-depth-shell [class*="d3a84c"],
+.admin-depth-shell [class*="b18425"]{
+  --tw-text-opacity:1;
+  --tw-bg-opacity:.12;
+  --tw-border-opacity:.35;
+  color:#00DFA5!important;
+  border-color:rgba(0,223,165,.3)!important;
+}
+.dashboard-depth-shell [class*="text-ink/"],
+.dashboard-depth-shell [class*="text-[#F5F5DC]"],
+.admin-depth-shell [class*="text-ink/"],
+.admin-depth-shell [class*="text-[#F5F5DC]"]{color:#B5BEC3!important}
+.dashboard-depth-shell [class*="text-forest"],
+.admin-depth-shell [class*="text-forest"]{color:#00DFA5!important}
+.dashboard-depth-shell [class*="border-ink/"],
+.admin-depth-shell [class*="border-ink/"]{border-color:rgba(181,190,195,.16)!important}
+.dashboard-depth-shell input,.dashboard-depth-shell textarea,.dashboard-depth-shell select,
+.admin-depth-shell input,.admin-depth-shell textarea,.admin-depth-shell select{
+  background-color:#454D54!important;
+  color:#F2F5F6!important;
+  border-color:rgba(181,190,195,.22)!important;
+}
+.dashboard-depth-shell input::placeholder,.dashboard-depth-shell textarea::placeholder,
+.admin-depth-shell input::placeholder,.admin-depth-shell textarea::placeholder{color:#B5BEC3!important;opacity:.72}
+.dashboard-depth-shell :focus-visible,.admin-depth-shell :focus-visible{outline-color:#00DFA5}
+.dashboard-depth-shell .kelyani-nav-link[aria-current="page"],
+.admin-depth-shell .kelyani-nav-link[data-active="true"]{
+  color:#00DFA5!important;
+  background:linear-gradient(110deg,rgba(0,223,165,.15),rgba(69,77,84,.42))!important;
+  border-color:rgba(0,223,165,.28)!important;
+}
+.dashboard-depth-shell table th,.admin-depth-shell table th{color:#B5BEC3}
+.dashboard-depth-shell table td,.admin-depth-shell table td{color:#F2F5F6}
+.dashboard-depth-shell .recharts-cartesian-axis-tick-value,
+.admin-depth-shell .recharts-cartesian-axis-tick-value{fill:#B5BEC3}
+.dashboard-depth-shell .recharts-cartesian-grid line,
+.admin-depth-shell .recharts-cartesian-grid line{stroke:rgba(181,190,195,.14)}
+/* Avoid low-contrast blue text sitting on blue tiles: blue is text-only on Nardo surfaces. */
+.dashboard-depth-shell [class*="text-cyan-"],.admin-depth-shell [class*="text-cyan-"]{color:#00D9F5!important}
