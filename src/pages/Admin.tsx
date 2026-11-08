@@ -610,11 +610,7 @@ export default function Admin() {
       <header className="admin-depth-topbar sticky top-0 z-50 border-b border-[#242424] bg-[#050505]/95 px-3 py-3 backdrop-blur-2xl sm:px-5">
         <div className="mx-auto flex max-w-[1700px] items-center gap-3">
           <button type="button" onClick={() => navigate('/admin')} className="flex shrink-0 items-center gap-3 text-left" aria-label="KELYANI">
-            <KelyaniMark size={72} />
-            <div className="hidden sm:block leading-none">
-              <p className="font-display text-xl font-semibold tracking-[.08em] text-[#00DFA5]">KELYANI</p>
-              <p className="mt-1 text-[7px] font-semibold uppercase tracking-[.22em] text-[#00DFA5]/70">CUSTOMER INTELLIGENCE</p>
-            </div>
+            <KelyaniMark size={52} />
           </button>
 
           <div className="relative mx-auto hidden min-w-0 flex-1 max-w-2xl md:block">
