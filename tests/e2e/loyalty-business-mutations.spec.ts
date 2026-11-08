@@ -277,7 +277,7 @@ test('Admin — création établissement, attribution Responsable et accès à s
     await expect(page).toHaveURL(/\/admin(?:$|\/)/, { timeout: 30_000 });
 
     await page.getByRole('button', { name: 'Établissements', exact: true }).click();
-    await page.getByRole('button', { name: /Nouvel établissement/i }).click();
+    await page.getByRole('button', { name: 'Ajouter un établissement', exact: true }).click();
     await page.getByPlaceholder('Ex : Restaurant Atlas').fill(name);
     await page.getByPlaceholder('restaurant-atlas').fill(slug);
 
