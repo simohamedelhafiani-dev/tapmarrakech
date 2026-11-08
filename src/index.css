@@ -1236,3 +1236,99 @@ body:has(#root .admin-depth-shell),
   background-color: transparent !important;
   background-image: none !important;
 }
+
+
+/* KELYANI UNIFIED PRODUCT THEME — shared by admin and establishment workspaces.
+   Onyx canvas, Nardo surfaces, emerald actions. No gold, beige, or blue fills. */
+:root {
+  --kelyani-bg: #080A0B;
+  --kelyani-panel: #343A40;
+  --kelyani-panel-raised: #454D54;
+  --kelyani-border: rgba(181,190,195,.18);
+  --kelyani-text: #F2F5F6;
+  --kelyani-muted: #B5BEC3;
+  --kelyani-accent: #00DFA5;
+  --kelyani-accent-cyan: #00D9F5;
+}
+html, body, #root { background: #080A0B !important; color: #F2F5F6; }
+.dashboard-depth-shell, .admin-depth-shell {
+  background: #080A0B !important;
+  color: #F2F5F6 !important;
+}
+.dashboard-depth-shell .kelyani-workspace,
+.admin-depth-shell .kelyani-workspace {
+  background: transparent !important;
+  background-image: none !important;
+}
+/* Consistent Nardo hierarchy for legacy dark cards and panels. */
+.dashboard-depth-shell [class~="bg-[#101010]"],
+.dashboard-depth-shell [class~="bg-[#111111]"],
+.dashboard-depth-shell [class~="bg-[#121212]"],
+.dashboard-depth-shell [class~="bg-[#141414]"],
+.dashboard-depth-shell [class~="bg-[#151515]"],
+.dashboard-depth-shell [class~="bg-[#171717]"],
+.admin-depth-shell [class~="bg-[#101010]"],
+.admin-depth-shell [class~="bg-[#111111]"],
+.admin-depth-shell [class~="bg-[#121212]"],
+.admin-depth-shell [class~="bg-[#141414]"],
+.admin-depth-shell [class~="bg-[#151515]"],
+.admin-depth-shell [class~="bg-[#171717]"] {
+  background-color: #343A40 !important;
+  background-image: none !important;
+}
+/* Replace all remaining legacy gold accents in both authenticated workspaces. */
+.dashboard-depth-shell [class*="C9A45C"],
+.dashboard-depth-shell [class*="E1C27A"],
+.dashboard-depth-shell [class*="D9B76B"],
+.dashboard-depth-shell [class*="F5F5DC"],
+.admin-depth-shell [class*="C9A45C"],
+.admin-depth-shell [class*="E1C27A"],
+.admin-depth-shell [class*="D9B76B"],
+.admin-depth-shell [class*="F5F5DC"] {
+  color: #00DFA5 !important;
+  border-color: rgba(0,223,165,.3) !important;
+}
+.dashboard-depth-shell [class*="bg-[#C9A45C]"],
+.dashboard-depth-shell [class*="bg-[#E1C27A]"],
+.dashboard-depth-shell [class*="bg-[#D9B76B]"],
+.admin-depth-shell [class*="bg-[#C9A45C]"],
+.admin-depth-shell [class*="bg-[#E1C27A]"],
+.admin-depth-shell [class*="bg-[#D9B76B]"] {
+  background-color: rgba(0,223,165,.12) !important;
+  background-image: none !important;
+}
+.dashboard-depth-shell [class*="201,164,92"],
+.admin-depth-shell [class*="201,164,92"] {
+  background-image: linear-gradient(145deg, #343A40, #252B2F) !important;
+}
+.dashboard-depth-shell [class*="from-[#9B7737]"],
+.dashboard-depth-shell [class*="to-[#E1C27A]"],
+.admin-depth-shell [class*="from-[#9B7737]"],
+.admin-depth-shell [class*="to-[#E1C27A]"] {
+  --tw-gradient-from: #00DFA5 var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgba(0,223,165,.35) var(--tw-gradient-to-position) !important;
+}
+/* Keep all panel borders and form controls on the same neutral system. */
+.dashboard-depth-shell [class*="rounded-"][class*="border"],
+.admin-depth-shell [class*="rounded-"][class*="border"] {
+  border-color: rgba(181,190,195,.18) !important;
+}
+.dashboard-depth-shell input, .dashboard-depth-shell textarea, .dashboard-depth-shell select,
+.admin-depth-shell input, .admin-depth-shell textarea, .admin-depth-shell select {
+  background-color: #454D54 !important;
+  color: #F2F5F6 !important;
+  border-color: rgba(181,190,195,.22) !important;
+}
+.dashboard-depth-shell button[class*="bg-[#C9A45C]"],
+.dashboard-depth-shell a[class*="bg-[#C9A45C]"],
+.dashboard-depth-shell button[class*="bg-[#E1C27A]"],
+.dashboard-depth-shell a[class*="bg-[#E1C27A]"] {
+  background: #00DFA5 !important;
+  color: #07110F !important;
+}
+.dashboard-depth-shell .recharts-sector[fill="#C9A45C"],
+.dashboard-depth-shell .recharts-sector[fill="#D9B76B"],
+.dashboard-depth-shell .recharts-rectangle[fill="#C9A45C"],
+.dashboard-depth-shell .recharts-rectangle[fill="#D9B76B"] {
+  fill: #00DFA5 !important;
+}
