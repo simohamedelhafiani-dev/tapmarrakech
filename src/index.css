@@ -917,3 +917,39 @@ html,body,#root{background:#050505!important;color:#fff}
 .kelyani-login input { background: #454D54 !important; color: #F2F5F6 !important; }
 .kelyani-login select { background: #343A40 !important; color: #F2F5F6 !important; }
 .kelyani-login button[class*="bg-[#00DFA5]"] { background: #00DFA5 !important; color: #07110F !important; }
+
+
+/* KELYANI login — restrained 3D product stage */
+.kelyani-login { overflow:hidden; position:relative; isolation:isolate; }
+.kelyani-login::before {
+  content:""; position:absolute; width:560px; height:560px; left:4%; top:26%;
+  background:radial-gradient(circle,rgba(0,223,165,.12),rgba(0,223,165,.035) 42%,transparent 72%);
+  filter:blur(22px); pointer-events:none; z-index:-1;
+}
+.kelyani-login-stage { position:relative; min-height:330px; perspective:1100px; display:flex; align-items:center; justify-content:center; }
+.kelyani-dashboard-card {
+  position:relative; z-index:2; width:min(100%,620px); padding:22px 24px 17px;
+  border:1px solid rgba(0,223,165,.42); border-radius:22px;
+  background:linear-gradient(145deg,rgba(52,58,64,.98),rgba(21,27,29,.98) 72%);
+  box-shadow:0 28px 65px rgba(0,0,0,.48),0 0 0 1px rgba(0,223,165,.08),inset 0 1px rgba(255,255,255,.10);
+  transform:rotateY(-12deg) rotateX(5deg) rotateZ(-2deg); transform-style:preserve-3d;
+  animation:kelyani-card-float 7s ease-in-out infinite;
+}
+.kelyani-card-topline { display:flex; align-items:center; gap:10px; padding-bottom:17px; border-bottom:1px solid rgba(181,190,195,.17); color:#F2F5F6; }
+.kelyani-mini-mark { display:grid; place-items:center; width:30px; height:30px; border-radius:10px; background:linear-gradient(145deg,#00DFA5,#00D9F5); color:#06211A; font-family:Georgia,serif; font-size:19px; font-weight:bold; }
+.kelyani-card-topline b { display:block; font-size:10px; letter-spacing:.12em; }.kelyani-card-topline small { display:block; color:#B5BEC3; font-size:7px; letter-spacing:.12em; margin-top:2px; }
+.kelyani-card-topline i { margin-left:auto; border:1px solid rgba(0,223,165,.3); border-radius:20px; padding:5px 9px; color:#00DFA5; font-size:8px; font-style:normal; }
+.kelyani-card-heading { display:flex; justify-content:space-between; align-items:center; padding:17px 0 12px; color:#F2F5F6; font-size:13px; font-weight:600; }.kelyani-card-heading small { color:#B5BEC3; font-size:7px; letter-spacing:.1em; }
+.kelyani-metric-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.kelyani-metric { min-height:84px; padding:13px 14px; border:1px solid rgba(181,190,195,.2); border-radius:13px; background:linear-gradient(145deg,#454D54,#343A40); }
+.kelyani-metric small,.kelyani-chart-panel small { display:block; color:#B5BEC3; font-size:8px; letter-spacing:.1em; }.kelyani-metric strong { display:block; margin-top:5px; color:#F2F5F6; font-size:27px; font-weight:650; letter-spacing:-.04em; }.kelyani-metric em { color:#00D9F5; font-size:11px; font-style:normal; }.kelyani-metric span { color:#00DFA5; font-size:9px; letter-spacing:.1em; }
+.kelyani-metric-accent { border-color:rgba(0,223,165,.3); background:linear-gradient(145deg,rgba(0,223,165,.12),#343A40 80%); }.kelyani-metric-accent span { color:#B5BEC3; letter-spacing:0; }
+.kelyani-chart-panel { margin-top:11px; padding:12px 14px 5px; border:1px solid rgba(181,190,195,.16); border-radius:13px; background:rgba(8,10,11,.34); }.kelyani-chart-panel>div { display:flex; justify-content:space-between; align-items:center; }.kelyani-chart-panel b { color:#00DFA5; font-size:11px; }.kelyani-chart-panel svg { width:100%; height:67px; margin-top:4px; overflow:visible; }
+.kelyani-card-footer { display:flex; justify-content:space-between; gap:8px; padding-top:12px; color:#B5BEC3; font-size:7px; letter-spacing:.08em; }
+.kelyani-float-chip { position:absolute; z-index:3; display:flex; align-items:center; gap:8px; padding:10px 13px; border:1px solid rgba(0,223,165,.36); border-radius:13px; background:linear-gradient(145deg,#454D54,#252B2F); box-shadow:0 15px 35px rgba(0,0,0,.4); color:#F2F5F6; font-size:10px; animation:kelyani-chip-float 6s ease-in-out infinite; }.kelyani-float-chip strong { color:#00DFA5; font-size:9px; }.kelyani-chip-review { top:20px; right:0; }.kelyani-chip-loyalty { bottom:14px; left:-8px; animation-delay:-2.7s; }.kelyani-chip-dot { width:7px; height:7px; border-radius:50%; background:#00DFA5; box-shadow:0 0 10px rgba(0,223,165,.45); }.kelyani-chip-icon { display:grid; place-items:center; width:23px; height:23px; border-radius:7px; background:rgba(0,223,165,.16); color:#00DFA5; font-family:Georgia,serif; font-size:16px; }
+.kelyani-orbit { position:absolute; border:1px solid rgba(0,217,245,.15); border-radius:50%; pointer-events:none; }.kelyani-orbit-one { width:300px; height:300px; transform:rotateX(68deg) rotateZ(-20deg); }.kelyani-orbit-two { width:420px; height:180px; transform:rotateX(70deg) rotateZ(22deg); border-color:rgba(0,223,165,.12); }
+@keyframes kelyani-card-float { 0%,100% { transform:rotateY(-12deg) rotateX(5deg) rotateZ(-2deg) translateY(0); } 50% { transform:rotateY(-8deg) rotateX(3deg) rotateZ(-1deg) translateY(-9px); } }
+@keyframes kelyani-chip-float { 0%,100% { translate:0 0; } 50% { translate:0 -7px; } }
+@media(max-width:1023px) { .kelyani-login-stage { min-height:290px; margin-bottom:10px; }.kelyani-dashboard-card { transform:rotateY(-6deg) rotateX(3deg) rotateZ(-1deg); }.kelyani-chip-review { right:0; } }
+@media(max-width:540px) { .kelyani-login-stage { min-height:250px; }.kelyani-dashboard-card { padding:15px; border-radius:17px; }.kelyani-card-footer span:last-child { display:none; }.kelyani-float-chip { padding:8px 10px; font-size:8px; }.kelyani-metric strong { font-size:23px; } }
+@media(prefers-reduced-motion:reduce) { .kelyani-dashboard-card,.kelyani-float-chip { animation:none !important; } }
