@@ -279,7 +279,7 @@ export function DashboardLayout() {
           tone: 'info',
         }));
 
-        const redemptionNotifications: AppNotification[] = (redemptionRows ?? []).map((redemption) => ({
+        const redemptionNotifications: AppNotification[] = (redemptionRows ?? []).map((redemption: { id: string; points_used: number | null; discount_amount: number | null; created_at: string }) => ({
           id: `loyalty-redemption-${redemption.id}`,
           title: 'Récompense utilisée',
           description: `${redemption.points_used ?? 0} points utilisés${redemption.discount_amount ? ` · remise ${redemption.discount_amount} DH` : ''}.`,
