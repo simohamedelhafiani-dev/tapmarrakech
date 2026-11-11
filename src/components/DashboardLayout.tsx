@@ -868,7 +868,7 @@ export function DashboardLayout() {
                 end={end}
                 className={({ isActive }) => `kelyani-nav-link group flex min-w-[76px] flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 transition-all ${
                   isActive
-                    ? 'bg-[#111111] text-[#60A5FA] shadow-[0_0_24px_rgba(201,164,92,0.10)]'
+                    ? 'bg-[#111111] text-[#60A5FA] shadow-[0_0_24px_rgba(59,130,246,0.10)]'
                     : 'text-[#D1D5DB]/40 hover:bg-[#111111] hover:text-[#D1D5DB]'
                 }`}
               >
