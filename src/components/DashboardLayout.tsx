@@ -207,13 +207,34 @@ export function DashboardLayout() {
             .limit(100)
         );
 
-        const loyaltyRedemptionQuery = scope(
-          supabase.from('loyalty_redemptions')
-            .select('id,points_used,discount_amount,amount_paid,created_at,establishment_id')
-            .gte('created_at', since)
-            .order('created_at', { ascending: false })
-            .limit(100)
-        );
+        const loyaltyRedemptionQuery = (async () => {
+          if (role !== 'admin' && establishmentIds.length === 0) {
+            return { data: [], error: null };
+          }
+
+          if (role === 'admin') {
+            return supabase.rpc('get_loyalty_redemptions_analytics', {
+              p_since: since,
+              p_establishment_id: null,
+            });
+          }
+
+          const results = await Promise.all(
+            establishmentIds.map((establishmentId) =>
+              supabase.rpc('get_loyalty_redemptions_analytics', {
+                p_since: since,
+                p_establishment_id: establishmentId,
+              })
+            )
+          );
+          const failed = results.find((result) => result.error);
+          if (failed?.error) return { data: null, error: failed.error };
+
+          return {
+            data: results.flatMap((result) => result.data ?? []),
+            error: null,
+          };
+        })();
 
         const [
           { data: reviewRows, error: reviewError },
