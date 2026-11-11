@@ -845,7 +845,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen space-y-6 pb-8 text-white">
-      <section className="relative isolate overflow-hidden rounded-[28px] border border-[#3B82F6]/20 bg-[radial-gradient(ellipse_at_top_right,rgba(201,164,92,0.13),transparent_42%),linear-gradient(135deg,#151515_0%,#090909_62%,#111111_100%)] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:rounded-[32px] sm:p-8 lg:p-9">
+      <section className="relative isolate overflow-hidden rounded-[28px] border border-[#3B82F6]/20 bg-[radial-gradient(ellipse_at_top_right,rgba(59,130,246,0.13),transparent_42%),linear-gradient(135deg,#151515_0%,#090909_62%,#111111_100%)] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:rounded-[32px] sm:p-8 lg:p-9">
         <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full border border-[#3B82F6]/15" /><div className="pointer-events-none absolute -bottom-36 left-[38%] h-72 w-72 rounded-full bg-[#3B82F6]/[0.035] blur-3xl" />
         <div className="relative z-10">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
@@ -896,7 +896,7 @@ export default function Dashboard() {
       </section>
 
       <section aria-label="Analyses visuelles" className="grid gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(280px,.7fr)]">
-        <article className="overflow-hidden rounded-[24px] border border-white/[0.07] bg-[radial-gradient(ellipse_at_top_left,rgba(201,164,92,0.08),transparent_48%),linear-gradient(145deg,#141414,#090909)] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.2)] sm:rounded-[28px] sm:p-6 lg:p-7">
+        <article className="overflow-hidden rounded-[24px] border border-white/[0.07] bg-[radial-gradient(ellipse_at_top_left,rgba(59,130,246,0.08),transparent_48%),linear-gradient(145deg,#141414,#090909)] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.2)] sm:rounded-[28px] sm:p-6 lg:p-7">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div><p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#3B82F6]">Tendance</p><h2 className="mt-1 text-lg font-semibold text-white sm:text-xl">Évolution des avis</h2><p className="mt-1 text-xs text-[#D1D5DB]/35">Avis positifs et avis à surveiller sur la période choisie</p></div>
             <div className="flex flex-wrap gap-3 pt-1"><span className="flex items-center gap-1.5 text-[10px] text-[#D1D5DB]/55"><span className="h-2 w-2 rounded-full bg-[#3B82F6]" />Positifs</span><span className="flex items-center gap-1.5 text-[10px] text-[#D1D5DB]/55"><span className="h-2 w-2 rounded-full bg-[#82796B]" />À surveiller</span></div>
@@ -937,7 +937,7 @@ export default function Dashboard() {
           <span className="rounded-full border border-[#3B82F6]/20 bg-[#3B82F6]/[0.06] px-3 py-1.5 text-[9px] font-semibold uppercase tracking-wider text-[#60A5FA]">{selected.label}</span>
         </div>
         <div className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(280px,.75fr)]">
-          <article className="overflow-hidden rounded-[24px] border border-white/[0.07] bg-[radial-gradient(ellipse_at_top_left,rgba(201,164,92,0.08),transparent_48%),linear-gradient(145deg,#141414,#090909)] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.2)] sm:rounded-[28px] sm:p-6">
+          <article className="overflow-hidden rounded-[24px] border border-white/[0.07] bg-[radial-gradient(ellipse_at_top_left,rgba(59,130,246,0.08),transparent_48%),linear-gradient(145deg,#141414,#090909)] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.2)] sm:rounded-[28px] sm:p-6">
             <div className="flex items-start justify-between gap-3"><div><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#3B82F6]">Économie de fidélité</p><h3 className="mt-1 text-base font-semibold text-white sm:text-lg">Points gagnés vs utilisés</h3><p className="mt-1 text-xs text-[#D1D5DB]/35">Comprendre comment les récompenses circulent</p></div><div className="rounded-xl border border-[#3B82F6]/15 bg-[#3B82F6]/[0.08] p-2 text-[#3B82F6]"><Heart size={17} /></div></div>
             <div className="mt-5 h-56 sm:h-64">
               <ResponsiveContainer width="100%" height="100%"><BarChart data={[{ name: 'Points', gagnés: analytics.pointsEarned, utilisés: analytics.pointsRedeemed }]} barGap={18} barCategoryGap="35%" margin={{ top: 8, right: 4, left: -18, bottom: 0 }}>
@@ -977,7 +977,7 @@ export default function Dashboard() {
         </section>
         <section className="rounded-[24px] border border-[#242424] bg-[#111111] p-5 sm:p-6">
           <div className="flex items-center justify-between"><div><p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#3B82F6]">Fidélité</p><h2 className="mt-1 text-lg font-semibold text-white">Clients qui reviennent</h2></div><Heart size={18} className="text-[#3B82F6]" /></div>
-          <div className="mt-6 rounded-2xl border border-[#3B82F6]/15 bg-[linear-gradient(135deg,rgba(201,164,92,0.08),rgba(5,5,5,0.8)_55%)] p-5 sm:p-6"><p className="text-[10px] text-[#D1D5DB]/35">Taux de retour</p><p className="mt-2 font-display text-4xl text-[#60A5FA]">{analytics.returningRate.toFixed(1)}%</p><p className="mt-2 text-xs leading-5 text-[#D1D5DB]/35">{analytics.returningCustomers} clients ont effectué au moins deux visites.</p></div>
+          <div className="mt-6 rounded-2xl border border-[#3B82F6]/15 bg-[linear-gradient(135deg,rgba(59,130,246,0.08),rgba(5,5,5,0.8)_55%)] p-5 sm:p-6"><p className="text-[10px] text-[#D1D5DB]/35">Taux de retour</p><p className="mt-2 font-display text-4xl text-[#60A5FA]">{analytics.returningRate.toFixed(1)}%</p><p className="mt-2 text-xs leading-5 text-[#D1D5DB]/35">{analytics.returningCustomers} clients ont effectué au moins deux visites.</p></div>
           <div className="mt-3 grid grid-cols-2 gap-2.5"><div className="rounded-2xl bg-[#050505] p-4"><p className="text-[9px] uppercase tracking-[0.14em] text-[#D1D5DB]/25">Visites</p><p className="mt-2 text-xl font-semibold text-white">{dashboardStatsLoading ? '—' : analytics.visits.toLocaleString('fr-FR')}</p></div><div className="rounded-2xl bg-[#050505] p-4"><p className="text-[9px] uppercase tracking-[0.14em] text-[#D1D5DB]/25">Récompenses</p><p className="mt-2 text-xl font-semibold text-white">{redemptionsLoading ? '—' : analytics.currentRedemptions}</p></div></div>
           <Link to="/dashboard/loyalty" className="mt-3 flex h-10 items-center justify-center gap-2 rounded-xl border border-[#3B82F6]/25 text-[10px] font-bold text-[#60A5FA] hover:bg-[#3B82F6]/10">Ouvrir la fidélité <ArrowUpRight size={14} /></Link>
         </section>
