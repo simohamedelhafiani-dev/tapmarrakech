@@ -549,11 +549,10 @@ export default function Dashboard() {
 
       setRedemptionsLoading(true);
 
-      const { data, error } = await supabase
-        .from('loyalty_redemptions')
-        .select('id, establishment_id, customer_id, reward_id, employee_id, points_used, invoice_number, invoice_amount, discount_amount, amount_paid, payment_method, redemption_type, reward_cost_mad, created_at')
-        .eq('establishment_id', selectedEstablishmentId)
-        .order('created_at', { ascending: false });
+      const { data, error } = await supabase.rpc(
+        'get_establishment_loyalty_redemptions',
+        { p_establishment_id: selectedEstablishmentId },
+      );
 
       if (error) {
         console.error('Erreur chargement récompenses utilisées:', error);
