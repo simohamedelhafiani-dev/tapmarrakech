@@ -267,31 +267,9 @@ test('Admin — création établissement, attribution Responsable et accès à s
   let assignmentRestored = false;
 
   try {
-    // Capture the exact Supabase host and HTTP result used by the Preview UI.
+    // Capture the exact Supabase response deterministically. A page.on('response')
+    // async callback is not awaited by Playwright, so asserting its side effect races.
     const expectedStagingHost = new URL(process.env.E2E_SUPABASE_URL!).host;
-    let establishmentInsertRequestUrl: string | null = null;
-    let establishmentInsertResponse: { status: number; url: string; body: string } | null = null;
-    page.on('request', (request) => {
-      if (request.method() === 'POST' && /\/rest\/v1\/establishments(?:\?|$)/.test(request.url())) {
-        establishmentInsertRequestUrl = request.url();
-      }
-    });
-    page.on('response', async (response) => {
-      if (response.request().method() === 'POST' && /\/rest\/v1\/establishments(?:\?|$)/.test(response.url())) {
-        establishmentInsertResponse = {
-          status: response.status(),
-          url: response.url(),
-          body: (await response.text()).slice(0, 2000),
-        };
-        console.log('[E2E NETWORK PROOF] establishment POST', JSON.stringify({
-          appHost: new URL(response.url()).host,
-          robotHost: expectedStagingHost,
-          exactHostMatch: new URL(response.url()).host === expectedStagingHost,
-          status: response.status(),
-          body: establishmentInsertResponse.body,
-        }));
-      }
-    });
 
     // Create the establishment through the actual Admin UI form.
     page.on('dialog', (dialog) => dialog.accept());
@@ -300,7 +278,7 @@ test('Admin — création établissement, attribution Responsable et accès à s
     await page.locator('input[type="email"]').fill(process.env.E2E_ADMIN_EMAIL!);
     await page.locator('input[type="password"]').fill(process.env.E2E_ADMIN_PASSWORD!);
     await page.getByRole('button', { name: /Entrer dans KELYANI/i }).click();
-    await expect(page).toHaveURL(/\/admin(?:$|\/)/, { timeout: 30_000 });
+    await expect(page).toHaveURL(/\\/admin(?:$|\\/)/, { timeout: 30_000 });
 
     await page.getByRole('button', { name: 'Établissements', exact: true }).click();
     await page.getByRole('button', { name: 'Ajouter un établissement', exact: true }).click();
@@ -312,16 +290,32 @@ test('Admin — création établissement, attribution Responsable et accès à s
     const typeOption = await typeSelect.locator('option:not([value=""])').first().getAttribute('value');
     expect(typeOption).toBeTruthy();
     await typeSelect.selectOption(typeOption!);
+
+    const establishmentResponsePromise = page.waitForResponse((response) =>
+      response.request().method() === 'POST' &&
+      /\\/rest\\/v1\\/establishments(?:\\?|$)/.test(response.url()),
+      { timeout: 15_000 },
+    );
     await page.getByRole('button', { name: 'Créer l’établissement' }).click();
-    await expect.poll(() => establishmentInsertRequestUrl, {
-      message: 'La Preview doit envoyer le POST establishments vers Supabase',
-      timeout: 10_000,
-    }).not.toBeNull();
-    expect(new URL(establishmentInsertRequestUrl!).host, 'Hôte Supabase de la Preview = Hôte Supabase du robot')
+    const establishmentResponse = await establishmentResponsePromise;
+    const establishmentInsertRequestUrl = establishmentResponse.url();
+    const establishmentInsertResponse = {
+      status: establishmentResponse.status(),
+      url: establishmentResponse.url(),
+      body: (await establishmentResponse.text()).slice(0, 2000),
+    };
+
+    console.log('[E2E NETWORK PROOF] establishment POST', JSON.stringify({
+      appHost: new URL(establishmentInsertRequestUrl).host,
+      robotHost: expectedStagingHost,
+      exactHostMatch: new URL(establishmentInsertRequestUrl).host === expectedStagingHost,
+      status: establishmentInsertResponse.status,
+      body: establishmentInsertResponse.body,
+    }));
+    expect(new URL(establishmentInsertRequestUrl).host, 'Hôte Supabase de la Preview = Hôte Supabase du robot')
       .toBe(expectedStagingHost);
-    expect(establishmentInsertResponse, 'Réponse HTTP du POST establishments capturée').not.toBeNull();
-    expect(establishmentInsertResponse!.status, 'Insertion HTTP acceptée par Supabase').toBeGreaterThanOrEqual(200);
-    expect(establishmentInsertResponse!.status, 'Insertion HTTP sans erreur').toBeLessThan(300);
+    expect(establishmentInsertResponse.status, 'Insertion HTTP acceptée par Supabase').toBeGreaterThanOrEqual(200);
+    expect(establishmentInsertResponse.status, 'Insertion HTTP sans erreur').toBeLessThan(300);
 
     // SQL/API assertion: persisted establishment row and generated id.
     const { data: created, error: createdError } = await admin
