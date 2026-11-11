@@ -12,7 +12,7 @@
   --kelyani-bg: #050505;
   --kelyani-panel: #686D76;
   --kelyani-panel-raised: #242A33;
-  --kelyani-border: rgba(212, 175, 55, 0.18);
+  --kelyani-border: rgba(59, 130, 246, 0.22);
   --kelyani-text: #E5E7EB;
   --kelyani-muted: rgba(245,245,220,.55);
   --kelyani-blue: #3B82F6;
@@ -677,7 +677,7 @@ table {
 
 
 /* KELYANI BRAND ENFORCEMENT — global UI surfaces.
-   Keep the product interface within onyx/black and royal-gold tones.
+   Keep the product interface within the Nardo Tech black, gray and electric-blue palette.
    Customer-uploaded images and explicitly customized loyalty-card artwork remain untouched. */
 :root, body, #root {
   color-scheme: dark;
