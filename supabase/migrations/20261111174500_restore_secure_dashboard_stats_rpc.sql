@@ -138,7 +138,7 @@ BEGIN
     FROM scoped_events
   ),
   settings_metrics AS (
-    SELECT coalesce(avg(points_per_currency),1)::numeric AS points_per_currency
+    SELECT coalesce(avg(s.points_per_currency),1)::numeric AS points_per_currency
     FROM public.loyalty_settings s
     WHERE p_establishment_id IS NULL OR s.establishment_id = p_establishment_id
   )
