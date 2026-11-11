@@ -278,7 +278,7 @@ test('Admin — création établissement, attribution Responsable et accès à s
     await page.locator('input[type="email"]').fill(process.env.E2E_ADMIN_EMAIL!);
     await page.locator('input[type="password"]').fill(process.env.E2E_ADMIN_PASSWORD!);
     await page.getByRole('button', { name: /Entrer dans KELYANI/i }).click();
-    await expect(page).toHaveURL(/\\/admin(?:$|\\/)/, { timeout: 30_000 });
+    await expect(page).toHaveURL(/\/admin(?:$|\/)/, { timeout: 30_000 });
 
     await page.getByRole('button', { name: 'Établissements', exact: true }).click();
     await page.getByRole('button', { name: 'Ajouter un établissement', exact: true }).click();
@@ -293,7 +293,7 @@ test('Admin — création établissement, attribution Responsable et accès à s
 
     const establishmentResponsePromise = page.waitForResponse((response) =>
       response.request().method() === 'POST' &&
-      /\\/rest\\/v1\\/establishments(?:\\?|$)/.test(response.url()),
+      /\/rest\/v1\/establishments(?:\?|$)/.test(response.url()),
       { timeout: 15_000 },
     );
     await page.getByRole('button', { name: 'Créer l’établissement' }).click();
