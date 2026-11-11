@@ -4200,13 +4200,15 @@ function AdminAnalyticsSection({
       const establishmentFilter = selectedEstablishment === 'all' ? null : selectedEstablishment;
 
       let txQuery = supabase.from('loyalty_transactions').select('establishment_id, amount, points, created_at').gte('created_at', since.toISOString()).eq('type', 'EARN');
-      let redemptionQuery = supabase.from('loyalty_redemptions').select('establishment_id, points_used, reward_cost_mad, created_at').gte('created_at', since.toISOString());
+      const redemptionQuery = supabase.rpc('get_loyalty_redemptions_analytics', {
+        p_since: since.toISOString(),
+        p_establishment_id: establishmentFilter,
+      });
       let reviewQuery = supabase.from('reviews').select('establishment_id, rating, type, created_at').gte('created_at', since.toISOString());
       let eventQuery = supabase.from('analytics_events').select('establishment_id, created_at').gte('created_at', since.toISOString());
 
       if (establishmentFilter) {
         txQuery = txQuery.eq('establishment_id', establishmentFilter);
-        redemptionQuery = redemptionQuery.eq('establishment_id', establishmentFilter);
         reviewQuery = reviewQuery.eq('establishment_id', establishmentFilter);
         eventQuery = eventQuery.eq('establishment_id', establishmentFilter);
       }
@@ -4963,7 +4965,10 @@ function PDFReportsSection({ establishments }: { establishments: Establishment[]
     const [{ data: reviews }, { data: tx }, { data: redemptions }, { data: staffRows }, { count: events }] = await Promise.all([
       supabase.from('reviews').select('rating,type,comment,status,created_at').eq('establishment_id', selected.id).gte('created_at', since.toISOString()).order('created_at', { ascending: false }),
       supabase.from('loyalty_transactions').select('amount,points,created_at').eq('establishment_id', selected.id).eq('type','EARN').gte('created_at', since.toISOString()),
-      supabase.from('loyalty_redemptions').select('points_used,reward_cost_mad,created_at').eq('establishment_id', selected.id).gte('created_at', since.toISOString()),
+      supabase.rpc('get_loyalty_redemptions_analytics', {
+        p_since: since.toISOString(),
+        p_establishment_id: selected.id,
+      }),
       supabase.from('establishment_staff').select('role,active,created_at').eq('establishment_id', selected.id),
       supabase.from('analytics_events').select('id',{count:'exact',head:true}).eq('establishment_id', selected.id).gte('created_at', since.toISOString())
     ]);
