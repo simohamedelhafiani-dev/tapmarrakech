@@ -356,7 +356,10 @@ test('Admin — création établissement, attribution Responsable et accès à s
     expect(accessibleError).toBeNull();
     expect((accessible ?? []).some((row: { id: string }) => row.id === created.id)).toBeTruthy();
 
-    await page.goto('/login');
+    // End the browser's Admin session before testing the separate Responsable login.
+    // Otherwise Login's authenticated-user guard correctly redirects /login back to /admin.
+    await page.getByRole('button', { name: 'Déconnexion' }).click();
+    await expect(page).toHaveURL(/\/login(?:$|\/)/, { timeout: 15_000 });
     await page.getByRole('button', { name: /Responsable/i }).click();
     await page.locator('input[type="email"]').fill(process.env.E2E_RESPONSIBLE_EMAIL!);
     await page.locator('input[type="password"]').fill(process.env.E2E_RESPONSIBLE_PASSWORD!);
