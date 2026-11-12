@@ -426,7 +426,7 @@ test('Admin — création établissement, attribution Responsable et accès à s
     }
     await manager.auth.signOut();
     await admin.auth.signOut();
-    expect(assignmentRestored, 'Le compte Responsable QA doit être restauré sur Riad Demo (preuve SQL)').toBeTruthy();
+    expect(assignmentRestored, 'L’affectation du Responsable QA doit retrouver son état initial (preuve SQL)').toBeTruthy();
   }
 
   expect(createdEstablishmentId).toBeTruthy();
