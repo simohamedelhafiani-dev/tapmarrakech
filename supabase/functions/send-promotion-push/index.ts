@@ -1,6 +1,17 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import webpush from 'npm:web-push@3.6.7';
 const C={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type','Access-Control-Allow-Methods':'POST, OPTIONS'};
+function allowedPushEndpoint(value:string){
+try{
+const endpoint=new URL(value);
+if(endpoint.protocol!=='https:'||endpoint.username||endpoint.password||endpoint.port)return false;
+const host=endpoint.hostname.toLowerCase();
+return host==='fcm.googleapis.com'||host==='updates.push.services.mozilla.com'||host==='push.services.mozilla.com'||host.endsWith('.push.services.mozilla.com')||host.endsWith('.notify.windows.com')||host==='web.push.apple.com'||host.endsWith('.push.apple.com');
+}catch{return false}
+}
+function safeCardPath(value:string|null|undefined){
+return typeof value==='string'&&/^\/loyalty(?:\/[A-Za-z0-9_-]+)?$/.test(value);
+}
 const j=(d:unknown,s=200)=>new Response(JSON.stringify(d),{status:s,headers:{...C,'Content-Type':'application/json'}});
 Deno.serve(async r=>{
 if(r.method==='OPTIONS')return new Response('ok',{headers:C});
@@ -23,10 +34,10 @@ if(se)return j({success:false,error:'Impossible de charger les abonnements de no
 if(!ss?.length)return j({success:true,sent:0,failed:0,removed:0,skipped:0,total:0});
 webpush.setVapidDetails(subject,pub,priv);let sent=0,failed=0,removed=0,skipped=0,lastError='';
 for(const s of ss){
-if(!s.card_url){skipped++;continue}
+if(!s.card_url||!safeCardPath(s.card_url)||!allowedPushEndpoint(s.endpoint)){skipped++;continue}
 try{
-const u2=new URL(s.card_url);u2.searchParams.set('promotion',p.id);
-await webpush.sendNotification({endpoint:s.endpoint,keys:{p256dh:s.p256dh,auth:s.auth}},JSON.stringify({title:'🎁 Nouvelle offre membre',body:p.promo_price!=null?String(p.name)+' — '+String(p.promo_price)+' MAD':String(p.name),icon:'/tapmarrakech-logo.svg',badge:'/tapmarrakech-logo.svg',tag:'promotion-'+p.id,data:{url:u2.toString(),promotionId:p.id}}),{TTL:86400,urgency:'high'});
+const targetUrl=s.card_url+'?promotion='+encodeURIComponent(p.id);
+await webpush.sendNotification({endpoint:s.endpoint,keys:{p256dh:s.p256dh,auth:s.auth}},JSON.stringify({title:'🎁 Nouvelle offre membre',body:p.promo_price!=null?String(p.name)+' — '+String(p.promo_price)+' MAD':String(p.name),icon:'/tapmarrakech-logo.svg',badge:'/tapmarrakech-logo.svg',tag:'promotion-'+p.id,data:{url:targetUrl,promotionId:p.id}}),{TTL:86400,urgency:'high'});
 sent++;
 }catch(e){
 const scode=Number((e as {statusCode?:number})?.statusCode??0);
