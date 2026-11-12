@@ -67,6 +67,14 @@ export function planHasFeature(
 ) {
   if (!access) return false;
 
+  const status = String(access.subscription_status).toLowerCase();
+  if (status !== 'active' && status !== 'trial') return false;
+  if (status === 'trial') {
+    if (!access.current_period_end) return false;
+    const expiresAt = new Date(access.current_period_end).getTime();
+    if (!Number.isFinite(expiresAt) || expiresAt <= Date.now()) return false;
+  }
+
   const normalized = new Set(
     (access.features ?? []).map((item) =>
       String(item).trim().toLowerCase()
