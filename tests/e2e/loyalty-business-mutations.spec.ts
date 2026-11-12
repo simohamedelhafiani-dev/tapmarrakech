@@ -2,8 +2,15 @@ import { test, expect } from '@playwright/test';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 const STAGING_REF = 'jsllksnmylpxcgqaeidq';
-const PRIMARY_ESTABLISHMENT = '9366af04-bda7-4fb1-a521-8c08868b27ad';
 const SECOND_ESTABLISHMENT = 'aaacb2ac-ef2e-4318-8ec7-01e9f271681c';
+
+async function getManagerEstablishment(manager: SupabaseClient): Promise<string> {
+  const { data, error } = await manager.rpc('get_my_establishments');
+  expect(error, 'Le Responsable QA doit pouvoir lister ses établissements').toBeNull();
+  const establishmentId = (data ?? []).find((row: { id: string }) => Boolean(row.id))?.id;
+  expect(establishmentId, 'Le Responsable QA doit avoir au moins un établissement actif sur Staging').toBeTruthy();
+  return establishmentId as string;
+}
 
 function stagingClient() {
   const url = process.env.E2E_SUPABASE_URL!;
@@ -13,14 +20,14 @@ function stagingClient() {
   });
 }
 
-async function verify(manager: SupabaseClient, customerId: string) {
+async function verify(manager: SupabaseClient, establishmentId: string, customerId: string) {
   const { data, error } = await manager.rpc('fn_test_verify_loyalty_data', {
-    p_establishment_id: PRIMARY_ESTABLISHMENT,
+    p_establishment_id: establishmentId,
     p_customer_id: customerId,
   });
-  expect(error, 'Pont SQL Staging doit autoriser le Responsable sur son établissement').toBeNull();
+  expect(error, 'Pont SQL Staging doit autoriser le Responsable sur son établissement affecté').toBeNull();
   expect(data?.customer_id).toBe(customerId);
-  expect(data?.establishment_id).toBe(PRIMARY_ESTABLISHMENT);
+  expect(data?.establishment_id).toBe(establishmentId);
   return data as {
     customer_id: string;
     establishment_id: string;
@@ -42,13 +49,11 @@ test('Parcours Client — inscription publique, 3 scans, récompense et assertio
   });
   expect(loginError).toBeNull();
 
-  const { data: establishments, error: accessError } = await manager.rpc('get_my_establishments');
-  expect(accessError).toBeNull();
-  expect((establishments ?? []).some((item: { id: string }) => item.id === PRIMARY_ESTABLISHMENT)).toBeTruthy();
+  const establishmentId = await getManagerEstablishment(manager);
 
   const { data: scannerRows, error: scannerError } = await manager.rpc(
     'get_or_create_establishment_scanner_link',
-    { p_establishment_id: PRIMARY_ESTABLISHMENT },
+    { p_establishment_id: establishmentId },
   );
   expect(scannerError).toBeNull();
   const scanner = Array.isArray(scannerRows) ? scannerRows[0] : scannerRows;
@@ -62,7 +67,7 @@ test('Parcours Client — inscription publique, 3 scans, récompense et assertio
   const { data: enrollmentRows, error: enrollmentError } = await publicClient.rpc(
     'register_public_loyalty_customer_for_enrollment_v2',
     {
-      p_establishment_id: PRIMARY_ESTABLISHMENT,
+      p_establishment_id: establishmentId,
       p_first_name: firstName,
       p_last_name: 'Automation',
       p_phone: phone,
@@ -85,10 +90,10 @@ test('Parcours Client — inscription publique, 3 scans, récompense et assertio
   expect(cardError).toBeNull();
   const card = Array.isArray(cardRows) ? cardRows[0] : cardRows;
   expect(card?.first_name).toBe(firstName);
-  expect(card?.establishment_id).toBe(PRIMARY_ESTABLISHMENT);
+  expect(card?.establishment_id).toBe(establishmentId);
 
   // SQL proof of customer/profile + loyalty card insertion before earning points.
-  const initial = await verify(manager, card.customer_id);
+  const initial = await verify(manager, establishmentId, card.customer_id);
   expect(initial.points_balance).toBe(0);
   expect(initial.total_points_earned).toBe(0);
   expect(initial.visit_count).toBe(0);
@@ -107,7 +112,7 @@ test('Parcours Client — inscription publique, 3 scans, récompense et assertio
     expect(error, `Scan ${visit} doit réussir`).toBeNull();
     expect(Number(newBalance)).toBe(visit);
 
-    const state = await verify(manager, card.customer_id);
+    const state = await verify(manager, establishmentId, card.customer_id);
     expect(Number(state.points_balance)).toBe(visit);
     expect(Number(state.total_points_earned)).toBe(visit);
     expect(Number(state.visit_count)).toBe(visit);
@@ -118,7 +123,7 @@ test('Parcours Client — inscription publique, 3 scans, récompense et assertio
   // 3) Create a 3-point gift, claim it from the public loyalty-card token, redeem at scanner.
   const rewardName = `QA Reward ${unique}`;
   const { data: rewardId, error: rewardError } = await manager.rpc('create_loyalty_reward', {
-    p_establishment_id: PRIMARY_ESTABLISHMENT,
+    p_establishment_id: establishmentId,
     p_name: rewardName,
     p_description: 'Temporary Playwright Staging fixture',
     p_points_required: 3,
@@ -157,7 +162,7 @@ test('Parcours Client — inscription publique, 3 scans, récompense et assertio
   const claimAfter = Array.isArray(claimAfterRows) ? claimAfterRows[0] : claimAfterRows;
   expect(claimAfter?.status).toBe('REDEEMED');
 
-  const finalState = await verify(manager, card.customer_id);
+  const finalState = await verify(manager, establishmentId, card.customer_id);
   expect(Number(finalState.points_balance)).toBe(0);
   expect(Number(finalState.total_points_earned)).toBe(3);
   expect(Number(finalState.total_points_redeemed)).toBe(3);
@@ -186,10 +191,20 @@ test('Intrus — scanner d’un établissement B ne peut pas créditer un client
   });
   expect(adminLoginError).toBeNull();
 
-  // The global Admin obtains the legitimate scanner token for establishment B.
+  const establishmentId = await getManagerEstablishment(manager);
+  const { data: alternateEstablishments, error: alternateError } = await admin
+    .from('establishments')
+    .select('id')
+    .neq('id', establishmentId)
+    .limit(1);
+  expect(alternateError).toBeNull();
+  const alternateEstablishmentId = alternateEstablishments?.[0]?.id ?? SECOND_ESTABLISHMENT;
+  expect(alternateEstablishmentId).not.toBe(establishmentId);
+
+  // The global Admin obtains a legitimate scanner token for a different establishment.
   const { data: scannerRows, error: scannerError } = await admin.rpc(
     'get_or_create_establishment_scanner_link',
-    { p_establishment_id: SECOND_ESTABLISHMENT },
+    { p_establishment_id: alternateEstablishmentId },
   );
   expect(scannerError, 'Admin doit pouvoir accéder au scanner de B').toBeNull();
   const scanner = Array.isArray(scannerRows) ? scannerRows[0] : scannerRows;
@@ -200,7 +215,7 @@ test('Intrus — scanner d’un établissement B ne peut pas créditer un client
   const { data: enrollmentRows, error: enrollmentError } = await publicClient.rpc(
     'register_public_loyalty_customer_for_enrollment_v2',
     {
-      p_establishment_id: PRIMARY_ESTABLISHMENT,
+      p_establishment_id: establishmentId,
       p_first_name: `QA-INTRUDER-${unique}`,
       p_last_name: 'Isolation',
       p_phone: `+2126${unique}`,
@@ -220,7 +235,7 @@ test('Intrus — scanner d’un établissement B ne peut pas créditer un client
   });
   expect(cardError).toBeNull();
   const card = Array.isArray(cardRows) ? cardRows[0] : cardRows;
-  const before = await verify(manager, card.customer_id);
+  const before = await verify(manager, establishmentId, card.customer_id);
 
   // Scanner B tries to award 999 points to customer A. The RPC must reject it.
   const { error: attackError } = await publicClient.rpc('add_loyalty_points_by_scanner', {
@@ -233,7 +248,7 @@ test('Intrus — scanner d’un établissement B ne peut pas créditer un client
   expect(attackError, 'Le scanner B ne doit pas modifier un client de A').not.toBeNull();
 
   // SQL proof that the attempted write produced no balance or transaction change.
-  const after = await verify(manager, card.customer_id);
+  const after = await verify(manager, establishmentId, card.customer_id);
   expect(after.points_balance).toBe(before.points_balance);
   expect(after.total_points_earned).toBe(before.total_points_earned);
   expect(after.visit_count).toBe(before.visit_count);
@@ -262,6 +277,15 @@ test('Admin — création établissement, attribution Responsable et accès à s
   const suffix = Date.now().toString();
   const name = `QA E2E Establishment ${suffix}`;
   const slug = `qa-e2e-establishment-${suffix}`;
+
+  const { data: previousAssignments, error: previousAssignmentsError } = await admin
+    .from('establishment_staff')
+    .select('id,establishment_id,role,active')
+    .eq('user_id', managerProfile.id)
+    .eq('role', 'MANAGER')
+    .eq('active', true);
+  expect(previousAssignmentsError, 'État initial des affectations du Responsable lisible').toBeNull();
+  const previousEstablishmentId = previousAssignments?.[0]?.establishment_id ?? null;
 
   let createdEstablishmentId: string | null = null;
   let assignmentRestored = false;
@@ -367,23 +391,39 @@ test('Admin — création établissement, attribution Responsable et accès à s
     await expect(page).toHaveURL(/\/dashboard(?:$|\/)/, { timeout: 30_000 });
     await expect(page.getByRole('navigation', { name: 'Navigation principale' })).toBeVisible();
   } finally {
-    // Restore the pre-existing QA Responsable to its original Riad Demo assignment.
-    await admin.functions.invoke('admin-manage-responsibles', {
-      body: { action: 'assign', user_id: managerProfile.id, establishment_id: PRIMARY_ESTABLISHMENT },
-    });
-
-    // The database is the source of truth: the Edge Function response alone
-    // is not sufficient to certify that the original assignment is restored.
-    const { data: restoredRow, error: restoredQueryError } = await admin
-      .from('establishment_staff')
-      .select('user_id,establishment_id,role,active')
-      .eq('user_id', managerProfile.id)
-      .eq('role', 'MANAGER')
-      .eq('active', true)
-      .maybeSingle();
-    assignmentRestored =
-      !restoredQueryError &&
-      restoredRow?.establishment_id === PRIMARY_ESTABLISHMENT;
+    // Restore the exact pre-test state. If the Responsable had no active
+    // assignment, deactivate only the row created by this test.
+    if (previousEstablishmentId) {
+      const { error: restoreError } = await admin.functions.invoke('admin-manage-responsibles', {
+        body: { action: 'assign', user_id: managerProfile.id, establishment_id: previousEstablishmentId },
+      });
+      if (!restoreError) {
+        const { data: restoredRow, error: restoredQueryError } = await admin
+          .from('establishment_staff')
+          .select('user_id,establishment_id,role,active')
+          .eq('user_id', managerProfile.id)
+          .eq('role', 'MANAGER')
+          .eq('active', true)
+          .maybeSingle();
+        assignmentRestored = !restoredQueryError && restoredRow?.establishment_id === previousEstablishmentId;
+      }
+    } else if (createdEstablishmentId) {
+      const { error: cleanupError } = await admin
+        .from('establishment_staff')
+        .update({ active: false })
+        .eq('user_id', managerProfile.id)
+        .eq('establishment_id', createdEstablishmentId)
+        .eq('role', 'MANAGER');
+      if (!cleanupError) {
+        const { data: remainingRows, error: remainingError } = await admin
+          .from('establishment_staff')
+          .select('id')
+          .eq('user_id', managerProfile.id)
+          .eq('role', 'MANAGER')
+          .eq('active', true);
+        assignmentRestored = !remainingError && (remainingRows ?? []).length === 0;
+      }
+    }
     await manager.auth.signOut();
     await admin.auth.signOut();
     expect(assignmentRestored, 'Le compte Responsable QA doit être restauré sur Riad Demo (preuve SQL)').toBeTruthy();
