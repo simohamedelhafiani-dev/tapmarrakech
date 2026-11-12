@@ -419,12 +419,11 @@ test('Admin — création établissement, attribution Responsable et accès à s
         assignmentRestored = !restoredQueryError && restoredRow?.establishment_id === previousEstablishmentId;
       }
     } else if (createdEstablishmentId) {
-      const { error: cleanupError } = await admin
-        .from('establishment_staff')
-        .update({ active: false })
-        .eq('user_id', managerProfile.id)
-        .eq('establishment_id', createdEstablishmentId)
-        .eq('role', 'MANAGER');
+      // Use the admin-only Edge Function (service-role boundary), never direct
+      // browser-style table writes that are intentionally blocked by RLS.
+      const { error: cleanupError } = await admin.functions.invoke('admin-manage-responsibles', {
+        body: { action: 'unassign', user_id: managerProfile.id },
+      });
       if (!cleanupError) {
         const { data: remainingRows, error: remainingError } = await admin
           .from('establishment_staff')
