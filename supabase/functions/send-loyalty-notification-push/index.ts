@@ -7,6 +7,27 @@ const C = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
+
+function isAllowedPushEndpoint(value: string) {
+  try {
+    const endpoint = new URL(value);
+    if (endpoint.protocol !== 'https:' || endpoint.username || endpoint.password || endpoint.port) return false;
+    const host = endpoint.hostname.toLowerCase();
+    return host === 'fcm.googleapis.com' ||
+      host === 'updates.push.services.mozilla.com' ||
+      host.endsWith('.push.services.mozilla.com') ||
+      host.endsWith('.notify.windows.com') ||
+      host === 'web.push.apple.com' ||
+      host.endsWith('.push.apple.com');
+  } catch {
+    return false;
+  }
+}
+
+function isSafeCardPath(value: string | null | undefined) {
+  return typeof value === 'string' && /^\/loyalty(?:\/[A-Za-z0-9_-]+)?$/.test(value);
+}
+
 const json = (data: unknown, status = 200) =>
   new Response(JSON.stringify(data), {
     status,
@@ -116,12 +137,17 @@ Deno.serve(async (req) => {
     let sent = 0;
     let failed = 0;
     let removed = 0;
+    let invalid = 0;
     let lastError = '';
 
     for (const subscription of subscriptions) {
       try {
-        const recipient = recipients.find((row) => row.customer_id === subscription.customer_id);
         const targetUrl = subscription.card_url || '/loyalty';
+        if (!isAllowedPushEndpoint(subscription.endpoint) || !isSafeCardPath(targetUrl)) {
+          invalid++;
+          lastError = 'Abonnement Push ignoré : endpoint ou URL de carte non autorisé.';
+          continue;
+        }
 
         await webpush.sendNotification(
           {
@@ -152,9 +178,9 @@ Deno.serve(async (req) => {
       }
     }
 
-    const skipped = Math.max(0, recipients.length - subscriptions.length);
+    const skipped = Math.max(0, recipients.length - subscriptions.length) + invalid;
     const attemptStatus = sent > 0 && failed === 0 ? 'ACCEPTED_BY_PUSH_SERVICE' : sent > 0 ? 'PARTIAL' : failed > 0 ? 'FAILED' : 'NO_DELIVERIES';
-    await finishAttempt({ status: attemptStatus, sent, failed, removed, skipped, total: recipients.length, push_subscribers: subscriptions.length, error_summary: lastError || null });
+    await finishAttempt({ status: attemptStatus, sent, failed, removed, skipped, invalid, total: recipients.length, push_subscribers: subscriptions.length, error_summary: lastError || null });
 
     return json({
       success: sent > 0 && failed === 0,
@@ -162,6 +188,7 @@ Deno.serve(async (req) => {
       failed,
       removed,
       skipped,
+      invalid,
       total: recipients.length,
       push_subscribers: subscriptions.length,
       ...(lastError ? { error: lastError } : {}),
