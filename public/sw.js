@@ -51,7 +51,7 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const requestedPath = event.notification.data?.url || '/';
   const safePath = typeof requestedPath === 'string' &&
-    /^\/loyalty(?:\/[A-Za-z0-9_-]+)?$/.test(requestedPath)
+    /^\/loyalty(?:\/[A-Za-z0-9_-]+)?(?:\?promotion=[A-Za-z0-9_-]+)?$/.test(requestedPath)
       ? requestedPath
       : '/';
   const targetUrl = new URL(safePath, self.location.origin).href;
