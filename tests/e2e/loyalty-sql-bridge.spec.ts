@@ -14,35 +14,45 @@ test('QA SQL bridge: authorized manager, transaction consistency, and cross-esta
   });
   expect(loginError).toBeNull();
 
-  // Resolve an establishment currently assigned to this QA Responsable instead of
-  // depending on a historical hard-coded UUID whose customer fixtures may disappear.
+  // Resolve the QA Responsable's actual active assignment. Never assume an
+  // old Riad Demo UUID or depend on a pre-existing customer fixture.
   const { data: establishments, error: establishmentsError } = await client.rpc('get_my_establishments');
   expect(establishmentsError).toBeNull();
-  expect(establishments?.length).toBeGreaterThan(0);
+  const establishmentId = (establishments ?? []).find((row: { id: string }) => Boolean(row.id))?.id;
+  expect(establishmentId, 'Le Responsable QA doit avoir un établissement actif').toBeTruthy();
 
-  let establishmentId: string | null = null;
-  let customer: { id: string; points_balance: number; total_points_earned: number; total_points_redeemed: number; visit_count: number } | null = null;
-  for (const establishment of establishments ?? []) {
-    const { data: rows, error: rowsError } = await client
-      .from('loyalty_customers')
-      .select('id,points_balance,total_points_earned,total_points_redeemed,visit_count')
-      .eq('establishment_id', establishment.id)
-      .limit(1);
-    expect(rowsError).toBeNull();
-    if (rows?.length) {
-      establishmentId = establishment.id;
-      customer = rows[0];
-      break;
-    }
-  }
-  expect(establishmentId, 'Un établissement QA accessible avec au moins un client fidélité').toBeTruthy();
-  expect(customer).not.toBeNull();
+  const unique = Date.now().toString().slice(-8);
+  const { data: enrollmentRows, error: enrollmentError } = await client.rpc(
+    'register_public_loyalty_customer_for_enrollment_v2',
+    {
+      p_establishment_id: establishmentId,
+      p_first_name: `QA-BRIDGE-${unique}`,
+      p_last_name: 'Bridge',
+      p_phone: `+2126${unique}`,
+      p_birth_date: null,
+      p_email: null,
+      p_interests: [],
+      p_marketing_consent: false,
+      p_notification_consent: false,
+      p_preferred_channel: 'NONE',
+      p_visit_frequency: null,
+    },
+  );
+  expect(enrollmentError, 'Création d’un client temporaire sur l’établissement QA').toBeNull();
+  const enrollment = Array.isArray(enrollmentRows) ? enrollmentRows[0] : enrollmentRows;
+  expect(enrollment?.access_token).toBeTruthy();
+  const { data: cardRows, error: cardError } = await client.rpc('get_public_loyalty_card', {
+    p_access_token: enrollment.access_token,
+  });
+  expect(cardError).toBeNull();
+  const card = Array.isArray(cardRows) ? cardRows[0] : cardRows;
+  const customer = { id: card.customer_id };
 
   const { data, error } = await client.rpc('fn_test_verify_loyalty_data', {
-    p_establishment_id: establishmentId, p_customer_id: customer!.id,
+    p_establishment_id: establishmentId, p_customer_id: customer.id,
   });
   expect(error).toBeNull();
-  expect(data.customer_id).toBe(customer!.id);
+  expect(data.customer_id).toBe(customer.id);
   expect(Number(data.points_balance)).toBe(Number(customer!.points_balance));
   expect(Number(data.total_points_earned)).toBe(Number(customer!.total_points_earned));
   expect(Number(data.total_points_redeemed)).toBe(Number(customer!.total_points_redeemed));
@@ -52,7 +62,7 @@ test('QA SQL bridge: authorized manager, transaction consistency, and cross-esta
   // A deliberately wrong establishment must never reveal this customer's data.
   const { data: denied, error: deniedError } = await client.rpc('fn_test_verify_loyalty_data', {
     p_establishment_id: '00000000-0000-4000-8000-000000000001',
-    p_customer_id: customer!.id,
+    p_customer_id: customer.id,
   });
   expect(denied).toBeNull();
   expect(deniedError).not.toBeNull();
