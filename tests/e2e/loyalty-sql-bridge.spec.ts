@@ -19,8 +19,20 @@ test('QA SQL bridge: authorized manager, transaction consistency, and cross-esta
   // old Riad Demo UUID or depend on a pre-existing customer fixture.
   const { data: establishments, error: establishmentsError } = await client.rpc('get_my_establishments');
   expect(establishmentsError).toBeNull();
-  const establishmentId = (establishments ?? []).find((row: { id: string }) => Boolean(row.id))?.id;
-  expect(establishmentId, 'Le Responsable QA doit avoir un établissement actif').toBeTruthy();
+  let establishmentId: string | null = null;
+  for (const row of establishments ?? []) {
+    if (!row.id) continue;
+    const { data: settings, error: settingsError } = await client.rpc('get_loyalty_program_settings', {
+      p_establishment_id: row.id,
+    });
+    expect(settingsError).toBeNull();
+    const config = Array.isArray(settings) ? settings[0] : settings;
+    if (config?.enabled === true) {
+      establishmentId = row.id;
+      break;
+    }
+  }
+  expect(establishmentId, 'Le Responsable QA doit avoir un établissement avec fidélité activée').toBeTruthy();
 
   const unique = Date.now().toString().slice(-8);
   const { data: enrollment, error: enrollmentError } = await publicClient.rpc(
