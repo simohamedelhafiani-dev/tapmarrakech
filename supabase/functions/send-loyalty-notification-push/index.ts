@@ -180,7 +180,7 @@ Deno.serve(async (req) => {
 
     const skipped = Math.max(0, recipients.length - subscriptions.length) + invalid;
     const attemptStatus = sent > 0 && failed === 0 ? 'ACCEPTED_BY_PUSH_SERVICE' : sent > 0 ? 'PARTIAL' : failed > 0 ? 'FAILED' : 'NO_DELIVERIES';
-    await finishAttempt({ status: attemptStatus, sent, failed, removed, skipped, invalid, total: recipients.length, push_subscribers: subscriptions.length, error_summary: lastError || null });
+    await finishAttempt({ status: attemptStatus, sent, failed, removed, skipped, total: recipients.length, push_subscribers: subscriptions.length, error_summary: lastError || null });
 
     return json({
       success: sent > 0 && failed === 0,
