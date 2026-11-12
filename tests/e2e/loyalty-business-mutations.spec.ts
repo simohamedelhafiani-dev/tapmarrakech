@@ -402,6 +402,14 @@ test('Admin — création établissement, attribution Responsable et accès à s
     await expect(page).toHaveURL(/\/dashboard(?:$|\/)/, { timeout: 30_000 });
     await expect(page.getByRole('navigation', { name: 'Navigation principale' })).toBeVisible();
   } finally {
+    // The browser's global sign-out can revoke the parallel Node client's JWT.
+    // Re-authenticate before using the admin-only Edge Function for cleanup.
+    const { error: restoreAuthError } = await admin.auth.signInWithPassword({
+      email: process.env.E2E_ADMIN_EMAIL!,
+      password: process.env.E2E_ADMIN_PASSWORD!,
+    });
+    expect(restoreAuthError, 'Réauthentification Admin avant restauration').toBeNull();
+
     // Restore the exact pre-test state. If the Responsable had no active
     // assignment, deactivate only the row created by this test.
     if (previousEstablishmentId) {
