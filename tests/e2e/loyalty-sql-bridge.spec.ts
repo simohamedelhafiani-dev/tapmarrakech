@@ -8,6 +8,7 @@ test('QA SQL bridge: authorized manager, transaction consistency, and cross-esta
   const key = process.env.E2E_SUPABASE_ANON_KEY!;
   expect(new URL(url).hostname).toBe(`${STAGING_REF}.supabase.co`);
   const client = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+  const publicClient = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
   const { error: loginError } = await client.auth.signInWithPassword({
     email: process.env.E2E_RESPONSIBLE_EMAIL!,
     password: process.env.E2E_RESPONSIBLE_PASSWORD!,
@@ -22,8 +23,8 @@ test('QA SQL bridge: authorized manager, transaction consistency, and cross-esta
   expect(establishmentId, 'Le Responsable QA doit avoir un établissement actif').toBeTruthy();
 
   const unique = Date.now().toString().slice(-8);
-  const { data: enrollmentRows, error: enrollmentError } = await client.rpc(
-    'register_public_loyalty_customer_for_enrollment_v2',
+  const { data: enrollment, error: enrollmentError } = await publicClient.rpc(
+    'register_public_loyalty_customer_for_enrollment_v3',
     {
       p_establishment_id: establishmentId,
       p_first_name: `QA-BRIDGE-${unique}`,
@@ -39,14 +40,8 @@ test('QA SQL bridge: authorized manager, transaction consistency, and cross-esta
     },
   );
   expect(enrollmentError, 'Création d’un client temporaire sur l’établissement QA').toBeNull();
-  const enrollment = Array.isArray(enrollmentRows) ? enrollmentRows[0] : enrollmentRows;
   expect(enrollment?.access_token).toBeTruthy();
-  const { data: cardRows, error: cardError } = await client.rpc('get_public_loyalty_card', {
-    p_access_token: enrollment.access_token,
-  });
-  expect(cardError).toBeNull();
-  const card = Array.isArray(cardRows) ? cardRows[0] : cardRows;
-  const customer = { id: card.customer_id };
+  const customer = { id: enrollment.customer_id };
 
   const { data, error } = await client.rpc('fn_test_verify_loyalty_data', {
     p_establishment_id: establishmentId, p_customer_id: customer.id,
@@ -67,5 +62,5 @@ test('QA SQL bridge: authorized manager, transaction consistency, and cross-esta
   });
   expect(denied).toBeNull();
   expect(deniedError).not.toBeNull();
-  await client.auth.signOut();
+  await Promise.all([client.auth.signOut(), publicClient.auth.signOut()]);
 });
