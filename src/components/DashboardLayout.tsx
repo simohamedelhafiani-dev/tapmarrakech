@@ -207,13 +207,34 @@ export function DashboardLayout() {
             .limit(100)
         );
 
-        const loyaltyRedemptionQuery = scope(
-          supabase.from('loyalty_redemptions')
-            .select('id,points_used,discount_amount,amount_paid,created_at,establishment_id')
-            .gte('created_at', since)
-            .order('created_at', { ascending: false })
-            .limit(100)
-        );
+        const loyaltyRedemptionQuery = (async () => {
+          if (role !== 'admin' && establishmentIds.length === 0) {
+            return { data: [], error: null };
+          }
+
+          if (role === 'admin') {
+            return supabase.rpc('get_loyalty_redemptions_analytics', {
+              p_since: since,
+              p_establishment_id: null,
+            });
+          }
+
+          const results = await Promise.all(
+            establishmentIds.map((establishmentId) =>
+              supabase.rpc('get_loyalty_redemptions_analytics', {
+                p_since: since,
+                p_establishment_id: establishmentId,
+              })
+            )
+          );
+          const failed = results.find((result) => result.error);
+          if (failed?.error) return { data: null, error: failed.error };
+
+          return {
+            data: results.flatMap((result) => result.data ?? []),
+            error: null,
+          };
+        })();
 
         const [
           { data: reviewRows, error: reviewError },
@@ -258,7 +279,7 @@ export function DashboardLayout() {
           tone: 'info',
         }));
 
-        const redemptionNotifications: AppNotification[] = (redemptionRows ?? []).map((redemption) => ({
+        const redemptionNotifications: AppNotification[] = (redemptionRows ?? []).map((redemption: { id: string; points_used: number | null; discount_amount: number | null; created_at: string }) => ({
           id: `loyalty-redemption-${redemption.id}`,
           title: 'Récompense utilisée',
           description: `${redemption.points_used ?? 0} points utilisés${redemption.discount_amount ? ` · remise ${redemption.discount_amount} DH` : ''}.`,
@@ -590,13 +611,13 @@ export function DashboardLayout() {
               )}
               <div className="hidden min-w-0 sm:block">
                 <p className="max-w-[180px] truncate text-sm font-semibold text-white">{activeEstablishment?.name || 'Votre établissement'}</p>
-                <p className="mt-0.5 text-[8px] font-semibold uppercase tracking-[0.18em] text-[#C9A45C]/60">Espace établissement · KELYANI</p>
+                <p className="mt-0.5 text-[8px] font-semibold uppercase tracking-[0.18em] text-[#3B82F6]/60">Espace établissement · KELYANI</p>
               </div>
             </button>
 
             <div className="relative mx-auto hidden min-w-0 max-w-2xl flex-1 md:block">
               <label className="relative block">
-                <Search size={15} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#C9A45C]" />
+                <Search size={15} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#3B82F6]" />
                 <input
                   type="search"
                   value={searchQuery}
@@ -604,14 +625,14 @@ export function DashboardLayout() {
                   onChange={(event) => { setSearchQuery(event.target.value); setSearchOpen(true); }}
                   placeholder="Rechercher un client, un avis, un établissement..."
                   aria-label="Rechercher"
-                  className="h-11 w-full rounded-2xl border border-[#242424] bg-[#111111] pl-11 pr-16 text-sm text-[#FFFFFF] outline-none placeholder:text-[#F5F5DC]/30 focus:border-[#C9A45C]/60 focus:ring-1 focus:ring-[#C9A45C]/20"
+                  className="h-11 w-full rounded-2xl border border-[#242424] bg-[#111111] pl-11 pr-16 text-sm text-[#FFFFFF] outline-none placeholder:text-[#D1D5DB]/30 focus:border-[#3B82F6]/60 focus:ring-1 focus:ring-[#3B82F6]/20"
                 />
               </label>
               {searchOpen && searchQuery.trim().length >= 2 && (
                 <div className="absolute left-0 right-0 top-13 z-[70] overflow-hidden rounded-2xl border border-[#242424] bg-[#111111] shadow-[0_24px_70px_rgba(0,0,0,.55)]">
                   {searchResults.length ? searchResults.map((result) => (
                     <button key={`${result.type}-${result.id}`} type="button" onClick={() => selectSearchResult(result)} className="flex w-full items-start gap-3 border-b border-[#242424] px-4 py-3 text-left last:border-0 hover:bg-[#181818]">
-                      <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#C9A45C]/10 text-[#C9A45C]">{result.type === 'customer' ? '◉' : result.type === 'review' ? '★' : <Building2 size={15} />}</span>
+                      <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#3B82F6]/10 text-[#3B82F6]">{result.type === 'customer' ? '◉' : result.type === 'review' ? '★' : <Building2 size={15} />}</span>
                       <span className="min-w-0"><span className="block truncate text-xs font-semibold text-white">{result.title}</span><span className="mt-0.5 block truncate text-[10px] text-white/40">{result.subtitle}</span></span>
                     </button>
                   )) : <p className="px-4 py-5 text-center text-xs text-white/35">Aucun résultat.</p>}
@@ -637,7 +658,7 @@ export function DashboardLayout() {
                         setJoinQrError('Impossible de générer le QR code. Veuillez réessayer.');
                       }
                     }}
-                    className="flex h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#F5F5DC]/70 transition hover:border-[#C9A45C]/60 hover:text-[#E1C27A]"
+                    className="flex h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#D1D5DB]/70 transition hover:border-[#3B82F6]/60 hover:text-[#60A5FA]"
                   >
                     <QrCode size={14} /> <span className="hidden sm:inline">Créer une carte</span>
                   </button>
@@ -645,7 +666,7 @@ export function DashboardLayout() {
                     <button
                       type="button"
                       onClick={() => window.open(scannerUrl, '_blank', 'noopener,noreferrer')}
-                      className="hidden h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#F5F5DC]/70 transition hover:border-[#C9A45C]/60 hover:text-[#E1C27A] sm:flex"
+                      className="hidden h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#D1D5DB]/70 transition hover:border-[#3B82F6]/60 hover:text-[#60A5FA] sm:flex"
                     >
                       <QrCode size={14} /> Scanner
                     </button>
@@ -657,7 +678,7 @@ export function DashboardLayout() {
                 type="button"
                 onClick={refreshApp}
                 disabled={refreshing}
-                className="grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#F5F5DC]/65 transition hover:border-[#C9A45C]/60 hover:text-[#E1C27A] disabled:cursor-wait disabled:opacity-50"
+                className="grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#D1D5DB]/65 transition hover:border-[#3B82F6]/60 hover:text-[#60A5FA] disabled:cursor-wait disabled:opacity-50"
                 aria-label="Actualiser l’application"
                 title="Actualiser"
               >
@@ -676,13 +697,13 @@ export function DashboardLayout() {
                     setNotificationsOpen((value) => !value);
                     if (!notificationsOpen) markNotificationsRead();
                   }}
-                  className="relative grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#F5F5DC]/65 transition hover:border-[#C9A45C]/60 hover:text-[#E1C27A]"
+                  className="relative grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#D1D5DB]/65 transition hover:border-[#3B82F6]/60 hover:text-[#60A5FA]"
                   aria-label="Notifications"
                   aria-expanded={notificationsOpen}
                 >
                   <Bell size={17} />
                   {unreadNotifications.length > 0 && (
-                    <span className="absolute -right-1 -top-1 grid min-h-4 min-w-4 place-items-center rounded-full bg-[#C9A45C] px-1 text-[8px] font-bold text-[#050505]">
+                    <span className="absolute -right-1 -top-1 grid min-h-4 min-w-4 place-items-center rounded-full bg-[#3B82F6] px-1 text-[8px] font-bold text-[#050505]">
                       {unreadNotifications.length > 9 ? '9+' : unreadNotifications.length}
                     </span>
                   )}
@@ -695,10 +716,10 @@ export function DashboardLayout() {
                       <div className="flex items-center justify-between border-b border-[#242424] px-4 py-3">
                         <div>
                           <p className="text-sm font-semibold text-[#FFFFFF]">Notifications</p>
-                          <p className="text-[10px] text-[#F5F5DC]/40">{notifications.length} activité{notifications.length > 1 ? 's' : ''} récente{notifications.length > 1 ? 's' : ''}</p>
+                          <p className="text-[10px] text-[#D1D5DB]/40">{notifications.length} activité{notifications.length > 1 ? 's' : ''} récente{notifications.length > 1 ? 's' : ''}</p>
                         </div>
                         {notifications.length > 0 && (
-                          <button type="button" onClick={markNotificationsRead} className="text-[10px] font-semibold text-[#C9A45C]">
+                          <button type="button" onClick={markNotificationsRead} className="text-[10px] font-semibold text-[#3B82F6]">
                             Tout marquer comme lu
                           </button>
                         )}
@@ -706,19 +727,19 @@ export function DashboardLayout() {
                       <div className="max-h-[520px] overflow-y-auto">
                         {notifications.length === 0 ? (
                           <div className="px-5 py-10 text-center">
-                            <Check size={22} className="mx-auto text-[#C9A45C]/50" />
+                            <Check size={22} className="mx-auto text-[#3B82F6]/50" />
                             <p className="mt-2 text-sm font-medium text-[#FFFFFF]">Aucune notification</p>
-                            <p className="mt-1 text-[11px] text-[#F5F5DC]/35">Tout est à jour.</p>
+                            <p className="mt-1 text-[11px] text-[#D1D5DB]/35">Tout est à jour.</p>
                           </div>
                         ) : notifications.map((notification) => (
                           <div key={notification.id} className="flex gap-3 border-b border-[#242424] px-4 py-3.5 last:border-0">
-                            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#C9A45C]/10 text-[#C9A45C]">
+                            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#3B82F6]/10 text-[#3B82F6]">
                               {notification.tone === 'alert' ? <AlertTriangle size={16} /> : notification.tone === 'review' ? <MessageCircle size={16} /> : <Building2 size={16} />}
                             </div>
                             <div className="min-w-0 flex-1">
                               <p className="text-xs font-semibold text-[#FFFFFF]">{notification.title}</p>
-                              <p className="mt-1 text-[11px] leading-4 text-[#F5F5DC]/50">{notification.description}</p>
-                              <p className="mt-1 text-[9px] text-[#F5F5DC]/30">{new Intl.DateTimeFormat(language === 'ar' ? 'ar-MA' : language === 'en' ? 'en-GB' : 'fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(notification.createdAt))}</p>
+                              <p className="mt-1 text-[11px] leading-4 text-[#D1D5DB]/50">{notification.description}</p>
+                              <p className="mt-1 text-[9px] text-[#D1D5DB]/30">{new Intl.DateTimeFormat(language === 'ar' ? 'ar-MA' : language === 'en' ? 'en-GB' : 'fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(notification.createdAt))}</p>
                             </div>
                           </div>
                         ))}
@@ -729,15 +750,15 @@ export function DashboardLayout() {
               </div>
 
               <div className="hidden h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 sm:flex">
-                <div className="grid h-7 w-7 place-items-center rounded-full bg-[#C9A45C] text-xs font-semibold text-[#050505]">{avatarLetter}</div>
+                <div className="grid h-7 w-7 place-items-center rounded-full bg-[#3B82F6] text-xs font-semibold text-[#050505]">{avatarLetter}</div>
                 <div className="max-w-[130px] leading-tight">
                   <p className="truncate text-xs font-semibold text-[#FFFFFF]">{displayName}</p>
-                  <p className="text-[9px] text-[#F5F5DC]/40">{roleLabel}</p>
+                  <p className="text-[9px] text-[#D1D5DB]/40">{roleLabel}</p>
                 </div>
               </div>
 
-              <label className="hidden items-center rounded-full border border-[#242424] bg-[#111111] px-3 py-2 text-xs font-medium text-[#F5F5DC]/60 md:flex">
-                <select value={language} onChange={(event) => setLanguage(event.target.value as Language)} aria-label="Language" className="cursor-pointer bg-transparent text-[#F5F5DC] outline-none">
+              <label className="hidden items-center rounded-full border border-[#242424] bg-[#111111] px-3 py-2 text-xs font-medium text-[#D1D5DB]/60 md:flex">
+                <select value={language} onChange={(event) => setLanguage(event.target.value as Language)} aria-label="Language" className="cursor-pointer bg-transparent text-[#D1D5DB] outline-none">
                   <option className="bg-[#111111]" value="fr">FR</option>
                   <option className="bg-[#111111]" value="en">EN</option>
                   <option className="bg-[#111111]" value="ar">AR</option>
@@ -747,7 +768,7 @@ export function DashboardLayout() {
               <button
                 type="button"
                 onClick={logout}
-                className="grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#F5F5DC]/60 transition hover:border-[#C9A45C]/60 hover:text-[#E1C27A]"
+                className="grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#D1D5DB]/60 transition hover:border-[#3B82F6]/60 hover:text-[#60A5FA]"
                 aria-label="Déconnexion"
               >
                 <LogOut size={15} />
@@ -757,7 +778,7 @@ export function DashboardLayout() {
 
           <div className="relative mx-auto mt-3 md:hidden">
             <label className="relative block">
-              <Search size={14} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#C9A45C]" />
+              <Search size={14} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#3B82F6]" />
               <input
                 type="search"
                 value={searchQuery}
@@ -765,7 +786,7 @@ export function DashboardLayout() {
                 onChange={(event) => { setSearchQuery(event.target.value); setSearchOpen(true); }}
                 placeholder="Rechercher..."
                 aria-label="Rechercher"
-                className="h-10 w-full rounded-2xl border border-[#242424] bg-[#111111] pl-10 pr-4 text-xs text-[#FFFFFF] outline-none placeholder:text-[#F5F5DC]/30 focus:border-[#C9A45C]/60"
+                className="h-10 w-full rounded-2xl border border-[#242424] bg-[#111111] pl-10 pr-4 text-xs text-[#FFFFFF] outline-none placeholder:text-[#D1D5DB]/30 focus:border-[#3B82F6]/60"
               />
             </label>
             {searchOpen && searchQuery.trim().length >= 2 && (
@@ -785,7 +806,7 @@ export function DashboardLayout() {
             <div className="w-full max-w-sm rounded-3xl border border-[#242424] bg-[#111111] p-6 text-center shadow-[0_30px_100px_rgba(0,0,0,.65)]">
               <div className="flex items-center justify-between">
                 <div className="text-left">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A45C]">KELYANI</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#3B82F6]">KELYANI</p>
                   <h2 className="mt-1 text-lg font-semibold text-white">Créer ma carte</h2>
                 </div>
                 <button type="button" onClick={() => setJoinQrOpen(false)} className="grid h-9 w-9 place-items-center rounded-full border border-[#242424] text-white/60 hover:text-white"><X size={16} /></button>
@@ -798,7 +819,7 @@ export function DashboardLayout() {
               {joinQrError && <p className="mt-3 text-xs font-medium text-red-300">{joinQrError}</p>}
 
               <div className="mt-5 rounded-2xl border border-[#242424] bg-[#0B0B0B] p-3 text-left">
-                <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-[#C9A45C]/70">Lien de création · NFC</p>
+                <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-[#3B82F6]/70">Lien de création · NFC</p>
                 <p className="mt-1 break-all text-[10px] leading-4 text-white/55">{joinLink}</p>
               </div>
 
@@ -806,7 +827,7 @@ export function DashboardLayout() {
                 <button
                   type="button"
                   onClick={() => joinLink && navigator.clipboard?.writeText(joinLink)}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#242424] px-3 py-2.5 text-xs font-semibold text-[#C9A45C] hover:border-[#C9A45C]/60"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#242424] px-3 py-2.5 text-xs font-semibold text-[#3B82F6] hover:border-[#3B82F6]/60"
                 >
                   <Copy size={14} /> Copier le lien
                 </button>
@@ -821,7 +842,7 @@ export function DashboardLayout() {
                     link.click();
                     link.remove();
                   }}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#C9A45C] px-3 py-2.5 text-xs font-semibold text-[#050505] hover:bg-[#E1C27A]"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#3B82F6] px-3 py-2.5 text-xs font-semibold text-[#050505] hover:bg-[#60A5FA]"
                 >
                   <Download size={14} /> Télécharger le QR
                 </button>
@@ -847,8 +868,8 @@ export function DashboardLayout() {
                 end={end}
                 className={({ isActive }) => `kelyani-nav-link group flex min-w-[76px] flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 transition-all ${
                   isActive
-                    ? 'bg-[#111111] text-[#E1C27A] shadow-[0_0_24px_rgba(201,164,92,0.10)]'
-                    : 'text-[#F5F5DC]/40 hover:bg-[#111111] hover:text-[#F5F5DC]'
+                    ? 'bg-[#111111] text-[#60A5FA] shadow-[0_0_24px_rgba(59,130,246,0.10)]'
+                    : 'text-[#D1D5DB]/40 hover:bg-[#111111] hover:text-[#D1D5DB]'
                 }`}
               >
                 <Icon size={18} strokeWidth={1.8} />
