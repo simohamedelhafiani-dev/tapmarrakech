@@ -7,9 +7,20 @@ const SECOND_ESTABLISHMENT = 'aaacb2ac-ef2e-4318-8ec7-01e9f271681c';
 async function getManagerEstablishment(manager: SupabaseClient): Promise<string> {
   const { data, error } = await manager.rpc('get_my_establishments');
   expect(error, 'Le Responsable QA doit pouvoir lister ses établissements').toBeNull();
-  const establishmentId = (data ?? []).find((row: { id: string }) => Boolean(row.id))?.id;
-  expect(establishmentId, 'Le Responsable QA doit avoir au moins un établissement actif sur Staging').toBeTruthy();
-  return establishmentId as string;
+
+  // The first assignment is not necessarily configured for loyalty. Select only
+  // an establishment whose own settings explicitly enable a points program.
+  for (const row of data ?? []) {
+    if (!row.id) continue;
+    const { data: settings, error: settingsError } = await manager.rpc('get_loyalty_program_settings', {
+      p_establishment_id: row.id,
+    });
+    expect(settingsError, 'Lecture des paramètres fidélité de l’établissement QA').toBeNull();
+    const config = Array.isArray(settings) ? settings[0] : settings;
+    if (config?.enabled === true && config?.program_type === 'POINTS_REWARD') return row.id;
+  }
+
+  throw new Error('Aucun établissement actif du Responsable QA avec un programme POINTS_REWARD activé sur Staging. Préparer un établissement QA dédié avant de lancer les scénarios métier.');
 }
 
 function stagingClient() {
