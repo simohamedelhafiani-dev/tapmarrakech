@@ -41,7 +41,12 @@ test('QA SQL bridge: authorized manager, transaction consistency, and cross-esta
   );
   expect(enrollmentError, 'Création d’un client temporaire sur l’établissement QA').toBeNull();
   expect(enrollment?.access_token).toBeTruthy();
-  const customer = { id: enrollment.customer_id };
+  const { data: cardRows, error: cardError } = await publicClient.rpc('get_public_loyalty_card', {
+    p_access_token: enrollment.access_token,
+  });
+  expect(cardError).toBeNull();
+  const card = Array.isArray(cardRows) ? cardRows[0] : cardRows;
+  const customer = { id: card.customer_id };
 
   const { data, error } = await client.rpc('fn_test_verify_loyalty_data', {
     p_establishment_id: establishmentId, p_customer_id: customer.id,
