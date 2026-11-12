@@ -53,11 +53,12 @@ test('QA SQL bridge: authorized manager, transaction consistency, and cross-esta
   });
   expect(error).toBeNull();
   expect(data.customer_id).toBe(customer.id);
-  expect(Number(data.points_balance)).toBe(Number(customer!.points_balance));
-  expect(Number(data.total_points_earned)).toBe(Number(customer!.total_points_earned));
-  expect(Number(data.total_points_redeemed)).toBe(Number(customer!.total_points_redeemed));
-  expect(Number(data.visit_count)).toBe(Number(customer!.visit_count));
+  expect(Number(data.points_balance)).toBe(0);
+  expect(Number(data.total_points_earned)).toBe(0);
+  expect(Number(data.total_points_redeemed)).toBe(0);
+  expect(Number(data.visit_count)).toBe(0);
   expect(Array.isArray(data.transactions)).toBe(true);
+  expect(data.transactions).toHaveLength(0);
 
   // A deliberately wrong establishment must never reveal this customer's data.
   const { data: denied, error: deniedError } = await client.rpc('fn_test_verify_loyalty_data', {
