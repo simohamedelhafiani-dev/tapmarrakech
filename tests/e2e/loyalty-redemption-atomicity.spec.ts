@@ -364,7 +364,7 @@ test('Tampons — QR actif réutilisé, surplus conservé et QR rejoué refusé'
 
   // Tombola: execute a due draw, verify the winner code, redeem it once, reject replay.
   const dueStartsAt = new Date(Date.now() - 10 * 60_000).toISOString();
-  const dueDrawAt = new Date(Date.now() - 60_000).toISOString();
+  const dueDrawAt = new Date(Date.now() + 5_000).toISOString();
   const { data: dueRaffleId, error: dueRaffleError } = await manager.rpc(
     'create_loyalty_raffle',
     {
@@ -390,6 +390,8 @@ test('Tampons — QR actif réutilisé, surplus conservé et QR rejoué refusé'
   expect(dueRaffleError, 'Création tombola arrivée à échéance').toBeNull();
   expect(dueRaffleId).toBeTruthy();
 
+  // Let the draw timestamp pass so the real manager-only due-draw guard is exercised.
+  await new Promise((resolve) => setTimeout(resolve, 6_000));
   const { data: drawResult, error: drawError } = await manager.rpc(
     'rerun_loyalty_raffle_draw',
     { p_raffle_id: dueRaffleId },
