@@ -316,7 +316,14 @@ test('Admin — création établissement, attribution Responsable et accès à s
     await expect(page).toHaveURL(/\/admin(?:$|\/)/, { timeout: 30_000 });
 
     await page.getByRole('button', { name: 'Établissements', exact: true }).click();
-    await page.getByRole('button', { name: 'Ajouter un établissement', exact: true }).click();
+    // Wait for the section's async useEstablishments() load to settle before
+    // clicking: its loading -> data transition replaces the hero button DOM.
+    await expect(page.getByText('Portefeuille', { exact: true })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText(/établissements gérés/i)).toBeVisible({ timeout: 20_000 });
+    const addEstablishmentButton = page.getByRole('button', { name: 'Ajouter un établissement', exact: true });
+    await expect(addEstablishmentButton).toBeVisible({ timeout: 20_000 });
+    await expect(page.locator('.animate-pulse')).toHaveCount(0, { timeout: 20_000 });
+    await addEstablishmentButton.click({ timeout: 20_000 });
     await page.getByPlaceholder('Ex : Restaurant Atlas').fill(name);
     await page.getByPlaceholder('restaurant-atlas').fill(slug);
 
