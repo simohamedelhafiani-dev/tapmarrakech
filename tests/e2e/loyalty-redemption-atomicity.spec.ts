@@ -306,24 +306,31 @@ test('Tampons — QR actif réutilisé, surplus conservé et QR rejoué refusé'
   )).toBe(false);
 
   // Web Push must execute as the authenticated establishment manager.
+  let pushFailure: string | null = null;
   const { data: pushResult, error: pushError } = await manager.functions.invoke(
     'send-loyalty-notification-push',
     { body: { campaign_id: campaign.campaign_id } },
   );
-  expect(pushError, 'Exécution Web Push authentifiée').toBeNull();
-  expect(pushResult?.success).toBe(true);
-  expect(Number(pushResult?.push_subscribers)).toBe(0);
-  expect(Number(pushResult?.sent)).toBe(0);
+  if (pushError) {
+    // Keep the raffle scenarios running so one missing push secret does not hide
+    // independent tombola regressions in the same QA fixture.
+    pushFailure = pushError.message;
+    console.error('[E2E PUSH BLOCKER]', pushFailure);
+  } else {
+    expect(pushResult?.success).toBe(true);
+    expect(Number(pushResult?.push_subscribers)).toBe(0);
+    expect(Number(pushResult?.sent)).toBe(0);
 
-  const { data: campaignHistory, error: historyError } = await manager.rpc(
-    'get_loyalty_notification_campaign_history',
-    { p_establishment_id: establishmentId },
-  );
-  expect(historyError, 'Historique des campagnes de notification').toBeNull();
-  const savedCampaign = (campaignHistory ?? []).find(
-    (row: { id: string }) => row.id === campaign.campaign_id,
-  );
-  expect(savedCampaign?.last_push_status).toBe('NO_SUBSCRIBERS');
+    const { data: campaignHistory, error: historyError } = await manager.rpc(
+      'get_loyalty_notification_campaign_history',
+      { p_establishment_id: establishmentId },
+    );
+    expect(historyError, 'Historique des campagnes de notification').toBeNull();
+    const savedCampaign = (campaignHistory ?? []).find(
+      (row: { id: string }) => row.id === campaign.campaign_id,
+    );
+    expect(savedCampaign?.last_push_status).toBe('NO_SUBSCRIBERS');
+  }
 
   // Tombola: a live raffle must be visible on the public loyalty card.
   const raffleStartsAt = new Date(Date.now() - 60_000).toISOString();
@@ -429,6 +436,8 @@ test('Tampons — QR actif réutilisé, surplus conservé et QR rejoué refusé'
     { p_scanner_token: scanner.scanner_token, p_claim_token: winningTicket.claim_token },
   );
   expect(prizeReplayError, 'Un lot de tombola ne peut être réclamé deux fois').not.toBeNull();
+
+  expect(pushFailure, 'Web Push doit être configuré et exécutable').toBeNull();
 
   await Promise.all([manager.auth.signOut(), publicClient.auth.signOut()]);
 });
