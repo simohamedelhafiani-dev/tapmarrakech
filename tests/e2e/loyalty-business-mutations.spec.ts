@@ -316,12 +316,15 @@ test('Admin — création établissement, attribution Responsable et accès à s
     await expect(page).toHaveURL(/\/admin(?:$|\/)/, { timeout: 30_000 });
 
     await page.getByRole('button', { name: 'Établissements', exact: true }).click();
-    // Wait for the section's async useEstablishments() load to settle before
-    // clicking: its loading -> data transition replaces the hero button DOM.
-    const establishmentsSection = page.getByTestId('establishments-section');
-    await expect(establishmentsSection).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByTestId('establishments-loading')).toHaveCount(0, { timeout: 20_000 });
-    const addEstablishmentButton = establishmentsSection.getByRole('button', { name: 'Ajouter un établissement', exact: true });
+    // The Preview can serve a deployment whose source predates test-only
+    // data-testid attributes. Anchor on the user-visible section heading and
+    // wait for the actual action to become available instead.
+    await expect(page.getByRole('heading', { name: 'Établissements', exact: true }))
+      .toBeVisible({ timeout: 20_000 });
+    const addEstablishmentButton = page.getByRole('button', {
+      name: 'Ajouter un établissement',
+      exact: true,
+    });
     await expect(addEstablishmentButton).toBeVisible({ timeout: 20_000 });
     await addEstablishmentButton.click({ timeout: 20_000 });
     await page.getByPlaceholder('Ex : Restaurant Atlas').fill(name);
