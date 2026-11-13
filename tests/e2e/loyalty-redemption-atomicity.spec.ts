@@ -39,7 +39,12 @@ test('Tampons — QR actif réutilisé, surplus conservé et QR rejoué refusé'
   });
   expect(loginError).toBeNull();
 
-  const stampProgram = await findStampEstablishment(manager);\n  test.skip(!stampProgram, 'Fixture Staging manquante : aucun programme STAMP actif. Activer un établissement QA dédié avant de certifier ce scénario.');\n  const { id: establishmentId, goal } = stampProgram!;
+  const stampProgram = await findStampEstablishment(manager);
+  test.skip(
+    !stampProgram,
+    'Fixture Staging manquante : aucun programme STAMP actif. Activer un établissement QA dédié avant de certifier ce scénario.',
+  );
+  const { id: establishmentId, goal } = stampProgram!;
   const { data: scannerRows, error: scannerError } = await manager.rpc(
     'get_or_create_establishment_scanner_link',
     { p_establishment_id: establishmentId },
