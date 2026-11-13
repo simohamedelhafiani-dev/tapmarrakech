@@ -11,6 +11,52 @@ function stagingClient() {
   });
 }
 
+type StampFixtureCleanup = {
+  admin: SupabaseClient;
+  managerId: string;
+  previousEstablishmentId: string | null;
+  establishmentId: string;
+};
+let stampFixtureCleanup: StampFixtureCleanup | null = null;
+
+test.afterEach(async () => {
+  const fixture = stampFixtureCleanup;
+  stampFixtureCleanup = null;
+  if (!fixture) return;
+
+  const { error: loginError } = await fixture.admin.auth.signInWithPassword({
+    email: process.env.E2E_ADMIN_EMAIL!,
+    password: process.env.E2E_ADMIN_PASSWORD!,
+  });
+  expect(loginError, 'Réauthentification Admin Staging avant nettoyage').toBeNull();
+
+  if (fixture.previousEstablishmentId) {
+    const { error } = await fixture.admin.functions.invoke('admin-manage-responsibles', {
+      body: { action: 'assign', user_id: fixture.managerId, establishment_id: fixture.previousEstablishmentId },
+    });
+    expect(error, 'Restauration de l’affectation QA initiale').toBeNull();
+  } else {
+    const { error } = await fixture.admin.functions.invoke('admin-manage-responsibles', {
+      body: { action: 'unassign', user_id: fixture.managerId },
+    });
+    expect(error, 'Retrait de l’affectation temporaire QA').toBeNull();
+  }
+
+  const { error: deleteError } = await fixture.admin
+    .from('establishments')
+    .delete()
+    .eq('id', fixture.establishmentId);
+  expect(deleteError, 'Suppression de la fixture Staging (données liées en cascade)').toBeNull();
+
+  const { data: remaining, error: verifyError } = await fixture.admin
+    .from('establishments')
+    .select('id')
+    .eq('id', fixture.establishmentId);
+  expect(verifyError).toBeNull();
+  expect(remaining ?? []).toHaveLength(0);
+  await fixture.admin.auth.signOut();
+});
+
 async function findStampEstablishment(manager: SupabaseClient): Promise<{ id: string; goal: number } | null> {
   const { data, error } = await manager.rpc('get_my_establishments');
   expect(error, 'Le Responsable QA doit pouvoir lister ses établissements').toBeNull();
@@ -33,17 +79,88 @@ test('Tampons — QR actif réutilisé, surplus conservé et QR rejoué refusé'
   const manager = stagingClient();
   const publicClient = stagingClient();
 
+  const admin = stagingClient();
+  const { error: adminLoginError } = await admin.auth.signInWithPassword({
+    email: process.env.E2E_ADMIN_EMAIL!,
+    password: process.env.E2E_ADMIN_PASSWORD!,
+  });
+  expect(adminLoginError, 'Connexion Admin QA sur Staging').toBeNull();
+
+  const { data: managerProfile, error: profileError } = await admin
+    .from('profiles')
+    .select('id')
+    .eq('email', process.env.E2E_RESPONSIBLE_EMAIL!)
+    .single();
+  expect(profileError, 'Compte Responsable QA identifié').toBeNull();
+
+  const { data: previousAssignments, error: assignmentsError } = await admin
+    .from('establishment_staff')
+    .select('establishment_id')
+    .eq('user_id', managerProfile.id)
+    .eq('role', 'MANAGER')
+    .eq('active', true);
+  expect(assignmentsError, 'Affectation QA initiale lisible').toBeNull();
+  const previousEstablishmentId = previousAssignments?.[0]?.establishment_id ?? null;
+
+  const { data: businessTypes, error: businessTypeError } = await admin
+    .from('ai_business_types')
+    .select('id')
+    .eq('active', true)
+    .limit(1);
+  expect(businessTypeError).toBeNull();
+  expect(businessTypes?.[0]?.id, 'Type établissement actif disponible sur Staging').toBeTruthy();
+
+  const suffix = Date.now().toString();
+  const { data: created, error: createError } = await admin
+    .from('establishments')
+    .insert({
+      name: `QA STAMP Atomicity ${suffix}`,
+      slug: `qa-stamp-atomicity-${suffix}`,
+      ai_business_type_id: businessTypes![0].id,
+      google_review_url: '',
+      redirect_threshold: 4,
+    })
+    .select('id')
+    .single();
+  expect(createError, 'Création établissement fixture par Admin Staging').toBeNull();
+  expect(created?.id).toBeTruthy();
+
+  stampFixtureCleanup = {
+    admin,
+    managerId: managerProfile.id,
+    previousEstablishmentId,
+    establishmentId: created.id,
+  };
+
+  const { data: assignment, error: assignmentError } = await admin.functions.invoke('admin-manage-responsibles', {
+    body: { action: 'assign', user_id: managerProfile.id, establishment_id: created.id },
+  });
+  expect(assignmentError, 'Affectation temporaire du Responsable QA').toBeNull();
+  expect(assignment?.success).toBeTruthy();
+
   const { error: loginError } = await manager.auth.signInWithPassword({
     email: process.env.E2E_RESPONSIBLE_EMAIL!,
     password: process.env.E2E_RESPONSIBLE_PASSWORD!,
   });
   expect(loginError).toBeNull();
 
+  const { error: settingsError } = await manager.rpc('save_loyalty_program_settings', {
+    p_establishment_id: created.id,
+    p_program_type: 'STAMP',
+    p_stamp_goal: 2,
+    p_stamp_reward_name: 'Récompense QA',
+    p_stamp_reward_description: 'Fixture temporaire Playwright Staging',
+    p_discount_percent: null,
+    p_discount_valid_days: 7,
+    p_points_per_currency: 1,
+    p_currency: 'MAD',
+    p_enabled: true,
+    p_discount_points_threshold: 1000,
+  });
+  expect(settingsError, 'Activation du programme STAMP sur la fixture isolée').toBeNull();
+
   const stampProgram = await findStampEstablishment(manager);
-  test.skip(
-    !stampProgram,
-    'Fixture Staging manquante : aucun programme STAMP actif. Activer un établissement QA dédié avant de certifier ce scénario.',
-  );
+  expect(stampProgram, 'Programme STAMP QA activé et visible par le Responsable').not.toBeNull();
   const { id: establishmentId, goal } = stampProgram!;
   const { data: scannerRows, error: scannerError } = await manager.rpc(
     'get_or_create_establishment_scanner_link',
