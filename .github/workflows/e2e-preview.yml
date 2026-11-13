@@ -5,6 +5,8 @@ on:
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [test/stamp-redemption-atomicity-2026-11]
 
 permissions:
   contents: read
