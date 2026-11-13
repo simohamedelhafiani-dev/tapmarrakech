@@ -182,7 +182,7 @@ test('Tampons — QR actif réutilisé, surplus conservé et QR rejoué refusé'
       p_email: null,
       p_interests: [],
       p_marketing_consent: false,
-      p_notification_consent: false,
+      p_notification_consent: true,
       p_preferred_channel: 'NONE',
       p_visit_frequency: null,
     },
@@ -260,6 +260,173 @@ test('Tampons — QR actif réutilisé, surplus conservé et QR rejoué refusé'
     { p_scanner_token: scanner.scanner_token, p_claim_token: first.claim_token },
   );
   expect(replayError, 'Un QR déjà validé ne doit pas être rejoué').not.toBeNull();
+
+  // Notifications: publish a consent-respecting campaign, read it from the public card,
+  // acknowledge it, and verify that it disappears from the unread feed.
+  const { data: campaignRows, error: campaignError } = await manager.rpc(
+    'create_loyalty_notification_campaign',
+    {
+      p_establishment_id: establishmentId,
+      p_title: 'QA Notification',
+      p_message: 'Notification de test Staging',
+      p_type: 'INFO',
+      p_expires_at: null,
+      p_audience: { customer_ids: [card.customer_id] },
+    },
+  );
+  expect(campaignError, 'Publication de campagne de notification').toBeNull();
+  const campaign = Array.isArray(campaignRows) ? campaignRows[0] : campaignRows;
+  expect(Number(campaign?.recipient_count)).toBe(1);
+  expect(campaign?.campaign_id).toBeTruthy();
+
+  const { data: notificationRows, error: notificationError } = await publicClient.rpc(
+    'get_public_loyalty_notifications',
+    { p_access_token: enrollment.access_token, p_limit: 20 },
+  );
+  expect(notificationError, 'Lecture des notifications sur la carte client').toBeNull();
+  const publishedNotification = (notificationRows ?? []).find(
+    (notification: { title: string }) => notification.title === 'QA Notification',
+  );
+  expect(publishedNotification, 'La campagne apparaît dans le flux client').toBeTruthy();
+
+  const { data: markedRead, error: markReadError } = await publicClient.rpc(
+    'mark_public_loyalty_notification_read',
+    { p_access_token: enrollment.access_token, p_notification_id: publishedNotification.id },
+  );
+  expect(markReadError, 'Marquage de notification comme lue').toBeNull();
+  expect(markedRead).toBeTruthy();
+
+  const { data: unreadAfterRows, error: unreadAfterError } = await publicClient.rpc(
+    'get_public_loyalty_notifications',
+    { p_access_token: enrollment.access_token, p_limit: 20 },
+  );
+  expect(unreadAfterError).toBeNull();
+  expect((unreadAfterRows ?? []).some(
+    (notification: { id: string }) => notification.id === publishedNotification.id,
+  )).toBe(false);
+
+  // Web Push must execute as the authenticated establishment manager.
+  const { data: pushResult, error: pushError } = await manager.functions.invoke(
+    'send-loyalty-notification-push',
+    { body: { campaign_id: campaign.campaign_id } },
+  );
+  expect(pushError, 'Exécution Web Push authentifiée').toBeNull();
+  expect(pushResult?.success).toBe(true);
+  expect(Number(pushResult?.push_subscribers)).toBe(0);
+  expect(Number(pushResult?.sent)).toBe(0);
+
+  const { data: campaignHistory, error: historyError } = await manager.rpc(
+    'get_loyalty_notification_campaign_history',
+    { p_establishment_id: establishmentId },
+  );
+  expect(historyError, 'Historique des campagnes de notification').toBeNull();
+  const savedCampaign = (campaignHistory ?? []).find(
+    (row: { id: string }) => row.id === campaign.campaign_id,
+  );
+  expect(savedCampaign?.last_push_status).toBe('NO_SUBSCRIBERS');
+
+  // Tombola: a live raffle must be visible on the public loyalty card.
+  const raffleStartsAt = new Date(Date.now() - 60_000).toISOString();
+  const upcomingDrawAt = new Date(Date.now() + 60 * 60_000).toISOString();
+  const { data: upcomingRaffleId, error: upcomingRaffleError } = await manager.rpc(
+    'create_loyalty_raffle',
+    {
+      p_establishment_id: establishmentId,
+      p_title: 'QA Tombola publique',
+      p_description: 'Vérification de la tombola sur la carte',
+      p_prize_name: 'Lot QA public',
+      p_prize_description: 'Lot de test Staging',
+      p_starts_at: raffleStartsAt,
+      p_draw_at: upcomingDrawAt,
+      p_winners_count: 1,
+      p_reward_validity_mode: 'DAYS_AFTER_DRAW',
+      p_reward_valid_from: null,
+      p_reward_valid_until: null,
+      p_reward_valid_days: 7,
+      p_reservation_required: false,
+      p_single_use: true,
+      p_non_cumulative: true,
+      p_minimum_tier_key: 'STANDARD',
+      p_ticket_multiplier_mode: 'ONE',
+    },
+  );
+  expect(upcomingRaffleError, 'Création de tombola à venir').toBeNull();
+  expect(upcomingRaffleId).toBeTruthy();
+
+  const { data: publicRaffles, error: publicRafflesError } = await publicClient.rpc(
+    'get_public_loyalty_raffles',
+    { p_access_token: enrollment.access_token },
+  );
+  expect(publicRafflesError, 'Affichage des tombolas sur la carte publique').toBeNull();
+  expect((publicRaffles ?? []).some(
+    (raffle: { id: string }) => raffle.id === upcomingRaffleId,
+  )).toBe(true);
+
+  // Tombola: execute a due draw, verify the winner code, redeem it once, reject replay.
+  const dueStartsAt = new Date(Date.now() - 10 * 60_000).toISOString();
+  const dueDrawAt = new Date(Date.now() - 60_000).toISOString();
+  const { data: dueRaffleId, error: dueRaffleError } = await manager.rpc(
+    'create_loyalty_raffle',
+    {
+      p_establishment_id: establishmentId,
+      p_title: 'QA Tombola tirage',
+      p_description: 'Vérification du tirage et de la remise du lot',
+      p_prize_name: 'Lot QA gagnant',
+      p_prize_description: 'Lot de test Staging',
+      p_starts_at: dueStartsAt,
+      p_draw_at: dueDrawAt,
+      p_winners_count: 1,
+      p_reward_validity_mode: 'DAYS_AFTER_DRAW',
+      p_reward_valid_from: null,
+      p_reward_valid_until: null,
+      p_reward_valid_days: 7,
+      p_reservation_required: false,
+      p_single_use: true,
+      p_non_cumulative: true,
+      p_minimum_tier_key: 'STANDARD',
+      p_ticket_multiplier_mode: 'ONE',
+    },
+  );
+  expect(dueRaffleError, 'Création tombola arrivée à échéance').toBeNull();
+  expect(dueRaffleId).toBeTruthy();
+
+  const { data: drawResult, error: drawError } = await manager.rpc(
+    'rerun_loyalty_raffle_draw',
+    { p_raffle_id: dueRaffleId },
+  );
+  expect(drawError, 'Tirage manuel par le responsable autorisé').toBeNull();
+  expect(['NORMAL_POOL', 'EXPANDED_POOL', 'EXISTING_WINNERS']).toContain(drawResult);
+
+  const { data: publicWinners, error: publicWinnersError } = await publicClient.rpc(
+    'get_public_loyalty_raffle_winners',
+    { p_access_token: enrollment.access_token },
+  );
+  expect(publicWinnersError, 'Consultation des lots gagnés sur la carte').toBeNull();
+  const winningTicket = (publicWinners ?? []).find(
+    (winner: { raffle_id: string; status: string }) =>
+      winner.raffle_id === dueRaffleId && winner.status === 'PENDING',
+  );
+  expect(winningTicket?.claim_token, 'Le client gagnant reçoit un code de réclamation').toBeTruthy();
+
+  const { data: winnerValidation, error: winnerValidationError } = await publicClient.rpc(
+    'get_public_loyalty_raffle_winner_by_code',
+    { p_scanner_token: scanner.scanner_token, p_claim_token: winningTicket.claim_token },
+  );
+  expect(winnerValidationError, 'Validation du code gagnant par le scanner').toBeNull();
+  expect((Array.isArray(winnerValidation) ? winnerValidation[0] : winnerValidation)?.status).toBe('PENDING');
+
+  const { data: prizeRedemption, error: prizeRedemptionError } = await publicClient.rpc(
+    'redeem_public_loyalty_raffle_winner_by_code',
+    { p_scanner_token: scanner.scanner_token, p_claim_token: winningTicket.claim_token },
+  );
+  expect(prizeRedemptionError, 'Réclamation du lot par le scanner').toBeNull();
+  expect(prizeRedemption).toBeTruthy();
+
+  const { error: prizeReplayError } = await publicClient.rpc(
+    'redeem_public_loyalty_raffle_winner_by_code',
+    { p_scanner_token: scanner.scanner_token, p_claim_token: winningTicket.claim_token },
+  );
+  expect(prizeReplayError, 'Un lot de tombola ne peut être réclamé deux fois').not.toBeNull();
 
   await Promise.all([manager.auth.signOut(), publicClient.auth.signOut()]);
 });
