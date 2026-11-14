@@ -6,3 +6,6 @@ verify_jwt = true
 # is returned. No privileged Supabase key is exposed to the browser.
 [functions.google-wallet-create-pass]
 verify_jwt = false
+
+[functions.google-wallet-publish-design]
+verify_jwt = true
