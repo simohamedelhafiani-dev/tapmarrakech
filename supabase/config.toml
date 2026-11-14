@@ -1,0 +1,8 @@
+[functions.google-wallet-staging-check]
+verify_jwt = true
+
+# Public customer-card endpoint: the UUID access token is validated through
+# the existing get_public_loyalty_* RPCs before a signed save-to-Wallet URL
+# is returned. No privileged Supabase key is exposed to the browser.
+[functions.google-wallet-create-pass]
+verify_jwt = false
