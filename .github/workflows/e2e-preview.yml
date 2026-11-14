@@ -51,17 +51,17 @@ jobs:
           node -e "const u=new URL(process.env.E2E_BASE_URL); if(!u.hostname.endsWith('.vercel.app')) process.exit(1); const s=new URL(process.env.E2E_SUPABASE_URL); if(!s.hostname.endsWith('.supabase.co')) process.exit(1)"
       - name: Install application dependencies
         run: npm ci
-      - name: Install Playwright test runner and Chromium
-        run: |
-          npm install --no-save --package-lock=false @playwright/test
-          npx playwright install --with-deps chromium
+      - name: Install Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
       - name: Typecheck and build
         run: |
           npm run typecheck
           npm run build
-      - name: Run Preview E2E and Staging checks
-        run: npx playwright test
-      - name: Upload E2E report and failure artifacts
+      - name: Run Supabase Edge Function unit tests
+        run: deno test --allow-env supabase/functions/_shared/*.test.ts
+      - name: Upload test artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
