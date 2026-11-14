@@ -136,7 +136,7 @@ Deno.serve(async (request) => {
     if (saveError) return json({ success: false, stage: "persist", error: "Classe créée mais identifiant non enregistré dans KELYANI. Relancez la synchronisation." }, 500);
 
     return json({
-      success: true, class_id: classId, review_status: String(result.reviewStatus || "UNDER_REVIEW"),
+      success: true, class_id: classId, review_status: persistedReviewStatus,
       created, message: created
         ? "Classe Wallet créée pour cet établissement. Elle doit maintenant être approuvée par Google avant l'émission des cartes."
         : "Design synchronisé avec la classe Wallet de cet établissement. Google peut demander une nouvelle validation.",
