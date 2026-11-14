@@ -54,7 +54,6 @@ Deno.serve(async request => {
     const {data:{user},error:userError} = await admin.auth.getUser(auth.slice(7));
     if (userError || !user) return reply({success:false,error:"Session invalide"},401);
     const {data:profile} = await admin.from("profiles").select("role").eq("id",user.id).maybeSingle();
-    if (profile?.role !== "admin") return reply({success:false,error:"Action réservée à l'Admin KELYANI."},403);
 
     const body = await request.json().catch(() => ({}));
     const establishmentId = String(body.establishment_id || "");
@@ -64,6 +63,10 @@ Deno.serve(async request => {
     if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(establishmentId)
       || !/^[a-z0-9][a-z0-9_-]{1,39}$/.test(designKey) || !displayName) {
       return reply({success:false,error:"Établissement ou modèle invalide."},400);
+    }
+    const {data:ownsPlace,error:ownershipError} = await admin.rpc("user_owns_establishment",{target_establishment_id:establishmentId});
+    if (profile?.role !== "admin" && (ownershipError || ownsPlace !== true)) {
+      return reply({success:false,error:"Vous ne pouvez publier des designs que pour votre propre établissement."},403);
     }
     const {data:place,error:placeError} = await admin.from("establishments").select("id,name,logo_url").eq("id",establishmentId).maybeSingle();
     if (placeError || !place) return reply({success:false,error:"Établissement introuvable."},404);
