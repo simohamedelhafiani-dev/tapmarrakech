@@ -105,8 +105,16 @@ Deno.serve(async (request) => {
     const stamps = Math.max(0, Number(program.stamps_balance ?? card.stamps_balance ?? 0));
     const mode = String(program.program_type || "POINTS_REWARD");
     const progress = mode === "STAMP" ? `${stamps} / ${Number(program.stamp_goal || 10)} tampons` : `${balance.toLocaleString("fr-FR")} points`;
-    const cardColor = /^#[0-9A-Fa-f]{6}$/.test(String(design.primary_color || "")) ? design.primary_color : "#172A25";
-const appBaseUrl = (Deno.env.get("APP_BASE_URL") || "https://tapmarrakech.vercel.app").replace(/\/+$/, "");
+    const walletDesign = design.design_config?.wallet_design ?? {};
+    const cardColor = /^#[0-9A-Fa-f]{6}$/.test(String(walletDesign.primaryColor || ""))
+      ? walletDesign.primaryColor
+      : /^#[0-9A-Fa-f]{6}$/.test(String(walletDesign.backgroundColor || ""))
+        ? walletDesign.backgroundColor
+        : "#172A25";
+    const walletLogoUrl = /^https:\/\//i.test(String(walletDesign.logoUrl || ""))
+      ? String(walletDesign.logoUrl)
+      : card.establishment_logo_url;
+    const appBaseUrl = (Deno.env.get("APP_BASE_URL") || "https://tapmarrakech.vercel.app").replace(/\/+$/, "");
     const qrValue = `${appBaseUrl}/loyalty/${encodeURIComponent(accessToken)}`;
 
     const genericClass = { id: classId };
@@ -116,7 +124,7 @@ const appBaseUrl = (Deno.env.get("APP_BASE_URL") || "https://tapmarrakech.vercel
       state: "ACTIVE",
       cardTitle: localized("KELYANI", "fr-FR"),
       header: localized(establishmentName, "fr-FR"),
-      subheader: localized("Carte de fidélité", "fr-FR"),
+      subheader: localized(String(walletDesign.headerText || "Carte de fidélité").slice(0, 40), "fr-FR"),
       hexBackgroundColor: cardColor,
       barcode: { type: "QR_CODE", value: qrValue, alternateText: "Présentez ce QR code à l'établissement" },
       textModulesData: [
@@ -124,11 +132,11 @@ const appBaseUrl = (Deno.env.get("APP_BASE_URL") || "https://tapmarrakech.vercel
         { id: "progress", header: mode === "STAMP" ? "Tampons" : "Solde fidélité", body: progress },
         { id: "loyalty-number", header: "N° client", body: String(card.loyalty_number || "").slice(0, 40) },
       ],
-      ...(card.establishment_logo_url && /^https:\/\//i.test(card.establishment_logo_url)
-        ? { logo: { sourceUri: { uri: card.establishment_logo_url }, contentDescription: localized(`Logo ${establishmentName}`) } }
+      ...(walletLogoUrl && /^https:\/\//i.test(walletLogoUrl)
+        ? { logo: { sourceUri: { uri: walletLogoUrl }, contentDescription: localized(`Logo ${establishmentName}`) } }
         : {}),
-      ...(card.establishment_logo_url && /^https:\/\//i.test(card.establishment_logo_url)
-        ? { wideLogo: { sourceUri: { uri: card.establishment_logo_url }, contentDescription: localized(`Logo ${establishmentName}`) } }
+      ...(walletLogoUrl && /^https:\/\//i.test(walletLogoUrl)
+        ? { wideLogo: { sourceUri: { uri: walletLogoUrl }, contentDescription: localized(`Logo ${establishmentName}`) } }
         : {}),
     };
 
