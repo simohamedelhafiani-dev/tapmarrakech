@@ -197,7 +197,7 @@ Deno.serve(async (request) => {
           ? [{ id: "wallet-footer", header: "KELYANI", body: String(walletDesign.footerText).slice(0, 80) }]
           : []),
       ],
-      ...(walletDesign.logoUrl && /^https:\\/\\//i.test(String(walletDesign.logoUrl))
+      ...(typeof walletDesign.logoUrl === "string" && walletDesign.logoUrl.startsWith("https://")
         ? { imageModulesData: [{ mainImage: { sourceUri: { uri: String(walletDesign.logoUrl) }, contentDescription: localized("Logo KELYANI") } }] }
         : {}),
       linksModuleData: {
