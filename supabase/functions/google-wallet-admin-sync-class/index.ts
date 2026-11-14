@@ -93,6 +93,7 @@ Deno.serve(async (request) => {
     const getResponse = await fetch(endpoint, { headers: { Authorization: `Bearer ${token}` } });
     let result: Record<string, unknown>;
     let created = false;
+    let reviewStatus = "UNDER_REVIEW";
     if (getResponse.status === 404) {
       const insertResponse = await fetch("https://walletobjects.googleapis.com/walletobjects/v1/loyaltyClass", {
         method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
@@ -103,8 +104,10 @@ Deno.serve(async (request) => {
         return json({ success: false, stage: "class_create", google_status: insertResponse.status, error: (result as any)?.error?.message || "Google a refusé la création de la classe." }, 502);
       }
       created = true;
+      reviewStatus = String(result.reviewStatus || "UNDER_REVIEW");
     } else {
       const current = await getResponse.json().catch(() => ({}));
+      reviewStatus = String(current.reviewStatus || "UNDER_REVIEW");
       if (!getResponse.ok) return json({ success: false, stage: "class_read", google_status: getResponse.status, error: (current as any)?.error?.message || "Impossible de lire la classe Google." }, 502);
       // Updating the design must not reset Google's approval workflow.
       // Only newly-created classes are submitted as UNDER_REVIEW.
@@ -121,12 +124,10 @@ Deno.serve(async (request) => {
       });
       result = await patchResponse.json().catch(() => ({}));
       if (!patchResponse.ok) return json({ success: false, stage: "class_update", google_status: patchResponse.status, error: (result as any)?.error?.message || "Google a refusé la mise à jour de la classe." }, 502);
+      reviewStatus = String(result.reviewStatus || reviewStatus);
     }
 
-    const persistedReviewStatus = String(
-      result.reviewStatus ||
-      (created ? "UNDER_REVIEW" : "APPROVED"),
-    );
+    const persistedReviewStatus = reviewStatus;
     const nextWallet = { ...wallet, googleClassId: classId, googleClassStatus: persistedReviewStatus };
     const { error: saveError } = await admin.from("loyalty_card_designs").upsert({
       establishment_id: establishmentId,
