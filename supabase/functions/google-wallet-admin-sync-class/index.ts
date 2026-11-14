@@ -123,9 +123,10 @@ Deno.serve(async (request) => {
     }
 
     const nextWallet = { ...wallet, googleClassId: classId, googleClassStatus: String(result.reviewStatus || "UNDER_REVIEW") };
-    const { error: saveError } = await admin.from("loyalty_card_designs").update({
+    const { error: saveError } = await admin.from("loyalty_card_designs").upsert({
+      establishment_id: establishmentId,
       design_config: { ...config, wallet_design: nextWallet },
-    }).eq("establishment_id", establishmentId);
+    }, { onConflict: "establishment_id" });
     if (saveError) return json({ success: false, stage: "persist", error: "Classe créée mais identifiant non enregistré dans KELYANI. Relancez la synchronisation." }, 500);
 
     return json({
