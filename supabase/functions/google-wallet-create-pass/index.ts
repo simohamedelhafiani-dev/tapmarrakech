@@ -145,7 +145,7 @@ Deno.serve(async (request) => {
     const progress = mode === "STAMP"
       ? `${stamps}/${Number(program.stamp_goal || 10)}`
       : String(balance);
-    const appBaseUrl = (Deno.env.get("APP_BASE_URL") || "https://www.kelyani.com").replace(/\\/+$/, "");
+    const appBaseUrl = (Deno.env.get("APP_BASE_URL") || "https://www.kelyani.com").replace(/\/+$/, "");
     const qrValue = `${appBaseUrl}/loyalty/${encodeURIComponent(accessToken)}`;
     const objectSuffix = `kelyani_${String(card.establishment_id).replace(/-/g, "")}_${String(card.customer_id).replace(/-/g, "")}`;
     const objectId = `${issuerId}.${objectSuffix}`;
