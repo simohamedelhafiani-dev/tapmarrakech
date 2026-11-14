@@ -183,9 +183,8 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   const manager = useLoyaltyManager(establishmentId);
   const { role } = useAuth();
   const isAdmin = role === 'admin';
-  // Wallet pass design is centrally controlled by KELYANI administrators.
-  // Responsible users can manage their loyalty program, but cannot edit Wallet branding.
-  const canManageWallet = isAdmin;
+  const [ownsEstablishment, setOwnsEstablishment] = useState(false);
+  const canManageWallet = isAdmin || ownsEstablishment;
   const [tab, setTab] = useState<TabId>('settings');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -317,8 +316,21 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   };
 
   useEffect(() => {
-    if (!isAdmin && tab === 'design') setTab('settings');
-  }, [isAdmin, tab]);
+    let active = true;
+    if (isAdmin) {
+      setOwnsEstablishment(true);
+      return () => { active = false; };
+    }
+    void supabase.rpc('user_owns_establishment', { target_establishment_id: establishmentId })
+      .then(({ data, error }) => {
+        if (active) setOwnsEstablishment(!error && data === true);
+      });
+    return () => { active = false; };
+  }, [isAdmin, establishmentId]);
+
+  useEffect(() => {
+    if (!canManageWallet && (tab === 'design' || tab === 'wallet')) setTab('settings');
+  }, [canManageWallet, tab]);
 
   useEffect(() => {
     designHydratedRef.current = false;
@@ -772,7 +784,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     );
   };
 
-  const visibleTabs = isAdmin ? TABS : TABS.filter(item => item.id !== 'design' && item.id !== 'wallet');
+  const visibleTabs = canManageWallet ? TABS : TABS.filter(item => item.id !== 'design' && item.id !== 'wallet');
   const selectedTemplate = WALLET_TEMPLATES[design.templateId as keyof typeof WALLET_TEMPLATES];
 
   if (loading) {
