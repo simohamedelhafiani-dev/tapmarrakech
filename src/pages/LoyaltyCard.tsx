@@ -75,6 +75,16 @@ type Design = {
   border_radius: number;
 };
 
+type WalletCustomerDesign = {
+  id: string;
+  design_key: string;
+  display_name: string;
+  design_config: Record<string, unknown>;
+  google_class_id: string | null;
+  google_review_status: string | null;
+  apple_ready: boolean;
+};
+
 type EngagementContext = {
   google_review_url: string | null;
   tripadvisor_review_url: string | null;
@@ -1031,7 +1041,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
           <button
             type="button"
             onClick={() => void addToGoogleWallet()}
-            disabled={walletLoading || (walletDesigns.length > 0 && !selectedWalletDesignId)}
+            disabled={walletLoading || walletDesigns.length === 0 || !selectedWalletDesignId}
             className="flex w-full items-center justify-center gap-3 rounded-xl bg-white px-4 py-3.5 text-sm font-semibold text-[#111111] transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <span className="grid h-6 w-6 place-items-center rounded-md bg-[#4285F4] text-xs font-black text-white">G</span>
