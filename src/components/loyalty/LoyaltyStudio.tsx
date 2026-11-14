@@ -1271,60 +1271,70 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
 
           {tab === 'wallet' && isAdmin && (
             <div className="space-y-5">
-              <StudioCard eyebrow="Wallet" title="Cartes mobiles de vos clients">
-                <p className="text-xs leading-5 text-[#FFFFFF]/50">
-                  Proposez la carte de fidélité KELYANI dans les portefeuilles mobiles. Chaque établissement conserve son identité visuelle et chaque client reçoit sa carte personnelle.
+              <StudioCard eyebrow="Cartes mobiles" title="Vos cartes Wallet">
+                <p className="text-xs leading-5 text-white/55">
+                  Configurez séparément les cartes mobiles. Les réglages de cet onglet ne modifient pas le design de la Carte KELYANI.
                 </p>
               </StudioCard>
-              <div className="grid gap-4 md:grid-cols-2">
-                <StudioCard eyebrow="Personnalisation Wallet" title="Design indépendant des cartes Wallet">
-                <p className="mb-4 text-xs leading-5 text-white/50">Ces réglages sont enregistrés séparément du design de la Carte KELYANI. Ils personnalisent l’apparence du pass Google Wallet et serviront aussi de base au pass Apple Wallet.</p>
+
+              <div className="grid grid-cols-1 gap-4 2xl:grid-cols-2">
+                <StudioCard eyebrow="Google Wallet" title="Google Wallet">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-white">Pass Google Wallet</p>
+                      <p className="mt-1 text-[11px] leading-5 text-white/45">Génération du lien d’ajout depuis la carte personnelle du client.</p>
+                    </div>
+                    <span className="shrink-0 rounded-full border border-white/15 px-3 py-1.5 text-[10px] text-white/65">Mode test</span>
+                  </div>
+                  <p className="mt-3 text-[11px] leading-5 text-white/45">L’accès de publication Google est encore en attente. Les comptes autorisés au mode test peuvent essayer l’ajout.</p>
+                </StudioCard>
+
+                <StudioCard eyebrow="Apple Wallet" title="Apple Wallet">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-white">Pass Apple Wallet</p>
+                      <p className="mt-1 text-[11px] leading-5 text-white/45">Préparation du modèle de carte et de ses réglages.</p>
+                    </div>
+                    <span className="shrink-0 rounded-full border border-white/15 px-3 py-1.5 text-[10px] text-white/65">Certificats requis</span>
+                  </div>
+                  <p className="mt-3 text-[11px] leading-5 text-white/45">L’émission sera activée après configuration Apple Developer Organisation et des certificats Pass Type ID.</p>
+                </StudioCard>
+              </div>
+
+              <StudioCard eyebrow="Personnalisation" title="Apparence commune des passes">
+                <p className="mb-5 text-xs leading-5 text-white/50">
+                  Ce design est stocké séparément et appliqué au pass Google. Il servira de base au rendu Apple Wallet lorsque PassKit sera activé.
+                </p>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <ColorField label="Fond Wallet" value={walletDesign.backgroundColor} onChange={value => setWalletDesign(current => ({ ...current, backgroundColor: value }))} />
+                  <ColorField label="Couleur de fond" value={walletDesign.backgroundColor} onChange={value => setWalletDesign(current => ({ ...current, backgroundColor: value }))} />
                   <ColorField label="Couleur principale" value={walletDesign.primaryColor} onChange={value => setWalletDesign(current => ({ ...current, primaryColor: value }))} />
-                  <ColorField label="Accent Wallet" value={walletDesign.accentColor} onChange={value => setWalletDesign(current => ({ ...current, accentColor: value }))} />
-                  <ColorField label="Texte Wallet" value={walletDesign.textColor} onChange={value => setWalletDesign(current => ({ ...current, textColor: value }))} />
+                  <ColorField label="Couleur d’accent (aperçu)" value={walletDesign.accentColor} onChange={value => setWalletDesign(current => ({ ...current, accentColor: value }))} />
+                  <ColorField label="Couleur du texte (aperçu)" value={walletDesign.textColor} onChange={value => setWalletDesign(current => ({ ...current, textColor: value }))} />
                 </div>
-                <div className="mt-4 grid gap-3">
-                  <Field label="URL du logo Wallet">
+                <div className="mt-5 grid gap-4">
+                  <Field label="Logo spécifique Wallet (URL HTTPS)">
                     <input value={walletDesign.logoUrl} onChange={e => setWalletDesign(current => ({ ...current, logoUrl: e.target.value }))} placeholder="https://..." className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none focus:border-white/30" />
                   </Field>
-                  <Field label="Titre de la carte Wallet">
+                  <Field label="Sous-titre du pass">
                     <input value={walletDesign.headerText} onChange={e => setWalletDesign(current => ({ ...current, headerText: e.target.value }))} maxLength={40} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none focus:border-white/30" />
                   </Field>
-                  <Field label="Texte secondaire">
+                  <Field label="Texte complémentaire">
                     <input value={walletDesign.footerText} onChange={e => setWalletDesign(current => ({ ...current, footerText: e.target.value }))} maxLength={80} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none focus:border-white/30" />
                   </Field>
                 </div>
-                <div className="mt-4 flex flex-wrap gap-5">
-                  <label className="flex items-center gap-2 text-xs text-white/65"><input type="checkbox" checked={walletDesign.showPoints} onChange={e => setWalletDesign(current => ({ ...current, showPoints: e.target.checked }))} /> Afficher le solde</label>
-                  <label className="flex items-center gap-2 text-xs text-white/65"><input type="checkbox" checked={walletDesign.showQr} onChange={e => setWalletDesign(current => ({ ...current, showQr: e.target.checked }))} /> Afficher le QR code</label>
+                <div className="mt-5 flex flex-wrap gap-x-6 gap-y-3">
+                  <label className="flex items-center gap-2 text-xs text-white/65">
+                    <input type="checkbox" checked={walletDesign.showPoints} onChange={e => setWalletDesign(current => ({ ...current, showPoints: e.target.checked }))} />
+                    Afficher le solde fidélité
+                  </label>
+                  <label className="flex items-center gap-2 text-xs text-white/65">
+                    <input type="checkbox" checked={walletDesign.showQr} onChange={e => setWalletDesign(current => ({ ...current, showQr: e.target.checked }))} />
+                    Afficher le QR code
+                  </label>
                 </div>
-              </StudioCard>
-              <StudioCard eyebrow="Google Wallet" title="Google Wallet">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-white">Carte Google Wallet</p>
-                      <p className="mt-1 text-[11px] text-white/45">Ajout disponible en mode test.</p>
-                    </div>
-                    <span className="rounded-full border border-white/15 px-3 py-1.5 text-[10px] text-white/65">Mode test</span>
-                  </div>
-                  <p className="mt-4 text-[11px] leading-5 text-white/45">La génération du pass utilise le design, le logo et le programme de cet établissement. L’accès de publication Google reste à valider.</p>
-                </StudioCard>
-                <StudioCard eyebrow="Apple Wallet" title="Apple Wallet">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-white">Carte Apple Wallet</p>
-                      <p className="mt-1 text-[11px] text-white/45">Préparation de l’intégration PassKit.</p>
-                    </div>
-                    <span className="rounded-full border border-white/15 px-3 py-1.5 text-[10px] text-white/65">À configurer</span>
-                  </div>
-                  <p className="mt-4 text-[11px] leading-5 text-white/45">L’émission nécessitera le compte Apple Developer Organisation et les certificats Pass Type ID de KELYANI.</p>
-                </StudioCard>
-              </div>
-              <StudioCard eyebrow="Personnalisation" title="Identité de la carte Wallet">
-                <p className="text-xs leading-5 text-white/50">La carte Wallet reprend les réglages de la Carte KELYANI : logo, couleurs, modèle et image de fond. Pour modifier l’apparence, ouvrez l’onglet Carte KELYANI.</p>
-                <button type="button" onClick={() => setTab('design')} className="mt-4 rounded-xl border border-white/15 bg-[#181818] px-4 py-2.5 text-xs font-semibold text-white hover:bg-white/10">Personnaliser la Carte KELYANI</button>
+                <div className="mt-5 rounded-xl border border-white/10 bg-[#0B0B0B] p-3 text-[10px] leading-5 text-white/40">
+                  Note technique : Google Wallet contrôle certains styles natifs. La couleur de fond, le logo, le sous-titre, le solde, le QR et le texte complémentaire sont transmis au pass. Les couleurs de texte et d’accent sont conservées pour l’aperçu et la future version Apple.
+                </div>
               </StudioCard>
             </div>
           )}
