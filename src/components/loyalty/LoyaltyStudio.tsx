@@ -36,7 +36,7 @@ import { WALLET_TEMPLATES } from '@/components/LoyaltyCardVisual';
 import type { LoyaltyExperienceConfig, LoyaltyExperienceReward } from './LoyaltyExperience';
 
 type Props = { establishmentId: string };
-type TabId = 'settings' | 'rewards' | 'referral' | 'tiers' | 'raffle' | 'crm' | 'notifications' | 'design';
+type TabId = 'settings' | 'rewards' | 'referral' | 'tiers' | 'raffle' | 'crm' | 'notifications' | 'design' | 'wallet';
 type RewardType = 'GIFT' | 'DISCOUNT';
 
 type Reward = {
@@ -98,7 +98,8 @@ const TABS: { id: TabId; label: string; caption: string; icon: typeof Settings2 
   { id: 'raffle', label: 'Tombola', caption: 'Gagnants', icon: Trophy },
   { id: 'crm', label: 'Mes clients', caption: 'Clients & segments', icon: UsersRound },
   { id: 'notifications', label: 'Notifications', caption: 'Communication', icon: Bell },
-  { id: 'design', label: 'Design', caption: 'Visuels', icon: Palette },
+  { id: 'design', label: 'Carte KELYANI', caption: 'Carte fidélité', icon: Palette },
+  { id: 'wallet', label: 'Carte Wallet', caption: 'Google & Apple Wallet', icon: CreditCard },
 ];
 
 const TYPES: {
@@ -649,7 +650,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     );
   };
 
-  const visibleTabs = isAdmin ? TABS : TABS.filter(item => item.id !== 'design');
+  const visibleTabs = isAdmin ? TABS : TABS.filter(item => item.id !== 'design' && item.id !== 'wallet');
   const selectedTemplate = WALLET_TEMPLATES[design.templateId as keyof typeof WALLET_TEMPLATES];
 
   if (loading) {
@@ -1155,88 +1156,6 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                 )}
               </StudioCard>
 
-              <StudioCard eyebrow="Google Wallet" title="Carte mobile de vos clients">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex min-w-0 items-start gap-3">
-                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-[#FFFFFF]/10 bg-[#181818] text-[#FFFFFF]">
-                      <CreditCard size={19} />
-                    </span>
-                    <div>
-                      <p className="text-sm font-semibold text-[#FFFFFF]">Ajouter à Google Wallet</p>
-                      <p className="mt-1 max-w-xl text-xs leading-5 text-[#FFFFFF]/50">
-                        La carte Google Wallet reprend automatiquement l’identité visuelle de cet établissement : logo, couleurs, nom et programme de fidélité. Chaque client reçoit sa propre carte.
-                      </p>
-                    </div>
-                  </div>
-                  <span className="inline-flex w-fit shrink-0 items-center rounded-full border border-[#FFFFFF]/15 bg-[#181818] px-3 py-1.5 text-[10px] font-semibold text-[#FFFFFF]/65">
-                    Mode test · validation Google en attente
-                  </span>
-                </div>
-                <div className="mt-4 rounded-xl border border-[#FFFFFF]/10 bg-[#0B0B0B] p-3 text-[11px] leading-5 text-[#FFFFFF]/45">
-                  Modifiez le design ci-dessus pour personnaliser aussi le rendu Wallet. L’ajout effectif se fait depuis la carte du client, avec son lien personnel.
-                </div>
-              </StudioCard>
-
-              <StudioCard eyebrow="Google Wallet" title="Aperçu de la carte mobile">
-                <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_260px] lg:items-center">
-                  <div className="space-y-3">
-                    <p className="text-sm font-semibold text-[#FFFFFF]">Votre design est synchronisé avec l’aperçu Wallet</p>
-                    <p className="text-xs leading-5 text-[#FFFFFF]/50">
-                      Le logo, le nom de l’établissement et les couleurs ci-contre suivent les réglages de votre carte fidélité. Modifiez la palette ou le wallpaper pour voir le résultat évoluer en direct.
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      <span className="rounded-full border border-[#FFFFFF]/15 bg-[#181818] px-3 py-1.5 text-[10px] text-[#FFFFFF]/70">Par établissement</span>
-                      <span className="rounded-full border border-[#FFFFFF]/15 bg-[#181818] px-3 py-1.5 text-[10px] text-[#FFFFFF]/70">Carte individuelle par client</span>
-                    </div>
-                    <p className="text-[10px] leading-4 text-[#FFFFFF]/35">
-                      L’émission réelle reste en mode test jusqu’à l’approbation de l’accès de publication Google Wallet.
-                    </p>
-                  </div>
-                  <div className="mx-auto w-full max-w-[250px] rounded-[26px] border border-white/15 p-3 shadow-2xl" style={{ background: design.backgroundColor }}>
-                    <div className="relative flex min-h-[330px] flex-col overflow-hidden rounded-[19px] p-4" style={{
-                      color: design.textColor,
-                      background: design.wallpaperUrl
-                        ? `linear-gradient(180deg, rgba(0,0,0,.18), rgba(0,0,0,.78)), url("${design.wallpaperUrl}") center/cover`
-                        : `linear-gradient(145deg, ${design.primaryColor}, ${design.backgroundColor} 72%)`,
-                      borderRadius: Math.max(12, design.borderRadius * 0.65),
-                    }}>
-                      <div className="flex items-center gap-3">
-                        {design.logoUrl || establishment.logoUrl ? (
-                          <img src={design.logoUrl || establishment.logoUrl || ''} alt="" className="h-10 w-10 rounded-xl bg-white object-contain p-1" />
-                        ) : (
-                          <div className="grid h-10 w-10 place-items-center rounded-xl text-xs font-black" style={{ background: design.secondaryColor, color: design.backgroundColor }}>{establishment.name.slice(0,2).toUpperCase()}</div>
-                        )}
-                        <div className="min-w-0">
-                          <p className="truncate text-xs font-bold">{establishment.name}</p>
-                          <p className="text-[9px] uppercase tracking-[.16em] opacity-65">Programme fidélité</p>
-                        </div>
-                      </div>
-                      <div className="mt-8 text-center">
-                        <p className="text-[9px] font-bold uppercase tracking-[.2em]" style={{ color: design.secondaryColor }}>Votre solde</p>
-                        <p className="mt-1 text-4xl font-black">720</p>
-                        <p className="text-[10px]" style={{ color: design.secondaryColor }}>POINTS</p>
-                      </div>
-                      <div className="mt-auto rounded-xl border p-3" style={{ borderColor: `${design.secondaryColor}88`, background: 'rgba(0,0,0,.24)' }}>
-                        <div className="flex items-center justify-between text-[10px]">
-                          <span>Prochaine récompense</span><span className="font-bold" style={{ color: design.secondaryColor }}>1000 pts</span>
-                        </div>
-                        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/20">
-                          <div className="h-full w-[72%] rounded-full" style={{ background: design.secondaryColor }} />
-                        </div>
-                      </div>
-                      <div className="mt-3 flex justify-center">
-                        <div className="grid h-14 w-14 place-items-center rounded-lg bg-white p-1">
-                          <div className="grid h-full w-full grid-cols-5 gap-[2px]">
-                            {Array.from({length:25},(_,i)=><span key={i} className="rounded-[1px]" style={{background: (i*7)%3===0 ? '#111111' : '#FFFFFF'}} />)}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <p className="mt-2 text-center text-[9px] text-[#FFFFFF]/35">Simulation visuelle · non émise par Google</p>
-                  </div>
-                </div>
-              </StudioCard>
-
               <StudioCard eyebrow="Wallpaper" title="Arrière-plan de la carte">
                 <div className="grid gap-4 md:grid-cols-[1fr_220px] md:items-center">
                   <div>
@@ -1321,6 +1240,43 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
             </div>
           </>
 
+          {tab === 'wallet' && isAdmin && (
+            <div className="space-y-5">
+              <StudioCard eyebrow="Wallet" title="Cartes mobiles de vos clients">
+                <p className="text-xs leading-5 text-[#FFFFFF]/50">
+                  Proposez la carte de fidélité KELYANI dans les portefeuilles mobiles. Chaque établissement conserve son identité visuelle et chaque client reçoit sa carte personnelle.
+                </p>
+              </StudioCard>
+              <div className="grid gap-4 md:grid-cols-2">
+                <StudioCard eyebrow="Google Wallet" title="Google Wallet">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-white">Carte Google Wallet</p>
+                      <p className="mt-1 text-[11px] text-white/45">Ajout disponible en mode test.</p>
+                    </div>
+                    <span className="rounded-full border border-white/15 px-3 py-1.5 text-[10px] text-white/65">Mode test</span>
+                  </div>
+                  <p className="mt-4 text-[11px] leading-5 text-white/45">La génération du pass utilise le design, le logo et le programme de cet établissement. L’accès de publication Google reste à valider.</p>
+                </StudioCard>
+                <StudioCard eyebrow="Apple Wallet" title="Apple Wallet">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-white">Carte Apple Wallet</p>
+                      <p className="mt-1 text-[11px] text-white/45">Préparation de l’intégration PassKit.</p>
+                    </div>
+                    <span className="rounded-full border border-white/15 px-3 py-1.5 text-[10px] text-white/65">À configurer</span>
+                  </div>
+                  <p className="mt-4 text-[11px] leading-5 text-white/45">L’émission nécessitera le compte Apple Developer Organisation et les certificats Pass Type ID de KELYANI.</p>
+                </StudioCard>
+              </div>
+              <StudioCard eyebrow="Personnalisation" title="Identité de la carte Wallet">
+                <p className="text-xs leading-5 text-white/50">La carte Wallet reprend les réglages de la Carte KELYANI : logo, couleurs, modèle et image de fond. Pour modifier l’apparence, ouvrez l’onglet Carte KELYANI.</p>
+                <button type="button" onClick={() => setTab('design')} className="mt-4 rounded-xl border border-white/15 bg-[#181818] px-4 py-2.5 text-xs font-semibold text-white hover:bg-white/10">Personnaliser la Carte KELYANI</button>
+              </StudioCard>
+            </div>
+          )}
+
+
         <aside className="sticky top-6 h-fit overflow-hidden rounded-3xl bg-[#050505] p-4 sm:p-5">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
@@ -1335,6 +1291,21 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
           <div className="flex min-h-[500px] w-full items-center justify-center overflow-visible rounded-[24px] bg-[#111111]/[.03] p-3 sm:min-h-[560px]">
             <LoyaltyPreview config={previewConfig} />
           </div>
+          {tab === 'wallet' && (
+            <div className="mt-3 space-y-2">
+              <p className="text-center text-[9px] text-white/35">Aperçu du pass Wallet · simulation synchronisée avec le design</p>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="rounded-xl border border-white/10 bg-[#111111] p-3 text-center">
+                  <p className="text-[10px] font-semibold text-white">Google Wallet</p>
+                  <p className="mt-1 text-[9px] text-white/40">Mode test</p>
+                </div>
+                <div className="rounded-xl border border-white/10 bg-[#111111] p-3 text-center">
+                  <p className="text-[10px] font-semibold text-white">Apple Wallet</p>
+                  <p className="mt-1 text-[9px] text-white/40">À configurer</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="mt-4 rounded-2xl bg-[#111111] p-4">
             <div className="flex items-center justify-between gap-3">
