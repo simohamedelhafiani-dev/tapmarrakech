@@ -397,14 +397,25 @@ test('Tampons — QR actif réutilisé, surplus conservé et QR rejoué refusé'
   expect(dueRaffleError, 'Création tombola arrivée à échéance').toBeNull();
   expect(dueRaffleId).toBeTruthy();
 
-  // Let the draw timestamp pass so the real manager-only due-draw guard is exercised.
-  await new Promise((resolve) => setTimeout(resolve, 6_000));
-  const { data: drawResult, error: drawError } = await manager.rpc(
-    'rerun_loyalty_raffle_draw',
-    { p_raffle_id: dueRaffleId },
-  );
-  expect(drawError, 'Tirage manuel par le responsable autorisé').toBeNull();
-  expect(['NORMAL_POOL', 'EXPANDED_POOL', 'EXISTING_WINNERS']).toContain(drawResult);
+  // Verify the scheduled pg_cron worker performs the draw itself.
+  // The worker runs once per minute, so poll the manager-visible raffle row
+  // instead of racing it with a manual rerun.
+  const drawDeadline = Date.now() + 75_000;
+  let scheduledRaffle: { status: string; drawn_at: string | null; last_draw_fallback_stage: string | null } | null = null;
+  while (Date.now() < drawDeadline) {
+    const { data, error } = await manager
+      .from('loyalty_raffles')
+      .select('status,drawn_at,last_draw_fallback_stage')
+      .eq('id', dueRaffleId)
+      .single();
+    expect(error, 'Lecture du statut de la tombola par son Responsable').toBeNull();
+    scheduledRaffle = data;
+    if (scheduledRaffle?.status === 'DRAWN') break;
+    await new Promise((resolve) => setTimeout(resolve, 1_500));
+  }
+  expect(scheduledRaffle?.status, 'Le worker pg_cron doit tirer la tombola arrivée à échéance').toBe('DRAWN');
+  expect(scheduledRaffle?.drawn_at, 'La date réelle du tirage doit être enregistrée').toBeTruthy();
+  expect(['NORMAL_POOL', 'EXPANDED_POOL', 'EXISTING_WINNERS']).toContain(scheduledRaffle?.last_draw_fallback_stage);
 
   const { data: publicWinners, error: publicWinnersError } = await publicClient.rpc(
     'get_public_loyalty_raffle_winners',
