@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  CreditCard,
   Gift,
   Bell,
   ImagePlus,
@@ -1152,6 +1153,28 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                     Template actif : <span className="font-semibold text-[#E1C27A]">{selectedTemplate.name}</span>
                   </p>
                 )}
+              </StudioCard>
+
+              <StudioCard eyebrow="Google Wallet" title="Carte mobile de vos clients">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex min-w-0 items-start gap-3">
+                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-[#FFFFFF]/10 bg-[#181818] text-[#FFFFFF]">
+                      <CreditCard size={19} />
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold text-[#FFFFFF]">Ajouter à Google Wallet</p>
+                      <p className="mt-1 max-w-xl text-xs leading-5 text-[#FFFFFF]/50">
+                        La carte Google Wallet reprend automatiquement l’identité visuelle de cet établissement : logo, couleurs, nom et programme de fidélité. Chaque client reçoit sa propre carte.
+                      </p>
+                    </div>
+                  </div>
+                  <span className="inline-flex w-fit shrink-0 items-center rounded-full border border-[#FFFFFF]/15 bg-[#181818] px-3 py-1.5 text-[10px] font-semibold text-[#FFFFFF]/65">
+                    Mode test · validation Google en attente
+                  </span>
+                </div>
+                <div className="mt-4 rounded-xl border border-[#FFFFFF]/10 bg-[#0B0B0B] p-3 text-[11px] leading-5 text-[#FFFFFF]/45">
+                  Modifiez le design ci-dessus pour personnaliser aussi le rendu Wallet. L’ajout effectif se fait depuis la carte du client, avec son lien personnel.
+                </div>
               </StudioCard>
 
               <StudioCard eyebrow="Wallpaper" title="Arrière-plan de la carte">
