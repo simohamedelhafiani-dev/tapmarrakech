@@ -81,10 +81,16 @@ Deno.serve(async (request) => {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
-    const [{ data: cardRows, error: cardError }, { data: designRows }, { data: programRows }] = await Promise.all([
+    const [
+      { data: cardRows, error: cardError },
+      { data: designRows },
+      { data: programRows },
+      { data: walletDesignResult, error: walletDesignError },
+    ] = await Promise.all([
       publicClient.rpc("get_public_loyalty_card", { p_access_token: accessToken }),
       publicClient.rpc("get_public_loyalty_card_config", { p_access_token: accessToken }),
       publicClient.rpc("get_public_loyalty_program_context", { p_access_token: accessToken }),
+      publicClient.rpc("get_public_loyalty_wallet_config", { p_access_token: accessToken }),
     ]);
 
     if (cardError || !cardRows?.[0]) {
@@ -105,7 +111,13 @@ Deno.serve(async (request) => {
     const stamps = Math.max(0, Number(program.stamps_balance ?? card.stamps_balance ?? 0));
     const mode = String(program.program_type || "POINTS_REWARD");
     const progress = mode === "STAMP" ? `${stamps} / ${Number(program.stamp_goal || 10)} tampons` : `${balance.toLocaleString("fr-FR")} points`;
-    const walletDesign = design.design_config?.wallet_design ?? {};
+    if (walletDesignError) {
+      console.error("Google Wallet design lookup failed", walletDesignError.message);
+      return json({ success: false, error: "Impossible de charger le design Wallet de cet établissement" }, 500);
+    }
+    const walletDesign = walletDesignResult && typeof walletDesignResult === "object"
+      ? walletDesignResult as Record<string, unknown>
+      : {};
     const cardColor = /^#[0-9A-Fa-f]{6}$/.test(String(walletDesign.primaryColor || ""))
       ? walletDesign.primaryColor
       : /^#[0-9A-Fa-f]{6}$/.test(String(walletDesign.backgroundColor || ""))
@@ -122,15 +134,22 @@ Deno.serve(async (request) => {
       id: objectId,
       classId,
       state: "ACTIVE",
-      cardTitle: localized("KELYANI", "fr-FR"),
+      cardTitle: localized(String(walletDesign.cardTitle || "KELYANI").slice(0, 25), "fr-FR"),
       header: localized(establishmentName, "fr-FR"),
       subheader: localized(String(walletDesign.headerText || "Carte de fidélité").slice(0, 40), "fr-FR"),
       hexBackgroundColor: cardColor,
-      barcode: { type: "QR_CODE", value: qrValue, alternateText: "Présentez ce QR code à l'établissement" },
+      ...(walletDesign.showQr !== false
+        ? { barcode: { type: "QR_CODE", value: qrValue, alternateText: "Présentez ce QR code à l'établissement" } }
+        : {}),
       textModulesData: [
         { id: "customer", header: "Titulaire", body: clientName },
-        { id: "progress", header: mode === "STAMP" ? "Tampons" : "Solde fidélité", body: progress },
+        ...(walletDesign.showPoints !== false
+          ? [{ id: "progress", header: mode === "STAMP" ? "Tampons" : "Solde fidélité", body: progress }]
+          : []),
         { id: "loyalty-number", header: "N° client", body: String(card.loyalty_number || "").slice(0, 40) },
+        ...(walletDesign.footerText
+          ? [{ id: "wallet-footer", header: " ", body: String(walletDesign.footerText).slice(0, 80) }]
+          : []),
       ],
       ...(walletLogoUrl && /^https:\/\//i.test(walletLogoUrl)
         ? { logo: { sourceUri: { uri: walletLogoUrl }, contentDescription: localized(`Logo ${establishmentName}`) } }
