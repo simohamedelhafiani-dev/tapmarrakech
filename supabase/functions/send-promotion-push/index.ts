@@ -7,7 +7,7 @@ if(r.method==='OPTIONS')return new Response('ok',{headers:C});
 if(r.method!=='POST')return j({success:false,error:'Méthode non autorisée.'},405);
 try{
 const url=Deno.env.get('SUPABASE_URL'),anon=Deno.env.get('SUPABASE_ANON_KEY'),service=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'),priv=Deno.env.get('VAPID_PRIVATE_KEY');
-const subject=Deno.env.get('VAPID_SUBJECT')||'mailto:notifications@tapmarrakech.com',pub='BP6npYG0iStFDilI-plhetrxJ6msUZGBVgMDP9u7ytndT4QzjD1A2q9taxeRX5bEHCoDBjRYjOUXtd1t2ZuXCWA';
+const subject=Deno.env.get('VAPID_SUBJECT')||'mailto:notifications@kelyani.com',pub='BCqk2PNviEcKsLKPDSd2pUWxfgNbQI6IOPnr-OZnsYDUIBzZQpq6ScAmiB_SkGWXCymULuNZTaEOE8NLxaBVGTo';
 if(!url||!anon||!service||!priv)return j({success:false,error:'VAPID_PRIVATE_KEY manquant dans Supabase.'},503);
 const auth=r.headers.get('Authorization');if(!auth?.startsWith('Bearer '))return j({success:false,error:'Session utilisateur manquante.'},401);
 const uc=createClient(url,anon,{global:{headers:{Authorization:auth}},auth:{persistSession:false,autoRefreshToken:false}});

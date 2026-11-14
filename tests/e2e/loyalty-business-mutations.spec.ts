@@ -316,7 +316,17 @@ test('Admin — création établissement, attribution Responsable et accès à s
     await expect(page).toHaveURL(/\/admin(?:$|\/)/, { timeout: 30_000 });
 
     await page.getByRole('button', { name: 'Établissements', exact: true }).click();
-    await page.getByRole('button', { name: 'Ajouter un établissement', exact: true }).click();
+    // The Preview can serve a deployment whose source predates test-only
+    // data-testid attributes. Anchor on the user-visible section heading and
+    // wait for the actual action to become available instead.
+    await expect(page.getByRole('heading', { name: 'Établissements', exact: true }))
+      .toBeVisible({ timeout: 20_000 });
+    const addEstablishmentButton = page.getByRole('button', {
+      name: 'Ajouter un établissement',
+      exact: true,
+    });
+    await expect(addEstablishmentButton).toBeVisible({ timeout: 20_000 });
+    await addEstablishmentButton.click({ timeout: 20_000 });
     await page.getByPlaceholder('Ex : Restaurant Atlas').fill(name);
     await page.getByPlaceholder('restaurant-atlas').fill(slug);
 
@@ -442,9 +452,27 @@ test('Admin — création établissement, attribution Responsable et accès à s
         assignmentRestored = !remainingError && (remainingRows ?? []).length === 0;
       }
     }
+    // Delete only the establishment created by this exact test run, and only
+    // after the QA Responsable assignment has been restored successfully.
+    expect(assignmentRestored, 'L’affectation du Responsable QA doit retrouver son état initial (preuve SQL)').toBeTruthy();
+    if (createdEstablishmentId && assignmentRestored) {
+      const { error: deleteError } = await admin
+        .from('establishments')
+        .delete()
+        .eq('id', createdEstablishmentId)
+        .eq('slug', slug);
+      expect(deleteError, 'Suppression de la fixture établissement créée par ce test').toBeNull();
+
+      const { data: remaining, error: verifyDeleteError } = await admin
+        .from('establishments')
+        .select('id')
+        .eq('id', createdEstablishmentId)
+        .maybeSingle();
+      expect(verifyDeleteError, 'Vérification de suppression de la fixture').toBeNull();
+      expect(remaining).toBeNull();
+    }
     await manager.auth.signOut();
     await admin.auth.signOut();
-    expect(assignmentRestored, 'L’affectation du Responsable QA doit retrouver son état initial (preuve SQL)').toBeTruthy();
   }
 
   expect(createdEstablishmentId).toBeTruthy();

@@ -5,6 +5,8 @@ on:
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [test/stamp-redemption-atomicity-2026-11]
 
 permissions:
   contents: read
@@ -55,8 +57,9 @@ jobs:
         run: |
           npm install --no-save --package-lock=false @playwright/test
           npx playwright install --with-deps chromium
-      - name: Typecheck and build
+      - name: Lint, typecheck and build
         run: |
+          npm run lint
           npm run typecheck
           npm run build
       - name: Run Preview E2E and Staging checks
