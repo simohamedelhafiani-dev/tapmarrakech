@@ -172,9 +172,9 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   const manager = useLoyaltyManager(establishmentId);
   const { role } = useAuth();
   const isAdmin = role === 'admin';
-  // Establishment responsible users are authorized by save_loyalty_card_builder_config
-  // to manage their own wallet design; keep the broader Design tab admin-only.
-  const canManageWallet = role === 'admin' || role === 'responsible';
+  // Wallet pass design is centrally controlled by KELYANI administrators.
+  // Responsible users can manage their loyalty program, but cannot edit Wallet branding.
+  const canManageWallet = isAdmin;
   const [tab, setTab] = useState<TabId>('settings');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
