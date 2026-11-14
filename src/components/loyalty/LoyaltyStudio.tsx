@@ -1265,10 +1265,6 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
               </StudioCard>
             </div>
           )}
-        </div>
-            </div>
-          </>
-
           {tab === 'wallet' && isAdmin && (
             <div className="space-y-5">
               <StudioCard eyebrow="Cartes mobiles" title="Vos cartes Wallet">
@@ -1338,6 +1334,11 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
               </StudioCard>
             </div>
           )}
+        </div>
+            </div>
+          </>
+
+
 
 
         <aside className="sticky top-6 h-fit overflow-hidden rounded-3xl bg-[#050505] p-4 sm:p-5">
