@@ -39,6 +39,15 @@ type Props = { establishmentId: string };
 type TabId = 'settings' | 'rewards' | 'referral' | 'tiers' | 'raffle' | 'crm' | 'notifications' | 'design' | 'wallet';
 type RewardType = 'GIFT' | 'DISCOUNT';
 
+type WalletCatalogEntry = {
+  id: string;
+  design_key: string;
+  display_name: string;
+  publication_status: 'draft' | 'pending_validation' | 'published' | 'error' | 'archived';
+  google_review_status: string | null;
+  google_class_id: string | null;
+};
+
 type Reward = {
   id: string;
   name: string;
@@ -210,6 +219,8 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   const [conversionPoints, setConversionPoints] = useState(1);
   const [design, setDesign] = useState<DesignState>(DEFAULT_DESIGN);
   const [walletDesign, setWalletDesign] = useState<WalletDesignState>(DEFAULT_WALLET_DESIGN);
+  const [walletCatalog, setWalletCatalog] = useState<WalletCatalogEntry[]>([]);
+  const [publishingWalletKey, setPublishingWalletKey] = useState<string | null>(null);
   const [establishment, setEstablishment] = useState({
     name: 'Votre établissement',
     logoUrl: null as string | null,
@@ -266,6 +277,14 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       setRewards(
         ((rewardData ?? []) as unknown as Record<string, unknown>[]).map(normalizeReward),
       );
+
+      const { data: walletRows, error: walletRowsError } = await supabase
+        .from('loyalty_wallet_design_catalog')
+        .select('id,design_key,display_name,publication_status,google_review_status,google_class_id')
+        .eq('establishment_id', establishmentId)
+        .order('created_at', { ascending: true });
+      if (walletRowsError) throw walletRowsError;
+      setWalletCatalog((walletRows ?? []) as WalletCatalogEntry[]);
 
       const row = Array.isArray(designData) ? designData[0] : designData;
       if (row) {
@@ -532,6 +551,48 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       setMessage(error instanceof Error ? error.message : "Synchronisation Google Wallet impossible.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const publishWalletTemplate = async (templateKey: string) => {
+    if (!isAdmin || !establishmentId || publishingWalletKey) return;
+    const template = WALLET_TEMPLATES[templateKey as keyof typeof WALLET_TEMPLATES];
+    if (!template) return;
+    setPublishingWalletKey(templateKey);
+    setMessage('');
+    const config = {
+      ...walletDesign,
+      backgroundColor: template.background,
+      primaryColor: template.primary,
+      accentColor: template.accent,
+      textColor: template.text,
+      cardTitle: walletDesign.cardTitle || establishment.name,
+      logoUrl: walletDesign.logoUrl || establishment.logoUrl || '',
+    };
+    try {
+      const { data, error } = await supabase.functions.invoke('google-wallet-publish-design', {
+        body: {
+          establishment_id: establishmentId,
+          design_key: templateKey,
+          display_name: template.name,
+          design_config: config,
+        },
+      });
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Publication Wallet impossible.');
+      setWalletDesign(config);
+      setMessage(data.message || 'Modèle traité.');
+      const { data: rows, error: rowsError } = await supabase
+        .from('loyalty_wallet_design_catalog')
+        .select('id,design_key,display_name,publication_status,google_review_status,google_class_id')
+        .eq('establishment_id', establishmentId)
+        .order('created_at', { ascending: true });
+      if (rowsError) throw rowsError;
+      setWalletCatalog((rows ?? []) as WalletCatalogEntry[]);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Publication Wallet impossible.');
+    } finally {
+      setPublishingWalletKey(null);
     }
   };
 
@@ -1299,101 +1360,72 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
           )}
           {tab === 'wallet' && canManageWallet && (
             <div className="space-y-5">
-              <StudioCard eyebrow="Cartes mobiles" title="Vos cartes Wallet">
+              <StudioCard eyebrow="Catalogue Wallet" title="Bibliothèque de modèles">
                 <p className="text-xs leading-5 text-white/55">
-                  Configurez séparément les cartes mobiles. Les réglages de cet onglet ne modifient pas le design de la Carte KELYANI.
+                  Choisissez un modèle, prévisualisez-le puis publiez-le. Une classe Google indépendante est créée pour chaque modèle et établissement. Les modèles en attente de validation ne sont pas visibles par les clients.
                 </p>
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  {Object.values(WALLET_TEMPLATES).map(template => {
+                    const saved = walletCatalog.find(item => item.design_key === template.id);
+                    const busy = publishingWalletKey === template.id;
+                    return (
+                      <div key={template.id} className="overflow-hidden rounded-2xl border border-white/10 bg-[#0B0B0B]">
+                        <button type="button" onClick={() => setWalletDesign(current => ({
+                          ...current, backgroundColor: template.background, primaryColor: template.primary,
+                          accentColor: template.accent, textColor: template.text, cardTitle: current.cardTitle || establishment.name,
+                        }))} className="block w-full p-3 text-left">
+                          <div className="h-24 rounded-xl p-3" style={{background: template.background, color: template.text}}>
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-bold tracking-widest">KELYANI</span>
+                              <span className="h-3 w-3 rounded-full" style={{background:template.accent}} />
+                            </div>
+                            <p className="mt-6 text-sm font-semibold">{template.name}</p>
+                          </div>
+                          <p className="mt-2 text-xs font-semibold text-white">{template.name}</p>
+                        </button>
+                        <div className="flex items-center justify-between gap-2 border-t border-white/10 p-3">
+                          <span className="text-[10px] text-white/45">
+                            {saved ? saved.publication_status === 'published' ? 'Publié' : saved.publication_status === 'pending_validation' ? 'En attente Google' : saved.publication_status : 'Non publié'}
+                            {saved?.google_review_status ? ' · '+saved.google_review_status : ''}
+                          </span>
+                          <button type="button" onClick={() => void publishWalletTemplate(template.id)} disabled={Boolean(publishingWalletKey)} className="rounded-lg bg-[#686D76] px-3 py-2 text-[10px] font-semibold text-white disabled:opacity-40">
+                            {busy ? 'Publication…' : saved?.publication_status === 'published' ? 'Mettre à jour' : 'Publier'}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </StudioCard>
 
-              <div className="grid grid-cols-1 gap-4 2xl:grid-cols-2">
-                <StudioCard eyebrow="Google Wallet" title="Google Wallet">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-white">Pass Google Wallet</p>
-                      <p className="mt-1 text-[11px] leading-5 text-white/45">Génération du lien d’ajout depuis la carte personnelle du client.</p>
-                    </div>
-                    <span className="shrink-0 rounded-full border border-white/15 px-3 py-1.5 text-[10px] text-white/65">Mode test</span>
-                  </div>
-                  <p className="mt-3 text-[11px] leading-5 text-white/45">La classe Google Wallet doit être vérifiée au moment de l’émission. Les comptes autorisés au mode test peuvent essayer l’ajout.</p>
-                </StudioCard>
-
-                <StudioCard eyebrow="Apple Wallet" title="Apple Wallet">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-white">Pass Apple Wallet</p>
-                      <p className="mt-1 text-[11px] leading-5 text-white/45">Préparation du modèle de carte et de ses réglages.</p>
-                    </div>
-                    <span className="shrink-0 rounded-full border border-white/15 px-3 py-1.5 text-[10px] text-white/65">Certificats requis</span>
-                  </div>
-                  <p className="mt-3 text-[11px] leading-5 text-white/45">L’émission sera activée après configuration Apple Developer Organisation et des certificats Pass Type ID.</p>
-                </StudioCard>
-              </div>
-
-              <StudioCard eyebrow="Personnalisation" title="Apparence commune des passes">
-                <p className="mb-5 text-xs leading-5 text-white/50">
-                  Le fond et le logo sont synchronisés avec une classe Google propre à cet établissement. Le titre, les textes, les points et le QR sont transmis au pass. Les autres couleurs restent des réglages d’aperçu, car Google Wallet ne propose qu’une couleur de fond native pour cette classe.
-                </p>
+              <StudioCard eyebrow="Options du modèle" title="Personnalisation">
+                <p className="mb-4 text-xs leading-5 text-white/50">Les réglages ci-dessous s’appliquent au modèle sélectionné avant publication.</p>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <ColorField label="Couleur de fond Google Wallet" value={walletDesign.backgroundColor} onChange={value => setWalletDesign(current => ({ ...current, backgroundColor: value }))} />
-                  <ColorField label="Couleur principale (aperçu)" value={walletDesign.primaryColor} onChange={value => setWalletDesign(current => ({ ...current, primaryColor: value }))} />
-                  <ColorField label="Couleur d’accent (aperçu)" value={walletDesign.accentColor} onChange={value => setWalletDesign(current => ({ ...current, accentColor: value }))} />
-                  <ColorField label="Couleur du texte (aperçu)" value={walletDesign.textColor} onChange={value => setWalletDesign(current => ({ ...current, textColor: value }))} />
-                </div>
-                <div className="mt-5 grid gap-4">
-                  <Field label="Logo spécifique Wallet (URL HTTPS)">
-                    <input value={walletDesign.logoUrl} onChange={e => setWalletDesign(current => ({ ...current, logoUrl: e.target.value }))} placeholder="https://..." className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none focus:border-white/30" />
+                  <Field label="Titre Wallet">
+                    <input value={walletDesign.cardTitle} onChange={e => setWalletDesign(current => ({...current,cardTitle:e.target.value}))} maxLength={25} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
                   </Field>
-                  <Field label="Titre principal Wallet">
-                    <input value={walletDesign.cardTitle} onChange={e => setWalletDesign(current => ({ ...current, cardTitle: e.target.value }))} maxLength={25} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none focus:border-white/30" />
-                  </Field>
-                  <Field label="Sous-titre du pass">
-                    <input value={walletDesign.headerText} onChange={e => setWalletDesign(current => ({ ...current, headerText: e.target.value }))} maxLength={40} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none focus:border-white/30" />
+                  <Field label="Sous-titre">
+                    <input value={walletDesign.headerText} onChange={e => setWalletDesign(current => ({...current,headerText:e.target.value}))} maxLength={40} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
                   </Field>
                   <Field label="Texte complémentaire">
-                    <input value={walletDesign.footerText} onChange={e => setWalletDesign(current => ({ ...current, footerText: e.target.value }))} maxLength={80} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none focus:border-white/30" />
+                    <input value={walletDesign.footerText} onChange={e => setWalletDesign(current => ({...current,footerText:e.target.value}))} maxLength={80} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
+                  </Field>
+                  <Field label="Logo HTTPS">
+                    <input value={walletDesign.logoUrl} onChange={e => setWalletDesign(current => ({...current,logoUrl:e.target.value}))} placeholder="https://..." className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
                   </Field>
                 </div>
-                <div className="mt-5 flex flex-wrap gap-x-6 gap-y-3">
-                  <label className="flex items-center gap-2 text-xs text-white/65">
-                    <input type="checkbox" checked={walletDesign.showPoints} onChange={e => setWalletDesign(current => ({ ...current, showPoints: e.target.checked }))} />
-                    Afficher le solde fidélité
-                  </label>
-                  <label className="flex items-center gap-2 text-xs text-white/65">
-                    <input type="checkbox" checked={walletDesign.showQr} onChange={e => setWalletDesign(current => ({ ...current, showQr: e.target.checked }))} />
-                    Afficher le QR code
-                  </label>
-                </div>
-                <div className="mt-5 flex flex-col gap-3 rounded-2xl border border-white/10 bg-[#0B0B0B] p-4">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <p className="text-xs font-semibold text-white">Publication du design Google</p>
-                      <p className="mt-1 text-[10px] leading-4 text-white/45">
-                        Crée ou synchronise une classe Google dédiée à cet établissement. Google doit approuver une nouvelle classe avant l'émission des cartes.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => void syncGoogleWalletDesign()}
-                      disabled={saving}
-                      className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-white/15 px-4 text-[11px] font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-                      Synchroniser avec Google
-                    </button>
-                  </div>
-                  {walletDesign.googleClassId && (
-                    <p className="text-[10px] text-white/55">
-                      Classe : <span className="font-mono text-white/75">{walletDesign.googleClassId}</span>
-                      {' · '}Statut : <span className="font-semibold text-white">{walletDesign.googleClassStatus || 'À vérifier'}</span>
-                    </p>
-                  )}
-                </div>
-                <div className="mt-5 rounded-xl border border-white/10 bg-[#0B0B0B] p-3 text-[10px] leading-5 text-white/40">
-                  Le logo, le nom du programme et le fond sont synchronisés dans la classe Google de cet établissement. Le sous-titre, le texte complémentaire, le solde et le QR sont transmis au pass individuel. Les couleurs principale, d’accent et du texte servent à l’aperçu KELYANI ; Google Wallet applique la couleur de fond de la classe.
+                <div className="mt-4 flex flex-wrap gap-5 text-xs text-white/65">
+                  <label className="flex items-center gap-2"><input type="checkbox" checked={walletDesign.showPoints} onChange={e => setWalletDesign(current => ({...current,showPoints:e.target.checked}))}/> Afficher les points</label>
+                  <label className="flex items-center gap-2"><input type="checkbox" checked={walletDesign.showQr} onChange={e => setWalletDesign(current => ({...current,showQr:e.target.checked}))}/> Afficher le QR</label>
                 </div>
               </StudioCard>
+
+              <StudioCard eyebrow="Apple Wallet" title="Apple Wallet">
+                <p className="text-xs leading-5 text-white/55">Le catalogue est préparé, mais la publication Apple reste désactivée jusqu’à la configuration du compte Apple Developer Organisation et du certificat Pass Type ID.</p>
+                <span className="mt-3 inline-flex rounded-full border border-white/15 px-3 py-1.5 text-[10px] text-white/60">Certificats requis</span>
+              </StudioCard>
             </div>
-          )}
+          )}}
         </div>
             </div>
           </>
