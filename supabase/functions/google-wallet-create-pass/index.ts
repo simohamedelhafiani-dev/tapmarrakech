@@ -106,7 +106,7 @@ Deno.serve(async (request) => {
     const mode = String(program.program_type || "POINTS_REWARD");
     const progress = mode === "STAMP" ? `${stamps} / ${Number(program.stamp_goal || 10)} tampons` : `${balance.toLocaleString("fr-FR")} points`;
     const cardColor = /^#[0-9A-Fa-f]{6}$/.test(String(design.primary_color || "")) ? design.primary_color : "#172A25";
-    const appBaseUrl = (Deno.env.get("APP_BASE_URL") || "https://tapmarrakech.vercel.app").replace(/\\/$/, "");
+const appBaseUrl = (Deno.env.get("APP_BASE_URL") || "https://tapmarrakech.vercel.app").replace(/\/+$/, "");
     const qrValue = `${appBaseUrl}/loyalty/${encodeURIComponent(accessToken)}`;
 
     const genericClass = { id: classId };
