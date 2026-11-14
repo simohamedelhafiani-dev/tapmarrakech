@@ -89,9 +89,9 @@ type WalletDesignState = {
 };
 
 const DEFAULT_WALLET_DESIGN: WalletDesignState = {
-  backgroundColor: '#172A25',
-  primaryColor: '#243F37',
-  accentColor: '#D4AF37',
+  backgroundColor: '#050505',
+  primaryColor: '#686D76',
+  accentColor: '#3B82F6',
   textColor: '#FFFFFF',
   logoUrl: '',
   cardTitle: 'KELYANI',
