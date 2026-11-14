@@ -684,7 +684,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     );
   };
 
-  const visibleTabs = isAdmin ? TABS : TABS.filter(item => item.id !== 'design');
+  const visibleTabs = isAdmin ? TABS : TABS.filter(item => item.id !== 'design' && item.id !== 'wallet');
   const selectedTemplate = WALLET_TEMPLATES[design.templateId as keyof typeof WALLET_TEMPLATES];
 
   if (loading) {
