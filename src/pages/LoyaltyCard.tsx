@@ -146,6 +146,8 @@ export default function LoyaltyCard() {
   const [pushMessage, setPushMessage] = useState('');
   const [walletLoading, setWalletLoading] = useState(false);
   const [walletMessage, setWalletMessage] = useState('');
+  const [walletDesigns, setWalletDesigns] = useState<WalletCustomerDesign[]>([]);
+  const [selectedWalletDesignId, setSelectedWalletDesignId] = useState('');
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -162,13 +164,30 @@ export default function LoyaltyCard() {
 
   const cardUrl = window.location.href;
 
+  useEffect(() => {
+    if (!token) return;
+    let active = true;
+    void supabase.rpc('get_public_loyalty_wallet_designs', { p_access_token: token }).then(({ data, error: designsError }) => {
+      if (!active) return;
+      if (designsError) {
+        console.error('[KELYANI] Wallet designs unavailable:', designsError.message);
+        setWalletDesigns([]);
+        return;
+      }
+      const rows = (data ?? []) as WalletCustomerDesign[];
+      setWalletDesigns(rows);
+      setSelectedWalletDesignId(current => current && rows.some(row => row.id === current) ? current : rows[0]?.id ?? '');
+    });
+    return () => { active = false; };
+  }, [token]);
+
   async function addToGoogleWallet() {
     if (!token || walletLoading) return;
     setWalletLoading(true);
     setWalletMessage('');
     try {
       const { data, error: walletError } = await supabase.functions.invoke('google-wallet-create-pass', {
-        body: { access_token: token },
+        body: { access_token: token, ...(selectedWalletDesignId ? { design_id: selectedWalletDesignId } : {}) },
       });
       if (walletError) throw walletError;
       if (!data?.success || !data?.save_url) {
@@ -989,16 +1008,37 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         </div>
 
         <section className="mt-4 w-full max-w-[400px] rounded-2xl border border-white/10 bg-[#111111] p-4 shadow-lg">
+          {walletDesigns.length > 0 && (
+            <div className="mb-4">
+              <p className="mb-2 text-xs font-semibold text-white">Choisissez le design de votre carte</p>
+              <div className="grid grid-cols-2 gap-2">
+                {walletDesigns.map(item => {
+                  const cfg = item.design_config || {};
+                  const active = selectedWalletDesignId === item.id;
+                  return (
+                    <button key={item.id} type="button" onClick={() => setSelectedWalletDesignId(item.id)}
+                      className={`rounded-xl border p-2 text-left transition ${active ? 'border-white/70 bg-white/10' : 'border-white/10 bg-black/20'}`}>
+                      <span className="block h-12 rounded-lg p-2 text-[9px] font-bold" style={{background:String(cfg.backgroundColor || '#050505'),color:String(cfg.textColor || '#FFFFFF')}}>
+                        {String(cfg.cardTitle || item.display_name)}
+                      </span>
+                      <span className="mt-2 block text-[10px] font-medium text-white">{item.display_name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
           <button
             type="button"
             onClick={() => void addToGoogleWallet()}
-            disabled={walletLoading}
+            disabled={walletLoading || (walletDesigns.length > 0 && !selectedWalletDesignId)}
             className="flex w-full items-center justify-center gap-3 rounded-xl bg-white px-4 py-3.5 text-sm font-semibold text-[#111111] transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <span className="grid h-6 w-6 place-items-center rounded-md bg-[#4285F4] text-xs font-black text-white">G</span>
             {walletLoading ? 'Préparation de votre carte…' : 'Ajouter à Google Wallet'}
           </button>
-          <p className="mt-2 text-center text-[10px] leading-4 text-white/40">Retrouvez votre carte de fidélité sur votre téléphone.</p>
+          {walletDesigns.length === 0 && <p className="mt-2 text-center text-[10px] leading-4 text-white/40">Aucun modèle Wallet publié par cet établissement pour le moment.</p>}
+          <p className="mt-2 text-center text-[10px] leading-4 text-white/40">Votre compte, vos points et vos récompenses restent identiques quel que soit le design.</p>
           {walletMessage && <p role="alert" className="mt-3 text-center text-xs text-red-300">{walletMessage}</p>}
         </section>
 
