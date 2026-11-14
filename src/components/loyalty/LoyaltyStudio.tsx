@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  CreditCard,
   Gift,
   Bell,
   ImagePlus,
@@ -35,8 +36,17 @@ import { WALLET_TEMPLATES } from '@/components/LoyaltyCardVisual';
 import type { LoyaltyExperienceConfig, LoyaltyExperienceReward } from './LoyaltyExperience';
 
 type Props = { establishmentId: string };
-type TabId = 'settings' | 'rewards' | 'referral' | 'tiers' | 'raffle' | 'crm' | 'notifications' | 'design';
+type TabId = 'settings' | 'rewards' | 'referral' | 'tiers' | 'raffle' | 'crm' | 'notifications' | 'design' | 'wallet';
 type RewardType = 'GIFT' | 'DISCOUNT';
+
+type WalletCatalogEntry = {
+  id: string;
+  design_key: string;
+  display_name: string;
+  publication_status: 'draft' | 'pending_validation' | 'published' | 'error' | 'archived';
+  google_review_status: string | null;
+  google_class_id: string | null;
+};
 
 type Reward = {
   id: string;
@@ -74,6 +84,34 @@ type DesignState = {
   published: boolean;
 };
 
+type WalletDesignState = {
+  backgroundColor: string;
+  primaryColor: string;
+  accentColor: string;
+  textColor: string;
+  logoUrl: string;
+  cardTitle: string;
+  headerText: string;
+  footerText: string;
+  showPoints: boolean;
+  showQr: boolean;
+  googleClassId?: string;
+  googleClassStatus?: string;
+};
+
+const DEFAULT_WALLET_DESIGN: WalletDesignState = {
+  backgroundColor: '#050505',
+  primaryColor: '#686D76',
+  accentColor: '#3B82F6',
+  textColor: '#FFFFFF',
+  logoUrl: '',
+  cardTitle: 'KELYANI',
+  headerText: 'Carte de fidélité',
+  footerText: 'Présentez votre carte à chaque visite',
+  showPoints: true,
+  showQr: true,
+};
+
 const DEFAULT_DESIGN: DesignState = {
   templateId: 'onyx-black',
   primaryColor: '#181818',
@@ -97,7 +135,8 @@ const TABS: { id: TabId; label: string; caption: string; icon: typeof Settings2 
   { id: 'raffle', label: 'Tombola', caption: 'Gagnants', icon: Trophy },
   { id: 'crm', label: 'Mes clients', caption: 'Clients & segments', icon: UsersRound },
   { id: 'notifications', label: 'Notifications', caption: 'Communication', icon: Bell },
-  { id: 'design', label: 'Design', caption: 'Visuels', icon: Palette },
+  { id: 'design', label: 'Carte KELYANI', caption: 'Carte fidélité', icon: Palette },
+  { id: 'wallet', label: 'Carte Wallet', caption: 'Google & Apple Wallet', icon: CreditCard },
 ];
 
 const TYPES: {
@@ -144,6 +183,8 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   const manager = useLoyaltyManager(establishmentId);
   const { role } = useAuth();
   const isAdmin = role === 'admin';
+  const [ownsEstablishment, setOwnsEstablishment] = useState(false);
+  const canManageWallet = isAdmin || ownsEstablishment;
   const [tab, setTab] = useState<TabId>('settings');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -176,6 +217,9 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   const [conversionMad, setConversionMad] = useState(1);
   const [conversionPoints, setConversionPoints] = useState(1);
   const [design, setDesign] = useState<DesignState>(DEFAULT_DESIGN);
+  const [walletDesign, setWalletDesign] = useState<WalletDesignState>(DEFAULT_WALLET_DESIGN);
+  const [walletCatalog, setWalletCatalog] = useState<WalletCatalogEntry[]>([]);
+  const [publishingWalletKey, setPublishingWalletKey] = useState<string | null>(null);
   const [establishment, setEstablishment] = useState({
     name: 'Votre établissement',
     logoUrl: null as string | null,
@@ -233,9 +277,18 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
         ((rewardData ?? []) as unknown as Record<string, unknown>[]).map(normalizeReward),
       );
 
+      const { data: walletRows, error: walletRowsError } = await supabase
+        .from('loyalty_wallet_design_catalog')
+        .select('id,design_key,display_name,publication_status,google_review_status,google_class_id')
+        .eq('establishment_id', establishmentId)
+        .order('created_at', { ascending: true });
+      if (walletRowsError) throw walletRowsError;
+      setWalletCatalog((walletRows ?? []) as WalletCatalogEntry[]);
+
       const row = Array.isArray(designData) ? designData[0] : designData;
       if (row) {
         const cfg = row.design_config ?? {};
+        setWalletDesign({ ...DEFAULT_WALLET_DESIGN, ...(cfg.wallet_design ?? {}) });
         setDesign({
           ...DEFAULT_DESIGN,
           templateId: row.template_id ?? DEFAULT_DESIGN.templateId,
@@ -263,8 +316,21 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   };
 
   useEffect(() => {
-    if (!isAdmin && tab === 'design') setTab('settings');
-  }, [isAdmin, tab]);
+    let active = true;
+    if (isAdmin) {
+      setOwnsEstablishment(true);
+      return () => { active = false; };
+    }
+    void supabase.rpc('user_owns_establishment', { target_establishment_id: establishmentId })
+      .then(({ data, error }) => {
+        if (active) setOwnsEstablishment(!error && data === true);
+      });
+    return () => { active = false; };
+  }, [isAdmin, establishmentId]);
+
+  useEffect(() => {
+    if (!canManageWallet && (tab === 'design' || tab === 'wallet')) setTab('settings');
+  }, [canManageWallet, tab]);
 
   useEffect(() => {
     designHydratedRef.current = false;
@@ -322,7 +388,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   }), [program, design, establishment, rewards]);
 
   useEffect(() => {
-    if (!isAdmin || !establishmentId || !designHydratedRef.current) return;
+    if (!canManageWallet || !establishmentId || !designHydratedRef.current) return;
 
     if (liveDesignTimerRef.current !== null) {
       window.clearTimeout(liveDesignTimerRef.current);
@@ -345,6 +411,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
         discountPointsThreshold: program.discountPointsThreshold,
         discountPercent: program.discountPercent,
         discountValidDays: program.discountValidDays,
+        wallet_design: walletDesign,
       };
 
       const { error } = await supabase.rpc('save_loyalty_card_builder_config', {
@@ -374,6 +441,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   }, [
     establishmentId,
     design,
+    walletDesign,
     establishment.logoUrl,
     program.programType,
     program.stampRewardName,
@@ -419,7 +487,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
         },
       },
     });
-  }, [establishmentId, design, establishment.logoUrl, program, rewards, previewChannelReady]);
+  }, [establishmentId, design, walletDesign, establishment.logoUrl, program, rewards, previewChannelReady]);
 
   const selectTemplate = (id: string) => {
     const template = WALLET_TEMPLATES[id as keyof typeof WALLET_TEMPLATES];
@@ -473,6 +541,73 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     }
   };
 
+  const syncGoogleWalletDesign = async () => {
+    if (!isAdmin || !establishmentId || saving) return;
+    setSaving(true);
+    setMessage('');
+    try {
+      const { data, error } = await supabase.functions.invoke('google-wallet-admin-sync-class', {
+        body: { establishment_id: establishmentId },
+      });
+      if (error) throw error;
+      if (!data?.success || !data?.class_id) {
+        throw new Error(data?.error || "Synchronisation Google Wallet impossible.");
+      }
+      setWalletDesign(current => ({
+        ...current,
+        googleClassId: data.class_id,
+        googleClassStatus: data.review_status || 'UNDER_REVIEW',
+      }));
+      setMessage(data.message || "Design synchronisé avec Google Wallet.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Synchronisation Google Wallet impossible.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const publishWalletTemplate = async (templateKey: string) => {
+    if (!isAdmin || !establishmentId || publishingWalletKey) return;
+    const template = WALLET_TEMPLATES[templateKey as keyof typeof WALLET_TEMPLATES];
+    if (!template) return;
+    setPublishingWalletKey(templateKey);
+    setMessage('');
+    const config = {
+      ...walletDesign,
+      backgroundColor: template.background,
+      primaryColor: template.primary,
+      accentColor: template.accent,
+      textColor: template.text,
+      cardTitle: walletDesign.cardTitle || establishment.name,
+      logoUrl: walletDesign.logoUrl || establishment.logoUrl || '',
+    };
+    try {
+      const { data, error } = await supabase.functions.invoke('google-wallet-publish-design', {
+        body: {
+          establishment_id: establishmentId,
+          design_key: templateKey,
+          display_name: template.name,
+          design_config: config,
+        },
+      });
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Publication Wallet impossible.');
+      setWalletDesign(config);
+      setMessage(data.message || 'Modèle traité.');
+      const { data: rows, error: rowsError } = await supabase
+        .from('loyalty_wallet_design_catalog')
+        .select('id,design_key,display_name,publication_status,google_review_status,google_class_id')
+        .eq('establishment_id', establishmentId)
+        .order('created_at', { ascending: true });
+      if (rowsError) throw rowsError;
+      setWalletCatalog((rows ?? []) as WalletCatalogEntry[]);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Publication Wallet impossible.');
+    } finally {
+      setPublishingWalletKey(null);
+    }
+  };
+
   const saveAll = async (publish: boolean) => {
     setSaving(true);
     setMessage('');
@@ -493,7 +628,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       await manager.saveReferralDraft(referral);
       if (publish) await manager.publishReferral();
 
-      if (isAdmin) {
+      if (canManageWallet) {
         await saveDesign(publish);
         setDesign(current => ({ ...current, published: publish }));
       }
@@ -520,6 +655,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       discountPointsThreshold: program.discountPointsThreshold,
       discountPercent: program.discountPercent,
       discountValidDays: program.discountValidDays,
+      wallet_design: walletDesign,
     };
 
     const { error } = await supabase.rpc('save_loyalty_card_builder_config', {
@@ -648,7 +784,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     );
   };
 
-  const visibleTabs = isAdmin ? TABS : TABS.filter(item => item.id !== 'design');
+  const visibleTabs = canManageWallet ? TABS : TABS.filter(item => item.id !== 'design' && item.id !== 'wallet');
   const selectedTemplate = WALLET_TEMPLATES[design.templateId as keyof typeof WALLET_TEMPLATES];
 
   if (loading) {
@@ -1234,9 +1370,80 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
               </StudioCard>
             </div>
           )}
+          {tab === 'wallet' && canManageWallet && (
+            <div className="space-y-5">
+              <StudioCard eyebrow="Catalogue Wallet" title="Bibliothèque de modèles">
+                <p className="text-xs leading-5 text-white/55">
+                  Choisissez un modèle, prévisualisez-le puis publiez-le. Une classe Google indépendante est créée pour chaque modèle et établissement. Les modèles en attente de validation ne sont pas visibles par les clients.
+                </p>
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  {Object.values(WALLET_TEMPLATES).map(template => {
+                    const saved = walletCatalog.find(item => item.design_key === template.id);
+                    const busy = publishingWalletKey === template.id;
+                    return (
+                      <div key={template.id} className="overflow-hidden rounded-2xl border border-white/10 bg-[#0B0B0B]">
+                        <button type="button" onClick={() => setWalletDesign(current => ({
+                          ...current, backgroundColor: template.background, primaryColor: template.primary,
+                          accentColor: template.accent, textColor: template.text, cardTitle: current.cardTitle || establishment.name,
+                        }))} className="block w-full p-3 text-left">
+                          <div className="h-24 rounded-xl p-3" style={{background: template.background, color: template.text}}>
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-bold tracking-widest">KELYANI</span>
+                              <span className="h-3 w-3 rounded-full" style={{background:template.accent}} />
+                            </div>
+                            <p className="mt-6 text-sm font-semibold">{template.name}</p>
+                          </div>
+                          <p className="mt-2 text-xs font-semibold text-white">{template.name}</p>
+                        </button>
+                        <div className="flex items-center justify-between gap-2 border-t border-white/10 p-3">
+                          <span className="text-[10px] text-white/45">
+                            {saved ? saved.publication_status === 'published' ? 'Publié' : saved.publication_status === 'pending_validation' ? 'En attente Google' : saved.publication_status : 'Non publié'}
+                            {saved?.google_review_status ? ' · '+saved.google_review_status : ''}
+                          </span>
+                          <button type="button" onClick={() => void publishWalletTemplate(template.id)} disabled={Boolean(publishingWalletKey)} className="rounded-lg bg-[#686D76] px-3 py-2 text-[10px] font-semibold text-white disabled:opacity-40">
+                            {busy ? 'Publication…' : saved?.publication_status === 'published' ? 'Mettre à jour' : 'Publier'}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </StudioCard>
+
+              <StudioCard eyebrow="Options du modèle" title="Personnalisation">
+                <p className="mb-4 text-xs leading-5 text-white/50">Les réglages ci-dessous s’appliquent au modèle sélectionné avant publication.</p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label="Titre Wallet">
+                    <input value={walletDesign.cardTitle} onChange={e => setWalletDesign(current => ({...current,cardTitle:e.target.value}))} maxLength={25} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
+                  </Field>
+                  <Field label="Sous-titre">
+                    <input value={walletDesign.headerText} onChange={e => setWalletDesign(current => ({...current,headerText:e.target.value}))} maxLength={40} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
+                  </Field>
+                  <Field label="Texte complémentaire">
+                    <input value={walletDesign.footerText} onChange={e => setWalletDesign(current => ({...current,footerText:e.target.value}))} maxLength={80} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
+                  </Field>
+                  <Field label="Logo HTTPS">
+                    <input value={walletDesign.logoUrl} onChange={e => setWalletDesign(current => ({...current,logoUrl:e.target.value}))} placeholder="https://..." className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
+                  </Field>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-5 text-xs text-white/65">
+                  <label className="flex items-center gap-2"><input type="checkbox" checked={walletDesign.showPoints} onChange={e => setWalletDesign(current => ({...current,showPoints:e.target.checked}))}/> Afficher les points</label>
+                  <label className="flex items-center gap-2"><input type="checkbox" checked={walletDesign.showQr} onChange={e => setWalletDesign(current => ({...current,showQr:e.target.checked}))}/> Afficher le QR</label>
+                </div>
+              </StudioCard>
+
+              <StudioCard eyebrow="Apple Wallet" title="Apple Wallet">
+                <p className="text-xs leading-5 text-white/55">Le catalogue est préparé, mais la publication Apple reste désactivée jusqu’à la configuration du compte Apple Developer Organisation et du certificat Pass Type ID.</p>
+                <span className="mt-3 inline-flex rounded-full border border-white/15 px-3 py-1.5 text-[10px] text-white/60">Certificats requis</span>
+              </StudioCard>
+            </div>
+          )}
         </div>
             </div>
           </>
+
+
+
 
         <aside className="sticky top-6 h-fit overflow-hidden rounded-3xl bg-[#050505] p-4 sm:p-5">
           <div className="mb-4 flex items-center justify-between gap-3">
@@ -1250,8 +1457,36 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
           </div>
 
           <div className="flex min-h-[500px] w-full items-center justify-center overflow-visible rounded-[24px] bg-[#111111]/[.03] p-3 sm:min-h-[560px]">
-            <LoyaltyPreview config={previewConfig} />
+            {tab === 'wallet' ? (
+              <div className="w-full max-w-[300px] overflow-hidden rounded-[28px] border-[7px] border-[#E5E5E5] shadow-2xl" style={{ background: walletDesign.backgroundColor, color: walletDesign.textColor }}>
+                <div className="min-h-[430px] p-4" style={{ background: `linear-gradient(155deg, ${walletDesign.primaryColor}, ${walletDesign.backgroundColor} 76%)` }}>
+                  <div className="flex items-center gap-3">
+                    {walletDesign.logoUrl || design.logoUrl || establishment.logoUrl ? <img src={walletDesign.logoUrl || design.logoUrl || establishment.logoUrl || ''} alt="" className="h-10 w-10 rounded-xl bg-white object-contain p-1" /> : <div className="grid h-10 w-10 place-items-center rounded-xl text-xs font-bold" style={{ background: walletDesign.accentColor, color: walletDesign.backgroundColor }}>{establishment.name.slice(0,2).toUpperCase()}</div>}
+                    <div className="min-w-0"><p className="truncate text-xs font-bold">{walletDesign.cardTitle || 'KELYANI'}</p><p className="text-[9px] uppercase tracking-wider opacity-60">{establishment.name} · {walletDesign.headerText}</p></div>
+                  </div>
+                  {walletDesign.showPoints && <div className="mt-10 text-center"><p className="text-[9px] uppercase tracking-[.2em]" style={{ color: walletDesign.accentColor }}>Votre solde</p><p className="mt-1 text-4xl font-black">720</p><p className="text-[10px]" style={{ color: walletDesign.accentColor }}>POINTS</p></div>}
+                  <div className="mt-8 rounded-xl border p-3" style={{ borderColor: walletDesign.accentColor + '88', background: '#00000022' }}><p className="text-[10px] font-semibold">Prochaine récompense</p><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/20"><div className="h-full w-[72%]" style={{ background: walletDesign.accentColor }} /></div></div>
+                  {walletDesign.showQr && <div className="mt-7 flex justify-center"><div className="grid h-16 w-16 grid-cols-5 gap-[2px] rounded-lg bg-white p-2">{Array.from({length:25},(_,i)=><span key={i} className="rounded-[1px]" style={{background:(i*7)%3===0?'#111111':'#FFFFFF'}} />)}</div></div>}
+                  <p className="mt-5 text-center text-[9px] opacity-55">{walletDesign.footerText}</p>
+                </div>
+              </div>
+            ) : <LoyaltyPreview config={previewConfig} />}
           </div>
+          {tab === 'wallet' && (
+            <div className="mt-3 space-y-2">
+              <p className="text-center text-[9px] text-white/35">Aperçu du pass Wallet · simulation synchronisée avec le design</p>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="rounded-xl border border-white/10 bg-[#111111] p-3 text-center">
+                  <p className="text-[10px] font-semibold text-white">Google Wallet</p>
+                  <p className="mt-1 text-[9px] text-white/40">Mode test</p>
+                </div>
+                <div className="rounded-xl border border-white/10 bg-[#111111] p-3 text-center">
+                  <p className="text-[10px] font-semibold text-white">Apple Wallet</p>
+                  <p className="mt-1 text-[9px] text-white/40">À configurer</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="mt-4 rounded-2xl bg-[#111111] p-4">
             <div className="flex items-center justify-between gap-3">
