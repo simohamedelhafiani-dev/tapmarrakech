@@ -180,30 +180,41 @@ Deno.serve(async (request) => {
       state: "ACTIVE",
       accountName: clientName,
       accountId: loyaltyNumber,
-      loyaltyPoints: {
-        label: mode === "STAMP" ? "Tampons" : "Points",
-        balance: { string: progress },
-      },
-      barcode: {
-        type: "QR_CODE",
-        value: qrValue,
-        alternateText: "Présentez ce QR code à l'établissement",
-      },
+      ...(walletDesign.showPoints !== false ? {
+        loyaltyPoints: {
+          label: mode === "STAMP" ? "Tampons" : "Points",
+          balance: { string: progress },
+        },
+      } : {}),
+      ...(walletDesign.showQr !== false ? {
+        barcode: {
+          type: "QR_CODE",
+          value: qrValue,
+          alternateText: "Présentez ce QR code à l'établissement",
+        },
+      } : {}),
       textModulesData: [
-        { id: "establishment", header: "Établissement", body: String(card.establishment_name || "KELYANI").slice(0, 40) },
-        { id: "customer", header: "Titulaire", body: clientName },
-        { id: "loyalty-number", header: "Numéro client", body: loyaltyNumber },
+        {
+          id: "wallet-program",
+          header: String(walletDesign.cardTitle || "KELYANI").slice(0, 25),
+          body: String(walletDesign.headerText || "Carte de fidélité").slice(0, 40),
+        },
         ...(walletDesign.footerText
-          ? [{ id: "wallet-footer", header: "KELYANI", body: String(walletDesign.footerText).slice(0, 80) }]
+          ? [{ id: "wallet-footer", header: "Information", body: String(walletDesign.footerText).slice(0, 80) }]
           : []),
       ],
       ...(typeof walletDesign.logoUrl === "string" && walletDesign.logoUrl.startsWith("https://")
-        ? { imageModulesData: [{ mainImage: { sourceUri: { uri: String(walletDesign.logoUrl) }, contentDescription: localized("Logo KELYANI") } }] }
+        ? { imageModulesData: [{
+            id: "wallet-logo",
+            mainImage: {
+              sourceUri: { uri: String(walletDesign.logoUrl) },
+              contentDescription: localized("Logo de l'établissement"),
+            },
+          }] }
         : {}),
       linksModuleData: {
         uris: [{ uri: "https://www.kelyani.com", description: "Découvrir KELYANI" }],
       },
-      notifyPreference: "NOTIFY",
     };
 
     const now = Math.floor(Date.now() / 1000);
