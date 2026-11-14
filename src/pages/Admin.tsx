@@ -811,6 +811,7 @@ export default function Admin() {
 
           {section === 'loyalty' && (
             <section className="space-y-5">
+              <GoogleWalletStagingPanel />
               {establishments.length > 0 ? (
                 <>
                   <div className="rounded-3xl border border-[#242424] bg-[#111111] p-4 shadow-sm">
@@ -5579,6 +5580,47 @@ function BillingSection({
   );
 }
 
+function GoogleWalletStagingPanel() {
+  const [walletCheck, setWalletCheck] = useState<{ status: 'idle' | 'loading' | 'ok' | 'error'; detail: string; checkedAt?: string }>({ status: 'idle', detail: '' });
+
+  const runWalletCheck = async () => {
+    setWalletCheck({ status: 'loading', detail: 'Vérification des secrets et de l’accès Google Wallet…' });
+    try {
+      const { data, error } = await supabase.functions.invoke('google-wallet-staging-check', { body: {} });
+      if (error) throw new Error(error.message || 'Échec de l’appel Edge Function');
+      if (!data?.success) throw new Error(data?.error || 'La vérification Google Wallet a échoué');
+      setWalletCheck({ status: 'ok', detail: data.message || 'Authentification et API Google Wallet accessibles.', checkedAt: new Date().toISOString() });
+    } catch (error) {
+      setWalletCheck({ status: 'error', detail: error instanceof Error ? error.message : 'Erreur inconnue', checkedAt: new Date().toISOString() });
+    }
+  };
+
+  return (
+    <div className="mb-6 rounded-3xl border border-[#686D76]/40 bg-[#111111] p-6 shadow-sm">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/40">Google Wallet · Staging</p>
+          <h3 className="mt-2 text-lg font-semibold text-white">Test de connexion Google Wallet</h3>
+          <p className="mt-1 max-w-2xl text-xs leading-5 text-white/50">Vérifie les secrets serveur, l’authentification du compte de service et l’accès à l’Issuer. Aucun pass ni donnée client n’est créé ou modifié.</p>
+        </div>
+        <button type="button" onClick={() => void runWalletCheck()} disabled={walletCheck.status === 'loading'} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#686D76] px-4 py-3 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50">
+          <RefreshCw size={14} className={walletCheck.status === 'loading' ? 'animate-spin' : ''} />
+          {walletCheck.status === 'loading' ? 'Test en cours…' : 'Tester Google Wallet'}
+        </button>
+      </div>
+      {walletCheck.status !== 'idle' && (
+        <div className="mt-4 rounded-xl border border-[#686D76] bg-[#050505] p-4 text-xs leading-5 text-white/70">
+          <div className="flex items-center gap-2 font-semibold">
+            {walletCheck.status === 'ok' ? <CheckCircle2 size={15} /> : walletCheck.status === 'error' ? <AlertTriangle size={15} /> : <RefreshCw size={15} className="animate-spin" />}
+            {walletCheck.status === 'ok' ? 'Connexion validée' : walletCheck.status === 'error' ? 'Test non validé' : 'Vérification en cours'}
+          </div>
+          <p className="mt-2 break-words">{walletCheck.detail}</p>
+          {walletCheck.checkedAt && <p className="mt-2 text-[10px] opacity-60">Dernier test : {new Date(walletCheck.checkedAt).toLocaleString('fr-FR')}</p>}
+        </div>
+      )}
+    </div>
+  );
+}
 function SystemSection({
   billing,
   globalStats,
@@ -5607,20 +5649,6 @@ function SystemSection({
   const [checks, setChecks] = useState<Check[]>([]);
   const [checking, setChecking] = useState(false);
   const [lastChecked, setLastChecked] = useState<string | null>(null);
-
-  const [walletCheck, setWalletCheck] = useState<{ status: 'idle' | 'loading' | 'ok' | 'error'; detail: string; checkedAt?: string }>({ status: 'idle', detail: '' });
-
-  const runWalletCheck = async () => {
-    setWalletCheck({ status: 'loading', detail: 'Vérification des secrets et de l’accès Google Wallet…' });
-    try {
-      const { data, error } = await supabase.functions.invoke('google-wallet-staging-check', { body: {} });
-      if (error) throw new Error(error.message || 'Échec de l’appel Edge Function');
-      if (!data?.success) throw new Error(data?.error || 'La vérification Google Wallet a échoué');
-      setWalletCheck({ status: 'ok', detail: data.message || 'Authentification et API Google Wallet accessibles.', checkedAt: new Date().toISOString() });
-    } catch (error) {
-      setWalletCheck({ status: 'error', detail: error instanceof Error ? error.message : 'Erreur inconnue', checkedAt: new Date().toISOString() });
-    }
-  };
 
   const runChecks = async () => {
     setChecking(true);
@@ -5753,33 +5781,7 @@ function SystemSection({
             <h3 className="mt-2 text-lg font-semibold text-white">Test de connexion Google Wallet</h3>
             <p className="mt-1 max-w-2xl text-xs leading-5 text-white/50">Vérifie les secrets serveur, l’authentification du compte de service et l’accès à l’Issuer. Aucun pass ni donnée client n’est créé ou modifié.</p>
           </div>
-          <button type="button" onClick={() => void runWalletCheck()} disabled={walletCheck.status === 'loading'} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#686D76] px-4 py-3 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50">
-            <RefreshCw size={14} className={walletCheck.status === 'loading' ? 'animate-spin' : ''} />
-            {walletCheck.status === 'loading' ? 'Test en cours…' : 'Tester Google Wallet'}
-          </button>
-        </div>
-        {walletCheck.status !== 'idle' && (
-          <div className={`mt-4 rounded-xl border p-4 text-xs leading-5 ${walletCheck.status === 'ok' ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200' : walletCheck.status === 'error' ? 'border-red-500/30 bg-red-500/10 text-red-200' : 'border-[#686D76] bg-[#050505] text-white/60'}`}>
-            <div className="flex items-center gap-2 font-semibold">
-              {walletCheck.status === 'ok' ? <CheckCircle2 size={15} /> : walletCheck.status === 'error' ? <AlertTriangle size={15} /> : <RefreshCw size={15} className="animate-spin" />}
-              {walletCheck.status === 'ok' ? 'Connexion validée' : walletCheck.status === 'error' ? 'Test non validé' : 'Vérification en cours'}
-            </div>
-            <p className="mt-2 break-words">{walletCheck.detail}</p>
-            {walletCheck.checkedAt && <p className="mt-2 text-[10px] opacity-60">Dernier test : {new Date(walletCheck.checkedAt).toLocaleString('fr-FR')}</p>}
-          </div>
-        )}
-      </div>
-
-      <div className="mt-6 rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
-        <div className="flex items-center gap-3"><Filter size={17} className="text-[#C9A45C]" /><h3 className="font-semibold">État global</h3></div>
-        <div className="mt-4 rounded-xl bg-[#111111] p-4 text-sm">
-          {errorCount === 0 && checks.length > 0 ? <span className="font-semibold text-[#C9A45C]">Tous les contrôles exécutés sont opérationnels.</span> : <span className="font-semibold text-[#a15c50]">{errorCount} contrôle{errorCount > 1 ? 's' : ''} nécessite{errorCount > 1 ? 'nt' : ''} une vérification.</span>}
-        </div>
-        <div className="mt-4 grid gap-3 md:grid-cols-3">
-          <SystemMetric label="Avis" value={globalStats.reviews} />
-          <SystemMetric label="Événements" value={globalStats.analyticsEvents} />
-          <SystemMetric label="Abonnements" value={billing.available ? billing.subscriptions.length : 0} />
-        </div>
+          <button type="button" onClick={() => void runWalletCheck()} disabled={walletCheck.status === 'loading'} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#686D76] px-4 py-3 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-      </div>
         <p className="mt-4 text-xs leading-5 text-[#FFFFFF]/40">Dernier diagnostic : {lastChecked ? new Date(lastChecked).toLocaleString('fr-FR') : 'en cours'}. Les métriques d’uptime et de temps de chargement restent distinctes d’un diagnostic fonctionnel.</p>
       </div>
     </div>
