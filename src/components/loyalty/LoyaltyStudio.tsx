@@ -1331,10 +1331,10 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
 
               <StudioCard eyebrow="Personnalisation" title="Apparence commune des passes">
                 <p className="mb-5 text-xs leading-5 text-white/50">
-                  Les textes, le logo, l’affichage des points et le QR sont transmis au pass Google. Les couleurs restent dans l’aperçu tant que KELYANI n’a pas une classe Google distincte et approuvée pour chaque établissement.
+                  Le fond et le logo sont synchronisés avec une classe Google propre à cet établissement. Le titre, les textes, les points et le QR sont transmis au pass. Les autres couleurs restent des réglages d’aperçu, car Google Wallet ne propose qu’une couleur de fond native pour cette classe.
                 </p>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <ColorField label="Couleur de fond (aperçu)" value={walletDesign.backgroundColor} onChange={value => setWalletDesign(current => ({ ...current, backgroundColor: value }))} />
+                  <ColorField label="Couleur de fond Google Wallet" value={walletDesign.backgroundColor} onChange={value => setWalletDesign(current => ({ ...current, backgroundColor: value }))} />
                   <ColorField label="Couleur principale (aperçu)" value={walletDesign.primaryColor} onChange={value => setWalletDesign(current => ({ ...current, primaryColor: value }))} />
                   <ColorField label="Couleur d’accent (aperçu)" value={walletDesign.accentColor} onChange={value => setWalletDesign(current => ({ ...current, accentColor: value }))} />
                   <ColorField label="Couleur du texte (aperçu)" value={walletDesign.textColor} onChange={value => setWalletDesign(current => ({ ...current, textColor: value }))} />
@@ -1389,7 +1389,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   )}
                 </div>
                 <div className="mt-5 rounded-xl border border-white/10 bg-[#0B0B0B] p-3 text-[10px] leading-5 text-white/40">
-                  Note technique : le logo, le titre, le sous-titre, le texte complémentaire, le solde et le QR sont transmis au pass Google. Les quatre couleurs sont utilisées dans cet aperçu ; le fond natif Google est défini au niveau de la classe Wallet et ne peut pas varier par établissement avec la classe de démonstration partagée.
+                  Le logo, le nom du programme et le fond sont synchronisés dans la classe Google de cet établissement. Le sous-titre, le texte complémentaire, le solde et le QR sont transmis au pass individuel. Les couleurs principale, d’accent et du texte servent à l’aperçu KELYANI ; Google Wallet applique la couleur de fond de la classe.
                 </div>
               </StudioCard>
             </div>
