@@ -86,6 +86,8 @@ type WalletDesignState = {
   footerText: string;
   showPoints: boolean;
   showQr: boolean;
+  googleClassId?: string;
+  googleClassStatus?: string;
 };
 
 const DEFAULT_WALLET_DESIGN: WalletDesignState = {
@@ -503,6 +505,31 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       setMessage('Wallpaper ajouté à la bibliothèque.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Upload impossible.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const syncGoogleWalletDesign = async () => {
+    if (!isAdmin || !establishmentId || saving) return;
+    setSaving(true);
+    setMessage('');
+    try {
+      const { data, error } = await supabase.functions.invoke('google-wallet-admin-sync-class', {
+        body: { establishment_id: establishmentId },
+      });
+      if (error) throw error;
+      if (!data?.success || !data?.class_id) {
+        throw new Error(data?.error || "Synchronisation Google Wallet impossible.");
+      }
+      setWalletDesign(current => ({
+        ...current,
+        googleClassId: data.class_id,
+        googleClassStatus: data.review_status || 'UNDER_REVIEW',
+      }));
+      setMessage(data.message || "Design synchronisé avec Google Wallet.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Synchronisation Google Wallet impossible.");
     } finally {
       setSaving(false);
     }
@@ -1335,6 +1362,31 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                     <input type="checkbox" checked={walletDesign.showQr} onChange={e => setWalletDesign(current => ({ ...current, showQr: e.target.checked }))} />
                     Afficher le QR code
                   </label>
+                </div>
+                <div className="mt-5 flex flex-col gap-3 rounded-2xl border border-white/10 bg-[#0B0B0B] p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-semibold text-white">Publication du design Google</p>
+                      <p className="mt-1 text-[10px] leading-4 text-white/45">
+                        Crée ou synchronise une classe Google dédiée à cet établissement. Google doit approuver une nouvelle classe avant l'émission des cartes.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => void syncGoogleWalletDesign()}
+                      disabled={saving}
+                      className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-white/15 px-4 text-[11px] font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                      Synchroniser avec Google
+                    </button>
+                  </div>
+                  {walletDesign.googleClassId && (
+                    <p className="text-[10px] text-white/55">
+                      Classe : <span className="font-mono text-white/75">{walletDesign.googleClassId}</span>
+                      {' · '}Statut : <span className="font-semibold text-white">{walletDesign.googleClassStatus || 'À vérifier'}</span>
+                    </p>
+                  )}
                 </div>
                 <div className="mt-5 rounded-xl border border-white/10 bg-[#0B0B0B] p-3 text-[10px] leading-5 text-white/40">
                   Note technique : le logo, le titre, le sous-titre, le texte complémentaire, le solde et le QR sont transmis au pass Google. Les quatre couleurs sont utilisées dans cet aperçu ; le fond natif Google est défini au niveau de la classe Wallet et ne peut pas varier par établissement avec la classe de démonstration partagée.
