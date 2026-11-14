@@ -77,6 +77,7 @@ Deno.serve(async (request) => {
   try {
     const body = await request.json().catch(() => ({}));
     const accessToken = typeof body.access_token === "string" ? body.access_token : "";
+    const requestedDesignId = typeof body.design_id === "string" ? body.design_id : "";
     if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(accessToken)) {
       return json({ success: false, error: "Lien de carte invalide" }, 400);
     }
@@ -116,7 +117,9 @@ Deno.serve(async (request) => {
       publicClient.rpc("get_public_loyalty_card", { p_access_token: accessToken }),
       publicClient.rpc("get_public_loyalty_card_config", { p_access_token: accessToken }),
       publicClient.rpc("get_public_loyalty_program_context", { p_access_token: accessToken }),
-      publicClient.rpc("get_public_loyalty_wallet_config", { p_access_token: accessToken }),
+      requestedDesignId
+        ? publicClient.rpc("get_public_loyalty_wallet_design", { p_access_token: accessToken, p_design_id: requestedDesignId })
+        : publicClient.rpc("get_public_loyalty_wallet_config", { p_access_token: accessToken }),
     ]);
 
     if (cardError || !cardRows?.[0]) {
@@ -130,9 +133,21 @@ Deno.serve(async (request) => {
     const card = cardRows[0];
     const design = designRows?.[0] ?? {};
     const program = programRows?.[0] ?? {};
-    const walletDesign = walletDesignResult && typeof walletDesignResult === "object"
+    const rawWalletDesign = walletDesignResult && typeof walletDesignResult === "object"
       ? walletDesignResult as Record<string, unknown>
       : {};
+    const walletDesign = requestedDesignId
+      ? {
+          ...((rawWalletDesign.design_config && typeof rawWalletDesign.design_config === "object") ? rawWalletDesign.design_config as Record<string, unknown> : {}),
+          googleClassId: rawWalletDesign.googleClassId,
+          googleClassStatus: rawWalletDesign.googleClassStatus,
+          designKey: rawWalletDesign.design_key,
+          selectedDesignId: rawWalletDesign.id,
+        }
+      : rawWalletDesign;
+    if (requestedDesignId && !walletDesign.selectedDesignId) {
+      return json({ success: false, error: "Ce modèle Wallet n'est pas publié ou n'est pas disponible pour cette carte." }, 404);
+    }
     // Prefer the establishment-specific class saved by the KELYANI Admin.
     // Keep the approved demo class as a controlled fallback until a dedicated class is approved.
     const classId = String(walletDesign.googleClassId || configuredClassId).trim();
@@ -149,7 +164,8 @@ Deno.serve(async (request) => {
       : String(balance);
     const appBaseUrl = (Deno.env.get("APP_BASE_URL") || "https://www.kelyani.com").replace(/\/+$/, "");
     const qrValue = `${appBaseUrl}/loyalty/${encodeURIComponent(accessToken)}`;
-    const objectSuffix = `kelyani_${String(card.establishment_id).replace(/-/g, "")}_${String(card.customer_id).replace(/-/g, "")}`;
+    const designSuffix = String(walletDesign.designKey || "default").replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 40);
+    const objectSuffix = `kelyani_${String(card.establishment_id).replace(/-/g, "")}_${String(card.customer_id).replace(/-/g, "")}_${designSuffix}`;
     const objectId = `${issuerId}.${objectSuffix}`;
 
     // Verify the existing Loyalty Class before issuing a save link. A DRAFT class
