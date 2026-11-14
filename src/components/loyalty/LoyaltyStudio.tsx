@@ -81,6 +81,7 @@ type WalletDesignState = {
   accentColor: string;
   textColor: string;
   logoUrl: string;
+  cardTitle: string;
   headerText: string;
   footerText: string;
   showPoints: boolean;
@@ -93,6 +94,7 @@ const DEFAULT_WALLET_DESIGN: WalletDesignState = {
   accentColor: '#D4AF37',
   textColor: '#FFFFFF',
   logoUrl: '',
+  cardTitle: 'KELYANI',
   headerText: 'Carte de fidélité',
   footerText: 'Présentez votre carte à chaque visite',
   showPoints: true,
@@ -1311,6 +1313,9 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   <Field label="Logo spécifique Wallet (URL HTTPS)">
                     <input value={walletDesign.logoUrl} onChange={e => setWalletDesign(current => ({ ...current, logoUrl: e.target.value }))} placeholder="https://..." className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none focus:border-white/30" />
                   </Field>
+                  <Field label="Titre principal Wallet">
+                    <input value={walletDesign.cardTitle} onChange={e => setWalletDesign(current => ({ ...current, cardTitle: e.target.value }))} maxLength={25} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none focus:border-white/30" />
+                  </Field>
                   <Field label="Sous-titre du pass">
                     <input value={walletDesign.headerText} onChange={e => setWalletDesign(current => ({ ...current, headerText: e.target.value }))} maxLength={40} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none focus:border-white/30" />
                   </Field>
@@ -1358,7 +1363,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                 <div className="min-h-[430px] p-4" style={{ background: `linear-gradient(155deg, ${walletDesign.primaryColor}, ${walletDesign.backgroundColor} 76%)` }}>
                   <div className="flex items-center gap-3">
                     {walletDesign.logoUrl || design.logoUrl || establishment.logoUrl ? <img src={walletDesign.logoUrl || design.logoUrl || establishment.logoUrl || ''} alt="" className="h-10 w-10 rounded-xl bg-white object-contain p-1" /> : <div className="grid h-10 w-10 place-items-center rounded-xl text-xs font-bold" style={{ background: walletDesign.accentColor, color: walletDesign.backgroundColor }}>{establishment.name.slice(0,2).toUpperCase()}</div>}
-                    <div className="min-w-0"><p className="truncate text-xs font-bold">{establishment.name}</p><p className="text-[9px] uppercase tracking-wider opacity-60">{walletDesign.headerText}</p></div>
+                    <div className="min-w-0"><p className="truncate text-xs font-bold">{walletDesign.cardTitle || 'KELYANI'}</p><p className="text-[9px] uppercase tracking-wider opacity-60">{establishment.name} · {walletDesign.headerText}</p></div>
                   </div>
                   {walletDesign.showPoints && <div className="mt-10 text-center"><p className="text-[9px] uppercase tracking-[.2em]" style={{ color: walletDesign.accentColor }}>Votre solde</p><p className="mt-1 text-4xl font-black">720</p><p className="text-[10px]" style={{ color: walletDesign.accentColor }}>POINTS</p></div>}
                   <div className="mt-8 rounded-xl border p-3" style={{ borderColor: walletDesign.accentColor + '88', background: '#00000022' }}><p className="text-[10px] font-semibold">Prochaine récompense</p><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/20"><div className="h-full w-[72%]" style={{ background: walletDesign.accentColor }} /></div></div>
