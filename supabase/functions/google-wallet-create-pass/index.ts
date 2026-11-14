@@ -118,11 +118,11 @@ Deno.serve(async (request) => {
     const walletDesign = walletDesignResult && typeof walletDesignResult === "object"
       ? walletDesignResult as Record<string, unknown>
       : {};
-    const cardColor = /^#[0-9A-Fa-f]{6}$/.test(String(walletDesign.primaryColor || ""))
-      ? walletDesign.primaryColor
-      : /^#[0-9A-Fa-f]{6}$/.test(String(walletDesign.backgroundColor || ""))
-        ? walletDesign.backgroundColor
-        : "#172A25";
+    // Google Wallet's native pass background should follow the Wallet background setting.
+    // Keep the Nardo Tech absolute black as the safe default; primaryColor remains an accent/surface input.
+    const cardColor = /^#[0-9A-Fa-f]{6}$/.test(String(walletDesign.backgroundColor || ""))
+      ? walletDesign.backgroundColor
+      : "#050505";
     const walletLogoUrl = /^https:\/\//i.test(String(walletDesign.logoUrl || ""))
       ? String(walletDesign.logoUrl)
       : card.establishment_logo_url;
