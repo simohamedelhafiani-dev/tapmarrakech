@@ -75,6 +75,30 @@ type DesignState = {
   published: boolean;
 };
 
+type WalletDesignState = {
+  backgroundColor: string;
+  primaryColor: string;
+  accentColor: string;
+  textColor: string;
+  logoUrl: string;
+  headerText: string;
+  footerText: string;
+  showPoints: boolean;
+  showQr: boolean;
+};
+
+const DEFAULT_WALLET_DESIGN: WalletDesignState = {
+  backgroundColor: '#172A25',
+  primaryColor: '#243F37',
+  accentColor: '#D4AF37',
+  textColor: '#FFFFFF',
+  logoUrl: '',
+  headerText: 'Carte de fidélité',
+  footerText: 'Présentez votre carte à chaque visite',
+  showPoints: true,
+  showQr: true,
+};
+
 const DEFAULT_DESIGN: DesignState = {
   templateId: 'onyx-black',
   primaryColor: '#181818',
@@ -178,6 +202,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   const [conversionMad, setConversionMad] = useState(1);
   const [conversionPoints, setConversionPoints] = useState(1);
   const [design, setDesign] = useState<DesignState>(DEFAULT_DESIGN);
+  const [walletDesign, setWalletDesign] = useState<WalletDesignState>(DEFAULT_WALLET_DESIGN);
   const [establishment, setEstablishment] = useState({
     name: 'Votre établissement',
     logoUrl: null as string | null,
@@ -238,6 +263,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       const row = Array.isArray(designData) ? designData[0] : designData;
       if (row) {
         const cfg = row.design_config ?? {};
+        setWalletDesign({ ...DEFAULT_WALLET_DESIGN, ...(cfg.wallet_design ?? {}) });
         setDesign({
           ...DEFAULT_DESIGN,
           templateId: row.template_id ?? DEFAULT_DESIGN.templateId,
@@ -347,6 +373,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
         discountPointsThreshold: program.discountPointsThreshold,
         discountPercent: program.discountPercent,
         discountValidDays: program.discountValidDays,
+        wallet_design: walletDesign,
       };
 
       const { error } = await supabase.rpc('save_loyalty_card_builder_config', {
@@ -376,6 +403,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   }, [
     establishmentId,
     design,
+    walletDesign,
     establishment.logoUrl,
     program.programType,
     program.stampRewardName,
@@ -421,7 +449,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
         },
       },
     });
-  }, [establishmentId, design, establishment.logoUrl, program, rewards, previewChannelReady]);
+  }, [establishmentId, design, walletDesign, establishment.logoUrl, program, rewards, previewChannelReady]);
 
   const selectTemplate = (id: string) => {
     const template = WALLET_TEMPLATES[id as keyof typeof WALLET_TEMPLATES];
@@ -522,6 +550,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       discountPointsThreshold: program.discountPointsThreshold,
       discountPercent: program.discountPercent,
       discountValidDays: program.discountValidDays,
+      wallet_design: walletDesign,
     };
 
     const { error } = await supabase.rpc('save_loyalty_card_builder_config', {
@@ -1248,7 +1277,31 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                 </p>
               </StudioCard>
               <div className="grid gap-4 md:grid-cols-2">
-                <StudioCard eyebrow="Google Wallet" title="Google Wallet">
+                <StudioCard eyebrow="Personnalisation Wallet" title="Design indépendant des cartes Wallet">
+                <p className="mb-4 text-xs leading-5 text-white/50">Ces réglages sont enregistrés séparément du design de la Carte KELYANI. Ils personnalisent l’apparence du pass Google Wallet et serviront aussi de base au pass Apple Wallet.</p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <ColorField label="Fond Wallet" value={walletDesign.backgroundColor} onChange={value => setWalletDesign(current => ({ ...current, backgroundColor: value }))} />
+                  <ColorField label="Couleur principale" value={walletDesign.primaryColor} onChange={value => setWalletDesign(current => ({ ...current, primaryColor: value }))} />
+                  <ColorField label="Accent Wallet" value={walletDesign.accentColor} onChange={value => setWalletDesign(current => ({ ...current, accentColor: value }))} />
+                  <ColorField label="Texte Wallet" value={walletDesign.textColor} onChange={value => setWalletDesign(current => ({ ...current, textColor: value }))} />
+                </div>
+                <div className="mt-4 grid gap-3">
+                  <Field label="URL du logo Wallet">
+                    <input value={walletDesign.logoUrl} onChange={e => setWalletDesign(current => ({ ...current, logoUrl: e.target.value }))} placeholder="https://..." className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none focus:border-white/30" />
+                  </Field>
+                  <Field label="Titre de la carte Wallet">
+                    <input value={walletDesign.headerText} onChange={e => setWalletDesign(current => ({ ...current, headerText: e.target.value }))} maxLength={40} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none focus:border-white/30" />
+                  </Field>
+                  <Field label="Texte secondaire">
+                    <input value={walletDesign.footerText} onChange={e => setWalletDesign(current => ({ ...current, footerText: e.target.value }))} maxLength={80} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none focus:border-white/30" />
+                  </Field>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-5">
+                  <label className="flex items-center gap-2 text-xs text-white/65"><input type="checkbox" checked={walletDesign.showPoints} onChange={e => setWalletDesign(current => ({ ...current, showPoints: e.target.checked }))} /> Afficher le solde</label>
+                  <label className="flex items-center gap-2 text-xs text-white/65"><input type="checkbox" checked={walletDesign.showQr} onChange={e => setWalletDesign(current => ({ ...current, showQr: e.target.checked }))} /> Afficher le QR code</label>
+                </div>
+              </StudioCard>
+              <StudioCard eyebrow="Google Wallet" title="Google Wallet">
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p className="text-sm font-semibold text-white">Carte Google Wallet</p>
@@ -1289,7 +1342,20 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
           </div>
 
           <div className="flex min-h-[500px] w-full items-center justify-center overflow-visible rounded-[24px] bg-[#111111]/[.03] p-3 sm:min-h-[560px]">
-            <LoyaltyPreview config={previewConfig} />
+            {tab === 'wallet' ? (
+              <div className="w-full max-w-[300px] overflow-hidden rounded-[28px] border-[7px] border-[#E5E5E5] shadow-2xl" style={{ background: walletDesign.backgroundColor, color: walletDesign.textColor }}>
+                <div className="min-h-[430px] p-4" style={{ background: `linear-gradient(155deg, ${walletDesign.primaryColor}, ${walletDesign.backgroundColor} 76%)` }}>
+                  <div className="flex items-center gap-3">
+                    {walletDesign.logoUrl || design.logoUrl || establishment.logoUrl ? <img src={walletDesign.logoUrl || design.logoUrl || establishment.logoUrl || ''} alt="" className="h-10 w-10 rounded-xl bg-white object-contain p-1" /> : <div className="grid h-10 w-10 place-items-center rounded-xl text-xs font-bold" style={{ background: walletDesign.accentColor, color: walletDesign.backgroundColor }}>{establishment.name.slice(0,2).toUpperCase()}</div>}
+                    <div className="min-w-0"><p className="truncate text-xs font-bold">{establishment.name}</p><p className="text-[9px] uppercase tracking-wider opacity-60">{walletDesign.headerText}</p></div>
+                  </div>
+                  {walletDesign.showPoints && <div className="mt-10 text-center"><p className="text-[9px] uppercase tracking-[.2em]" style={{ color: walletDesign.accentColor }}>Votre solde</p><p className="mt-1 text-4xl font-black">720</p><p className="text-[10px]" style={{ color: walletDesign.accentColor }}>POINTS</p></div>}
+                  <div className="mt-8 rounded-xl border p-3" style={{ borderColor: walletDesign.accentColor + '88', background: '#00000022' }}><p className="text-[10px] font-semibold">Prochaine récompense</p><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/20"><div className="h-full w-[72%]" style={{ background: walletDesign.accentColor }} /></div></div>
+                  {walletDesign.showQr && <div className="mt-7 flex justify-center"><div className="grid h-16 w-16 grid-cols-5 gap-[2px] rounded-lg bg-white p-2">{Array.from({length:25},(_,i)=><span key={i} className="rounded-[1px]" style={{background:(i*7)%3===0?'#111111':'#FFFFFF'}} />)}</div></div>}
+                  <p className="mt-5 text-center text-[9px] opacity-55">{walletDesign.footerText}</p>
+                </div>
+              </div>
+            ) : <LoyaltyPreview config={previewConfig} />}
           </div>
           {tab === 'wallet' && (
             <div className="mt-3 space-y-2">
