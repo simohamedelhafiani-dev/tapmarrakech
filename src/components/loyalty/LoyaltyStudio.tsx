@@ -172,6 +172,9 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   const manager = useLoyaltyManager(establishmentId);
   const { role } = useAuth();
   const isAdmin = role === 'admin';
+  // Establishment responsible users are authorized by save_loyalty_card_builder_config
+  // to manage their own wallet design; keep the broader Design tab admin-only.
+  const canManageWallet = role === 'admin' || role === 'responsible';
   const [tab, setTab] = useState<TabId>('settings');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -352,7 +355,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   }), [program, design, establishment, rewards]);
 
   useEffect(() => {
-    if (!isAdmin || !establishmentId || !designHydratedRef.current) return;
+    if (!canManageWallet || !establishmentId || !designHydratedRef.current) return;
 
     if (liveDesignTimerRef.current !== null) {
       window.clearTimeout(liveDesignTimerRef.current);
@@ -525,7 +528,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       await manager.saveReferralDraft(referral);
       if (publish) await manager.publishReferral();
 
-      if (isAdmin) {
+      if (canManageWallet) {
         await saveDesign(publish);
         setDesign(current => ({ ...current, published: publish }));
       }
@@ -681,7 +684,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     );
   };
 
-  const visibleTabs = isAdmin ? TABS : TABS.filter(item => item.id !== 'design' && item.id !== 'wallet');
+  const visibleTabs = isAdmin ? TABS : TABS.filter(item => item.id !== 'design');
   const selectedTemplate = WALLET_TEMPLATES[design.templateId as keyof typeof WALLET_TEMPLATES];
 
   if (loading) {
@@ -1267,7 +1270,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
               </StudioCard>
             </div>
           )}
-          {tab === 'wallet' && isAdmin && (
+          {tab === 'wallet' && canManageWallet && (
             <div className="space-y-5">
               <StudioCard eyebrow="Cartes mobiles" title="Vos cartes Wallet">
                 <p className="text-xs leading-5 text-white/55">
