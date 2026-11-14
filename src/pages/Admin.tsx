@@ -5774,14 +5774,16 @@ function SystemSection({
         ))}
       </div>
 
-      <div className="mb-6 rounded-3xl border border-[#686D76]/40 bg-[#111111] p-6 shadow-sm">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/40">Google Wallet · Staging</p>
-            <h3 className="mt-2 text-lg font-semibold text-white">Test de connexion Google Wallet</h3>
-            <p className="mt-1 max-w-2xl text-xs leading-5 text-white/50">Vérifie les secrets serveur, l’authentification du compte de service et l’accès à l’Issuer. Aucun pass ni donnée client n’est créé ou modifié.</p>
-          </div>
-          <button type="button" onClick={() => void runWalletCheck()} disabled={walletCheck.status === 'loading'} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#686D76] px-4 py-3 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-      </div>
+      <div className="mt-6 rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
+        <div className="flex items-center gap-3"><Filter size={17} className="text-[#C9A45C]" /><h3 className="font-semibold">État global</h3></div>
+        <div className="mt-4 rounded-xl bg-[#111111] p-4 text-sm">
+          {errorCount === 0 && checks.length > 0 ? <span className="font-semibold text-[#C9A45C]">Tous les contrôles exécutés sont opérationnels.</span> : <span className="font-semibold text-[#a15c50]">{errorCount} contrôle{errorCount > 1 ? 's' : ''} nécessite{errorCount > 1 ? 'nt' : ''} une vérification.</span>}
+        </div>
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+          <SystemMetric label="Avis" value={globalStats.reviews} />
+          <SystemMetric label="Événements" value={globalStats.analyticsEvents} />
+          <SystemMetric label="Abonnements" value={billing.available ? billing.subscriptions.length : 0} />
+        </div>
         <p className="mt-4 text-xs leading-5 text-[#FFFFFF]/40">Dernier diagnostic : {lastChecked ? new Date(lastChecked).toLocaleString('fr-FR') : 'en cours'}. Les métriques d’uptime et de temps de chargement restent distinctes d’un diagnostic fonctionnel.</p>
       </div>
     </div>
