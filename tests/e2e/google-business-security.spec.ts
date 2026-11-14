@@ -3,13 +3,13 @@ import { test, expect } from '@playwright/test';
 const STAGING_REF = 'jsllksnmylpxcgqaeidq';
 
 function stagingEndpoint(slug: string) {
-  const supabaseUrl = process.env.E2E_SUPABASE_URL!;
+  const supabaseUrl = (process.env.E2E_SUPABASE_URL ?? '');
   expect(new URL(supabaseUrl).hostname).toBe(`${STAGING_REF}.supabase.co`);
   return `${supabaseUrl.replace(/\\/$/, '')}/functions/v1/${slug}`;
 }
 
 test('Google Business — les fonctions privées refusent les appels sans session', async ({ request }) => {
-  const apiKey = process.env.E2E_SUPABASE_ANON_KEY!;
+  const apiKey = (process.env.E2E_SUPABASE_ANON_KEY ?? '');
   const privateFunctions = [
     'google-business-oauth',
     'google-business-sync',
