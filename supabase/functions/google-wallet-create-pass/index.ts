@@ -84,19 +84,15 @@ Deno.serve(async (request) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
     const issuerId = (Deno.env.get("GOOGLE_WALLET_ISSUER_ID") || Deno.env.get("WALLET_ISSUER_ID") || "").trim();
-    const classId = (Deno.env.get("GOOGLE_WALLET_CLASS_ID") || (issuerId ? `${issuerId}.kelyani_loyalty_demo_v1` : "")).trim();
+    const configuredClassId = (Deno.env.get("GOOGLE_WALLET_CLASS_ID") || (issuerId ? `${issuerId}.kelyani_loyalty_demo_v1` : "")).trim();
     const serviceAccountRaw =
       Deno.env.get("GOOGLE_WALLET_SERVICE_ACCOUNT_JSON") ||
       Deno.env.get("GOOGLE_WALLET_SERVICE_ACCOUNT") ||
       Deno.env.get("GOOGLE_SERVICE_ACCOUNT_JSON") || "";
 
-    if (!supabaseUrl || !anonKey || !issuerId || !classId || !serviceAccountRaw) {
+    if (!supabaseUrl || !anonKey || !issuerId || !configuredClassId || !serviceAccountRaw) {
       return json({ success: false, error: "Configuration Wallet incomplète. Contactez l'établissement." }, 503);
     }
-    if (!classId.startsWith(`${issuerId}.`)) {
-      return json({ success: false, error: "La classe Google Wallet ne correspond pas à l'émetteur configuré." }, 503);
-    }
-
     let serviceAccount: { client_email?: string; private_key?: string };
     try {
       serviceAccount = JSON.parse(serviceAccountRaw);
@@ -137,6 +133,12 @@ Deno.serve(async (request) => {
     const walletDesign = walletDesignResult && typeof walletDesignResult === "object"
       ? walletDesignResult as Record<string, unknown>
       : {};
+    // Prefer the establishment-specific class saved by the KELYANI Admin.
+    // Keep the approved demo class as a controlled fallback until a dedicated class is approved.
+    const classId = String(walletDesign.googleClassId || configuredClassId).trim();
+    if (!classId.startsWith(`${issuerId}.`)) {
+      return json({ success: false, error: "La classe Google Wallet ne correspond pas à l'émetteur configuré." }, 503);
+    }
     const clientName = [card.first_name, card.last_name].filter(Boolean).join(" ").slice(0, 20) || "Client KELYANI";
     const loyaltyNumber = String(card.loyalty_number || card.customer_id).slice(0, 20);
     const balance = Math.max(0, Math.floor(Number(card.points_balance || 0)));
