@@ -144,6 +144,8 @@ export default function LoyaltyCard() {
   const [pushEnabled, setPushEnabled] = useState(false);
   const [pushLoading, setPushLoading] = useState(false);
   const [pushMessage, setPushMessage] = useState('');
+  const [walletLoading, setWalletLoading] = useState(false);
+  const [walletMessage, setWalletMessage] = useState('');
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -159,6 +161,27 @@ export default function LoyaltyCard() {
   }, []);
 
   const cardUrl = window.location.href;
+
+  async function addToGoogleWallet() {
+    if (!token || walletLoading) return;
+    setWalletLoading(true);
+    setWalletMessage('');
+    try {
+      const { data, error: walletError } = await supabase.functions.invoke('google-wallet-create-pass', {
+        body: { access_token: token },
+      });
+      if (walletError) throw walletError;
+      if (!data?.success || !data?.save_url) {
+        throw new Error(data?.error || "Impossible de préparer Google Wallet.");
+      }
+      window.location.assign(data.save_url);
+    } catch (error) {
+      console.error('[KELYANI] Google Wallet pass generation failed:', error);
+      setWalletMessage(error instanceof Error ? error.message : "Google Wallet est momentanément indisponible.");
+    } finally {
+      setWalletLoading(false);
+    }
+  }
 
   async function loadReferralCode() {
     if (!token || referralLoading || referralCode) return;
@@ -964,6 +987,20 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
             />
           </div>
         </div>
+
+        <section className="mt-4 w-full max-w-[400px] rounded-2xl border border-white/10 bg-[#111111] p-4 shadow-lg">
+          <button
+            type="button"
+            onClick={() => void addToGoogleWallet()}
+            disabled={walletLoading}
+            className="flex w-full items-center justify-center gap-3 rounded-xl bg-white px-4 py-3.5 text-sm font-semibold text-[#111111] transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <span className="grid h-6 w-6 place-items-center rounded-md bg-[#4285F4] text-xs font-black text-white">G</span>
+            {walletLoading ? 'Préparation de votre carte…' : 'Ajouter à Google Wallet'}
+          </button>
+          <p className="mt-2 text-center text-[10px] leading-4 text-white/40">Retrouvez votre carte de fidélité sur votre téléphone.</p>
+          {walletMessage && <p role="alert" className="mt-3 text-center text-xs text-red-300">{walletMessage}</p>}
+        </section>
 
         {(notifications.length > 0 || raffleWins.length > 0) && (
           <section className="mt-4 w-full space-y-3" aria-label="Notifications et gains de tombola">
