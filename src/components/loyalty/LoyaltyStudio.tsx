@@ -1177,6 +1177,66 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                 </div>
               </StudioCard>
 
+              <StudioCard eyebrow="Google Wallet" title="Aperçu de la carte mobile">
+                <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_260px] lg:items-center">
+                  <div className="space-y-3">
+                    <p className="text-sm font-semibold text-[#FFFFFF]">Votre design est synchronisé avec l’aperçu Wallet</p>
+                    <p className="text-xs leading-5 text-[#FFFFFF]/50">
+                      Le logo, le nom de l’établissement et les couleurs ci-contre suivent les réglages de votre carte fidélité. Modifiez la palette ou le wallpaper pour voir le résultat évoluer en direct.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="rounded-full border border-[#FFFFFF]/15 bg-[#181818] px-3 py-1.5 text-[10px] text-[#FFFFFF]/70">Par établissement</span>
+                      <span className="rounded-full border border-[#FFFFFF]/15 bg-[#181818] px-3 py-1.5 text-[10px] text-[#FFFFFF]/70">Carte individuelle par client</span>
+                    </div>
+                    <p className="text-[10px] leading-4 text-[#FFFFFF]/35">
+                      L’émission réelle reste en mode test jusqu’à l’approbation de l’accès de publication Google Wallet.
+                    </p>
+                  </div>
+                  <div className="mx-auto w-full max-w-[250px] rounded-[26px] border border-white/15 p-3 shadow-2xl" style={{ background: design.backgroundColor }}>
+                    <div className="relative flex min-h-[330px] flex-col overflow-hidden rounded-[19px] p-4" style={{
+                      color: design.textColor,
+                      background: design.wallpaperUrl
+                        ? `linear-gradient(180deg, rgba(0,0,0,.18), rgba(0,0,0,.78)), url("${design.wallpaperUrl}") center/cover`
+                        : `linear-gradient(145deg, ${design.primaryColor}, ${design.backgroundColor} 72%)`,
+                      borderRadius: Math.max(12, design.borderRadius * 0.65),
+                    }}>
+                      <div className="flex items-center gap-3">
+                        {design.logoUrl || establishment.logoUrl ? (
+                          <img src={design.logoUrl || establishment.logoUrl || ''} alt="" className="h-10 w-10 rounded-xl bg-white object-contain p-1" />
+                        ) : (
+                          <div className="grid h-10 w-10 place-items-center rounded-xl text-xs font-black" style={{ background: design.secondaryColor, color: design.backgroundColor }}>{establishment.name.slice(0,2).toUpperCase()}</div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="truncate text-xs font-bold">{establishment.name}</p>
+                          <p className="text-[9px] uppercase tracking-[.16em] opacity-65">Programme fidélité</p>
+                        </div>
+                      </div>
+                      <div className="mt-8 text-center">
+                        <p className="text-[9px] font-bold uppercase tracking-[.2em]" style={{ color: design.secondaryColor }}>Votre solde</p>
+                        <p className="mt-1 text-4xl font-black">720</p>
+                        <p className="text-[10px]" style={{ color: design.secondaryColor }}>POINTS</p>
+                      </div>
+                      <div className="mt-auto rounded-xl border p-3" style={{ borderColor: `${design.secondaryColor}88`, background: 'rgba(0,0,0,.24)' }}>
+                        <div className="flex items-center justify-between text-[10px]">
+                          <span>Prochaine récompense</span><span className="font-bold" style={{ color: design.secondaryColor }}>1000 pts</span>
+                        </div>
+                        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/20">
+                          <div className="h-full w-[72%] rounded-full" style={{ background: design.secondaryColor }} />
+                        </div>
+                      </div>
+                      <div className="mt-3 flex justify-center">
+                        <div className="grid h-14 w-14 place-items-center rounded-lg bg-white p-1">
+                          <div className="grid h-full w-full grid-cols-5 gap-[2px]">
+                            {Array.from({length:25},(_,i)=><span key={i} className="rounded-[1px]" style={{background: (i*7)%3===0 ? '#111111' : '#FFFFFF'}} />)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="mt-2 text-center text-[9px] text-[#FFFFFF]/35">Simulation visuelle · non émise par Google</p>
+                  </div>
+                </div>
+              </StudioCard>
+
               <StudioCard eyebrow="Wallpaper" title="Arrière-plan de la carte">
                 <div className="grid gap-4 md:grid-cols-[1fr_220px] md:items-center">
                   <div>
