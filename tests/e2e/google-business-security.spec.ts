@@ -3,14 +3,21 @@ import { test, expect } from '@playwright/test';
 const STAGING_REF = 'jsllksnmylpxcgqaeidq';
 
 function stagingEndpoint(slug: string) {
-  const supabaseUrl = (process.env.E2E_SUPABASE_URL ?? '');
+  const supabaseUrl = process.env.E2E_SUPABASE_URL ?? '';
+  expect(supabaseUrl, 'E2E_SUPABASE_URL doit être défini').not.toBe('');
   expect(new URL(supabaseUrl).hostname).toBe(`${STAGING_REF}.supabase.co`);
   const baseUrl = supabaseUrl.endsWith('/') ? supabaseUrl.slice(0, -1) : supabaseUrl;
   return `${baseUrl}/functions/v1/${slug}`;
-
 }
+
+function stagingApiKey() {
+  const apiKey = process.env.E2E_SUPABASE_ANON_KEY ?? '';
+  expect(apiKey, 'E2E_SUPABASE_ANON_KEY doit être défini').not.toBe('');
+  return apiKey;
+}
+
 test('Google Business — les fonctions privées refusent les appels sans session', async ({ request }) => {
-  const apiKey = (process.env.E2E_SUPABASE_ANON_KEY ?? '');
+  const apiKey = stagingApiKey();
   const privateFunctions = [
     'google-business-oauth',
     'google-business-sync',
@@ -32,9 +39,8 @@ test('Google Business — les fonctions privées refusent les appels sans sessio
 });
 
 test('Google Business webhook — refuse une requête sans secret Pub/Sub', async ({ request }) => {
-  const apiKey = process.env.E2E_SUPABASE_ANON_KEY!;
   const response = await request.post(stagingEndpoint('google-business-webhook'), {
-    headers: { apikey: apiKey, 'Content-Type': 'application/json' },
+    headers: { apikey: stagingApiKey(), 'Content-Type': 'application/json' },
     data: { message: {} },
   });
 
