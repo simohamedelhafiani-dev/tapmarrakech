@@ -8,6 +8,7 @@ function stagingEndpoint(slug: string) {
   const baseUrl = supabaseUrl.endsWith('/') ? supabaseUrl.slice(0, -1) : supabaseUrl;
   return `${baseUrl}/functions/v1/${slug}`;
 
+}
 test('Google Business — les fonctions privées refusent les appels sans session', async ({ request }) => {
   const apiKey = (process.env.E2E_SUPABASE_ANON_KEY ?? '');
   const privateFunctions = [
