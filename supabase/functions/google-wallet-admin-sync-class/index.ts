@@ -106,13 +106,14 @@ Deno.serve(async (request) => {
     } else {
       const current = await getResponse.json().catch(() => ({}));
       if (!getResponse.ok) return json({ success: false, stage: "class_read", google_status: getResponse.status, error: (current as any)?.error?.message || "Impossible de lire la classe Google." }, 502);
+      // Updating the design must not reset Google's approval workflow.
+      // Only newly-created classes are submitted as UNDER_REVIEW.
       const patch = {
         issuerName: classBody.issuerName,
         programName: classBody.programName,
         programLogo: classBody.programLogo,
         hexBackgroundColor: classBody.hexBackgroundColor,
         homepageUri: classBody.homepageUri,
-        reviewStatus: "UNDER_REVIEW",
       };
       const patchResponse = await fetch(endpoint, {
         method: "PATCH", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
@@ -122,7 +123,11 @@ Deno.serve(async (request) => {
       if (!patchResponse.ok) return json({ success: false, stage: "class_update", google_status: patchResponse.status, error: (result as any)?.error?.message || "Google a refusé la mise à jour de la classe." }, 502);
     }
 
-    const nextWallet = { ...wallet, googleClassId: classId, googleClassStatus: String(result.reviewStatus || "UNDER_REVIEW") };
+    const persistedReviewStatus = String(
+      result.reviewStatus ||
+      (created ? "UNDER_REVIEW" : "APPROVED"),
+    );
+    const nextWallet = { ...wallet, googleClassId: classId, googleClassStatus: persistedReviewStatus };
     const { error: saveError } = await admin.from("loyalty_card_designs").upsert({
       establishment_id: establishmentId,
       design_config: { ...config, wallet_design: nextWallet },
