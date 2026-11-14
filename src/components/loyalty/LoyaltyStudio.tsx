@@ -1437,7 +1437,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                 <span className="mt-3 inline-flex rounded-full border border-white/15 px-3 py-1.5 text-[10px] text-white/60">Certificats requis</span>
               </StudioCard>
             </div>
-          )}}
+          )}
         </div>
             </div>
           </>
