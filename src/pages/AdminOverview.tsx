@@ -111,7 +111,7 @@ export default function AdminOverview() {
   return (
     <section className="min-h-full bg-[#080808] text-white px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1500px] space-y-6">
-        <header className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#111111]/95 p-6 shadow-[0_20px_60px_rgba(23,61,50,0.08)] backdrop-blur-xl sm:p-8">
+        <header className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#111111]/95 p-6 shadow-[0_20px_60px_rgba(104,109,118,0.08)] backdrop-blur-xl sm:p-8">
           <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-[#686D76]/10 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-24 -left-20 h-64 w-64 rounded-full bg-[#686D76]/10 blur-3xl" />
 
@@ -206,7 +206,7 @@ export default function AdminOverview() {
         </div>
 
         <div className="grid gap-6 xl:grid-cols-[1.45fr_1fr]">
-          <section className="rounded-[26px] border border-white/10 bg-[#111111] p-6 shadow-[0_18px_50px_rgba(17,24,39,0.06)] backdrop-blur-xl sm:p-7">
+          <section className="rounded-[26px] border border-white/10 bg-[#111111] p-6 shadow-[0_18px_50px_rgba(0,0,0,0.06)] backdrop-blur-xl sm:p-7">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/40">
@@ -268,7 +268,7 @@ export default function AdminOverview() {
             </div>
           </section>
 
-          <section className="rounded-[26px] border border-white/10 bg-[#686D76] p-6 text-white shadow-[0_18px_50px_rgba(23,61,50,0.18)] sm:p-7">
+          <section className="rounded-[26px] border border-white/10 bg-[#686D76] p-6 text-white shadow-[0_18px_50px_rgba(104,109,118,0.18)] sm:p-7">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/45">
@@ -398,7 +398,7 @@ function MetricCard({
   };
 
   return (
-    <article data-testid={testId} className="group rounded-[24px] border border-white/10 bg-[#111111] p-5 shadow-[0_14px_40px_rgba(17,24,39,0.05)] backdrop-blur-xl transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_45px_rgba(17,24,39,0.08)]">
+    <article data-testid={testId} className="group rounded-[24px] border border-white/10 bg-[#111111] p-5 shadow-[0_14px_40px_rgba(0,0,0,0.05)] backdrop-blur-xl transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_45px_rgba(0,0,0,0.08)]">
       <div className="flex items-start justify-between gap-3">
         <p className="text-xs font-semibold text-white/45">{label}</p>
         <span
@@ -465,7 +465,7 @@ function MiniPanel({
   secondary: string;
 }) {
   return (
-    <article className="rounded-[24px] border border-white/10 bg-[#111111] p-6 shadow-[0_14px_40px_rgba(17,24,39,0.05)] backdrop-blur-xl">
+    <article className="rounded-[24px] border border-white/10 bg-[#111111] p-6 shadow-[0_14px_40px_rgba(0,0,0,0.05)] backdrop-blur-xl">
       <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/35">
         {eyebrow}
       </p>

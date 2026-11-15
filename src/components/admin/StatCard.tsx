@@ -32,7 +32,7 @@ function TrendIndicator({ value, label }: { value: number; label?: string }) {
 export default function StatCard({ label, value, icon: Icon, iconTone = 'indigo', trend, trendLabel, hint }: StatCardProps) {
   return (
     <article
-      className="group relative overflow-hidden rounded-2xl border border-[#3B82F6]/40 bg-[#686D76] p-6 shadow-[0_18px_45px_rgba(17,24,39,0.055),0_3px_10px_rgba(17,24,39,0.045)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-0.5 hover:border-[#3B82F6]/15 hover:shadow-[0_24px_55px_rgba(17,24,39,0.075),0_5px_14px_rgba(17,24,39,0.055)]"
+      className="group relative overflow-hidden rounded-2xl border border-[#3B82F6]/40 bg-[#686D76] p-6 shadow-[0_18px_45px_rgba(0,0,0,0.055),0_3px_10px_rgba(0,0,0,0.045)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-0.5 hover:border-[#3B82F6]/15 hover:shadow-[0_24px_55px_rgba(0,0,0,0.075),0_5px_14px_rgba(0,0,0,0.055)]"
     >
       <div className="flex items-start justify-between gap-5">
         <div className="min-w-0">
