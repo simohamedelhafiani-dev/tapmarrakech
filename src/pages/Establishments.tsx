@@ -691,7 +691,7 @@ export default function Establishments() {
                       })
                     }
                     placeholder={placeholder}
-                    className="mt-2 w-full rounded-xl border border-ink/10 bg-[#686D76] p-3 text-sm font-normal outline-none focus:ring-2 focus:ring-gold"
+                    className="mt-2 w-full rounded-xl border border-ink/10 bg-[#686D76] p-3 text-sm font-normal outline-none focus:ring-2 focus:ring-[#3B82F6]"
                   />
                 </label>
               ))}
@@ -743,7 +743,7 @@ export default function Establishments() {
                       <div className="mt-4 space-y-3">
                         <label className="block text-[11px] font-semibold text-ink/65">
                           Langue
-                          <select value={googleReplyLanguage} onChange={(e) => setGoogleReplyLanguage(e.target.value)} className="mt-1.5 w-full rounded-xl border border-ink/10 bg-white p-2.5 text-xs outline-none focus:ring-2 focus:ring-gold">
+                          <select value={googleReplyLanguage} onChange={(e) => setGoogleReplyLanguage(e.target.value)} className="mt-1.5 w-full rounded-xl border border-ink/10 bg-white p-2.5 text-xs outline-none focus:ring-2 focus:ring-[#3B82F6]">
                             <option>français</option>
                             <option>anglais</option>
                             <option>arabe</option>
@@ -752,7 +752,7 @@ export default function Establishments() {
                         </label>
                         <label className="block text-[11px] font-semibold text-ink/65">
                           Ton
-                          <select value={googleReplyTone} onChange={(e) => setGoogleReplyTone(e.target.value)} className="mt-1.5 w-full rounded-xl border border-ink/10 bg-white p-2.5 text-xs outline-none focus:ring-2 focus:ring-gold">
+                          <select value={googleReplyTone} onChange={(e) => setGoogleReplyTone(e.target.value)} className="mt-1.5 w-full rounded-xl border border-ink/10 bg-white p-2.5 text-xs outline-none focus:ring-2 focus:ring-[#3B82F6]">
                             <option>professionnel et chaleureux</option>
                             <option>premium et élégant</option>
                             <option>amical et naturel</option>
@@ -782,7 +782,7 @@ export default function Establishments() {
                       ),
                     })
                   }
-                  className="mt-2 w-full rounded-xl border border-ink/10 bg-[#686D76] p-3 text-sm font-normal outline-none focus:ring-2 focus:ring-gold"
+                  className="mt-2 w-full rounded-xl border border-ink/10 bg-[#686D76] p-3 text-sm font-normal outline-none focus:ring-2 focus:ring-[#3B82F6]"
                 >
                   {[1, 2, 3, 4, 5].map((n) => (
                     <option key={n} value={n}>

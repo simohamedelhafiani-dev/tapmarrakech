@@ -397,7 +397,7 @@ export default function Reviews() {
               Relation client
             </p>
 
-            <h1 className="mt-2 font-display text-4xl text-forest">
+            <h1 className="mt-2 font-display text-4xl text-[#3B82F6]">
               Avis reçus
             </h1>
 
@@ -432,7 +432,7 @@ export default function Reviews() {
       <section className="mb-7 overflow-hidden rounded-3xl border border-[#242424] bg-[#111111] shadow-xl">
         <div className="flex flex-col gap-4 border-b border-[#242424] p-6 md:flex-row md:items-center md:justify-between">
           <div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#3B82F6]">Feedback fidélité</p><h2 className="mt-1 font-display text-2xl text-white">Satisfaction client</h2><p className="mt-1 text-xs text-white/40">Retours laissés directement depuis les cartes fidélité.</p></div>
-          {satisfactionSummary.negative_count > 0 && <div className="flex items-center gap-2 rounded-xl border border-red-400/20 bg-[#242424] px-4 py-3 text-xs font-semibold text-[#B0B0B0]"><AlertTriangle size={16} /> {satisfactionSummary.negative_count} retour(s) à ≤ 2/5</div>}
+          {satisfactionSummary.negative_count > 0 && <div className="flex items-center gap-2 rounded-xl border border-[#686D76]/20 bg-[#242424] px-4 py-3 text-xs font-semibold text-[#B0B0B0]"><AlertTriangle size={16} /> {satisfactionSummary.negative_count} retour(s) à ≤ 2/5</div>}
         </div>
         <div className="grid gap-px bg-[#242424] sm:grid-cols-3">
           <div className="bg-[#111111] p-5"><p className="text-[10px] uppercase tracking-wider text-white/35">Note moyenne</p><p className="mt-1 text-2xl font-semibold text-[#3B82F6]">{satisfactionSummary.average_rating ? satisfactionSummary.average_rating + '/5' : '—'}</p></div>
@@ -444,7 +444,7 @@ export default function Reviews() {
 
       {/* ERREUR IA */}
       {aiError && (
-        <div className="mb-5 flex items-start gap-3 rounded-2xl border border-red-200 bg-[#242424] p-4 text-sm text-[#B0B0B0]">
+        <div className="mb-5 flex items-start gap-3 rounded-2xl border border-[#686D76]/20 bg-[#242424] p-4 text-sm text-[#B0B0B0]">
           <AlertTriangle
             size={18}
             className="mt-0.5 shrink-0"
@@ -510,7 +510,7 @@ export default function Reviews() {
                   Avis analysés
                 </p>
 
-                <p className="mt-1 text-2xl font-semibold text-forest">
+                <p className="mt-1 text-2xl font-semibold text-[#3B82F6]">
                   {aiStatistics.total_reviews}
                 </p>
               </div>
@@ -520,7 +520,7 @@ export default function Reviews() {
                   Note moyenne
                 </p>
 
-                <p className="mt-1 text-2xl font-semibold text-forest">
+                <p className="mt-1 text-2xl font-semibold text-[#3B82F6]">
                   ⭐ {aiStatistics.average_rating}/5
                 </p>
               </div>
@@ -530,7 +530,7 @@ export default function Reviews() {
                   Avis positifs
                 </p>
 
-                <p className="mt-1 text-2xl font-semibold text-forest">
+                <p className="mt-1 text-2xl font-semibold text-[#3B82F6]">
                   {aiStatistics.positive_reviews}
                 </p>
               </div>
@@ -540,7 +540,7 @@ export default function Reviews() {
                   Avis à surveiller
                 </p>
 
-                <p className="mt-1 text-2xl font-semibold text-forest">
+                <p className="mt-1 text-2xl font-semibold text-[#3B82F6]">
                   {aiStatistics.negative_reviews}
                 </p>
               </div>
@@ -559,7 +559,7 @@ export default function Reviews() {
               </p>
 
               <div className="mt-4 flex flex-wrap gap-2">
-                <span className="rounded-full bg-[var(--kelyani-panel)] px-3 py-1.5 text-xs font-semibold text-forest shadow-sm">
+                <span className="rounded-full bg-[var(--kelyani-panel)] px-3 py-1.5 text-xs font-semibold text-[#3B82F6] shadow-sm">
                   Sentiment :{' '}
                   {aiAnalysis.sentiment}
                 </span>
@@ -572,10 +572,10 @@ export default function Reviews() {
                 <div className="flex items-center gap-2">
                   <CheckCircle2
                     size={18}
-                    className="text-forest"
+                    className="text-[#3B82F6]"
                   />
 
-                  <h3 className="font-semibold text-forest">
+                  <h3 className="font-semibold text-[#3B82F6]">
                     Ce que vos clients apprécient
                   </h3>
                 </div>
@@ -609,7 +609,7 @@ export default function Reviews() {
                     className="text-[#B0B0B0]"
                   />
 
-                  <h3 className="font-semibold text-forest">
+                  <h3 className="font-semibold text-[#3B82F6]">
                     Ce qui peut être amélioré
                   </h3>
                 </div>
@@ -645,7 +645,7 @@ export default function Reviews() {
                   className="text-[#3B82F6]"
                 />
 
-                <h3 className="font-semibold text-forest">
+                <h3 className="font-semibold text-[#3B82F6]">
                   Problèmes récurrents
                 </h3>
               </div>
@@ -659,7 +659,7 @@ export default function Reviews() {
                         className="rounded-xl bg-[#686D76] p-4"
                       >
                         <div className="flex flex-col justify-between gap-2 md:flex-row">
-                          <p className="font-semibold text-forest">
+                          <p className="font-semibold text-[#3B82F6]">
                             {issue.topic}
                           </p>
 
@@ -697,7 +697,7 @@ export default function Reviews() {
                   className="text-[#3B82F6]"
                 />
 
-                <h3 className="font-semibold text-forest">
+                <h3 className="font-semibold text-[#3B82F6]">
                   Recommandations IA
                 </h3>
               </div>
@@ -717,7 +717,7 @@ export default function Reviews() {
 
                           <div>
                             <div className="flex flex-wrap items-center gap-2">
-                              <p className="font-semibold text-forest">
+                              <p className="font-semibold text-[#3B82F6]">
                                 {recommendation.action}
                               </p>
 
@@ -850,7 +850,7 @@ export default function Reviews() {
               <div className="flex items-center gap-3">
                 <Stars rating={review.rating} />
 
-                <span className="text-xs font-semibold text-forest">
+                <span className="text-xs font-semibold text-[#3B82F6]">
                   {review.establishment?.name}
                 </span>
               </div>
@@ -885,7 +885,7 @@ export default function Reviews() {
                   ? 'bg-[#686D76] text-[#B0B0B0]'
                   : review.status === 'En cours'
                     ? 'bg-[#686D76] text-[#3B82F6]'
-                    : 'bg-[#686D76] text-forest'
+                    : 'bg-[#686D76] text-[#3B82F6]'
               }`}>{review.status}</span>
             </div>
           </div>

@@ -1304,7 +1304,7 @@ export default function Loyalty() {
             <div className="rounded-xl bg-[#686D76] p-4">
               <p className="text-xs text-ink/45">Client</p>
 
-              <p className="mt-1 font-semibold text-forest">
+              <p className="mt-1 font-semibold text-[#3B82F6]">
                 {showPoints.first_name || 'Client'}
               </p>
 
@@ -1368,7 +1368,7 @@ export default function Loyalty() {
               <div className="flex justify-between text-xs text-ink/50">
                 <span>Règle du programme</span>
 
-                <strong className="text-forest">
+                <strong className="text-[#3B82F6]">
                   {programSettings.points_per_currency} pt /{' '}
                   {programSettings.currency}
                 </strong>
@@ -1389,7 +1389,7 @@ export default function Loyalty() {
                   </strong>
                 </div>
 
-                <div className="mt-2 flex justify-between text-sm font-semibold text-forest">
+                <div className="mt-2 flex justify-between text-sm font-semibold text-[#3B82F6]">
                   <span>Nouveau solde</span>
 
                   <span>
@@ -1430,7 +1430,7 @@ export default function Loyalty() {
             <div className="rounded-xl bg-[#686D76] p-4">
               <p className="text-xs text-ink/45">Client</p>
 
-              <p className="mt-1 font-semibold text-forest">
+              <p className="mt-1 font-semibold text-[#3B82F6]">
                 {showRewards.first_name || 'Client'}
               </p>
 
@@ -1469,7 +1469,7 @@ export default function Loyalty() {
                         </div>
 
                         <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-forest">
+                          <p className="font-semibold text-[#3B82F6]">
                             {reward.name}
                           </p>
 
@@ -1533,7 +1533,7 @@ export default function Loyalty() {
                   </div>
 
                   <div>
-                    <p className="font-semibold text-forest">
+                    <p className="font-semibold text-[#3B82F6]">
                       Code de validation
                     </p>
 
@@ -1549,7 +1549,7 @@ export default function Loyalty() {
                   Récompense sélectionnée
                 </p>
 
-                <p className="mt-1 font-semibold text-forest">
+                <p className="mt-1 font-semibold text-[#3B82F6]">
                   {selectedReward.name}
                 </p>
 
@@ -1630,7 +1630,7 @@ export default function Loyalty() {
                     Client
                   </span>
 
-                  <strong className="text-forest">
+                  <strong className="text-[#3B82F6]">
                     {showRewards.first_name || 'Client'}
                   </strong>
                 </div>
@@ -1650,7 +1650,7 @@ export default function Loyalty() {
                     Nouveau solde
                   </span>
 
-                  <strong className="text-forest">
+                  <strong className="text-[#3B82F6]">
                     {showRewards.points_balance -
                       selectedReward.points_required}{' '}
                     points
@@ -1699,12 +1699,12 @@ function Stat({
             {label}
           </p>
 
-          <p className="mt-3 font-display text-3xl text-forest">
+          <p className="mt-3 font-display text-3xl text-[#3B82F6]">
             {value}
           </p>
         </div>
 
-        <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#686D76] text-forest">
+        <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#686D76] text-[#3B82F6]">
           <Icon size={18} />
         </div>
       </div>
@@ -1725,7 +1725,7 @@ function Modal({
     <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-5">
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="font-display text-2xl text-forest">
+          <h2 className="font-display text-2xl text-[#3B82F6]">
             {title}
           </h2>
 

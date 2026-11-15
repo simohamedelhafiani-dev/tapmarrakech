@@ -810,7 +810,7 @@ export default function Templates() {
                       key={template.id}
                       type="button"
                       onClick={() => { setSelectedTemplate(template); setEditorTab('preview'); }}
-                      className={`overflow-hidden rounded-2xl border text-left transition ${selected ? 'border-[#242424] ring-2 ring-forest/10' : 'border-ink/10 hover:border-[#242424]/30'}`}
+                      className={`overflow-hidden rounded-2xl border text-left transition ${selected ? 'border-[#242424] ring-2 ring-[#3B82F6]/10' : 'border-ink/10 hover:border-[#242424]/30'}`}
                     >
                       <TemplateVisualPreview template={template} compact />
                       <div className="border-t border-ink/10 bg-white p-3">
