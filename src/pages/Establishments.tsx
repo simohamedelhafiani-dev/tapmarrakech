@@ -332,7 +332,7 @@ export default function Establishments() {
         width: 900,
         margin: 2,
         color: {
-          dark: '#17352a',
+          dark: '#686D76',
           light: '#ffffff',
         },
       }
@@ -417,7 +417,7 @@ export default function Establishments() {
       {/* MESSAGE */}
 
       {message && (
-        <div className="mb-5 rounded-xl bg-[#e5eee9] px-4 py-3 text-sm text-[#3B82F6]">
+        <div className="mb-5 rounded-xl bg-[#686D76] px-4 py-3 text-sm text-[#3B82F6]">
           {message}
         </div>
       )}
@@ -524,7 +524,7 @@ export default function Establishments() {
                   {publicLinks(place).map((link) => {
                     const Icon = link.icon;
                     return (
-                      <div key={link.key} className="rounded-xl border border-ink/5 bg-[#f7f7f3] p-3">
+                      <div key={link.key} className="rounded-xl border border-ink/5 bg-[#686D76] p-3">
                         <div className="flex items-start gap-3"><div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white text-[#3B82F6]"><Icon size={16} /></div><div className="min-w-0 flex-1"><p className="text-xs font-semibold text-[#3B82F6]">{link.title}</p><p className="mt-0.5 text-[10px] text-ink/40">{link.description}</p><p className="mt-2 truncate rounded-lg bg-white px-2.5 py-2 text-[10px] text-ink/50">{link.url}</p></div></div>
                         <div className="mt-2 flex flex-wrap gap-2">
                           <button onClick={() => copy(link.url)} className="flex items-center gap-1.5 rounded-lg bg-[#050505] px-3 py-2 text-[10px] font-semibold text-white"><Copy size={12} />Copier</button>
@@ -536,7 +536,7 @@ export default function Establishments() {
                   })}
                 </div>
               </div>
-              <div className="mt-5 rounded-2xl border border-[#3B82F6]/20 bg-[#f7f7f3] p-4">
+              <div className="mt-5 rounded-2xl border border-[#3B82F6]/20 bg-[#686D76] p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#3B82F6]">
@@ -596,7 +596,7 @@ export default function Establishments() {
                   href={`/p/${place.slug}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-1.5 rounded-lg bg-[#f7f7f3] px-3 py-2 text-[11px] font-semibold text-[#3B82F6]"
+                  className="flex items-center gap-1.5 rounded-lg bg-[#686D76] px-3 py-2 text-[11px] font-semibold text-[#3B82F6]"
                 >
                   <ExternalLink size={13} />
                   Voir la page
@@ -604,7 +604,7 @@ export default function Establishments() {
 
                 <button
                   onClick={() => copy(publicUrl(place.slug))}
-                  className="flex items-center gap-1.5 rounded-lg bg-[#f7f7f3] px-3 py-2 text-[11px] font-semibold text-[#3B82F6]"
+                  className="flex items-center gap-1.5 rounded-lg bg-[#686D76] px-3 py-2 text-[11px] font-semibold text-[#3B82F6]"
                 >
                   <Copy size={13} />
                   Copier le lien
@@ -612,7 +612,7 @@ export default function Establishments() {
 
                 <button
                   onClick={() => setQr({ title: place.name, url: publicUrl(place.slug), filename: `${place.slug}-qr.png` })}
-                  className="flex items-center gap-1.5 rounded-lg bg-[#f7f7f3] px-3 py-2 text-[11px] font-semibold text-[#3B82F6]"
+                  className="flex items-center gap-1.5 rounded-lg bg-[#686D76] px-3 py-2 text-[11px] font-semibold text-[#3B82F6]"
                 >
                   <QrCode size={13} />
                   QR Code
@@ -691,7 +691,7 @@ export default function Establishments() {
                       })
                     }
                     placeholder={placeholder}
-                    className="mt-2 w-full rounded-xl border border-ink/10 bg-[#fbfaf7] p-3 text-sm font-normal outline-none focus:ring-2 focus:ring-gold"
+                    className="mt-2 w-full rounded-xl border border-ink/10 bg-[#686D76] p-3 text-sm font-normal outline-none focus:ring-2 focus:ring-gold"
                   />
                 </label>
               ))}
@@ -719,7 +719,7 @@ export default function Establishments() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-[#3B82F6]/20 bg-[#f7f7f3] p-4">
+              <div className="rounded-2xl border border-[#3B82F6]/20 bg-[#686D76] p-4">
                 <div className="flex items-start gap-3">
                   <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-[#3B82F6]">
                     <Bot size={18} />
@@ -782,7 +782,7 @@ export default function Establishments() {
                       ),
                     })
                   }
-                  className="mt-2 w-full rounded-xl border border-ink/10 bg-[#fbfaf7] p-3 text-sm font-normal outline-none focus:ring-2 focus:ring-gold"
+                  className="mt-2 w-full rounded-xl border border-ink/10 bg-[#686D76] p-3 text-sm font-normal outline-none focus:ring-2 focus:ring-gold"
                 >
                   {[1, 2, 3, 4, 5].map((n) => (
                     <option key={n} value={n}>
@@ -838,7 +838,7 @@ export default function Establishments() {
               onClick={() =>
                 copy(qr.url)
               }
-              className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#f7f7f3] py-3 text-xs font-semibold text-[#3B82F6]"
+              className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#686D76] py-3 text-xs font-semibold text-[#3B82F6]"
             >
               <Link2 size={16} />
               Copier l’URL
@@ -858,7 +858,7 @@ function QRCodePreview({ url }: { url: string }) {
       width: 240,
       margin: 2,
       color: {
-        dark: '#17352a',
+        dark: '#686D76',
         light: '#ffffff',
       },
     }).then(setSrc);

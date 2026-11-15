@@ -181,7 +181,7 @@ export default function Login() {
                         <defs><linearGradient id="kelyaniChartFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#3B82F6" stopOpacity=".3" /><stop offset="100%" stopColor="#3B82F6" stopOpacity="0" /></linearGradient></defs>
                         <path d="M0 58 C24 52 28 45 48 48 S76 53 96 35 S126 42 145 29 S173 38 196 20 S230 29 250 15 S287 18 320 3 L320 68 L0 68 Z" fill="url(#kelyaniChartFill)" />
                         <path d="M0 58 C24 52 28 45 48 48 S76 53 96 35 S126 42 145 29 S173 38 196 20 S230 29 250 15 S287 18 320 3" fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" />
-                        <circle cx="250" cy="15" r="4" fill="#3B82F6" stroke="#15120A" strokeWidth="2" />
+                        <circle cx="250" cy="15" r="4" fill="#3B82F6" stroke="#686D76" strokeWidth="2" />
                       </svg>
                     </div>
                   </div>
@@ -217,7 +217,7 @@ export default function Login() {
 
             {!selectedRole ? (
               <div className="space-y-3">
-                <button type="button" onClick={() => selectRole('admin')} className="group flex w-full items-center gap-4 rounded-[24px] border border-white/[0.075] bg-gradient-to-r from-[#151515] to-[#0E0E0E] p-4 text-left shadow-[0_16px_45px_rgba(0,0,0,.28),inset_0_1px_0_rgba(255,255,255,.035)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#3B82F6]/40 hover:from-[#181818] hover:to-[#11100D] hover:shadow-[0_24px_55px_rgba(0,0,0,.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3B82F6]/60 active:translate-y-0">
+                <button type="button" onClick={() => selectRole('admin')} className="group flex w-full items-center gap-4 rounded-[24px] border border-white/[0.075] bg-gradient-to-r from-[#151515] to-[#0E0E0E] p-4 text-left shadow-[0_16px_45px_rgba(0,0,0,.28),inset_0_1px_0_rgba(255,255,255,.035)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#3B82F6]/40 hover:from-[#181818] hover:to-[#686D76] hover:shadow-[0_24px_55px_rgba(0,0,0,.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3B82F6]/60 active:translate-y-0">
                   <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#686D76]/10 text-[#3B82F6]"><ShieldCheck size={21} /></div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#3B82F6]/30">Plateforme</p>
@@ -227,7 +227,7 @@ export default function Login() {
                   <ArrowRight size={18} className="text-[#3B82F6] transition-transform group-hover:translate-x-1" />
                 </button>
 
-                <button type="button" onClick={() => selectRole('responsible')} className="group flex w-full items-center gap-4 rounded-[24px] border border-white/[0.075] bg-gradient-to-r from-[#151515] to-[#0E0E0E] p-4 text-left shadow-[0_16px_45px_rgba(0,0,0,.24),inset_0_1px_0_rgba(255,255,255,.025)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#3B82F6]/40 hover:from-[#181818] hover:to-[#11100D] hover:shadow-[0_24px_55px_rgba(0,0,0,.38)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3B82F6]/60 active:translate-y-0">
+                <button type="button" onClick={() => selectRole('responsible')} className="group flex w-full items-center gap-4 rounded-[24px] border border-white/[0.075] bg-gradient-to-r from-[#151515] to-[#0E0E0E] p-4 text-left shadow-[0_16px_45px_rgba(0,0,0,.24),inset_0_1px_0_rgba(255,255,255,.025)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#3B82F6]/40 hover:from-[#181818] hover:to-[#686D76] hover:shadow-[0_24px_55px_rgba(0,0,0,.38)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3B82F6]/60 active:translate-y-0">
                   <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#686D76]/10 text-[#3B82F6]"><UserRound size={21} /></div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#3B82F6]/30">Établissement</p>
@@ -285,7 +285,7 @@ export default function Login() {
               <div className="mt-6">
                 <Link
                   to="/register"
-                  className="group flex w-full items-center gap-4 rounded-[24px] border border-white/[0.075] bg-gradient-to-r from-[#151515] to-[#0E0E0E] p-4 text-left shadow-[0_16px_45px_rgba(0,0,0,.24),inset_0_1px_0_rgba(255,255,255,.025)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#3B82F6]/40 hover:from-[#181818] hover:to-[#11100D] hover:shadow-[0_24px_55px_rgba(0,0,0,.38)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3B82F6]/60 active:translate-y-0"
+                  className="group flex w-full items-center gap-4 rounded-[24px] border border-white/[0.075] bg-gradient-to-r from-[#151515] to-[#0E0E0E] p-4 text-left shadow-[0_16px_45px_rgba(0,0,0,.24),inset_0_1px_0_rgba(255,255,255,.025)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#3B82F6]/40 hover:from-[#181818] hover:to-[#686D76] hover:shadow-[0_24px_55px_rgba(0,0,0,.38)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3B82F6]/60 active:translate-y-0"
                 >
                   <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#686D76]/10 text-[#3B82F6]"><UserRound size={21} /></div>
                   <div className="min-w-0 flex-1">
