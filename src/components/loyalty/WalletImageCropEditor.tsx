@@ -22,7 +22,7 @@ export default function WalletImageCropEditor({ imageUrl, platform, establishmen
     dragRef.current = {x,y,px:event.clientX,py:event.clientY};
     event.currentTarget.setPointerCapture(event.pointerId);
   };
-  const moveDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+  const moveDrag = (event: PointerEvent<HTMLDivElement>) => {
     if (!dragRef.current || !frameRef.current) return;
     const rect = frameRef.current.getBoundingClientRect();
     setX(Math.max(0,Math.min(100,dragRef.current.x-(event.clientX-dragRef.current.px)/rect.width*100)));
