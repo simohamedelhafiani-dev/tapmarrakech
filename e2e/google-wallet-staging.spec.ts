@@ -4,10 +4,20 @@ test('admin can verify Google Wallet Staging without creating a pass', async ({ 
   const baseUrl = process.env.E2E_BASE_URL;
   const email = process.env.E2E_ADMIN_EMAIL;
   const password = process.env.E2E_ADMIN_PASSWORD;
+  const expectedSupabaseHost = new URL(process.env.E2E_SUPABASE_URL || '').hostname;
 
-  if (!baseUrl || !email || !password) {
+  if (!baseUrl || !email || !password || !expectedSupabaseHost) {
     throw new Error('E2E Preview URL and dedicated Staging admin credentials are required.');
   }
+
+  await page.route(/^https:\/\/[^/]+\.supabase\.co\//, async (route) => {
+    const host = new URL(route.request().url()).hostname;
+    if (host !== expectedSupabaseHost) {
+      await route.abort();
+      throw new Error(`Blocked Supabase request outside the configured Staging project: ${host}`);
+    }
+    await route.continue();
+  });
 
   await page.goto(new URL('/login', baseUrl).toString());
   await page.getByRole('button', { name: /administrateur/i }).click();
