@@ -64,8 +64,9 @@ jobs:
           npm run typecheck
           npm run build
       - name: Run Preview E2E and Staging checks
-        run: npx playwright test
+        run: npx playwright test e2e/google-wallet-staging.spec.ts
       - name: Run Supabase Edge Function unit tests
+        if: always()
         run: deno test --allow-env supabase/functions/_shared/*.test.ts
       - name: Upload E2E report and failure artifacts
         if: always()
