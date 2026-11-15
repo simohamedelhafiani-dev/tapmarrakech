@@ -16,7 +16,7 @@ export default function AdminOverviewV2() {
     <main className="min-h-screen bg-[#f7f7f3] px-6 py-8 text-[#173d32] sm:px-8 lg:px-10">
       <div className="mx-auto max-w-[1500px] space-y-8">
         <section className="relative overflow-hidden rounded-[32px] border border-white/80 bg-white/75 p-8 shadow-[0_20px_60px_rgba(23,61,50,0.08)] backdrop-blur-xl sm:p-10">
-          <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[#3B82F6]/10 blur-3xl" />
+          <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[#686D76]/10 blur-3xl" />
 
           <div className="relative">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#173d32]/10 bg-[#173d32]/5 px-3 py-1.5">
@@ -52,7 +52,7 @@ export default function AdminOverviewV2() {
         </section>
 
         {hasError && (
-          <section className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+          <section className="rounded-2xl border border-[#686D76] bg-[#242424] p-5 text-sm text-[#B0B0B0]">
             {state.error}
           </section>
         )}
@@ -86,7 +86,7 @@ export default function AdminOverviewV2() {
             }
             detail="Note moyenne des avis"
             icon="★"
-            iconClass="bg-[#3B82F6]/12 text-[#b18425]"
+            iconClass="bg-[#686D76]/12 text-[#3B82F6]"
           />
 
           <StatCard
@@ -100,7 +100,7 @@ export default function AdminOverviewV2() {
             }
             detail="Clients du programme"
             icon="●"
-            iconClass="bg-emerald-50 text-emerald-600"
+            iconClass="bg-[#686D76]/10 text-[#B0B0B0]"
           />
 
           <StatCard
@@ -130,8 +130,8 @@ export default function AdminOverviewV2() {
               </h2>
             </div>
 
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#686D76] bg-[#686D76]/10 px-4 py-2 text-sm font-medium text-[#B0B0B0]">
+              <span className="h-2 w-2 rounded-full bg-[#686D76]/10" />
               {isLoading ? 'Chargement' : hasError ? 'Erreur' : 'Données disponibles'}
             </div>
           </div>
