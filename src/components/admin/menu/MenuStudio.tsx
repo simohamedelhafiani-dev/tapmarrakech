@@ -60,7 +60,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
     wallpaperObjectUrl: null,
     wallpaperRemoved: false,
     overlayOpacity: 0.35,
-    themeColors: { background: '#F5F1E8', surface: '#FFFDFA', text: '#24211C', accent: '#3B82F6' },
+    themeColors: { background: '#111111', surface: '#111111', text: '#FFFFFF', accent: '#3B82F6' },
     aiDesign: null,
   });
 
@@ -98,9 +98,9 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
     const rawColors = normalizeObject(raw.theme_colors);
     const validHex = (value: unknown, fallback: string) => typeof value === 'string' && /^#[0-9a-fA-F]{6}$/.test(value) ? value : fallback;
     const themeColors = {
-      background: validHex(rawColors.background, '#F5F1E8'),
-      surface: validHex(rawColors.surface, '#FFFDFA'),
-      text: validHex(rawColors.text, '#24211C'),
+      background: validHex(rawColors.background, '#686D76'),
+      surface: validHex(rawColors.surface, '#686D76'),
+      text: validHex(rawColors.text, '#686D76'),
       accent: validHex(rawColors.accent, '#3B82F6'),
     };
 
