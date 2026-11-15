@@ -80,12 +80,25 @@ Deno.serve(async request => {
       ? design.logoUrl
       : typeof place.logo_url === "string" && place.logo_url.startsWith("https://")
         ? place.logo_url : "https://www.kelyani.com/kelyani-wallet-logo.png";
+    const httpsImage = (value: unknown) =>
+      typeof value === "string" && /^https:\/\//i.test(value) ? value : "";
+    const heroImage = httpsImage(design.heroImageUrl);
+    const websiteUrl = httpsImage(design.websiteUrl) || "https://www.kelyani.com";
+    const phoneNumber = typeof design.phoneNumber === "string" ? design.phoneNumber.trim().slice(0, 30) : "";
+    const address = typeof design.address === "string" ? design.address.trim().slice(0, 100) : "";
+    const customMessage = typeof design.customMessage === "string" ? design.customMessage.trim().slice(0, 80) : "";
     const classBody = {
       id:classId, issuerName:"KELYANI",
       programName:String(design.cardTitle || displayName).slice(0,20),
       programLogo:{sourceUri:{uri:logo},contentDescription:localized("Logo du programme de fidélité")},
+      ...(heroImage ? { heroImage:{sourceUri:{uri:heroImage},contentDescription:localized("Visuel principal de la carte")} } : {}),
       hexBackgroundColor:hex(design.backgroundColor,"#050505"),
-      homepageUri:{uri:"https://www.kelyani.com",description:"Découvrir KELYANI"},
+      homepageUri:{uri:websiteUrl,description:"Découvrir l'établissement"},
+      ...(phoneNumber ? {linksModuleData:{uris:[{uri:"tel:"+phoneNumber,description:"Téléphone"}]}} : {}),
+      textModulesData:[
+        ...(customMessage ? [{id:"wallet-message",header:"Bienvenue",body:customMessage}] : []),
+        ...(address ? [{id:"wallet-address",header:"Adresse",body:address}] : []),
+      ],
       reviewStatus:"UNDER_REVIEW",
     };
     const endpoint = `https://walletobjects.googleapis.com/walletobjects/v1/loyaltyClass/${encodeURIComponent(classId)}`;
