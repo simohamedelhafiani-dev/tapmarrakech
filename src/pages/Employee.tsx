@@ -136,7 +136,7 @@ export default function Employee() {
   const [loyaltyDesign, setLoyaltyDesign] = useState({
     template_id: 'luxury',
     primary_color: '#3B82F6',
-    secondary_color: '#D3A84C',
+    secondary_color: '#686D76',
     background_color: '#F7F7F3',
     text_color: '#3B82F6',
     button_color: '#3B82F6',
@@ -688,7 +688,7 @@ export default function Employee() {
             .establishment { margin-top: 18px; font-size: 22px; font-weight: 700; color: #ffffff; }
             .name { margin-top: 55px; font-size: 26px; font-weight: 700; }
             .number-label { margin-top: 30px; color: rgba(255,255,255,.6); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; }
-            .number { margin-top: 6px; font-size: 30px; font-weight: 800; letter-spacing: 3px; color: #d3a84c; }
+            .number { margin-top: 6px; font-size: 30px; font-weight: 800; letter-spacing: 3px; color: #686D76; }
             .footer { margin-top: 28px; display: flex; justify-content: space-between; color: rgba(255,255,255,.55); font-size: 11px; }
             @media print { body { padding: 0; background: white; } .card { box-shadow: none; } }
           </style>

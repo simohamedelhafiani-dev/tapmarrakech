@@ -818,3 +818,28 @@ body { background:#050505; color:#FFFFFF; }
   background-color: rgba(104,109,118,.08) !important;
   background-image: none !important;
 }
+
+/* Nardo Tech enforcement: legacy semantic utility colors are normalized globally. */
+#root [class*="bg-red-"], #root [class*="bg-amber-"], #root [class*="bg-yellow-"],
+#root [class*="bg-orange-"], #root [class*="bg-green-"], #root [class*="bg-emerald-"],
+#root [class*="bg-lime-"], #root [class*="bg-teal-"], #root [class*="bg-cyan-"],
+#root [class*="bg-sky-"], #root [class*="bg-indigo-"], #root [class*="bg-purple-"],
+#root [class*="bg-pink-"] {
+  background-color: #686D76 !important;
+  background-image: none !important;
+  color: #3B82F6 !important;
+}
+#root [class*="text-red-"], #root [class*="text-amber-"], #root [class*="text-yellow-"],
+#root [class*="text-orange-"], #root [class*="text-green-"], #root [class*="text-emerald-"],
+#root [class*="text-lime-"], #root [class*="text-teal-"], #root [class*="text-cyan-"],
+#root [class*="text-sky-"], #root [class*="text-indigo-"], #root [class*="text-purple-"],
+#root [class*="text-pink-"] {
+  color: #B0B0B0 !important;
+}
+#root [class*="border-red-"], #root [class*="border-amber-"], #root [class*="border-yellow-"],
+#root [class*="border-orange-"], #root [class*="border-green-"], #root [class*="border-emerald-"],
+#root [class*="border-lime-"], #root [class*="border-teal-"], #root [class*="border-cyan-"],
+#root [class*="border-sky-"], #root [class*="border-indigo-"], #root [class*="border-purple-"],
+#root [class*="border-pink-"] {
+  border-color: #686D76 !important;
+}

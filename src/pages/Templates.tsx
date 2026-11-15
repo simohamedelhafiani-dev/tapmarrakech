@@ -163,7 +163,7 @@ function TemplateVisualPreview({ template, compact = false }: { template: Templa
       logoUrl: null,
       coverImageUrl: c.background_image_url || null,
       primaryColor: c.primary || '#173D32',
-      secondaryColor: c.secondary || '#D3A84C',
+      secondaryColor: c.secondary || '#686D76',
       backgroundColor: c.background || '#F7F7F3',
       textColor: c.text || '#686D76',
       borderRadius: Number(c.radius || 28),
@@ -933,7 +933,7 @@ export default function Templates() {
                     <LoyaltyCardVisual
                       design={{
                         primary_color: String(previewing.config?.primary || '#173D32'),
-                        secondary_color: String(previewing.config?.secondary || '#D3A84C'),
+                        secondary_color: String(previewing.config?.secondary || '#686D76'),
                         background_color: String(previewing.config?.background || '#F7F7F3'),
                         text_color: String(previewing.config?.text || '#686D76'),
                         border_radius: Number(previewing.config?.radius || 28),
