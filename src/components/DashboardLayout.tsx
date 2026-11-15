@@ -637,7 +637,7 @@ export function DashboardLayout() {
                         setJoinQrError('Impossible de générer le QR code. Veuillez réessayer.');
                       }
                     }}
-                    className="flex h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#B0B0B0]/70 transition hover:border-[#3B82F6]/60 hover:text-[#60A5FA]"
+                    className="flex h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#B0B0B0]/70 transition hover:border-[#3B82F6]/60 hover:text-[#3B82F6]"
                   >
                     <QrCode size={14} /> <span className="hidden sm:inline">Créer une carte</span>
                   </button>
@@ -645,7 +645,7 @@ export function DashboardLayout() {
                     <button
                       type="button"
                       onClick={() => window.open(scannerUrl, '_blank', 'noopener,noreferrer')}
-                      className="hidden h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#B0B0B0]/70 transition hover:border-[#3B82F6]/60 hover:text-[#60A5FA] sm:flex"
+                      className="hidden h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#B0B0B0]/70 transition hover:border-[#3B82F6]/60 hover:text-[#3B82F6] sm:flex"
                     >
                       <QrCode size={14} /> Scanner
                     </button>
@@ -657,7 +657,7 @@ export function DashboardLayout() {
                 type="button"
                 onClick={refreshApp}
                 disabled={refreshing}
-                className="grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#B0B0B0]/65 transition hover:border-[#3B82F6]/60 hover:text-[#60A5FA] disabled:cursor-wait disabled:opacity-50"
+                className="grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#B0B0B0]/65 transition hover:border-[#3B82F6]/60 hover:text-[#3B82F6] disabled:cursor-wait disabled:opacity-50"
                 aria-label="Actualiser l’application"
                 title="Actualiser"
               >
@@ -676,7 +676,7 @@ export function DashboardLayout() {
                     setNotificationsOpen((value) => !value);
                     if (!notificationsOpen) markNotificationsRead();
                   }}
-                  className="relative grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#B0B0B0]/65 transition hover:border-[#3B82F6]/60 hover:text-[#60A5FA]"
+                  className="relative grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#B0B0B0]/65 transition hover:border-[#3B82F6]/60 hover:text-[#3B82F6]"
                   aria-label="Notifications"
                   aria-expanded={notificationsOpen}
                 >
@@ -747,7 +747,7 @@ export function DashboardLayout() {
               <button
                 type="button"
                 onClick={logout}
-                className="grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#B0B0B0]/60 transition hover:border-[#3B82F6]/60 hover:text-[#60A5FA]"
+                className="grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#B0B0B0]/60 transition hover:border-[#3B82F6]/60 hover:text-[#3B82F6]"
                 aria-label="Déconnexion"
               >
                 <LogOut size={15} />
@@ -821,7 +821,7 @@ export function DashboardLayout() {
                     link.click();
                     link.remove();
                   }}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#3B82F6] px-3 py-2.5 text-xs font-semibold text-[#050505] hover:bg-[#60A5FA]"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#3B82F6] px-3 py-2.5 text-xs font-semibold text-[#050505] hover:bg-[#3B82F6]"
                 >
                   <Download size={14} /> Télécharger le QR
                 </button>
@@ -847,7 +847,7 @@ export function DashboardLayout() {
                 end={end}
                 className={({ isActive }) => `kelyani-nav-link group flex min-w-[76px] flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 transition-all ${
                   isActive
-                    ? 'bg-[#111111] text-[#60A5FA] shadow-[0_0_24px_rgba(59,130,246,0.10)]'
+                    ? 'bg-[#111111] text-[#3B82F6] shadow-[0_0_24px_rgba(59,130,246,0.10)]'
                     : 'text-[#B0B0B0]/40 hover:bg-[#111111] hover:text-[#B0B0B0]'
                 }`}
               >

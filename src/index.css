@@ -16,7 +16,7 @@
   --kelyani-text: #FFFFFF;
   --kelyani-muted: #B0B0B0;
   --kelyani-accent: #3B82F6;
-  --kelyani-accent-soft: #60A5FA;
+  --kelyani-accent-soft: #3B82F6;
 }
 ::selection { color: #3B82F6; background: #686D76; }
 :focus-visible { outline: 2px solid rgba(59,130,246,.8); outline-offset: 3px; }
@@ -227,7 +227,7 @@ table {
 }
 
 .dashboard-depth-shell .text-forest {
-  color: #60A5FA !important;
+  color: #3B82F6 !important;
 }
 
 .dashboard-depth-shell .bg-forest {
@@ -294,7 +294,7 @@ table {
   box-shadow: 0 -16px 38px -20px rgba(0,0,0,.78);
 }
 .admin-depth-nav .kelyani-nav-link[data-active="true"] {
-  color: #60A5FA !important;
+  color: #3B82F6 !important;
   background: linear-gradient(105deg, rgba(59,130,246,.15), rgba(59,130,246,.035)) !important;
   box-shadow: inset 0 0 0 1px rgba(59,130,246,.12), 0 0 24px rgba(59,130,246,.04) !important;
 }
@@ -389,7 +389,7 @@ table {
 .kelyani-orbit-one { width:190px;height:190px;right:4%;top:-35px;transform:rotateX(68deg) rotateZ(-20deg); }
 .kelyani-orbit-two { width:250px;height:250px;left:5%;bottom:-95px;border-color:rgba(59,130,246,.09);transform:rotateY(67deg) rotateZ(22deg); }
 .kelyani-glow-point {
-  position:absolute;right:15%;top:20px;width:7px;height:7px;border-radius:50%;background:#60A5FA;
+  position:absolute;right:15%;top:20px;width:7px;height:7px;border-radius:50%;background:#3B82F6;
   box-shadow:0 0 10px 3px rgba(59,130,246,.45),0 0 28px 8px rgba(59,130,246,.12);
   animation:kelyani-glow-pulse 3s ease-in-out infinite;
 }
@@ -408,7 +408,7 @@ table {
 .kelyani-float-icon,.kelyani-loyalty-symbol {
   display:grid;place-items:center;width:29px;height:29px;flex-shrink:0;border-radius:10px;
   background:linear-gradient(145deg,rgba(59,130,246,.23),rgba(59,130,246,.06));
-  color:#60A5FA;border:1px solid rgba(59,130,246,.17);
+  color:#3B82F6;border:1px solid rgba(59,130,246,.17);
 }
 .kelyani-loyalty-symbol { font-family:Georgia,serif;font-size:17px;font-weight:700; }
 .kelyani-float-check { display:grid;place-items:center;width:17px;height:17px;border-radius:50%;background:rgba(59,130,246,.14);color:#B0B0B0!important;font-size:10px!important; }
@@ -686,7 +686,7 @@ table {
   --kelyani-text: #FFFFFF;
   --kelyani-muted: #B0B0B0;
   --kelyani-accent: #3B82F6;
-  --kelyani-accent-soft: #60A5FA;
+  --kelyani-accent-soft: #3B82F6;
 }
 html, body, #root { min-height:100%; background:#050505; color:#FFFFFF; }
 body { background:#050505; color:#FFFFFF; }

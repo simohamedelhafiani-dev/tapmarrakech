@@ -612,7 +612,7 @@ export default function Admin() {
           <button type="button" onClick={() => navigate('/admin')} className="flex shrink-0 items-center gap-3 text-left" aria-label="KELYANI">
             <KelyaniMark size={72} />
             <div className="hidden sm:block leading-none">
-              <p className="font-display text-xl font-semibold tracking-[.08em] text-[#60A5FA]">KELYANI</p>
+              <p className="font-display text-xl font-semibold tracking-[.08em] text-[#3B82F6]">KELYANI</p>
               <p className="mt-1 text-[7px] font-semibold uppercase tracking-[.22em] text-[#3B82F6]/70">CUSTOMER INTELLIGENCE</p>
             </div>
           </button>
@@ -637,15 +637,15 @@ export default function Admin() {
                 <option className="bg-[#111111]" value="ar">AR</option>
               </select>
             </label>
-            <button type="button" className="relative grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#B0B0B0]/65 transition hover:border-[#3B82F6]/50 hover:text-[#60A5FA]" aria-label="Notifications">
+            <button type="button" className="relative grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#B0B0B0]/65 transition hover:border-[#3B82F6]/50 hover:text-[#3B82F6]" aria-label="Notifications">
               <Bell size={16} />
               <span className="absolute right-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-[#686D76]" />
             </button>
-            <button type="button" onClick={reloadAll} className="hidden h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#B0B0B0]/65 transition hover:border-[#3B82F6]/50 hover:text-[#60A5FA] lg:flex">
+            <button type="button" onClick={reloadAll} className="hidden h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#B0B0B0]/65 transition hover:border-[#3B82F6]/50 hover:text-[#3B82F6] lg:flex">
               <RefreshCw size={13} />
               Actualiser
             </button>
-            <button type="button" onClick={logout} className="grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#B0B0B0]/65 transition hover:border-[#3B82F6]/50 hover:text-[#60A5FA]" aria-label="Déconnexion">
+            <button type="button" onClick={logout} className="grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#B0B0B0]/65 transition hover:border-[#3B82F6]/50 hover:text-[#3B82F6]" aria-label="Déconnexion">
               <LogOut size={15} />
             </button>
           </div>
@@ -737,42 +737,42 @@ export default function Admin() {
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#3B82F6]/70">Administration centrale</p>
-                    <h2 className="font-display text-3xl text-[#60A5FA] md:text-4xl">Paramètres automatisation</h2>
+                    <h2 className="font-display text-3xl text-[#3B82F6] md:text-4xl">Paramètres automatisation</h2>
                     <p className="mt-2 max-w-2xl text-sm leading-6 text-white/50">Centralisez les avis, les réglages IA et toutes les automatisations dans un tableau de bord unique.</p>
                   </div>
-                  <span className="inline-flex w-fit items-center gap-2 rounded-full border border-[#3B82F6]/25 bg-[#686D76]/5 px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-[#60A5FA]"><Sparkles size={13} /> Centre IA</span>
+                  <span className="inline-flex w-fit items-center gap-2 rounded-full border border-[#3B82F6]/25 bg-[#686D76]/5 px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-[#3B82F6]"><Sparkles size={13} /> Centre IA</span>
                 </div>
               </header>
 
               {aiWorkspaceTab === 'home' ? (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                   <button type="button" onClick={() => setAIWorkspaceTab('engine')} className="group min-h-[190px] rounded-3xl border border-[#3B82F6]/35 bg-gradient-to-br from-[#111111] via-[#0d0d0d] to-[#050505] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#3B82F6]/75 hover:shadow-[0_20px_45px_rgba(59,130,246,.12)] [transform:perspective(1000px)_rotateX(2deg)]">
-                    <span className="grid h-12 w-12 place-items-center rounded-2xl border border-[#3B82F6]/30 bg-[#686D76]/10 text-[#60A5FA]"><Brain size={22} /></span>
-                    <span className="mt-5 block text-lg font-semibold text-[#60A5FA]">Moteur IA global</span>
+                    <span className="grid h-12 w-12 place-items-center rounded-2xl border border-[#3B82F6]/30 bg-[#686D76]/10 text-[#3B82F6]"><Brain size={22} /></span>
+                    <span className="mt-5 block text-lg font-semibold text-[#3B82F6]">Moteur IA global</span>
                     <span className="mt-2 block text-sm leading-6 text-white/50">Fournisseur, modèle, clé API, température et limites de génération.</span>
                     <span className="mt-5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#3B82F6]">Ouvrir les paramètres →</span>
                   </button>
                   <button type="button" onClick={() => setAIWorkspaceTab('prompts')} className="group min-h-[190px] rounded-3xl border border-[#242424] bg-gradient-to-br from-[#171717] via-[#0d0d0d] to-[#050505] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#3B82F6]/60 hover:shadow-[0_20px_45px_rgba(59,130,246,.1)] [transform:perspective(1000px)_rotateX(2deg)]">
-                    <span className="grid h-12 w-12 place-items-center rounded-2xl border border-white/10 bg-white/5 text-[#60A5FA]"><FileText size={22} /></span>
+                    <span className="grid h-12 w-12 place-items-center rounded-2xl border border-white/10 bg-white/5 text-[#3B82F6]"><FileText size={22} /></span>
                     <span className="mt-5 block text-lg font-semibold text-white">Prompts & fonctionnalités</span>
                     <span className="mt-2 block text-sm leading-6 text-white/50">Instructions métier et comportements des fonctionnalités IA.</span>
                     <span className="mt-5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#3B82F6]">Ouvrir les paramètres →</span>
                   </button>
                   <button type="button" onClick={() => setAIWorkspaceTab('google')} className="group min-h-[190px] rounded-3xl border border-[#3B82F6]/35 bg-gradient-to-br from-[#111111] via-[#0d0d0d] to-[#050505] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#3B82F6]/75 hover:shadow-[0_20px_45px_rgba(59,130,246,.12)] [transform:perspective(1000px)_rotateX(2deg)]">
-                    <span className="grid h-12 w-12 place-items-center rounded-2xl border border-[#3B82F6]/30 bg-[#686D76]/10 text-[#60A5FA]"><MessageSquare size={22} /></span>
-                    <span className="mt-5 block text-lg font-semibold text-[#60A5FA]">Avis Google & automatisations</span>
+                    <span className="grid h-12 w-12 place-items-center rounded-2xl border border-[#3B82F6]/30 bg-[#686D76]/10 text-[#3B82F6]"><MessageSquare size={22} /></span>
+                    <span className="mt-5 block text-lg font-semibold text-[#3B82F6]">Avis Google & automatisations</span>
                     <span className="mt-2 block text-sm leading-6 text-white/50">Un seul espace pour connecter Google, gérer les avis, configurer les réponses IA, les langues, les liens et la fréquence de synchronisation.</span>
                     <span className="mt-5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#3B82F6]">Ouvrir l’espace centralisé →</span>
                   </button>
                 </div>
               ) : (
                 <div className="space-y-5">
-                  <button type="button" onClick={() => setAIWorkspaceTab('home')} className="inline-flex items-center gap-2 rounded-xl border border-[#242424] bg-[#101010] px-4 py-2.5 text-xs font-semibold text-[#60A5FA] transition hover:border-[#3B82F6]/60"><span aria-hidden="true">←</span> Toutes les options</button>
+                  <button type="button" onClick={() => setAIWorkspaceTab('home')} className="inline-flex items-center gap-2 rounded-xl border border-[#242424] bg-[#101010] px-4 py-2.5 text-xs font-semibold text-[#3B82F6] transition hover:border-[#3B82F6]/60"><span aria-hidden="true">←</span> Toutes les options</button>
                   {aiWorkspaceTab === 'engine' && <AIConfigurationSection view="engine" businessTypes={aiBusinessTypes} reload={loadAIBusinessTypes} />}
                   {aiWorkspaceTab === 'prompts' && <AIConfigurationSection view="prompts" businessTypes={aiBusinessTypes} reload={loadAIBusinessTypes} />}
                   {aiWorkspaceTab === 'menus' && (
                     <section className="space-y-5 rounded-3xl border border-[#242424] bg-[#111111] p-5 sm:p-7">
-                      <div><h3 className="font-display text-2xl text-[#60A5FA]">IA pour les menus</h3><p className="mt-2 text-sm text-white/50">Sélectionnez un établissement pour ouvrir son studio de menus existant.</p></div>
+                      <div><h3 className="font-display text-2xl text-[#3B82F6]">IA pour les menus</h3><p className="mt-2 text-sm text-white/50">Sélectionnez un établissement pour ouvrir son studio de menus existant.</p></div>
                       {establishments.length ? (
                         <div className="space-y-4">
                           <label className="block max-w-xl text-xs font-semibold text-[#3B82F6]">Établissement
@@ -790,7 +790,7 @@ export default function Admin() {
                     <div>
                       <div className="mb-5">
                         <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#3B82F6]/60">Avis et automatisation</p>
-                        <h3 className="font-display text-2xl text-[#60A5FA] md:text-3xl">Avis & Google Business</h3>
+                        <h3 className="font-display text-2xl text-[#3B82F6] md:text-3xl">Avis & Google Business</h3>
                         <p className="mt-2 max-w-3xl text-sm leading-6 text-white/50">Choisissez une tuile pour afficher uniquement les réglages de cette fonctionnalité.</p>
                       </div>
                       <GoogleBusinessAdminSection establishments={establishments} businessTypes={aiBusinessTypes} onEstablishmentCreated={async () => { await Promise.all([loadEstablishments(), reloadEstablishmentList()]); }} legacyReviews={<ReviewsSection establishments={establishments} />} />
@@ -835,21 +835,21 @@ export default function Admin() {
                         <button
                           type="button"
                           onClick={() => setLoyaltyTab('program')}
-                          className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${loyaltyTab === 'program' ? 'bg-[#686D76] text-[#050505]' : 'text-[#FFFFFF]/45 hover:text-[#60A5FA]'}`}
+                          className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${loyaltyTab === 'program' ? 'bg-[#686D76] text-[#050505]' : 'text-[#FFFFFF]/45 hover:text-[#3B82F6]'}`}
                         >
                           <Gem size={14} /> Programme
                         </button>
                         <button
                           type="button"
                           onClick={() => setLoyaltyTab('notifications')}
-                          className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${loyaltyTab === 'notifications' ? 'bg-[#686D76] text-[#050505]' : 'text-[#FFFFFF]/45 hover:text-[#60A5FA]'}`}
+                          className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${loyaltyTab === 'notifications' ? 'bg-[#686D76] text-[#050505]' : 'text-[#FFFFFF]/45 hover:text-[#3B82F6]'}`}
                         >
                           <Bell size={14} /> Notifications
                         </button>
                         <button
                           type="button"
                           onClick={() => setLoyaltyTab('raffles')}
-                          className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${loyaltyTab === 'raffles' ? 'bg-[#686D76] text-[#050505]' : 'text-[#FFFFFF]/45 hover:text-[#60A5FA]'}`}
+                          className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${loyaltyTab === 'raffles' ? 'bg-[#686D76] text-[#050505]' : 'text-[#FFFFFF]/45 hover:text-[#3B82F6]'}`}
                         >
                           <Ticket size={14} /> Tombola
                         </button>
@@ -899,7 +899,7 @@ export default function Admin() {
                 aria-label={label}
                 data-active={active} className={`kelyani-nav-link group flex min-w-[68px] flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 transition-all ${
                   active
-                    ? 'bg-[#111111] text-[#60A5FA] shadow-[0_0_24px_rgba(59,130,246,0.10)]'
+                    ? 'bg-[#111111] text-[#3B82F6] shadow-[0_0_24px_rgba(59,130,246,0.10)]'
                     : 'text-[#B0B0B0]/40 hover:bg-[#111111] hover:text-[#B0B0B0]'
                 }`}
               >
@@ -1234,7 +1234,7 @@ function AdminMetric({ icon: Icon, label, value, detail }: { icon: typeof Star; 
       className="group relative overflow-hidden rounded-2xl border border-white/[0.07] bg-[linear-gradient(145deg,#171717,#0C0C0C)] p-4 shadow-[0_14px_36px_rgba(0,0,0,0.18)] transition duration-200 hover:-translate-y-0.5 hover:border-[#3B82F6]/25 sm:rounded-[22px] sm:p-5"
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="grid h-10 w-10 place-items-center rounded-xl border border-[#3B82F6]/15 bg-[#686D76]/[0.08] text-[#60A5FA]"><Icon size={18} /></div>
+        <div className="grid h-10 w-10 place-items-center rounded-xl border border-[#3B82F6]/15 bg-[#686D76]/[0.08] text-[#3B82F6]"><Icon size={18} /></div>
       </div>
       <p className="mt-4 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#FFFFFF]/45">{label}</p>
       <p className="mt-1 text-2xl font-semibold tracking-tight text-white sm:text-[28px]">{value}</p>
@@ -1247,7 +1247,7 @@ function QuickStat({ label, value, alert = false }: { label: string; value: stri
   return (
     <div className="flex items-center justify-between rounded-xl bg-[#111111] px-4 py-3">
       <span className="text-xs text-[#FFFFFF]/50">{label}</span>
-      <span className={`text-sm font-semibold ${alert ? 'text-[#60A5FA]' : 'text-[#3B82F6]'}`}>{value}</span>
+      <span className={`text-sm font-semibold ${alert ? 'text-[#3B82F6]' : 'text-[#3B82F6]'}`}>{value}</span>
     </div>
   );
 }
@@ -2571,10 +2571,10 @@ function UnassignedResponsiblesPanel({ establishments, reload }: { establishment
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#3B82F6]/70">Comptes inscrits</p>
-          <h3 className="mt-1 text-lg font-semibold text-[#60A5FA]">Responsables à attribuer</h3>
+          <h3 className="mt-1 text-lg font-semibold text-[#3B82F6]">Responsables à attribuer</h3>
           <p className="mt-1 text-xs text-white/45">Les comptes déjà créés qui n’ont pas encore d’établissement apparaissent ici.</p>
         </div>
-        <button type="button" onClick={() => void load()} disabled={loading} className="rounded-xl border border-[#3B82F6]/25 px-3 py-2 text-xs font-semibold text-[#60A5FA] disabled:opacity-50">
+        <button type="button" onClick={() => void load()} disabled={loading} className="rounded-xl border border-[#3B82F6]/25 px-3 py-2 text-xs font-semibold text-[#3B82F6] disabled:opacity-50">
           {loading ? 'Actualisation…' : 'Actualiser'}
         </button>
       </div>
@@ -3114,8 +3114,8 @@ function StaffRow({
         <span
           className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${
             member.active
-              ? 'bg-[#111111] text-[#60A5FA]'
-              : 'bg-[#111111] text-[#60A5FA]'
+              ? 'bg-[#111111] text-[#3B82F6]'
+              : 'bg-[#111111] text-[#3B82F6]'
           }`}
         >
           {member.active ? 'ACTIF' : 'DÉSACTIVÉ'}
@@ -3128,8 +3128,8 @@ function StaffRow({
           disabled={saving}
           className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium transition ${
             member.active
-              ? 'border-[#242424] text-[#60A5FA] hover:bg-[#111111]'
-              : 'border-[#242424] text-[#60A5FA] hover:bg-[#111111]'
+              ? 'border-[#242424] text-[#3B82F6] hover:bg-[#111111]'
+              : 'border-[#242424] text-[#3B82F6] hover:bg-[#111111]'
           } disabled:opacity-40`}
         >
           <Power size={14} />
@@ -3205,7 +3205,7 @@ function EditStaffModal({ member, establishments, close, reload }: { member: Sta
         {isEmployee && <label className="block md:col-span-2"><span className="mb-1 block text-xs font-semibold">Nouveau code employé <span className="font-normal text-[#FFFFFF]/35">(laisser vide pour conserver)</span></span><input value={code} onChange={e=>setCode(e.target.value)} placeholder="4 à 12 caractères" className="w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 py-3 text-center text-lg tracking-[0.2em]"/></label>}
         <label className="flex items-center gap-3 rounded-xl bg-[#111111] p-4 md:col-span-2"><input type="checkbox" checked={active} onChange={e=>setActive(e.target.checked)}/><span><strong className="block text-sm text-[#3B82F6]">Accès actif</strong><span className="text-xs text-[#FFFFFF]/40">Désactiver coupe l’accès sans supprimer l’historique.</span></span></label>
       </div>
-      <div className="mt-6 flex flex-wrap justify-between gap-3"><button onClick={retire} disabled={saving} className="rounded-xl border border-[#242424] px-4 py-3 text-xs font-semibold text-[#60A5FA]">Retirer de l’établissement</button><div className="flex gap-3"><button onClick={close} disabled={saving} className="rounded-xl border border-[#242424]/10 px-5 py-3 text-sm">Annuler</button><button onClick={save} disabled={saving} className="rounded-xl bg-[#111111] px-5 py-3 text-sm font-semibold text-[#FFFFFF]">{saving ? 'Enregistrement...' : 'Enregistrer'}</button></div></div>
+      <div className="mt-6 flex flex-wrap justify-between gap-3"><button onClick={retire} disabled={saving} className="rounded-xl border border-[#242424] px-4 py-3 text-xs font-semibold text-[#3B82F6]">Retirer de l’établissement</button><div className="flex gap-3"><button onClick={close} disabled={saving} className="rounded-xl border border-[#242424]/10 px-5 py-3 text-sm">Annuler</button><button onClick={save} disabled={saving} className="rounded-xl bg-[#111111] px-5 py-3 text-sm font-semibold text-[#FFFFFF]">{saving ? 'Enregistrement...' : 'Enregistrer'}</button></div></div>
     </div>
   </div>;
 }
@@ -3584,7 +3584,7 @@ function ReviewAnalysisSection({
         </div>
 
         {error && (
-          <div className="mt-4 rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#60A5FA]">
+          <div className="mt-4 rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#3B82F6]">
             {error}
           </div>
         )}
@@ -3716,7 +3716,7 @@ function ReviewAnalysisSection({
                       <span className="rounded-full bg-[#111111]/5 px-2.5 py-1 text-[10px] font-semibold text-[#FFFFFF]/50">
                         {issue.frequency}
                       </span>
-                      <span className="rounded-full bg-[#111111] px-2.5 py-1 text-[10px] font-semibold text-[#60A5FA]">
+                      <span className="rounded-full bg-[#111111] px-2.5 py-1 text-[10px] font-semibold text-[#3B82F6]">
                         Priorité : {issue.priority}
                       </span>
                     </div>
@@ -3753,7 +3753,7 @@ function ReviewAnalysisSection({
                     <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#111111] text-sm font-semibold text-[#FFFFFF]">
                       {index + 1}
                     </span>
-                    <span className="rounded-full bg-[#111111] px-2.5 py-1 text-[10px] font-semibold text-[#60A5FA]">
+                    <span className="rounded-full bg-[#111111] px-2.5 py-1 text-[10px] font-semibold text-[#3B82F6]">
                       {action.priority}
                     </span>
                   </div>
@@ -4088,8 +4088,8 @@ function ReviewsSection({
                         <span
                           className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${
                             review.type === 'positive'
-                              ? 'bg-[#111111] text-[#60A5FA]'
-                              : 'bg-[#111111] text-[#60A5FA]'
+                              ? 'bg-[#111111] text-[#3B82F6]'
+                              : 'bg-[#111111] text-[#3B82F6]'
                           }`}
                         >
                           {review.type === 'positive' ? 'POSITIF' : 'NÉGATIF'}
@@ -4098,10 +4098,10 @@ function ReviewsSection({
                         <span
                           className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${
                             review.status === 'Nouveau'
-                              ? 'bg-[#111111] text-[#60A5FA]'
+                              ? 'bg-[#111111] text-[#3B82F6]'
                               : review.status === 'En cours'
-                              ? 'bg-[#111111] text-[#60A5FA]'
-                              : 'bg-[#111111] text-[#60A5FA]'
+                              ? 'bg-[#111111] text-[#3B82F6]'
+                              : 'bg-[#111111] text-[#3B82F6]'
                           }`}
                         >
                           {review.status}
@@ -4733,7 +4733,7 @@ function AIConfigurationSection({
 
       {view === 'engine' && (
       <div className="mb-6 rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
-        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#3B82F6]">Moteur IA global</p><h3 className="mt-1 text-xl font-semibold text-[#3B82F6]">Provider et modèle utilisés par l’analyse</h3></div><span className={`rounded-full px-3 py-1 text-[10px] font-semibold ${aiSettings.enabled ? 'bg-[#111111] text-[#60A5FA]' : 'bg-[#111111] text-[#60A5FA]'}`}>{aiSettings.enabled ? 'IA ACTIVE' : 'IA DÉSACTIVÉE'}</span></div>
+        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#3B82F6]">Moteur IA global</p><h3 className="mt-1 text-xl font-semibold text-[#3B82F6]">Provider et modèle utilisés par l’analyse</h3></div><span className={`rounded-full px-3 py-1 text-[10px] font-semibold ${aiSettings.enabled ? 'bg-[#111111] text-[#3B82F6]' : 'bg-[#111111] text-[#3B82F6]'}`}>{aiSettings.enabled ? 'IA ACTIVE' : 'IA DÉSACTIVÉE'}</span></div>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <label className="block"><span className="mb-1 block text-xs font-semibold">Provider / moteur</span><select value={String(aiSettings.provider ?? 'openai').toLowerCase()} onChange={e=>setAISettings((v:any)=>({...v,provider:e.target.value}))} className="w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 py-3 text-sm"><option value="openai">OpenAI</option></select><span className="mt-1 block text-xs text-[#FFFFFF]/40">Les fonctionnalités IA connectées à ce moteur utilisent actuellement OpenAI.</span></label>
           <label className="block"><span className="mb-1 block text-xs font-semibold">Modèle</span><input value={aiSettings.model ?? ''} onChange={e=>setAISettings((v:any)=>({...v,model:e.target.value}))} placeholder="gpt-5.6-luna" className="w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 py-3 text-sm"/></label>
@@ -4875,8 +4875,8 @@ function AIConfigurationSection({
                   <span
                     className={`rounded-full px-3 py-1 text-[10px] font-semibold ${
                       type.active
-                        ? 'bg-[#111111] text-[#60A5FA]'
-                        : 'bg-[#111111] text-[#60A5FA]'
+                        ? 'bg-[#111111] text-[#3B82F6]'
+                        : 'bg-[#111111] text-[#3B82F6]'
                     }`}
                   >
                     {type.active ? 'ACTIF' : 'DÉSACTIVÉ'}
@@ -4906,8 +4906,8 @@ function AIConfigurationSection({
                   onClick={() => toggleActive(type)}
                   className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium transition ${
                     type.active
-                      ? 'border-[#242424] text-[#60A5FA] hover:bg-[#111111]'
-                      : 'border-[#242424] text-[#60A5FA] hover:bg-[#111111]'
+                      ? 'border-[#242424] text-[#3B82F6] hover:bg-[#111111]'
+                      : 'border-[#242424] text-[#3B82F6] hover:bg-[#111111]'
                   }`}
                 >
                   <Power size={14} />
@@ -4916,7 +4916,7 @@ function AIConfigurationSection({
 
                 <button
                   onClick={() => deleteType(type)}
-                  className="inline-flex items-center gap-2 rounded-lg border border-[#242424] px-3 py-2 text-xs font-medium text-[#60A5FA] transition hover:bg-[#111111]"
+                  className="inline-flex items-center gap-2 rounded-lg border border-[#242424] px-3 py-2 text-xs font-medium text-[#3B82F6] transition hover:bg-[#111111]"
                 >
                   Supprimer
                 </button>
@@ -5328,7 +5328,7 @@ function BillingSection({
       </div>
 
       {!billing.available ? (
-        <div className="mb-6 rounded-3xl border border-[#242424] bg-[#111111] p-5 text-sm text-[#60A5FA]">
+        <div className="mb-6 rounded-3xl border border-[#242424] bg-[#111111] p-5 text-sm text-[#3B82F6]">
           <strong>Module facturation non configuré.</strong> Les tables d’abonnement doivent être présentes dans Supabase pour activer le suivi réel.
         </div>
       ) : null}
@@ -5402,7 +5402,7 @@ function BillingSection({
               <div key={sub.id} className="grid min-w-[900px] grid-cols-[1.35fr_1fr_.8fr_1fr_1fr_auto] items-center gap-4 border-b border-[#242424] px-5 py-4 text-sm last:border-0">
                 <div><p className="font-semibold">{e?.name ?? 'Établissement supprimé'}</p><p className="text-xs text-[#FFFFFF]/35">{e?.city ?? 'Ville non définie'}</p></div>
                 <span>{sub.plan?.name ?? '—'}</span>
-                <span className={`w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold ${sub.status === 'active' ? 'bg-[#111111] text-[#60A5FA]' : sub.status === 'trial' ? 'bg-[#111111] text-[#60A5FA]' : 'bg-[#111111] text-[#B0B0B0]'}`}>{sub.status}</span>
+                <span className={`w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold ${sub.status === 'active' ? 'bg-[#111111] text-[#3B82F6]' : sub.status === 'trial' ? 'bg-[#111111] text-[#3B82F6]' : 'bg-[#111111] text-[#B0B0B0]'}`}>{sub.status}</span>
                 <span className="font-semibold">{Number(sub.plan?.price_mad ?? 0).toLocaleString('fr-FR')} MAD</span>
                 <span className="text-[#FFFFFF]/50">{formatDate(sub.current_period_end)}</span>
                 <button type="button" onClick={() => openSubscriptionEditor(sub)} className="rounded-lg border border-[#242424]/10 bg-[#111111] px-3 py-2 text-[11px] font-semibold text-[#3B82F6] transition hover:border-[#3B82F6] hover:bg-[#111111]">
@@ -5570,7 +5570,7 @@ function BillingSection({
               <div className="mt-5 flex gap-2">
                 <button onClick={() => openPlanEditor(p)} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-[#242424]/10 bg-[#111111] px-3 py-2 text-xs font-semibold"><Pencil size={13} /> Modifier</button>
                 <button onClick={() => togglePlanActive(p)} className="rounded-xl border border-[#242424]/10 bg-[#111111] px-3 py-2 text-xs font-semibold">{p.active ? 'Désactiver' : 'Activer'}</button>
-                <button onClick={() => deletePlan(p)} title="Supprimer" className="rounded-xl border border-[#242424] bg-[#111111] px-3 py-2 text-[#60A5FA]"><Trash2 size={13} /></button>
+                <button onClick={() => deletePlan(p)} title="Supprimer" className="rounded-xl border border-[#242424] bg-[#111111] px-3 py-2 text-[#3B82F6]"><Trash2 size={13} /></button>
               </div>
             </div>
           ))}
@@ -5765,7 +5765,7 @@ function SystemSection({
             <div className="flex items-start justify-between gap-4">
               <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#111111]/10 text-[#3B82F6]"><Icon size={20} /></div>
               <span className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${
-                status === 'ok' ? 'bg-[#111111] text-[#60A5FA]' : status === 'error' ? 'bg-[#111111] text-[#60A5FA]' : 'bg-[#111111] text-[#60A5FA]'
+                status === 'ok' ? 'bg-[#111111] text-[#3B82F6]' : status === 'error' ? 'bg-[#111111] text-[#3B82F6]' : 'bg-[#111111] text-[#3B82F6]'
               }`}>{status === 'ok' ? 'Opérationnel' : status === 'error' ? 'Erreur' : 'Vérification…'}</span>
             </div>
             <h3 className="mt-5 text-base font-semibold">{label}</h3>

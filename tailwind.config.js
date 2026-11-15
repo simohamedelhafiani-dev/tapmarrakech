@@ -7,7 +7,7 @@ export default {
         ink: '#FFFFFF',
         forest: '#686D76',
         electric: '#3B82F6',
-        'electric-light': '#60A5FA',
+        'electric-light': '#3B82F6',
         cream: '#1A1A1A',
         onyx: '#050505',
         surface: '#1A1A1A',
