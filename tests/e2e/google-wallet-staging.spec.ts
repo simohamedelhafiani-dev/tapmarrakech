@@ -4,11 +4,15 @@ test('admin can run the non-destructive Google Wallet Staging check and display 
   const baseUrl = process.env.E2E_BASE_URL;
   const email = process.env.E2E_ADMIN_EMAIL;
   const password = process.env.E2E_ADMIN_PASSWORD;
-  const expectedSupabaseHost = new URL(process.env.E2E_SUPABASE_URL || '').hostname;
+  const configuredSupabaseUrl = process.env.E2E_SUPABASE_URL;
+  const expectedSupabaseHost = 'jsllksnmylpxcgqaeidq.supabase.co';
   const vercelBypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
 
-  if (!baseUrl || !email || !password || !expectedSupabaseHost || !vercelBypassSecret) {
+  if (!baseUrl || !email || !password || !configuredSupabaseUrl || !vercelBypassSecret) {
     throw new Error('Preview URL, Vercel bypass and dedicated Staging admin credentials are required.');
+  }
+  if (new URL(configuredSupabaseUrl).hostname !== expectedSupabaseHost) {
+    throw new Error('E2E_SUPABASE_URL must target the dedicated Supabase Staging project; Production is blocked.');
   }
 
   const previewOrigin = new URL(baseUrl).origin;

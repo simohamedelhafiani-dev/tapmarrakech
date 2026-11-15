@@ -50,7 +50,7 @@ jobs:
         shell: bash
         run: |
           node -e "console.log('E2E Preview host:', new URL(process.env.E2E_BASE_URL).host)"
-          marker='name="kelyani-preview-track" content="nardo-wallet-visual-2026-11"'
+          marker='name="kelyani-preview-track" content="nardo-wallet-visual-2026-11-v2"'
           for attempt in $(seq 1 30); do
             if curl -fsS -H "x-vercel-protection-bypass: ${VERCEL_AUTOMATION_BYPASS_SECRET}" -H "x-vercel-set-bypass-cookie: true" "$E2E_BASE_URL" | grep -Fq "$marker"; then
               echo "Current integration Preview confirmed."
