@@ -306,6 +306,12 @@ test('Admin — création établissement, attribution Responsable et accès à s
     // async callback is not awaited by Playwright, so asserting its side effect races.
     const expectedStagingHost = new URL(process.env.E2E_SUPABASE_URL!).host;
 
+    // Capture browser-side failures around the Admin form opening.
+    page.on('console', (message) => {
+      if (message.type() === 'error') console.log('[ADMIN BROWSER CONSOLE ERROR]', message.text());
+    });
+    page.on('pageerror', (error) => console.log('[ADMIN BROWSER PAGE ERROR]', error.stack ?? error.message));
+
     // Create the establishment through the actual Admin UI form.
     page.on('dialog', (dialog) => dialog.accept());
     await page.goto('/login');
@@ -327,6 +333,19 @@ test('Admin — création établissement, attribution Responsable et accès à s
     });
     await expect(addEstablishmentButton).toBeVisible({ timeout: 20_000 });
     await addEstablishmentButton.click({ timeout: 20_000 });
+    const createFormHeading = page.getByRole('heading', { name: 'Nouvel établissement', exact: true });
+    try {
+      await expect(createFormHeading).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByPlaceholder('Ex : Restaurant Atlas')).toBeVisible({ timeout: 5_000 });
+    } catch (error) {
+      console.log('[ADMIN FORM DIAGNOSTIC]', JSON.stringify({
+        url: page.url(),
+        headingCount: await page.getByRole('heading', { name: 'Nouvel établissement', exact: true }).count(),
+        addButtonCount: await page.getByRole('button', { name: 'Ajouter un établissement', exact: true }).count(),
+        bodyText: (await page.locator('body').innerText()).slice(0, 5000),
+      }));
+      throw error;
+    }
     await page.getByPlaceholder('Ex : Restaurant Atlas').fill(name);
     await page.getByPlaceholder('restaurant-atlas').fill(slug);
 
