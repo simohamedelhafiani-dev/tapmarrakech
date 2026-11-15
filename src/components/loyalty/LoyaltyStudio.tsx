@@ -28,6 +28,7 @@ import {
   type LoyaltyReferralConfig,
 } from '@/hooks/useLoyaltyManager';
 import LoyaltyPreview from './LoyaltyPreview';
+import WalletImageCropEditor from './WalletImageCropEditor';
 import LoyaltyRaffleStudio from './LoyaltyRaffleStudio';
 import LoyaltyTierStudio from './LoyaltyTierStudio';
 import LoyaltyCrmSegments from './LoyaltyCrmSegments';
@@ -95,6 +96,7 @@ type WalletDesignState = {
   textColor: string;
   logoUrl: string;
   heroImageUrl: string;
+  appleStripImageUrl: string;
   websiteUrl: string;
   phoneNumber: string;
   address: string;
@@ -119,6 +121,7 @@ const DEFAULT_WALLET_DESIGN: WalletDesignState = {
   textColor: '#FFFFFF',
   logoUrl: '',
   heroImageUrl: '',
+  appleStripImageUrl: '',
   websiteUrl: 'https://www.kelyani.com',
   phoneNumber: '',
   address: '',
@@ -1549,6 +1552,8 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                     <input ref={walletHeroInput} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={e => { const file=e.target.files?.[0]; if(file) void uploadWalletHero(file); e.currentTarget.value=''; }} />
                   </div>
                   {walletDesign.heroImageUrl && <div className="mt-3 overflow-hidden rounded-xl"><img src={walletDesign.heroImageUrl} alt="Aperçu du visuel principal Wallet" className="max-h-40 w-full object-cover" /></div>}
+                  {walletDesign.heroImageUrl && <WalletImageCropEditor imageUrl={walletDesign.heroImageUrl} platform="google" establishmentId={establishmentId} onSaved={url => { setWalletDesign(current => ({...current,heroImageUrl:url})); setMessage('Cadrage Google Wallet enregistré.'); }} />}
+                  {walletDesign.heroImageUrl && <WalletImageCropEditor imageUrl={walletDesign.heroImageUrl} platform="apple" establishmentId={establishmentId} onSaved={url => { setWalletDesign(current => ({...current,appleStripImageUrl:url})); setMessage('Cadrage Apple Wallet enregistré.'); }} />}
                 </div>
                 <div className="mt-4 flex flex-wrap gap-5 text-xs text-white/65">
                   <label className="flex items-center gap-2"><input type="checkbox" checked={walletDesign.showPoints} onChange={e => setWalletDesign(current => ({...current,showPoints:e.target.checked}))}/> Afficher les points</label>
@@ -1556,8 +1561,9 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                 </div>
               </StudioCard>
 
-              <StudioCard eyebrow="Apple Wallet" title="Apple Wallet">
-                <p className="text-xs leading-5 text-white/55">Le catalogue est préparé, mais la publication Apple reste désactivée jusqu’à la configuration du compte Apple Developer Organisation et du certificat Pass Type ID.</p>
+              <StudioCard eyebrow="Apple Wallet" title="Aperçu Apple Wallet">
+                <p className="text-xs leading-5 text-white/55">Le visuel Apple est préparé séparément. La publication reste désactivée jusqu’à la configuration du compte Apple Developer Organisation et du certificat Pass Type ID.</p>
+                {walletDesign.appleStripImageUrl && <div className="mt-3 overflow-hidden rounded-xl"><img src={walletDesign.appleStripImageUrl} alt="Visuel cadré pour Apple Wallet" className="w-full" /></div>}
                 <span className="mt-3 inline-flex rounded-full border border-white/15 px-3 py-1.5 text-[10px] text-white/60">Certificats requis</span>
               </StudioCard>
             </div>
