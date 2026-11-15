@@ -39,7 +39,7 @@ test('admin can verify Google Wallet Staging without creating a pass', async ({ 
   await expect(page).toHaveURL(/\/admin(?:\/|$)/, { timeout: 45_000 });
   const adminNav = page.getByRole('navigation', { name: 'Navigation administration' });
   await adminNav.getByRole('button', { name: /fidélité/i }).click();
-  await expect(page).toHaveURL(/\\/admin\\/loyalty$/);
+  await expect(page).toHaveURL(/\/admin\/loyalty$/);
   await expect(page.getByText('Google Wallet · Staging')).toBeVisible();
 
   await page.getByRole('button', { name: 'Tester Google Wallet' }).click();
