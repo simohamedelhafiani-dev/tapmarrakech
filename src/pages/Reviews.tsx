@@ -606,7 +606,7 @@ export default function Reviews() {
                 <div className="flex items-center gap-2">
                   <AlertTriangle
                     size={18}
-                    className="text-[#a15c50]"
+                    className="text-[#686D76]"
                   />
 
                   <h3 className="font-semibold text-forest">
@@ -622,7 +622,7 @@ export default function Reviews() {
                           key={index}
                           className="flex gap-2 text-sm leading-6 text-ink/65"
                         >
-                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#a15c50]" />
+                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#686D76]" />
 
                           <span>{item}</span>
                         </li>
@@ -668,7 +668,7 @@ export default function Reviews() {
                               {issue.frequency}
                             </span>
 
-                            <span className="rounded-full bg-[#f4e4e1] px-2.5 py-1 text-[11px] font-semibold text-[#a15c50]">
+                            <span className="rounded-full bg-[#f4e4e1] px-2.5 py-1 text-[11px] font-semibold text-[#686D76]">
                               Priorité {issue.priority}
                             </span>
                           </div>
@@ -882,7 +882,7 @@ export default function Reviews() {
 
               <span className={`rounded-lg px-3 py-2 text-xs font-semibold ${
                 review.status === 'Nouveau'
-                  ? 'bg-[#f4e4e1] text-[#a15c50]'
+                  ? 'bg-[#f4e4e1] text-[#686D76]'
                   : review.status === 'En cours'
                     ? 'bg-[#686D76] text-[#3B82F6]'
                     : 'bg-[#e5eee9] text-forest'

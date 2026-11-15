@@ -1376,7 +1376,7 @@ export default function Loyalty() {
             </div>
 
             {Number(amount) > 0 && (
-              <div className="rounded-xl border border-[#3B82F6]/30 bg-[#f4ead3] p-4">
+              <div className="rounded-xl border border-[#3B82F6]/30 bg-[#686D76] p-4">
                 <div className="flex justify-between text-xs">
                   <span>Points gagnés</span>
 
@@ -1464,7 +1464,7 @@ export default function Loyalty() {
                       className="rounded-xl border border-ink/5 bg-[#111111] p-4"
                     >
                       <div className="flex items-start gap-3">
-                        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#f4ead3] text-[#3B82F6]">
+                        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#686D76] text-[#3B82F6]">
                           <Gift size={18} />
                         </div>
 
@@ -1528,7 +1528,7 @@ export default function Loyalty() {
             <div className="space-y-5">
               <div className="rounded-xl border border-[#3B82F6]/30 bg-[#fdf9ef] p-4">
                 <div className="flex items-center gap-3">
-                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#f4ead3] text-[#3B82F6]">
+                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#686D76] text-[#3B82F6]">
                     <LockKeyhole size={18} />
                   </div>
 
