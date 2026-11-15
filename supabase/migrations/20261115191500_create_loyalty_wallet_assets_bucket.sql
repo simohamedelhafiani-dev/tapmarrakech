@@ -17,7 +17,13 @@ on storage.objects for insert to authenticated
 with check (
   bucket_id = 'loyalty-assets'
   and array_length(storage.foldername(name), 1) >= 2
-  and public.user_owns_establishment((storage.foldername(name))[2]::uuid)
+  and case
+    when public.is_tapmarrakech_admin() then true
+    when array_length(storage.foldername(name), 1) >= 2
+      and (storage.foldername(name))[2] ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+      then public.user_owns_establishment((storage.foldername(name))[2]::uuid)
+    else false
+  end
 );
 
 drop policy if exists "Wallet assets owner update" on storage.objects;
@@ -26,12 +32,24 @@ on storage.objects for update to authenticated
 using (
   bucket_id = 'loyalty-assets'
   and array_length(storage.foldername(name), 1) >= 2
-  and public.user_owns_establishment((storage.foldername(name))[2]::uuid)
+  and case
+    when public.is_tapmarrakech_admin() then true
+    when array_length(storage.foldername(name), 1) >= 2
+      and (storage.foldername(name))[2] ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+      then public.user_owns_establishment((storage.foldername(name))[2]::uuid)
+    else false
+  end
 )
 with check (
   bucket_id = 'loyalty-assets'
   and array_length(storage.foldername(name), 1) >= 2
-  and public.user_owns_establishment((storage.foldername(name))[2]::uuid)
+  and case
+    when public.is_tapmarrakech_admin() then true
+    when array_length(storage.foldername(name), 1) >= 2
+      and (storage.foldername(name))[2] ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+      then public.user_owns_establishment((storage.foldername(name))[2]::uuid)
+    else false
+  end
 );
 
 drop policy if exists "Wallet assets owner delete" on storage.objects;
@@ -40,5 +58,11 @@ on storage.objects for delete to authenticated
 using (
   bucket_id = 'loyalty-assets'
   and array_length(storage.foldername(name), 1) >= 2
-  and public.user_owns_establishment((storage.foldername(name))[2]::uuid)
+  and case
+    when public.is_tapmarrakech_admin() then true
+    when array_length(storage.foldername(name), 1) >= 2
+      and (storage.foldername(name))[2] ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+      then public.user_owns_establishment((storage.foldername(name))[2]::uuid)
+    else false
+  end
 );
