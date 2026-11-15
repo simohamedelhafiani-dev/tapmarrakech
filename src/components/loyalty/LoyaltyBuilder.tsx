@@ -206,7 +206,7 @@ function BuilderPanel({
 }) {
   return (
     <div className="min-w-0">
-      <div className="flex overflow-x-auto rounded-2xl bg-[#f7f7f3] p-1">
+      <div className="flex overflow-x-auto rounded-2xl bg-[#111111] p-1">
         {TABS.map(tab => (
           <button key={tab} type="button" onClick={() => setActiveTab(tab)} className={`flex-1 whitespace-nowrap rounded-xl px-3 py-2.5 text-xs font-semibold transition ${activeTab === tab ? 'bg-white text-forest shadow-sm' : 'text-ink/40 hover:text-forest'}`}>
             {tab}
@@ -262,7 +262,7 @@ function BuilderPanel({
                 const active = config.loyaltyType === option.id;
                 return (
                   <button key={option.id} type="button" onClick={() => update({ loyaltyType: option.id })} className={`flex items-center gap-3 rounded-2xl border p-3 text-left ${active ? 'border-forest bg-forest/[0.04] ring-2 ring-forest/10' : 'border-ink/10 hover:border-forest/25'}`}>
-                    <span className={`grid h-9 w-9 place-items-center rounded-xl ${active ? 'bg-forest text-white' : 'bg-[#f7f7f3] text-ink/40'}`}><Icon size={18} /></span>
+                    <span className={`grid h-9 w-9 place-items-center rounded-xl ${active ? 'bg-forest text-white' : 'bg-[#111111] text-ink/40'}`}><Icon size={18} /></span>
                     <span className="min-w-0"><span className="block text-xs font-semibold text-forest">{option.title}</span><span className="mt-0.5 block text-[9px] leading-4 text-ink/40">{option.description}</span></span>
                     {active && <Check className="ml-auto shrink-0 text-[#3B82F6]" size={15} />}
                   </button>
@@ -287,38 +287,38 @@ function BuilderPanel({
       {activeTab === 'Récompense' && (
         <div className="mt-4 space-y-4">
           {config.loyaltyType === 'STAMP' && (
-            <div className="grid gap-3 rounded-2xl bg-[#f7f7f3] p-4 sm:grid-cols-2">
+            <div className="grid gap-3 rounded-2xl bg-[#111111] p-4 sm:grid-cols-2">
               <NumberField label="Nombre de tampons" value={config.stampGoal} min={1} max={12} onChange={v => update({ stampGoal: v })} />
               <Field label="Récompense" value={config.rewardName} onChange={v => update({ rewardName: v })} />
               <Field label="Description" value={config.rewardDescription} onChange={v => update({ rewardDescription: v })} />
             </div>
           )}
           {config.loyaltyType === 'POINTS' && (
-            <div className="grid gap-3 rounded-2xl bg-[#f7f7f3] p-4">
+            <div className="grid gap-3 rounded-2xl bg-[#111111] p-4">
               <NumberField label="Points nécessaires" value={config.rewardThreshold} min={1} max={100000} onChange={v => update({ rewardThreshold: v })} />
               <Field label="Récompense" value={config.rewardName} onChange={v => update({ rewardName: v })} />
               <Field label="Description" value={config.rewardDescription} onChange={v => update({ rewardDescription: v })} />
             </div>
           )}
           {config.loyaltyType === 'DISCOUNT' && (
-            <div className="grid gap-3 rounded-2xl bg-[#f7f7f3] p-4 sm:grid-cols-2">
+            <div className="grid gap-3 rounded-2xl bg-[#111111] p-4 sm:grid-cols-2">
               <NumberField label="Pourcentage de réduction" value={config.discountPercent} min={1} max={100} onChange={v => update({ discountPercent: v })} />
               <Field label="Condition" value={config.progressText} onChange={v => update({ progressText: v })} />
             </div>
           )}
           {config.loyaltyType === 'REWARD' && (
-            <div className="grid gap-3 rounded-2xl bg-[#f7f7f3] p-4 sm:grid-cols-2">
+            <div className="grid gap-3 rounded-2xl bg-[#111111] p-4 sm:grid-cols-2">
               <NumberField label="Seuil de visites / achats" value={config.stampGoal} min={1} max={100} onChange={v => update({ stampGoal: v })} />
               <Field label="Récompense" value={config.rewardName} onChange={v => update({ rewardName: v })} />
             </div>
           )}
           {config.loyaltyType === 'TIER' && (
-            <div className="rounded-2xl bg-[#f7f7f3] p-4 text-xs text-ink/50">
+            <div className="rounded-2xl bg-[#111111] p-4 text-xs text-ink/50">
               Les niveaux Bronze, Silver et Gold sont prévisualisés dans la carte. Les seuils peuvent être branchés au moteur de points existant.
             </div>
           )}
           {config.loyaltyType === 'CHALLENGE' || config.loyaltyType === 'CASHBACK' ? (
-            <div className="rounded-2xl bg-[#f7f7f3] p-4 text-xs text-ink/50">
+            <div className="rounded-2xl bg-[#111111] p-4 text-xs text-ink/50">
               Cette mécanique est préparée dans l'interface et peut être activée lorsque le moteur correspondant sera disponible.
             </div>
           ) : null}
@@ -326,7 +326,7 @@ function BuilderPanel({
       )}
 
       {activeTab === 'Aperçu' && (
-        <div className="mt-4 rounded-2xl bg-[#f7f7f3] p-5 text-center">
+        <div className="mt-4 rounded-2xl bg-[#111111] p-5 text-center">
           <Sparkles className="mx-auto text-[#3B82F6]" size={22} />
           <p className="mt-3 text-sm font-semibold text-forest">Aperçu côté client</p>
           <p className="mt-1 text-xs text-ink/45">La carte centrale est mise à jour en temps réel à chaque modification.</p>
@@ -361,7 +361,7 @@ function ClientPreview({ config, establishment }: { config: LoyaltyBuilderConfig
   } as const;
 
   return (
-    <div className="min-w-0 rounded-2xl bg-[#f7f7f3] p-4">
+    <div className="min-w-0 rounded-2xl bg-[#111111] p-4">
       <div className="text-center">
         <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-ink">Aperçu côté client</p>
         <p className="mt-1 text-xs text-ink/45">Chaque modification est reflétée ici immédiatement.</p>
@@ -397,7 +397,7 @@ function TemplateGallery({ filter, setFilter, templates, selectedId, onSelect }:
       <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink">Modèles de cartes restaurant</p>
       <p className="mt-1 text-xs text-ink/45">Choisissez un modèle et personnalisez-le selon votre univers.</p>
       <div className="mt-3 flex gap-1.5 overflow-x-auto pb-1">
-        {filters.map(item => <button key={item} type="button" onClick={() => setFilter(item)} className={`whitespace-nowrap rounded-full px-3 py-1.5 text-[9px] font-semibold ${filter === item ? 'bg-forest text-white' : 'bg-[#f7f7f3] text-ink/50'}`}>{item}</button>)}
+        {filters.map(item => <button key={item} type="button" onClick={() => setFilter(item)} className={`whitespace-nowrap rounded-full px-3 py-1.5 text-[9px] font-semibold ${filter === item ? 'bg-forest text-white' : 'bg-[#111111] text-ink/50'}`}>{item}</button>)}
       </div>
       <div className="mt-4 grid grid-cols-2 gap-3">
         {templates.map(template => (
@@ -428,7 +428,7 @@ function TemplateThumb({ template }: { template: LoyaltyTemplate }) {
 
 function AssetButton({ title, image, loading, onClick }: { title: string; image: string | null; loading: boolean; onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} className="overflow-hidden rounded-2xl border border-dashed border-ink/15 bg-[#fafaf8] text-left">
+    <button type="button" onClick={onClick} className="overflow-hidden rounded-2xl border border-dashed border-ink/15 bg-[#111111] text-left">
       <div className="flex h-28 items-center justify-center p-2">
         {image ? <img src={image} alt="" className="h-full w-full rounded-xl object-cover" /> : <ImagePlus className="text-ink/25" size={25} />}
       </div>

@@ -147,7 +147,7 @@ export default function Analytics() {
           <select
             value={establishmentId}
             onChange={e => setEstablishmentId(e.target.value)}
-            className="mt-2 w-full max-w-md rounded-xl border border-ink/10 bg-[#fafaf7] px-4 py-3 text-sm text-ink outline-none"
+            className="mt-2 w-full max-w-md rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm text-ink outline-none"
           >
             {establishments.map(establishment => (
               <option key={establishment.id} value={establishment.id}>

@@ -17,7 +17,7 @@ type MenuPreviewProps = {
 const palettes = {
   editorial: { page: 'bg-[#3B82F6] text-[#3B82F6]', panel: 'bg-[#fffdf8]', accent: 'text-[#9c7a32]', muted: 'text-[#74776e]', line: 'border-[#3B82F6]/15', card: 'bg-white' },
   luxury: { page: 'bg-[#11100d] text-[#f7f0df]', panel: 'bg-[#171510]', accent: 'text-[#d2b46a]', muted: 'text-white/60', line: 'border-[#c8a75d]/30', card: 'bg-[#1b1914]' },
-  cards: { page: 'bg-[#f7f7f3] text-[#3B82F6]', panel: 'bg-white', accent: 'text-[#a17d31]', muted: 'text-[#777b73]', line: 'border-black/10', card: 'bg-white' },
+  cards: { page: 'bg-[#111111] text-[#3B82F6]', panel: 'bg-white', accent: 'text-[#a17d31]', muted: 'text-[#777b73]', line: 'border-black/10', card: 'bg-white' },
   dark: { page: 'bg-[#0D0D0D] text-white', panel: 'bg-[#111111]', accent: 'text-[#d6b86b]', muted: 'text-white/60', line: 'border-white/15', card: 'bg-white/[0.06]' },
   onyx: { page: 'bg-[#050505] text-white', panel: 'bg-[#101010]', accent: 'text-[#3B82F6]', muted: 'text-white/60', line: 'border-white/15', card: 'bg-white/[0.05]' },
   'royal-gold': { page: 'bg-[#050505] text-white', panel: 'bg-[#686D76]', accent: 'text-[#3B82F6]', muted: 'text-white/60', line: 'border-[#3B82F6]/30', card: 'bg-[#111111]' },

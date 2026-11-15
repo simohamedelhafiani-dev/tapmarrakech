@@ -137,7 +137,7 @@ export default function Employee() {
     template_id: 'luxury',
     primary_color: '#3B82F6',
     secondary_color: '#686D76',
-    background_color: '#F7F7F3',
+    background_color: '#111111',
     text_color: '#3B82F6',
     button_color: '#3B82F6',
     border_radius: 24,
@@ -680,7 +680,7 @@ export default function Employee() {
           <title>Carte fidélité ${customer.loyalty_number}</title>
           <style>
             * { box-sizing: border-box; }
-            body { margin: 0; padding: 40px; background: #f7f7f3; font-family: Arial, sans-serif; }
+            body { margin: 0; padding: 40px; background: #111111; font-family: Arial, sans-serif; }
             .card { width: 640px; max-width: 100%; margin: 0 auto; padding: 34px; border-radius: 28px; background: #173f35; color: white; box-shadow: 0 20px 50px rgba(0,0,0,.16); }
             .small { margin-top: 8px; color: rgba(255,255,255,.65); font-size: 12px; text-transform: uppercase; letter-spacing: 2px; }
             .brand { display: flex; align-items: center; gap: 14px; }
@@ -1020,7 +1020,7 @@ export default function Employee() {
 
   if (loginLoading) {
     return (
-      <div className="min-h-screen grid place-items-center bg-[#f7f7f3]">
+      <div className="min-h-screen grid place-items-center bg-[#111111]">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
       </div>
     );
@@ -1028,7 +1028,7 @@ export default function Employee() {
 
   if (!session) {
     return (
-      <div className="min-h-screen bg-[#f7f7f3] px-4 py-8">
+      <div className="min-h-screen bg-[#111111] px-4 py-8">
         <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md items-center justify-center">
           <div className="w-full rounded-[2rem] border border-ink/5 bg-white p-7 shadow-2xl md:p-9">
             <div className="mb-8 text-center">
@@ -1062,7 +1062,7 @@ export default function Employee() {
                   if (e.key === 'Enter') loginEmployee();
                 }}
                 placeholder="Code de connexion"
-                className="w-full rounded-2xl border border-ink/10 bg-[#f7f7f3] py-4 pl-12 pr-4 text-center text-lg tracking-[0.25em] outline-none focus:border-forest"
+                className="w-full rounded-2xl border border-ink/10 bg-[#111111] py-4 pl-12 pr-4 text-center text-lg tracking-[0.25em] outline-none focus:border-forest"
               />
             </div>
 
@@ -1091,14 +1091,14 @@ export default function Employee() {
 
   if (loading) {
     return (
-      <div className="min-h-screen grid place-items-center bg-[#f7f7f3]">
+      <div className="min-h-screen grid place-items-center bg-[#111111]">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f7f3] p-4 md:p-8">
+    <div className="min-h-screen bg-[#111111] p-4 md:p-8">
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 flex justify-center">
           <div className="flex items-center gap-3 rounded-2xl border border-ink/5 bg-white px-5 py-3 shadow-sm">
@@ -1258,7 +1258,7 @@ export default function Employee() {
                   </div>
 
                   <div className="flex flex-wrap items-center gap-3">
-                    <div className="rounded-xl bg-[#f7f7f3] px-4 py-2 text-center">
+                    <div className="rounded-xl bg-[#111111] px-4 py-2 text-center">
                       <p className="text-[10px] uppercase tracking-wide text-ink/40">
                         {isStampProgram ? 'Tampons' : 'Points'}
                       </p>
@@ -1327,7 +1327,7 @@ export default function Employee() {
       {showInstallHelp && (
         <Modal title="Installer le scanner" onClose={() => setShowInstallHelp(false)}>
           <div className="space-y-4 text-sm text-ink/60">
-            <div className="rounded-2xl bg-[#f7f7f3] p-4">
+            <div className="rounded-2xl bg-[#111111] p-4">
               <p className="font-semibold text-forest">Scanner fidélité</p>
               <p className="mt-1 leading-6">Ce raccourci est lié à cet établissement et ouvrira directement le scanner.</p>
             </div>
@@ -1392,7 +1392,7 @@ export default function Employee() {
             if (!saving) setEditCustomer(null);
           }}
         >
-          <div className="mb-5 rounded-2xl bg-[#f7f7f3] p-4">
+          <div className="mb-5 rounded-2xl bg-[#111111] p-4">
             <p className="text-xs text-ink/40">Numéro de fidélité</p>
             <p className="mt-1 text-xl font-bold tracking-wider text-forest">
               {editCustomer.loyalty_number}
@@ -1514,7 +1514,7 @@ export default function Employee() {
             value={manualCustomerSearch}
             onChange={e => setManualCustomerSearch(e.target.value)}
             placeholder="N° fidélité, téléphone, nom..."
-            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+            className="w-full rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-forest"
           />
 
           {manualMatches.length > 0 && (
@@ -1534,7 +1534,7 @@ export default function Employee() {
                     }
                     setManualCustomerSearch('');
                   }}
-                  className="flex w-full items-center justify-between border-b border-ink/5 bg-white px-4 py-3 text-left last:border-0 hover:bg-[#f7f7f3]"
+                  className="flex w-full items-center justify-between border-b border-ink/5 bg-white px-4 py-3 text-left last:border-0 hover:bg-[#111111]"
                 >
                   <span>
                     <span className="block text-sm font-semibold text-forest">{customer.first_name} {customer.last_name ?? ''}</span>
@@ -1567,7 +1567,7 @@ export default function Employee() {
             }
           }}
         >
-          <div className="rounded-2xl bg-[#f7f7f3] p-4">
+          <div className="rounded-2xl bg-[#111111] p-4">
             <p className="font-semibold text-forest">
               {showPoints.first_name} {showPoints.last_name ?? ''}
             </p>
@@ -1644,7 +1644,7 @@ export default function Employee() {
             }
           }}
         >
-          <div className="rounded-2xl bg-[#f7f7f3] p-4">
+          <div className="rounded-2xl bg-[#111111] p-4">
             <p className="text-xs text-ink/40">Client</p>
             <p className="mt-1 font-semibold text-forest">
               {showDiscount.first_name} {showDiscount.last_name ?? ''}
@@ -1740,7 +1740,7 @@ export default function Employee() {
         >
           <div className="grid gap-5 md:grid-cols-[1fr_1fr]">
             <div>
-              <div className="rounded-2xl bg-[#f7f7f3] p-4">
+              <div className="rounded-2xl bg-[#111111] p-4">
                 <p className="text-xs text-ink/40">Client</p>
                 <p className="mt-1 font-semibold text-forest">
                   {showRewards.first_name} {showRewards.last_name ?? ''}
@@ -1787,7 +1787,7 @@ export default function Employee() {
                               </p>
                             )}
                           </div>
-                          <span className="shrink-0 rounded-lg bg-[#f7f7f3] px-2.5 py-1 text-xs font-semibold text-forest">
+                          <span className="shrink-0 rounded-lg bg-[#111111] px-2.5 py-1 text-xs font-semibold text-forest">
                             {reward.points_required} pts
                           </span>
                         </div>
@@ -1916,7 +1916,7 @@ function Modal({
           <h2 className="font-display text-2xl text-forest">{title}</h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-2 text-ink/40 hover:bg-[#f7f7f3]"
+            className="rounded-lg p-2 text-ink/40 hover:bg-[#111111]"
           >
             <X size={20} />
           </button>
