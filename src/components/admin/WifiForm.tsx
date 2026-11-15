@@ -113,13 +113,13 @@ export default function WifiForm({ establishmentId }: WifiFormProps) {
       <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-[0_12px_40px_rgba(15,23,42,0.045)]">
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Connectivité</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#3B82F6]">Connectivité</p>
             <h3 className="mt-1 text-lg font-semibold text-[#3B82F6]">Wi-Fi client</h3>
             <p className="mt-1 text-xs leading-5 text-[#FFFFFF]/40">
               Configure le réseau qui sera proposé aux clients. Le QR est généré localement à partir des informations saisies.
             </p>
           </div>
-          <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-semibold ${active ? 'bg-[#3B82F6]/5 text-[#3B82F6]' : 'bg-[#242424] text-[#FFFFFF]/45'}`}>
+          <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-semibold ${active ? 'bg-[#686D76]/5 text-[#3B82F6]' : 'bg-[#242424] text-[#FFFFFF]/45'}`}>
             <Wifi size={13} />
             {active ? 'Actif' : 'Désactivé'}
           </span>
@@ -205,7 +205,7 @@ export default function WifiForm({ establishmentId }: WifiFormProps) {
             type="button"
             onClick={() => void handleSave()}
             disabled={engine.saving || !networkName.trim()}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#3B82F6] px-5 py-3 text-sm font-semibold text-[#050505] transition hover:bg-[#3B82F6]-light disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#686D76] px-5 py-3 text-sm font-semibold text-[#050505] transition hover:bg-[#686D76]-light disabled:cursor-not-allowed disabled:opacity-40"
           >
             {engine.saving ? <Loader2 size={16} className="animate-spin" /> : <Wifi size={16} />}
             {engine.saving ? 'Enregistrement…' : 'Enregistrer le Wi-Fi'}
@@ -213,16 +213,16 @@ export default function WifiForm({ establishmentId }: WifiFormProps) {
         </div>
       </div>
 
-      <div className="rounded-3xl border border-[#242424] bg-[#3B82F6] p-6 text-[#050505] shadow-[0_12px_40px_rgba(23,61,50,0.12)]">
+      <div className="rounded-3xl border border-[#242424] bg-[#686D76] p-6 text-[#050505] shadow-[0_12px_40px_rgba(23,61,50,0.12)]">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Accès instantané</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#3B82F6]">Accès instantané</p>
             <h3 className="mt-1 text-lg font-semibold">QR Code Wi-Fi</h3>
             <p className="mt-1 text-xs leading-5 text-[#050505]/55">
               Le QR se met à jour en temps réel. Scanne-le avec un téléphone compatible pour rejoindre le réseau.
             </p>
           </div>
-          <QrCode size={22} className="text-gold" />
+          <QrCode size={22} className="text-[#3B82F6]" />
         </div>
 
         <div className="mt-6 flex min-h-[320px] items-center justify-center rounded-3xl bg-[#111111] p-6">
@@ -240,7 +240,7 @@ export default function WifiForm({ establishmentId }: WifiFormProps) {
           type="button"
           onClick={downloadQr}
           disabled={!qrDataUrl}
-          className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gold px-4 py-3 text-sm font-bold text-[#3B82F6] transition hover:bg-gold/90 disabled:cursor-not-allowed disabled:opacity-40"
+          className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#686D76] px-4 py-3 text-sm font-bold text-[#3B82F6] transition hover:bg-[#686D76]/90 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Download size={16} />
           Télécharger le QR Code
