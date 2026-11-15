@@ -85,6 +85,10 @@ type DesignState = {
 };
 
 type WalletDesignState = {
+  walletProgramType: 'STAMP' | 'DISCOUNT' | 'POINTS';
+  walletDiscountPercent: number;
+  walletStampGoal: number;
+  walletRewardLabel: string;
   backgroundColor: string;
   primaryColor: string;
   accentColor: string;
@@ -105,6 +109,10 @@ type WalletDesignState = {
 };
 
 const DEFAULT_WALLET_DESIGN: WalletDesignState = {
+  walletProgramType: 'POINTS',
+  walletDiscountPercent: 10,
+  walletStampGoal: 10,
+  walletRewardLabel: 'Récompense fidélité',
   backgroundColor: '#050505',
   primaryColor: '#686D76',
   accentColor: '#3B82F6',
@@ -1431,6 +1439,27 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
           )}
           {tab === 'wallet' && canManageWallet && (
             <div className="space-y-5">
+              <StudioCard eyebrow="Programme Wallet indépendant" title="Type de carte Wallet">
+                <p className="mb-4 text-xs leading-5 text-white/50">Ce réglage concerne uniquement Google Wallet et Apple Wallet. Il ne modifie jamais le programme ni la carte KELYANI classique.</p>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  {([
+                    { id: 'STAMP', title: 'Tampons', detail: 'Visites et objectif de tampons', icon: Stamp },
+                    { id: 'DISCOUNT', title: 'Réduction', detail: 'Avantage directement visible', icon: Percent },
+                    { id: 'POINTS', title: 'Points', detail: 'Solde et progression', icon: Star },
+                  ] as const).map(option => {
+                    const Icon = option.icon;
+                    const active = walletDesign.walletProgramType === option.id;
+                    return <button key={option.id} type="button" onClick={() => setWalletDesign(current => ({ ...current, walletProgramType: option.id }))} className={`rounded-2xl border p-4 text-left transition ${active ? 'border-[#3B82F6] bg-[#686D76]' : 'border-white/10 bg-[#0B0B0B] hover:border-white/25'}`}>
+                      <Icon size={18} className="mb-3 text-white" />
+                      <p className="text-sm font-semibold text-white">{option.title}</p>
+                      <p className="mt-1 text-[10px] text-white/55">{option.detail}</p>
+                    </button>;
+                  })}
+                </div>
+                {walletDesign.walletProgramType === 'STAMP' && <div className="mt-4 grid gap-4 sm:grid-cols-2"><Field label="Objectif de tampons"><input type="number" min="1" max="100" value={walletDesign.walletStampGoal} onChange={e => setWalletDesign(current => ({...current,walletStampGoal:Math.max(1,Math.min(100,Number(e.target.value)||1))}))} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white" /></Field><Field label="Récompense"><input value={walletDesign.walletRewardLabel} onChange={e => setWalletDesign(current => ({...current,walletRewardLabel:e.target.value}))} maxLength={40} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white" /></Field></div>}
+                {walletDesign.walletProgramType === 'DISCOUNT' && <div className="mt-4 max-w-xs"><Field label="Réduction (%)"><input type="number" min="1" max="100" value={walletDesign.walletDiscountPercent} onChange={e => setWalletDesign(current => ({...current,walletDiscountPercent:Math.max(1,Math.min(100,Number(e.target.value)||1))}))} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white" /></Field></div>}
+              </StudioCard>
+
               <StudioCard eyebrow="Catalogue Wallet" title="Bibliothèque de modèles">
                 <p className="text-xs leading-5 text-white/55">
                   Choisissez un modèle, prévisualisez-le puis publiez-le. Une classe Google indépendante est créée pour chaque modèle et établissement. Les modèles en attente de validation ne sont pas visibles par les clients.
@@ -1560,8 +1589,9 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                     {walletDesign.logoUrl || design.logoUrl || establishment.logoUrl ? <img src={walletDesign.logoUrl || design.logoUrl || establishment.logoUrl || ''} alt="" className="h-10 w-10 rounded-xl bg-white object-contain p-1" /> : <div className="grid h-10 w-10 place-items-center rounded-xl text-xs font-bold" style={{ background: walletDesign.accentColor, color: walletDesign.backgroundColor }}>{establishment.name.slice(0,2).toUpperCase()}</div>}
                     <div className="min-w-0"><p className="truncate text-xs font-bold">{walletDesign.cardTitle || 'KELYANI'}</p><p className="text-[9px] uppercase tracking-wider opacity-60">{establishment.name} · {walletDesign.headerText}</p></div>
                   </div>
-                  {walletDesign.showPoints && <div className="mt-10 text-center"><p className="text-[9px] uppercase tracking-[.2em]" style={{ color: walletDesign.accentColor }}>Votre solde</p><p className="mt-1 text-4xl font-black">720</p><p className="text-[10px]" style={{ color: walletDesign.accentColor }}>POINTS</p></div>}
-                  <div className="mt-8 rounded-xl border p-3" style={{ borderColor: walletDesign.accentColor + '88', background: '#00000022' }}><p className="text-[10px] font-semibold">Prochaine récompense</p><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/20"><div className="h-full w-[72%]" style={{ background: walletDesign.accentColor }} /></div></div>
+                  {walletDesign.walletProgramType === 'POINTS' && walletDesign.showPoints && <div className="mt-10 text-center"><p className="text-[9px] uppercase tracking-[.2em]" style={{ color: walletDesign.accentColor }}>Votre solde</p><p className="mt-1 text-4xl font-black">720</p><p className="text-[10px]" style={{ color: walletDesign.accentColor }}>POINTS</p></div>}
+                  {walletDesign.walletProgramType === 'STAMP' && <div className="mt-10 rounded-xl border p-3" style={{ borderColor: walletDesign.accentColor + '88', background: '#00000022' }}><p className="text-[10px] font-semibold">Vos tampons · 4/{walletDesign.walletStampGoal}</p><div className="mt-3 flex flex-wrap gap-2">{Array.from({length:Math.min(walletDesign.walletStampGoal,10)},(_,i)=><span key={i} className={`h-5 w-5 rounded-full border ${i<4?'border-transparent':'border-white/40'}`} style={i<4?{background:walletDesign.accentColor}:{}} />)}</div><p className="mt-3 text-[10px] opacity-70">{walletDesign.walletRewardLabel}</p></div>}
+                  {walletDesign.walletProgramType === 'DISCOUNT' && <div className="mt-10 rounded-xl border p-4 text-center" style={{ borderColor: walletDesign.accentColor + '88', background: '#00000022' }}><p className="text-[9px] uppercase tracking-[.2em]" style={{ color: walletDesign.accentColor }}>Votre avantage</p><p className="mt-1 text-4xl font-black">-{walletDesign.walletDiscountPercent}%</p><p className="mt-1 text-[10px] opacity-70">Réduction fidélité</p></div>}
                   {walletDesign.showQr && <div className="mt-7 flex justify-center"><div className="grid h-16 w-16 grid-cols-5 gap-[2px] rounded-lg bg-white p-2">{Array.from({length:25},(_,i)=><span key={i} className="rounded-[1px]" style={{background:(i*7)%3===0?'#111111':'#FFFFFF'}} />)}</div></div>}
                   <p className="mt-5 text-center text-[9px] opacity-55">{walletDesign.footerText}</p>
                 </div>
