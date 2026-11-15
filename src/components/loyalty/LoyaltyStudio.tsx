@@ -95,6 +95,7 @@ type WalletDesignState = {
   accentColor: string;
   textColor: string;
   logoUrl: string;
+  heroImageSourceUrl: string;
   heroImageUrl: string;
   appleStripImageUrl: string;
   websiteUrl: string;
@@ -120,6 +121,7 @@ const DEFAULT_WALLET_DESIGN: WalletDesignState = {
   accentColor: '#3B82F6',
   textColor: '#FFFFFF',
   logoUrl: '',
+  heroImageSourceUrl: '',
   heroImageUrl: '',
   appleStripImageUrl: '',
   websiteUrl: 'https://www.kelyani.com',
@@ -311,7 +313,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       const row = Array.isArray(designData) ? designData[0] : designData;
       if (row) {
         const cfg = row.design_config ?? {};
-        setWalletDesign({ ...DEFAULT_WALLET_DESIGN, ...(cfg.wallet_design ?? {}) });
+        setWalletDesign({ ...DEFAULT_WALLET_DESIGN, ...(cfg.wallet_design ?? {}), heroImageSourceUrl: cfg.wallet_design?.heroImageSourceUrl || cfg.wallet_design?.heroImageUrl || '' });
         setDesign({
           ...DEFAULT_DESIGN,
           templateId: row.template_id ?? DEFAULT_DESIGN.templateId,
@@ -602,7 +604,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       });
       if (error) throw error;
       const { data } = supabase.storage.from('loyalty-assets').getPublicUrl(path);
-      setWalletDesign(current => ({ ...current, heroImageUrl: data.publicUrl }));
+      setWalletDesign(current => ({ ...current, heroImageSourceUrl: data.publicUrl, heroImageUrl: data.publicUrl, appleStripImageUrl: '' }));
       setMessage('Visuel principal ajouté.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Upload du visuel impossible.');
@@ -1552,8 +1554,8 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                     <input ref={walletHeroInput} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={e => { const file=e.target.files?.[0]; if(file) void uploadWalletHero(file); e.currentTarget.value=''; }} />
                   </div>
                   {walletDesign.heroImageUrl && <div className="mt-3 overflow-hidden rounded-xl"><img src={walletDesign.heroImageUrl} alt="Aperçu du visuel principal Wallet" className="max-h-40 w-full object-cover" /></div>}
-                  {walletDesign.heroImageUrl && <WalletImageCropEditor imageUrl={walletDesign.heroImageUrl} platform="google" establishmentId={establishmentId} onSaved={url => { setWalletDesign(current => ({...current,heroImageUrl:url})); setMessage('Cadrage Google Wallet enregistré.'); }} />}
-                  {walletDesign.heroImageUrl && <WalletImageCropEditor imageUrl={walletDesign.heroImageUrl} platform="apple" establishmentId={establishmentId} onSaved={url => { setWalletDesign(current => ({...current,appleStripImageUrl:url})); setMessage('Cadrage Apple Wallet enregistré.'); }} />}
+                  {walletDesign.heroImageUrl && <WalletImageCropEditor imageUrl={walletDesign.heroImageSourceUrl || walletDesign.heroImageUrl} platform="google" establishmentId={establishmentId} onSaved={url => { setWalletDesign(current => ({...current,heroImageUrl:url})); setMessage('Cadrage Google Wallet enregistré.'); }} />}
+                  {walletDesign.heroImageUrl && <WalletImageCropEditor imageUrl={walletDesign.heroImageSourceUrl || walletDesign.heroImageUrl} platform="apple" establishmentId={establishmentId} onSaved={url => { setWalletDesign(current => ({...current,appleStripImageUrl:url})); setMessage('Cadrage Apple Wallet enregistré.'); }} />}
                 </div>
                 <div className="mt-4 flex flex-wrap gap-5 text-xs text-white/65">
                   <label className="flex items-center gap-2"><input type="checkbox" checked={walletDesign.showPoints} onChange={e => setWalletDesign(current => ({...current,showPoints:e.target.checked}))}/> Afficher les points</label>
