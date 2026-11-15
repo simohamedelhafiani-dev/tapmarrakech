@@ -28,6 +28,7 @@ import {
   type LoyaltyReferralConfig,
 } from '@/hooks/useLoyaltyManager';
 import LoyaltyPreview from './LoyaltyPreview';
+import WalletImageCropEditor from './WalletImageCropEditor';
 import LoyaltyRaffleStudio from './LoyaltyRaffleStudio';
 import LoyaltyTierStudio from './LoyaltyTierStudio';
 import LoyaltyCrmSegments from './LoyaltyCrmSegments';
@@ -85,11 +86,22 @@ type DesignState = {
 };
 
 type WalletDesignState = {
+  walletProgramType: 'STAMP' | 'DISCOUNT' | 'POINTS';
+  walletDiscountPercent: number;
+  walletStampGoal: number;
+  walletRewardLabel: string;
   backgroundColor: string;
   primaryColor: string;
   accentColor: string;
   textColor: string;
   logoUrl: string;
+  heroImageSourceUrl: string;
+  heroImageUrl: string;
+  appleStripImageUrl: string;
+  websiteUrl: string;
+  phoneNumber: string;
+  address: string;
+  customMessage: string;
   cardTitle: string;
   headerText: string;
   footerText: string;
@@ -100,11 +112,22 @@ type WalletDesignState = {
 };
 
 const DEFAULT_WALLET_DESIGN: WalletDesignState = {
+  walletProgramType: 'POINTS',
+  walletDiscountPercent: 10,
+  walletStampGoal: 10,
+  walletRewardLabel: 'Récompense fidélité',
   backgroundColor: '#050505',
   primaryColor: '#686D76',
   accentColor: '#3B82F6',
   textColor: '#FFFFFF',
   logoUrl: '',
+  heroImageSourceUrl: '',
+  heroImageUrl: '',
+  appleStripImageUrl: '',
+  websiteUrl: 'https://www.kelyani.com',
+  phoneNumber: '',
+  address: '',
+  customMessage: '',
   cardTitle: 'KELYANI',
   headerText: 'Carte de fidélité',
   footerText: 'Présentez votre carte à chaque visite',
@@ -225,6 +248,8 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     logoUrl: null as string | null,
   });
   const wallpaperInput = useRef<HTMLInputElement>(null);
+  const walletHeroInput = useRef<HTMLInputElement>(null);
+  const walletLogoInput = useRef<HTMLInputElement>(null);
   const designHydratedRef = useRef(false);
   const previewChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const [previewChannelReady, setPreviewChannelReady] = useState(false);
@@ -288,7 +313,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       const row = Array.isArray(designData) ? designData[0] : designData;
       if (row) {
         const cfg = row.design_config ?? {};
-        setWalletDesign({ ...DEFAULT_WALLET_DESIGN, ...(cfg.wallet_design ?? {}) });
+        setWalletDesign({ ...DEFAULT_WALLET_DESIGN, ...(cfg.wallet_design ?? {}), heroImageSourceUrl: cfg.wallet_design?.heroImageSourceUrl || cfg.wallet_design?.heroImageUrl || '' });
         setDesign({
           ...DEFAULT_DESIGN,
           templateId: row.template_id ?? DEFAULT_DESIGN.templateId,
@@ -541,8 +566,55 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     }
   };
 
+  const uploadWalletLogo = async (file: File) => {
+    if (!file.type.startsWith('image/')) return;
+    if (file.size > 8 * 1024 * 1024) {
+      setMessage('Image trop lourde (8 Mo maximum).');
+      return;
+    }
+    setSaving(true);
+    try {
+      const ext = file.name.split('.').pop()?.toLowerCase() || 'png';
+      const path = `loyalty-cards/${establishmentId}/wallet-logo-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('loyalty-assets').upload(path, file, { upsert: true, contentType: file.type });
+      if (error) throw error;
+      const { data } = supabase.storage.from('loyalty-assets').getPublicUrl(path);
+      setWalletDesign(current => ({ ...current, logoUrl: data.publicUrl }));
+      setMessage('Logo Wallet ajouté.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Upload du logo impossible.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const uploadWalletHero = async (file: File) => {
+    if (!file.type.startsWith('image/')) return;
+    if (file.size > 8 * 1024 * 1024) {
+      setMessage('Image trop lourde (8 Mo maximum).');
+      return;
+    }
+    setSaving(true);
+    try {
+      const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const path = `loyalty-cards/${establishmentId}/wallet-hero-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('loyalty-assets').upload(path, file, {
+        upsert: true,
+        contentType: file.type,
+      });
+      if (error) throw error;
+      const { data } = supabase.storage.from('loyalty-assets').getPublicUrl(path);
+      setWalletDesign(current => ({ ...current, heroImageSourceUrl: data.publicUrl, heroImageUrl: data.publicUrl, appleStripImageUrl: '' }));
+      setMessage('Visuel principal ajouté.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Upload du visuel impossible.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const syncGoogleWalletDesign = async () => {
-    if (!isAdmin || !establishmentId || saving) return;
+    if (!canManageWallet || !establishmentId || saving) return;
     setSaving(true);
     setMessage('');
     try {
@@ -567,7 +639,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   };
 
   const publishWalletTemplate = async (templateKey: string) => {
-    if (!isAdmin || !establishmentId || publishingWalletKey) return;
+    if (!canManageWallet || !establishmentId || publishingWalletKey) return;
     const template = WALLET_TEMPLATES[templateKey as keyof typeof WALLET_TEMPLATES];
     if (!template) return;
     setPublishingWalletKey(templateKey);
@@ -790,7 +862,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   if (loading) {
     return (
       <div className="grid min-h-[560px] place-items-center rounded-3xl bg-[#111111]">
-        <Loader2 className="animate-spin text-[#C9A45C]" />
+        <Loader2 className="animate-spin text-[#686D76]" />
       </div>
     );
   }
@@ -799,22 +871,22 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     <section className="rounded-3xl border border-[#242424] bg-[#050505] p-4 shadow-soft md:p-6">
       <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[.22em] text-[#C9A45C]">Loyalty Studio</p>
-          <h2 className="mt-1 font-display text-3xl text-[#E1C27A]">Carte fidélité</h2>
+          <p className="text-[10px] font-bold uppercase tracking-[.22em] text-[#686D76]">Loyalty Studio</p>
+          <h2 className="mt-1 font-display text-3xl text-[#FFFFFF]">Carte fidélité</h2>
           <p className="mt-1 max-w-xl text-sm text-[#FFFFFF]/45">
             Un espace unique pour piloter le programme, l’acquisition et l’identité de la carte.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className={`hidden rounded-full px-3 py-1.5 text-[10px] font-semibold sm:inline-flex ${design.published ? 'bg-[#111111] text-[#E1C27A]' : 'bg-[#111111] text-[#E1C27A]'}`}>
+          <span className={`hidden rounded-full px-3 py-1.5 text-[10px] font-semibold sm:inline-flex ${design.published ? 'bg-[#111111] text-[#FFFFFF]' : 'bg-[#111111] text-[#FFFFFF]'}`}>
             {design.published ? 'Publié' : 'Brouillon'}
           </span>
           <button
             type="button"
             onClick={() => void saveAll(false)}
             disabled={saving}
-            className="rounded-xl border border-[#C9A45C]/20 bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#E1C27A] transition hover:bg-[#242424] disabled:opacity-50"
+            className="rounded-xl border border-[#686D76]/20 bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#FFFFFF] transition hover:bg-[#242424] disabled:opacity-50"
           >
             Enregistrer
           </button>
@@ -822,7 +894,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
             type="button"
             onClick={() => void saveAll(true)}
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#C9A45C]-gradient px-4 py-2.5 text-xs font-semibold text-[#050505] shadow-sm transition hover:-translate-y-0.5 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#686D76] px-4 py-2.5 text-xs font-semibold text-[#050505] shadow-sm transition hover:-translate-y-0.5 disabled:opacity-50"
           >
             <Save size={14} />
             {saving ? '...' : 'Publier'}
@@ -831,7 +903,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       </div>
 
       {message && (
-        <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl bg-[#242424] px-4 py-3 text-xs text-[#E1C27A]">
+        <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl bg-[#242424] px-4 py-3 text-xs text-[#FFFFFF]">
           <span>{message}</span>
           <button type="button" onClick={() => setMessage('')} className="text-[#FFFFFF]/30 hover:text-[#FFFFFF]/60">
             <X size={14} />
@@ -844,15 +916,15 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
           <div className="min-w-0">
             <aside className="mb-5 rounded-2xl border border-white/10 bg-[#0D0D0D] p-2 xl:sticky xl:top-5 xl:mb-0 xl:p-3">
               <div className="mb-3 hidden px-3 pt-2 xl:block">
-                <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#D4AF37]">KELYANI</p>
+                <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#686D76]">KELYANI</p>
                 <p className="mt-1 text-xs text-white/45">Loyalty Studio</p>
               </div>
               <nav aria-label="Applications fidélité" className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 xl:flex xl:flex-col">
                 {visibleTabs.map(item => {
                   const Icon = item.icon;
                   return (
-                    <button key={item.id} type="button" onClick={() => setTab(item.id)} aria-current={tab === item.id ? 'page' : undefined} className={`flex min-w-0 items-center gap-2.5 rounded-xl border px-3 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] ${tab === item.id ? 'border-[#D4AF37]/50 bg-[#D4AF37]/10 text-[#E1C27A]' : 'border-transparent text-white/65 hover:border-white/10 hover:bg-white/[.04] hover:text-white'}`}>
-                      <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${tab === item.id ? 'bg-gradient-to-br from-[#E1C27A] to-[#B68A2B] text-[#0D0D0D]' : 'bg-white/[.06] text-[#D4AF37]'}`}>
+                    <button key={item.id} type="button" onClick={() => setTab(item.id)} aria-current={tab === item.id ? 'page' : undefined} className={`flex min-w-0 items-center gap-2.5 rounded-xl border px-3 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#686D76] ${tab === item.id ? 'border-[#686D76]/50 bg-[#686D76]/10 text-[#FFFFFF]' : 'border-transparent text-white/65 hover:border-white/10 hover:bg-white/[.04] hover:text-white'}`}>
+                      <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${tab === item.id ? 'bg-gradient-to-br from-[#FFFFFF] to-[#686D76] text-[#0D0D0D]' : 'bg-white/[.06] text-[#686D76]'}`}>
                         <Icon size={18} />
                       </span>
                       <span className="min-w-0">
@@ -868,7 +940,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
           <div className="min-w-0">
             <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#D4AF37]">Loyalty Studio</p>
+                <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#686D76]">Loyalty Studio</p>
                 <h3 className="mt-1 text-2xl font-semibold text-white sm:text-3xl">{tab === 'crm' ? 'Mes clients' : visibleTabs.find(item => item.id === tab)?.label}</h3>
               </div>
             </div>
@@ -882,7 +954,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
               <StudioCard eyebrow="Activation" title="Piloter le programme">
                 <div className="flex items-center justify-between gap-4 rounded-2xl bg-[#242424] p-4">
                   <div>
-                    <p className="text-sm font-semibold text-[#E1C27A]">Programme fidélité</p>
+                    <p className="text-sm font-semibold text-[#FFFFFF]">Programme fidélité</p>
                     <p className="mt-1 text-[10px] leading-4 text-[#FFFFFF]/40">
                       Les clients peuvent utiliser leur carte lorsque le programme est actif.
                     </p>
@@ -901,10 +973,10 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                         key={item.id}
                         type="button"
                         onClick={() => setProgram(current => ({ ...current, programType: item.id }))}
-                        className={`rounded-2xl border p-4 text-left transition ${active ? 'border-[#242424] bg-[#C9A45C]-gradient/[.04] ring-2 ring-[#C9A45C]/15' : 'border-[#242424]/10 hover:border-[#C9A45C]/30'}`}
+                        className={`rounded-2xl border p-4 text-left transition ${active ? 'border-[#242424] bg-[#686D76]/[.04] ring-2 ring-[#686D76]/15' : 'border-[#242424]/10 hover:border-[#686D76]/30'}`}
                       >
-                        <Icon size={18} className={active ? 'text-[#C9A45C]' : 'text-[#FFFFFF]/35'} />
-                        <p className="mt-3 text-sm font-semibold text-[#E1C27A]">{item.label}</p>
+                        <Icon size={18} className={active ? 'text-[#686D76]' : 'text-[#FFFFFF]/35'} />
+                        <p className="mt-3 text-sm font-semibold text-[#FFFFFF]">{item.label}</p>
                         <p className="mt-1 text-[10px] leading-4 text-[#FFFFFF]/45">{item.description}</p>
                       </button>
                     );
@@ -928,7 +1000,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                           pointsPerCurrency: Math.max(0.01, conversionPoints / mad),
                         }));
                       }}
-                      className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25"
+                      className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#FFFFFF] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#686D76]/15 placeholder:text-[#FFFFFF]/25"
                     />
                   </Field>
                   <span className="hidden pb-3 text-xs font-bold text-[#FFFFFF]/25 md:block">=</span>
@@ -946,7 +1018,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                           pointsPerCurrency: Math.max(0.01, points / conversionMad),
                         }));
                       }}
-                      className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25"
+                      className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#FFFFFF] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#686D76]/15 placeholder:text-[#FFFFFF]/25"
                     />
                   </Field>
                 </div>
@@ -969,7 +1041,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                             ...current,
                             stampGoal: Math.min(10, Math.max(1, Number(e.target.value) || 1)),
                           }))}
-                          className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25"
+                          className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#FFFFFF] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#686D76]/15 placeholder:text-[#FFFFFF]/25"
                         />
                       </Field>
                       <p className="mt-3 rounded-xl bg-[#242424] px-3 py-2.5 text-[10px] leading-4 text-[#FFFFFF]/45">
@@ -985,7 +1057,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                           value={program.stampRewardName}
                           onChange={e => setProgram(current => ({ ...current, stampRewardName: e.target.value }))}
                           placeholder="Ex. Café offert, dessert offert..."
-                          className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25"
+                          className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#FFFFFF] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#686D76]/15 placeholder:text-[#FFFFFF]/25"
                         />
                       </Field>
                       <Field label="Description de la récompense">
@@ -993,12 +1065,12 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                           value={program.stampRewardDescription}
                           onChange={e => setProgram(current => ({ ...current, stampRewardDescription: e.target.value }))}
                           placeholder="Ex. Un café ou un dessert au choix"
-                          className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25"
+                          className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#FFFFFF] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#686D76]/15 placeholder:text-[#FFFFFF]/25"
                         />
                       </Field>
                     </div>
-                    <div className="mt-4 rounded-xl border border-[#C9A45C]/20 bg-[#C9A45C]/5 px-4 py-3">
-                      <p className="text-[10px] font-semibold text-[#E1C27A]">Récompense dédiée aux tampons</p>
+                    <div className="mt-4 rounded-xl border border-[#686D76]/20 bg-[#686D76]/5 px-4 py-3">
+                      <p className="text-[10px] font-semibold text-[#FFFFFF]">Récompense dédiée aux tampons</p>
                       <p className="mt-1 text-[10px] leading-4 text-[#FFFFFF]/40">
                         Cette récompense est indépendante du catalogue des récompenses en points.
                       </p>
@@ -1019,7 +1091,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                           ...current,
                           discountPointsThreshold: Math.max(1, Number(e.target.value) || 1),
                         }))}
-                        className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25"
+                        className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#FFFFFF] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#686D76]/15 placeholder:text-[#FFFFFF]/25"
                       />
                     </Field>
                     <Field label="Réduction">
@@ -1033,7 +1105,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                             ...current,
                             discountPercent: Math.min(100, Math.max(1, Number(e.target.value) || 1)),
                           }))}
-                          className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25 pr-10"
+                          className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#FFFFFF] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#686D76]/15 placeholder:text-[#FFFFFF]/25 pr-10"
                         />
                         <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-[#FFFFFF]/35">%</span>
                       </div>
@@ -1045,7 +1117,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                           ...current,
                           discountValidDays: Number(e.target.value),
                         }))}
-                        className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15"
+                        className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#FFFFFF] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#686D76]/15"
                       >
                         <option value={1}>24 heures</option>
                         <option value={7}>7 jours</option>
@@ -1080,20 +1152,20 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   {rewards.length === 0 && (
                     <div className="rounded-2xl border border-dashed border-[#242424]/10 px-5 py-10 text-center">
                       <Gift className="mx-auto text-[#FFFFFF]/20" size={22} />
-                      <p className="mt-3 text-sm font-semibold text-[#E1C27A]">Votre catalogue est vide</p>
+                      <p className="mt-3 text-sm font-semibold text-[#FFFFFF]">Votre catalogue est vide</p>
                       <p className="mt-1 text-[10px] text-[#FFFFFF]/40">Ajoutez votre première récompense ci-dessous.</p>
                     </div>
                   )}
 
                   {rewards.map(reward => (
                     <div key={reward.id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-[#242424]/8 bg-[#111111] p-3">
-                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#111111] text-[#C9A45C] shadow-sm">
+                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#111111] text-[#686D76] shadow-sm">
                         {reward.reward_type === 'DISCOUNT' ? <Percent size={16} /> : <Gift size={16} />}
                       </span>
                       <div className="min-w-[150px] flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-xs font-semibold text-[#E1C27A]">{reward.name}</p>
-                          <span className={`rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-[.12em] ${reward.active ? 'bg-[#111111] text-[#E1C27A]' : 'bg-[#111111]/5 text-[#FFFFFF]/35'}`}>
+                          <p className="text-xs font-semibold text-[#FFFFFF]">{reward.name}</p>
+                          <span className={`rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-[.12em] ${reward.active ? 'bg-[#111111] text-[#FFFFFF]' : 'bg-[#111111]/5 text-[#FFFFFF]/35'}`}>
                             {reward.active ? 'Active' : 'Inactive'}
                           </span>
                         </div>
@@ -1103,13 +1175,13 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                         {reward.description && <p className="mt-1 truncate text-[10px] text-[#FFFFFF]/30">{reward.description}</p>}
                       </div>
                       <div className="flex items-center gap-1">
-                        <button type="button" onClick={() => void toggleReward(reward)} className="rounded-lg px-2.5 py-2 text-[10px] font-semibold text-[#FFFFFF]/45 hover:bg-[#111111] hover:text-[#E1C27A]">
+                        <button type="button" onClick={() => void toggleReward(reward)} className="rounded-lg px-2.5 py-2 text-[10px] font-semibold text-[#FFFFFF]/45 hover:bg-[#111111] hover:text-[#FFFFFF]">
                           {reward.active ? 'Désactiver' : 'Activer'}
                         </button>
-                        <button type="button" onClick={() => editReward(reward)} className="rounded-lg px-2.5 py-2 text-[10px] font-semibold text-[#E1C27A] hover:bg-[#111111]">
+                        <button type="button" onClick={() => editReward(reward)} className="rounded-lg px-2.5 py-2 text-[10px] font-semibold text-[#FFFFFF] hover:bg-[#111111]">
                           Modifier
                         </button>
-                        <button type="button" onClick={() => void deleteReward(reward.id)} className="rounded-lg p-2 text-[#FFFFFF]/25 hover:bg-[#111111] hover:text-[#E1C27A]">
+                        <button type="button" onClick={() => void deleteReward(reward.id)} className="rounded-lg p-2 text-[#FFFFFF]/25 hover:bg-[#111111] hover:text-[#FFFFFF]">
                           <Trash2 size={14} />
                         </button>
                       </div>
@@ -1121,13 +1193,13 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
               <StudioCard eyebrow={rewardDraft.id ? 'Édition' : 'Nouveau'} title={rewardDraft.id ? 'Modifier la récompense' : 'Ajouter une récompense'}>
                 <div className="grid gap-4 md:grid-cols-2">
                   <Field label="Nom">
-                    <input value={rewardDraft.name} onChange={e => setRewardDraft(current => ({ ...current, name: e.target.value }))} placeholder="Ex. Dessert offert" className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25" />
+                    <input value={rewardDraft.name} onChange={e => setRewardDraft(current => ({ ...current, name: e.target.value }))} placeholder="Ex. Dessert offert" className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#FFFFFF] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#686D76]/15 placeholder:text-[#FFFFFF]/25" />
                   </Field>
                   <Field label="Points requis">
-                    <input type="number" min="1" value={rewardDraft.pointsRequired} onChange={e => setRewardDraft(current => ({ ...current, pointsRequired: Math.max(1, Number(e.target.value) || 1) }))} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25" />
+                    <input type="number" min="1" value={rewardDraft.pointsRequired} onChange={e => setRewardDraft(current => ({ ...current, pointsRequired: Math.max(1, Number(e.target.value) || 1) }))} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#FFFFFF] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#686D76]/15 placeholder:text-[#FFFFFF]/25" />
                   </Field>
                   <Field label="Type">
-                    <select value={rewardDraft.rewardType} onChange={e => setRewardDraft(current => ({ ...current, rewardType: e.target.value as RewardType }))} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25">
+                    <select value={rewardDraft.rewardType} onChange={e => setRewardDraft(current => ({ ...current, rewardType: e.target.value as RewardType }))} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#FFFFFF] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#686D76]/15 placeholder:text-[#FFFFFF]/25">
                       <option value="GIFT">Cadeau</option>
                       <option value="DISCOUNT">Réduction</option>
                     </select>
@@ -1135,16 +1207,16 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   {rewardDraft.rewardType === 'DISCOUNT' && (
                     <>
                       <Field label="Pourcentage de réduction">
-                        <input type="number" min="1" max="20" value={rewardDraft.discountPercent} onChange={e => setRewardDraft(current => ({ ...current, discountPercent: Math.min(20, Math.max(1, Number(e.target.value) || 1)) }))} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25" />
+                        <input type="number" min="1" max="20" value={rewardDraft.discountPercent} onChange={e => setRewardDraft(current => ({ ...current, discountPercent: Math.min(20, Math.max(1, Number(e.target.value) || 1)) }))} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#FFFFFF] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#686D76]/15 placeholder:text-[#FFFFFF]/25" />
                       </Field>
                       <Field label="Plafond de réduction (MAD)">
-                        <input type="number" min="0" value={rewardDraft.discountMaxAmount ?? ''} onChange={e => setRewardDraft(current => ({ ...current, discountMaxAmount: e.target.value === '' ? null : Math.max(0, Number(e.target.value)) }))} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25" placeholder="Optionnel" />
+                        <input type="number" min="0" value={rewardDraft.discountMaxAmount ?? ''} onChange={e => setRewardDraft(current => ({ ...current, discountMaxAmount: e.target.value === '' ? null : Math.max(0, Number(e.target.value)) }))} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#FFFFFF] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#686D76]/15 placeholder:text-[#FFFFFF]/25" placeholder="Optionnel" />
                       </Field>
                     </>
                   )}
                   <div className="md:col-span-2">
                     <Field label="Description">
-                      <textarea value={rewardDraft.description} onChange={e => setRewardDraft(current => ({ ...current, description: e.target.value }))} rows={3} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25 resize-none" placeholder="Ce que le client reçoit..." />
+                      <textarea value={rewardDraft.description} onChange={e => setRewardDraft(current => ({ ...current, description: e.target.value }))} rows={3} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#FFFFFF] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#686D76]/15 placeholder:text-[#FFFFFF]/25 resize-none" placeholder="Ce que le client reçoit..." />
                     </Field>
                   </div>
                 </div>
@@ -1154,7 +1226,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                       Annuler
                     </button>
                   )}
-                  <button type="button" onClick={() => void saveReward()} disabled={rewardSaving} className="inline-flex items-center gap-2 rounded-xl bg-[#C9A45C]-gradient px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50">
+                  <button type="button" onClick={() => void saveReward()} disabled={rewardSaving} className="inline-flex items-center gap-2 rounded-xl bg-[#686D76] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50">
                     <Gift size={14} />
                     {rewardSaving ? 'Enregistrement...' : rewardDraft.id ? 'Mettre à jour' : 'Ajouter'}
                   </button>
@@ -1168,11 +1240,11 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
               <StudioCard eyebrow="Acquisition" title="Transformer les clients en ambassadeurs">
                 <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
                   <div className="flex min-w-0 items-center gap-3 rounded-2xl bg-[#242424] p-4">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#111111] text-[#C9A45C] shadow-sm">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#111111] text-[#686D76] shadow-sm">
                       <UserPlus size={17} />
                     </span>
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-[#E1C27A]">Programme de parrainage</p>
+                      <p className="text-sm font-semibold text-[#FFFFFF]">Programme de parrainage</p>
                       <p className="mt-1 text-[10px] leading-4 text-[#FFFFFF]/50">
                         Récompensez le parrain et le nouveau client après leur mise en relation.
                       </p>
@@ -1185,11 +1257,11 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                     aria-checked={referral.enabled}
                     aria-label={referral.enabled ? 'Désactiver le programme de parrainage' : 'Activer le programme de parrainage'}
                     onClick={() => setReferral(current => ({ ...current, enabled: !current.enabled }))}
-                    className={`group flex w-full items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A45C] sm:min-w-[190px] sm:w-auto ${referral.enabled ? 'border-[#C9A45C]/40 bg-[#C9A45C]/10 hover:bg-[#C9A45C]/15' : 'border-[#FFFFFF]/15 bg-[#111111] hover:border-[#C9A45C]/40 hover:bg-[#181818]'}`}
+                    className={`group flex w-full items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#686D76] sm:min-w-[190px] sm:w-auto ${referral.enabled ? 'border-[#686D76]/40 bg-[#686D76]/10 hover:bg-[#686D76]/15' : 'border-[#FFFFFF]/15 bg-[#111111] hover:border-[#686D76]/40 hover:bg-[#181818]'}`}
                     title="Cliquer pour activer ou désactiver le parrainage"
                   >
                     <div>
-                      <p className="text-xs font-semibold text-[#E1C27A]">
+                      <p className="text-xs font-semibold text-[#FFFFFF]">
                         {referral.enabled ? 'Parrainage activé' : 'Parrainage désactivé'}
                       </p>
                       <p className="mt-1 text-[10px] text-[#FFFFFF]/55">
@@ -1198,7 +1270,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                     </div>
                     <span
                       aria-hidden="true"
-                      className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${referral.enabled ? 'bg-[#C9A45C]' : 'bg-[#444444]'}`}
+                      className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${referral.enabled ? 'bg-[#686D76]' : 'bg-[#444444]'}`}
                     >
                       <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${referral.enabled ? 'translate-x-6' : 'translate-x-1'}`} />
                     </span>
@@ -1232,7 +1304,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                           max_referrals: e.target.value === '' ? null : Math.max(0, Math.floor(Number(e.target.value) || 0)),
                         }))}
                         placeholder="Illimité"
-                        className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25 pr-20"
+                        className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#FFFFFF] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#686D76]/15 placeholder:text-[#FFFFFF]/25 pr-20"
                       />
                       <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[#FFFFFF]/30">par client</span>
                     </div>
@@ -1247,7 +1319,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
               </StudioCard>
 
               <div className="rounded-2xl border border-[#242424]/8 bg-[#242424] p-4 text-[10px] leading-5 text-[#FFFFFF]/45">
-                Les changements sont conservés avec le bouton <strong className="text-[#E1C27A]">Enregistrer</strong>. Le miroir de droite reflète immédiatement les paramètres qui modifient la carte.
+                Les changements sont conservés avec le bouton <strong className="text-[#FFFFFF]">Enregistrer</strong>. Le miroir de droite reflète immédiatement les paramètres qui modifient la carte.
               </div>
             </div>
           )}
@@ -1271,13 +1343,13 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                         key={item.id}
                         type="button"
                         onClick={() => selectTemplate(item.id)}
-                        className={`overflow-hidden rounded-2xl border text-left transition ${active ? 'border-[#242424] ring-2 ring-[#C9A45C]/15' : 'border-[#242424]/10 hover:border-[#C9A45C]/30'}`}
+                        className={`overflow-hidden rounded-2xl border text-left transition ${active ? 'border-[#242424] ring-2 ring-[#686D76]/15' : 'border-[#242424]/10 hover:border-[#686D76]/30'}`}
                       >
                         <div className="relative h-20 overflow-hidden" style={{ background: item.background }}>
                           <div className="absolute inset-x-3 bottom-3 h-1 rounded-full" style={{ background: item.accent }} />
                         </div>
                         <div className="bg-[#111111] px-3 py-2.5">
-                          <p className="text-[10px] font-semibold text-[#E1C27A]">{item.name}</p>
+                          <p className="text-[10px] font-semibold text-[#FFFFFF]">{item.name}</p>
                         </div>
                       </button>
                     );
@@ -1285,7 +1357,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                 </div>
                 {selectedTemplate && (
                   <p className="mt-3 text-[10px] text-[#FFFFFF]/35">
-                    Template actif : <span className="font-semibold text-[#E1C27A]">{selectedTemplate.name}</span>
+                    Template actif : <span className="font-semibold text-[#FFFFFF]">{selectedTemplate.name}</span>
                   </p>
                 )}
               </StudioCard>
@@ -1293,12 +1365,12 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
               <StudioCard eyebrow="Wallpaper" title="Arrière-plan de la carte">
                 <div className="grid gap-4 md:grid-cols-[1fr_220px] md:items-center">
                   <div>
-                    <p className="text-sm font-semibold text-[#E1C27A]">Image immersive</p>
+                    <p className="text-sm font-semibold text-[#FFFFFF]">Image immersive</p>
                     <p className="mt-1 text-[10px] leading-4 text-[#FFFFFF]/40">
                       Ajoutez plusieurs wallpapers et choisissez celui qui sera actif sur la carte.
                     </p>
                     <div className="mt-4 flex flex-wrap gap-2">
-                      <button type="button" onClick={() => wallpaperInput.current?.click()} className="inline-flex items-center gap-2 rounded-xl border border-[#C9A45C]/20 bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#E1C27A]">
+                      <button type="button" onClick={() => wallpaperInput.current?.click()} className="inline-flex items-center gap-2 rounded-xl border border-[#686D76]/20 bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#FFFFFF]">
                         <ImagePlus size={14} />
                         Ajouter un wallpaper
                       </button>
@@ -1306,7 +1378,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                         <button type="button" onClick={() => setDesign(current => {
                           const wallpaperUrls = current.wallpaperUrls.filter(url => url !== current.wallpaperUrl);
                           return { ...current, wallpaperUrl: wallpaperUrls[0] ?? null, wallpaperUrls, published: false };
-                        })} className="rounded-xl border border-[#242424] px-4 py-2.5 text-xs font-semibold text-[#E1C27A]">
+                        })} className="rounded-xl border border-[#242424] px-4 py-2.5 text-xs font-semibold text-[#FFFFFF]">
                           Retirer l'actif
                         </button>
                       )}
@@ -1324,7 +1396,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                         <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#FFFFFF]/45">Bibliothèque de wallpapers</p>
                         <p className="mt-1 text-[10px] text-[#FFFFFF]/30">Cliquez sur une image pour la rendre active.</p>
                       </div>
-                      <span className="rounded-full bg-[#C9A45C]/10 px-2.5 py-1 text-[9px] font-semibold text-[#E1C27A]">
+                      <span className="rounded-full bg-[#686D76]/10 px-2.5 py-1 text-[9px] font-semibold text-[#FFFFFF]">
                         {design.wallpaperUrls.length}
                       </span>
                     </div>
@@ -1332,9 +1404,9 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                       {design.wallpaperUrls.map(url => {
                         const active = url === design.wallpaperUrl;
                         return (
-                          <button key={url} type="button" onClick={() => setDesign(current => ({ ...current, wallpaperUrl: url, published: false }))} className={`relative aspect-[3/4] overflow-hidden rounded-xl border ${active ? 'border-[#E1C27A] ring-2 ring-[#E1C27A]/20' : 'border-[#242424]'}`}>
+                          <button key={url} type="button" onClick={() => setDesign(current => ({ ...current, wallpaperUrl: url, published: false }))} className={`relative aspect-[3/4] overflow-hidden rounded-xl border ${active ? 'border-[#FFFFFF] ring-2 ring-[#FFFFFF]/20' : 'border-[#242424]'}`}>
                             <img src={url} alt="" className="h-full w-full object-cover transition group-hover:scale-105" />
-                            {active && <span className="absolute bottom-1.5 left-1.5 rounded-full bg-[#E1C27A] px-2 py-0.5 text-[8px] font-bold text-[#111111]">ACTIF</span>}
+                            {active && <span className="absolute bottom-1.5 left-1.5 rounded-full bg-[#FFFFFF] px-2 py-0.5 text-[8px] font-bold text-[#111111]">ACTIF</span>}
                           </button>
                         );
                       })}
@@ -1353,14 +1425,14 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                 </div>
                 <div className="mt-5">
                   <Field label={`Rayon des angles · ${design.borderRadius}px`}>
-                    <input type="range" min="8" max="40" value={design.borderRadius} onChange={e => setDesign(current => ({ ...current, templateId: 'custom', borderRadius: Number(e.target.value) }))} className="w-full accent-[#C9A45C]" />
+                    <input type="range" min="8" max="40" value={design.borderRadius} onChange={e => setDesign(current => ({ ...current, templateId: 'custom', borderRadius: Number(e.target.value) }))} className="w-full accent-[#686D76]" />
                   </Field>
                 </div>
                 <div className="mt-5">
                   <Field label="Style des tampons">
                     <div className="grid grid-cols-4 gap-2">
                       {(['circles', 'squares', 'stars', 'hearts'] as const).map(style => (
-                        <button key={style} type="button" onClick={() => setDesign(current => ({ ...current, stampStyle: style }))} className={`rounded-xl border px-2 py-2.5 text-[10px] font-semibold capitalize ${design.stampStyle === style ? 'border-[#242424] bg-[#C9A45C]-gradient text-[#050505]' : 'border-[#242424]/10 text-[#FFFFFF]/45'}`}>
+                        <button key={style} type="button" onClick={() => setDesign(current => ({ ...current, stampStyle: style }))} className={`rounded-xl border px-2 py-2.5 text-[10px] font-semibold capitalize ${design.stampStyle === style ? 'border-[#242424] bg-[#686D76] text-[#050505]' : 'border-[#242424]/10 text-[#FFFFFF]/45'}`}>
                           {style === 'circles' ? 'Ronds' : style === 'squares' ? 'Carrés' : style === 'stars' ? 'Étoiles' : 'Cœurs'}
                         </button>
                       ))}
@@ -1372,6 +1444,27 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
           )}
           {tab === 'wallet' && canManageWallet && (
             <div className="space-y-5">
+              <StudioCard eyebrow="Programme Wallet indépendant" title="Type de carte Wallet">
+                <p className="mb-4 text-xs leading-5 text-white/50">Ce réglage concerne uniquement Google Wallet et Apple Wallet. Il ne modifie jamais le programme ni la carte KELYANI classique.</p>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  {([
+                    { id: 'STAMP', title: 'Tampons', detail: 'Visites et objectif de tampons', icon: Stamp },
+                    { id: 'DISCOUNT', title: 'Réduction', detail: 'Avantage directement visible', icon: Percent },
+                    { id: 'POINTS', title: 'Points', detail: 'Solde et progression', icon: Star },
+                  ] as const).map(option => {
+                    const Icon = option.icon;
+                    const active = walletDesign.walletProgramType === option.id;
+                    return <button key={option.id} type="button" onClick={() => setWalletDesign(current => ({ ...current, walletProgramType: option.id }))} className={`rounded-2xl border p-4 text-left transition ${active ? 'border-[#3B82F6] bg-[#686D76]' : 'border-white/10 bg-[#0B0B0B] hover:border-white/25'}`}>
+                      <Icon size={18} className="mb-3 text-white" />
+                      <p className="text-sm font-semibold text-white">{option.title}</p>
+                      <p className="mt-1 text-[10px] text-white/55">{option.detail}</p>
+                    </button>;
+                  })}
+                </div>
+                {walletDesign.walletProgramType === 'STAMP' && <div className="mt-4 grid gap-4 sm:grid-cols-2"><Field label="Objectif de tampons"><input type="number" min="1" max="100" value={walletDesign.walletStampGoal} onChange={e => setWalletDesign(current => ({...current,walletStampGoal:Math.max(1,Math.min(100,Number(e.target.value)||1))}))} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white" /></Field><Field label="Récompense"><input value={walletDesign.walletRewardLabel} onChange={e => setWalletDesign(current => ({...current,walletRewardLabel:e.target.value}))} maxLength={40} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white" /></Field></div>}
+                {walletDesign.walletProgramType === 'DISCOUNT' && <div className="mt-4 max-w-xs"><Field label="Réduction (%)"><input type="number" min="1" max="100" value={walletDesign.walletDiscountPercent} onChange={e => setWalletDesign(current => ({...current,walletDiscountPercent:Math.max(1,Math.min(100,Number(e.target.value)||1))}))} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white" /></Field></div>}
+              </StudioCard>
+
               <StudioCard eyebrow="Catalogue Wallet" title="Bibliothèque de modèles">
                 <p className="text-xs leading-5 text-white/55">
                   Choisissez un modèle, prévisualisez-le puis publiez-le. Une classe Google indépendante est créée pour chaque modèle et établissement. Les modèles en attente de validation ne sont pas visibles par les clients.
@@ -1422,9 +1515,47 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   <Field label="Texte complémentaire">
                     <input value={walletDesign.footerText} onChange={e => setWalletDesign(current => ({...current,footerText:e.target.value}))} maxLength={80} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
                   </Field>
-                  <Field label="Logo HTTPS">
-                    <input value={walletDesign.logoUrl} onChange={e => setWalletDesign(current => ({...current,logoUrl:e.target.value}))} placeholder="https://..." className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
+                  <div>
+                    <Field label="Logo HTTPS">
+                      <input value={walletDesign.logoUrl} onChange={e => setWalletDesign(current => ({...current,logoUrl:e.target.value}))} placeholder="https://..." className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
+                    </Field>
+                    <div className="mt-2 flex items-center gap-2">
+                      <button type="button" onClick={() => walletLogoInput.current?.click()} disabled={saving} className="rounded-lg border border-white/15 px-3 py-2 text-[10px] font-semibold text-white disabled:opacity-40">Importer le logo</button>
+                      <input ref={walletLogoInput} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={e => { const file=e.target.files?.[0]; if(file) void uploadWalletLogo(file); e.currentTarget.value=''; }} />
+                      {walletDesign.logoUrl && <img src={walletDesign.logoUrl} alt="Logo Wallet" className="h-9 w-9 rounded-lg bg-white object-contain p-1" />}
+                    </div>
+                  </div>
+                  <Field label="Site web">
+                    <input value={walletDesign.websiteUrl} onChange={e => setWalletDesign(current => ({...current,websiteUrl:e.target.value}))} placeholder="https://..." className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
                   </Field>
+                  <Field label="Téléphone">
+                    <input value={walletDesign.phoneNumber} onChange={e => setWalletDesign(current => ({...current,phoneNumber:e.target.value}))} placeholder="+212..." className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
+                  </Field>
+                  <Field label="Adresse">
+                    <input value={walletDesign.address} onChange={e => setWalletDesign(current => ({...current,address:e.target.value}))} maxLength={100} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
+                  </Field>
+                  <Field label="Message personnalisé">
+                    <input value={walletDesign.customMessage} onChange={e => setWalletDesign(current => ({...current,customMessage:e.target.value}))} maxLength={80} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
+                  </Field>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <ColorField label="Fond Wallet" value={walletDesign.backgroundColor} onChange={value => setWalletDesign(current => ({...current,backgroundColor:value}))} />
+                  <ColorField label="Couleur principale" value={walletDesign.primaryColor} onChange={value => setWalletDesign(current => ({...current,primaryColor:value}))} />
+                  <ColorField label="Accent" value={walletDesign.accentColor} onChange={value => setWalletDesign(current => ({...current,accentColor:value}))} />
+                  <ColorField label="Texte" value={walletDesign.textColor} onChange={value => setWalletDesign(current => ({...current,textColor:value}))} />
+                </div>
+                <div className="mt-4 rounded-2xl border border-white/10 bg-[#0B0B0B] p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-semibold text-white">Visuel principal Google Wallet</p>
+                      <p className="mt-1 text-[10px] text-white/45">Image HTTPS accessible par Google · PNG, JPG ou WebP · 8 Mo max.</p>
+                    </div>
+                    <button type="button" onClick={() => walletHeroInput.current?.click()} disabled={saving} className="rounded-xl border border-white/15 px-3 py-2 text-xs font-semibold text-white disabled:opacity-40">Importer une image</button>
+                    <input ref={walletHeroInput} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={e => { const file=e.target.files?.[0]; if(file) void uploadWalletHero(file); e.currentTarget.value=''; }} />
+                  </div>
+                  {walletDesign.heroImageUrl && <div className="mt-3 overflow-hidden rounded-xl"><img src={walletDesign.heroImageUrl} alt="Aperçu du visuel principal Wallet" className="max-h-40 w-full object-cover" /></div>}
+                  {walletDesign.heroImageUrl && <WalletImageCropEditor imageUrl={walletDesign.heroImageSourceUrl || walletDesign.heroImageUrl} platform="google" establishmentId={establishmentId} onSaved={url => { setWalletDesign(current => ({...current,heroImageUrl:url})); setMessage('Cadrage Google Wallet enregistré.'); }} />}
+                  {walletDesign.heroImageUrl && <WalletImageCropEditor imageUrl={walletDesign.heroImageSourceUrl || walletDesign.heroImageUrl} platform="apple" establishmentId={establishmentId} onSaved={url => { setWalletDesign(current => ({...current,appleStripImageUrl:url})); setMessage('Cadrage Apple Wallet enregistré.'); }} />}
                 </div>
                 <div className="mt-4 flex flex-wrap gap-5 text-xs text-white/65">
                   <label className="flex items-center gap-2"><input type="checkbox" checked={walletDesign.showPoints} onChange={e => setWalletDesign(current => ({...current,showPoints:e.target.checked}))}/> Afficher les points</label>
@@ -1432,8 +1563,9 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                 </div>
               </StudioCard>
 
-              <StudioCard eyebrow="Apple Wallet" title="Apple Wallet">
-                <p className="text-xs leading-5 text-white/55">Le catalogue est préparé, mais la publication Apple reste désactivée jusqu’à la configuration du compte Apple Developer Organisation et du certificat Pass Type ID.</p>
+              <StudioCard eyebrow="Apple Wallet" title="Aperçu Apple Wallet">
+                <p className="text-xs leading-5 text-white/55">Le visuel Apple est préparé séparément. La publication reste désactivée jusqu’à la configuration du compte Apple Developer Organisation et du certificat Pass Type ID.</p>
+                {walletDesign.appleStripImageUrl && <div className="mt-3 overflow-hidden rounded-xl"><img src={walletDesign.appleStripImageUrl} alt="Visuel cadré pour Apple Wallet" className="w-full" /></div>}
                 <span className="mt-3 inline-flex rounded-full border border-white/15 px-3 py-1.5 text-[10px] text-white/60">Certificats requis</span>
               </StudioCard>
             </div>
@@ -1448,10 +1580,10 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
         <aside className="sticky top-6 h-fit overflow-hidden rounded-3xl bg-[#050505] p-4 sm:p-5">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[.24em] text-[#C9A45C]">Le Miroir</p>
+              <p className="text-[10px] font-bold uppercase tracking-[.24em] text-[#686D76]">Le Miroir</p>
               <p className="mt-1 text-xs text-[#FFFFFF]/40">Aperçu permanent et synchronisé</p>
             </div>
-            <span className="rounded-full bg-[#111111] px-3 py-1.5 text-[9px] font-bold uppercase tracking-[.12em] text-[#E1C27A]">
+            <span className="rounded-full bg-[#111111] px-3 py-1.5 text-[9px] font-bold uppercase tracking-[.12em] text-[#FFFFFF]">
               {visibleTabs.find(item => item.id === tab)?.label}
             </span>
           </div>
@@ -1460,12 +1592,14 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
             {tab === 'wallet' ? (
               <div className="w-full max-w-[300px] overflow-hidden rounded-[28px] border-[7px] border-[#E5E5E5] shadow-2xl" style={{ background: walletDesign.backgroundColor, color: walletDesign.textColor }}>
                 <div className="min-h-[430px] p-4" style={{ background: `linear-gradient(155deg, ${walletDesign.primaryColor}, ${walletDesign.backgroundColor} 76%)` }}>
+                  {walletDesign.heroImageUrl && <img src={walletDesign.heroImageUrl} alt="" className="mb-4 h-24 w-full rounded-xl object-cover" />}
                   <div className="flex items-center gap-3">
                     {walletDesign.logoUrl || design.logoUrl || establishment.logoUrl ? <img src={walletDesign.logoUrl || design.logoUrl || establishment.logoUrl || ''} alt="" className="h-10 w-10 rounded-xl bg-white object-contain p-1" /> : <div className="grid h-10 w-10 place-items-center rounded-xl text-xs font-bold" style={{ background: walletDesign.accentColor, color: walletDesign.backgroundColor }}>{establishment.name.slice(0,2).toUpperCase()}</div>}
                     <div className="min-w-0"><p className="truncate text-xs font-bold">{walletDesign.cardTitle || 'KELYANI'}</p><p className="text-[9px] uppercase tracking-wider opacity-60">{establishment.name} · {walletDesign.headerText}</p></div>
                   </div>
-                  {walletDesign.showPoints && <div className="mt-10 text-center"><p className="text-[9px] uppercase tracking-[.2em]" style={{ color: walletDesign.accentColor }}>Votre solde</p><p className="mt-1 text-4xl font-black">720</p><p className="text-[10px]" style={{ color: walletDesign.accentColor }}>POINTS</p></div>}
-                  <div className="mt-8 rounded-xl border p-3" style={{ borderColor: walletDesign.accentColor + '88', background: '#00000022' }}><p className="text-[10px] font-semibold">Prochaine récompense</p><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/20"><div className="h-full w-[72%]" style={{ background: walletDesign.accentColor }} /></div></div>
+                  {walletDesign.walletProgramType === 'POINTS' && walletDesign.showPoints && <div className="mt-10 text-center"><p className="text-[9px] uppercase tracking-[.2em]" style={{ color: walletDesign.accentColor }}>Votre solde</p><p className="mt-1 text-4xl font-black">720</p><p className="text-[10px]" style={{ color: walletDesign.accentColor }}>POINTS</p></div>}
+                  {walletDesign.walletProgramType === 'STAMP' && <div className="mt-10 rounded-xl border p-3" style={{ borderColor: walletDesign.accentColor + '88', background: '#00000022' }}><p className="text-[10px] font-semibold">Vos tampons · 4/{walletDesign.walletStampGoal}</p><div className="mt-3 flex flex-wrap gap-2">{Array.from({length:Math.min(walletDesign.walletStampGoal,10)},(_,i)=><span key={i} className={`h-5 w-5 rounded-full border ${i<4?'border-transparent':'border-white/40'}`} style={i<4?{background:walletDesign.accentColor}:{}} />)}</div><p className="mt-3 text-[10px] opacity-70">{walletDesign.walletRewardLabel}</p></div>}
+                  {walletDesign.walletProgramType === 'DISCOUNT' && <div className="mt-10 rounded-xl border p-4 text-center" style={{ borderColor: walletDesign.accentColor + '88', background: '#00000022' }}><p className="text-[9px] uppercase tracking-[.2em]" style={{ color: walletDesign.accentColor }}>Votre avantage</p><p className="mt-1 text-4xl font-black">-{walletDesign.walletDiscountPercent}%</p><p className="mt-1 text-[10px] opacity-70">Réduction fidélité</p></div>}
                   {walletDesign.showQr && <div className="mt-7 flex justify-center"><div className="grid h-16 w-16 grid-cols-5 gap-[2px] rounded-lg bg-white p-2">{Array.from({length:25},(_,i)=><span key={i} className="rounded-[1px]" style={{background:(i*7)%3===0?'#111111':'#FFFFFF'}} />)}</div></div>}
                   <p className="mt-5 text-center text-[9px] opacity-55">{walletDesign.footerText}</p>
                 </div>
@@ -1491,10 +1625,10 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
           <div className="mt-4 rounded-2xl bg-[#111111] p-4">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-[9px] uppercase tracking-[.16em] text-[#C9A45C]">Carte actuelle</p>
-                <p className="mt-1 text-sm font-semibold text-[#E1C27A]">{establishment.name}</p>
+                <p className="text-[9px] uppercase tracking-[.16em] text-[#686D76]">Carte actuelle</p>
+                <p className="mt-1 text-sm font-semibold text-[#FFFFFF]">{establishment.name}</p>
               </div>
-              <span className={`h-2.5 w-2.5 rounded-full ${previewChannelReady ? 'bg-[#111111]0' : 'bg-[#C9A45C]'}`} title={previewChannelReady ? 'Synchronisation active' : 'Connexion en cours'} />
+              <span className={`h-2.5 w-2.5 rounded-full ${previewChannelReady ? 'bg-[#686D76]' : 'bg-[#686D76]'}`} title={previewChannelReady ? 'Synchronisation active' : 'Connexion en cours'} />
             </div>
             <p className="mt-2 text-[10px] leading-4 text-[#FFFFFF]/35">
               {program.programType === 'STAMP'
@@ -1514,8 +1648,8 @@ function StudioCard({ eyebrow, title, children }: { eyebrow: string; title: stri
   return (
     <section className="rounded-[24px] border border-[#242424]/8 bg-[#111111] p-5 shadow-[0_10px_35px_rgba(20,30,24,0.035)]">
       <div className="mb-5">
-        <p className="text-[9px] font-bold uppercase tracking-[.2em] text-[#C9A45C]">{eyebrow}</p>
-        <h3 className="mt-1 text-lg font-semibold text-[#E1C27A]">{title}</h3>
+        <p className="text-[9px] font-bold uppercase tracking-[.2em] text-[#686D76]">{eyebrow}</p>
+        <h3 className="mt-1 text-lg font-semibold text-[#FFFFFF]">{title}</h3>
       </div>
       {children}
     </section>
@@ -1538,7 +1672,7 @@ function Metric({ label, value, icon }: { label: string; value: string | number;
         {icon}
         {label}
       </div>
-      <p className="mt-2 text-lg font-semibold text-[#E1C27A]">{value}</p>
+      <p className="mt-2 text-lg font-semibold text-[#FFFFFF]">{value}</p>
     </div>
   );
 }
@@ -1550,7 +1684,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (checked: b
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className={`relative h-7 w-12 shrink-0 rounded-full p-1 transition ${checked ? 'bg-[#C9A45C]-gradient' : 'bg-[#111111]/15'}`}
+      className={`relative h-7 w-12 shrink-0 rounded-full p-1 transition ${checked ? 'bg-[#686D76]' : 'bg-[#111111]/15'}`}
     >
       <span className={`block h-5 w-5 rounded-full bg-[#111111] shadow-sm transition ${checked ? 'translate-x-5' : 'translate-x-0'}`} />
     </button>
@@ -1563,7 +1697,7 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
       {label}
       <div className="mt-2 flex items-center gap-2 rounded-xl border border-[#242424]/10 bg-[#111111] p-2">
         <input type="color" value={value} onChange={e => onChange(e.target.value)} className="h-9 w-10 cursor-pointer rounded-lg border-0 bg-transparent p-0" />
-        <input value={value} onChange={e => onChange(e.target.value)} className="min-w-0 flex-1 bg-transparent px-1 text-xs font-semibold uppercase text-[#E1C27A] outline-none" />
+        <input value={value} onChange={e => onChange(e.target.value)} className="min-w-0 flex-1 bg-transparent px-1 text-xs font-semibold uppercase text-[#FFFFFF] outline-none" />
       </div>
     </label>
   );
@@ -1584,7 +1718,7 @@ function ReferralField({
     <div>
       <p className="text-xs font-semibold text-[#FFFFFF]/55">{label}</p>
       <div className="mt-2 grid grid-cols-[1fr_110px] gap-2">
-        <select value={type} onChange={e => onChange(e.target.value as LoyaltyReferralBonusType, value)} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25">
+        <select value={type} onChange={e => onChange(e.target.value as LoyaltyReferralBonusType, value)} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#FFFFFF] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#686D76]/15 placeholder:text-[#FFFFFF]/25">
           <option value="POINTS">Points</option>
           <option value="STAMP">Tampons</option>
           <option value="REDUCTION">Réduction</option>
@@ -1594,7 +1728,7 @@ function ReferralField({
           min="0"
           value={value}
           onChange={e => onChange(type, Math.max(0, Number(e.target.value) || 0))}
-          className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#C9A45C]/15 placeholder:text-[#FFFFFF]/25"
+          className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#FFFFFF] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#686D76]/15 placeholder:text-[#FFFFFF]/25"
         />
       </div>
     </div>

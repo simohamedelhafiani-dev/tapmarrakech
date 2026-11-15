@@ -158,9 +158,12 @@ Deno.serve(async (request) => {
     const loyaltyNumber = String(card.loyalty_number || card.customer_id).slice(0, 20);
     const balance = Math.max(0, Math.floor(Number(card.points_balance || 0)));
     const stamps = Math.max(0, Math.floor(Number(program.stamps_balance ?? card.stamps_balance ?? 0)));
-    const mode = String(program.program_type || "POINTS_REWARD");
-    const progress = mode === "STAMP"
-      ? `${stamps}/${Number(program.stamp_goal || 10)}`
+    // Wallet program type is deliberately independent from the KELYANI in-app loyalty program.
+    const walletMode = String(walletDesign.walletProgramType || "POINTS").toUpperCase();
+    const walletStampGoal = Math.max(1, Math.min(100, Number(walletDesign.walletStampGoal || 10)));
+    const walletDiscountPercent = Math.max(1, Math.min(100, Number(walletDesign.walletDiscountPercent || 10)));
+    const progress = walletMode === "STAMP"
+      ? `${stamps}/${walletStampGoal}`
       : String(balance);
     const appBaseUrl = (Deno.env.get("APP_BASE_URL") || "https://www.kelyani.com").replace(/\/+$/, "");
     const qrValue = `${appBaseUrl}/loyalty/${encodeURIComponent(accessToken)}`;
@@ -198,9 +201,9 @@ Deno.serve(async (request) => {
       state: "ACTIVE",
       accountName: clientName,
       accountId: loyaltyNumber,
-      ...(walletDesign.showPoints !== false ? {
+      ...(walletMode !== "DISCOUNT" && walletDesign.showPoints !== false ? {
         loyaltyPoints: {
-          label: mode === "STAMP" ? "Tampons" : "Points",
+          label: walletMode === "STAMP" ? "Tampons" : "Points",
           balance: { string: progress },
         },
       } : {}),
@@ -217,8 +220,24 @@ Deno.serve(async (request) => {
           header: String(walletDesign.cardTitle || "KELYANI").slice(0, 25),
           body: String(walletDesign.headerText || "Carte de fidélité").slice(0, 40),
         },
+        ...(walletMode === "DISCOUNT" ? [{
+          id: "wallet-discount",
+          header: "Votre avantage",
+          body: `${walletDiscountPercent}% de réduction`,
+        }] : []),
+        ...(walletMode === "STAMP" ? [{
+          id: "wallet-stamp-reward",
+          header: "Récompense",
+          body: String(walletDesign.walletRewardLabel || "Récompense fidélité").slice(0, 40),
+        }] : []),
         ...(walletDesign.footerText
           ? [{ id: "wallet-footer", header: "Information", body: String(walletDesign.footerText).slice(0, 80) }]
+          : []),
+        ...(walletDesign.customMessage
+          ? [{ id: "wallet-custom-message", header: "Message", body: String(walletDesign.customMessage).slice(0, 80) }]
+          : []),
+        ...(walletDesign.address
+          ? [{ id: "wallet-address", header: "Adresse", body: String(walletDesign.address).slice(0, 100) }]
           : []),
       ],
       ...(typeof walletDesign.logoUrl === "string" && walletDesign.logoUrl.startsWith("https://")
@@ -230,8 +249,19 @@ Deno.serve(async (request) => {
             },
           }] }
         : {}),
+      ...(typeof walletDesign.heroImageUrl === "string" && walletDesign.heroImageUrl.startsWith("https://")
+        ? { heroImage: {
+            sourceUri: { uri: String(walletDesign.heroImageUrl) },
+            contentDescription: localized("Visuel de la carte de fidélité"),
+          } }
+        : {}),
       linksModuleData: {
-        uris: [{ uri: "https://www.kelyani.com", description: "Découvrir KELYANI" }],
+        uris: [
+          { uri: typeof walletDesign.websiteUrl === "string" && walletDesign.websiteUrl.startsWith("https://") ? walletDesign.websiteUrl : "https://www.kelyani.com", description: "Site web" },
+          ...(typeof walletDesign.phoneNumber === "string" && walletDesign.phoneNumber.trim()
+            ? [{ uri: "tel:" + walletDesign.phoneNumber.trim().replace(/[^+0-9]/g, ""), description: "Appeler l'établissement" }]
+            : []),
+        ],
       },
     };
 
