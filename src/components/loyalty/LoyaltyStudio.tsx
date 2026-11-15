@@ -236,6 +236,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   });
   const wallpaperInput = useRef<HTMLInputElement>(null);
   const walletHeroInput = useRef<HTMLInputElement>(null);
+  const walletLogoInput = useRef<HTMLInputElement>(null);
   const designHydratedRef = useRef(false);
   const previewChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const [previewChannelReady, setPreviewChannelReady] = useState(false);
@@ -547,6 +548,28 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       setMessage('Wallpaper ajouté à la bibliothèque.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Upload impossible.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const uploadWalletLogo = async (file: File) => {
+    if (!file.type.startsWith('image/')) return;
+    if (file.size > 8 * 1024 * 1024) {
+      setMessage('Image trop lourde (8 Mo maximum).');
+      return;
+    }
+    setSaving(true);
+    try {
+      const ext = file.name.split('.').pop()?.toLowerCase() || 'png';
+      const path = `loyalty-cards/${establishmentId}/wallet-logo-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('loyalty-assets').upload(path, file, { upsert: true, contentType: file.type });
+      if (error) throw error;
+      const { data } = supabase.storage.from('loyalty-assets').getPublicUrl(path);
+      setWalletDesign(current => ({ ...current, logoUrl: data.publicUrl }));
+      setMessage('Logo Wallet ajouté.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Upload du logo impossible.');
     } finally {
       setSaving(false);
     }
@@ -1458,9 +1481,16 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   <Field label="Texte complémentaire">
                     <input value={walletDesign.footerText} onChange={e => setWalletDesign(current => ({...current,footerText:e.target.value}))} maxLength={80} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
                   </Field>
-                  <Field label="Logo HTTPS">
-                    <input value={walletDesign.logoUrl} onChange={e => setWalletDesign(current => ({...current,logoUrl:e.target.value}))} placeholder="https://..." className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
-                  </Field>
+                  <div>
+                    <Field label="Logo HTTPS">
+                      <input value={walletDesign.logoUrl} onChange={e => setWalletDesign(current => ({...current,logoUrl:e.target.value}))} placeholder="https://..." className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
+                    </Field>
+                    <div className="mt-2 flex items-center gap-2">
+                      <button type="button" onClick={() => walletLogoInput.current?.click()} disabled={saving} className="rounded-lg border border-white/15 px-3 py-2 text-[10px] font-semibold text-white disabled:opacity-40">Importer le logo</button>
+                      <input ref={walletLogoInput} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={e => { const file=e.target.files?.[0]; if(file) void uploadWalletLogo(file); e.currentTarget.value=''; }} />
+                      {walletDesign.logoUrl && <img src={walletDesign.logoUrl} alt="Logo Wallet" className="h-9 w-9 rounded-lg bg-white object-contain p-1" />}
+                    </div>
+                  </div>
                   <Field label="Site web">
                     <input value={walletDesign.websiteUrl} onChange={e => setWalletDesign(current => ({...current,websiteUrl:e.target.value}))} placeholder="https://..." className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
                   </Field>
