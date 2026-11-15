@@ -845,7 +845,31 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen space-y-6 pb-8 text-white">
+    <div className="kelyani-cockpit min-h-screen space-y-6 pb-8 text-white">
+      <style>{`
+        .kelyani-cockpit{--kc-gold:#D4AF37;--kc-gold-light:#F5DE9A;background:radial-gradient(ellipse at 84% 0%,rgba(212,175,55,.10),transparent 34%),#0A0A0A}
+        .kelyani-cockpit>section>article,.kelyani-cockpit>section>div>article,.kelyani-cockpit>div>section{background:linear-gradient(145deg,rgba(255,255,255,.065),rgba(255,255,255,.016))!important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-color:rgba(212,175,55,.22)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.055),0 22px 65px rgba(0,0,0,.24)}
+        .kelyani-cockpit article{border-color:rgba(212,175,55,.18)!important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+        .kelyani-cockpit h1{letter-spacing:-.045em}
+        .kelyani-cockpit h1 span,.kelyani-cockpit .font-display.text-4xl,.kelyani-cockpit .font-display.text-3xl{background:linear-gradient(115deg,#FFF0B8,#D4AF37 52%,#98701F);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .kelyani-cockpit article>p.text-xl,.kelyani-cockpit article>p.text-2xl,.kelyani-cockpit article>p.text-\[28px\]{background:linear-gradient(115deg,#FFF0B8,#D4AF37 58%,#98701F);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .kelyani-cockpit .text-\[9px\].font-bold.uppercase,.kelyani-cockpit .text-\[10px\].font-bold.uppercase{letter-spacing:.22em}
+        .kelyani-cockpit .rounded-full.bg-gradient-to-r{box-shadow:0 0 18px rgba(212,175,55,.22)}
+        .kelyani-cockpit article:hover{border-color:rgba(212,175,55,.38)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 24px 70px rgba(0,0,0,.34),0 0 28px rgba(212,175,55,.045);transform:translateY(-2px);transition:all .28s ease}
+        .kelyani-cockpit .recharts-area{filter:drop-shadow(0 3px 8px rgba(212,175,55,.12))}
+        .kelyani-cockpit .recharts-cartesian-grid line{stroke:rgba(255,255,255,.055)}
+        .kelyani-cockpit .recharts-tooltip-wrapper{filter:drop-shadow(0 12px 24px rgba(0,0,0,.35))}
+        .kelyani-cockpit section:first-of-type{background:radial-gradient(ellipse at 82% 0%,rgba(212,175,55,.16),transparent 42%),linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.015))!important;border-color:rgba(212,175,55,.34)!important}
+        .kelyani-cockpit section:first-of-type [class*=grid]>*{border-color:rgba(212,175,55,.22)!important;background:rgba(5,5,5,.42)!important;backdrop-filter:blur(14px)}
+        .kelyani-cockpit section[aria-label*=Performance] article,.kelyani-cockpit section[aria-label*=Analyses] article{animation:kc-rise .72s cubic-bezier(.2,.8,.2,1) both}
+        .kelyani-cockpit section[aria-label*=Performance] article:nth-child(2),.kelyani-cockpit section[aria-label*=Analyses] article:nth-child(2){animation-delay:.08s}
+        .kelyani-cockpit section[aria-label*=Performance] article:nth-child(3){animation-delay:.16s}
+        .kelyani-cockpit section[aria-label*=Performance] article:nth-child(4){animation-delay:.24s}
+        .kelyani-cockpit section:last-of-type .rounded-full{animation:kc-pulse 1.9s ease-in-out infinite}
+        @keyframes kc-rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes kc-pulse{0%,100%{box-shadow:0 0 0 0 rgba(212,175,55,.28)}50%{box-shadow:0 0 0 6px rgba(212,175,55,0)}}
+        @media(prefers-reduced-motion:reduce){.kelyani-cockpit *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+      `}</style>
       <section className="relative isolate overflow-hidden rounded-[28px] border border-[#C9A45C]/20 bg-[radial-gradient(ellipse_at_top_right,rgba(201,164,92,0.13),transparent_42%),linear-gradient(135deg,#151515_0%,#090909_62%,#111111_100%)] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:rounded-[32px] sm:p-8 lg:p-9">
         <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full border border-[#C9A45C]/15" /><div className="pointer-events-none absolute -bottom-36 left-[38%] h-72 w-72 rounded-full bg-[#C9A45C]/[0.035] blur-3xl" />
         <div className="relative z-10">
@@ -909,8 +933,8 @@ export default function Dashboard() {
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#F5F5DC', opacity: 0.42, fontSize: 10 }} />
               <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{ fill: '#F5F5DC', opacity: 0.32, fontSize: 9 }} width={28} />
               <Tooltip contentStyle={{ background: '#111111', border: '1px solid #34302A', borderRadius: 14, color: '#fff', fontSize: 12 }} />
-              <Area type="monotone" dataKey="positive" name="Avis positifs" stroke="#C9A45C" strokeWidth={2.5} fill="url(#kelyaniPositiveFill)" activeDot={{ r: 4, strokeWidth: 0 }} />
-              <Area type="monotone" dataKey="negative" name="Avis à surveiller" stroke="#82796B" strokeWidth={2} fill="url(#kelyaniNegativeFill)" activeDot={{ r: 4, strokeWidth: 0 }} />
+              <Area type="monotone" dataKey="positive" name="Avis positifs" stroke="#C9A45C" strokeWidth={2.8} fill="url(#kelyaniPositiveFill)" isAnimationActive animationDuration={1500} activeDot={{ r: 4, strokeWidth: 0 }} />
+              <Area type="monotone" dataKey="negative" name="Avis à surveiller" stroke="#82796B" strokeWidth={2} fill="url(#kelyaniNegativeFill)" isAnimationActive animationDuration={1700} activeDot={{ r: 4, strokeWidth: 0 }} />
             </AreaChart></ResponsiveContainer>
           </div>
           <div className="mt-4 grid grid-cols-3 gap-2 border-t border-white/[0.07] pt-4">
