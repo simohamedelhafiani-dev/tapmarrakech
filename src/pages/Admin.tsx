@@ -613,7 +613,7 @@ export default function Admin() {
             <KelyaniMark size={72} />
             <div className="hidden sm:block leading-none">
               <p className="font-display text-xl font-semibold tracking-[.08em] text-[#3B82F6]">KELYANI</p>
-              <p className="mt-1 text-[7px] font-semibold uppercase tracking-[.22em] text-[#3B82F6]/70">CUSTOMER INTELLIGENCE</p>
+              <p className="mt-1 text-[7px] font-semibold uppercase tracking-[.22em] text-[#3B82F6]/70">L’ART DE LA RELATION CLIENT</p>
             </div>
           </button>
 
@@ -746,19 +746,19 @@ export default function Admin() {
 
               {aiWorkspaceTab === 'home' ? (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  <button type="button" onClick={() => setAIWorkspaceTab('engine')} className="group min-h-[190px] rounded-3xl border border-[#3B82F6]/35 bg-gradient-to-br from-[#111111] via-[#0d0d0d] to-[#080808] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#3B82F6]/75 hover:shadow-[0_20px_45px_rgba(201,164,92,.12)] [transform:perspective(1000px)_rotateX(2deg)]">
+                  <button type="button" onClick={() => setAIWorkspaceTab('engine')} className="group min-h-[190px] rounded-3xl border border-[#3B82F6]/35 bg-gradient-to-br from-[#111111] via-[#0d0d0d] to-[#080808] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#3B82F6]/75 hover:shadow-[0_20px_45px_rgba(59,130,246,.12)] [transform:perspective(1000px)_rotateX(2deg)]">
                     <span className="grid h-12 w-12 place-items-center rounded-2xl border border-[#3B82F6]/30 bg-[#686D76]/10 text-[#3B82F6]"><Brain size={22} /></span>
                     <span className="mt-5 block text-lg font-semibold text-[#3B82F6]">Moteur IA global</span>
                     <span className="mt-2 block text-sm leading-6 text-white/50">Fournisseur, modèle, clé API, température et limites de génération.</span>
                     <span className="mt-5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#3B82F6]">Ouvrir les paramètres →</span>
                   </button>
-                  <button type="button" onClick={() => setAIWorkspaceTab('prompts')} className="group min-h-[190px] rounded-3xl border border-[#242424] bg-gradient-to-br from-[#171717] via-[#0d0d0d] to-[#080808] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#3B82F6]/60 hover:shadow-[0_20px_45px_rgba(201,164,92,.1)] [transform:perspective(1000px)_rotateX(2deg)]">
+                  <button type="button" onClick={() => setAIWorkspaceTab('prompts')} className="group min-h-[190px] rounded-3xl border border-[#242424] bg-gradient-to-br from-[#171717] via-[#0d0d0d] to-[#080808] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#3B82F6]/60 hover:shadow-[0_20px_45px_rgba(59,130,246,.1)] [transform:perspective(1000px)_rotateX(2deg)]">
                     <span className="grid h-12 w-12 place-items-center rounded-2xl border border-white/10 bg-white/5 text-[#3B82F6]"><FileText size={22} /></span>
                     <span className="mt-5 block text-lg font-semibold text-white">Prompts & fonctionnalités</span>
                     <span className="mt-2 block text-sm leading-6 text-white/50">Instructions métier et comportements des fonctionnalités IA.</span>
                     <span className="mt-5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#3B82F6]">Ouvrir les paramètres →</span>
                   </button>
-                  <button type="button" onClick={() => setAIWorkspaceTab('google')} className="group min-h-[190px] rounded-3xl border border-[#3B82F6]/35 bg-gradient-to-br from-[#111111] via-[#0d0d0d] to-[#080808] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#3B82F6]/75 hover:shadow-[0_20px_45px_rgba(201,164,92,.12)] [transform:perspective(1000px)_rotateX(2deg)]">
+                  <button type="button" onClick={() => setAIWorkspaceTab('google')} className="group min-h-[190px] rounded-3xl border border-[#3B82F6]/35 bg-gradient-to-br from-[#111111] via-[#0d0d0d] to-[#080808] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#3B82F6]/75 hover:shadow-[0_20px_45px_rgba(59,130,246,.12)] [transform:perspective(1000px)_rotateX(2deg)]">
                     <span className="grid h-12 w-12 place-items-center rounded-2xl border border-[#3B82F6]/30 bg-[#686D76]/10 text-[#3B82F6]"><MessageSquare size={22} /></span>
                     <span className="mt-5 block text-lg font-semibold text-[#3B82F6]">Avis Google & automatisations</span>
                     <span className="mt-2 block text-sm leading-6 text-white/50">Un seul espace pour connecter Google, gérer les avis, configurer les réponses IA, les langues, les liens et la fréquence de synchronisation.</span>
@@ -899,7 +899,7 @@ export default function Admin() {
                 aria-label={label}
                 data-active={active} className={`kelyani-nav-link group flex min-w-[68px] flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 transition-all ${
                   active
-                    ? 'bg-[#111111] text-[#3B82F6] shadow-[0_0_24px_rgba(201,164,92,0.10)]'
+                    ? 'bg-[#111111] text-[#3B82F6] shadow-[0_0_24px_rgba(59,130,246,0.10)]'
                     : 'text-[#FFFFFF]/40 hover:bg-[#111111] hover:text-[#FFFFFF]'
                 }`}
               >
@@ -1140,7 +1140,7 @@ function Overview({
 
   return (
     <div className="space-y-6 pb-8 text-white">
-      <section className="relative isolate overflow-hidden rounded-[28px] border border-[#3B82F6]/20 bg-[radial-gradient(ellipse_at_top_right,rgba(201,164,92,0.15),transparent_42%),linear-gradient(135deg,#171717_0%,#090909_66%,#111111_100%)] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.25)] sm:rounded-[32px] sm:p-7 lg:p-8"><div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full border border-[#3B82F6]/15" /><div className="relative flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
+      <section className="relative isolate overflow-hidden rounded-[28px] border border-[#3B82F6]/20 bg-[radial-gradient(ellipse_at_top_right,rgba(59,130,246,0.15),transparent_42%),linear-gradient(135deg,#171717_0%,#090909_66%,#111111_100%)] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.25)] sm:rounded-[32px] sm:p-7 lg:p-8"><div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full border border-[#3B82F6]/15" /><div className="relative flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
         <div>
           <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#3B82F6]/45">Vue globale</p>
           <h2 className="text-3xl font-semibold tracking-tight text-[#FFFFFF] md:text-[38px]">
@@ -1184,7 +1184,7 @@ function Overview({
           scansData={overviewStats?.scansEvolution ?? []}
           loading={overviewStatsStatus === 'loading'}
         />
-        <section className="overflow-hidden rounded-[24px] border border-white/[0.07] bg-[radial-gradient(ellipse_at_top,rgba(201,164,92,0.09),transparent_48%),linear-gradient(145deg,#151515,#090909)] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.2)] sm:rounded-[28px] sm:p-6">
+        <section className="overflow-hidden rounded-[24px] border border-white/[0.07] bg-[radial-gradient(ellipse_at_top,rgba(59,130,246,0.09),transparent_48%),linear-gradient(145deg,#151515,#090909)] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.2)] sm:rounded-[28px] sm:p-6">
           <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#3B82F6]">Réputation globale</p>
           <h3 className="mt-1 text-lg font-semibold text-white">Qualité des avis</h3>
           <p className="mt-1 text-xs leading-5 text-white/40">Répartition des avis positifs et des avis à surveiller sur la plateforme.</p>
@@ -1932,13 +1932,13 @@ function EstablishmentWorkspace({
 
   return (
     <div>
-      <div className="relative mb-6 overflow-hidden rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] sm:p-8">
+      <div className="relative mb-6 overflow-hidden rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:p-8">
         <div className="absolute right-0 top-0 h-44 w-44 rounded-full bg-[#686D76]/10 blur-3xl" />
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <button onClick={onBack} className="mb-5 inline-flex items-center gap-2 text-[11px] font-semibold text-[#3B82F6]/65 transition hover:text-[#3B82F6]">← Retour aux établissements</button>
             <div className="flex items-center gap-4">
-              <div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-[#111111] text-2xl font-display text-[#3B82F6] shadow-lg shadow-[0_10px_35px_rgba(201,164,92,0.10)]">
+              <div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-[#111111] text-2xl font-display text-[#3B82F6] shadow-lg shadow-[0_10px_35px_rgba(59,130,246,0.10)]">
                 {(profile.name ?? establishment.name)?.[0]?.toUpperCase()}
               </div>
               <div>
@@ -1950,12 +1950,12 @@ function EstablishmentWorkspace({
           </div>
           <div className="flex flex-wrap gap-2">
             {scannerLink && <a href={scannerLink} target="_blank" rel="noreferrer" className="rounded-xl border border-[#3B82F6]/30 bg-[#111111] px-4 py-3 text-xs font-semibold text-[#3B82F6] transition hover:border-[#3B82F6] hover:bg-[#111111]">Scanner fidélité ↗</a>}
-            <a href={publicLink} target="_blank" rel="noreferrer" className="rounded-xl bg-[#111111] px-4 py-3 text-center text-xs font-semibold text-[#FFFFFF] shadow-lg shadow-[0_10px_35px_rgba(201,164,92,0.10)] transition hover:bg-[#111111]">Ouvrir la page publique ↗</a>
+            <a href={publicLink} target="_blank" rel="noreferrer" className="rounded-xl bg-[#111111] px-4 py-3 text-center text-xs font-semibold text-[#FFFFFF] shadow-lg shadow-[0_10px_35px_rgba(59,130,246,0.10)] transition hover:bg-[#111111]">Ouvrir la page publique ↗</a>
           </div>
         </div>
       </div>
 
-      <div className="mb-6 overflow-hidden rounded-3xl border border-[#242424]/10 bg-[#111111] text-[#FFFFFF] shadow-[0_18px_55px_rgba(23,61,50,0.14)]">
+      <div className="mb-6 overflow-hidden rounded-3xl border border-[#242424]/10 bg-[#111111] text-[#FFFFFF] shadow-[0_18px_55px_rgba(104,109,118,0.14)]">
         <div className="grid lg:grid-cols-[1fr_210px]">
           <div className="relative p-6 sm:p-7">
             <div className="absolute -right-20 -top-20 h-52 w-52 rounded-full bg-[#686D76]/10 blur-3xl" />

@@ -111,7 +111,7 @@ export default function Login() {
             <div className="flex items-center justify-between">
               <button type="button" onClick={() => navigate('/')} className="group flex items-center gap-4 text-left transition-transform duration-300 hover:-translate-y-0.5 active:translate-y-0" aria-label="KELYANI">
                 <div className="relative shrink-0">
-                  <div className="absolute inset-0 rounded-[18px] bg-[#686D76]/10 blur-xl shadow-[0_0_35px_rgba(201,164,92,.08)] transition group-hover:bg-[#686D76]/20" />
+                  <div className="absolute inset-0 rounded-[18px] bg-[#686D76]/10 blur-xl shadow-[0_0_35px_rgba(59,130,246,.08)] transition group-hover:bg-[#686D76]/20" />
                   <KelyaniMark size={72} className="relative" />
                 </div>
                 <div className="leading-none">
@@ -131,7 +131,7 @@ export default function Login() {
             </div>
 
             <div className="relative mt-auto max-w-3xl pb-2 pt-12 lg:pt-8 xl:pt-4">
-              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#3B82F6]/25 bg-[#686D76]/[0.06] px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.24em] text-[#3B82F6] shadow-[0_8px_28px_rgba(201,164,92,.08)] backdrop-blur-xl">
+              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#3B82F6]/25 bg-[#686D76]/[0.06] px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.24em] text-[#3B82F6] shadow-[0_8px_28px_rgba(59,130,246,.08)] backdrop-blur-xl">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#686D76]" />
                 Plateforme client 2026
               </div>
@@ -192,7 +192,7 @@ export default function Login() {
                 </div>
               </div>
               <div className="mt-4 flex max-w-2xl items-center gap-3 rounded-2xl border border-white/[0.055] bg-white/[0.018] px-4 py-3.5">
-                <div className="h-2 w-2 shrink-0 rounded-full bg-[#686D76] shadow-[0_0_14px_rgba(201,164,92,.7)]" />
+                <div className="h-2 w-2 shrink-0 rounded-full bg-[#686D76] shadow-[0_0_14px_rgba(59,130,246,.7)]" />
                 <p className="text-[11px] leading-5 text-white/45">Une plateforme pensée pour transformer chaque interaction en relation durable.</p>
               </div>
 
@@ -238,7 +238,7 @@ export default function Login() {
                 </button>
               </div>
             ) : (
-              <div className="rounded-[28px] border border-[#242424] bg-[#111111]/90 p-5 shadow-[0_30px_100px_rgba(5,5,5,.48),inset_0_1px_0_rgba(245,245,220,.04)] backdrop-blur-xl sm:p-6">
+              <div className="rounded-[28px] border border-[#242424] bg-[#111111]/90 p-5 shadow-[0_30px_100px_rgba(5,5,5,.48),inset_0_1px_0_rgba(255,255,255,.04)] backdrop-blur-xl sm:p-6">
                 <div className="mb-6 flex items-center gap-3">
                   <KelyaniMark size={38} />
                   <div>
@@ -255,7 +255,7 @@ export default function Login() {
                     <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#3B82F6]/45">{t.email}</label>
                     <div className="relative">
                       <UserRound size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#3B82F6]/50" />
-                      <input type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }} placeholder={t.emailPlaceholder} className="w-full rounded-2xl border border-[#242424] bg-[#050505] py-3.5 pl-11 pr-4 text-sm text-white outline-none shadow-[inset_0_1px_0_rgba(245,245,220,.025),0_10px_25px_rgba(5,5,5,.28)] transition-all duration-300 placeholder:text-[#3B82F6]/20 hover:border-[#242424] hover:shadow-[inset_0_1px_0_rgba(245,245,220,.04),0_14px_32px_rgba(5,5,5,.34)] focus:border-[#3B82F6]/55 focus:ring-4 focus:ring-[#3B82F6]/[0.07]" />
+                      <input type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }} placeholder={t.emailPlaceholder} className="w-full rounded-2xl border border-[#242424] bg-[#050505] py-3.5 pl-11 pr-4 text-sm text-white outline-none shadow-[inset_0_1px_0_rgba(255,255,255,.025),0_10px_25px_rgba(5,5,5,.28)] transition-all duration-300 placeholder:text-[#3B82F6]/20 hover:border-[#242424] hover:shadow-[inset_0_1px_0_rgba(255,255,255,.04),0_14px_32px_rgba(5,5,5,.34)] focus:border-[#3B82F6]/55 focus:ring-4 focus:ring-[#3B82F6]/[0.07]" />
                     </div>
                   </div>
                   <div>
@@ -265,11 +265,11 @@ export default function Login() {
                     </div>
                     <div className="relative">
                       <LockKeyhole size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#3B82F6]/50" />
-                      <input type={showPassword ? 'text' : 'password'} autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }} placeholder={t.passwordPlaceholder} className="w-full rounded-2xl border border-[#242424] bg-[#050505] py-3.5 pl-11 pr-11 text-sm text-white outline-none shadow-[inset_0_1px_0_rgba(245,245,220,.025),0_10px_25px_rgba(5,5,5,.28)] transition-all duration-300 placeholder:text-[#3B82F6]/20 hover:shadow-[inset_0_1px_0_rgba(245,245,220,.04),0_14px_32px_rgba(5,5,5,.34)] focus:border-[#3B82F6]/55 focus:ring-4 focus:ring-[#3B82F6]/[0.07]" />
+                      <input type={showPassword ? 'text' : 'password'} autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }} placeholder={t.passwordPlaceholder} className="w-full rounded-2xl border border-[#242424] bg-[#050505] py-3.5 pl-11 pr-11 text-sm text-white outline-none shadow-[inset_0_1px_0_rgba(255,255,255,.025),0_10px_25px_rgba(5,5,5,.28)] transition-all duration-300 placeholder:text-[#3B82F6]/20 hover:shadow-[inset_0_1px_0_rgba(255,255,255,.04),0_14px_32px_rgba(5,5,5,.34)] focus:border-[#3B82F6]/55 focus:ring-4 focus:ring-[#3B82F6]/[0.07]" />
                       <button type="button" onClick={() => setShowPassword(value => !value)} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-xl p-2 text-[#3B82F6]/25 hover:text-[#3B82F6]">{showPassword ? <EyeOff size={16} /> : <Eye size={16} />}</button>
                     </div>
                   </div>
-                  <button onClick={handleLogin} disabled={saving} className="group flex w-full items-center justify-center gap-2 rounded-2xl bg-[#686D76] py-3.5 text-sm font-bold text-[#050505] shadow-[0_14px_34px_rgba(201,164,92,.18),inset_0_1px_0_rgba(245,245,220,.22)] transition-all duration-300 hover:bg-[#686D76] hover:-translate-y-0.5 hover:shadow-[0_20px_42px_rgba(201,164,92,.24),inset_0_1px_0_rgba(245,245,220,.28)] active:translate-y-0 active:shadow-[0_10px_24px_rgba(201,164,92,.16)] disabled:opacity-50">
+                  <button onClick={handleLogin} disabled={saving} className="group flex w-full items-center justify-center gap-2 rounded-2xl bg-[#686D76] py-3.5 text-sm font-bold text-[#050505] shadow-[0_14px_34px_rgba(59,130,246,.18),inset_0_1px_0_rgba(255,255,255,.22)] transition-all duration-300 hover:bg-[#686D76] hover:-translate-y-0.5 hover:shadow-[0_20px_42px_rgba(59,130,246,.24),inset_0_1px_0_rgba(255,255,255,.28)] active:translate-y-0 active:shadow-[0_10px_24px_rgba(59,130,246,.16)] disabled:opacity-50">
                     {saving ? 'Connexion…' : 'Entrer dans KELYANI'} {!saving && <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />}
                   </button>
                 </div>

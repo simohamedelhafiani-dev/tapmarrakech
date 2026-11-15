@@ -99,7 +99,7 @@ export default function WifiForm({ establishmentId }: WifiFormProps) {
 
   if (engine.loading) {
     return (
-      <div className="rounded-3xl border border-[#242424] bg-[#111111] p-8 shadow-[0_12px_40px_rgba(15,23,42,0.045)]">
+      <div className="rounded-3xl border border-[#242424] bg-[#111111] p-8 shadow-[0_12px_40px_rgba(0,0,0,0.045)]">
         <div className="flex items-center gap-3 text-sm text-[#FFFFFF]/45">
           <Loader2 size={17} className="animate-spin text-[#3B82F6]" />
           Chargement du Wi-Fi…
@@ -110,7 +110,7 @@ export default function WifiForm({ establishmentId }: WifiFormProps) {
 
   return (
     <div className="grid gap-5 xl:grid-cols-[1.1fr_.9fr]">
-      <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-[0_12px_40px_rgba(15,23,42,0.045)]">
+      <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-[0_12px_40px_rgba(0,0,0,0.045)]">
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#3B82F6]">Connectivité</p>
@@ -213,7 +213,7 @@ export default function WifiForm({ establishmentId }: WifiFormProps) {
         </div>
       </div>
 
-      <div className="rounded-3xl border border-[#242424] bg-[#686D76] p-6 text-[#050505] shadow-[0_12px_40px_rgba(23,61,50,0.12)]">
+      <div className="rounded-3xl border border-[#242424] bg-[#686D76] p-6 text-[#050505] shadow-[0_12px_40px_rgba(104,109,118,0.12)]">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#3B82F6]">Accès instantané</p>
