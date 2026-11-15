@@ -23,7 +23,7 @@ export default function EstablishmentCard({
 
   return (
     <article className="group relative overflow-hidden rounded-[26px] border border-ink/6 bg-[#141414] p-5 text-left shadow-[0_8px_30px_rgba(0,0,0,0.045)] transition duration-300 hover:-translate-y-1 hover:border-[#242424]/15 hover:shadow-[0_18px_45px_rgba(104,109,118,0.12)] sm:p-6">
-      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#686D76] via-[#686D76]/70 to-[#3B82F6] opacity-70" />
+      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#686D76] via-[#686D76]/70 to-[#686D76] opacity-70" />
 
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-center gap-4">
@@ -75,7 +75,7 @@ export default function EstablishmentCard({
             className={[
               'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold',
               isActive
-                ? 'bg-[#3B82F6]/12 text-[#3B82F6]'
+                ? 'bg-[#686D76]/12 text-[#3B82F6]'
                 : isTrial
                   ? 'bg-[#686D76]/15 text-[#3B82F6]'
                   : 'bg-ink/5 text-ink/55',
