@@ -28,6 +28,7 @@ import {
   type LoyaltyReferralConfig,
 } from '@/hooks/useLoyaltyManager';
 import LoyaltyPreview from './LoyaltyPreview';
+import WalletImageCropEditor from './WalletImageCropEditor';
 import LoyaltyRaffleStudio from './LoyaltyRaffleStudio';
 import LoyaltyTierStudio from './LoyaltyTierStudio';
 import LoyaltyCrmSegments from './LoyaltyCrmSegments';
@@ -90,6 +91,8 @@ type WalletDesignState = {
   accentColor: string;
   textColor: string;
   logoUrl: string;
+  heroImageUrl: string;
+  appleHeroImageUrl: string;
   cardTitle: string;
   headerText: string;
   footerText: string;
@@ -105,6 +108,8 @@ const DEFAULT_WALLET_DESIGN: WalletDesignState = {
   accentColor: '#3B82F6',
   textColor: '#FFFFFF',
   logoUrl: '',
+  heroImageUrl: '',
+  appleHeroImageUrl: '',
   cardTitle: 'KELYANI',
   headerText: 'Carte de fidélité',
   footerText: 'Présentez votre carte à chaque visite',
@@ -218,6 +223,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   const [conversionPoints, setConversionPoints] = useState(1);
   const [design, setDesign] = useState<DesignState>(DEFAULT_DESIGN);
   const [walletDesign, setWalletDesign] = useState<WalletDesignState>(DEFAULT_WALLET_DESIGN);
+  const [walletCropPlatform, setWalletCropPlatform] = useState<'google' | 'apple' | null>(null);
   const [walletCatalog, setWalletCatalog] = useState<WalletCatalogEntry[]>([]);
   const [publishingWalletKey, setPublishingWalletKey] = useState<string | null>(null);
   const [establishment, setEstablishment] = useState({
@@ -225,6 +231,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     logoUrl: null as string | null,
   });
   const wallpaperInput = useRef<HTMLInputElement>(null);
+  const walletHeroInput = useRef<HTMLInputElement>(null);
   const designHydratedRef = useRef(false);
   const previewChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const [previewChannelReady, setPreviewChannelReady] = useState(false);
@@ -536,6 +543,35 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       setMessage('Wallpaper ajouté à la bibliothèque.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Upload impossible.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const uploadWalletHeroSource = async (file: File) => {
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+      setMessage('Formats acceptés : PNG, JPG ou WebP.');
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      setMessage('Image trop lourde (8 Mo maximum).');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const ext = file.type === 'image/jpeg' ? 'jpg' : file.type.split('/')[1];
+      const path = `loyalty-cards/${establishmentId}/wallet-source-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage
+        .from('loyalty-assets')
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (error) throw error;
+
+      const { data } = supabase.storage.from('loyalty-assets').getPublicUrl(path);
+      setWalletDesign(current => ({ ...current, heroImageUrl: data.publicUrl }));
+      setMessage('Image Wallet ajoutée. Vous pouvez maintenant la recadrer pour chaque plateforme.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Upload de l’image Wallet impossible.');
     } finally {
       setSaving(false);
     }
@@ -1425,6 +1461,37 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   <Field label="Logo HTTPS">
                     <input value={walletDesign.logoUrl} onChange={e => setWalletDesign(current => ({...current,logoUrl:e.target.value}))} placeholder="https://..." className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
                   </Field>
+                  <Field label="Image de couverture Wallet">
+                    <input
+                      value={walletDesign.heroImageUrl}
+                      onChange={e => setWalletDesign(current => ({ ...current, heroImageUrl: e.target.value }))}
+                      placeholder="URL HTTPS ou importer une image"
+                      className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none"
+                    />
+                    <input
+                      ref={walletHeroInput}
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      className="hidden"
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        if (file) void uploadWalletHeroSource(file);
+                        e.currentTarget.value = '';
+                      }}
+                    />
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <button type="button" onClick={() => walletHeroInput.current?.click()} disabled={saving} className="rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-[10px] font-semibold text-[#3B82F6] disabled:opacity-40">
+                        Importer une image
+                      </button>
+                      <button type="button" onClick={() => setWalletCropPlatform('google')} disabled={!walletDesign.heroImageUrl || saving} className="rounded-lg bg-[#686D76] px-3 py-2 text-[10px] font-semibold text-white disabled:opacity-40">
+                        Recadrer Google
+                      </button>
+                      <button type="button" onClick={() => setWalletCropPlatform('apple')} disabled={!walletDesign.heroImageUrl || saving} className="rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-[10px] font-semibold text-white disabled:opacity-40">
+                        Recadrer Apple
+                      </button>
+                    </div>
+                    <p className="mt-2 text-[10px] leading-4 text-white/40">Image publique HTTPS, 8 Mo maximum. Le cadrage Google et Apple est enregistré séparément dans le stockage sécurisé de l’établissement.</p>
+                  </Field>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-5 text-xs text-white/65">
                   <label className="flex items-center gap-2"><input type="checkbox" checked={walletDesign.showPoints} onChange={e => setWalletDesign(current => ({...current,showPoints:e.target.checked}))}/> Afficher les points</label>
@@ -1432,6 +1499,20 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                 </div>
               </StudioCard>
 
+              {walletCropPlatform && (
+                <WalletImageCropEditor
+                  imageUrl={walletCropPlatform === 'apple' ? (walletDesign.appleHeroImageUrl || walletDesign.heroImageUrl) : walletDesign.heroImageUrl}
+                  platform={walletCropPlatform}
+                  establishmentId={establishmentId}
+                  onSaved={url => {
+                    const key = walletCropPlatform === 'google' ? 'heroImageUrl' : 'appleHeroImageUrl';
+                    setWalletDesign(current => ({ ...current, [key]: url }));
+                    setWalletCropPlatform(null);
+                    setMessage(walletCropPlatform === 'google' ? 'Visuel Google Wallet recadré.' : 'Visuel Apple Wallet recadré.');
+                  }}
+                  onClose={() => setWalletCropPlatform(null)}
+                />
+              )}
               <StudioCard eyebrow="Apple Wallet" title="Apple Wallet">
                 <p className="text-xs leading-5 text-white/55">Le catalogue est préparé, mais la publication Apple reste désactivée jusqu’à la configuration du compte Apple Developer Organisation et du certificat Pass Type ID.</p>
                 <span className="mt-3 inline-flex rounded-full border border-white/15 px-3 py-1.5 text-[10px] text-white/60">Certificats requis</span>
