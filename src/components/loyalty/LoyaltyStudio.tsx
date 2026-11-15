@@ -90,6 +90,11 @@ type WalletDesignState = {
   accentColor: string;
   textColor: string;
   logoUrl: string;
+  heroImageUrl: string;
+  websiteUrl: string;
+  phoneNumber: string;
+  address: string;
+  customMessage: string;
   cardTitle: string;
   headerText: string;
   footerText: string;
@@ -105,6 +110,11 @@ const DEFAULT_WALLET_DESIGN: WalletDesignState = {
   accentColor: '#3B82F6',
   textColor: '#FFFFFF',
   logoUrl: '',
+  heroImageUrl: '',
+  websiteUrl: 'https://www.kelyani.com',
+  phoneNumber: '',
+  address: '',
+  customMessage: '',
   cardTitle: 'KELYANI',
   headerText: 'Carte de fidélité',
   footerText: 'Présentez votre carte à chaque visite',
@@ -225,6 +235,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     logoUrl: null as string | null,
   });
   const wallpaperInput = useRef<HTMLInputElement>(null);
+  const walletHeroInput = useRef<HTMLInputElement>(null);
   const designHydratedRef = useRef(false);
   const previewChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const [previewChannelReady, setPreviewChannelReady] = useState(false);
@@ -541,8 +552,33 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     }
   };
 
+  const uploadWalletHero = async (file: File) => {
+    if (!file.type.startsWith('image/')) return;
+    if (file.size > 8 * 1024 * 1024) {
+      setMessage('Image trop lourde (8 Mo maximum).');
+      return;
+    }
+    setSaving(true);
+    try {
+      const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const path = `loyalty-cards/${establishmentId}/wallet-hero-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('loyalty-assets').upload(path, file, {
+        upsert: true,
+        contentType: file.type,
+      });
+      if (error) throw error;
+      const { data } = supabase.storage.from('loyalty-assets').getPublicUrl(path);
+      setWalletDesign(current => ({ ...current, heroImageUrl: data.publicUrl }));
+      setMessage('Visuel principal ajouté.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Upload du visuel impossible.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const syncGoogleWalletDesign = async () => {
-    if (!isAdmin || !establishmentId || saving) return;
+    if (!canManageWallet || !establishmentId || saving) return;
     setSaving(true);
     setMessage('');
     try {
@@ -567,7 +603,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   };
 
   const publishWalletTemplate = async (templateKey: string) => {
-    if (!isAdmin || !establishmentId || publishingWalletKey) return;
+    if (!canManageWallet || !establishmentId || publishingWalletKey) return;
     const template = WALLET_TEMPLATES[templateKey as keyof typeof WALLET_TEMPLATES];
     if (!template) return;
     setPublishingWalletKey(templateKey);
@@ -1425,6 +1461,29 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   <Field label="Logo HTTPS">
                     <input value={walletDesign.logoUrl} onChange={e => setWalletDesign(current => ({...current,logoUrl:e.target.value}))} placeholder="https://..." className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
                   </Field>
+                  <Field label="Site web">
+                    <input value={walletDesign.websiteUrl} onChange={e => setWalletDesign(current => ({...current,websiteUrl:e.target.value}))} placeholder="https://..." className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
+                  </Field>
+                  <Field label="Téléphone">
+                    <input value={walletDesign.phoneNumber} onChange={e => setWalletDesign(current => ({...current,phoneNumber:e.target.value}))} placeholder="+212..." className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
+                  </Field>
+                  <Field label="Adresse">
+                    <input value={walletDesign.address} onChange={e => setWalletDesign(current => ({...current,address:e.target.value}))} maxLength={100} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
+                  </Field>
+                  <Field label="Message personnalisé">
+                    <input value={walletDesign.customMessage} onChange={e => setWalletDesign(current => ({...current,customMessage:e.target.value}))} maxLength={80} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
+                  </Field>
+                </div>
+                <div className="mt-4 rounded-2xl border border-white/10 bg-[#0B0B0B] p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-semibold text-white">Visuel principal Google Wallet</p>
+                      <p className="mt-1 text-[10px] text-white/45">Image HTTPS accessible par Google · PNG, JPG ou WebP · 8 Mo max.</p>
+                    </div>
+                    <button type="button" onClick={() => walletHeroInput.current?.click()} disabled={saving} className="rounded-xl border border-white/15 px-3 py-2 text-xs font-semibold text-white disabled:opacity-40">Importer une image</button>
+                    <input ref={walletHeroInput} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={e => { const file=e.target.files?.[0]; if(file) void uploadWalletHero(file); e.currentTarget.value=''; }} />
+                  </div>
+                  {walletDesign.heroImageUrl && <div className="mt-3 overflow-hidden rounded-xl"><img src={walletDesign.heroImageUrl} alt="Aperçu du visuel principal Wallet" className="max-h-40 w-full object-cover" /></div>}
                 </div>
                 <div className="mt-4 flex flex-wrap gap-5 text-xs text-white/65">
                   <label className="flex items-center gap-2"><input type="checkbox" checked={walletDesign.showPoints} onChange={e => setWalletDesign(current => ({...current,showPoints:e.target.checked}))}/> Afficher les points</label>
