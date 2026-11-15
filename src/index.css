@@ -243,7 +243,7 @@ table {
 }
 
 .dashboard-depth-shell [class*="text-ink/"] {
-  color: rgba(245,245,220,.55) !important;
+  color: rgba(255,255,255,.55) !important;
 }
 
 .dashboard-depth-shell [class*="shadow-soft"] {
@@ -258,7 +258,7 @@ table {
 
 .dashboard-depth-shell input::placeholder,
 .dashboard-depth-shell textarea::placeholder {
-  color: rgba(245,245,220,.3);
+  color: rgba(255,255,255,.3);
 }
 
 
@@ -411,7 +411,7 @@ table {
   color:#60A5FA;border:1px solid rgba(104,109,118,.17);
 }
 .kelyani-loyalty-symbol { font-family:Georgia,serif;font-size:17px;font-weight:700; }
-.kelyani-float-check { display:grid;place-items:center;width:17px;height:17px;border-radius:50%;background:rgba(82,180,124,.14);color:#7bd9a0!important;font-size:10px!important; }
+.kelyani-float-check { display:grid;place-items:center;width:17px;height:17px;border-radius:50%;background:rgba(104,109,118,.14);color:#B0B0B0!important;font-size:10px!important; }
 @keyframes kelyani-dashboard-float { 0%,100% { transform:rotateX(5deg) rotateY(-8deg) rotateZ(-1deg) translateY(0); } 50% { transform:rotateX(3deg) rotateY(-5deg) rotateZ(-.2deg) translateY(-5px); } }
 @keyframes kelyani-chip-float { 0%,100% { translate:0 0; } 50% { translate:0 -7px; } }
 @keyframes kelyani-glow-pulse { 0%,100% { opacity:.65;scale:1; } 50% { opacity:1;scale:1.25; } }
@@ -578,10 +578,10 @@ table {
   background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.016));
 }
 .kelyani-kpi-tile>div:first-child,.kelyani-chart-tile>div:first-child {
-  color:rgba(245,240,225,.58);
+  color:rgba(255,255,255,.58);
 }
 .kelyani-kpi-tile p,.kelyani-dashboard-top p,.kelyani-dashboard-footer,
-.kelyani-float-chip span { color:rgba(245,240,225,.56); }
+.kelyani-float-chip span { color:rgba(255,255,255,.56); }
 .kelyani-kpi-featured {
   border-color:rgba(104,109,118,.31);
   background:linear-gradient(145deg,rgba(104,109,118,.16),rgba(104,109,118,.035));
@@ -589,7 +589,7 @@ table {
 .kelyani-chart-tile {
   box-shadow:inset 0 1px 0 rgba(255,255,255,.045),0 10px 28px -24px rgba(104,109,118,.35);
 }
-.kelyani-dashboard-footer { color:rgba(245,240,225,.48); }
+.kelyani-dashboard-footer { color:rgba(255,255,255,.48); }
 .kelyani-float-chip {
   border-color:rgba(104,109,118,.34);
   box-shadow:0 28px 52px -20px rgba(0,0,0,.98),0 6px 22px -14px rgba(104,109,118,.5),inset 0 1px 0 rgba(255,255,255,.13);
@@ -614,7 +614,7 @@ table {
   .kelyani-dashboard-3d { transform:none; }
   .kelyani-dashboard-3d::before { display:none; }
   .kelyani-kpi-tile>div:first-child,.kelyani-chart-tile>div:first-child { font-size:7px; }
-  .kelyani-kpi-tile p,.kelyani-dashboard-top p,.kelyani-dashboard-footer,.kelyani-float-chip span { color:rgba(245,240,225,.6); }
+  .kelyani-kpi-tile p,.kelyani-dashboard-top p,.kelyani-dashboard-footer,.kelyani-float-chip span { color:rgba(255,255,255,.6); }
 }
 
 /* QA correction pass: keep floating UI inside the hero and improve readability */
@@ -646,19 +646,19 @@ table {
   text-overflow:ellipsis;
 }
 .kelyani-kpi-tile>div:first-child,.kelyani-chart-tile>div:first-child {
-  color:rgba(250,246,235,.68);
+  color:rgba(255,255,255,.68);
 }
 .kelyani-kpi-tile p,.kelyani-dashboard-top p {
-  color:rgba(250,246,235,.58);
+  color:rgba(255,255,255,.58);
 }
 .kelyani-dashboard-footer {
-  color:rgba(250,246,235,.55);
+  color:rgba(255,255,255,.55);
 }
 .kelyani-dashboard-footer>span:first-child {
-  color:rgba(250,246,235,.72);
+  color:rgba(255,255,255,.72);
 }
 .kelyani-hero-stage + div p {
-  color:rgba(250,246,235,.66);
+  color:rgba(255,255,255,.66);
 }
 @media (min-width:1024px) {
   .kelyani-hero-stage { margin-top:20px; }
