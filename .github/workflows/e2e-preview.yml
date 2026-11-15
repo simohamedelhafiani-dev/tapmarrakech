@@ -2,8 +2,6 @@ name: E2E — Vercel Preview + Supabase Staging
 
 on:
   workflow_dispatch:
-  push:
-    branches: [integration/visual-theme-consolidation-2026-11, integration/nardo-wallet-visual-2026-11]
   pull_request:
     branches: [main, integration/visual-theme-consolidation-2026-11]
     types: [opened, synchronize, reopened, ready_for_review]
