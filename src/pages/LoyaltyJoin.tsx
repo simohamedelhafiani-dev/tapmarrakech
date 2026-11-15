@@ -180,10 +180,10 @@ export default function LoyaltyJoin() {
     return (
       <main className="min-h-screen bg-[#111111] px-4 py-8">
         <div className="mx-auto max-w-md rounded-[2rem] bg-[#111111] p-7 text-center shadow-xl">
-          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#1A1A1A] text-[#60A5FA]">
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#1A1A1A] text-[#3B82F6]">
             <Gift className="h-6 w-6" />
           </div>
-          <h1 className="mt-5 font-display text-3xl tracking-tight text-[#60A5FA]">Lien d’inscription invalide</h1>
+          <h1 className="mt-5 font-display text-3xl tracking-tight text-[#3B82F6]">Lien d’inscription invalide</h1>
           <p className="mt-2 text-sm leading-6 text-white/45">
             Scannez le QR Code ou la plaque NFC de l’établissement pour rejoindre son programme fidélité.
           </p>
@@ -197,7 +197,7 @@ export default function LoyaltyJoin() {
       <main className="grid min-h-screen place-items-center bg-[#050505] px-4">
         <div className="text-center">
           <div className="mx-auto h-9 w-9 animate-spin rounded-full border-2 border-[#3B82F6] border-t-transparent" />
-          <p className="mt-4 text-sm text-[#60A5FA]/55">Préparation de votre inscription…</p>
+          <p className="mt-4 text-sm text-[#3B82F6]/55">Préparation de votre inscription…</p>
         </div>
       </main>
     );
@@ -210,7 +210,7 @@ export default function LoyaltyJoin() {
           <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-red-50 text-red-600">
             <Gift className="h-6 w-6" />
           </div>
-          <h1 className="mt-5 font-display text-2xl text-[#60A5FA]">Inscription indisponible</h1>
+          <h1 className="mt-5 font-display text-2xl text-[#3B82F6]">Inscription indisponible</h1>
           <p className="mt-2 text-sm leading-6 text-white/45">{error}</p>
         </div>
       </main>
@@ -228,7 +228,7 @@ export default function LoyaltyJoin() {
         <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-[#111111] shadow-luxury">
           <div className="bg-[#111111] px-6 py-7 text-white">
             <div className="flex items-center gap-3">
-              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-electric-gradient text-[#60A5FA]">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-electric-gradient text-[#3B82F6]">
                 <Gift className="h-5 w-5" />
               </div>
               <div className="min-w-0">
@@ -299,7 +299,7 @@ export default function LoyaltyJoin() {
             </div>
             <div className="rounded-2xl border border-white/10 bg-[#171717] p-4">
               <p className="text-xs font-semibold text-white">Ce qui vous intéresse</p><p className="mt-1 text-[10px] leading-4 text-white/35">Choisissez ce que vous souhaitez recevoir. Cela aide l’établissement à vous envoyer des offres plus pertinentes.</p>
-              <div className="mt-3 flex flex-wrap gap-2">{interestOptions.map((interest) => { const active = interests.includes(interest); return <button key={interest} type="button" onClick={() => setInterests(current => active ? current.filter(item => item !== interest) : [...current, interest])} className={`rounded-full border px-3 py-2 text-[10px] font-semibold transition ${active ? 'border-[#3B82F6] bg-[#3B82F6]/15 text-[#60A5FA]' : 'border-white/10 bg-[#242424] text-white/45 hover:border-[#3B82F6]/40'}`}>{interest}</button>; })}</div>
+              <div className="mt-3 flex flex-wrap gap-2">{interestOptions.map((interest) => { const active = interests.includes(interest); return <button key={interest} type="button" onClick={() => setInterests(current => active ? current.filter(item => item !== interest) : [...current, interest])} className={`rounded-full border px-3 py-2 text-[10px] font-semibold transition ${active ? 'border-[#3B82F6] bg-[#3B82F6]/15 text-[#3B82F6]' : 'border-white/10 bg-[#242424] text-white/45 hover:border-[#3B82F6]/40'}`}>{interest}</button>; })}</div>
             </div>
             <div className="rounded-2xl border border-white/10 bg-[#171717] p-4">
               <p className="text-xs font-semibold text-white">Notifications</p>
@@ -308,7 +308,7 @@ export default function LoyaltyJoin() {
               <label className="mt-3 flex cursor-pointer items-start gap-3 text-[11px] leading-5 text-white/55"><input type="checkbox" checked={marketingConsent} onChange={e => setMarketingConsent(e.target.checked)} className="mt-1 accent-[#3B82F6]" /><span>J’accepte les communications commerciales et offres promotionnelles.</span></label>
             </div>
             {error && <div className="rounded-xl bg-red-50 px-4 py-3 text-xs leading-5 text-red-700">{error}</div>}
-            <button type="button" onClick={() => void join()} disabled={!canSubmit || loading} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#3B82F6] px-5 py-4 text-sm font-bold text-[#050505] shadow-lg transition hover:bg-[#60A5FA] disabled:cursor-not-allowed disabled:opacity-40">{loading && <Loader2 className="h-4 w-4 animate-spin" />}{loading ? 'Création de votre carte…' : 'Créer ma carte fidélité'}</button>
+            <button type="button" onClick={() => void join()} disabled={!canSubmit || loading} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#3B82F6] px-5 py-4 text-sm font-bold text-[#050505] shadow-lg transition hover:bg-[#3B82F6] disabled:cursor-not-allowed disabled:opacity-40">{loading && <Loader2 className="h-4 w-4 animate-spin" />}{loading ? 'Création de votre carte…' : 'Créer ma carte fidélité'}</button>
             <p className="text-center text-[10px] leading-4 text-white/25">Les préférences sont facultatives et servent à personnaliser les communications de l’établissement.</p>
           </div>
         </section>
