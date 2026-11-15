@@ -164,7 +164,7 @@ function TemplateVisualPreview({ template, compact = false }: { template: Templa
       coverImageUrl: c.background_image_url || null,
       primaryColor: c.primary || '#173D32',
       secondaryColor: c.secondary || '#686D76',
-      backgroundColor: c.background || '#F7F7F3',
+      backgroundColor: c.background || '#111111',
       textColor: c.text || '#686D76',
       borderRadius: Number(c.radius || 28),
       customerName: 'Mohamed Elhafiani',
@@ -613,7 +613,7 @@ export default function Templates() {
         <button
           onClick={() => setKind('page')}
           className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold ${
-            kind === 'page' ? 'bg-forest text-white' : 'text-ink/50 hover:bg-[#f7f7f3]'
+            kind === 'page' ? 'bg-forest text-white' : 'text-ink/50 hover:bg-[#111111]'
           }`}
         >
           <LayoutTemplate size={17} />
@@ -622,13 +622,13 @@ export default function Templates() {
         <button
           onClick={() => setKind('menu')}
           className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold ${
-            kind === 'menu' ? 'bg-forest text-white' : 'text-ink/50 hover:bg-[#f7f7f3]'
+            kind === 'menu' ? 'bg-forest text-white' : 'text-ink/50 hover:bg-[#111111]'
           }`}
         >
           <Menu size={17} />
           Menus
         </button>
-        <button onClick={() => setKind('loyalty')} className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold ${kind === 'loyalty' ? 'bg-forest text-white' : 'text-ink/50 hover:bg-[#f7f7f3]'}`}>
+        <button onClick={() => setKind('loyalty')} className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold ${kind === 'loyalty' ? 'bg-forest text-white' : 'text-ink/50 hover:bg-[#111111]'}`}>
           <Star size={17} />
           Fidélité
         </button>
@@ -647,7 +647,7 @@ export default function Templates() {
             </div>
             <button
               onClick={resetForm}
-              className="rounded-xl border border-ink/10 p-2 text-ink/45 hover:bg-[#f7f7f3]"
+              className="rounded-xl border border-ink/10 p-2 text-ink/45 hover:bg-[#111111]"
             >
               <X size={17} />
             </button>
@@ -659,7 +659,7 @@ export default function Templates() {
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+                className="w-full rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-forest"
               />
             </div>
 
@@ -674,7 +674,7 @@ export default function Templates() {
                   const preset = nextKind === 'page' ? PAGE_PRESETS[0] : nextKind === 'menu' ? MENU_PRESETS[0] : LOYALTY_PRESETS[0];
                   setConfigText(prettyJson(preset.config));
                 }}
-                className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none"
+                className="w-full rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm outline-none"
               >
                 <option value="page">Page publique</option>
                 <option value="menu">Menu</option>
@@ -687,7 +687,7 @@ export default function Templates() {
                 rows={3}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+                className="w-full rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-forest"
               />
             </div>
 
@@ -697,7 +697,7 @@ export default function Templates() {
                 value={thumbnailUrl}
                 onChange={(e) => setThumbnailUrl(e.target.value)}
                 placeholder="https://..."
-                className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+                className="w-full rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-forest"
               />
             </div>
 
@@ -709,7 +709,7 @@ export default function Templates() {
                     <button
                       key={preset.label}
                       onClick={() => setConfigText(prettyJson(preset.config))}
-                      className="rounded-lg border border-ink/10 px-3 py-1.5 text-[11px] font-semibold text-ink/60 hover:bg-[#f7f7f3]"
+                      className="rounded-lg border border-ink/10 px-3 py-1.5 text-[11px] font-semibold text-ink/60 hover:bg-[#111111]"
                     >
                       Preset {preset.label}
                     </button>
@@ -727,7 +727,7 @@ export default function Templates() {
               </p>
             </div>
 
-            <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-[#f7f7f3] p-4">
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-[#111111] p-4">
               <input
                 type="checkbox"
                 checked={active}
@@ -740,7 +740,7 @@ export default function Templates() {
               </span>
             </label>
 
-            <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-[#f7f7f3] p-4">
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-[#111111] p-4">
               <input
                 type="checkbox"
                 checked={isDefault}
@@ -757,7 +757,7 @@ export default function Templates() {
           <div className="mt-6 flex justify-end gap-3">
             <button
               onClick={resetForm}
-              className="rounded-xl border border-ink/10 px-5 py-3 text-sm font-semibold text-ink/55 hover:bg-[#f7f7f3]"
+              className="rounded-xl border border-ink/10 px-5 py-3 text-sm font-semibold text-ink/55 hover:bg-[#111111]"
             >
               Annuler
             </button>
@@ -841,14 +841,14 @@ export default function Templates() {
                   </span>
                 </div>
 
-                <div className="min-h-[500px] bg-[#f7f7f3] p-5">
+                <div className="min-h-[500px] bg-[#111111] p-5">
                   <div className="mx-auto max-w-[470px]">
                     <TemplateVisualPreview template={selectedTemplate} />
                   </div>
                 </div>
 
                 <div className="border-t border-ink/10 p-5">
-                  <div className="mb-4 flex rounded-xl bg-[#f7f7f3] p-1">
+                  <div className="mb-4 flex rounded-xl bg-[#111111] p-1">
                     <button onClick={() => setEditorTab('preview')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab === 'preview' ? 'bg-white text-forest shadow-sm' : 'text-ink/45'}`}>Aperçu</button>
                     <button onClick={() => setEditorTab('design')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab === 'design' ? 'bg-white text-forest shadow-sm' : 'text-ink/45'}`}>Modifier</button>
                   </div>
@@ -918,7 +918,7 @@ export default function Templates() {
 
       {previewing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/70 p-4">
-          <div className="max-h-[94vh] w-full max-w-6xl overflow-hidden rounded-[28px] bg-[#f7f7f3] shadow-2xl">
+          <div className="max-h-[94vh] w-full max-w-6xl overflow-hidden rounded-[28px] bg-[#111111] shadow-2xl">
             <div className="flex items-center justify-between border-b border-ink/10 bg-white px-6 py-4">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#3B82F6]">Studio template</p>
@@ -934,7 +934,7 @@ export default function Templates() {
                       design={{
                         primary_color: String(previewing.config?.primary || '#173D32'),
                         secondary_color: String(previewing.config?.secondary || '#686D76'),
-                        background_color: String(previewing.config?.background || '#F7F7F3'),
+                        background_color: String(previewing.config?.background || '#111111'),
                         text_color: String(previewing.config?.text || '#686D76'),
                         border_radius: Number(previewing.config?.radius || 28),
                         config: {
@@ -964,7 +964,7 @@ export default function Templates() {
                 )}
               </div>
               <aside className="border-l border-ink/10 bg-white p-6">
-                <div className="mb-5 flex rounded-xl bg-[#f7f7f3] p-1">
+                <div className="mb-5 flex rounded-xl bg-[#111111] p-1">
                   <button onClick={() => setEditorTab('preview')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab==='preview'?'bg-white text-forest shadow-sm':'text-ink/45'}`}>Aperçu</button>
                   <button onClick={() => setEditorTab('design')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab==='design'?'bg-white text-forest shadow-sm':'text-ink/45'}`}>Modifier</button>
                 </div>
@@ -994,7 +994,7 @@ export default function Templates() {
                 ) : (
                   <div className="space-y-4 text-sm text-ink/55">
                     <p>Tu peux sélectionner ce template, voir son rendu réel, modifier ses couleurs, son texte et ajouter un wallpaper.</p>
-                    <div className="rounded-2xl bg-[#f7f7f3] p-4"><p className="text-xs font-semibold text-forest">Template global</p><p className="mt-1 text-xs">Les modifications faites ici deviennent disponibles pour les établissements qui utilisent ce template.</p></div>
+                    <div className="rounded-2xl bg-[#111111] p-4"><p className="text-xs font-semibold text-forest">Template global</p><p className="mt-1 text-xs">Les modifications faites ici deviennent disponibles pour les établissements qui utilisent ce template.</p></div>
                     <button onClick={()=>setEditorTab('design')} className="w-full rounded-xl bg-forest px-4 py-3 text-sm font-semibold text-white">Modifier le design</button>
                   </div>
                 )}

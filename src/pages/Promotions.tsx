@@ -329,7 +329,7 @@ export default function Promotions() {
               value={form.name}
               onChange={(event) => updateForm('name', event.target.value)}
               placeholder="Ex. Menu déjeuner -20%"
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-forest"
             />
           </label>
 
@@ -339,7 +339,7 @@ export default function Promotions() {
               value={form.description}
               onChange={(event) => updateForm('description', event.target.value)}
               placeholder="Ex. Du lundi au vendredi, midi uniquement"
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-forest"
             />
           </label>
 
@@ -351,7 +351,7 @@ export default function Promotions() {
               type="number"
               min="0"
               placeholder="250"
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-forest"
             />
           </label>
 
@@ -363,7 +363,7 @@ export default function Promotions() {
               type="number"
               min="0"
               placeholder="199"
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-forest"
             />
           </label>
         </div>
@@ -419,7 +419,7 @@ export default function Promotions() {
                     className="aspect-[16/9] w-full object-cover"
                   />
                 ) : (
-                  <div className="grid aspect-[16/9] place-items-center bg-[#f7f7f3] text-ink/20">
+                  <div className="grid aspect-[16/9] place-items-center bg-[#111111] text-ink/20">
                     <ImageIcon size={32} />
                   </div>
                 )}

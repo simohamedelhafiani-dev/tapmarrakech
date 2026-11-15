@@ -416,7 +416,7 @@ export default function LoyaltySettings() {
           </button>
         </div>
 
-        <div className="mt-6 rounded-xl bg-[#f7f7f3] p-4 text-xs text-ink/55">
+        <div className="mt-6 rounded-xl bg-[#111111] p-4 text-xs text-ink/55">
           {enabled
             ? "Le programme est actuellement actif pour cet établissement."
             : "Le programme est désactivé. Aucun nouveau point ne pourra être ajouté."}
@@ -531,7 +531,7 @@ export default function LoyaltySettings() {
         </div>
 
         {rewards.length === 0 ? (
-          <div className="mt-6 rounded-xl bg-[#f7f7f3] p-6 text-center">
+          <div className="mt-6 rounded-xl bg-[#111111] p-6 text-center">
             <Gift
               size={28}
               className="mx-auto text-ink/20"
@@ -673,7 +673,7 @@ export default function LoyaltySettings() {
                 type="button"
                 onClick={closeRewardForm}
                 disabled={savingReward}
-                className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#f7f7f3] text-ink/50"
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#111111] text-ink/50"
               >
                 <X size={17} />
               </button>
@@ -754,7 +754,7 @@ export default function LoyaltySettings() {
                 </div>
               </div>
 
-              <div className="rounded-xl bg-[#f7f7f3] p-4">
+              <div className="rounded-xl bg-[#111111] p-4">
                 <p className="text-xs text-ink/45">
                   Exemple
                 </p>

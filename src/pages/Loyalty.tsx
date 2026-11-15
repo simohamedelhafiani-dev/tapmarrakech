@@ -828,7 +828,7 @@ export default function Loyalty() {
           <select
             value={establishmentId}
             onChange={e => setEstablishmentId(e.target.value)}
-            className="mt-2 w-full max-w-md rounded-xl border border-ink/10 bg-[#fafaf7] px-4 py-3 text-sm text-ink outline-none"
+            className="mt-2 w-full max-w-md rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm text-ink outline-none"
           >
             {establishments.map(establishment => (
               <option
@@ -1301,7 +1301,7 @@ export default function Loyalty() {
           onClose={() => setShowPoints(null)}
         >
           <div className="space-y-5">
-            <div className="rounded-xl bg-[#f7f7f3] p-4">
+            <div className="rounded-xl bg-[#111111] p-4">
               <p className="text-xs text-ink/45">Client</p>
 
               <p className="mt-1 font-semibold text-forest">
@@ -1364,7 +1364,7 @@ export default function Loyalty() {
               />
             </div>
 
-            <div className="rounded-xl bg-[#f7f7f3] p-4">
+            <div className="rounded-xl bg-[#111111] p-4">
               <div className="flex justify-between text-xs text-ink/50">
                 <span>Règle du programme</span>
 
@@ -1427,7 +1427,7 @@ export default function Loyalty() {
           onClose={closeRewards}
         >
           <div className="space-y-5">
-            <div className="rounded-xl bg-[#f7f7f3] p-4">
+            <div className="rounded-xl bg-[#111111] p-4">
               <p className="text-xs text-ink/45">Client</p>
 
               <p className="mt-1 font-semibold text-forest">
@@ -1461,7 +1461,7 @@ export default function Loyalty() {
                   return (
                     <div
                       key={reward.id}
-                      className="rounded-xl border border-ink/5 bg-[#fafaf7] p-4"
+                      className="rounded-xl border border-ink/5 bg-[#111111] p-4"
                     >
                       <div className="flex items-start gap-3">
                         <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#f4ead3] text-[#3B82F6]">
@@ -1544,7 +1544,7 @@ export default function Loyalty() {
                 </div>
               </div>
 
-              <div className="rounded-xl bg-[#f7f7f3] p-4">
+              <div className="rounded-xl bg-[#111111] p-4">
                 <p className="text-xs text-ink/45">
                   Récompense sélectionnée
                 </p>
@@ -1624,7 +1624,7 @@ export default function Loyalty() {
                 </select>
               </div>
 
-              <div className="rounded-xl bg-[#f7f7f3] p-4">
+              <div className="rounded-xl bg-[#111111] p-4">
                 <div className="flex justify-between text-xs">
                   <span className="text-ink/50">
                     Client
@@ -1732,7 +1732,7 @@ function Modal({
           <button
             type="button"
             onClick={onClose}
-            className="grid h-9 w-9 place-items-center rounded-full bg-[#f7f7f3] text-ink/50"
+            className="grid h-9 w-9 place-items-center rounded-full bg-[#111111] text-ink/50"
           >
             <X size={17} />
           </button>

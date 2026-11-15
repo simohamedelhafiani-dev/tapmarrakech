@@ -549,7 +549,7 @@ export default function Reviews() {
 
           {/* RÉSUMÉ */}
           <div className="p-6 md:p-8">
-            <div className="rounded-2xl bg-[#f7f7f3] p-5">
+            <div className="rounded-2xl bg-[#111111] p-5">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#3B82F6]">
                 Synthèse
               </p>
@@ -656,7 +656,7 @@ export default function Reviews() {
                     (issue, index) => (
                       <div
                         key={index}
-                        className="rounded-xl bg-[#f7f7f3] p-4"
+                        className="rounded-xl bg-[#111111] p-4"
                       >
                         <div className="flex flex-col justify-between gap-2 md:flex-row">
                           <p className="font-semibold text-forest">
@@ -690,7 +690,7 @@ export default function Reviews() {
             </div>
 
             {/* RECOMMANDATIONS */}
-            <div className="mt-5 rounded-2xl bg-[#f7f7f3] p-5">
+            <div className="mt-5 rounded-2xl bg-[#111111] p-5">
               <div className="flex items-center gap-2">
                 <Lightbulb
                   size={18}
