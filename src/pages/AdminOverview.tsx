@@ -145,7 +145,7 @@ export default function AdminOverview() {
         </header>
 
         {error !== null && (
-          <div className="rounded-2xl border border-[#EF4444]/20 bg-[#EF4444]/[0.06] px-4 py-3 text-sm text-[#B91C1C]">
+          <div className="rounded-2xl border border-[#242424]/20 bg-[#686D76]/[0.06] px-4 py-3 text-sm text-[#B0B0B0]">
             Erreur de chargement des statistiques : {error}
           </div>
         )}

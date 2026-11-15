@@ -611,7 +611,7 @@ export function DashboardLayout() {
                 <div className="absolute left-0 right-0 top-13 z-[70] overflow-hidden rounded-2xl border border-[#242424] bg-[#111111] shadow-[0_24px_70px_rgba(0,0,0,.55)]">
                   {searchResults.length ? searchResults.map((result) => (
                     <button key={`${result.type}-${result.id}`} type="button" onClick={() => selectSearchResult(result)} className="flex w-full items-start gap-3 border-b border-[#242424] px-4 py-3 text-left last:border-0 hover:bg-[#181818]">
-                      <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#3B82F6]/10 text-[#3B82F6]">{result.type === 'customer' ? '◉' : result.type === 'review' ? '★' : <Building2 size={15} />}</span>
+                      <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#686D76]/10 text-[#3B82F6]">{result.type === 'customer' ? '◉' : result.type === 'review' ? '★' : <Building2 size={15} />}</span>
                       <span className="min-w-0"><span className="block truncate text-xs font-semibold text-white">{result.title}</span><span className="mt-0.5 block truncate text-[10px] text-white/40">{result.subtitle}</span></span>
                     </button>
                   )) : <p className="px-4 py-5 text-center text-xs text-white/35">Aucun résultat.</p>}
@@ -682,7 +682,7 @@ export function DashboardLayout() {
                 >
                   <Bell size={17} />
                   {unreadNotifications.length > 0 && (
-                    <span className="absolute -right-1 -top-1 grid min-h-4 min-w-4 place-items-center rounded-full bg-[#3B82F6] px-1 text-[8px] font-bold text-[#050505]">
+                    <span className="absolute -right-1 -top-1 grid min-h-4 min-w-4 place-items-center rounded-full bg-[#686D76] px-1 text-[8px] font-bold text-[#050505]">
                       {unreadNotifications.length > 9 ? '9+' : unreadNotifications.length}
                     </span>
                   )}
@@ -712,7 +712,7 @@ export function DashboardLayout() {
                           </div>
                         ) : notifications.map((notification) => (
                           <div key={notification.id} className="flex gap-3 border-b border-[#242424] px-4 py-3.5 last:border-0">
-                            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#3B82F6]/10 text-[#3B82F6]">
+                            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#686D76]/10 text-[#3B82F6]">
                               {notification.tone === 'alert' ? <AlertTriangle size={16} /> : notification.tone === 'review' ? <MessageCircle size={16} /> : <Building2 size={16} />}
                             </div>
                             <div className="min-w-0 flex-1">
@@ -729,7 +729,7 @@ export function DashboardLayout() {
               </div>
 
               <div className="hidden h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 sm:flex">
-                <div className="grid h-7 w-7 place-items-center rounded-full bg-[#3B82F6] text-xs font-semibold text-[#050505]">{avatarLetter}</div>
+                <div className="grid h-7 w-7 place-items-center rounded-full bg-[#686D76] text-xs font-semibold text-[#050505]">{avatarLetter}</div>
                 <div className="max-w-[130px] leading-tight">
                   <p className="truncate text-xs font-semibold text-[#FFFFFF]">{displayName}</p>
                   <p className="text-[9px] text-[#B0B0B0]/40">{roleLabel}</p>
@@ -795,7 +795,7 @@ export function DashboardLayout() {
               </div>
               <p className="mt-5 text-sm font-medium text-white">Scannez pour créer votre carte fidélité</p>
               <p className="mt-1 text-[11px] leading-5 text-white/40">Le client remplit directement son formulaire sur son téléphone.</p>
-              {joinQrError && <p className="mt-3 text-xs font-medium text-red-300">{joinQrError}</p>}
+              {joinQrError && <p className="mt-3 text-xs font-medium text-[#B0B0B0]">{joinQrError}</p>}
 
               <div className="mt-5 rounded-2xl border border-[#242424] bg-[#0B0B0B] p-3 text-left">
                 <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-[#3B82F6]/70">Lien de création · NFC</p>
@@ -821,7 +821,7 @@ export function DashboardLayout() {
                     link.click();
                     link.remove();
                   }}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#3B82F6] px-3 py-2.5 text-xs font-semibold text-[#050505] hover:bg-[#60A5FA]"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#686D76] px-3 py-2.5 text-xs font-semibold text-[#050505] hover:bg-[#686D76]"
                 >
                   <Download size={14} /> Télécharger le QR
                 </button>
