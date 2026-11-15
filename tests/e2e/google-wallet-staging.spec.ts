@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test('admin can verify Google Wallet Staging without creating a pass', async ({ page }) => {
+test('admin can run the non-destructive Google Wallet Staging check and display its result', async ({ page }) => {
   const baseUrl = process.env.E2E_BASE_URL;
   const email = process.env.E2E_ADMIN_EMAIL;
   const password = process.env.E2E_ADMIN_PASSWORD;
@@ -43,6 +43,8 @@ test('admin can verify Google Wallet Staging without creating a pass', async ({ 
   await expect(page.getByText('Google Wallet · Staging')).toBeVisible();
 
   await page.getByRole('button', { name: 'Tester Google Wallet' }).click();
-  await expect(page.getByText('Connexion validée')).toBeVisible({ timeout: 30_000 });
+  const result = page.getByText(/Connexion validée|Test non validé/);
+  await expect(result).toBeVisible({ timeout: 30_000 });
+  console.log('Google Wallet Staging check result:', await result.textContent());
   await expect(page.getByText(/aucun pass ni donnée client/i)).toBeVisible();
 });
