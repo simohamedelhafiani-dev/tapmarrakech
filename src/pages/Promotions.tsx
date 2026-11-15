@@ -433,7 +433,7 @@ export default function Promotions() {
                       </p>
                     </div>
                     <span
-                      className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold ${promotion.active ? 'bg-green-100 text-green-700' : 'bg-ink/5 text-ink/40'}`}
+                      className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold ${promotion.active ? 'bg-[#686D76]/10 text-[#B0B0B0]' : 'bg-ink/5 text-ink/40'}`}
                     >
                       {promotion.active ? 'Publiée' : 'Masquée'}
                     </span>
