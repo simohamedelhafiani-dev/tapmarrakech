@@ -606,7 +606,7 @@ export default function Admin() {
     'Vue d’ensemble';
 
   return (
-    <div className="admin-depth-shell min-h-screen bg-[#050505] text-[#FFFFFF] selection:bg-[#3B82F6]/30">
+    <div className="admin-depth-shell min-h-screen bg-[#050505] text-[#FFFFFF] selection:bg-[#686D76]/30">
       <header className="admin-depth-topbar sticky top-0 z-50 border-b border-[#242424] bg-[#050505]/95 px-3 py-3 backdrop-blur-2xl sm:px-5">
         <div className="mx-auto flex max-w-[1700px] items-center gap-3">
           <button type="button" onClick={() => navigate('/admin')} className="flex shrink-0 items-center gap-3 text-left" aria-label="KELYANI">
@@ -622,12 +622,12 @@ export default function Admin() {
               <Search size={15} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#3B82F6]" />
               <input type="search" value={searchQuery} onFocus={() => setSearchOpen(true)} onChange={event => { setSearchQuery(event.target.value); setSearchOpen(true); }} placeholder="Rechercher un établissement, client, avis..." aria-label="Rechercher dans KELYANI" className="h-11 w-full rounded-3xl border border-[#242424] bg-[#111111] pl-11 pr-4 text-sm text-[#FFFFFF] outline-none placeholder:text-[#B0B0B0]/35 focus:border-[#3B82F6]/60 focus:ring-1 focus:ring-[#3B82F6]/20" />
             </label>
-            {searchOpen && searchQuery.trim().length >= 2 && <div className="absolute left-0 right-0 top-13 z-[70] overflow-hidden rounded-2xl border border-[#242424] bg-[#111111] shadow-[0_24px_70px_rgba(0,0,0,.55)]">{searchResults.length ? searchResults.map(result => <button key={`${result.type}-${result.id}`} type="button" onClick={() => selectSearchResult(result)} className="flex w-full items-start gap-3 border-b border-[#242424] px-4 py-3 text-left last:border-0 hover:bg-[#181818]"><span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#3B82F6]/10 text-[#3B82F6]">{result.type === 'customer' ? '◉' : result.type === 'review' ? '★' : <Building2 size={15} />}</span><span className="min-w-0"><span className="block truncate text-xs font-semibold text-white">{result.title}</span><span className="mt-0.5 block truncate text-[10px] text-white/40">{result.subtitle}</span></span></button>) : <p className="px-4 py-5 text-center text-xs text-white/35">Aucun résultat.</p>}</div>}
+            {searchOpen && searchQuery.trim().length >= 2 && <div className="absolute left-0 right-0 top-13 z-[70] overflow-hidden rounded-2xl border border-[#242424] bg-[#111111] shadow-[0_24px_70px_rgba(0,0,0,.55)]">{searchResults.length ? searchResults.map(result => <button key={`${result.type}-${result.id}`} type="button" onClick={() => selectSearchResult(result)} className="flex w-full items-start gap-3 border-b border-[#242424] px-4 py-3 text-left last:border-0 hover:bg-[#181818]"><span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#686D76]/10 text-[#3B82F6]">{result.type === 'customer' ? '◉' : result.type === 'review' ? '★' : <Building2 size={15} />}</span><span className="min-w-0"><span className="block truncate text-xs font-semibold text-white">{result.title}</span><span className="mt-0.5 block truncate text-[10px] text-white/40">{result.subtitle}</span></span></button>) : <p className="px-4 py-5 text-center text-xs text-white/35">Aucun résultat.</p>}</div>}
           </div>
 
           <div className="ml-auto flex shrink-0 items-center gap-2">
             <div className="hidden items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 py-2 text-[10px] font-semibold text-[#B0B0B0]/65 sm:flex">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#3B82F6]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-[#686D76]" />
               Connecté
             </div>
             <label className="hidden items-center rounded-full border border-[#242424] bg-[#111111] px-3 py-2 text-[10px] font-semibold text-[#B0B0B0]/65 lg:flex">
@@ -639,7 +639,7 @@ export default function Admin() {
             </label>
             <button type="button" className="relative grid h-10 w-10 place-items-center rounded-full border border-[#242424] bg-[#111111] text-[#B0B0B0]/65 transition hover:border-[#3B82F6]/50 hover:text-[#60A5FA]" aria-label="Notifications">
               <Bell size={16} />
-              <span className="absolute right-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-[#3B82F6]" />
+              <span className="absolute right-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-[#686D76]" />
             </button>
             <button type="button" onClick={reloadAll} className="hidden h-10 items-center gap-2 rounded-full border border-[#242424] bg-[#111111] px-3 text-[10px] font-semibold text-[#B0B0B0]/65 transition hover:border-[#3B82F6]/50 hover:text-[#60A5FA] lg:flex">
               <RefreshCw size={13} />
@@ -733,33 +733,33 @@ export default function Admin() {
 
           {section === 'ai' && (
             <section className="space-y-6">
-              <header className="rounded-3xl border border-[#3B82F6]/20 bg-gradient-to-br from-[#14120e] via-[#0b0b0b] to-[#111111] p-5 sm:p-7">
+              <header className="rounded-3xl border border-[#3B82F6]/20 bg-gradient-to-br from-[#111111] via-[#050505] to-[#111111] p-5 sm:p-7">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#3B82F6]/70">Administration centrale</p>
                     <h2 className="font-display text-3xl text-[#60A5FA] md:text-4xl">Paramètres automatisation</h2>
                     <p className="mt-2 max-w-2xl text-sm leading-6 text-white/50">Centralisez les avis, les réglages IA et toutes les automatisations dans un tableau de bord unique.</p>
                   </div>
-                  <span className="inline-flex w-fit items-center gap-2 rounded-full border border-[#3B82F6]/25 bg-[#3B82F6]/5 px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-[#60A5FA]"><Sparkles size={13} /> Centre IA</span>
+                  <span className="inline-flex w-fit items-center gap-2 rounded-full border border-[#3B82F6]/25 bg-[#686D76]/5 px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-[#60A5FA]"><Sparkles size={13} /> Centre IA</span>
                 </div>
               </header>
 
               {aiWorkspaceTab === 'home' ? (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  <button type="button" onClick={() => setAIWorkspaceTab('engine')} className="group min-h-[190px] rounded-3xl border border-[#3B82F6]/35 bg-gradient-to-br from-[#19150c] via-[#0d0d0d] to-[#080808] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#3B82F6]/75 hover:shadow-[0_20px_45px_rgba(59,130,246,.12)] [transform:perspective(1000px)_rotateX(2deg)]">
-                    <span className="grid h-12 w-12 place-items-center rounded-2xl border border-[#3B82F6]/30 bg-[#3B82F6]/10 text-[#60A5FA]"><Brain size={22} /></span>
+                  <button type="button" onClick={() => setAIWorkspaceTab('engine')} className="group min-h-[190px] rounded-3xl border border-[#3B82F6]/35 bg-gradient-to-br from-[#111111] via-[#0d0d0d] to-[#050505] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#3B82F6]/75 hover:shadow-[0_20px_45px_rgba(59,130,246,.12)] [transform:perspective(1000px)_rotateX(2deg)]">
+                    <span className="grid h-12 w-12 place-items-center rounded-2xl border border-[#3B82F6]/30 bg-[#686D76]/10 text-[#60A5FA]"><Brain size={22} /></span>
                     <span className="mt-5 block text-lg font-semibold text-[#60A5FA]">Moteur IA global</span>
                     <span className="mt-2 block text-sm leading-6 text-white/50">Fournisseur, modèle, clé API, température et limites de génération.</span>
                     <span className="mt-5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#3B82F6]">Ouvrir les paramètres →</span>
                   </button>
-                  <button type="button" onClick={() => setAIWorkspaceTab('prompts')} className="group min-h-[190px] rounded-3xl border border-[#242424] bg-gradient-to-br from-[#171717] via-[#0d0d0d] to-[#080808] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#3B82F6]/60 hover:shadow-[0_20px_45px_rgba(59,130,246,.1)] [transform:perspective(1000px)_rotateX(2deg)]">
+                  <button type="button" onClick={() => setAIWorkspaceTab('prompts')} className="group min-h-[190px] rounded-3xl border border-[#242424] bg-gradient-to-br from-[#171717] via-[#0d0d0d] to-[#050505] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#3B82F6]/60 hover:shadow-[0_20px_45px_rgba(59,130,246,.1)] [transform:perspective(1000px)_rotateX(2deg)]">
                     <span className="grid h-12 w-12 place-items-center rounded-2xl border border-white/10 bg-white/5 text-[#60A5FA]"><FileText size={22} /></span>
                     <span className="mt-5 block text-lg font-semibold text-white">Prompts & fonctionnalités</span>
                     <span className="mt-2 block text-sm leading-6 text-white/50">Instructions métier et comportements des fonctionnalités IA.</span>
                     <span className="mt-5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#3B82F6]">Ouvrir les paramètres →</span>
                   </button>
-                  <button type="button" onClick={() => setAIWorkspaceTab('google')} className="group min-h-[190px] rounded-3xl border border-[#3B82F6]/35 bg-gradient-to-br from-[#19150c] via-[#0d0d0d] to-[#080808] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#3B82F6]/75 hover:shadow-[0_20px_45px_rgba(59,130,246,.12)] [transform:perspective(1000px)_rotateX(2deg)]">
-                    <span className="grid h-12 w-12 place-items-center rounded-2xl border border-[#3B82F6]/30 bg-[#3B82F6]/10 text-[#60A5FA]"><MessageSquare size={22} /></span>
+                  <button type="button" onClick={() => setAIWorkspaceTab('google')} className="group min-h-[190px] rounded-3xl border border-[#3B82F6]/35 bg-gradient-to-br from-[#111111] via-[#0d0d0d] to-[#050505] p-6 text-left shadow-[0_12px_35px_rgba(0,0,0,.28)] transition duration-200 hover:-translate-y-1 hover:border-[#3B82F6]/75 hover:shadow-[0_20px_45px_rgba(59,130,246,.12)] [transform:perspective(1000px)_rotateX(2deg)]">
+                    <span className="grid h-12 w-12 place-items-center rounded-2xl border border-[#3B82F6]/30 bg-[#686D76]/10 text-[#60A5FA]"><MessageSquare size={22} /></span>
                     <span className="mt-5 block text-lg font-semibold text-[#60A5FA]">Avis Google & automatisations</span>
                     <span className="mt-2 block text-sm leading-6 text-white/50">Un seul espace pour connecter Google, gérer les avis, configurer les réponses IA, les langues, les liens et la fréquence de synchronisation.</span>
                     <span className="mt-5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#3B82F6]">Ouvrir l’espace centralisé →</span>
@@ -776,7 +776,7 @@ export default function Admin() {
                       {establishments.length ? (
                         <div className="space-y-4">
                           <label className="block max-w-xl text-xs font-semibold text-[#3B82F6]">Établissement
-                            <select value={selectedMenuEstablishmentId} onChange={event => setSelectedMenuEstablishmentId(event.target.value)} className="mt-2 w-full rounded-xl border border-[#242424] bg-[#080808] px-3 py-3 text-sm text-white">
+                            <select value={selectedMenuEstablishmentId} onChange={event => setSelectedMenuEstablishmentId(event.target.value)} className="mt-2 w-full rounded-xl border border-[#242424] bg-[#050505] px-3 py-3 text-sm text-white">
                               <option value="">Choisir un établissement</option>
                               {establishments.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}
                             </select>
@@ -811,6 +811,7 @@ export default function Admin() {
 
           {section === 'loyalty' && (
             <section className="space-y-5">
+              <GoogleWalletStagingPanel />
               {establishments.length > 0 ? (
                 <>
                   <div className="rounded-3xl border border-[#242424] bg-[#111111] p-4 shadow-sm">
@@ -830,25 +831,25 @@ export default function Admin() {
                         </select>
                       </label>
 
-                      <div className="flex flex-wrap gap-2 rounded-2xl border border-[#242424]/10 bg-[#0b0b0b] p-1">
+                      <div className="flex flex-wrap gap-2 rounded-2xl border border-[#242424]/10 bg-[#050505] p-1">
                         <button
                           type="button"
                           onClick={() => setLoyaltyTab('program')}
-                          className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${loyaltyTab === 'program' ? 'bg-[#3B82F6] text-[#050505]' : 'text-[#FFFFFF]/45 hover:text-[#60A5FA]'}`}
+                          className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${loyaltyTab === 'program' ? 'bg-[#686D76] text-[#050505]' : 'text-[#FFFFFF]/45 hover:text-[#60A5FA]'}`}
                         >
                           <Gem size={14} /> Programme
                         </button>
                         <button
                           type="button"
                           onClick={() => setLoyaltyTab('notifications')}
-                          className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${loyaltyTab === 'notifications' ? 'bg-[#3B82F6] text-[#050505]' : 'text-[#FFFFFF]/45 hover:text-[#60A5FA]'}`}
+                          className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${loyaltyTab === 'notifications' ? 'bg-[#686D76] text-[#050505]' : 'text-[#FFFFFF]/45 hover:text-[#60A5FA]'}`}
                         >
                           <Bell size={14} /> Notifications
                         </button>
                         <button
                           type="button"
                           onClick={() => setLoyaltyTab('raffles')}
-                          className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${loyaltyTab === 'raffles' ? 'bg-[#3B82F6] text-[#050505]' : 'text-[#FFFFFF]/45 hover:text-[#60A5FA]'}`}
+                          className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${loyaltyTab === 'raffles' ? 'bg-[#686D76] text-[#050505]' : 'text-[#FFFFFF]/45 hover:text-[#60A5FA]'}`}
                         >
                           <Ticket size={14} /> Tombola
                         </button>
@@ -1202,7 +1203,7 @@ function Overview({
             </div>
           </div>
           <div className="mt-2 space-y-2">
-            <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-3"><span className="flex items-center gap-2 text-xs text-white/60"><span className="h-2.5 w-2.5 rounded-full bg-[#3B82F6]" />Avis positifs</span><strong className="text-sm text-white">{globalStats.positiveReviews.toLocaleString('fr-FR')}</strong></div>
+            <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-3"><span className="flex items-center gap-2 text-xs text-white/60"><span className="h-2.5 w-2.5 rounded-full bg-[#686D76]" />Avis positifs</span><strong className="text-sm text-white">{globalStats.positiveReviews.toLocaleString('fr-FR')}</strong></div>
             <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-3"><span className="flex items-center gap-2 text-xs text-white/60"><span className="h-2.5 w-2.5 rounded-full bg-[#686D76]" />À surveiller</span><strong className="text-sm text-white">{globalStats.negativeReviews.toLocaleString('fr-FR')}</strong></div>
           </div>
         </section>
@@ -1233,7 +1234,7 @@ function AdminMetric({ icon: Icon, label, value, detail }: { icon: typeof Star; 
       className="group relative overflow-hidden rounded-2xl border border-white/[0.07] bg-[linear-gradient(145deg,#171717,#0C0C0C)] p-4 shadow-[0_14px_36px_rgba(0,0,0,0.18)] transition duration-200 hover:-translate-y-0.5 hover:border-[#3B82F6]/25 sm:rounded-[22px] sm:p-5"
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="grid h-10 w-10 place-items-center rounded-xl border border-[#3B82F6]/15 bg-[#3B82F6]/[0.08] text-[#60A5FA]"><Icon size={18} /></div>
+        <div className="grid h-10 w-10 place-items-center rounded-xl border border-[#3B82F6]/15 bg-[#686D76]/[0.08] text-[#60A5FA]"><Icon size={18} /></div>
       </div>
       <p className="mt-4 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#FFFFFF]/45">{label}</p>
       <p className="mt-1 text-2xl font-semibold tracking-tight text-white sm:text-[28px]">{value}</p>
@@ -1932,7 +1933,7 @@ function EstablishmentWorkspace({
   return (
     <div>
       <div className="relative mb-6 overflow-hidden rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-[0_18px_55px_rgba(15,23,42,0.06)] sm:p-8">
-        <div className="absolute right-0 top-0 h-44 w-44 rounded-full bg-[#3B82F6]/10 blur-3xl" />
+        <div className="absolute right-0 top-0 h-44 w-44 rounded-full bg-[#686D76]/10 blur-3xl" />
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <button onClick={onBack} className="mb-5 inline-flex items-center gap-2 text-[11px] font-semibold text-[#3B82F6]/65 transition hover:text-[#3B82F6]">← Retour aux établissements</button>
@@ -1957,10 +1958,10 @@ function EstablishmentWorkspace({
       <div className="mb-6 overflow-hidden rounded-3xl border border-[#242424]/10 bg-[#111111] text-[#FFFFFF] shadow-[0_18px_55px_rgba(59,130,246,0.14)]">
         <div className="grid lg:grid-cols-[1fr_210px]">
           <div className="relative p-6 sm:p-7">
-            <div className="absolute -right-20 -top-20 h-52 w-52 rounded-full bg-[#3B82F6]/10 blur-3xl" />
+            <div className="absolute -right-20 -top-20 h-52 w-52 rounded-full bg-[#686D76]/10 blur-3xl" />
             <div className="relative">
               <div className="flex items-center gap-2">
-                <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#3B82F6] text-[#3B82F6]"><Gift size={16} /></span>
+                <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#686D76] text-[#3B82F6]"><Gift size={16} /></span>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#3B82F6]">Accès équipe</p>
                   <h3 className="mt-1 text-lg font-semibold">Scanner fidélité</h3>
@@ -2566,7 +2567,7 @@ function UnassignedResponsiblesPanel({ establishments, reload }: { establishment
   };
 
   return (
-    <section className="mb-6 rounded-3xl border border-[#3B82F6]/25 bg-gradient-to-br from-[#15120c] to-[#0b0b0b] p-5 sm:p-6">
+    <section className="mb-6 rounded-3xl border border-[#3B82F6]/25 bg-gradient-to-br from-[#111111] to-[#050505] p-5 sm:p-6">
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#3B82F6]/70">Comptes inscrits</p>
@@ -2577,7 +2578,7 @@ function UnassignedResponsiblesPanel({ establishments, reload }: { establishment
           {loading ? 'Actualisation…' : 'Actualiser'}
         </button>
       </div>
-      {error ? <p className="mt-4 rounded-xl border border-red-500/20 bg-red-500/5 p-3 text-xs text-red-300">{error}</p> :
+      {error ? <p className="mt-4 rounded-xl border border-[#686D76]/20 bg-[#686D76]/5 p-3 text-xs text-[#B0B0B0]">{error}</p> :
         loading ? <p className="mt-4 text-sm text-white/40">Chargement des comptes…</p> :
         accounts.length === 0 ? <p className="mt-4 rounded-xl border border-white/5 bg-white/[0.02] p-4 text-sm text-white/45">Aucun compte responsable en attente d’attribution.</p> :
         <div className="mt-4 space-y-3">
@@ -2588,10 +2589,10 @@ function UnassignedResponsiblesPanel({ establishments, reload }: { establishment
                 <p className="truncate text-xs text-white/45">{account.email || 'E-mail non renseigné'}</p>
               </div>
               <div className="flex flex-col gap-2 sm:flex-row">
-                <select value={selected[account.id] ?? establishments[0]?.id ?? ''} onChange={event => setSelected(current => ({ ...current, [account.id]: event.target.value }))} className="min-w-[190px] rounded-xl border border-white/10 bg-[#080808] px-3 py-2.5 text-xs text-white">
+                <select value={selected[account.id] ?? establishments[0]?.id ?? ''} onChange={event => setSelected(current => ({ ...current, [account.id]: event.target.value }))} className="min-w-[190px] rounded-xl border border-white/10 bg-[#050505] px-3 py-2.5 text-xs text-white">
                   {establishments.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}
                 </select>
-                <button type="button" onClick={() => void assign(account.id)} disabled={savingId === account.id || establishments.length === 0} className="rounded-xl bg-[#3B82F6] px-4 py-2.5 text-xs font-bold text-black disabled:opacity-50">
+                <button type="button" onClick={() => void assign(account.id)} disabled={savingId === account.id || establishments.length === 0} className="rounded-xl bg-[#686D76] px-4 py-2.5 text-xs font-bold text-black disabled:opacity-50">
                   {savingId === account.id ? 'Attribution…' : 'Attribuer'}
                 </button>
               </div>
@@ -4815,7 +4816,7 @@ function AIConfigurationSection({
                 type="checkbox"
                 checked={active}
                 onChange={(e) => setActive(e.target.checked)}
-                className="h-4 w-4 accent-[#173d32]"
+                className="h-4 w-4 accent-[#686D76]"
               />
               <span>
                 <span className="block text-sm font-semibold text-[#3B82F6]">
@@ -5038,18 +5039,18 @@ function PDFReportsSection({ establishments }: { establishments: Establishment[]
 <html lang="fr"><head><meta charset="utf-8"><title>${escapeHtml(title)} — ${escapeHtml(selected.name)}</title>
 <style>
 @page{size:A4;margin:16mm 15mm 18mm}
-*{box-sizing:border-box}body{margin:0;background:#fff;color:#17241f;font-family:Inter,Arial,Helvetica,sans-serif;font-size:11px;line-height:1.55}
-.page{max-width:800px;margin:auto}.cover{padding:0 0 26px;border-bottom:2px solid #173d32;margin-bottom:24px}
-.brand{display:flex;justify-content:space-between;align-items:center;padding:8px 0 22px;border-bottom:1px solid #e8e5de}
+*{box-sizing:border-box}body{margin:0;background:#fff;color:#FFFFFF;font-family:Inter,Arial,Helvetica,sans-serif;font-size:11px;line-height:1.55}
+.page{max-width:800px;margin:auto}.cover{padding:0 0 26px;border-bottom:2px solid #686D76;margin-bottom:24px}
+.brand{display:flex;justify-content:space-between;align-items:center;padding:8px 0 22px;border-bottom:1px solid #242424}
 .brand-logo{display:flex;align-items:center}.brand-logo img{display:block;width:150px;height:auto;max-height:42px;object-fit:contain;object-position:left center}
-.doc-type{font-size:9px;text-transform:uppercase;letter-spacing:2px;color:#8a8b82;font-weight:700}
-h1{font-size:31px;line-height:1.08;letter-spacing:-1.2px;margin:28px 0 8px;color:#173d32} .subtitle{font-size:13px;color:#69716c;margin:0}
-.meta{display:flex;gap:24px;flex-wrap:wrap;margin-top:20px;color:#59625d;font-size:10px}.meta strong{display:block;color:#173d32;font-size:11px;margin-bottom:2px}
-.report-section{margin-top:28px;break-inside:auto}.section-heading{display:flex;align-items:center;gap:9px;border-bottom:1px solid #deddd7;padding-bottom:9px;margin-bottom:13px}.section-heading span{width:4px;height:20px;border-radius:4px;background:#3B82F6}.section-heading h2{font-size:18px;color:#173d32;margin:0}
-.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:12px 0}.kpi{border:1px solid #e8e5de;border-radius:10px;padding:12px;background:#fafaf8;min-height:76px}.kpi-label{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:#7c837e;font-weight:700}.kpi-value{font-size:19px;font-weight:800;color:#173d32;margin-top:5px}.kpi-note{font-size:8px;color:#969b96;margin-top:2px}
-.insight{border-left:3px solid #3B82F6;background:#f7f3ea;padding:12px 14px;margin:15px 0;border-radius:0 8px 8px 0}.insight strong{color:#173d32}.insight p{margin:3px 0 0;color:#626b65}
-.table-wrap{border:1px solid #e4e2db;border-radius:10px;overflow:hidden;margin-top:15px}table{width:100%;border-collapse:collapse}th{background:#173d32;color:#fff;text-align:left;font-size:8px;text-transform:uppercase;letter-spacing:.7px;padding:8px}td{padding:8px;border-bottom:1px solid #eee;font-size:9px;vertical-align:top}tr:last-child td{border-bottom:0}.rating{font-weight:800;color:#173d32}.badge{display:inline-block;padding:2px 6px;border-radius:99px;font-size:8px;font-weight:700}.positive{background:#e8f2ed;color:#276044}.negative{background:#fbebeb;color:#a13b3b}.empty{text-align:center;border:1px dashed #ddd;padding:20px;color:#999;border-radius:9px}
-.footer{margin-top:35px;padding-top:12px;border-top:1px solid #e5e3dc;display:flex;justify-content:space-between;color:#929790;font-size:8px}.conf{color:#173d32;font-weight:700}
+.doc-type{font-size:9px;text-transform:uppercase;letter-spacing:2px;color:#B0B0B0;font-weight:700}
+h1{font-size:31px;line-height:1.08;letter-spacing:-1.2px;margin:28px 0 8px;color:#686D76} .subtitle{font-size:13px;color:#B0B0B0;margin:0}
+.meta{display:flex;gap:24px;flex-wrap:wrap;margin-top:20px;color:#B0B0B0;font-size:10px}.meta strong{display:block;color:#686D76;font-size:11px;margin-bottom:2px}
+.report-section{margin-top:28px;break-inside:auto}.section-heading{display:flex;align-items:center;gap:9px;border-bottom:1px solid #242424;padding-bottom:9px;margin-bottom:13px}.section-heading span{width:4px;height:20px;border-radius:4px;background:#3B82F6}.section-heading h2{font-size:18px;color:#686D76;margin:0}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:12px 0}.kpi{border:1px solid #242424;border-radius:10px;padding:12px;background:#111111;min-height:76px}.kpi-label{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:#B0B0B0;font-weight:700}.kpi-value{font-size:19px;font-weight:800;color:#686D76;margin-top:5px}.kpi-note{font-size:8px;color:#B0B0B0;margin-top:2px}
+.insight{border-left:3px solid #3B82F6;background:#111111;padding:12px 14px;margin:15px 0;border-radius:0 8px 8px 0}.insight strong{color:#686D76}.insight p{margin:3px 0 0;color:#B0B0B0}
+.table-wrap{border:1px solid #242424;border-radius:10px;overflow:hidden;margin-top:15px}table{width:100%;border-collapse:collapse}th{background:#686D76;color:#fff;text-align:left;font-size:8px;text-transform:uppercase;letter-spacing:.7px;padding:8px}td{padding:8px;border-bottom:1px solid #eee;font-size:9px;vertical-align:top}tr:last-child td{border-bottom:0}.rating{font-weight:800;color:#686D76}.badge{display:inline-block;padding:2px 6px;border-radius:99px;font-size:8px;font-weight:700}.positive{background:#111111;color:#686D76}.negative{background:#111111;color:#686D76}.empty{text-align:center;border:1px dashed #242424;padding:20px;color:#B0B0B0;border-radius:9px}
+.footer{margin-top:35px;padding-top:12px;border-top:1px solid #242424;display:flex;justify-content:space-between;color:#B0B0B0;font-size:8px}.conf{color:#686D76;font-weight:700}
 @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.no-print{display:none!important}.report-section{break-inside:auto}.table-wrap{break-inside:auto}thead{display:table-header-group}}
 </style></head><body><div class="page">
 <div class="cover"><div class="brand"><div class="brand-logo"><img src="/kelyani-final.svg" alt="KELYANI"></div><div class="doc-type">Rapport de performance</div></div>
@@ -5088,7 +5089,7 @@ ${body}
   );
 }
 
-function escapeHtml(value: string) { return value.replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char] as string)); }
+function escapeHtml(value: string) { return value.replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#686D76;'}[char] as string)); }
 function formatReportMad(value: number) { return `${value.toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:0})} DH`; }
 
 /* =========================================================
@@ -5579,6 +5580,47 @@ function BillingSection({
   );
 }
 
+function GoogleWalletStagingPanel() {
+  const [walletCheck, setWalletCheck] = useState<{ status: 'idle' | 'loading' | 'ok' | 'error'; detail: string; checkedAt?: string }>({ status: 'idle', detail: '' });
+
+  const runWalletCheck = async () => {
+    setWalletCheck({ status: 'loading', detail: 'Vérification des secrets et de l’accès Google Wallet…' });
+    try {
+      const { data, error } = await supabase.functions.invoke('google-wallet-staging-check', { body: {} });
+      if (error) throw new Error(error.message || 'Échec de l’appel Edge Function');
+      if (!data?.success) throw new Error(data?.error || 'La vérification Google Wallet a échoué');
+      setWalletCheck({ status: 'ok', detail: data.message || 'Authentification et API Google Wallet accessibles.', checkedAt: new Date().toISOString() });
+    } catch (error) {
+      setWalletCheck({ status: 'error', detail: error instanceof Error ? error.message : 'Erreur inconnue', checkedAt: new Date().toISOString() });
+    }
+  };
+
+  return (
+    <div className="mb-6 rounded-3xl border border-[#686D76]/40 bg-[#111111] p-6 shadow-sm">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/40">Google Wallet · Staging</p>
+          <h3 className="mt-2 text-lg font-semibold text-white">Test de connexion Google Wallet</h3>
+          <p className="mt-1 max-w-2xl text-xs leading-5 text-white/50">Vérifie les secrets serveur, l’authentification du compte de service et l’accès à l’Issuer. Aucun pass ni donnée client n’est créé ou modifié.</p>
+        </div>
+        <button type="button" onClick={() => void runWalletCheck()} disabled={walletCheck.status === 'loading'} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#686D76] px-4 py-3 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50">
+          <RefreshCw size={14} className={walletCheck.status === 'loading' ? 'animate-spin' : ''} />
+          {walletCheck.status === 'loading' ? 'Test en cours…' : 'Tester Google Wallet'}
+        </button>
+      </div>
+      {walletCheck.status !== 'idle' && (
+        <div className="mt-4 rounded-xl border border-[#686D76] bg-[#050505] p-4 text-xs leading-5 text-white/70">
+          <div className="flex items-center gap-2 font-semibold">
+            {walletCheck.status === 'ok' ? <CheckCircle2 size={15} /> : walletCheck.status === 'error' ? <AlertTriangle size={15} /> : <RefreshCw size={15} className="animate-spin" />}
+            {walletCheck.status === 'ok' ? 'Connexion validée' : walletCheck.status === 'error' ? 'Test non validé' : 'Vérification en cours'}
+          </div>
+          <p className="mt-2 break-words">{walletCheck.detail}</p>
+          {walletCheck.checkedAt && <p className="mt-2 text-[10px] opacity-60">Dernier test : {new Date(walletCheck.checkedAt).toLocaleString('fr-FR')}</p>}
+        </div>
+      )}
+    </div>
+  );
+}
 function SystemSection({
   billing,
   globalStats,
@@ -5735,7 +5777,7 @@ function SystemSection({
       <div className="mt-6 rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-sm">
         <div className="flex items-center gap-3"><Filter size={17} className="text-[#3B82F6]" /><h3 className="font-semibold">État global</h3></div>
         <div className="mt-4 rounded-xl bg-[#111111] p-4 text-sm">
-          {errorCount === 0 && checks.length > 0 ? <span className="font-semibold text-[#3B82F6]">Tous les contrôles exécutés sont opérationnels.</span> : <span className="font-semibold text-[#a15c50]">{errorCount} contrôle{errorCount > 1 ? 's' : ''} nécessite{errorCount > 1 ? 'nt' : ''} une vérification.</span>}
+          {errorCount === 0 && checks.length > 0 ? <span className="font-semibold text-[#3B82F6]">Tous les contrôles exécutés sont opérationnels.</span> : <span className="font-semibold text-[#686D76]">{errorCount} contrôle{errorCount > 1 ? 's' : ''} nécessite{errorCount > 1 ? 'nt' : ''} une vérification.</span>}
         </div>
         <div className="mt-4 grid gap-3 md:grid-cols-3">
           <SystemMetric label="Avis" value={globalStats.reviews} />

@@ -221,8 +221,8 @@ table {
    Legacy feature pages still contain light utility classes; scope this normalization
    strictly to the responsible dashboard shell so public pages are unaffected. */
 .dashboard-depth-shell [class~="bg-white"],
-.dashboard-depth-shell [class~="bg-[#fffdf9]"],
-.dashboard-depth-shell [class~="bg-[#f7f7f3]"] {
+.dashboard-depth-shell [class~="bg-[#111111]"],
+.dashboard-depth-shell [class~="bg-[#111111]"] {
   background-color: #111111 !important;
 }
 
@@ -331,7 +331,7 @@ table {
   padding: 15px;
   background:
     linear-gradient(125deg, rgba(255,255,255,.055), transparent 30%),
-    linear-gradient(145deg, #191817 0%, #10100f 52%, #080808 100%);
+    linear-gradient(145deg, #111111 0%, #050505 52%, #080808 100%);
   box-shadow:
     0 34px 54px -25px rgba(0,0,0,.9),
     0 12px 28px -16px rgba(59,130,246,.28),
@@ -377,7 +377,7 @@ table {
 .kelyani-kpi-tile>div:first-child,.kelyani-chart-tile>div:first-child {
   color:rgba(255,255,255,.42);font-size:8px;font-weight:800;letter-spacing:.13em;
 }
-.kelyani-kpi-tile strong { font-size:25px;line-height:1;letter-spacing:-.06em;color:#f8f5ec;font-weight:650; }
+.kelyani-kpi-tile strong { font-size:25px;line-height:1;letter-spacing:-.06em;color:#FFFFFF;font-weight:650; }
 .kelyani-kpi-featured { border-color:rgba(59,130,246,.24);background:linear-gradient(145deg,rgba(59,130,246,.12),rgba(59,130,246,.025)); }
 .kelyani-chart-tile { grid-column:1/-1;background:linear-gradient(100deg,rgba(59,130,246,.045),rgba(255,255,255,.012)); }
 .kelyani-dashboard-footer { padding-top:10px;border-top:1px solid rgba(255,255,255,.065);font-size:8px;color:rgba(255,255,255,.34);letter-spacing:.09em; }
@@ -411,7 +411,7 @@ table {
   color:#60A5FA;border:1px solid rgba(59,130,246,.17);
 }
 .kelyani-loyalty-symbol { font-family:Georgia,serif;font-size:17px;font-weight:700; }
-.kelyani-float-check { display:grid;place-items:center;width:17px;height:17px;border-radius:50%;background:rgba(82,180,124,.14);color:#7bd9a0!important;font-size:10px!important; }
+.kelyani-float-check { display:grid;place-items:center;width:17px;height:17px;border-radius:50%;background:rgba(82,180,124,.14);color:#B0B0B0!important;font-size:10px!important; }
 @keyframes kelyani-dashboard-float { 0%,100% { transform:rotateX(5deg) rotateY(-8deg) rotateZ(-1deg) translateY(0); } 50% { transform:rotateX(3deg) rotateY(-5deg) rotateZ(-.2deg) translateY(-5px); } }
 @keyframes kelyani-chip-float { 0%,100% { translate:0 0; } 50% { translate:0 -7px; } }
 @keyframes kelyani-glow-pulse { 0%,100% { opacity:.65;scale:1; } 50% { opacity:1;scale:1.25; } }
@@ -454,7 +454,7 @@ table {
   border-color: rgba(59,130,246,.34);
   background:
     linear-gradient(112deg, rgba(255,255,255,.085) 0%, transparent 24%, transparent 66%, rgba(59,130,246,.055) 100%),
-    linear-gradient(145deg, #1d1b16 0%, #121211 42%, #080808 100%);
+    linear-gradient(145deg, #111111 0%, #111111 42%, #080808 100%);
   box-shadow:
     0 42px 70px -28px rgba(0,0,0,.96),
     0 18px 38px -20px rgba(59,130,246,.32),
@@ -558,7 +558,7 @@ table {
   background:
     linear-gradient(115deg,rgba(255,255,255,.095),transparent 24%,transparent 62%,rgba(59,130,246,.075)),
     radial-gradient(ellipse at 15% 0%,rgba(59,130,246,.09),transparent 42%),
-    linear-gradient(145deg,#1d1c18 0%,#121211 43%,#080808 100%);
+    linear-gradient(145deg,#111111 0%,#111111 43%,#080808 100%);
   box-shadow:
     0 46px 76px -30px rgba(0,0,0,.98),
     0 18px 38px -18px rgba(59,130,246,.28),
