@@ -1021,7 +1021,7 @@ export default function Employee() {
   if (loginLoading) {
     return (
       <div className="min-h-screen grid place-items-center bg-[#f7f7f3]">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#242424] border-t-transparent" />
       </div>
     );
   }
@@ -1042,7 +1042,7 @@ export default function Employee() {
               <p className="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#3B82F6]">
                 Espace employé
               </p>
-              <h1 className="mt-2 font-display text-3xl text-forest">
+              <h1 className="mt-2 font-display text-3xl text-[#3B82F6]">
                 Entrez votre code
               </h1>
               <p className="mt-2 text-sm leading-6 text-ink/45">
@@ -1062,14 +1062,14 @@ export default function Employee() {
                   if (e.key === 'Enter') loginEmployee();
                 }}
                 placeholder="Code de connexion"
-                className="w-full rounded-2xl border border-ink/10 bg-[#f7f7f3] py-4 pl-12 pr-4 text-center text-lg tracking-[0.25em] outline-none focus:border-forest"
+                className="w-full rounded-2xl border border-ink/10 bg-[#f7f7f3] py-4 pl-12 pr-4 text-center text-lg tracking-[0.25em] outline-none focus:border-[#242424]"
               />
             </div>
 
             <button
               onClick={loginEmployee}
               disabled={loginSaving}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-forest py-4 text-sm font-semibold text-white transition hover:bg-forest-light disabled:opacity-50"
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#050505] py-4 text-sm font-semibold text-white transition hover:bg-[#050505]-light disabled:opacity-50"
             >
               <KeyRound size={17} />
               {loginSaving ? 'Connexion...' : 'Accéder à mon espace'}
@@ -1079,7 +1079,7 @@ export default function Employee() {
               onClick={() => {
                 window.location.href = '/login';
               }}
-              className="mt-5 w-full text-center text-xs font-medium text-ink/40 hover:text-forest"
+              className="mt-5 w-full text-center text-xs font-medium text-ink/40 hover:text-[#3B82F6]"
             >
               ← Retour aux accès KELYANI
             </button>
@@ -1092,7 +1092,7 @@ export default function Employee() {
   if (loading) {
     return (
       <div className="min-h-screen grid place-items-center bg-[#f7f7f3]">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#242424] border-t-transparent" />
       </div>
     );
   }
@@ -1111,13 +1111,13 @@ export default function Employee() {
                 />
               </div>
             ) : (
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border border-ink/10 bg-white text-forest">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border border-ink/10 bg-white text-[#3B82F6]">
                 <Building2 size={24} />
               </div>
             )}
 
             <div className="min-w-0 max-w-[300px] text-center">
-              <p className="truncate text-base font-semibold text-forest md:text-lg">
+              <p className="truncate text-base font-semibold text-[#3B82F6] md:text-lg">
                 {session.establishment_name || selectedEstablishmentName}
               </p>
               <p className="mt-0.5 text-[10px] font-medium uppercase tracking-[0.18em] text-[#3B82F6]">
@@ -1129,10 +1129,10 @@ export default function Employee() {
 
         <div className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-forest/50">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#3B82F6]/50">
               Espace employé
             </p>
-            <h1 className="mt-2 font-display text-3xl text-forest md:text-4xl">
+            <h1 className="mt-2 font-display text-3xl text-[#3B82F6] md:text-4xl">
               Fidélité
             </h1>
             <p className="mt-2 text-sm text-ink/50">
@@ -1158,7 +1158,7 @@ export default function Employee() {
             {scannerReady && (
               <button
                 onClick={installEmployeeScanner}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-forest/15 bg-white px-4 py-3 text-sm font-semibold text-forest transition hover:bg-forest/5"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#242424]/15 bg-white px-4 py-3 text-sm font-semibold text-[#3B82F6] transition hover:bg-[#050505]/5"
               >
                 <WalletCards size={17} />
                 Installer sur le téléphone
@@ -1191,13 +1191,13 @@ export default function Employee() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="N° fidélité, téléphone, prénom ou nom..."
-              className="w-full rounded-2xl border border-ink/10 bg-white py-4 pl-12 pr-4 text-sm outline-none focus:border-forest"
+              className="w-full rounded-2xl border border-ink/10 bg-white py-4 pl-12 pr-4 text-sm outline-none focus:border-[#242424]"
             />
           </div>
 
           <button
             onClick={() => setShowNewCustomer(true)}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-forest px-5 py-4 text-sm font-semibold text-white transition hover:bg-forest-light"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#050505] px-5 py-4 text-sm font-semibold text-white transition hover:bg-[#050505]-light"
           >
             <UserPlus size={18} />
             Nouveau client
@@ -1208,13 +1208,13 @@ export default function Employee() {
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-xs text-ink/40">Programme fidélité</p>
-              <p className="mt-1 text-sm font-semibold text-forest">
+              <p className="mt-1 text-sm font-semibold text-[#3B82F6]">
                 {settings.enabled
                   ? `${settings.points_per_currency} point(s) / ${settings.currency}`
                   : 'Désactivé'}
               </p>
             </div>
-            <Coins size={25} className="text-forest/50" />
+            <Coins size={25} className="text-[#3B82F6]/50" />
           </div>
         </div>
 
@@ -1222,7 +1222,7 @@ export default function Employee() {
           {filteredCustomers.length === 0 ? (
             <div className="p-12 text-center">
               <User size={38} className="mx-auto text-ink/20" />
-              <h2 className="mt-4 font-display text-2xl text-forest">
+              <h2 className="mt-4 font-display text-2xl text-[#3B82F6]">
                 Aucun client trouvé
               </h2>
               <p className="mt-2 text-sm text-ink/40">
@@ -1237,12 +1237,12 @@ export default function Employee() {
                   className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between"
                 >
                   <div className="flex min-w-0 items-center gap-4">
-                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-forest/10 text-forest">
+                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#050505]/10 text-[#3B82F6]">
                       <User size={21} />
                     </div>
 
                     <div className="min-w-0">
-                      <p className="truncate font-semibold text-forest">
+                      <p className="truncate font-semibold text-[#3B82F6]">
                         {customer.first_name} {customer.last_name ?? ''}
                       </p>
                       <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink/45">
@@ -1250,7 +1250,7 @@ export default function Employee() {
                           <Phone size={13} />
                           {customer.phone}
                         </span>
-                        <span className="font-medium text-forest/60">
+                        <span className="font-medium text-[#3B82F6]/60">
                           N° {customer.loyalty_number}
                         </span>
                       </p>
@@ -1262,19 +1262,19 @@ export default function Employee() {
                       <p className="text-[10px] uppercase tracking-wide text-ink/40">
                         {isStampProgram ? 'Tampons' : 'Points'}
                       </p>
-                      <p className="font-semibold text-forest">
+                      <p className="font-semibold text-[#3B82F6]">
                         {isStampProgram ? `${customer.stamps_balance ?? 0} / ${loyaltyProgram.stamp_goal}` : customer.points_balance}
                       </p>
                     </div>
 
                     {isStampProgram ? (
                       <>
-                        <button onClick={() => void addStamp(customer)} disabled={saving} className="inline-flex items-center gap-2 rounded-xl border border-[#3B82F6]/30 bg-white px-4 py-2.5 text-xs font-semibold text-forest hover:bg-[#686D76]/5 disabled:opacity-50">
+                        <button onClick={() => void addStamp(customer)} disabled={saving} className="inline-flex items-center gap-2 rounded-xl border border-[#3B82F6]/30 bg-white px-4 py-2.5 text-xs font-semibold text-[#3B82F6] hover:bg-[#686D76]/5 disabled:opacity-50">
                           <Gift size={16} />
                           Ajouter un tampon
                         </button>
                         {(customer.stamps_balance ?? 0) >= loyaltyProgram.stamp_goal && (
-                          <button onClick={() => void redeemStampReward(customer)} disabled={saving} className="inline-flex items-center gap-2 rounded-xl bg-[#686D76] px-4 py-2.5 text-xs font-semibold text-forest hover:opacity-90 disabled:opacity-50">
+                          <button onClick={() => void redeemStampReward(customer)} disabled={saving} className="inline-flex items-center gap-2 rounded-xl bg-[#686D76] px-4 py-2.5 text-xs font-semibold text-[#3B82F6] hover:opacity-90 disabled:opacity-50">
                             <Gift size={16} />
                             Réclamer récompense
                           </button>
@@ -1282,11 +1282,11 @@ export default function Employee() {
                       </>
                     ) : (
                       <>
-                        <button onClick={() => setShowPoints(customer)} className="inline-flex items-center gap-2 rounded-xl border border-forest/15 px-4 py-2.5 text-xs font-semibold text-forest hover:bg-forest/5">
+                        <button onClick={() => setShowPoints(customer)} className="inline-flex items-center gap-2 rounded-xl border border-[#242424]/15 px-4 py-2.5 text-xs font-semibold text-[#3B82F6] hover:bg-[#050505]/5">
                           <Coins size={16} />
                           Ajouter points
                         </button>
-                        <button onClick={() => openRewards(customer)} className="inline-flex items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white hover:bg-forest-light">
+                        <button onClick={() => openRewards(customer)} className="inline-flex items-center gap-2 rounded-xl bg-[#050505] px-4 py-2.5 text-xs font-semibold text-white hover:bg-[#050505]-light">
                           <Gift size={16} />
                           Utiliser points
                         </button>
@@ -1295,7 +1295,7 @@ export default function Employee() {
 
                     <button
                       onClick={() => openEditCustomer(customer)}
-                      className="inline-flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-4 py-2.5 text-xs font-semibold text-ink/60 hover:border-forest/20 hover:text-forest"
+                      className="inline-flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-4 py-2.5 text-xs font-semibold text-ink/60 hover:border-[#242424]/20 hover:text-[#3B82F6]"
                     >
                       <Pencil size={16} />
                       Modifier
@@ -1303,7 +1303,7 @@ export default function Employee() {
 
                     <button
                       onClick={() => setShowCard(customer)}
-                      className="inline-flex items-center gap-2 rounded-xl border border-[#3B82F6]/30 bg-white px-4 py-2.5 text-xs font-semibold text-forest hover:bg-[#686D76]/5"
+                      className="inline-flex items-center gap-2 rounded-xl border border-[#3B82F6]/30 bg-white px-4 py-2.5 text-xs font-semibold text-[#3B82F6] hover:bg-[#686D76]/5"
                     >
                       <CreditCard size={16} />
                       Carte
@@ -1311,7 +1311,7 @@ export default function Employee() {
 
                     <button
                       onClick={() => openRewards(customer)}
-                      className="inline-flex items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white hover:bg-forest-light"
+                      className="inline-flex items-center gap-2 rounded-xl bg-[#050505] px-4 py-2.5 text-xs font-semibold text-white hover:bg-[#050505]-light"
                     >
                       <Gift size={16} />
                       Récompenses
@@ -1328,14 +1328,14 @@ export default function Employee() {
         <Modal title="Installer le scanner" onClose={() => setShowInstallHelp(false)}>
           <div className="space-y-4 text-sm text-ink/60">
             <div className="rounded-2xl bg-[#f7f7f3] p-4">
-              <p className="font-semibold text-forest">Scanner fidélité</p>
+              <p className="font-semibold text-[#3B82F6]">Scanner fidélité</p>
               <p className="mt-1 leading-6">Ce raccourci est lié à cet établissement et ouvrira directement le scanner.</p>
             </div>
             <div className="space-y-3 leading-6">
-              <p><strong className="text-forest">iPhone :</strong> Safari → Partager → « Sur l’écran d’accueil » → Ajouter.</p>
-              <p><strong className="text-forest">Android :</strong> Chrome → menu ⋮ → « Ajouter à l’écran d’accueil » ou « Installer l’application ».</p>
+              <p><strong className="text-[#3B82F6]">iPhone :</strong> Safari → Partager → « Sur l’écran d’accueil » → Ajouter.</p>
+              <p><strong className="text-[#3B82F6]">Android :</strong> Chrome → menu ⋮ → « Ajouter à l’écran d’accueil » ou « Installer l’application ».</p>
             </div>
-            <button onClick={() => setShowInstallHelp(false)} className="w-full rounded-xl bg-forest py-3.5 text-sm font-semibold text-white">Compris</button>
+            <button onClick={() => setShowInstallHelp(false)} className="w-full rounded-xl bg-[#050505] py-3.5 text-sm font-semibold text-white">Compris</button>
           </div>
         </Modal>
       )}
@@ -1376,7 +1376,7 @@ export default function Employee() {
             <button
               disabled={saving}
               onClick={createCustomer}
-              className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white disabled:opacity-50"
+              className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#050505] py-3.5 text-sm font-semibold text-white disabled:opacity-50"
             >
               <UserPlus size={17} />
               {saving ? 'Création...' : 'Créer le client'}
@@ -1394,7 +1394,7 @@ export default function Employee() {
         >
           <div className="mb-5 rounded-2xl bg-[#f7f7f3] p-4">
             <p className="text-xs text-ink/40">Numéro de fidélité</p>
-            <p className="mt-1 text-xl font-bold tracking-wider text-forest">
+            <p className="mt-1 text-xl font-bold tracking-wider text-[#3B82F6]">
               {editCustomer.loyalty_number}
             </p>
             <p className="mt-2 text-xs text-ink/40">Le numéro reste inchangé.</p>
@@ -1409,7 +1409,7 @@ export default function Employee() {
             <button
               disabled={saving}
               onClick={updateCustomer}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#050505] py-3.5 text-sm font-semibold text-white disabled:opacity-50"
             >
               <CheckCircle2 size={17} />
               {saving ? 'Enregistrement...' : 'Enregistrer les modifications'}
@@ -1458,10 +1458,10 @@ export default function Employee() {
                 published: true,
               }}
             />
-            {loyaltyProgram.program_type === 'STAMP' && <button disabled={saving} onClick={() => void addStamp(showCard)} className="w-full rounded-xl bg-[#686D76] py-3.5 text-xs font-bold text-forest disabled:opacity-50">+ Ajouter 1 tampon</button>}
-            {showCardLink && <button onClick={async () => { await navigator.clipboard.writeText(showCardLink); alert('Lien de la carte copié.'); }} className="w-full rounded-xl border border-ink/10 bg-white py-3 text-xs font-semibold text-forest">Copier le lien client</button>}
+            {loyaltyProgram.program_type === 'STAMP' && <button disabled={saving} onClick={() => void addStamp(showCard)} className="w-full rounded-xl bg-[#686D76] py-3.5 text-xs font-bold text-[#3B82F6] disabled:opacity-50">+ Ajouter 1 tampon</button>}
+            {showCardLink && <button onClick={async () => { await navigator.clipboard.writeText(showCardLink); alert('Lien de la carte copié.'); }} className="w-full rounded-xl border border-ink/10 bg-white py-3 text-xs font-semibold text-[#3B82F6]">Copier le lien client</button>}
             <div className="flex gap-3">
-              <button onClick={() => printLoyaltyCard(showCard)} className="flex-1 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white">Imprimer / PDF</button>
+              <button onClick={() => printLoyaltyCard(showCard)} className="flex-1 rounded-xl bg-[#050505] py-3.5 text-sm font-semibold text-white">Imprimer / PDF</button>
               <button onClick={() => setShowCard(null)} className="rounded-xl border border-ink/10 px-5 py-3.5 text-sm font-semibold">Fermer</button>
             </div>
           </div>
@@ -1514,7 +1514,7 @@ export default function Employee() {
             value={manualCustomerSearch}
             onChange={e => setManualCustomerSearch(e.target.value)}
             placeholder="N° fidélité, téléphone, nom..."
-            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-[#242424]"
           />
 
           {manualMatches.length > 0 && (
@@ -1537,7 +1537,7 @@ export default function Employee() {
                   className="flex w-full items-center justify-between border-b border-ink/5 bg-white px-4 py-3 text-left last:border-0 hover:bg-[#f7f7f3]"
                 >
                   <span>
-                    <span className="block text-sm font-semibold text-forest">{customer.first_name} {customer.last_name ?? ''}</span>
+                    <span className="block text-sm font-semibold text-[#3B82F6]">{customer.first_name} {customer.last_name ?? ''}</span>
                     <span className="text-[11px] text-ink/40">{customer.loyalty_number} · {customer.phone}</span>
                   </span>
                   <span className="text-xs font-semibold text-[#3B82F6]">{customer.points_balance} pts</span>
@@ -1568,14 +1568,14 @@ export default function Employee() {
           }}
         >
           <div className="rounded-2xl bg-[#f7f7f3] p-4">
-            <p className="font-semibold text-forest">
+            <p className="font-semibold text-[#3B82F6]">
               {showPoints.first_name} {showPoints.last_name ?? ''}
             </p>
             <p className="mt-1 text-xs text-ink/45">{showPoints.phone}</p>
-            <p className="mt-1 text-xs font-medium text-forest/60">N° fidélité : {showPoints.loyalty_number}</p>
+            <p className="mt-1 text-xs font-medium text-[#3B82F6]/60">N° fidélité : {showPoints.loyalty_number}</p>
             <div className="mt-4 flex items-center justify-between border-t border-ink/5 pt-3">
               <span className="text-xs text-ink/45">Solde actuel</span>
-              <span className="font-bold text-forest">
+              <span className="font-bold text-[#3B82F6]">
                 {showPoints.points_balance} points
               </span>
             </div>
@@ -1609,7 +1609,7 @@ export default function Employee() {
             />
 
             {purchaseAmount && Number(purchaseAmount) > 0 && (
-              <div className="rounded-xl border border-forest/10 bg-forest/5 p-3 text-sm text-forest">
+              <div className="rounded-xl border border-[#242424]/10 bg-[#050505]/5 p-3 text-sm text-[#3B82F6]">
                 Cet achat générera environ{' '}
                 <strong>
                   {Math.floor(
@@ -1624,7 +1624,7 @@ export default function Employee() {
           <button
             disabled={saving}
             onClick={addPoints}
-            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white disabled:opacity-50"
+            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#050505] py-3.5 text-sm font-semibold text-white disabled:opacity-50"
           >
             <CheckCircle2 size={17} />
             {saving ? 'Validation...' : 'Valider les points'}
@@ -1646,16 +1646,16 @@ export default function Employee() {
         >
           <div className="rounded-2xl bg-[#f7f7f3] p-4">
             <p className="text-xs text-ink/40">Client</p>
-            <p className="mt-1 font-semibold text-forest">
+            <p className="mt-1 font-semibold text-[#3B82F6]">
               {showDiscount.first_name} {showDiscount.last_name ?? ''}
             </p>
             <p className="mt-1 text-xs text-ink/45">{showDiscount.phone}</p>
-            <p className="mt-1 text-xs font-medium text-forest/60">N° fidélité : {showDiscount.loyalty_number}</p>
+            <p className="mt-1 text-xs font-medium text-[#3B82F6]/60">N° fidélité : {showDiscount.loyalty_number}</p>
           </div>
 
           <div className="mt-5 rounded-2xl border border-[#3B82F6]/20 bg-[#686D76]/5 p-4 text-center">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#3B82F6]">Réduction active</p>
-            <p className="mt-1 text-4xl font-bold text-forest">Avantage fidélité</p>
+            <p className="mt-1 text-4xl font-bold text-[#3B82F6]">Avantage fidélité</p>
             <p className="mt-2 text-xs text-ink/50">La réduction reste utilisable sur plusieurs achats jusqu’à sa date d’expiration.</p>
           </div>
 
@@ -1691,7 +1691,7 @@ export default function Employee() {
                     onClick={() => setDiscountPaymentMethod(value as 'CASH' | 'CARD' | 'TRANSFER' | 'OTHER')}
                     className={`rounded-xl border px-3 py-2.5 text-xs font-semibold ${
                       discountPaymentMethod === value
-                        ? 'border-forest bg-forest/5 text-forest'
+                        ? 'border-[#242424] bg-[#050505]/5 text-[#3B82F6]'
                         : 'border-ink/10 text-ink/50'
                     }`}
                   >
@@ -1702,7 +1702,7 @@ export default function Employee() {
             </div>
 
             {discountAmount && Number(discountAmount) > 0 && (
-              <div className="rounded-xl border border-forest/10 bg-forest/5 p-4 text-sm text-forest">
+              <div className="rounded-xl border border-[#242424]/10 bg-[#050505]/5 p-4 text-sm text-[#3B82F6]">
                 <div className="flex items-center justify-between">
                   <span>Montant facture</span>
                   <strong>{Number(discountAmount).toFixed(2)} {settings.currency}</strong>
@@ -1719,7 +1719,7 @@ export default function Employee() {
           <button
             disabled={saving}
             onClick={() => void redeemDiscount()}
-            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white disabled:opacity-50"
+            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#050505] py-3.5 text-sm font-semibold text-white disabled:opacity-50"
           >
             <CheckCircle2 size={17} />
             {saving ? 'Validation...' : 'Appliquer la réduction'}
@@ -1742,14 +1742,14 @@ export default function Employee() {
             <div>
               <div className="rounded-2xl bg-[#f7f7f3] p-4">
                 <p className="text-xs text-ink/40">Client</p>
-                <p className="mt-1 font-semibold text-forest">
+                <p className="mt-1 font-semibold text-[#3B82F6]">
                   {showRewards.first_name} {showRewards.last_name ?? ''}
                 </p>
                 <p className="mt-1 text-xs text-ink/45">{showRewards.phone}</p>
-                <p className="mt-1 text-xs font-medium text-forest/60">N° fidélité : {showRewards.loyalty_number}</p>
+                <p className="mt-1 text-xs font-medium text-[#3B82F6]/60">N° fidélité : {showRewards.loyalty_number}</p>
                 <div className="mt-4 flex items-center justify-between border-t border-ink/5 pt-3">
                   <span className="text-xs text-ink/45">Solde</span>
-                  <span className="font-bold text-forest">
+                  <span className="font-bold text-[#3B82F6]">
                     {showRewards.points_balance} points
                   </span>
                 </div>
@@ -1772,13 +1772,13 @@ export default function Employee() {
                         onClick={() => setSelectedReward(reward)}
                         className={`w-full rounded-xl border p-4 text-left transition ${
                           selectedReward?.id === reward.id
-                            ? 'border-forest bg-forest/5'
+                            ? 'border-[#242424] bg-[#050505]/5'
                             : 'border-ink/10 bg-white'
-                        } ${!available ? 'cursor-not-allowed opacity-40' : 'hover:border-forest/30'}`}
+                        } ${!available ? 'cursor-not-allowed opacity-40' : 'hover:border-[#242424]/30'}`}
                       >
                         <div className="flex items-center justify-between gap-3">
                           <div>
-                            <p className="font-semibold text-forest">
+                            <p className="font-semibold text-[#3B82F6]">
                               {reward.name}
                             </p>
                             {reward.description && (
@@ -1787,7 +1787,7 @@ export default function Employee() {
                               </p>
                             )}
                           </div>
-                          <span className="shrink-0 rounded-lg bg-[#f7f7f3] px-2.5 py-1 text-xs font-semibold text-forest">
+                          <span className="shrink-0 rounded-lg bg-[#f7f7f3] px-2.5 py-1 text-xs font-semibold text-[#3B82F6]">
                             {reward.points_required} pts
                           </span>
                         </div>
@@ -1810,7 +1810,7 @@ export default function Employee() {
                 </div>
               ) : (
                 <>
-                  <div className="rounded-xl bg-forest p-4 text-white">
+                  <div className="rounded-xl bg-[#050505] p-4 text-white">
                     <p className="text-xs text-white/60">Récompense sélectionnée</p>
                     <p className="mt-1 font-semibold">{selectedReward.name}</p>
                     <p className="mt-1 text-xs text-white/70">
@@ -1863,7 +1863,7 @@ export default function Employee() {
                             }
                             className={`rounded-xl border px-2 py-2.5 text-xs font-semibold ${
                               paymentMethod === value
-                                ? 'border-forest bg-forest/5 text-forest'
+                                ? 'border-[#242424] bg-[#050505]/5 text-[#3B82F6]'
                                 : 'border-ink/10 text-ink/50'
                             }`}
                           >
@@ -1877,7 +1877,7 @@ export default function Employee() {
                     <button
                       disabled={saving}
                       onClick={redeemReward}
-                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white disabled:opacity-50"
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#050505] py-3.5 text-sm font-semibold text-white disabled:opacity-50"
                     >
                       <CheckCircle2 size={17} />
                       {saving ? 'Validation...' : 'Valider la récompense'}
@@ -1913,7 +1913,7 @@ function Modal({
         }`}
       >
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="font-display text-2xl text-forest">{title}</h2>
+          <h2 className="font-display text-2xl text-[#3B82F6]">{title}</h2>
           <button
             onClick={onClose}
             className="rounded-lg p-2 text-ink/40 hover:bg-[#f7f7f3]"
@@ -1956,7 +1956,7 @@ function Field({
           value={value}
           onChange={e => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full rounded-xl border border-ink/10 bg-white py-3 pl-10 pr-3 text-sm outline-none focus:border-forest"
+          className="w-full rounded-xl border border-ink/10 bg-white py-3 pl-10 pr-3 text-sm outline-none focus:border-[#242424]"
         />
       </div>
     </div>

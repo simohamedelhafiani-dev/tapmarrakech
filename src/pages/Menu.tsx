@@ -506,7 +506,7 @@ export default function Menu() {
 
   if (errorMessage && establishments.length === 0) {
     return (
-      <div className="rounded-3xl border border-red-200 bg-red-50 p-8 text-red-700">
+      <div className="rounded-3xl border border-[#686D76] bg-[#242424] p-8 text-[#B0B0B0]">
         <p className="font-semibold">Impossible de charger le menu.</p>
         <p className="mt-2 text-sm">{errorMessage}</p>
       </div>
@@ -517,7 +517,7 @@ export default function Menu() {
     return (
       <div className="rounded-3xl border border-[#242424]/10 bg-[#111111] p-10 text-center">
         <UtensilsCrossed className="mx-auto mb-4 text-[#3B82F6]" size={34} />
-        <h1 className="text-2xl font-semibold text-forest">
+        <h1 className="text-2xl font-semibold text-[#3B82F6]">
           Aucun établissement
         </h1>
         <p className="mt-2 text-sm text-[#B0B0B0]/50">
@@ -534,10 +534,10 @@ export default function Menu() {
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#3B82F6]">Design du menu</p>
-              <h2 className="mt-1 text-lg font-semibold text-forest">Choisir un template</h2>
+              <h2 className="mt-1 text-lg font-semibold text-[#3B82F6]">Choisir un template</h2>
               <p className="mt-1 text-xs text-[#B0B0B0]/45">Les templates sont créés et publiés par l’Admin. Ici, tu choisis uniquement celui de ton établissement.</p>
             </div>
-            <span className="rounded-full bg-forest/5 px-3 py-1.5 text-[10px] font-semibold text-forest">{selectedTemplate?.name ?? 'Automatique'}</span>
+            <span className="rounded-full bg-[#050505]/5 px-3 py-1.5 text-[10px] font-semibold text-[#3B82F6]">{selectedTemplate?.name ?? 'Automatique'}</span>
           </div>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {menuTemplates.map((template) => (
@@ -547,7 +547,7 @@ export default function Menu() {
                   <div className={`mt-3 h-2 w-3/4 rounded-full ${template.key === 'dark' ? 'bg-[#111111]/20' : 'bg-ink/10'}`} />
                   <div className={`mt-2 h-2 w-1/2 rounded-full ${template.key === 'dark' ? 'bg-[#111111]/10' : 'bg-ink/5'}`} />
                 </div>
-                <p className="mt-3 text-xs font-semibold text-forest">{template.name}</p>
+                <p className="mt-3 text-xs font-semibold text-[#3B82F6]">{template.name}</p>
                 <p className="mt-1 text-[10px] leading-4 text-[#B0B0B0]/40">{template.description}</p>
               </button>
             ))}
@@ -555,7 +555,7 @@ export default function Menu() {
         </section>
       )}
 
-      <section className="rounded-[28px] bg-forest p-6 text-white shadow-xl md:p-8">
+      <section className="rounded-[28px] bg-[#050505] p-6 text-white shadow-xl md:p-8">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
             <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#3B82F6]">
@@ -601,7 +601,7 @@ export default function Menu() {
             <button
               type="button"
               onClick={openNewCategory}
-              className="flex items-center justify-center gap-2 rounded-xl bg-[#686D76] px-4 py-3 text-sm font-semibold text-forest transition hover:brightness-105"
+              className="flex items-center justify-center gap-2 rounded-xl bg-[#686D76] px-4 py-3 text-sm font-semibold text-[#3B82F6] transition hover:brightness-105"
             >
               <Plus size={17} />
               Nouvelle catégorie
@@ -611,7 +611,7 @@ export default function Menu() {
       </section>
 
       {errorMessage && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
+        <div className="rounded-2xl border border-[#686D76] bg-[#242424] px-5 py-4 text-sm text-[#B0B0B0]">
           {errorMessage}
         </div>
       )}
@@ -620,7 +620,7 @@ export default function Menu() {
         {categories.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-[#242424]/15 bg-[#111111] p-12 text-center">
             <UtensilsCrossed className="mx-auto mb-4 text-[#3B82F6]" size={36} />
-            <h2 className="text-xl font-semibold text-forest">
+            <h2 className="text-xl font-semibold text-[#3B82F6]">
               Ton menu est vide
             </h2>
             <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#B0B0B0]/50">
@@ -630,7 +630,7 @@ export default function Menu() {
             <button
               type="button"
               onClick={openNewCategory}
-              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white"
+              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#050505] px-5 py-3 text-sm font-semibold text-white"
             >
               <Plus size={17} />
               Créer ma première catégorie
@@ -656,13 +656,13 @@ export default function Menu() {
                     onClick={() => toggleCategory(category.id)}
                     className="flex min-w-0 items-center gap-4 text-left"
                   >
-                    <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#1A1A1A] text-forest">
+                    <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#1A1A1A] text-[#3B82F6]">
                       <UtensilsCrossed size={19} />
                     </div>
 
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <h2 className="truncate text-lg font-semibold text-forest">
+                        <h2 className="truncate text-lg font-semibold text-[#3B82F6]">
                           {category.name}
                         </h2>
                         {!category.active && (
@@ -723,7 +723,7 @@ export default function Menu() {
                     <button
                       type="button"
                       onClick={() => deleteCategory(category)}
-                      className="grid h-9 w-9 place-items-center rounded-xl border border-red-100 text-red-500"
+                      className="grid h-9 w-9 place-items-center rounded-xl border border-[#686D76] text-[#B0B0B0]"
                     >
                       <Trash2 size={15} />
                     </button>
@@ -731,7 +731,7 @@ export default function Menu() {
                     <button
                       type="button"
                       onClick={() => openNewItem(category.id)}
-                      className="flex items-center gap-2 rounded-xl bg-forest px-3 py-2 text-xs font-semibold text-white"
+                      className="flex items-center gap-2 rounded-xl bg-[#050505] px-3 py-2 text-xs font-semibold text-white"
                     >
                       <Plus size={15} />
                       Produit
@@ -761,7 +761,7 @@ export default function Menu() {
                         <button
                           type="button"
                           onClick={() => openNewItem(category.id)}
-                          className="mt-4 inline-flex items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white"
+                          className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#050505] px-4 py-2.5 text-xs font-semibold text-white"
                         >
                           <Plus size={15} />
                           Ajouter un produit
@@ -795,7 +795,7 @@ export default function Menu() {
 
                               <div className="min-w-0">
                                 <div className="flex items-center gap-2">
-                                  <h3 className="truncate font-semibold text-forest">
+                                  <h3 className="truncate font-semibold text-[#3B82F6]">
                                     {item.name}
                                   </h3>
                                   {!item.active && (
@@ -844,7 +844,7 @@ export default function Menu() {
                                 <button
                                   type="button"
                                   onClick={() => deleteItem(item)}
-                                  className="grid h-9 w-9 place-items-center rounded-xl border border-red-100 text-red-500"
+                                  className="grid h-9 w-9 place-items-center rounded-xl border border-[#686D76] text-[#B0B0B0]"
                                   title="Supprimer"
                                 >
                                   <Trash2 size={15} />
@@ -871,7 +871,7 @@ export default function Menu() {
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#3B82F6]">
                   Menu
                 </p>
-                <h2 className="mt-1 text-xl font-semibold text-forest">
+                <h2 className="mt-1 text-xl font-semibold text-[#3B82F6]">
                   {editingCategoryId
                     ? 'Modifier la catégorie'
                     : 'Nouvelle catégorie'}
@@ -927,7 +927,7 @@ export default function Menu() {
               <button
                 type="submit"
                 disabled={saving}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#050505] px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
               >
                 <Save size={16} />
                 {saving ? 'Enregistrement…' : 'Enregistrer'}
@@ -945,7 +945,7 @@ export default function Menu() {
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#3B82F6]">
                   Menu
                 </p>
-                <h2 className="mt-1 text-xl font-semibold text-forest">
+                <h2 className="mt-1 text-xl font-semibold text-[#3B82F6]">
                   {editingItemId ? 'Modifier le produit' : 'Nouveau produit'}
                 </h2>
               </div>
@@ -1057,7 +1057,7 @@ export default function Menu() {
               <button
                 type="submit"
                 disabled={saving}
-                className="flex items-center justify-center gap-2 rounded-xl bg-forest px-4 py-3 text-sm font-semibold text-white disabled:opacity-50 md:col-span-2"
+                className="flex items-center justify-center gap-2 rounded-xl bg-[#050505] px-4 py-3 text-sm font-semibold text-white disabled:opacity-50 md:col-span-2"
               >
                 <Save size={16} />
                 {saving ? 'Enregistrement…' : 'Enregistrer le produit'}
