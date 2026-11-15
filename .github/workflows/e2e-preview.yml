@@ -46,6 +46,21 @@ jobs:
             echo "Check whether the values are Repository secrets or Environment secrets."
             exit 1
           fi
+      - name: Confirm the branch-specific Preview is deployed
+        shell: bash
+        run: |
+          node -e "console.log('E2E Preview host:', new URL(process.env.E2E_BASE_URL).host)"
+          marker='name="kelyani-preview-track" content="nardo-wallet-visual-2026-11"'
+          for attempt in $(seq 1 30); do
+            if curl -fsS -H "x-vercel-protection-bypass: ${VERCEL_AUTOMATION_BYPASS_SECRET}" -H "x-vercel-set-bypass-cookie: true" "$E2E_BASE_URL" | grep -Fq "$marker"; then
+              echo "Current integration Preview confirmed."
+              exit 0
+            fi
+            echo "Waiting for current Preview deployment ($attempt/30)..."
+            sleep 10
+          done
+          echo "::error::E2E_BASE_URL is not serving the current Nardo/Wallet integration Preview."
+          exit 1
       - name: Install application dependencies
         run: npm ci
       - name: Install Playwright test runner and Chromium
