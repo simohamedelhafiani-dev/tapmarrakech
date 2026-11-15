@@ -391,10 +391,10 @@ function MetricCard({
   testId?: string;
 }) {
   const accentClasses = {
-    forest: 'bg-[#3B82F6]/[0.07] text-[#3B82F6]',
-    gold: 'bg-[#686D76] text-[#3B82F6]',
-    violet: 'bg-[#8B5CF6]/[0.10] text-[#3B82F6]',
-    indigo: 'bg-[#6366F1]/[0.10] text-[#3B82F6]',
+    forest: 'bg-[#686D76] text-[#3B82F6]',
+    blue: 'bg-[#686D76] text-[#3B82F6]',
+    violet: 'bg-[#686D76] text-[#3B82F6]',
+    indigo: 'bg-[#686D76] text-[#3B82F6]',
   };
 
   return (
