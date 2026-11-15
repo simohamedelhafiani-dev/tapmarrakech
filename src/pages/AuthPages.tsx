@@ -207,7 +207,7 @@ export function Register() {
   </AuthShell>;
 }
 
-export function ForgotPassword() { const [email, setEmail] = useState(''); const [sent, setSent] = useState(false); const [error, setError] = useState(''); const submit = async (e: React.FormEvent) => { e.preventDefault(); setError(''); const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}/reset-password` }); if (resetError) { setError('Impossible d’envoyer le lien. Vérifiez l’adresse email et réessayez.'); return; } setSent(true); }; return <AuthShell eyebrow="Accès sécurisé" title="Réinitialiser l’accès.">{sent ? <div className="mt-9 rounded-2xl bg-[var(--kelyani-panel)] p-5 text-sm text-white/65"><Check className="mb-2 text-forest" />Si un compte correspond à cette adresse, vous recevrez un email avec les instructions.</div> : <form onSubmit={submit} className="mt-9 space-y-4"><Field icon={Mail} type="email" required placeholder="Adresse email" value={email} onChange={e => setEmail(e.target.value)} />{error && <p className="text-sm text-[#B0B0B0]">{error}</p>}<button className="w-full rounded-xl bg-[#686D76] py-3.5 text-sm font-semibold text-[#3B82F6] transition hover:bg-[#686D76]">Recevoir le lien</button><Link to="/login" className="block text-center text-xs text-[#3B82F6]">Retour à la connexion</Link></form>}</AuthShell>; }
+export function ForgotPassword() { const [email, setEmail] = useState(''); const [sent, setSent] = useState(false); const [error, setError] = useState(''); const submit = async (e: React.FormEvent) => { e.preventDefault(); setError(''); const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}/reset-password` }); if (resetError) { setError('Impossible d’envoyer le lien. Vérifiez l’adresse email et réessayez.'); return; } setSent(true); }; return <AuthShell eyebrow="Accès sécurisé" title="Réinitialiser l’accès.">{sent ? <div className="mt-9 rounded-2xl bg-[var(--kelyani-panel)] p-5 text-sm text-white/65"><Check className="mb-2 text-[#3B82F6]" />Si un compte correspond à cette adresse, vous recevrez un email avec les instructions.</div> : <form onSubmit={submit} className="mt-9 space-y-4"><Field icon={Mail} type="email" required placeholder="Adresse email" value={email} onChange={e => setEmail(e.target.value)} />{error && <p className="text-sm text-[#B0B0B0]">{error}</p>}<button className="w-full rounded-xl bg-[#686D76] py-3.5 text-sm font-semibold text-[#3B82F6] transition hover:bg-[#686D76]">Recevoir le lien</button><Link to="/login" className="block text-center text-xs text-[#3B82F6]">Retour à la connexion</Link></form>}</AuthShell>; }
 
 
 export function ResetPassword() {
@@ -249,7 +249,7 @@ export function ResetPassword() {
     <AuthShell eyebrow="Accès sécurisé" title="Définir un nouveau mot de passe.">
       {updated ? (
         <div className="mt-9 rounded-2xl bg-[var(--kelyani-panel)] p-5 text-sm text-white/65">
-          <Check className="mb-2 text-forest" />
+          <Check className="mb-2 text-[#3B82F6]" />
           Votre mot de passe a été mis à jour. Redirection vers la connexion…
         </div>
       ) : (
@@ -320,7 +320,7 @@ export function EmailConfirmation() {
         <div className="mt-9 rounded-2xl border border-[var(--kelyani-border)] bg-[var(--kelyani-panel)] p-5 text-sm text-white/65">Nous vérifions votre adresse e-mail. Veuillez patienter.</div>
       ) : status === 'success' ? (
         <div className="mt-9 rounded-2xl border border-[var(--kelyani-border)] bg-[var(--kelyani-panel)] p-5 text-sm text-white/65">
-          <Check className="mb-3 text-forest" />
+          <Check className="mb-3 text-[#3B82F6]" />
           Votre adresse e-mail est confirmée. Vous pouvez maintenant vous connecter à KELYANI.
           <button type="button" onClick={() => navigate('/login')} className="mt-5 w-full rounded-xl bg-[#686D76] py-3 font-semibold text-[#3B82F6]">Se connecter</button>
         </div>

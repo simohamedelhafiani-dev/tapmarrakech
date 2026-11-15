@@ -334,7 +334,7 @@ export default function LoyaltySettings() {
           Fidélité
         </p>
 
-        <h1 className="mt-2 font-display text-4xl text-forest">
+        <h1 className="mt-2 font-display text-4xl text-[#3B82F6]">
           Programme fidélité
         </h1>
 
@@ -347,12 +347,12 @@ export default function LoyaltySettings() {
       {establishments.length > 1 && (
         <section className="rounded-2xl border border-ink/5 bg-[#1A1A1A] p-6 shadow-soft md:p-8">
         <div className="flex items-start gap-4">
-          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#e5eee9] text-forest">
+          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#e5eee9] text-[#3B82F6]">
             <Settings2 size={20} />
           </div>
 
           <div>
-            <h2 className="font-display text-xl text-forest">
+            <h2 className="font-display text-xl text-[#3B82F6]">
               Établissement
             </h2>
 
@@ -386,12 +386,12 @@ export default function LoyaltySettings() {
       <section className="mt-6 rounded-2xl border border-ink/5 bg-[#1A1A1A] p-6 shadow-soft md:p-8">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-start gap-4">
-            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#e5eee9] text-forest">
+            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#e5eee9] text-[#3B82F6]">
               <Star size={20} />
             </div>
 
             <div>
-              <h2 className="font-display text-xl text-forest">
+              <h2 className="font-display text-xl text-[#3B82F6]">
                 Programme actif
               </h2>
 
@@ -405,7 +405,7 @@ export default function LoyaltySettings() {
             type="button"
             onClick={() => setEnabled(!enabled)}
             className={`relative h-7 w-12 rounded-full transition ${
-              enabled ? 'bg-forest' : 'bg-ink/20'
+              enabled ? 'bg-[#050505]' : 'bg-ink/20'
             }`}
           >
             <span
@@ -431,7 +431,7 @@ export default function LoyaltySettings() {
           </div>
 
           <div>
-            <h2 className="font-display text-xl text-forest">
+            <h2 className="font-display text-xl text-[#3B82F6]">
               Attribution des points
             </h2>
 
@@ -486,11 +486,11 @@ export default function LoyaltySettings() {
 
             <p className="text-sm text-ink/65">
               Pour un achat de{' '}
-              <strong className="text-forest">
+              <strong className="text-[#3B82F6]">
                 100 {currency}
               </strong>
               , le client reçoit{' '}
-              <strong className="text-forest">
+              <strong className="text-[#3B82F6]">
                 {Number(pointsPerCurrency || 0) * 100} points
               </strong>
               .
@@ -503,12 +503,12 @@ export default function LoyaltySettings() {
       <section className="mt-6 rounded-2xl border border-ink/5 bg-[#1A1A1A] p-6 shadow-soft md:p-8">
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div className="flex items-start gap-4">
-            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#e5eee9] text-forest">
+            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#e5eee9] text-[#3B82F6]">
               <Gift size={20} />
             </div>
 
             <div>
-              <h2 className="font-display text-xl text-forest">
+              <h2 className="font-display text-xl text-[#3B82F6]">
                 Récompenses
               </h2>
 
@@ -523,7 +523,7 @@ export default function LoyaltySettings() {
             type="button"
             onClick={openNewReward}
             disabled={!establishmentId}
-            className="flex items-center justify-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-forest-light disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex items-center justify-center gap-2 rounded-xl bg-[#050505] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#050505]-light disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Plus size={16} />
             Nouvelle récompense
@@ -537,7 +537,7 @@ export default function LoyaltySettings() {
               className="mx-auto text-ink/20"
             />
 
-            <p className="mt-3 text-sm font-medium text-forest">
+            <p className="mt-3 text-sm font-medium text-[#3B82F6]">
               Aucune récompense
             </p>
 
@@ -560,14 +560,14 @@ export default function LoyaltySettings() {
 
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-semibold text-forest">
+                        <h3 className="font-semibold text-[#3B82F6]">
                           {reward.name}
                         </h3>
 
                         <span
                           className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
                             reward.active
-                              ? 'bg-[#e5eee9] text-forest'
+                              ? 'bg-[#e5eee9] text-[#3B82F6]'
                               : 'bg-ink/10 text-ink/40'
                           }`}
                         >
@@ -608,7 +608,7 @@ export default function LoyaltySettings() {
                     <button
                       type="button"
                       onClick={() => deleteReward(reward)}
-                      className="grid h-9 w-9 place-items-center rounded-lg border border-red-100 bg-[#1A1A1A] text-red-500 hover:bg-red-50"
+                      className="grid h-9 w-9 place-items-center rounded-lg border border-[#686D76] bg-[#1A1A1A] text-[#B0B0B0] hover:bg-[#242424]"
                       title="Supprimer"
                     >
                       <Trash2 size={15} />
@@ -622,7 +622,7 @@ export default function LoyaltySettings() {
       </section>
 
       {/* BOUTON ENREGISTRER */}
-      <div className="mt-6 flex flex-col items-start justify-between gap-4 rounded-2xl bg-forest p-6 text-white md:flex-row md:items-center">
+      <div className="mt-6 flex flex-col items-start justify-between gap-4 rounded-2xl bg-[#050505] p-6 text-white md:flex-row md:items-center">
         <div>
           <p className="font-medium">
             {selectedEstablishment?.name || 'Votre établissement'}
@@ -636,7 +636,7 @@ export default function LoyaltySettings() {
         <button
           onClick={saveSettings}
           disabled={saving || !establishmentId}
-          className="flex items-center gap-2 rounded-xl bg-electric px-5 py-3 text-xs font-semibold text-forest transition hover:bg-[#2563EB] disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex items-center gap-2 rounded-xl bg-electric px-5 py-3 text-xs font-semibold text-[#3B82F6] transition hover:bg-[#2563EB] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {saved ? (
             <>
@@ -658,7 +658,7 @@ export default function LoyaltySettings() {
           <div className="w-full max-w-md rounded-2xl bg-[#1A1A1A] p-6 shadow-2xl">
             <div className="mb-6 flex items-center justify-between">
               <div>
-                <h2 className="font-display text-2xl text-forest">
+                <h2 className="font-display text-2xl text-[#3B82F6]">
                   {editingRewardId
                     ? 'Modifier la récompense'
                     : 'Nouvelle récompense'}
@@ -759,7 +759,7 @@ export default function LoyaltySettings() {
                   Exemple
                 </p>
 
-                <p className="mt-1 text-sm font-medium text-forest">
+                <p className="mt-1 text-sm font-medium text-[#3B82F6]">
                   {rewardName.trim() || 'Votre récompense'}
                 </p>
 
@@ -781,7 +781,7 @@ export default function LoyaltySettings() {
                   Number(rewardCost) < 0 ||
                   !Number.isFinite(Number(rewardCost))
                 }
-                className="w-full rounded-xl bg-forest px-4 py-3 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
+                className="w-full rounded-xl bg-[#050505] px-4 py-3 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {savingReward
                   ? 'Enregistrement...'
