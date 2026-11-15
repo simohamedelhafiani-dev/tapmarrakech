@@ -13,7 +13,7 @@ export const MENU_TEMPLATES: MenuTemplateDefinition[] = [
   { id: '01_cafe_classic', label: 'Café Classique', sector: 'Cafés', description: 'Carte claire et lisible pour cafés et snacks.', family: 'editorial', layout: 'price-list' },
   { id: '02_burger_house', label: 'Burger House', sector: 'Restauration', description: 'Contraste fort et produits mis en avant.', family: 'dark', layout: 'stacked-photo' },
   { id: '03_restaurant_modern', label: 'Restaurant Moderne', sector: 'Restauration', description: 'Présentation contemporaine et structurée.', family: 'cards', layout: 'split-catalog' },
-  { id: '04_menu_luxe', label: 'Menu Prestige', sector: 'Restauration', description: 'Typographie raffinée et détails dorés.', family: 'royal-gold', layout: 'editorial-center' },
+  { id: '04_menu_luxe', label: 'Menu Prestige', sector: 'Restauration', description: 'Typographie raffinée et détails bleu électrique.', family: 'royal-gold', layout: 'editorial-center' },
   { id: '05_minimal_food', label: 'Minimal Food', sector: 'Restauration', description: 'Carte légère, épurée et mobile-first.', family: 'pearl', layout: 'minimal-list' },
   { id: '06_beauty_studio', label: 'Beauty Studio', sector: 'Beauté', description: 'Services et tarifs dans une présentation élégante.', family: 'pearl', layout: 'service-table' },
   { id: '07_hair_salon', label: 'Hair Salon', sector: 'Coiffure', description: 'Prestations et prix faciles à parcourir.', family: 'onyx', layout: 'service-table' },

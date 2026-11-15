@@ -15,14 +15,14 @@ type MenuPreviewProps = {
 };
 
 const palettes = {
-  editorial: { page: 'bg-[#3B82F6] text-[#3B82F6]', panel: 'bg-[#fffdf8]', accent: 'text-[#9c7a32]', muted: 'text-[#74776e]', line: 'border-[#3B82F6]/15', card: 'bg-white' },
-  luxury: { page: 'bg-[#11100d] text-[#f7f0df]', panel: 'bg-[#171510]', accent: 'text-[#d2b46a]', muted: 'text-white/60', line: 'border-[#c8a75d]/30', card: 'bg-[#1b1914]' },
-  cards: { page: 'bg-[#111111] text-[#3B82F6]', panel: 'bg-white', accent: 'text-[#a17d31]', muted: 'text-[#777b73]', line: 'border-black/10', card: 'bg-white' },
-  dark: { page: 'bg-[#0D0D0D] text-white', panel: 'bg-[#111111]', accent: 'text-[#d6b86b]', muted: 'text-white/60', line: 'border-white/15', card: 'bg-white/[0.06]' },
-  onyx: { page: 'bg-[#050505] text-white', panel: 'bg-[#101010]', accent: 'text-[#3B82F6]', muted: 'text-white/60', line: 'border-white/15', card: 'bg-white/[0.05]' },
+  editorial: { page: 'bg-[#050505] text-white', panel: 'bg-[#111111]', accent: 'text-[#3B82F6]', muted: 'text-white/60', line: 'border-[#686D76]/40', card: 'bg-[#111111]' },
+  luxury: { page: 'bg-[#050505] text-white', panel: 'bg-[#111111]', accent: 'text-[#3B82F6]', muted: 'text-white/60', line: 'border-[#686D76]/40', card: 'bg-[#111111]' },
+  cards: { page: 'bg-[#050505] text-white', panel: 'bg-[#686D76]', accent: 'text-[#3B82F6]', muted: 'text-white/60', line: 'border-[#3B82F6]/25', card: 'bg-[#111111]' },
+  dark: { page: 'bg-[#050505] text-white', panel: 'bg-[#111111]', accent: 'text-[#3B82F6]', muted: 'text-white/60', line: 'border-[#686D76]/40', card: 'bg-[#111111]' },
+  onyx: { page: 'bg-[#050505] text-white', panel: 'bg-[#111111]', accent: 'text-[#3B82F6]', muted: 'text-white/60', line: 'border-[#3B82F6]/25', card: 'bg-[#111111]' },
   'royal-gold': { page: 'bg-[#050505] text-white', panel: 'bg-[#686D76]', accent: 'text-[#3B82F6]', muted: 'text-white/60', line: 'border-[#3B82F6]/30', card: 'bg-[#111111]' },
-  'deep-ocean': { page: 'bg-[#06151B] text-[#F2FCFF]', panel: 'bg-[#0A222B]', accent: 'text-[#8ED9E8]', muted: 'text-white/60', line: 'border-[#8ED9E8]/25', card: 'bg-[#0A222B]' },
-  pearl: { page: 'bg-[#3B82F6] text-[#1B1A17]', panel: 'bg-[#fffdf8]', accent: 'text-[#9A7A3C]', muted: 'text-[#74716a]', line: 'border-[#B59A67]/25', card: 'bg-white' },
+  'deep-ocean': { page: 'bg-[#050505] text-white', panel: 'bg-[#111111]', accent: 'text-[#3B82F6]', muted: 'text-white/60', line: 'border-[#686D76]/40', card: 'bg-[#111111]' },
+  pearl: { page: 'bg-[#050505] text-white', panel: 'bg-[#686D76]', accent: 'text-[#3B82F6]', muted: 'text-white/60', line: 'border-[#3B82F6]/25', card: 'bg-[#111111]' },
 } as const;
 
 export default function MenuPreview({
@@ -42,7 +42,7 @@ export default function MenuPreview({
     wallpaperObjectUrl: null,
     wallpaperRemoved: false,
     overlayOpacity: 0.35,
-    themeColors: { background: '#3B82F6', surface: '#3B82F6', text: '#3B82F6', accent: '#3B82F6' },
+    themeColors: { background: '#050505', surface: '#686D76', text: '#FFFFFF', accent: '#3B82F6' },
     aiDesign: null,
   };
   const family = getMenuTemplateFamily(activeDraft.template);
