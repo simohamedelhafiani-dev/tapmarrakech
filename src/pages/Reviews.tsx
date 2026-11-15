@@ -432,19 +432,19 @@ export default function Reviews() {
       <section className="mb-7 overflow-hidden rounded-3xl border border-[#242424] bg-[#111111] shadow-xl">
         <div className="flex flex-col gap-4 border-b border-[#242424] p-6 md:flex-row md:items-center md:justify-between">
           <div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#3B82F6]">Feedback fidélité</p><h2 className="mt-1 font-display text-2xl text-white">Satisfaction client</h2><p className="mt-1 text-xs text-white/40">Retours laissés directement depuis les cartes fidélité.</p></div>
-          {satisfactionSummary.negative_count > 0 && <div className="flex items-center gap-2 rounded-xl border border-red-400/20 bg-red-400/5 px-4 py-3 text-xs font-semibold text-red-300"><AlertTriangle size={16} /> {satisfactionSummary.negative_count} retour(s) à ≤ 2/5</div>}
+          {satisfactionSummary.negative_count > 0 && <div className="flex items-center gap-2 rounded-xl border border-red-400/20 bg-[#242424] px-4 py-3 text-xs font-semibold text-[#B0B0B0]"><AlertTriangle size={16} /> {satisfactionSummary.negative_count} retour(s) à ≤ 2/5</div>}
         </div>
         <div className="grid gap-px bg-[#242424] sm:grid-cols-3">
           <div className="bg-[#111111] p-5"><p className="text-[10px] uppercase tracking-wider text-white/35">Note moyenne</p><p className="mt-1 text-2xl font-semibold text-[#3B82F6]">{satisfactionSummary.average_rating ? satisfactionSummary.average_rating + '/5' : '—'}</p></div>
           <div className="bg-[#111111] p-5"><p className="text-[10px] uppercase tracking-wider text-white/35">Retours</p><p className="mt-1 text-2xl font-semibold text-white">{satisfactionSummary.total_feedback}</p></div>
-          <div className="bg-[#111111] p-5"><p className="text-[10px] uppercase tracking-wider text-white/35">Alertes ≤ 2</p><p className="mt-1 text-2xl font-semibold text-red-300">{satisfactionSummary.negative_count}</p></div>
+          <div className="bg-[#111111] p-5"><p className="text-[10px] uppercase tracking-wider text-white/35">Alertes ≤ 2</p><p className="mt-1 text-2xl font-semibold text-[#B0B0B0]">{satisfactionSummary.negative_count}</p></div>
         </div>
         {satisfactionFeedback.length > 0 ? <div className="divide-y divide-[#242424]">{satisfactionFeedback.slice(0, 8).map(item => <div key={item.id} className="flex flex-col gap-2 p-5 sm:flex-row sm:items-start sm:justify-between"><div><div className="flex items-center gap-2"><span className="font-semibold text-white">{item.customer_name || 'Client'}</span><span className="text-[#3B82F6]">{'★'.repeat(item.rating)}<span className="text-white/15">{'★'.repeat(5 - item.rating)}</span></span></div>{item.comment && <p className="mt-1 text-sm leading-6 text-white/55">{item.comment}</p>}</div><div className="shrink-0 text-[10px] text-white/30">{new Date(item.created_at).toLocaleDateString('fr-FR')}</div></div>)}</div> : <div className="p-8 text-center text-xs text-white/35">Aucun feedback fidélité pour le moment.</div>}
       </section>
 
       {/* ERREUR IA */}
       {aiError && (
-        <div className="mb-5 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div className="mb-5 flex items-start gap-3 rounded-2xl border border-red-200 bg-[#242424] p-4 text-sm text-[#B0B0B0]">
           <AlertTriangle
             size={18}
             className="mt-0.5 shrink-0"
@@ -549,7 +549,7 @@ export default function Reviews() {
 
           {/* RÉSUMÉ */}
           <div className="p-6 md:p-8">
-            <div className="rounded-2xl bg-[#f7f7f3] p-5">
+            <div className="rounded-2xl bg-[#686D76] p-5">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#3B82F6]">
                 Synthèse
               </p>
@@ -606,7 +606,7 @@ export default function Reviews() {
                 <div className="flex items-center gap-2">
                   <AlertTriangle
                     size={18}
-                    className="text-[#a15c50]"
+                    className="text-[#B0B0B0]"
                   />
 
                   <h3 className="font-semibold text-forest">
@@ -622,7 +622,7 @@ export default function Reviews() {
                           key={index}
                           className="flex gap-2 text-sm leading-6 text-ink/65"
                         >
-                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#a15c50]" />
+                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#686D76]" />
 
                           <span>{item}</span>
                         </li>
@@ -656,7 +656,7 @@ export default function Reviews() {
                     (issue, index) => (
                       <div
                         key={index}
-                        className="rounded-xl bg-[#f7f7f3] p-4"
+                        className="rounded-xl bg-[#686D76] p-4"
                       >
                         <div className="flex flex-col justify-between gap-2 md:flex-row">
                           <p className="font-semibold text-forest">
@@ -668,7 +668,7 @@ export default function Reviews() {
                               {issue.frequency}
                             </span>
 
-                            <span className="rounded-full bg-[#f4e4e1] px-2.5 py-1 text-[11px] font-semibold text-[#a15c50]">
+                            <span className="rounded-full bg-[#686D76] px-2.5 py-1 text-[11px] font-semibold text-[#B0B0B0]">
                               Priorité {issue.priority}
                             </span>
                           </div>
@@ -690,7 +690,7 @@ export default function Reviews() {
             </div>
 
             {/* RECOMMANDATIONS */}
-            <div className="mt-5 rounded-2xl bg-[#f7f7f3] p-5">
+            <div className="mt-5 rounded-2xl bg-[#686D76] p-5">
               <div className="flex items-center gap-2">
                 <Lightbulb
                   size={18}
@@ -764,7 +764,7 @@ export default function Reviews() {
                   {review.review_created_at && <span className="text-[10px] text-white/30">{new Date(review.review_created_at).toLocaleString('fr-FR')}</span>}
                 </div>
                 <p className="mt-3 text-sm leading-6 text-white/65">{review.comment || 'Avis sans commentaire.'}</p>
-                <div className="mt-4 rounded-2xl border border-[#3B82F6]/15 bg-[#3B82F6]/5 p-4">
+                <div className="mt-4 rounded-2xl border border-[#3B82F6]/15 bg-[#686D76]/5 p-4">
                   <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#3B82F6]">Réponse générée</p>
                   <p className="mt-2 text-sm leading-6 text-white/70">{review.owner_reply || 'Aucune réponse générée pour le moment.'}</p>
                   {review.owner_reply_updated_at && <p className="mt-2 text-[10px] text-white/25">{new Date(review.owner_reply_updated_at).toLocaleString('fr-FR')}</p>}
@@ -790,7 +790,7 @@ export default function Reviews() {
                 setSearch(e.target.value)
               }
               placeholder="Rechercher dans les avis…"
-              className="w-full rounded-xl border border-ink/10 bg-[#fbfaf7] py-3 pl-10 pr-3 text-sm outline-none focus:ring-2 focus:ring-[#3B82F6]"
+              className="w-full rounded-xl border border-ink/10 bg-[#686D76] py-3 pl-10 pr-3 text-sm outline-none focus:ring-2 focus:ring-[#3B82F6]"
             />
           </div>
 
@@ -800,7 +800,7 @@ export default function Reviews() {
               onChange={(e) =>
                 setStatus(e.target.value)
               }
-              className="rounded-xl border border-ink/10 bg-[#fbfaf7] px-3 py-3 text-xs outline-none"
+              className="rounded-xl border border-ink/10 bg-[#686D76] px-3 py-3 text-xs outline-none"
             >
               <option>Tous</option>
               <option>Nouveau</option>
@@ -813,7 +813,7 @@ export default function Reviews() {
               onChange={(e) =>
                 setRating(e.target.value)
               }
-              className="rounded-xl border border-ink/10 bg-[#fbfaf7] px-3 py-3 text-xs outline-none"
+              className="rounded-xl border border-ink/10 bg-[#686D76] px-3 py-3 text-xs outline-none"
             >
               <option value="Tous">
                 Toutes les notes
@@ -882,10 +882,10 @@ export default function Reviews() {
 
               <span className={`rounded-lg px-3 py-2 text-xs font-semibold ${
                 review.status === 'Nouveau'
-                  ? 'bg-[#f4e4e1] text-[#a15c50]'
+                  ? 'bg-[#686D76] text-[#B0B0B0]'
                   : review.status === 'En cours'
                     ? 'bg-[#686D76] text-[#3B82F6]'
-                    : 'bg-[#e5eee9] text-forest'
+                    : 'bg-[#686D76] text-forest'
               }`}>{review.status}</span>
             </div>
           </div>

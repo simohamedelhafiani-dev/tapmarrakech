@@ -347,7 +347,7 @@ export default function LoyaltySettings() {
       {establishments.length > 1 && (
         <section className="rounded-2xl border border-ink/5 bg-[#1A1A1A] p-6 shadow-soft md:p-8">
         <div className="flex items-start gap-4">
-          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#e5eee9] text-[#3B82F6]">
+          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#686D76] text-[#3B82F6]">
             <Settings2 size={20} />
           </div>
 
@@ -386,7 +386,7 @@ export default function LoyaltySettings() {
       <section className="mt-6 rounded-2xl border border-ink/5 bg-[#1A1A1A] p-6 shadow-soft md:p-8">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-start gap-4">
-            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#e5eee9] text-[#3B82F6]">
+            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#686D76] text-[#3B82F6]">
               <Star size={20} />
             </div>
 
@@ -416,7 +416,7 @@ export default function LoyaltySettings() {
           </button>
         </div>
 
-        <div className="mt-6 rounded-xl bg-[#f7f7f3] p-4 text-xs text-ink/55">
+        <div className="mt-6 rounded-xl bg-[#686D76] p-4 text-xs text-ink/55">
           {enabled
             ? "Le programme est actuellement actif pour cet établissement."
             : "Le programme est désactivé. Aucun nouveau point ne pourra être ajouté."}
@@ -503,7 +503,7 @@ export default function LoyaltySettings() {
       <section className="mt-6 rounded-2xl border border-ink/5 bg-[#1A1A1A] p-6 shadow-soft md:p-8">
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div className="flex items-start gap-4">
-            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#e5eee9] text-[#3B82F6]">
+            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#686D76] text-[#3B82F6]">
               <Gift size={20} />
             </div>
 
@@ -531,7 +531,7 @@ export default function LoyaltySettings() {
         </div>
 
         {rewards.length === 0 ? (
-          <div className="mt-6 rounded-xl bg-[#f7f7f3] p-6 text-center">
+          <div className="mt-6 rounded-xl bg-[#686D76] p-6 text-center">
             <Gift
               size={28}
               className="mx-auto text-ink/20"
@@ -567,7 +567,7 @@ export default function LoyaltySettings() {
                         <span
                           className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
                             reward.active
-                              ? 'bg-[#e5eee9] text-[#3B82F6]'
+                              ? 'bg-[#686D76] text-[#3B82F6]'
                               : 'bg-ink/10 text-ink/40'
                           }`}
                         >
@@ -636,7 +636,7 @@ export default function LoyaltySettings() {
         <button
           onClick={saveSettings}
           disabled={saving || !establishmentId}
-          className="flex items-center gap-2 rounded-xl bg-electric px-5 py-3 text-xs font-semibold text-[#3B82F6] transition hover:bg-[#2563EB] disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex items-center gap-2 rounded-xl bg-electric px-5 py-3 text-xs font-semibold text-[#3B82F6] transition hover:bg-[#686D76] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {saved ? (
             <>
@@ -673,7 +673,7 @@ export default function LoyaltySettings() {
                 type="button"
                 onClick={closeRewardForm}
                 disabled={savingReward}
-                className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#f7f7f3] text-ink/50"
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#686D76] text-ink/50"
               >
                 <X size={17} />
               </button>
@@ -754,7 +754,7 @@ export default function LoyaltySettings() {
                 </div>
               </div>
 
-              <div className="rounded-xl bg-[#f7f7f3] p-4">
+              <div className="rounded-xl bg-[#686D76] p-4">
                 <p className="text-xs text-ink/45">
                   Exemple
                 </p>
