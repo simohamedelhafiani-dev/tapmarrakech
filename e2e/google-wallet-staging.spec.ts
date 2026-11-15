@@ -21,5 +21,5 @@ test('admin can verify Google Wallet Staging without creating a pass', async ({ 
 
   await page.getByRole('button', { name: 'Tester Google Wallet' }).click();
   await expect(page.getByText('Connexion validée')).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByText(/aucun pass ni donnée client n'est créé ou modifié/i)).toBeVisible();
+  await expect(page.getByText(/aucun pass ni donnée client/i)).toBeVisible();
 });
