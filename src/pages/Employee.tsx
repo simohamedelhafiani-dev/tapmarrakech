@@ -1034,7 +1034,7 @@ export default function Employee() {
             <div className="mb-8 text-center">
               <div className="mb-4 flex justify-center">
                 <img
-                  src="/kelyani-final.svg"
+                  src="/kelyani-official-app-icon.webp"
                   alt="KELYANI"
                   className="h-16 w-16 object-contain"
                 />

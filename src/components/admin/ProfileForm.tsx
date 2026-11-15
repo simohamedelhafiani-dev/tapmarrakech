@@ -155,7 +155,7 @@ export default function ProfileForm({ engine, businessTypes, onSaved }: ProfileF
       <div className="rounded-3xl border border-[#242424] bg-[#111111] p-6 shadow-[0_12px_40px_rgba(0,0,0,0.045)]">
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Identité</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#3B82F6]">Identité</p>
             <h3 className="mt-1 text-lg font-semibold text-[#3B82F6]">Informations de l’établissement</h3>
             <p className="mt-1 text-xs text-[#FFFFFF]/40">Ces informations alimentent la page publique et les modules de l’établissement.</p>
           </div>

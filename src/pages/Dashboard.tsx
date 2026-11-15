@@ -852,7 +852,7 @@ export default function Dashboard() {
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0">
               <div className="mb-4 flex items-center gap-3">
-                {selectedEstablishment?.logo_url ? <img src={selectedEstablishment.logo_url} alt={selectedEstablishment.name} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = '/kelyani-final.svg'; }} className="h-12 w-12 rounded-xl border border-[#242424] bg-[#050505] object-contain p-1" /> : <div className="grid h-12 w-12 place-items-center rounded-xl border border-[#242424] bg-[#050505]"><KelyaniMark size={28} /></div>}
+                {selectedEstablishment?.logo_url ? <img src={selectedEstablishment.logo_url} alt={selectedEstablishment.name} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = '/kelyani-official-app-icon.webp'; }} className="h-12 w-12 rounded-xl border border-[#242424] bg-[#050505] object-contain p-1" /> : <div className="grid h-12 w-12 place-items-center rounded-xl border border-[#242424] bg-[#050505]"><KelyaniMark size={28} /></div>}
                 <div className="min-w-0 leading-none">
                   <p className="max-w-[260px] truncate text-lg font-semibold text-white">{selectedEstablishment?.name || 'Votre établissement'}</p>
                   <p className="mt-1 text-[7px] font-semibold uppercase tracking-[.22em] text-[#3B82F6]/60">ESPACE ÉTABLISSEMENT · KELYANI</p>
