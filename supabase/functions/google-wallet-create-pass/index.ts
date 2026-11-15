@@ -220,6 +220,12 @@ Deno.serve(async (request) => {
         ...(walletDesign.footerText
           ? [{ id: "wallet-footer", header: "Information", body: String(walletDesign.footerText).slice(0, 80) }]
           : []),
+        ...(walletDesign.customMessage
+          ? [{ id: "wallet-custom-message", header: "Message", body: String(walletDesign.customMessage).slice(0, 80) }]
+          : []),
+        ...(walletDesign.address
+          ? [{ id: "wallet-address", header: "Adresse", body: String(walletDesign.address).slice(0, 100) }]
+          : []),
       ],
       ...(typeof walletDesign.logoUrl === "string" && walletDesign.logoUrl.startsWith("https://")
         ? { imageModulesData: [{
@@ -230,8 +236,19 @@ Deno.serve(async (request) => {
             },
           }] }
         : {}),
+      ...(typeof walletDesign.heroImageUrl === "string" && walletDesign.heroImageUrl.startsWith("https://")
+        ? { heroImage: {
+            sourceUri: { uri: String(walletDesign.heroImageUrl) },
+            contentDescription: localized("Visuel de la carte de fidélité"),
+          } }
+        : {}),
       linksModuleData: {
-        uris: [{ uri: "https://www.kelyani.com", description: "Découvrir KELYANI" }],
+        uris: [
+          { uri: typeof walletDesign.websiteUrl === "string" && walletDesign.websiteUrl.startsWith("https://") ? walletDesign.websiteUrl : "https://www.kelyani.com", description: "Site web" },
+          ...(typeof walletDesign.phoneNumber === "string" && walletDesign.phoneNumber.trim()
+            ? [{ uri: "tel:" + walletDesign.phoneNumber.trim().replace(/[^+0-9]/g, ""), description: "Appeler l'établissement" }]
+            : []),
+        ],
       },
     };
 
