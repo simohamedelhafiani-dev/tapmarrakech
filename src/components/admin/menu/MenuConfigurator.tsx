@@ -94,7 +94,7 @@ export default function MenuConfigurator({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#3B82F6]">Design</p>
-          <h3 className="mt-1 text-xl font-semibold text-forest">Studio visuel</h3>
+          <h3 className="mt-1 text-xl font-semibold text-[#3B82F6]">Studio visuel</h3>
           <p className="mt-1 text-xs leading-5 text-white/40">
             La structure du modèle reste verrouillée. Tu peux personnaliser les couleurs et le fond, puis publier.
           </p>
@@ -116,10 +116,10 @@ export default function MenuConfigurator({
                 onClick={() => onChange({ template: template.id })}
                 className={[
                   'rounded-2xl border p-3 text-left transition',
-                  active ? 'border-[#3B82F6] bg-[#686D76]/10 ring-1 ring-gold/20' : 'border-ink/8 bg-[#fafaf7] hover:border-forest/20',
+                  active ? 'border-[#3B82F6] bg-[#686D76]/10 ring-1 ring-[#3B82F6]/20' : 'border-ink/8 bg-[#fafaf7] hover:border-[#242424]/20',
                 ].join(' ')}
               >
-                <div className={`mb-3 min-h-[86px] overflow-hidden rounded-xl border p-2.5 ${['dark', 'onyx', 'royal-gold', 'deep-ocean'].includes(template.family) ? 'border-white/10 bg-[#111111] text-white' : 'border-black/5 bg-[#f7f3ea] text-forest'}`}>
+                <div className={`mb-3 min-h-[86px] overflow-hidden rounded-xl border p-2.5 ${['dark', 'onyx', 'royal-gold', 'deep-ocean'].includes(template.family) ? 'border-white/10 bg-[#111111] text-white' : 'border-black/5 bg-[#f7f3ea] text-[#3B82F6]'}`}>
                   {['04_menu_luxe', '17_fine_dining'].includes(template.id) ? (
                     <div className="flex h-[86px] flex-col items-center justify-center bg-[#11100d] px-3 text-center text-[#f7f0df]"><div className="mb-2 h-px w-8 bg-[#d2b46a]" /><div className="font-serif text-[10px] tracking-[0.2em]">MENU SIGNATURE</div><div className="my-2 h-px w-12 bg-[#d2b46a]/60" /><div className="space-y-1"><div className="h-1 w-20 bg-white/50" /><div className="mx-auto h-1 w-12 bg-[#d2b46a]" /><div className="mx-auto h-1 w-16 bg-white/25" /></div></div>
                   ) : template.id === '11_brunch_cafe' ? (
@@ -136,7 +136,7 @@ export default function MenuConfigurator({
                     <div className={template.layout === 'magazine-grid' ? 'grid grid-cols-2 gap-2' : 'grid grid-cols-3 gap-2'}>
                       {[0, 1, 2].slice(0, template.layout === 'magazine-grid' ? 2 : 3).map(index => (
                         <div key={index} className="overflow-hidden rounded-md bg-black/5">
-                          <div className={`h-8 ${index === 0 ? 'bg-[#686D76]/40' : 'bg-forest/10'}`} />
+                          <div className={`h-8 ${index === 0 ? 'bg-[#686D76]/40' : 'bg-[#050505]/10'}`} />
                           <div className="space-y-1 p-1.5"><div className="h-1 w-full rounded bg-current/20" /><div className="h-1 w-1/2 rounded bg-[#686D76]/70" /></div>
                         </div>
                       ))}
@@ -154,7 +154,7 @@ export default function MenuConfigurator({
                   )}
                 </div>
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-semibold text-forest">{template.label}</span>
+                  <span className="text-xs font-semibold text-[#3B82F6]">{template.label}</span>
                   {active && <Check size={14} className="text-[#3B82F6]" />}
                 </div>
                 <p className="mt-1 text-[10px] leading-4 text-white/40">{template.description}</p>
@@ -167,7 +167,7 @@ export default function MenuConfigurator({
 
       <div className="rounded-2xl border border-white/10 bg-[#171717] p-4">
         <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#3B82F6]">Textes du menu</p>
-        <h4 className="mt-1 text-sm font-semibold text-forest">Personnaliser les titres</h4>
+        <h4 className="mt-1 text-sm font-semibold text-[#3B82F6]">Personnaliser les titres</h4>
         <p className="mt-1 text-[10px] leading-4 text-white/45">Modifie le titre et le sous-titre affichés en haut du menu. Les modifications apparaissent directement dans l’aperçu et seront enregistrées avec « Publier ».</p>
         {(() => {
           const ai = draft.aiDesign && typeof draft.aiDesign === 'object' ? draft.aiDesign : {};
@@ -177,22 +177,22 @@ export default function MenuConfigurator({
             onChange({ aiDesign: { ...ai, hero: nextHero } });
           };
           return <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <label className="block"><span className="mb-1 block text-[10px] font-medium text-forest">Titre principal</span><input type="text" maxLength={70} value={typeof hero.title === 'string' ? hero.title : ''} placeholder={establishmentName || 'Nom de votre établissement'} disabled={publishing} onChange={event => updateHero('title', event.target.value)} className="w-full rounded-xl border border-ink/10 bg-[#fafaf7] px-3 py-2.5 text-xs text-forest outline-none focus:border-[#3B82F6]"/></label>
-            <label className="block"><span className="mb-1 block text-[10px] font-medium text-forest">Sous-titre</span><input type="text" maxLength={100} value={typeof hero.subtitle === 'string' ? hero.subtitle : ''} placeholder="Notre carte" disabled={publishing} onChange={event => updateHero('subtitle', event.target.value)} className="w-full rounded-xl border border-ink/10 bg-[#fafaf7] px-3 py-2.5 text-xs text-forest outline-none focus:border-[#3B82F6]"/></label>
+            <label className="block"><span className="mb-1 block text-[10px] font-medium text-[#3B82F6]">Titre principal</span><input type="text" maxLength={70} value={typeof hero.title === 'string' ? hero.title : ''} placeholder={establishmentName || 'Nom de votre établissement'} disabled={publishing} onChange={event => updateHero('title', event.target.value)} className="w-full rounded-xl border border-ink/10 bg-[#fafaf7] px-3 py-2.5 text-xs text-[#3B82F6] outline-none focus:border-[#3B82F6]"/></label>
+            <label className="block"><span className="mb-1 block text-[10px] font-medium text-[#3B82F6]">Sous-titre</span><input type="text" maxLength={100} value={typeof hero.subtitle === 'string' ? hero.subtitle : ''} placeholder="Notre carte" disabled={publishing} onChange={event => updateHero('subtitle', event.target.value)} className="w-full rounded-xl border border-ink/10 bg-[#fafaf7] px-3 py-2.5 text-xs text-[#3B82F6] outline-none focus:border-[#3B82F6]"/></label>
           </div>;
         })()}
       </div>
 
       <div className="rounded-2xl border border-white/10 bg-[#171717] p-4">
         <div className="flex items-start justify-between gap-3">
-          <div><p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#3B82F6]">Personnalisation</p><h4 className="mt-1 text-sm font-semibold text-forest">Couleurs du modèle</h4><p className="mt-1 text-[10px] leading-4 text-white/45">Le layout reste verrouillé ; seules les couleurs et le fond changent.</p></div>
-          <span className="rounded-full border border-white/10 bg-[#111111] px-2.5 py-1 text-[9px] font-semibold text-forest">Structure verrouillée</span>
+          <div><p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#3B82F6]">Personnalisation</p><h4 className="mt-1 text-sm font-semibold text-[#3B82F6]">Couleurs du modèle</h4><p className="mt-1 text-[10px] leading-4 text-white/45">Le layout reste verrouillé ; seules les couleurs et le fond changent.</p></div>
+          <span className="rounded-full border border-white/10 bg-[#111111] px-2.5 py-1 text-[9px] font-semibold text-[#3B82F6]">Structure verrouillée</span>
         </div>
-        <div className="mt-4 rounded-xl border border-[#3B82F6]/20 bg-gradient-to-r from-gold/10 to-transparent p-3">
+        <div className="mt-4 rounded-xl border border-[#3B82F6]/20 bg-gradient-to-r from-[#686D76]/10 to-transparent p-3">
           <div className="flex items-center gap-3">
             {logoUrl ? <img src={logoUrl} alt="Logo de l’établissement" className="h-11 w-11 rounded-lg border border-ink/10 bg-white object-contain p-1" /> : <div className="grid h-11 w-11 place-items-center rounded-lg border border-dashed border-ink/15 bg-white text-white/30"><ImagePlus size={18}/></div>}
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold text-forest">Palette de marque par IA</p>
+              <p className="text-xs font-semibold text-[#3B82F6]">Palette de marque par IA</p>
               <p className="mt-1 text-[10px] leading-4 text-white/45">{logoUrl ? 'Analyse le logo et propose 4 couleurs harmonisées, avec un contraste lisible.' : 'Ajoute d’abord le logo dans les informations de ton établissement.'}</p>
             </div>
             <button type="button" disabled={publishing || paletteBusy || !logoUrl} onClick={async () => {
@@ -208,7 +208,7 @@ export default function MenuConfigurator({
                 setPaletteNotice('Palette de marque générée. Vérifie l’aperçu puis publie pour l’appliquer au menu.');
               } catch (cause) { setError(cause instanceof Error ? cause.message : 'Erreur lors de la génération de la palette.'); }
               finally { setPaletteBusy(false); }
-            }} className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-forest px-3 py-2.5 text-[10px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40">
+            }} className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-[#050505] px-3 py-2.5 text-[10px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40">
               {paletteBusy ? <Loader2 size={13} className="animate-spin"/> : <Sparkles size={13}/>}
               {paletteBusy ? 'Analyse…' : 'Générer'}
             </button>
@@ -219,15 +219,15 @@ export default function MenuConfigurator({
           {([{key:'background',label:'Arrière-plan'},{key:'surface',label:'Blocs / cartes'},{key:'text',label:'Texte'},{key:'accent',label:'Accent / prix'}] as const).map(color => (
             <label key={color.key} className="flex min-w-0 items-center gap-2 rounded-xl border border-white/10 bg-[#111111] p-2.5">
               <input type="color" value={draft.themeColors[color.key]} onChange={event => onChange({themeColors:{...draft.themeColors,[color.key]:event.target.value}})} className="h-9 w-10 shrink-0 cursor-pointer rounded-lg border-0 bg-transparent p-0" aria-label={color.label}/>
-              <span className="text-[10px] font-medium text-forest">{color.label}</span>
+              <span className="text-[10px] font-medium text-[#3B82F6]">{color.label}</span>
             </label>
           ))}
         </div>
-        <button type="button" disabled={publishing} onClick={() => onChange({themeColors:{background:'#3B82F6',surface:'#3B82F6',text:'#3B82F6',accent:'#3B82F6'}})} className="mt-3 rounded-full border border-white/10 bg-[#111111] px-3 py-2 text-[10px] font-semibold text-forest disabled:opacity-50">Réinitialiser les couleurs</button>
+        <button type="button" disabled={publishing} onClick={() => onChange({themeColors:{background:'#3B82F6',surface:'#3B82F6',text:'#3B82F6',accent:'#3B82F6'}})} className="mt-3 rounded-full border border-white/10 bg-[#111111] px-3 py-2 text-[10px] font-semibold text-[#3B82F6] disabled:opacity-50">Réinitialiser les couleurs</button>
       </div>
 
       <div className="rounded-2xl border border-white/10 bg-[#171717] p-4">
-        <div className="flex items-center justify-between gap-3"><div><p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#3B82F6]">Wallpaper</p><p className="mt-1 text-xs text-white/50">Règle l’intensité du voile sur l’image de fond.</p></div><span className="text-xs font-bold text-forest">{Math.round(draft.overlayOpacity * 100)}%</span></div>
+        <div className="flex items-center justify-between gap-3"><div><p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#3B82F6]">Wallpaper</p><p className="mt-1 text-xs text-white/50">Règle l’intensité du voile sur l’image de fond.</p></div><span className="text-xs font-bold text-[#3B82F6]">{Math.round(draft.overlayOpacity * 100)}%</span></div>
         <input aria-label="Intensité du voile du wallpaper" type="range" min="0" max="70" step="5" value={Math.round(draft.overlayOpacity * 100)} onChange={event => onChange({overlayOpacity:Number(event.target.value)/100})} disabled={publishing} className="mt-3 w-full accent-[#3B82F6]"/>
       </div>
 
@@ -235,7 +235,7 @@ export default function MenuConfigurator({
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#3B82F6]">Expérience</p>
-            <h4 className="mt-1 text-sm font-semibold text-forest">Navigation du menu</h4>
+            <h4 className="mt-1 text-sm font-semibold text-[#3B82F6]">Navigation du menu</h4>
             <p className="mt-1 text-[10px] leading-4 text-white/40">
               Choisis comment le visiteur parcourt ton menu.
             </p>
@@ -256,12 +256,12 @@ export default function MenuConfigurator({
                 className={[
                   'rounded-xl border px-3 py-3 text-left transition-all duration-200',
                   active
-                    ? 'border-[#3B82F6]/40 bg-[#686D76]/10 shadow-sm ring-1 ring-gold/20'
+                    ? 'border-[#3B82F6]/40 bg-[#686D76]/10 shadow-sm ring-1 ring-[#3B82F6]/20'
                     : 'border-white/10 bg-white/[.03] hover:border-[#3B82F6]/30 hover:bg-white/[.06]',
                 ].join(' ')}
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-[11px] font-semibold text-forest">{mode.label}</span>
+                  <span className="text-[11px] font-semibold text-[#3B82F6]">{mode.label}</span>
                   <span
                     className={[
                       'grid h-5 w-5 place-items-center rounded-full border',
@@ -292,7 +292,7 @@ export default function MenuConfigurator({
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={publishing}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-forest px-3 py-2 text-[11px] font-semibold text-white disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[#050505] px-3 py-2 text-[11px] font-semibold text-white disabled:opacity-50"
           >
             <Upload size={13} /> Choisir
           </button>
@@ -338,7 +338,7 @@ export default function MenuConfigurator({
             className="mt-3 flex aspect-[3/4] w-full flex-col items-center justify-center rounded-2xl border border-dashed border-ink/10 bg-[#fafaf7] text-center"
           >
             <ImagePlus size={24} className="text-[#3B82F6]" />
-            <span className="mt-2 text-xs font-semibold text-forest">Aucun wallpaper</span>
+            <span className="mt-2 text-xs font-semibold text-[#3B82F6]">Aucun wallpaper</span>
             <span className="mt-1 text-[10px] text-white/35">Ajoute ton image verticale</span>
           </button>
         )}
@@ -364,7 +364,7 @@ export default function MenuConfigurator({
         type="button"
         onClick={onPublish}
         disabled={!hasChanges || publishing}
-        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-forest px-4 py-3 text-xs font-semibold text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-35"
+        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#050505] px-4 py-3 text-xs font-semibold text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-35"
       >
         {publishing && <Loader2 size={14} className="animate-spin" />}
         {publishing ? 'Publication…' : hasChanges ? 'Publier les modifications' : 'Design publié'}

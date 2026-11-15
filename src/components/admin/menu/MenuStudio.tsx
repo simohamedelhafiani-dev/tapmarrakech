@@ -296,7 +296,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
                 className={[
                   'group flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-xs font-semibold transition-all duration-200',
                   active
-                    ? 'bg-[#686D76]-gradient text-[#050505] shadow-gold'
+                    ? 'bg-[#686D76]-gradient text-[#050505] shadow-electric'
                     : 'text-white/45 hover:bg-white/[.06] hover:text-white',
                 ].join(' ')}
                 aria-selected={active}
@@ -394,7 +394,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
                   type="button"
                   onClick={() => void publish()}
                   disabled={!hasChanges || publishing || loadingDesign}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#686D76]-gradient px-4 py-3 text-xs font-bold text-[#090909] shadow-gold transition disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#686D76]-gradient px-4 py-3 text-xs font-bold text-[#090909] shadow-electric transition disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {publishing ? (
                     <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-black/25 border-t-black" />
