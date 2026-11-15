@@ -52,7 +52,7 @@ export default function WifiForm({ establishmentId }: WifiFormProps) {
       width: 480,
       margin: 3,
       errorCorrectionLevel: 'M',
-      color: { dark: '#173D32', light: '#FFFFFF' },
+      color: { dark: '#686D76', light: '#FFFFFF' },
     })
       .then((dataUrl) => {
         if (!cancelled) setQrDataUrl(dataUrl);
