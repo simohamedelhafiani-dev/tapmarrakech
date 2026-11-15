@@ -119,9 +119,11 @@ Deno.serve(async request => {
       reviewStatus = String(current.reviewStatus || "UNDER_REVIEW");
       const patch = await fetch(endpoint,{method:"PATCH",headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"},body:JSON.stringify({
         issuerName:classBody.issuerName,programName:classBody.programName,programLogo:classBody.programLogo,
-        ...(classBody.heroImage ? {heroImage:classBody.heroImage} : {}),
+        heroImage:classBody.heroImage || null,
         hexBackgroundColor:classBody.hexBackgroundColor,homepageUri:classBody.homepageUri,
-        textModulesData:classBody.textModulesData,linksModuleData:classBody.linksModuleData,
+        textModulesData:classBody.textModulesData,
+        linksModuleData:classBody.linksModuleData || {uris:[]},
+        reviewStatus:"UNDER_REVIEW",
       })});
       const updated = await patch.json().catch(() => ({}));
       if (!patch.ok) return reply({success:false,stage:"google_class_update",google_status:patch.status,error:updated.error?.message || "Google a refusé la mise à jour."},502);
