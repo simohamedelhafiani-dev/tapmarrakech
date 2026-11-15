@@ -40,7 +40,7 @@ type Winner = {
   customer?: { first_name: string; last_name: string | null; phone: string } | null;
 };
 
-const inputClass = 'h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#E1C27A] outline-none focus:border-[#C9A45C]/50 focus:ring-2 focus:ring-[#C9A45C]/10 placeholder:text-[#FFFFFF]/25';
+const inputClass = 'h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#3B82F6] outline-none focus:border-[#3B82F6]/50 focus:ring-2 focus:ring-[#3B82F6]/10 placeholder:text-[#FFFFFF]/25';
 const labelClass = 'mb-2 block text-[10px] font-semibold uppercase tracking-[.12em] text-[#FFFFFF]/40';
 
 function localInputValue(date: Date) {
@@ -231,11 +231,11 @@ export default function LoyaltyRaffleStudio({ establishmentId }: Props) {
       <section className="rounded-3xl border border-[#242424]/10 bg-[#111111] p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[.18em] text-[#C9A45C]">Nouvelle tombola</p>
-            <h2 className="mt-1 text-lg font-semibold text-[#E1C27A]">Créer une expérience gagnante</h2>
+            <p className="text-[10px] font-bold uppercase tracking-[.18em] text-[#3B82F6]">Nouvelle tombola</p>
+            <h2 className="mt-1 text-lg font-semibold text-[#3B82F6]">Créer une expérience gagnante</h2>
             <p className="mt-1 max-w-2xl text-[11px] leading-5 text-[#FFFFFF]/40">KELYANI sélectionnera automatiquement les gagnants à la date prévue et leur enverra une notification directement sur leur carte.</p>
           </div>
-          <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#C9A45C]/10 text-[#C9A45C]"><Gift size={17} /></div>
+          <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#3B82F6]/10 text-[#3B82F6]"><Gift size={17} /></div>
         </div>
 
         <div className="mt-5 grid gap-4 md:grid-cols-2">
@@ -257,15 +257,15 @@ export default function LoyaltyRaffleStudio({ establishmentId }: Props) {
           </Field>
         </div>
 
-        <div className="mt-5 rounded-2xl border border-[#C9A45C]/15 bg-[#C9A45C]/5 p-4">
-          <div className="flex items-center gap-2 text-xs font-semibold text-[#E1C27A]"><CalendarDays size={15} /> Validité du cadeau</div>
+        <div className="mt-5 rounded-2xl border border-[#3B82F6]/15 bg-[#3B82F6]/5 p-4">
+          <div className="flex items-center gap-2 text-xs font-semibold text-[#3B82F6]"><CalendarDays size={15} /> Validité du cadeau</div>
           <div className="mt-3 grid gap-2 sm:grid-cols-3">
             {[
               ['ONE_DAY', 'Une journée'],
               ['DATE_RANGE', 'Une période'],
               ['DAYS_AFTER_DRAW', 'X jours après le tirage'],
             ].map(([value, label]) => (
-              <button key={value} type="button" onClick={() => setForm({ ...form, validityMode: value as Raffle['reward_validity_mode'] })} className={`rounded-xl border px-3 py-3 text-left text-xs font-semibold transition ${form.validityMode === value ? 'border-[#C9A45C]/50 bg-[#C9A45C]/10 text-[#E1C27A]' : 'border-[#242424]/10 text-[#FFFFFF]/40 hover:border-[#C9A45C]/25'}`}>
+              <button key={value} type="button" onClick={() => setForm({ ...form, validityMode: value as Raffle['reward_validity_mode'] })} className={`rounded-xl border px-3 py-3 text-left text-xs font-semibold transition ${form.validityMode === value ? 'border-[#3B82F6]/50 bg-[#3B82F6]/10 text-[#3B82F6]' : 'border-[#242424]/10 text-[#FFFFFF]/40 hover:border-[#3B82F6]/25'}`}>
                 {label}
               </button>
             ))}
@@ -283,7 +283,7 @@ export default function LoyaltyRaffleStudio({ establishmentId }: Props) {
         </div>
 
         <div className="mt-5 flex justify-end">
-          <button type="button" onClick={() => void createRaffle()} disabled={saving} className="inline-flex items-center gap-2 rounded-xl bg-[#C9A45C] px-5 py-3 text-xs font-bold text-[#050505] disabled:opacity-50">
+          <button type="button" onClick={() => void createRaffle()} disabled={saving} className="inline-flex items-center gap-2 rounded-xl bg-[#3B82F6] px-5 py-3 text-xs font-bold text-[#050505] disabled:opacity-50">
             <Plus size={15} /> {saving ? 'Programmation...' : 'Programmer la tombola'}
           </button>
         </div>
@@ -291,7 +291,7 @@ export default function LoyaltyRaffleStudio({ establishmentId }: Props) {
 
       <section className="rounded-3xl border border-[#242424]/10 bg-[#111111] p-5">
         <div className="flex items-center justify-between gap-3">
-          <div><p className="text-[10px] font-bold uppercase tracking-[.18em] text-[#C9A45C]">Historique</p><h2 className="mt-1 text-lg font-semibold text-[#E1C27A]">Vos tombolas</h2></div>
+          <div><p className="text-[10px] font-bold uppercase tracking-[.18em] text-[#3B82F6]">Historique</p><h2 className="mt-1 text-lg font-semibold text-[#3B82F6]">Vos tombolas</h2></div>
           {loading && <span className="text-[10px] text-[#FFFFFF]/35">Chargement...</span>}
         </div>
         <div className="mt-4 space-y-2">
@@ -301,14 +301,14 @@ export default function LoyaltyRaffleStudio({ establishmentId }: Props) {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-sm font-semibold text-[#E1C27A]">{raffle.title}</p>
-                    <span className="rounded-full bg-[#C9A45C]/10 px-2 py-1 text-[8px] font-bold uppercase tracking-[.12em] text-[#C9A45C]">{statusLabel(raffle.status)}</span>
+                    <p className="text-sm font-semibold text-[#3B82F6]">{raffle.title}</p>
+                    <span className="rounded-full bg-[#3B82F6]/10 px-2 py-1 text-[8px] font-bold uppercase tracking-[.12em] text-[#3B82F6]">{statusLabel(raffle.status)}</span>
                   </div>
                   <p className="mt-1 text-[11px] text-[#FFFFFF]/40">🎁 {raffle.prize_name} · 🎟️ {raffle.participant_count} · {raffle.minimum_tier_key} minimum · chances par niveau participants · 🏆 {raffle.winner_count}/{raffle.winners_count} gagnant(s)</p>
                   <p className="mt-1 text-[10px] text-[#FFFFFF]/30">Tirage : {formatDate(raffle.draw_at)}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  {(raffle.status === 'DRAWN') && <button type="button" onClick={() => void loadWinners(raffle.id)} className="rounded-xl border border-[#C9A45C]/20 px-3 py-2 text-[10px] font-semibold text-[#E1C27A]">Voir les gagnants</button>}
+                  {(raffle.status === 'DRAWN') && <button type="button" onClick={() => void loadWinners(raffle.id)} className="rounded-xl border border-[#3B82F6]/20 px-3 py-2 text-[10px] font-semibold text-[#3B82F6]">Voir les gagnants</button>}
                   {raffle.status === 'SCHEDULED' && <button type="button" onClick={() => void cancelRaffle(raffle.id)} className="rounded-xl border border-red-500/20 px-3 py-2 text-[10px] font-semibold text-red-300"><Ban size={13} /></button>}
                 </div>
               </div>
@@ -318,28 +318,28 @@ export default function LoyaltyRaffleStudio({ establishmentId }: Props) {
       </section>
 
       {selectedId && (
-        <section className="rounded-3xl border border-[#C9A45C]/15 bg-[#111111] p-5">
+        <section className="rounded-3xl border border-[#3B82F6]/15 bg-[#111111] p-5">
           <div className="flex items-center justify-between gap-3">
-            <div><p className="text-[10px] font-bold uppercase tracking-[.18em] text-[#C9A45C]">Résultat</p><h2 className="mt-1 text-lg font-semibold text-[#E1C27A]">Gagnants de la tombola</h2></div>
+            <div><p className="text-[10px] font-bold uppercase tracking-[.18em] text-[#3B82F6]">Résultat</p><h2 className="mt-1 text-lg font-semibold text-[#3B82F6]">Gagnants de la tombola</h2></div>
             <button type="button" onClick={() => { setSelectedId(null); setWinners([]); }} className="rounded-xl p-2 text-[#FFFFFF]/30 hover:text-white"><X size={17} /></button>
           </div>
           <div className="mt-4 space-y-2">
             {winners.length === 0 && <p className="rounded-2xl bg-[#0b0b0b] p-5 text-center text-xs text-[#FFFFFF]/35">Aucun gagnant disponible.</p>}
             {winners.map(winner => (
               <div key={winner.id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-[#242424]/10 bg-[#0b0b0b] p-4">
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#C9A45C]/10 text-[#C9A45C]"><Trophy size={17} /></div>
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#3B82F6]/10 text-[#3B82F6]"><Trophy size={17} /></div>
                 <div className="min-w-[160px] flex-1">
-                  <p className="text-xs font-semibold text-[#E1C27A]">#{winner.rank} · {winner.customer ? [winner.customer.first_name, winner.customer.last_name].filter(Boolean).join(' ') : 'Client'}</p>
+                  <p className="text-xs font-semibold text-[#3B82F6]">#{winner.rank} · {winner.customer ? [winner.customer.first_name, winner.customer.last_name].filter(Boolean).join(' ') : 'Client'}</p>
                   <p className="mt-1 text-[10px] text-[#FFFFFF]/35">{winner.customer?.phone || '—'} · valable jusqu'au {formatDate(winner.valid_until)}</p>
                 </div>
-                {winner.status === 'PENDING' ? <button type="button" onClick={() => void redeemWinner(winner.id)} className="inline-flex items-center gap-2 rounded-xl bg-[#C9A45C] px-3 py-2 text-[10px] font-bold text-[#050505]"><CheckCircle2 size={13} /> Marquer utilisé</button> : <span className={`rounded-full px-2.5 py-1 text-[8px] font-bold uppercase tracking-[.12em] ${winner.status === 'REDEEMED' ? 'bg-emerald-500/10 text-emerald-300' : 'bg-red-500/10 text-red-300'}`}>{winner.status === 'REDEEMED' ? 'Utilisé' : 'Expiré'}</span>}
+                {winner.status === 'PENDING' ? <button type="button" onClick={() => void redeemWinner(winner.id)} className="inline-flex items-center gap-2 rounded-xl bg-[#3B82F6] px-3 py-2 text-[10px] font-bold text-[#050505]"><CheckCircle2 size={13} /> Marquer utilisé</button> : <span className={`rounded-full px-2.5 py-1 text-[8px] font-bold uppercase tracking-[.12em] ${winner.status === 'REDEEMED' ? 'bg-emerald-500/10 text-emerald-300' : 'bg-red-500/10 text-red-300'}`}>{winner.status === 'REDEEMED' ? 'Utilisé' : 'Expiré'}</span>}
               </div>
             ))}
           </div>
         </section>
       )}
 
-      {message && <div className="flex items-center justify-between gap-3 rounded-2xl border border-[#C9A45C]/15 bg-[#C9A45C]/5 px-4 py-3 text-xs text-[#E1C27A]"><span>{message}</span><button type="button" onClick={() => setMessage('')}><X size={14} /></button></div>}
+      {message && <div className="flex items-center justify-between gap-3 rounded-2xl border border-[#3B82F6]/15 bg-[#3B82F6]/5 px-4 py-3 text-xs text-[#3B82F6]"><span>{message}</span><button type="button" onClick={() => setMessage('')}><X size={14} /></button></div>}
     </div>
   );
 }
@@ -349,12 +349,12 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 }
 
 function Toggle({ label, checked, onChange }: { label: string; checked: boolean; onChange: (value: boolean) => void }) {
-  return <button type="button" onClick={() => onChange(!checked)} className={`flex min-h-12 items-center justify-between gap-3 rounded-xl border px-3 py-3 text-left ${checked ? 'border-[#C9A45C]/35 bg-[#C9A45C]/5' : 'border-[#242424]/10 bg-[#111111]'}`}>
-    <span className="text-[10px] font-semibold text-[#E1C27A]">{label}</span>
-    <span className={`h-5 w-9 rounded-full p-0.5 transition ${checked ? 'bg-[#C9A45C]' : 'bg-[#242424]'}`}><span className={`block h-4 w-4 rounded-full bg-white transition ${checked ? 'translate-x-4' : ''}`} /></span>
+  return <button type="button" onClick={() => onChange(!checked)} className={`flex min-h-12 items-center justify-between gap-3 rounded-xl border px-3 py-3 text-left ${checked ? 'border-[#3B82F6]/35 bg-[#3B82F6]/5' : 'border-[#242424]/10 bg-[#111111]'}`}>
+    <span className="text-[10px] font-semibold text-[#3B82F6]">{label}</span>
+    <span className={`h-5 w-9 rounded-full p-0.5 transition ${checked ? 'bg-[#3B82F6]' : 'bg-[#242424]'}`}><span className={`block h-4 w-4 rounded-full bg-white transition ${checked ? 'translate-x-4' : ''}`} /></span>
   </button>;
 }
 
 function Metric({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
-  return <div className="rounded-2xl border border-[#242424]/10 bg-[#111111] p-4"><div className="flex items-center gap-2 text-[#C9A45C]">{icon}<span className="text-[9px] font-bold uppercase tracking-[.16em] text-[#FFFFFF]/35">{label}</span></div><p className="mt-2 text-2xl font-semibold text-[#E1C27A]">{value}</p></div>;
+  return <div className="rounded-2xl border border-[#242424]/10 bg-[#111111] p-4"><div className="flex items-center gap-2 text-[#3B82F6]">{icon}<span className="text-[9px] font-bold uppercase tracking-[.16em] text-[#FFFFFF]/35">{label}</span></div><p className="mt-2 text-2xl font-semibold text-[#3B82F6]">{value}</p></div>;
 }

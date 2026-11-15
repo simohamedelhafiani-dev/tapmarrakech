@@ -129,7 +129,7 @@ export default function Analytics() {
   return (
     <div>
       <div className="mb-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#3B82F6]">
           Comprendre votre audience
         </p>
         <h1 className="mt-2 font-display text-4xl text-forest">Analytics</h1>
@@ -334,7 +334,7 @@ function Metric({
 }) {
   return (
     <div className="rounded-2xl border border-ink/5 bg-white p-5 shadow-soft">
-      <Icon size={18} className="text-gold" />
+      <Icon size={18} className="text-[#3B82F6]" />
       <p className="mt-5 text-xs text-ink/45">{label}</p>
       <p className="mt-1 font-display text-3xl text-forest">{value}</p>
       <p className="mt-1 text-[11px] text-ink/40">{detail}</p>

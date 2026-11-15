@@ -499,7 +499,7 @@ export default function Menu() {
   if (loading && establishments.length === 0) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="text-sm text-[#F5F5DC]/50">Chargement du menu…</div>
+        <div className="text-sm text-[#B0B0B0]/50">Chargement du menu…</div>
       </div>
     );
   }
@@ -516,11 +516,11 @@ export default function Menu() {
   if (establishments.length === 0) {
     return (
       <div className="rounded-3xl border border-[#242424]/10 bg-[#111111] p-10 text-center">
-        <UtensilsCrossed className="mx-auto mb-4 text-gold" size={34} />
+        <UtensilsCrossed className="mx-auto mb-4 text-[#3B82F6]" size={34} />
         <h1 className="text-2xl font-semibold text-forest">
           Aucun établissement
         </h1>
-        <p className="mt-2 text-sm text-[#F5F5DC]/50">
+        <p className="mt-2 text-sm text-[#B0B0B0]/50">
           Crée d’abord ton établissement pour gérer son menu.
         </p>
       </div>
@@ -533,22 +533,22 @@ export default function Menu() {
         <section className="rounded-2xl border border-[#242424]/10 bg-[#111111] p-5 shadow-sm">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">Design du menu</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#3B82F6]">Design du menu</p>
               <h2 className="mt-1 text-lg font-semibold text-forest">Choisir un template</h2>
-              <p className="mt-1 text-xs text-[#F5F5DC]/45">Les templates sont créés et publiés par l’Admin. Ici, tu choisis uniquement celui de ton établissement.</p>
+              <p className="mt-1 text-xs text-[#B0B0B0]/45">Les templates sont créés et publiés par l’Admin. Ici, tu choisis uniquement celui de ton établissement.</p>
             </div>
             <span className="rounded-full bg-forest/5 px-3 py-1.5 text-[10px] font-semibold text-forest">{selectedTemplate?.name ?? 'Automatique'}</span>
           </div>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {menuTemplates.map((template) => (
-              <button key={template.id} type="button" onClick={() => void saveTemplate(template.id)} className={`rounded-2xl border p-4 text-left transition ${selectedTemplateId === template.id ? 'border-gold ring-2 ring-gold/15' : 'border-[#242424]/10 hover:border-gold/40'}`}>
-                <div className={`h-20 rounded-xl p-3 ${template.key === 'dark' ? 'bg-[#102B24]' : template.key === 'luxury' ? 'bg-[#F7F3EA]' : template.key === 'cards' ? 'bg-[#111111] border border-[#242424]/10' : 'bg-[#F3EEE2]'}`}>
-                  <div className={`h-2 w-16 rounded-full ${template.key === 'dark' ? 'bg-gold' : 'bg-[#C9A45C]'}`} />
+              <button key={template.id} type="button" onClick={() => void saveTemplate(template.id)} className={`rounded-2xl border p-4 text-left transition ${selectedTemplateId === template.id ? 'border-[#3B82F6] ring-2 ring-[#3B82F6]/15' : 'border-[#242424]/10 hover:border-[#3B82F6]/40'}`}>
+                <div className={`h-20 rounded-xl p-3 ${template.key === 'dark' ? 'bg-[#102B24]' : template.key === 'luxury' ? 'bg-[#686D76]' : template.key === 'cards' ? 'bg-[#111111] border border-[#242424]/10' : 'bg-[#686D76]'}`}>
+                  <div className={`h-2 w-16 rounded-full ${template.key === 'dark' ? 'bg-[#686D76]' : 'bg-[#3B82F6]'}`} />
                   <div className={`mt-3 h-2 w-3/4 rounded-full ${template.key === 'dark' ? 'bg-[#111111]/20' : 'bg-ink/10'}`} />
                   <div className={`mt-2 h-2 w-1/2 rounded-full ${template.key === 'dark' ? 'bg-[#111111]/10' : 'bg-ink/5'}`} />
                 </div>
                 <p className="mt-3 text-xs font-semibold text-forest">{template.name}</p>
-                <p className="mt-1 text-[10px] leading-4 text-[#F5F5DC]/40">{template.description}</p>
+                <p className="mt-1 text-[10px] leading-4 text-[#B0B0B0]/40">{template.description}</p>
               </button>
             ))}
           </div>
@@ -558,7 +558,7 @@ export default function Menu() {
       <section className="rounded-[28px] bg-forest p-6 text-white shadow-xl md:p-8">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
-            <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-gold">
+            <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#3B82F6]">
               <UtensilsCrossed size={15} />
               Menu
             </div>
@@ -581,7 +581,7 @@ export default function Menu() {
                 <option
                   key={establishment.id}
                   value={establishment.id}
-                  className="text-[#F5F5DC]"
+                  className="text-[#B0B0B0]"
                 >
                   {establishment.name}
                 </option>
@@ -601,7 +601,7 @@ export default function Menu() {
             <button
               type="button"
               onClick={openNewCategory}
-              className="flex items-center justify-center gap-2 rounded-xl bg-gold px-4 py-3 text-sm font-semibold text-forest transition hover:brightness-105"
+              className="flex items-center justify-center gap-2 rounded-xl bg-[#686D76] px-4 py-3 text-sm font-semibold text-forest transition hover:brightness-105"
             >
               <Plus size={17} />
               Nouvelle catégorie
@@ -619,11 +619,11 @@ export default function Menu() {
       <section className="space-y-4">
         {categories.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-[#242424]/15 bg-[#111111] p-12 text-center">
-            <UtensilsCrossed className="mx-auto mb-4 text-gold" size={36} />
+            <UtensilsCrossed className="mx-auto mb-4 text-[#3B82F6]" size={36} />
             <h2 className="text-xl font-semibold text-forest">
               Ton menu est vide
             </h2>
-            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#F5F5DC]/50">
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#B0B0B0]/50">
               Commence par créer une catégorie comme Entrées, Plats, Burgers,
               Desserts ou Boissons.
             </p>
@@ -666,13 +666,13 @@ export default function Menu() {
                           {category.name}
                         </h2>
                         {!category.active && (
-                          <span className="rounded-full bg-ink/5 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#F5F5DC]/45">
+                          <span className="rounded-full bg-ink/5 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#B0B0B0]/45">
                             Masquée
                           </span>
                         )}
                       </div>
 
-                      <p className="mt-1 text-xs text-[#F5F5DC]/45">
+                      <p className="mt-1 text-xs text-[#B0B0B0]/45">
                         {categoryItems.length}{' '}
                         {categoryItems.length > 1 ? 'produits' : 'produit'}
                         {category.description
@@ -688,7 +688,7 @@ export default function Menu() {
                       title="Monter"
                       disabled={index === 0}
                       onClick={() => moveCategory(category, -1)}
-                      className="grid h-9 w-9 place-items-center rounded-xl border border-[#242424]/10 text-[#F5F5DC]/50 disabled:cursor-not-allowed disabled:opacity-30"
+                      className="grid h-9 w-9 place-items-center rounded-xl border border-[#242424]/10 text-[#B0B0B0]/50 disabled:cursor-not-allowed disabled:opacity-30"
                     >
                       <ChevronUp size={16} />
                     </button>
@@ -698,7 +698,7 @@ export default function Menu() {
                       title="Descendre"
                       disabled={index === categories.length - 1}
                       onClick={() => moveCategory(category, 1)}
-                      className="grid h-9 w-9 place-items-center rounded-xl border border-[#242424]/10 text-[#F5F5DC]/50 disabled:cursor-not-allowed disabled:opacity-30"
+                      className="grid h-9 w-9 place-items-center rounded-xl border border-[#242424]/10 text-[#B0B0B0]/50 disabled:cursor-not-allowed disabled:opacity-30"
                     >
                       <ChevronDown size={16} />
                     </button>
@@ -706,7 +706,7 @@ export default function Menu() {
                     <button
                       type="button"
                       onClick={() => toggleCategoryActive(category)}
-                      className="flex items-center gap-2 rounded-xl border border-[#242424]/10 px-3 py-2 text-xs font-semibold text-[#F5F5DC]/60"
+                      className="flex items-center gap-2 rounded-xl border border-[#242424]/10 px-3 py-2 text-xs font-semibold text-[#B0B0B0]/60"
                     >
                       {category.active ? <EyeOff size={15} /> : <Eye size={15} />}
                       {category.active ? 'Masquer' : 'Afficher'}
@@ -715,7 +715,7 @@ export default function Menu() {
                     <button
                       type="button"
                       onClick={() => openEditCategory(category)}
-                      className="grid h-9 w-9 place-items-center rounded-xl border border-[#242424]/10 text-[#F5F5DC]/50"
+                      className="grid h-9 w-9 place-items-center rounded-xl border border-[#242424]/10 text-[#B0B0B0]/50"
                     >
                       <Edit3 size={15} />
                     </button>
@@ -740,7 +740,7 @@ export default function Menu() {
                     <button
                       type="button"
                       onClick={() => toggleCategory(category.id)}
-                      className="grid h-9 w-9 place-items-center rounded-xl border border-[#242424]/10 text-[#F5F5DC]/50"
+                      className="grid h-9 w-9 place-items-center rounded-xl border border-[#242424]/10 text-[#B0B0B0]/50"
                     >
                       {expanded ? (
                         <ChevronUp size={16} />
@@ -755,7 +755,7 @@ export default function Menu() {
                   <div className="border-t border-[#242424]/5 bg-[#fbfbf8] p-4 md:p-6">
                     {categoryItems.length === 0 ? (
                       <div className="rounded-2xl border border-dashed border-[#242424]/10 bg-[#111111] p-8 text-center">
-                        <p className="text-sm text-[#F5F5DC]/45">
+                        <p className="text-sm text-[#B0B0B0]/45">
                           Aucun produit dans cette catégorie.
                         </p>
                         <button
@@ -787,7 +787,7 @@ export default function Menu() {
                                     className="h-full w-full object-cover"
                                   />
                                 ) : (
-                                  <div className="grid h-full w-full place-items-center text-[#F5F5DC]/25">
+                                  <div className="grid h-full w-full place-items-center text-[#B0B0B0]/25">
                                     <ImageIcon size={20} />
                                   </div>
                                 )}
@@ -799,14 +799,14 @@ export default function Menu() {
                                     {item.name}
                                   </h3>
                                   {!item.active && (
-                                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[#F5F5DC]/35">
+                                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[#B0B0B0]/35">
                                       Masqué
                                     </span>
                                   )}
                                 </div>
 
                                 {item.description && (
-                                  <p className="mt-1 line-clamp-2 text-xs leading-5 text-[#F5F5DC]/45">
+                                  <p className="mt-1 line-clamp-2 text-xs leading-5 text-[#B0B0B0]/45">
                                     {item.description}
                                   </p>
                                 )}
@@ -814,7 +814,7 @@ export default function Menu() {
                             </div>
 
                             <div className="flex items-center justify-between gap-3 md:justify-end">
-                              <p className="text-sm font-bold text-gold">
+                              <p className="text-sm font-bold text-[#3B82F6]">
                                 {item.price.toFixed(2)} MAD
                               </p>
 
@@ -822,7 +822,7 @@ export default function Menu() {
                                 <button
                                   type="button"
                                   onClick={() => toggleItemActive(item)}
-                                  className="grid h-9 w-9 place-items-center rounded-xl border border-[#242424]/10 text-[#F5F5DC]/50"
+                                  className="grid h-9 w-9 place-items-center rounded-xl border border-[#242424]/10 text-[#B0B0B0]/50"
                                   title={item.active ? 'Masquer' : 'Afficher'}
                                 >
                                   {item.active ? (
@@ -835,7 +835,7 @@ export default function Menu() {
                                 <button
                                   type="button"
                                   onClick={() => openEditItem(item)}
-                                  className="grid h-9 w-9 place-items-center rounded-xl border border-[#242424]/10 text-[#F5F5DC]/50"
+                                  className="grid h-9 w-9 place-items-center rounded-xl border border-[#242424]/10 text-[#B0B0B0]/50"
                                   title="Modifier"
                                 >
                                   <Edit3 size={15} />
@@ -868,7 +868,7 @@ export default function Menu() {
           <div className="w-full max-w-lg rounded-3xl bg-[#111111] p-6 shadow-2xl">
             <div className="mb-6 flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#3B82F6]">
                   Menu
                 </p>
                 <h2 className="mt-1 text-xl font-semibold text-forest">
@@ -881,7 +881,7 @@ export default function Menu() {
               <button
                 type="button"
                 onClick={() => setShowCategoryForm(false)}
-                className="grid h-9 w-9 place-items-center rounded-full bg-ink/5 text-[#F5F5DC]/50"
+                className="grid h-9 w-9 place-items-center rounded-full bg-ink/5 text-[#B0B0B0]/50"
               >
                 <X size={17} />
               </button>
@@ -889,7 +889,7 @@ export default function Menu() {
 
             <form onSubmit={saveCategory} className="space-y-4">
               <label className="block">
-                <span className="mb-2 block text-xs font-semibold text-[#F5F5DC]/60">
+                <span className="mb-2 block text-xs font-semibold text-[#B0B0B0]/60">
                   Nom
                 </span>
                 <input
@@ -901,13 +901,13 @@ export default function Menu() {
                     }))
                   }
                   placeholder="Ex. Burgers"
-                  className="w-full rounded-xl border border-[#242424]/10 px-4 py-3 text-sm outline-none focus:border-gold"
+                  className="w-full rounded-xl border border-[#242424]/10 px-4 py-3 text-sm outline-none focus:border-[#3B82F6]"
                   autoFocus
                 />
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-xs font-semibold text-[#F5F5DC]/60">
+                <span className="mb-2 block text-xs font-semibold text-[#B0B0B0]/60">
                   Description <span className="font-normal">(optionnel)</span>
                 </span>
                 <textarea
@@ -920,7 +920,7 @@ export default function Menu() {
                   }
                   rows={3}
                   placeholder="Une courte présentation de la catégorie"
-                  className="w-full resize-none rounded-xl border border-[#242424]/10 px-4 py-3 text-sm outline-none focus:border-gold"
+                  className="w-full resize-none rounded-xl border border-[#242424]/10 px-4 py-3 text-sm outline-none focus:border-[#3B82F6]"
                 />
               </label>
 
@@ -942,7 +942,7 @@ export default function Menu() {
           <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-[#111111] p-6 shadow-2xl">
             <div className="mb-6 flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#3B82F6]">
                   Menu
                 </p>
                 <h2 className="mt-1 text-xl font-semibold text-forest">
@@ -953,7 +953,7 @@ export default function Menu() {
               <button
                 type="button"
                 onClick={() => setShowItemForm(false)}
-                className="grid h-9 w-9 place-items-center rounded-full bg-ink/5 text-[#F5F5DC]/50"
+                className="grid h-9 w-9 place-items-center rounded-full bg-ink/5 text-[#B0B0B0]/50"
               >
                 <X size={17} />
               </button>
@@ -961,7 +961,7 @@ export default function Menu() {
 
             <form onSubmit={saveItem} className="grid gap-4 md:grid-cols-2">
               <label className="block md:col-span-2">
-                <span className="mb-2 block text-xs font-semibold text-[#F5F5DC]/60">
+                <span className="mb-2 block text-xs font-semibold text-[#B0B0B0]/60">
                   Catégorie
                 </span>
                 <select
@@ -972,7 +972,7 @@ export default function Menu() {
                       categoryId: event.target.value,
                     }))
                   }
-                  className="w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-gold"
+                  className="w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#3B82F6]"
                 >
                   <option value="">Choisir une catégorie</option>
                   {categories.map((category) => (
@@ -984,7 +984,7 @@ export default function Menu() {
               </label>
 
               <label className="block md:col-span-2">
-                <span className="mb-2 block text-xs font-semibold text-[#F5F5DC]/60">
+                <span className="mb-2 block text-xs font-semibold text-[#B0B0B0]/60">
                   Nom du produit
                 </span>
                 <input
@@ -996,13 +996,13 @@ export default function Menu() {
                     }))
                   }
                   placeholder="Ex. Cheeseburger"
-                  className="w-full rounded-xl border border-[#242424]/10 px-4 py-3 text-sm outline-none focus:border-gold"
+                  className="w-full rounded-xl border border-[#242424]/10 px-4 py-3 text-sm outline-none focus:border-[#3B82F6]"
                   autoFocus
                 />
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-xs font-semibold text-[#F5F5DC]/60">
+                <span className="mb-2 block text-xs font-semibold text-[#B0B0B0]/60">
                   Prix (MAD)
                 </span>
                 <input
@@ -1015,12 +1015,12 @@ export default function Menu() {
                   }
                   inputMode="decimal"
                   placeholder="69"
-                  className="w-full rounded-xl border border-[#242424]/10 px-4 py-3 text-sm outline-none focus:border-gold"
+                  className="w-full rounded-xl border border-[#242424]/10 px-4 py-3 text-sm outline-none focus:border-[#3B82F6]"
                 />
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-xs font-semibold text-[#F5F5DC]/60">
+                <span className="mb-2 block text-xs font-semibold text-[#B0B0B0]/60">
                   URL de la photo <span className="font-normal">(optionnel)</span>
                 </span>
                 <input
@@ -1032,12 +1032,12 @@ export default function Menu() {
                     }))
                   }
                   placeholder="https://…"
-                  className="w-full rounded-xl border border-[#242424]/10 px-4 py-3 text-sm outline-none focus:border-gold"
+                  className="w-full rounded-xl border border-[#242424]/10 px-4 py-3 text-sm outline-none focus:border-[#3B82F6]"
                 />
               </label>
 
               <label className="block md:col-span-2">
-                <span className="mb-2 block text-xs font-semibold text-[#F5F5DC]/60">
+                <span className="mb-2 block text-xs font-semibold text-[#B0B0B0]/60">
                   Description <span className="font-normal">(optionnel)</span>
                 </span>
                 <textarea
@@ -1050,7 +1050,7 @@ export default function Menu() {
                   }
                   rows={4}
                   placeholder="Décris le produit simplement. L’IA pourra aider à reformuler plus tard."
-                  className="w-full resize-none rounded-xl border border-[#242424]/10 px-4 py-3 text-sm outline-none focus:border-gold"
+                  className="w-full resize-none rounded-xl border border-[#242424]/10 px-4 py-3 text-sm outline-none focus:border-[#3B82F6]"
                 />
               </label>
 
