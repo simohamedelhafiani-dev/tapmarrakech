@@ -91,6 +91,7 @@ type WalletDesignState = {
   accentColor: string;
   textColor: string;
   logoUrl: string;
+  heroImageSourceUrl: string;
   heroImageUrl: string;
   appleHeroImageUrl: string;
   cardTitle: string;
@@ -108,6 +109,7 @@ const DEFAULT_WALLET_DESIGN: WalletDesignState = {
   accentColor: '#3B82F6',
   textColor: '#FFFFFF',
   logoUrl: '',
+  heroImageSourceUrl: '',
   heroImageUrl: '',
   appleHeroImageUrl: '',
   cardTitle: 'KELYANI',
@@ -568,7 +570,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       if (error) throw error;
 
       const { data } = supabase.storage.from('loyalty-assets').getPublicUrl(path);
-      setWalletDesign(current => ({ ...current, heroImageUrl: data.publicUrl }));
+      setWalletDesign(current => ({ ...current, heroImageSourceUrl: data.publicUrl, heroImageUrl: data.publicUrl, appleHeroImageUrl: '' }));
       setMessage('Image Wallet ajoutée. Vous pouvez maintenant la recadrer pour chaque plateforme.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Upload de l’image Wallet impossible.');
@@ -1463,8 +1465,8 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   </Field>
                   <Field label="Image de couverture Wallet">
                     <input
-                      value={walletDesign.heroImageUrl}
-                      onChange={e => setWalletDesign(current => ({ ...current, heroImageUrl: e.target.value }))}
+                      value={walletDesign.heroImageSourceUrl}
+                      onChange={e => setWalletDesign(current => ({ ...current, heroImageSourceUrl: e.target.value, heroImageUrl: e.target.value, appleHeroImageUrl: '' }))}
                       placeholder="URL HTTPS ou importer une image"
                       className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none"
                     />
@@ -1483,10 +1485,10 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                       <button type="button" onClick={() => walletHeroInput.current?.click()} disabled={saving} className="rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-[10px] font-semibold text-[#3B82F6] disabled:opacity-40">
                         Importer une image
                       </button>
-                      <button type="button" onClick={() => setWalletCropPlatform('google')} disabled={!walletDesign.heroImageUrl || saving} className="rounded-lg bg-[#686D76] px-3 py-2 text-[10px] font-semibold text-white disabled:opacity-40">
+                      <button type="button" onClick={() => setWalletCropPlatform('google')} disabled={!walletDesign.heroImageSourceUrl || saving} className="rounded-lg bg-[#686D76] px-3 py-2 text-[10px] font-semibold text-white disabled:opacity-40">
                         Recadrer Google
                       </button>
-                      <button type="button" onClick={() => setWalletCropPlatform('apple')} disabled={!walletDesign.heroImageUrl || saving} className="rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-[10px] font-semibold text-white disabled:opacity-40">
+                      <button type="button" onClick={() => setWalletCropPlatform('apple')} disabled={!walletDesign.heroImageSourceUrl || saving} className="rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-[10px] font-semibold text-white disabled:opacity-40">
                         Recadrer Apple
                       </button>
                     </div>
@@ -1501,7 +1503,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
 
               {walletCropPlatform && (
                 <WalletImageCropEditor
-                  imageUrl={walletCropPlatform === 'apple' ? (walletDesign.appleHeroImageUrl || walletDesign.heroImageUrl) : walletDesign.heroImageUrl}
+                  imageUrl={walletDesign.heroImageSourceUrl}
                   platform={walletCropPlatform}
                   establishmentId={establishmentId}
                   onSaved={url => {
@@ -1540,7 +1542,9 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
           <div className="flex min-h-[500px] w-full items-center justify-center overflow-visible rounded-[24px] bg-[#111111]/[.03] p-3 sm:min-h-[560px]">
             {tab === 'wallet' ? (
               <div className="w-full max-w-[300px] overflow-hidden rounded-[28px] border-[7px] border-[#E5E5E5] shadow-2xl" style={{ background: walletDesign.backgroundColor, color: walletDesign.textColor }}>
-                <div className="min-h-[430px] p-4" style={{ background: `linear-gradient(155deg, ${walletDesign.primaryColor}, ${walletDesign.backgroundColor} 76%)` }}>
+                <div className="relative min-h-[430px] overflow-hidden p-4" style={{ background: `linear-gradient(155deg, ${walletDesign.primaryColor}, ${walletDesign.backgroundColor} 76%)` }}>
+                  {(walletDesign.heroImageUrl || walletDesign.heroImageSourceUrl) && <img src={walletDesign.heroImageUrl || walletDesign.heroImageSourceUrl} alt="" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-30" />}
+                  <div className="relative z-10">
                   <div className="flex items-center gap-3">
                     {walletDesign.logoUrl || design.logoUrl || establishment.logoUrl ? <img src={walletDesign.logoUrl || design.logoUrl || establishment.logoUrl || ''} alt="" className="h-10 w-10 rounded-xl bg-white object-contain p-1" /> : <div className="grid h-10 w-10 place-items-center rounded-xl text-xs font-bold" style={{ background: walletDesign.accentColor, color: walletDesign.backgroundColor }}>{establishment.name.slice(0,2).toUpperCase()}</div>}
                     <div className="min-w-0"><p className="truncate text-xs font-bold">{walletDesign.cardTitle || 'KELYANI'}</p><p className="text-[9px] uppercase tracking-wider opacity-60">{establishment.name} · {walletDesign.headerText}</p></div>
@@ -1549,6 +1553,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   <div className="mt-8 rounded-xl border p-3" style={{ borderColor: walletDesign.accentColor + '88', background: '#00000022' }}><p className="text-[10px] font-semibold">Prochaine récompense</p><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/20"><div className="h-full w-[72%]" style={{ background: walletDesign.accentColor }} /></div></div>
                   {walletDesign.showQr && <div className="mt-7 flex justify-center"><div className="grid h-16 w-16 grid-cols-5 gap-[2px] rounded-lg bg-white p-2">{Array.from({length:25},(_,i)=><span key={i} className="rounded-[1px]" style={{background:(i*7)%3===0?'#111111':'#FFFFFF'}} />)}</div></div>}
                   <p className="mt-5 text-center text-[9px] opacity-55">{walletDesign.footerText}</p>
+                  </div>
                 </div>
               </div>
             ) : <LoyaltyPreview config={previewConfig} />}
