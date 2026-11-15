@@ -5,10 +5,21 @@ test('admin can verify Google Wallet Staging without creating a pass', async ({ 
   const email = process.env.E2E_ADMIN_EMAIL;
   const password = process.env.E2E_ADMIN_PASSWORD;
   const expectedSupabaseHost = new URL(process.env.E2E_SUPABASE_URL || '').hostname;
+  const vercelBypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
 
-  if (!baseUrl || !email || !password || !expectedSupabaseHost) {
-    throw new Error('E2E Preview URL and dedicated Staging admin credentials are required.');
+  if (!baseUrl || !email || !password || !expectedSupabaseHost || !vercelBypassSecret) {
+    throw new Error('Preview URL, Vercel bypass and dedicated Staging admin credentials are required.');
   }
+
+  const previewOrigin = new URL(baseUrl).origin;
+  await page.route(`${previewOrigin}/**`, async (route) => {
+    const headers = {
+      ...route.request().headers(),
+      'x-vercel-protection-bypass': vercelBypassSecret,
+      'x-vercel-set-bypass-cookie': 'true',
+    };
+    await route.continue({ headers });
+  });
 
   await page.route(/^https:\/\/[^/]+\.supabase\.co\//, async (route) => {
     const host = new URL(route.request().url()).hostname;

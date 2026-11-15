@@ -38,7 +38,7 @@ jobs:
         shell: bash
         run: |
           missing=0
-          for name in E2E_SUPABASE_URL E2E_SUPABASE_ANON_KEY E2E_CLIENT_EMAIL E2E_CLIENT_PASSWORD E2E_RESPONSIBLE_EMAIL E2E_RESPONSIBLE_PASSWORD E2E_ADMIN_EMAIL E2E_ADMIN_PASSWORD; do
+          for name in E2E_SUPABASE_URL E2E_SUPABASE_ANON_KEY E2E_CLIENT_EMAIL E2E_CLIENT_PASSWORD E2E_RESPONSIBLE_EMAIL E2E_RESPONSIBLE_PASSWORD E2E_ADMIN_EMAIL E2E_ADMIN_PASSWORD VERCEL_AUTOMATION_BYPASS_SECRET; do
             if [ -z "${!name}" ]; then
               echo "::error::Required Actions secret is unavailable: $name"
               missing=1
@@ -48,7 +48,7 @@ jobs:
             echo "Check whether the values are Repository secrets or Environment secrets. If they are Environment secrets, bind this job to the exact existing GitHub Environment name."
             exit 1
           fi
-          node -e "const u=new URL(process.env.E2E_BASE_URL); if(u.hostname!=='tapmarrakech-git-feat-google-wal-8a3a4d-simohamedelhafiani-7962.vercel.app') throw new Error('E2E_BASE_URL must target the Google Wallet Preview branch'); const s=new URL(process.env.E2E_SUPABASE_URL); if(s.hostname!=='jsllksnmylpxcgqaeidq.supabase.co') throw new Error('E2E_SUPABASE_URL must target Kelyani-Staging (jsllksnmylpxcgqaeidq), never Production');"
+          node -e "const u=new URL(process.env.E2E_BASE_URL); if(u.hostname!=='tapmarrakech-git-feat-google-wal-8a3a4d-simohamedelhafiani-7962.vercel.app') throw new Error('E2E_BASE_URL must target the Google Wallet Preview branch'); const s=new URL(process.env.E2E_SUPABASE_URL); if(s.hostname!=='jsllksnmylpxcgqaeidq.supabase.co') throw new Error('E2E_SUPABASE_URL must target Kelyani-Staging (jsllksnmylpxcgqaeidq), never Production')"
       - name: Install application dependencies
         run: npm ci
       - name: Install Playwright test runner and Chromium
