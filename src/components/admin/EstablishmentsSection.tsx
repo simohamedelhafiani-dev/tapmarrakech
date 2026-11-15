@@ -57,7 +57,7 @@ export default function EstablishmentsSection({
   ).length;
 
   return (
-    <div className="space-y-7">
+    <div className="space-y-7" data-testid="establishments-section">
       <div className="relative overflow-hidden rounded-[28px] border border-ink/5 bg-forest p-6 text-white shadow-[0_18px_60px_rgba(23,61,50,0.14)] sm:p-8">
         <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-gold/10 blur-2xl" />
         <div className="absolute -bottom-24 left-1/3 h-48 w-48 rounded-full bg-[#141414]/5 blur-3xl" />
@@ -173,7 +173,7 @@ export default function EstablishmentsSection({
           <p className="mt-1 text-xs text-[#F5F5DC]/60">{error.message}</p>
         </div>
       ) : loading ? (
-        <div className="grid gap-4 xl:grid-cols-2">
+        <div className="grid gap-4 xl:grid-cols-2" data-testid="establishments-loading">
           {[1, 2, 3, 4].map((item) => (
             <div
               key={item}

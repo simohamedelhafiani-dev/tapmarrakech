@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
     const service = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     const privateKey = Deno.env.get('VAPID_PRIVATE_KEY');
     const subject = Deno.env.get('VAPID_SUBJECT') || 'mailto:notifications@kelyani.com';
-    const publicKey = 'BP6npYG0iStFDilI-plhetrxJ6msUZGBVgMDP9u7ytndT4QzjD1A2q9taxeRX5bEHCoDBjRYjOUXtd1t2ZuXCWA';
+    const publicKey = 'BCqk2PNviEcKsLKPDSd2pUWxfgNbQI6IOPnr-OZnsYDUIBzZQpq6ScAmiB_SkGWXCymULuNZTaEOE8NLxaBVGTo';
 
     if (!url || !anon || !service || !privateKey) return json({ success: false, error: 'Configuration Web Push incomplète.' }, 503);
 
