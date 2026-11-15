@@ -739,7 +739,7 @@ body { background:#050505; color:#FFFFFF; }
   border:1px solid rgba(59,130,246,.38);
   box-shadow:0 16px 38px rgba(0,0,0,.42),0 0 22px rgba(59,130,246,.14);
 }
-#root button[class*="bg-[#3B82F6]"], #root a[class*="bg-[#3B82F6]"] {
+#root button[class~="bg-[#3B82F6]"], #root a[class~="bg-[#3B82F6]"] {
   background-color:#686D76 !important;
   background-image:none !important;
   color:#3B82F6 !important;
@@ -805,10 +805,16 @@ body { background:#050505; color:#FFFFFF; }
 
 
 /* Nardo Tech rule: electric blue is reserved for text, borders and glow, never surfaces. */
-#root [class*="bg-[#3B82F6]"],
-#root [class*="bg-electric"],
+#root [class~="bg-[#3B82F6]"],
+#root [class~="bg-electric"],
 #root [class*="bg-blue-"] {
   background-color: #686D76 !important;
   background-image: none !important;
   color: #3B82F6 !important;
+}
+#root [class*="bg-[#3B82F6]/"],
+#root [class*="bg-electric/"],
+#root [class*="bg-blue-"][class*="/"] {
+  background-color: rgba(104,109,118,.08) !important;
+  background-image: none !important;
 }
