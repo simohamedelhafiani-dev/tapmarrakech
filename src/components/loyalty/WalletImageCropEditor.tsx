@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, type PointerEvent } from 'react';
 import { Move, Save } from 'lucide-react';
 
 type Props = {
@@ -18,7 +18,7 @@ export default function WalletImageCropEditor({ imageUrl, platform, establishmen
   const [error,setError] = useState('');
   const ratio = platform === 'google' ? '1032 / 812' : '1125 / 432';
 
-  const startDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+  const startDrag = (event: PointerEvent<HTMLDivElement>) => {
     dragRef.current = {x,y,px:event.clientX,py:event.clientY};
     event.currentTarget.setPointerCapture(event.pointerId);
   };
@@ -67,7 +67,7 @@ export default function WalletImageCropEditor({ imageUrl, platform, establishmen
       <div><p className="text-xs font-semibold text-white">Cadrage {platform === 'google' ? 'Google Wallet' : 'Apple Wallet'}</p><p className="mt-1 text-[10px] text-white/45">Glissez l’image pour la déplacer, puis ajustez le zoom.</p></div>
       <Move size={16} className="text-[#3B82F6]" />
     </div>
-    <div ref={frameRef} className="touch-none cursor-grab overflow-hidden rounded-xl active:cursor-grabbing" style={{aspectRatio:ratio,backgroundImage:`url("${imageUrl}")`,backgroundRepeat:'no-repeat',backgroundSize:`${zoom*100}% auto`,backgroundPosition:`${x}% ${y}%`}} onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={stopDrag} onPointerCancel={stopDrag} role="img" aria-label={`Zone de cadrage ${platform} Wallet`} />
+    <div ref={frameRef} className="relative touch-none cursor-grab overflow-hidden rounded-xl active:cursor-grabbing" style={{aspectRatio:ratio}} onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={stopDrag} onPointerCancel={stopDrag} role="img" aria-label={`Zone de cadrage ${platform} Wallet`}><img src={imageUrl} alt="" draggable={false} className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover" style={{objectPosition:`${x}% ${y}%`,transform:`scale(${zoom})`}} /></div>
     <div className="mt-3 flex items-center gap-3"><label className="text-[10px] text-white/60">Zoom</label><input aria-label="Zoom image" type="range" min="1" max="3" step="0.01" value={zoom} onChange={event=>setZoom(Number(event.target.value))} className="min-w-0 flex-1 accent-[#3B82F6]" /><span className="w-10 text-right text-[10px] tabular-nums text-white/60">{zoom.toFixed(1)}×</span></div>
     <div className="mt-3 flex items-center justify-between gap-2"><button type="button" onClick={()=>{setZoom(1);setX(50);setY(50);}} className="rounded-lg px-3 py-2 text-[10px] text-white/60 hover:bg-white/5">Réinitialiser</button><button type="button" onClick={()=>void saveCrop()} disabled={saving} className="inline-flex items-center gap-2 rounded-xl bg-[#686D76] px-3 py-2 text-[10px] font-semibold text-white disabled:opacity-50"><Save size={13}/>{saving?'Enregistrement…':'Valider ce cadrage'}</button></div>
     {error && <p className="mt-2 text-[10px] text-red-400">{error}</p>}
