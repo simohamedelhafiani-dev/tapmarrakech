@@ -1465,7 +1465,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   </Field>
                   <Field label="Image de couverture Wallet">
                     <input
-                      value={walletDesign.heroImageSourceUrl}
+                      value={walletDesign.heroImageSourceUrl || walletDesign.heroImageUrl}
                       onChange={e => setWalletDesign(current => ({ ...current, heroImageSourceUrl: e.target.value, heroImageUrl: e.target.value, appleHeroImageUrl: '' }))}
                       placeholder="URL HTTPS ou importer une image"
                       className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none"
@@ -1485,7 +1485,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                       <button type="button" onClick={() => walletHeroInput.current?.click()} disabled={saving} className="rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-[10px] font-semibold text-[#3B82F6] disabled:opacity-40">
                         Importer une image
                       </button>
-                      <button type="button" onClick={() => setWalletCropPlatform('google')} disabled={!walletDesign.heroImageSourceUrl || saving} className="rounded-lg bg-[#686D76] px-3 py-2 text-[10px] font-semibold text-white disabled:opacity-40">
+                      <button type="button" onClick={() => setWalletCropPlatform('google')} disabled={!(walletDesign.heroImageSourceUrl || walletDesign.heroImageUrl) || saving} className="rounded-lg bg-[#686D76] px-3 py-2 text-[10px] font-semibold text-white disabled:opacity-40">
                         Recadrer Google
                       </button>
                       <button type="button" onClick={() => setWalletCropPlatform('apple')} disabled={!walletDesign.heroImageSourceUrl || saving} className="rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-[10px] font-semibold text-white disabled:opacity-40">
@@ -1503,7 +1503,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
 
               {walletCropPlatform && (
                 <WalletImageCropEditor
-                  imageUrl={walletDesign.heroImageSourceUrl}
+                  imageUrl={walletDesign.heroImageSourceUrl || walletDesign.heroImageUrl}
                   platform={walletCropPlatform}
                   establishmentId={establishmentId}
                   onSaved={url => {
