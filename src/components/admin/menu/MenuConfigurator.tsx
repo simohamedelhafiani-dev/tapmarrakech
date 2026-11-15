@@ -223,7 +223,7 @@ export default function MenuConfigurator({
             </label>
           ))}
         </div>
-        <button type="button" disabled={publishing} onClick={() => onChange({themeColors:{background:'#3B82F6',surface:'#3B82F6',text:'#3B82F6',accent:'#3B82F6'}})} className="mt-3 rounded-full border border-white/10 bg-[#111111] px-3 py-2 text-[10px] font-semibold text-[#3B82F6] disabled:opacity-50">Réinitialiser les couleurs</button>
+        <button type="button" disabled={publishing} onClick={() => onChange({themeColors:{background:'#050505',surface:'#686D76',text:'#FFFFFF',accent:'#3B82F6'}})} className="mt-3 rounded-full border border-white/10 bg-[#111111] px-3 py-2 text-[10px] font-semibold text-[#3B82F6] disabled:opacity-50">Réinitialiser les couleurs</button>
       </div>
 
       <div className="rounded-2xl border border-white/10 bg-[#171717] p-4">
