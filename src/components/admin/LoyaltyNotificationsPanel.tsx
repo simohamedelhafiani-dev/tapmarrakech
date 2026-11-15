@@ -300,7 +300,7 @@ export default function LoyaltyNotificationsPanel({ establishmentId, initialView
                     <div className="mt-3 rounded-xl border border-white/[0.07] bg-white/[0.02] px-3 py-2.5">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="text-[10px] font-semibold uppercase tracking-wide text-white/40">Dernier résultat Web Push</span>
-                        <span className={`rounded-full px-2 py-1 text-[10px] ${campaign.last_push_status === 'ACCEPTED_BY_PUSH_SERVICE' ? 'bg-emerald-500/10 text-emerald-300' : campaign.last_push_status === 'PARTIAL' ? 'bg-blue-500/10 text-blue-300' : campaign.last_push_status === 'FAILED' ? 'bg-red-500/10 text-red-300' : 'bg-white/[0.06] text-white/50'}`}>
+                        <span className={`rounded-full px-2 py-1 text-[10px] ${campaign.last_push_status === 'ACCEPTED_BY_PUSH_SERVICE' ? 'bg-emerald-500/10 text-emerald-300' : campaign.last_push_status === 'PARTIAL' ? 'bg-blue-500/10 text-[#3B82F6]' : campaign.last_push_status === 'FAILED' ? 'bg-red-500/10 text-red-300' : 'bg-white/[0.06] text-white/50'}`}>
                           {campaign.last_push_status === 'ACCEPTED_BY_PUSH_SERVICE' ? 'Accepté par le service Push' : campaign.last_push_status === 'PARTIAL' ? 'Partiellement accepté' : campaign.last_push_status === 'FAILED' ? 'Échec' : campaign.last_push_status === 'NO_SUBSCRIBERS' ? 'Aucun abonnement actif' : campaign.last_push_status === 'NO_RECIPIENTS' ? 'Aucun destinataire' : campaign.last_push_status === 'SENDING' ? 'En cours' : campaign.last_push_status === 'NO_DELIVERIES' ? 'Aucun envoi accepté' : campaign.last_push_status || 'Aucune tentative enregistrée'}
                         </span>
                       </div>

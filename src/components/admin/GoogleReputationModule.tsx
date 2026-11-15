@@ -334,7 +334,7 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
           </div>
         </div>
         {connection?.last_sync_at && <p className="mt-4 text-[10px] text-white/30">Dernière synchronisation : {new Date(connection.last_sync_at).toLocaleString('fr-FR')}</p>}
-        {connection?.last_error && <p className="mt-2 text-xs text-blue-300">{connection.last_error}</p>}
+        {connection?.last_error && <p className="mt-2 text-xs text-[#3B82F6]">{connection.last_error}</p>}
       </div>
 
       )}
