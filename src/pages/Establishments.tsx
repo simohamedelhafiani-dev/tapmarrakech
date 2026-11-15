@@ -332,7 +332,7 @@ export default function Establishments() {
         width: 900,
         margin: 2,
         color: {
-          dark: '#17352a',
+          dark: '#686D76',
           light: '#ffffff',
         },
       }
@@ -858,7 +858,7 @@ function QRCodePreview({ url }: { url: string }) {
       width: 240,
       margin: 2,
       color: {
-        dark: '#17352a',
+        dark: '#686D76',
         light: '#ffffff',
       },
     }).then(setSrc);

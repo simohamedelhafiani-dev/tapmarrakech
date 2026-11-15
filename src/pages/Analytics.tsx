@@ -227,7 +227,7 @@ export default function Analytics() {
                 <Bar
                   dataKey="total"
                   name="Avis"
-                  fill="#17352a"
+                  fill="#686D76"
                   radius={[5, 5, 0, 0]}
                 />
               </BarChart>
@@ -258,7 +258,7 @@ export default function Analytics() {
                     <Cell
                       key={i}
                       fill={
-                        ['#c8a96b', '#a9b987', '#6f9581', '#4d7865', '#17352a'][i]
+                        ['#3B82F6', '#686D76', '#686D76', '#686D76', '#686D76'][i]
                       }
                     />
                   ))}
@@ -279,7 +279,7 @@ export default function Analytics() {
                     className="h-2 w-2 rounded-full"
                     style={{
                       background:
-                        ['#c8a96b', '#a9b987', '#6f9581', '#4d7865', '#17352a'][i],
+                        ['#3B82F6', '#686D76', '#686D76', '#686D76', '#686D76'][i],
                     }}
                   />
                   {item.name}

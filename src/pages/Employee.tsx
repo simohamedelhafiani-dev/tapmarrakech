@@ -681,7 +681,7 @@ export default function Employee() {
           <style>
             * { box-sizing: border-box; }
             body { margin: 0; padding: 40px; background: #111111; font-family: Arial, sans-serif; }
-            .card { width: 640px; max-width: 100%; margin: 0 auto; padding: 34px; border-radius: 28px; background: #173f35; color: white; box-shadow: 0 20px 50px rgba(0,0,0,.16); }
+            .card { width: 640px; max-width: 100%; margin: 0 auto; padding: 34px; border-radius: 28px; background: #686D76; color: white; box-shadow: 0 20px 50px rgba(0,0,0,.16); }
             .small { margin-top: 8px; color: rgba(255,255,255,.65); font-size: 12px; text-transform: uppercase; letter-spacing: 2px; }
             .brand { display: flex; align-items: center; gap: 14px; }
             .brand img { width: 58px; height: 58px; object-fit: contain; border-radius: 12px; background: #ffffff; padding: 5px; }
