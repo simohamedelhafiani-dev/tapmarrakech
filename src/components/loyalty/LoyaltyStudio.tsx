@@ -716,7 +716,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   const Icon = item.icon;
                   return (
                     <button key={item.id} type="button" onClick={() => setTab(item.id)} aria-current={tab === item.id ? 'page' : undefined} className={`flex min-w-0 items-center gap-2.5 rounded-xl border px-3 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3B82F6] ${tab === item.id ? 'border-[#3B82F6]/50 bg-[#3B82F6]/10 text-[#3B82F6]' : 'border-transparent text-white/65 hover:border-white/10 hover:bg-white/[.04] hover:text-white'}`}>
-                      <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${tab === item.id ? 'bg-gradient-to-br from-[#3B82F6] to-[#B68A2B] text-[#0D0D0D]' : 'bg-white/[.06] text-[#3B82F6]'}`}>
+                      <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${tab === item.id ? 'bg-gradient-to-br from-[#3B82F6] to-[#686D76] text-[#0D0D0D]' : 'bg-white/[.06] text-[#3B82F6]'}`}>
                         <Icon size={18} />
                       </span>
                       <span className="min-w-0">
