@@ -58,7 +58,7 @@ export default function EstablishmentsSection({
 
   return (
     <div className="space-y-7">
-      <div className="relative overflow-hidden rounded-[28px] border border-ink/5 bg-forest p-6 text-white shadow-[0_18px_60px_rgba(23,61,50,0.14)] sm:p-8">
+      <div className="relative overflow-hidden rounded-[28px] border border-ink/5 bg-forest p-6 text-white shadow-[0_18px_60px_rgba(59,130,246,0.14)] sm:p-8">
         <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-[#686D76]/10 blur-2xl" />
         <div className="absolute -bottom-24 left-1/3 h-48 w-48 rounded-full bg-[#141414]/5 blur-3xl" />
 

@@ -152,7 +152,7 @@ export default function ItemEditor({
       <div className="border-b border-white/5 p-5">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Édition</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#3B82F6]">Édition</p>
             <h3 className="mt-1 text-xl font-semibold text-white">{category.name}</h3>
             <p className="mt-1 text-xs text-white/40">
               {items.length} article{items.length > 1 ? 's' : ''}
@@ -226,10 +226,10 @@ export default function ItemEditor({
               {item.description && <p className="mt-1 truncate text-xs text-white/45">{item.description}</p>}
             </div>
             <div className="flex gap-2">
-              <button type="button" onClick={() => startEdit(item)} disabled={saving} className="inline-flex items-center gap-1.5 rounded-lg bg-gold px-3 py-2 text-[11px] font-semibold text-[#0D0D0D] disabled:opacity-40">
+              <button type="button" onClick={() => startEdit(item)} disabled={saving} className="inline-flex items-center gap-1.5 rounded-lg bg-[#686D76] px-3 py-2 text-[11px] font-semibold text-[#0D0D0D] disabled:opacity-40">
                 <Pencil size={13} /> Modifier
               </button>
-              <button type="button" onClick={() => void onToggleActive(item.id)} disabled={saving} className={item.active ? 'rounded-full bg-gold/10 px-3 py-1.5 text-[10px] font-semibold text-gold' : 'rounded-full bg-ink/10 px-3 py-1.5 text-[10px] font-semibold text-white/45'}>
+              <button type="button" onClick={() => void onToggleActive(item.id)} disabled={saving} className={item.active ? 'rounded-full bg-[#686D76]/10 px-3 py-1.5 text-[10px] font-semibold text-[#3B82F6]' : 'rounded-full bg-ink/10 px-3 py-1.5 text-[10px] font-semibold text-white/45'}>
                 {item.active ? 'Actif' : 'Inactif'}
               </button>
               <button type="button" onClick={() => void onDelete(item.id)} disabled={saving} className="grid h-8 w-8 place-items-center rounded-lg bg-[#242424] text-white/45 hover:text-red-300 disabled:opacity-40">

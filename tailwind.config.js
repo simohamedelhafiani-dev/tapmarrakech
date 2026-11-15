@@ -5,7 +5,7 @@ export default {
     extend: {
       colors: {
         ink: '#FFFFFF',
-        forest: '#050505',
+        forest: '#686D76',
         electric: '#3B82F6',
         'electric-light': '#60A5FA',
         cream: '#1A1A1A',

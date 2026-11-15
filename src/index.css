@@ -243,7 +243,7 @@ table {
 }
 
 .dashboard-depth-shell [class*="text-ink/"] {
-  color: rgba(245,245,220,.55) !important;
+  color: rgba(255,255,255,.55) !important;
 }
 
 .dashboard-depth-shell [class*="shadow-soft"] {
@@ -258,7 +258,7 @@ table {
 
 .dashboard-depth-shell input::placeholder,
 .dashboard-depth-shell textarea::placeholder {
-  color: rgba(245,245,220,.3);
+  color: rgba(255,255,255,.3);
 }
 
 

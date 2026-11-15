@@ -20,7 +20,7 @@ const palettes = {
   cards: { page: 'bg-[#f7f7f3] text-[#3B82F6]', panel: 'bg-white', accent: 'text-[#a17d31]', muted: 'text-[#777b73]', line: 'border-black/10', card: 'bg-white' },
   dark: { page: 'bg-[#0D0D0D] text-white', panel: 'bg-[#111111]', accent: 'text-[#d6b86b]', muted: 'text-white/60', line: 'border-white/15', card: 'bg-white/[0.06]' },
   onyx: { page: 'bg-[#050505] text-white', panel: 'bg-[#101010]', accent: 'text-[#3B82F6]', muted: 'text-white/60', line: 'border-white/15', card: 'bg-white/[0.05]' },
-  'royal-gold': { page: 'bg-[#3B82F6] text-[#3B82F6]', panel: 'bg-[#3B82F6]', accent: 'text-[#3B82F6]', muted: 'text-[#3B82F6]/60', line: 'border-[#3B82F6]/30', card: 'bg-[#3B82F6]' },
+  'royal-gold': { page: 'bg-[#050505] text-white', panel: 'bg-[#686D76]', accent: 'text-[#3B82F6]', muted: 'text-white/60', line: 'border-[#3B82F6]/30', card: 'bg-[#111111]' },
   'deep-ocean': { page: 'bg-[#06151B] text-[#F2FCFF]', panel: 'bg-[#0A222B]', accent: 'text-[#8ED9E8]', muted: 'text-white/60', line: 'border-[#8ED9E8]/25', card: 'bg-[#0A222B]' },
   pearl: { page: 'bg-[#3B82F6] text-[#1B1A17]', panel: 'bg-[#fffdf8]', accent: 'text-[#9A7A3C]', muted: 'text-[#74716a]', line: 'border-[#B59A67]/25', card: 'bg-white' },
 } as const;
@@ -183,7 +183,7 @@ export default function MenuPreview({
   };
 
   return <aside className={`min-w-0 overflow-hidden border border-white/10 bg-[#111] shadow-soft ${fullScreen ? 'rounded-[32px]' : 'rounded-3xl lg:sticky lg:top-24 lg:self-start'}`}>
-    {!compact && <div className="border-b border-white/10 bg-[#111111] p-5"><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Aperçu en direct</p><h3 className="mt-1 text-base font-semibold text-white">{establishmentName || 'Menu public'}</h3><p className="mt-1 text-[11px] text-white/35">Miroir KELYANI · synchronisé avec le Studio</p></div>}
+    {!compact && <div className="border-b border-white/10 bg-[#111111] p-5"><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#3B82F6]">Aperçu en direct</p><h3 className="mt-1 text-base font-semibold text-white">{establishmentName || 'Menu public'}</h3><p className="mt-1 text-[11px] text-white/35">Miroir KELYANI · synchronisé avec le Studio</p></div>}
     <div className={compact ? 'p-0' : 'p-3 sm:p-4'}>
       <div className={`relative mx-auto h-[min(680px,78vh)] min-h-[480px] w-full max-w-[360px] overflow-hidden rounded-[28px] border-[5px] border-[#202020] shadow-xl ${palette.page}`} style={{ backgroundColor: activeDraft.themeColors.background, color: activeDraft.themeColors.text, backgroundImage: activeDraft.wallpaperUrl ? `linear-gradient(rgba(0,0,0,${activeDraft.overlayOpacity}), rgba(0,0,0,${activeDraft.overlayOpacity})), url("${activeDraft.wallpaperUrl}")` : undefined, backgroundSize: 'cover', backgroundPosition: 'center' }}>
         <div className="absolute inset-0 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" style={{ paddingBottom: activeDraft.navigation === 'app' ? 76 : 20 }}>
