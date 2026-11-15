@@ -262,7 +262,7 @@ export default function Promotions() {
   if (establishments.length === 0) {
     return (
       <div className="rounded-3xl border border-ink/10 bg-[var(--kelyani-panel)] p-10 text-center">
-        <Gift className="mx-auto mb-4 text-gold" size={36} />
+        <Gift className="mx-auto mb-4 text-[#3B82F6]" size={36} />
         <h1 className="text-2xl font-semibold text-forest">Aucun établissement</h1>
         <p className="mt-2 text-sm text-ink/50">
           Crée d’abord ton établissement pour gérer ses promotions.
@@ -276,7 +276,7 @@ export default function Promotions() {
       <section className="rounded-[28px] bg-forest p-6 text-white shadow-xl md:p-8">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
-            <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-gold">
+            <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#3B82F6]">
               <Sparkles size={15} />
               Promotions
             </div>
@@ -304,14 +304,14 @@ export default function Promotions() {
       </section>
 
       {errorMessage && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
+        <div className="rounded-2xl border border-[#686D76]/20 bg-[#242424] px-5 py-4 text-sm text-[#B0B0B0]">
           {errorMessage}
         </div>
       )}
 
       <section className="rounded-3xl border border-ink/10 bg-[var(--kelyani-panel)] p-6 shadow-sm md:p-8">
         <div className="flex items-start gap-4">
-          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gold/10 text-gold">
+          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#686D76]/10 text-[#3B82F6]">
             <ImageIcon size={19} />
           </div>
           <div>
@@ -329,7 +329,7 @@ export default function Promotions() {
               value={form.name}
               onChange={(event) => updateForm('name', event.target.value)}
               placeholder="Ex. Menu déjeuner -20%"
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-forest"
             />
           </label>
 
@@ -339,7 +339,7 @@ export default function Promotions() {
               value={form.description}
               onChange={(event) => updateForm('description', event.target.value)}
               placeholder="Ex. Du lundi au vendredi, midi uniquement"
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-forest"
             />
           </label>
 
@@ -351,7 +351,7 @@ export default function Promotions() {
               type="number"
               min="0"
               placeholder="250"
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-forest"
             />
           </label>
 
@@ -363,7 +363,7 @@ export default function Promotions() {
               type="number"
               min="0"
               placeholder="199"
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-forest"
             />
           </label>
         </div>
@@ -389,7 +389,7 @@ export default function Promotions() {
       <section>
         <div className="mb-4 flex items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">Publication</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#3B82F6]">Publication</p>
             <h2 className="mt-1 text-2xl font-semibold text-forest">Tes promotions</h2>
           </div>
           <span className="rounded-full bg-[var(--kelyani-panel)] px-3 py-1.5 text-xs font-semibold text-ink/45 ring-1 ring-ink/5">
@@ -399,7 +399,7 @@ export default function Promotions() {
 
         {promotions.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-ink/15 bg-[var(--kelyani-panel)] p-10 text-center">
-            <Plus className="mx-auto mb-3 text-gold" size={28} />
+            <Plus className="mx-auto mb-3 text-[#3B82F6]" size={28} />
             <p className="text-sm font-semibold text-forest">Aucune promotion publiée</p>
             <p className="mt-1 text-xs text-ink/45">
               La première promotion générée apparaîtra automatiquement sur la page publique.
@@ -419,7 +419,7 @@ export default function Promotions() {
                     className="aspect-[16/9] w-full object-cover"
                   />
                 ) : (
-                  <div className="grid aspect-[16/9] place-items-center bg-[#f7f7f3] text-ink/20">
+                  <div className="grid aspect-[16/9] place-items-center bg-[#111111] text-ink/20">
                     <ImageIcon size={32} />
                   </div>
                 )}
@@ -433,7 +433,7 @@ export default function Promotions() {
                       </p>
                     </div>
                     <span
-                      className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold ${promotion.active ? 'bg-green-100 text-green-700' : 'bg-ink/5 text-ink/40'}`}
+                      className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold ${promotion.active ? 'bg-[#686D76]/10 text-[#B0B0B0]' : 'bg-ink/5 text-ink/40'}`}
                     >
                       {promotion.active ? 'Publiée' : 'Masquée'}
                     </span>
@@ -441,7 +441,7 @@ export default function Promotions() {
 
                   <div className="mt-4 flex items-center justify-between gap-3">
                     <div>
-                      <span className="text-sm font-bold text-gold">
+                      <span className="text-sm font-bold text-[#3B82F6]">
                         {promotion.promo_price ?? '—'} MAD
                       </span>
                       {promotion.normal_price != null && (
@@ -459,7 +459,7 @@ export default function Promotions() {
                         type="button"
                         onClick={() => void regeneratePromotion(promotion)}
                         disabled={regeneratingId === promotion.id}
-                        className="inline-flex items-center gap-1.5 rounded-xl border border-gold/30 bg-gold/5 px-3 py-2 text-xs font-semibold text-gold disabled:opacity-50"
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-[#3B82F6]/30 bg-[#686D76]/5 px-3 py-2 text-xs font-semibold text-[#3B82F6] disabled:opacity-50"
                       >
                         {regeneratingId === promotion.id ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
                         {regeneratingId === promotion.id ? 'Génération…' : 'Nouveau visuel'}
@@ -475,7 +475,7 @@ export default function Promotions() {
                       <button
                         type="button"
                         onClick={() => void deletePromotion(promotion)}
-                        className="grid h-9 w-9 place-items-center rounded-xl border border-red-200 text-red-600"
+                        className="grid h-9 w-9 place-items-center rounded-xl border border-[#686D76]/20 text-[#B0B0B0]"
                         aria-label="Supprimer"
                       >
                         <Trash2 size={14} />

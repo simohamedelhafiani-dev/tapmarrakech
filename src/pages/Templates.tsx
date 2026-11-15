@@ -50,7 +50,7 @@ const PAGE_PRESETS = [
       actions: { showCall: true, showWhatsapp: true, showDirections: true, showReviews: true },
       modules: { style: 'cards', showIcons: true },
       navigation: { style: 'bottom' },
-      theme: { primary: '#173F35', accent: '#C9A45C', background: '#F7F3EA', radius: 'xl' },
+      theme: { primary: '#686D76', accent: '#3B82F6', background: '#686D76', radius: 'xl' },
     },
   },
   {
@@ -61,18 +61,18 @@ const PAGE_PRESETS = [
       actions: { showCall: true, showWhatsapp: true, showDirections: true, showReviews: true },
       modules: { style: 'list', showIcons: false },
       navigation: { style: 'tabs' },
-      theme: { primary: '#173F35', accent: '#C9A45C', background: '#FFFFFF', radius: 'lg' },
+      theme: { primary: '#686D76', accent: '#3B82F6', background: '#686D76', radius: 'lg' },
     },
   },
 ];
 
 const LOYALTY_PRESETS = [
-  { label: 'Obsidian', config: { key: 'obsidian', primary: '#0A0A09', secondary: '#D6B15A', background: '#111111', text: '#FFFFFF', radius: 30, mode: 'QR', title: 'Bon goût. Belles rencontres.', subtitle: 'Votre fidélité mérite une expérience à part.', stampStyle: 'circles' } },
-  { label: 'Editorial', config: { key: 'editorial', primary: '#3B332B', secondary: '#C9A86A', background: '#F4EDE1', text: '#17130F', radius: 30, mode: 'QR', title: 'Des moments qui comptent.', subtitle: 'Une expérience pensée pour vous.', stampStyle: 'circles' } },
-  { label: 'Glass', config: { key: 'glass', primary: '#18372C', secondary: '#D8C28A', background: '#10251E', text: '#FFFFFF', radius: 30, mode: 'QR', title: 'Prendre soin de vous, toujours.', subtitle: 'Vos avantages évoluent avec vous.', stampStyle: 'circles' } },
-  { label: 'Titanium', config: { key: 'titanium', primary: '#11110F', secondary: '#D6B15A', background: '#10100F', text: '#FFFFFF', radius: 26, mode: 'QR', title: 'GOOD FOOD. BETTER PEOPLE.', subtitle: 'Elevate every visit.', stampStyle: 'squares' } },
-  { label: 'Hospitality', config: { key: 'hospitality', primary: '#3A2115', secondary: '#E2B66D', background: '#2B1B13', text: '#FFFFFF', radius: 30, mode: 'QR', title: 'Plus qu’un repas, une expérience.', subtitle: 'Saveurs. Partage. Souvenirs.', stampStyle: 'circles' } },
-  { label: 'Apple Wallet', config: { key: 'apple-wallet', primary: '#403A32', secondary: '#B9975B', background: '#F2EEE6', text: '#1B1A18', radius: 28, mode: 'QR', title: 'Beauty in every detail.', subtitle: 'Vos privilèges, toujours avec vous.', stampStyle: 'circles' } },
+  { label: 'Obsidian', config: { key: 'obsidian', primary: '#0A0A09', secondary: '#3B82F6', background: '#111111', text: '#686D76', radius: 30, mode: 'QR', title: 'Bon goût. Belles rencontres.', subtitle: 'Votre fidélité mérite une expérience à part.', stampStyle: 'circles' } },
+  { label: 'Editorial', config: { key: 'editorial', primary: '#686D76', secondary: '#3B82F6', background: '#111111', text: '#FFFFFF', radius: 30, mode: 'QR', title: 'Des moments qui comptent.', subtitle: 'Une expérience pensée pour vous.', stampStyle: 'circles' } },
+  { label: 'Glass', config: { key: 'glass', primary: '#686D76', secondary: '#3B82F6', background: '#111111', text: '#686D76', radius: 30, mode: 'QR', title: 'Prendre soin de vous, toujours.', subtitle: 'Vos avantages évoluent avec vous.', stampStyle: 'circles' } },
+  { label: 'Titanium', config: { key: 'titanium', primary: '#11110F', secondary: '#3B82F6', background: '#10100F', text: '#686D76', radius: 26, mode: 'QR', title: 'GOOD FOOD. BETTER PEOPLE.', subtitle: 'Elevate every visit.', stampStyle: 'squares' } },
+  { label: 'Hospitality', config: { key: 'hospitality', primary: '#686D76', secondary: '#3B82F6', background: '#111111', text: '#686D76', radius: 30, mode: 'QR', title: 'Plus qu’un repas, une expérience.', subtitle: 'Saveurs. Partage. Souvenirs.', stampStyle: 'circles' } },
+  { label: 'Apple Wallet', config: { key: 'apple-wallet', primary: '#686D76', secondary: '#3B82F6', background: '#111111', text: '#FFFFFF', radius: 28, mode: 'QR', title: 'Beauty in every detail.', subtitle: 'Vos privilèges, toujours avec vous.', stampStyle: 'circles' } },
 ];
 
 const MENU_PRESETS = [
@@ -87,7 +87,7 @@ const MENU_PRESETS = [
       showPrices: true,
       showSearch: false,
       hero: { style: 'typographic', eyebrow: 'La carte', titleStyle: 'display' },
-      theme: { primary: '#173F35', accent: '#C9A45C', background: '#F3EEE2' },
+      theme: { primary: '#686D76', accent: '#3B82F6', background: '#686D76' },
     },
   },
   {
@@ -101,7 +101,7 @@ const MENU_PRESETS = [
       showPrices: true,
       showSearch: false,
       hero: { style: 'image', overlay: true },
-      theme: { primary: '#173F35', accent: '#C9A45C', background: '#F7F3EA' },
+      theme: { primary: '#686D76', accent: '#3B82F6', background: '#686D76' },
     },
   },
   {
@@ -115,7 +115,7 @@ const MENU_PRESETS = [
       showPrices: true,
       showSearch: false,
       hero: { style: 'image', fullBleed: true },
-      theme: { primary: '#173F35', accent: '#C9A45C', background: '#EBE5D8' },
+      theme: { primary: '#686D76', accent: '#3B82F6', background: '#686D76' },
     },
   },
   {
@@ -128,8 +128,8 @@ const MENU_PRESETS = [
       showDescriptions: true,
       showPrices: true,
       showSearch: false,
-      hero: { style: 'dark', accent: 'gold' },
-      theme: { primary: '#102B24', accent: '#C9A45C', background: '#102B24' },
+      hero: { style: 'dark', accent: '#3B82F6' },
+      theme: { primary: '#686D76', accent: '#3B82F6', background: '#111111' },
     },
   },
 ];
@@ -138,12 +138,12 @@ const BUILTIN_TEMPLATES: Template[] = [
   { id: 'builtin-menu-editorial', kind: 'menu', name: '01 — Editorial', description: 'Mise en page éditoriale premium, typographie élégante et espace négatif.', thumbnail_url: null, config: { key: 'editorial', layout: 'editorial' }, active: true, is_default: true, created_at: '', updated_at: '', source: 'builtin' },
   { id: 'builtin-menu-luxury', kind: 'menu', name: '02 — Luxury', description: 'Présentation luxe avec visuels et cartes produits.', thumbnail_url: null, config: { key: 'luxury', layout: 'luxury' }, active: true, is_default: false, created_at: '', updated_at: '', source: 'builtin' },
   { id: 'builtin-menu-cards', kind: 'menu', name: '03 — Cards', description: 'Présentation moderne en cartes, claire et visuelle.', thumbnail_url: null, config: { key: 'cards', layout: 'cards' }, active: true, is_default: false, created_at: '', updated_at: '', source: 'builtin' },
-  { id: 'builtin-menu-dark', kind: 'menu', name: '04 — Noir Signature', description: 'Univers sombre premium avec accents dorés.', thumbnail_url: null, config: { key: 'dark', layout: 'dark' }, active: true, is_default: false, created_at: '', updated_at: '', source: 'builtin' },
-  { id: 'builtin-loyalty-obsidian', kind: 'loyalty', name: '01 — Obsidian', description: 'Fond photo immersif, contraste cinématique et or discret.', thumbnail_url: null, config: LOYALTY_PRESETS[0].config, active: true, is_default: false, created_at: '', updated_at: '', source: 'builtin' },
-  { id: 'builtin-loyalty-editorial', kind: 'loyalty', name: '02 — Editorial', description: 'Ivoire, typographie magazine, espace négatif et champagne.', thumbnail_url: null, config: LOYALTY_PRESETS[1].config, active: true, is_default: true, created_at: '', updated_at: '', source: 'builtin' },
+  { id: 'builtin-menu-dark', kind: 'menu', name: '04 — Noir Signature', description: 'Univers sombre premium, surfaces Nardo et accents électriques.', thumbnail_url: null, config: { key: 'dark', layout: 'dark' }, active: true, is_default: false, created_at: '', updated_at: '', source: 'builtin' },
+  { id: 'builtin-loyalty-obsidian', kind: 'loyalty', name: '01 — Obsidian', description: 'Fond photo immersif, contraste cinématique et accents électriques.', thumbnail_url: null, config: LOYALTY_PRESETS[0].config, active: true, is_default: false, created_at: '', updated_at: '', source: 'builtin' },
+  { id: 'builtin-loyalty-editorial', kind: 'loyalty', name: '02 — Editorial', description: 'Surfaces Nardo, typographie magazine et espace négatif.', thumbnail_url: null, config: LOYALTY_PRESETS[1].config, active: true, is_default: true, created_at: '', updated_at: '', source: 'builtin' },
   { id: 'builtin-loyalty-glass', kind: 'loyalty', name: '03 — Glass', description: 'Surfaces vitrées, blur et lumière pour une esthétique wellness premium.', thumbnail_url: null, config: LOYALTY_PRESETS[2].config, active: true, is_default: false, created_at: '', updated_at: '', source: 'builtin' },
-  { id: 'builtin-loyalty-titanium', kind: 'loyalty', name: '04 — Titanium', description: 'Noir profond, reflets métalliques et signature gold.', thumbnail_url: null, config: LOYALTY_PRESETS[3].config, active: true, is_default: false, created_at: '', updated_at: '', source: 'builtin' },
-  { id: 'builtin-loyalty-hospitality', kind: 'loyalty', name: '05 — Hospitality', description: 'Univers hôtel, restaurant et travel, chaleureux et premium.', thumbnail_url: null, config: LOYALTY_PRESETS[4].config, active: true, is_default: false, created_at: '', updated_at: '', source: 'builtin' },
+  { id: 'builtin-loyalty-titanium', kind: 'loyalty', name: '04 — Titanium', description: 'Noir profond, reflets métalliques et signature électrique.', thumbnail_url: null, config: LOYALTY_PRESETS[3].config, active: true, is_default: false, created_at: '', updated_at: '', source: 'builtin' },
+  { id: 'builtin-loyalty-hospitality', kind: 'loyalty', name: '05 — Hospitality', description: 'Univers hôtel, restaurant et travel, sobre et premium.', thumbnail_url: null, config: LOYALTY_PRESETS[4].config, active: true, is_default: false, created_at: '', updated_at: '', source: 'builtin' },
   { id: 'builtin-loyalty-wallet', kind: 'loyalty', name: '06 — Apple Wallet', description: 'Minimalisme premium et lecture instantanée sur mobile.', thumbnail_url: null, config: LOYALTY_PRESETS[5].config, active: true, is_default: false, created_at: '', updated_at: '', source: 'builtin' },
 ];
 
@@ -162,10 +162,10 @@ function TemplateVisualPreview({ template, compact = false }: { template: Templa
       establishmentName: 'Votre établissement',
       logoUrl: null,
       coverImageUrl: c.background_image_url || null,
-      primaryColor: c.primary || '#173D32',
-      secondaryColor: c.secondary || '#D3A84C',
-      backgroundColor: c.background || '#F7F7F3',
-      textColor: c.text || '#FFFFFF',
+      primaryColor: c.primary || '#686D76',
+      secondaryColor: c.secondary || '#686D76',
+      backgroundColor: c.background || '#686D76',
+      textColor: c.text || '#686D76',
       borderRadius: Number(c.radius || 28),
       customerName: 'Mohamed Elhafiani',
       pointsBalance: 720,
@@ -190,13 +190,13 @@ function TemplateVisualPreview({ template, compact = false }: { template: Templa
   if (template.kind === 'menu') {
     const theme = c.theme || {};
     return (
-      <div className={`overflow-hidden rounded-[24px] bg-white shadow-xl ${compact ? 'h-[190px]' : ''}`} style={{ background: theme.background || '#F7F3EA' }}>
-        <div className={`relative p-6 ${compact ? 'h-[105px]' : 'h-44'}`} style={{ background: c.background_image_url ? `linear-gradient(#173F35aa,#173F35aa),url(${c.background_image_url}) center/cover` : theme.primary || '#173F35' }}>
-          <p className="text-[9px] uppercase tracking-[.28em]" style={{ color: theme.accent || '#C9A45C' }}>LA CARTE</p>
+      <div className={`overflow-hidden rounded-[24px] bg-white shadow-xl ${compact ? 'h-[190px]' : ''}`} style={{ background: theme.background || '#686D76' }}>
+        <div className={`relative p-6 ${compact ? 'h-[105px]' : 'h-44'}`} style={{ background: c.background_image_url ? `linear-gradient(#686D76,#686D76),url(${c.background_image_url}) center/cover` : theme.primary || '#686D76' }}>
+          <p className="text-[9px] uppercase tracking-[.28em]" style={{ color: theme.accent || '#3B82F6' }}>LA CARTE</p>
           <h4 className={`mt-2 font-serif text-white ${compact ? 'text-xl' : 'text-3xl'}`}>Maison & saveurs</h4>
         </div>
         <div className={`grid gap-2 p-4 ${compact ? 'grid-cols-2' : 'sm:grid-cols-2'}`}>
-          {['Entrées','Plats','Desserts','Boissons'].map(item => <div key={item} className="rounded-xl border border-black/10 bg-white p-3"><p className="text-xs font-semibold" style={{ color: theme.primary || '#173F35' }}>{item}</p><p className="mt-1 text-[9px] text-black/40">Sélection de la maison</p>{!compact && <p className="mt-2 text-xs font-semibold">À partir de 85 MAD</p>}</div>)}
+          {['Entrées','Plats','Desserts','Boissons'].map(item => <div key={item} className="rounded-xl border border-black/10 bg-white p-3"><p className="text-xs font-semibold" style={{ color: theme.primary || '#686D76' }}>{item}</p><p className="mt-1 text-[9px] text-black/40">Sélection de la maison</p>{!compact && <p className="mt-2 text-xs font-semibold">À partir de 85 MAD</p>}</div>)}
         </div>
       </div>
     );
@@ -205,8 +205,8 @@ function TemplateVisualPreview({ template, compact = false }: { template: Templa
   const theme = c.theme || {};
   return (
     <div className={`overflow-hidden rounded-[24px] bg-white shadow-xl ${compact ? 'h-[190px]' : ''}`}>
-      <div className={`p-6 ${compact ? 'h-[105px]' : 'h-44'}`} style={{ background: theme.primary || '#173F35' }}>
-        <p className="text-[9px] uppercase tracking-[.28em]" style={{ color: theme.accent || '#C9A45C' }}>EXPÉRIENCE CLIENT</p>
+      <div className={`p-6 ${compact ? 'h-[105px]' : 'h-44'}`} style={{ background: theme.primary || '#686D76' }}>
+        <p className="text-[9px] uppercase tracking-[.28em]" style={{ color: theme.accent || '#3B82F6' }}>EXPÉRIENCE CLIENT</p>
         <h4 className={`mt-3 font-serif text-white ${compact ? 'text-xl' : 'text-3xl'}`}>Votre établissement</h4>
       </div>
       <div className="grid gap-2 p-4 sm:grid-cols-2">
@@ -591,10 +591,10 @@ export default function Templates() {
     <div className="space-y-8">
       <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#3B82F6]">
             Personnalisation
           </p>
-          <h1 className="mt-1 font-display text-3xl text-forest">Templates</h1>
+          <h1 className="mt-1 font-display text-3xl text-[#3B82F6]">Templates</h1>
           <p className="mt-2 max-w-3xl text-sm text-ink/50">
             Crée et gère les présentations publiques de TapMarrakech sans modifier le code.
           </p>
@@ -602,7 +602,7 @@ export default function Templates() {
 
         <button
           onClick={startCreate}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-forest/90"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#050505] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#050505]/90"
         >
           <Plus size={17} />
           Nouveau template
@@ -613,7 +613,7 @@ export default function Templates() {
         <button
           onClick={() => setKind('page')}
           className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold ${
-            kind === 'page' ? 'bg-forest text-white' : 'text-ink/50 hover:bg-[#f7f7f3]'
+            kind === 'page' ? 'bg-[#050505] text-white' : 'text-ink/50 hover:bg-[#111111]'
           }`}
         >
           <LayoutTemplate size={17} />
@@ -622,32 +622,32 @@ export default function Templates() {
         <button
           onClick={() => setKind('menu')}
           className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold ${
-            kind === 'menu' ? 'bg-forest text-white' : 'text-ink/50 hover:bg-[#f7f7f3]'
+            kind === 'menu' ? 'bg-[#050505] text-white' : 'text-ink/50 hover:bg-[#111111]'
           }`}
         >
           <Menu size={17} />
           Menus
         </button>
-        <button onClick={() => setKind('loyalty')} className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold ${kind === 'loyalty' ? 'bg-forest text-white' : 'text-ink/50 hover:bg-[#f7f7f3]'}`}>
+        <button onClick={() => setKind('loyalty')} className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold ${kind === 'loyalty' ? 'bg-[#050505] text-white' : 'text-ink/50 hover:bg-[#111111]'}`}>
           <Star size={17} />
           Fidélité
         </button>
       </div>
 
       {(editing || name) && (
-        <section className="rounded-2xl border border-gold/20 bg-white p-6 shadow-sm">
+        <section className="rounded-2xl border border-[#3B82F6]/20 bg-white p-6 shadow-sm">
           <div className="mb-6 flex items-start justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#3B82F6]">
                 {editing ? 'Modification' : 'Création'}
               </p>
-              <h2 className="mt-1 font-display text-2xl text-forest">
+              <h2 className="mt-1 font-display text-2xl text-[#3B82F6]">
                 {editing ? editing.name : 'Nouveau template'}
               </h2>
             </div>
             <button
               onClick={resetForm}
-              className="rounded-xl border border-ink/10 p-2 text-ink/45 hover:bg-[#f7f7f3]"
+              className="rounded-xl border border-ink/10 p-2 text-ink/45 hover:bg-[#111111]"
             >
               <X size={17} />
             </button>
@@ -659,7 +659,7 @@ export default function Templates() {
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+                className="w-full rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#242424]"
               />
             </div>
 
@@ -674,7 +674,7 @@ export default function Templates() {
                   const preset = nextKind === 'page' ? PAGE_PRESETS[0] : nextKind === 'menu' ? MENU_PRESETS[0] : LOYALTY_PRESETS[0];
                   setConfigText(prettyJson(preset.config));
                 }}
-                className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none"
+                className="w-full rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm outline-none"
               >
                 <option value="page">Page publique</option>
                 <option value="menu">Menu</option>
@@ -687,7 +687,7 @@ export default function Templates() {
                 rows={3}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+                className="w-full rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#242424]"
               />
             </div>
 
@@ -697,7 +697,7 @@ export default function Templates() {
                 value={thumbnailUrl}
                 onChange={(e) => setThumbnailUrl(e.target.value)}
                 placeholder="https://..."
-                className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+                className="w-full rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#242424]"
               />
             </div>
 
@@ -709,7 +709,7 @@ export default function Templates() {
                     <button
                       key={preset.label}
                       onClick={() => setConfigText(prettyJson(preset.config))}
-                      className="rounded-lg border border-ink/10 px-3 py-1.5 text-[11px] font-semibold text-ink/60 hover:bg-[#f7f7f3]"
+                      className="rounded-lg border border-ink/10 px-3 py-1.5 text-[11px] font-semibold text-ink/60 hover:bg-[#111111]"
                     >
                       Preset {preset.label}
                     </button>
@@ -720,35 +720,35 @@ export default function Templates() {
                 rows={18}
                 value={configText}
                 onChange={(e) => setConfigText(e.target.value)}
-                className="w-full rounded-xl border border-ink/10 bg-[#171c19] px-4 py-3 font-mono text-xs leading-5 text-white outline-none focus:border-gold"
+                className="w-full rounded-xl border border-ink/10 bg-[#686D76] px-4 py-3 font-mono text-xs leading-5 text-white outline-none focus:border-[#3B82F6]"
               />
               <p className="mt-2 text-[11px] text-ink/35">
                 Cette configuration définit la présentation. Le contenu de chaque établissement reste indépendant du template.
               </p>
             </div>
 
-            <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-[#f7f7f3] p-4">
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-[#111111] p-4">
               <input
                 type="checkbox"
                 checked={active}
                 onChange={(e) => setActive(e.target.checked)}
-                className="h-4 w-4 accent-[#173d32]"
+                className="h-4 w-4 accent-[#3B82F6]"
               />
               <span>
-                <span className="block text-sm font-semibold text-forest">Template actif</span>
+                <span className="block text-sm font-semibold text-[#3B82F6]">Template actif</span>
                 <span className="mt-1 block text-xs text-ink/40">Disponible pour les établissements.</span>
               </span>
             </label>
 
-            <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-[#f7f7f3] p-4">
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-[#111111] p-4">
               <input
                 type="checkbox"
                 checked={isDefault}
                 onChange={(e) => setIsDefault(e.target.checked)}
-                className="h-4 w-4 accent-[#173d32]"
+                className="h-4 w-4 accent-[#3B82F6]"
               />
               <span>
-                <span className="block text-sm font-semibold text-forest">Template par défaut</span>
+                <span className="block text-sm font-semibold text-[#3B82F6]">Template par défaut</span>
                 <span className="mt-1 block text-xs text-ink/40">Un seul défaut par type.</span>
               </span>
             </label>
@@ -757,14 +757,14 @@ export default function Templates() {
           <div className="mt-6 flex justify-end gap-3">
             <button
               onClick={resetForm}
-              className="rounded-xl border border-ink/10 px-5 py-3 text-sm font-semibold text-ink/55 hover:bg-[#f7f7f3]"
+              className="rounded-xl border border-ink/10 px-5 py-3 text-sm font-semibold text-ink/55 hover:bg-[#111111]"
             >
               Annuler
             </button>
             <button
               disabled={saving}
               onClick={save}
-              className="inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#050505] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
             >
               <Save size={17} />
               {saving ? 'Enregistrement...' : 'Enregistrer'}
@@ -775,8 +775,8 @@ export default function Templates() {
 
       <section>
         <div className="mb-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">Bibliothèque</p>
-          <h2 className="mt-1 font-display text-2xl text-forest">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#3B82F6]">Bibliothèque</p>
+          <h2 className="mt-1 font-display text-2xl text-[#3B82F6]">
             {kind === 'page' ? 'Templates de page' : kind === 'menu' ? 'Templates de menu' : 'Templates fidélité'}
           </h2>
           <p className="mt-1 text-xs text-ink/40">Choisis un modèle pour voir son rendu, le personnaliser et l'utiliser comme base.</p>
@@ -786,7 +786,7 @@ export default function Templates() {
           <div className="rounded-2xl border border-ink/10 bg-white p-8 text-center text-sm text-ink/40">Chargement...</div>
         ) : filteredTemplates.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-ink/15 bg-white p-10 text-center">
-            <p className="text-sm font-semibold text-forest">Aucun template</p>
+            <p className="text-sm font-semibold text-[#3B82F6]">Aucun template</p>
             <p className="mt-1 text-xs text-ink/40">Crée ton premier template.</p>
           </div>
         ) : (
@@ -794,10 +794,10 @@ export default function Templates() {
             <div className="rounded-[24px] border border-ink/10 bg-white p-5 shadow-sm">
               <div className="mb-4 flex items-center justify-between">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">Modèles</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#3B82F6]">Modèles</p>
                   <p className="mt-1 text-xs text-ink/40">{filteredTemplates.length} modèles disponibles</p>
                 </div>
-                <button onClick={startCreate} className="inline-flex items-center gap-2 rounded-xl bg-forest px-3 py-2 text-xs font-semibold text-white">
+                <button onClick={startCreate} className="inline-flex items-center gap-2 rounded-xl bg-[#050505] px-3 py-2 text-xs font-semibold text-white">
                   <Plus size={14}/> Nouveau
                 </button>
               </div>
@@ -810,16 +810,16 @@ export default function Templates() {
                       key={template.id}
                       type="button"
                       onClick={() => { setSelectedTemplate(template); setEditorTab('preview'); }}
-                      className={`overflow-hidden rounded-2xl border text-left transition ${selected ? 'border-forest ring-2 ring-forest/10' : 'border-ink/10 hover:border-forest/30'}`}
+                      className={`overflow-hidden rounded-2xl border text-left transition ${selected ? 'border-[#242424] ring-2 ring-[#3B82F6]/10' : 'border-ink/10 hover:border-[#242424]/30'}`}
                     >
                       <TemplateVisualPreview template={template} compact />
                       <div className="border-t border-ink/10 bg-white p-3">
                         <div className="flex items-start justify-between gap-2">
                           <div>
-                            <p className="text-sm font-semibold text-forest">{template.name}</p>
+                            <p className="text-sm font-semibold text-[#3B82F6]">{template.name}</p>
                             <p className="mt-1 line-clamp-2 text-[10px] leading-4 text-ink/40">{template.description || 'Aucune description.'}</p>
                           </div>
-                          {selected && <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-forest text-white"><Check size={13}/></span>}
+                          {selected && <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#050505] text-white"><Check size={13}/></span>}
                         </div>
                       </div>
                     </button>
@@ -832,25 +832,25 @@ export default function Templates() {
               <div className="overflow-hidden rounded-[24px] border border-ink/10 bg-white shadow-sm">
                 <div className="flex items-center justify-between border-b border-ink/10 px-5 py-4">
                   <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">Aperçu en temps réel</p>
-                    <h3 className="mt-1 font-display text-xl text-forest">{selectedTemplate.name}</h3>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#3B82F6]">Aperçu en temps réel</p>
+                    <h3 className="mt-1 font-display text-xl text-[#3B82F6]">{selectedTemplate.name}</h3>
                     <p className="mt-1 text-xs text-ink/40">Voici le rendu de base du template.</p>
                   </div>
-                  <span className="rounded-full bg-forest/5 px-3 py-1.5 text-[10px] font-semibold text-forest">
+                  <span className="rounded-full bg-[#050505]/5 px-3 py-1.5 text-[10px] font-semibold text-[#3B82F6]">
                     {selectedTemplate.kind === 'loyalty' ? 'Fidélité' : selectedTemplate.kind === 'menu' ? 'Menu' : 'Page'}
                   </span>
                 </div>
 
-                <div className="min-h-[500px] bg-[#f7f7f3] p-5">
+                <div className="min-h-[500px] bg-[#111111] p-5">
                   <div className="mx-auto max-w-[470px]">
                     <TemplateVisualPreview template={selectedTemplate} />
                   </div>
                 </div>
 
                 <div className="border-t border-ink/10 p-5">
-                  <div className="mb-4 flex rounded-xl bg-[#f7f7f3] p-1">
-                    <button onClick={() => setEditorTab('preview')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab === 'preview' ? 'bg-white text-forest shadow-sm' : 'text-ink/45'}`}>Aperçu</button>
-                    <button onClick={() => setEditorTab('design')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab === 'design' ? 'bg-white text-forest shadow-sm' : 'text-ink/45'}`}>Modifier</button>
+                  <div className="mb-4 flex rounded-xl bg-[#111111] p-1">
+                    <button onClick={() => setEditorTab('preview')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab === 'preview' ? 'bg-white text-[#3B82F6] shadow-sm' : 'text-ink/45'}`}>Aperçu</button>
+                    <button onClick={() => setEditorTab('design')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab === 'design' ? 'bg-white text-[#3B82F6] shadow-sm' : 'text-ink/45'}`}>Modifier</button>
                   </div>
 
                   {editorTab === 'design' ? (
@@ -869,7 +869,7 @@ export default function Templates() {
                           <div className="grid grid-cols-2 gap-3">
                             {['primary','secondary','background','text'].map(key => (
                               <label key={key} className="text-xs font-semibold text-ink/55">{key}
-                                <input type="color" value={String(selectedTemplate.config?.[key] || '#173D32')} onChange={e => { const config={...selectedTemplate.config,[key]:e.target.value}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 h-10 w-full cursor-pointer rounded-lg border border-ink/10"/>
+                                <input type="color" value={String(selectedTemplate.config?.[key] || '#686D76')} onChange={e => { const config={...selectedTemplate.config,[key]:e.target.value}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 h-10 w-full cursor-pointer rounded-lg border border-ink/10"/>
                               </label>
                             ))}
                           </div>
@@ -886,25 +886,25 @@ export default function Templates() {
                         <div className="grid grid-cols-2 gap-3">
                           {['primary','accent','background'].map(key => (
                             <label key={key} className="text-xs font-semibold text-ink/55">{key}
-                              <input type="color" value={String(selectedTemplate.config?.theme?.[key] || (key === 'primary' ? '#173F35' : key === 'accent' ? '#C9A45C' : '#F7F3EA'))} onChange={e => { const config={...selectedTemplate.config,theme:{...(selectedTemplate.config?.theme || {}),[key]:e.target.value}}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 h-10 w-full cursor-pointer rounded-lg border border-ink/10"/>
+                              <input type="color" value={String(selectedTemplate.config?.theme?.[key] || (key === 'primary' ? '#686D76' : key === 'accent' ? '#3B82F6' : '#686D76'))} onChange={e => { const config={...selectedTemplate.config,theme:{...(selectedTemplate.config?.theme || {}),[key]:e.target.value}}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 h-10 w-full cursor-pointer rounded-lg border border-ink/10"/>
                             </label>
                           ))}
                         </div>
                       )}
 
-                      <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-gold/40 bg-gold/5 px-4 py-4 text-xs font-semibold text-forest">
+                      <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-[#3B82F6]/40 bg-[#686D76]/5 px-4 py-4 text-xs font-semibold text-[#3B82F6]">
                         <span>{uploadingWallpaper ? 'Upload...' : 'Ajouter un wallpaper / photo'}</span>
                         <input type="file" accept="image/*" className="hidden" disabled={uploadingWallpaper} onChange={e => { const file=e.target.files?.[0]; if(file) void uploadTemplateWallpaper(file); e.currentTarget.value=''; }}/>
                       </label>
 
                       <div className="flex gap-2">
-                        <button onClick={() => void saveVisualEditor()} className="flex-1 rounded-xl bg-forest px-4 py-3 text-sm font-semibold text-white">Enregistrer les modifications</button>
+                        <button onClick={() => void saveVisualEditor()} className="flex-1 rounded-xl bg-[#050505] px-4 py-3 text-sm font-semibold text-white">Enregistrer les modifications</button>
                         <button onClick={() => void startEdit(selectedTemplate)} className="rounded-xl border border-ink/10 px-4 py-3 text-sm font-semibold text-ink/55">Ouvrir l'éditeur complet</button>
                       </div>
                     </div>
                   ) : (
                     <div className="flex flex-wrap gap-2">
-                      <button onClick={() => setEditorTab('design')} className="rounded-xl bg-forest px-4 py-3 text-xs font-semibold text-white"><Pencil size={14} className="mr-1 inline"/> Modifier le template</button>
+                      <button onClick={() => setEditorTab('design')} className="rounded-xl bg-[#050505] px-4 py-3 text-xs font-semibold text-white"><Pencil size={14} className="mr-1 inline"/> Modifier le template</button>
                       <button onClick={() => void startEdit(selectedTemplate)} className="rounded-xl border border-ink/10 px-4 py-3 text-xs font-semibold text-ink/55">Éditeur avancé</button>
                       <button onClick={() => void duplicate(selectedTemplate)} className="rounded-xl border border-ink/10 px-4 py-3 text-xs font-semibold text-ink/55"><Copy size={14} className="mr-1 inline"/> Dupliquer</button>
                     </div>
@@ -918,24 +918,24 @@ export default function Templates() {
 
       {previewing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/70 p-4">
-          <div className="max-h-[94vh] w-full max-w-6xl overflow-hidden rounded-[28px] bg-[#f7f7f3] shadow-2xl">
+          <div className="max-h-[94vh] w-full max-w-6xl overflow-hidden rounded-[28px] bg-[#111111] shadow-2xl">
             <div className="flex items-center justify-between border-b border-ink/10 bg-white px-6 py-4">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">Studio template</p>
-                <h3 className="font-display text-2xl text-forest">{previewing.name}</h3>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#3B82F6]">Studio template</p>
+                <h3 className="font-display text-2xl text-[#3B82F6]">{previewing.name}</h3>
               </div>
               <button onClick={() => setPreviewing(null)} className="rounded-xl border border-ink/10 p-2"><X size={18}/></button>
             </div>
             <div className="grid max-h-[calc(94vh-80px)] overflow-auto lg:grid-cols-[minmax(0,1fr)_380px]">
-              <div className="flex min-h-[620px] items-center justify-center bg-[#ebe7de] p-6 md:p-10">
+              <div className="flex min-h-[620px] items-center justify-center bg-[#686D76] p-6 md:p-10">
                 {previewing.kind === 'loyalty' ? (
                   <div className="w-full max-w-[360px]">
                     <LoyaltyCardVisual
                       design={{
-                        primary_color: String(previewing.config?.primary || '#173D32'),
-                        secondary_color: String(previewing.config?.secondary || '#D3A84C'),
-                        background_color: String(previewing.config?.background || '#F7F7F3'),
-                        text_color: String(previewing.config?.text || '#FFFFFF'),
+                        primary_color: String(previewing.config?.primary || '#686D76'),
+                        secondary_color: String(previewing.config?.secondary || '#686D76'),
+                        background_color: String(previewing.config?.background || '#686D76'),
+                        text_color: String(previewing.config?.text || '#686D76'),
                         border_radius: Number(previewing.config?.radius || 28),
                         config: {
                           front_title: previewing.config?.title || 'CARTE FIDÉLITÉ',
@@ -953,20 +953,20 @@ export default function Templates() {
                   </div>
                 ) : (
                   <div className="w-full max-w-[520px] overflow-hidden rounded-[28px] bg-white shadow-xl">
-                    <div className="h-40 p-7" style={{ background: previewing.config?.background_image_url ? `linear-gradient(#173d32aa,#173d32aa),url(${previewing.config.background_image_url}) center/cover` : String(previewing.config?.theme?.background || '#F3EEE2') }}>
-                      <p className="text-xs uppercase tracking-[.25em]" style={{ color: String(previewing.config?.theme?.accent || '#C9A45C') }}>La carte</p>
-                      <h4 className="mt-3 text-3xl font-semibold" style={{ color: String(previewing.config?.theme?.primary || '#173D35') }}>Maison & saveurs</h4>
+                    <div className="h-40 p-7" style={{ background: previewing.config?.background_image_url ? `linear-gradient(#686D76,#686D76),url(${previewing.config.background_image_url}) center/cover` : String(previewing.config?.theme?.background || '#686D76') }}>
+                      <p className="text-xs uppercase tracking-[.25em]" style={{ color: String(previewing.config?.theme?.accent || '#3B82F6') }}>La carte</p>
+                      <h4 className="mt-3 text-3xl font-semibold" style={{ color: String(previewing.config?.theme?.primary || '#686D76') }}>Maison & saveurs</h4>
                     </div>
                     <div className="grid gap-3 p-6 sm:grid-cols-2">
-                      {['Entrées','Plats','Desserts','Boissons'].map((x) => <div key={x} className="rounded-2xl border border-ink/10 p-4"><p className="font-semibold text-forest">{x}</p><p className="mt-2 text-xs text-ink/40">Sélection de la maison</p><p className="mt-3 text-sm font-semibold">À partir de 85 MAD</p></div>)}
+                      {['Entrées','Plats','Desserts','Boissons'].map((x) => <div key={x} className="rounded-2xl border border-ink/10 p-4"><p className="font-semibold text-[#3B82F6]">{x}</p><p className="mt-2 text-xs text-ink/40">Sélection de la maison</p><p className="mt-3 text-sm font-semibold">À partir de 85 MAD</p></div>)}
                     </div>
                   </div>
                 )}
               </div>
               <aside className="border-l border-ink/10 bg-white p-6">
-                <div className="mb-5 flex rounded-xl bg-[#f7f7f3] p-1">
-                  <button onClick={() => setEditorTab('preview')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab==='preview'?'bg-white text-forest shadow-sm':'text-ink/45'}`}>Aperçu</button>
-                  <button onClick={() => setEditorTab('design')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab==='design'?'bg-white text-forest shadow-sm':'text-ink/45'}`}>Modifier</button>
+                <div className="mb-5 flex rounded-xl bg-[#111111] p-1">
+                  <button onClick={() => setEditorTab('preview')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab==='preview'?'bg-white text-[#3B82F6] shadow-sm':'text-ink/45'}`}>Aperçu</button>
+                  <button onClick={() => setEditorTab('design')} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${editorTab==='design'?'bg-white text-[#3B82F6] shadow-sm':'text-ink/45'}`}>Modifier</button>
                 </div>
                 {editorTab === 'design' ? (
                   <div className="space-y-5">
@@ -979,23 +979,23 @@ export default function Templates() {
                       <textarea value={String(previewing.config?.subtitle || '')} onChange={e => { const config={...previewing.config,subtitle:e.target.value}; setPreviewing({...previewing,config}); setConfigText(prettyJson(config)); }} rows={3} className="w-full rounded-xl border border-ink/10 px-3 py-2.5 text-sm"/>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                      {['primary','secondary','background','text'].map(key => <label key={key} className="text-xs font-semibold">{key}<input type="color" value={String(previewing.config?.[key] || '#173D32')} onChange={e=>{const config={...previewing.config,[key]:e.target.value};setPreviewing({...previewing,config});setConfigText(prettyJson(config));}} className="mt-2 h-10 w-full cursor-pointer rounded-lg border border-ink/10"/></label>)}
+                      {['primary','secondary','background','text'].map(key => <label key={key} className="text-xs font-semibold">{key}<input type="color" value={String(previewing.config?.[key] || '#686D76')} onChange={e=>{const config={...previewing.config,[key]:e.target.value};setPreviewing({...previewing,config});setConfigText(prettyJson(config));}} className="mt-2 h-10 w-full cursor-pointer rounded-lg border border-ink/10"/></label>)}
                     </div>
                     <div>
                       <label className="mb-2 block text-xs font-semibold">Wallpaper</label>
-                      <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-gold/40 bg-gold/5 px-4 py-4 text-xs font-semibold text-forest">
+                      <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-[#3B82F6]/40 bg-[#686D76]/5 px-4 py-4 text-xs font-semibold text-[#3B82F6]">
                         <ImagePlus size={17}/>{uploadingWallpaper ? 'Upload...' : 'Ajouter un wallpaper'}
                         <input type="file" accept="image/*" className="hidden" disabled={uploadingWallpaper} onChange={e=>{const f=e.target.files?.[0]; if(f) void uploadTemplateWallpaper(f); e.currentTarget.value='';}}/>
                       </label>
-                      {previewing.config?.background_image_url && <button onClick={()=>{const config={...previewing.config,background_image_url:null};setPreviewing({...previewing,config});setConfigText(prettyJson(config));}} className="mt-2 text-xs text-red-600">Retirer le wallpaper</button>}
+                      {previewing.config?.background_image_url && <button onClick={()=>{const config={...previewing.config,background_image_url:null};setPreviewing({...previewing,config});setConfigText(prettyJson(config));}} className="mt-2 text-xs text-[#B0B0B0]">Retirer le wallpaper</button>}
                     </div>
-                    <button onClick={()=>void saveVisualEditor()} className="w-full rounded-xl bg-forest px-4 py-3 text-sm font-semibold text-white">Enregistrer les modifications</button>
+                    <button onClick={()=>void saveVisualEditor()} className="w-full rounded-xl bg-[#050505] px-4 py-3 text-sm font-semibold text-white">Enregistrer les modifications</button>
                   </div>
                 ) : (
                   <div className="space-y-4 text-sm text-ink/55">
                     <p>Tu peux sélectionner ce template, voir son rendu réel, modifier ses couleurs, son texte et ajouter un wallpaper.</p>
-                    <div className="rounded-2xl bg-[#f7f7f3] p-4"><p className="text-xs font-semibold text-forest">Template global</p><p className="mt-1 text-xs">Les modifications faites ici deviennent disponibles pour les établissements qui utilisent ce template.</p></div>
-                    <button onClick={()=>setEditorTab('design')} className="w-full rounded-xl bg-forest px-4 py-3 text-sm font-semibold text-white">Modifier le design</button>
+                    <div className="rounded-2xl bg-[#111111] p-4"><p className="text-xs font-semibold text-[#3B82F6]">Template global</p><p className="mt-1 text-xs">Les modifications faites ici deviennent disponibles pour les établissements qui utilisent ce template.</p></div>
+                    <button onClick={()=>setEditorTab('design')} className="w-full rounded-xl bg-[#050505] px-4 py-3 text-sm font-semibold text-white">Modifier le design</button>
                   </div>
                 )}
               </aside>

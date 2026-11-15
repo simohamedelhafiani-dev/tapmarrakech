@@ -129,7 +129,7 @@ export default function Analytics() {
   return (
     <div>
       <div className="mb-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#3B82F6]">
           Comprendre votre audience
         </p>
         <h1 className="mt-2 font-display text-4xl text-forest">Analytics</h1>
@@ -147,7 +147,7 @@ export default function Analytics() {
           <select
             value={establishmentId}
             onChange={e => setEstablishmentId(e.target.value)}
-            className="mt-2 w-full max-w-md rounded-xl border border-ink/10 bg-[#fafaf7] px-4 py-3 text-sm text-ink outline-none"
+            className="mt-2 w-full max-w-md rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm text-ink outline-none"
           >
             {establishments.map(establishment => (
               <option key={establishment.id} value={establishment.id}>
@@ -203,31 +203,31 @@ export default function Analytics() {
               <BarChart data={weekly}>
                 <CartesianGrid
                   vertical={false}
-                  stroke="#edf0eb"
+                  stroke="#242424"
                 />
                 <XAxis
                   dataKey="name"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: '#9ca89f', fontSize: 11 }}
+                  tick={{ fill: '#B0B0B0', fontSize: 11 }}
                 />
                 <YAxis
                   allowDecimals={false}
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: '#9ca89f', fontSize: 11 }}
+                  tick={{ fill: '#B0B0B0', fontSize: 11 }}
                 />
                 <Tooltip
                   contentStyle={{
                     borderRadius: 12,
-                    border: '1px solid #edf0eb',
+                    border: '1px solid #242424',
                     fontSize: 12,
                   }}
                 />
                 <Bar
                   dataKey="total"
                   name="Avis"
-                  fill="#17352a"
+                  fill="#686D76"
                   radius={[5, 5, 0, 0]}
                 />
               </BarChart>
@@ -258,7 +258,7 @@ export default function Analytics() {
                     <Cell
                       key={i}
                       fill={
-                        ['#c8a96b', '#a9b987', '#6f9581', '#4d7865', '#17352a'][i]
+                        ['#3B82F6', '#7C8085', '#686D76', '#454D54', '#686D76'][i]
                       }
                     />
                   ))}
@@ -279,7 +279,7 @@ export default function Analytics() {
                     className="h-2 w-2 rounded-full"
                     style={{
                       background:
-                        ['#c8a96b', '#a9b987', '#6f9581', '#4d7865', '#17352a'][i],
+                        ['#3B82F6', '#7C8085', '#686D76', '#454D54', '#686D76'][i],
                     }}
                   />
                   {item.name}
@@ -334,7 +334,7 @@ function Metric({
 }) {
   return (
     <div className="rounded-2xl border border-ink/5 bg-white p-5 shadow-soft">
-      <Icon size={18} className="text-gold" />
+      <Icon size={18} className="text-[#3B82F6]" />
       <p className="mt-5 text-xs text-ink/45">{label}</p>
       <p className="mt-1 font-display text-3xl text-forest">{value}</p>
       <p className="mt-1 text-[11px] text-ink/40">{detail}</p>
@@ -355,7 +355,7 @@ function InfoCard({
 }) {
   return (
     <div className="flex items-center gap-4 rounded-2xl border border-ink/5 bg-white p-5 shadow-soft">
-      <div className="grid h-11 w-11 place-items-center rounded-xl bg-[#e5eee9] text-forest">
+      <div className="grid h-11 w-11 place-items-center rounded-xl bg-[#111111] text-forest">
         <Icon size={19} />
       </div>
       <div>
