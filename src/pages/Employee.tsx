@@ -1167,7 +1167,7 @@ export default function Employee() {
 
             <button
               onClick={logoutEmployee}
-              className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+              className="inline-flex items-center gap-2 rounded-xl border border-[#686D76] bg-white px-4 py-3 text-sm font-semibold text-[#B0B0B0] transition hover:bg-[#242424]"
             >
               <LogOut size={17} />
               Déconnexion
@@ -1483,7 +1483,7 @@ export default function Employee() {
             Scannez la carte du client pour les opérations habituelles, ou saisissez ci-dessous le code gagnant d’une tombola.
           </p>
 
-          <div className="mb-5 rounded-2xl border border-[#3B82F6]/25 bg-[#3B82F6] p-4 text-white">
+          <div className="mb-5 rounded-2xl border border-[#3B82F6]/25 bg-[#686D76] p-4 text-white">
             <div className="mb-3 flex items-center gap-2">
               <Trophy size={17} className="text-[#3B82F6]" />
               <h3 className="text-sm font-semibold">Valider un gain de tombola</h3>
@@ -1491,14 +1491,14 @@ export default function Employee() {
             <p className="mb-3 text-[11px] leading-5 text-white/55">Saisissez le code affiché par le gagnant sur sa carte. La récompense sera vérifiée pour cet établissement avant toute utilisation.</p>
             <div className="flex flex-col gap-2 sm:flex-row">
               <input value={raffleClaimCode} onChange={e => { setRaffleClaimCode(e.target.value.trim()); setRaffleClaim(null); }} placeholder="Code gagnant" autoComplete="off" className="min-w-0 flex-1 rounded-xl border border-white/15 bg-white/5 px-3 py-3 font-mono text-xs text-white outline-none focus:border-[#3B82F6]" />
-              <button type="button" disabled={raffleClaimBusy || !raffleClaimCode.trim()} onClick={() => void lookupRaffleClaim()} className="rounded-xl bg-[#3B82F6] px-4 py-3 text-xs font-bold text-[#3B82F6] disabled:opacity-50">{raffleClaimBusy ? 'Vérification…' : 'Vérifier le code'}</button>
+              <button type="button" disabled={raffleClaimBusy || !raffleClaimCode.trim()} onClick={() => void lookupRaffleClaim()} className="rounded-xl bg-[#686D76] px-4 py-3 text-xs font-bold text-[#3B82F6] disabled:opacity-50">{raffleClaimBusy ? 'Vérification…' : 'Vérifier le code'}</button>
             </div>
             {raffleClaim && <div className="mt-4 rounded-xl border border-[#3B82F6]/20 bg-white/[0.04] p-3">
               <p className="text-[9px] font-bold uppercase tracking-wider text-[#3B82F6]">{raffleClaim.title}</p>
               <p className="mt-1 text-sm font-semibold">{raffleClaim.prize_name}</p>
               {raffleClaim.prize_description && <p className="mt-1 text-xs leading-5 text-white/60">{raffleClaim.prize_description}</p>}
               <p className="mt-2 text-[10px] text-white/50">Valable du {new Date(raffleClaim.valid_from).toLocaleDateString('fr-FR')} au {new Date(raffleClaim.valid_until).toLocaleDateString('fr-FR')}{raffleClaim.reservation_required ? ' · Réservation obligatoire' : ''}</p>
-              <button type="button" disabled={raffleClaimBusy} onClick={() => void redeemRaffleClaim()} className="mt-3 w-full rounded-xl bg-[#3B82F6] px-4 py-3 text-xs font-bold text-[#3B82F6] disabled:opacity-50">{raffleClaimBusy ? 'Validation…' : 'Utiliser la récompense'}</button>
+              <button type="button" disabled={raffleClaimBusy} onClick={() => void redeemRaffleClaim()} className="mt-3 w-full rounded-xl bg-[#686D76] px-4 py-3 text-xs font-bold text-[#3B82F6] disabled:opacity-50">{raffleClaimBusy ? 'Validation…' : 'Utiliser la récompense'}</button>
             </div>}
           </div>
 
@@ -1550,7 +1550,7 @@ export default function Employee() {
             <p className="mt-3 text-center text-xs text-ink/45">Lecture de la carte…</p>
           )}
           {scannerMessage && (
-            <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-xs leading-5 text-red-700">{scannerMessage}</p>
+            <p className="mt-3 rounded-xl bg-[#242424] px-3 py-2 text-xs leading-5 text-[#B0B0B0]">{scannerMessage}</p>
           )}
         </Modal>
       )}
