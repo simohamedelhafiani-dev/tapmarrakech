@@ -172,7 +172,7 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
         </div>
       </div>
 
-      {error && <div role="alert" className="rounded-xl border border-red-400/20 bg-red-400/10 p-3 text-sm text-red-200">{error}</div>}
+      {error && <div role="alert" className="rounded-xl border border-[#686D76]/20 bg-[#242424] p-3 text-sm text-[#B0B0B0]">{error}</div>}
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
         {[
@@ -216,7 +216,7 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
                   <td className="px-4 py-3 tabular-nums text-white/80">{c.visit_count}</td>
                   <td className="px-4 py-3 text-xs text-white/60">{c.last_visit_at ? new Date(c.last_visit_at).toLocaleDateString('fr-FR') : 'Aucune visite enregistrée'}</td>
                   <td className="px-4 py-3 text-xs text-white/60">{c.birth_day && c.birth_month ? String(c.birth_day).padStart(2, '0') + '/' + String(c.birth_month).padStart(2, '0') : '—'}</td>
-                  <td className="px-4 py-3"><div className="flex flex-wrap gap-1">{c.marketing_consent && <span className="rounded-full bg-emerald-400/10 px-2 py-1 text-[10px] text-emerald-200">Marketing</span>}{c.notification_consent && <span className="rounded-full bg-sky-400/10 px-2 py-1 text-[10px] text-sky-200">Notifications</span>}{!c.marketing_consent && !c.notification_consent && <span className="text-xs text-white/30">Aucun</span>}</div></td>
+                  <td className="px-4 py-3"><div className="flex flex-wrap gap-1">{c.marketing_consent && <span className="rounded-full bg-[#686D76]/10 px-2 py-1 text-[10px] text-[#B0B0B0]">Marketing</span>}{c.notification_consent && <span className="rounded-full bg-[#686D76]/10 px-2 py-1 text-[10px] text-[#3B82F6]">Notifications</span>}{!c.marketing_consent && !c.notification_consent && <span className="text-xs text-white/30">Aucun</span>}</div></td>
                   <td className="px-4 py-3">
                     <button type="button" onClick={() => void createRecoveryQr(c)} disabled={recoveryLoadingId !== null} className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-[#3B82F6]/30 px-3 py-2 text-xs font-semibold text-[#3B82F6] transition hover:bg-[#686D76]/10 disabled:cursor-not-allowed disabled:opacity-50">
                       {recoveryLoadingId === c.id ? <Loader2 size={13} className="animate-spin" /> : <QrCode size={13} />}

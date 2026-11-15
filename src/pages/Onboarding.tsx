@@ -69,7 +69,7 @@ export default function Onboarding() {
               <input autoComplete="name" required minLength={2} value={name} onChange={event => setName(event.target.value)} placeholder="Votre nom et prénom" className="w-full rounded-xl border border-[var(--kelyani-border)] bg-[var(--kelyani-bg)] py-3 pl-10 pr-4 text-sm text-[var(--kelyani-text)] outline-none transition focus:border-[var(--kelyani-accent)] focus:ring-2 focus:ring-[var(--kelyani-accent)]/20" />
             </span>
           </label>
-          {error && <p role="alert" className="rounded-xl border border-red-400/20 bg-red-950/30 px-4 py-3 text-sm text-red-300">{error}</p>}
+          {error && <p role="alert" className="rounded-xl border border-[#686D76]/20 bg-[#242424] px-4 py-3 text-sm text-[#B0B0B0]">{error}</p>}
           <button type="submit" disabled={saving} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--kelyani-accent)] px-5 py-3.5 text-sm font-semibold text-[var(--kelyani-bg)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60">
             {saving ? <LoaderCircle size={17} className="animate-spin" /> : <Check size={17} />}
             {saving ? 'Enregistrement…' : 'Terminer mon profil'}

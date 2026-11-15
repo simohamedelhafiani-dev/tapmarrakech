@@ -304,7 +304,7 @@ export default function Promotions() {
       </section>
 
       {errorMessage && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
+        <div className="rounded-2xl border border-[#686D76]/20 bg-[#242424] px-5 py-4 text-sm text-[#B0B0B0]">
           {errorMessage}
         </div>
       )}
@@ -329,7 +329,7 @@ export default function Promotions() {
               value={form.name}
               onChange={(event) => updateForm('name', event.target.value)}
               placeholder="Ex. Menu déjeuner -20%"
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-forest"
             />
           </label>
 
@@ -339,7 +339,7 @@ export default function Promotions() {
               value={form.description}
               onChange={(event) => updateForm('description', event.target.value)}
               placeholder="Ex. Du lundi au vendredi, midi uniquement"
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-forest"
             />
           </label>
 
@@ -351,7 +351,7 @@ export default function Promotions() {
               type="number"
               min="0"
               placeholder="250"
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-forest"
             />
           </label>
 
@@ -363,7 +363,7 @@ export default function Promotions() {
               type="number"
               min="0"
               placeholder="199"
-              className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+              className="w-full rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-forest"
             />
           </label>
         </div>
@@ -419,7 +419,7 @@ export default function Promotions() {
                     className="aspect-[16/9] w-full object-cover"
                   />
                 ) : (
-                  <div className="grid aspect-[16/9] place-items-center bg-[#f7f7f3] text-ink/20">
+                  <div className="grid aspect-[16/9] place-items-center bg-[#111111] text-ink/20">
                     <ImageIcon size={32} />
                   </div>
                 )}
@@ -475,7 +475,7 @@ export default function Promotions() {
                       <button
                         type="button"
                         onClick={() => void deletePromotion(promotion)}
-                        className="grid h-9 w-9 place-items-center rounded-xl border border-red-200 text-red-600"
+                        className="grid h-9 w-9 place-items-center rounded-xl border border-[#686D76]/20 text-[#B0B0B0]"
                         aria-label="Supprimer"
                       >
                         <Trash2 size={14} />

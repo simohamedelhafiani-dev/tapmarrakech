@@ -1118,7 +1118,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
 
         {/* Les campagnes sont envoyées par Web Push. On ne les affiche pas dans la carte fidélité. */}
         {raffleLoadError && (
-          <div role="status" className="mt-4 w-full rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-xs leading-5 text-amber-100">
+          <div role="status" className="mt-4 w-full rounded-xl border border-[#686D76]/30 bg-[#686D76]/10 px-4 py-3 text-xs leading-5 text-[#B0B0B0]">
             {raffleLoadError}
           </div>
         )}
@@ -1164,7 +1164,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
           <button
             type="button"
             onClick={() => void saveCardOnPhone()}
-            className="mt-4 flex w-full items-center justify-center gap-3 rounded-2xl bg-gold-gradient px-5 py-4 text-sm font-semibold text-[#050505] shadow-gold transition hover:brightness-105"
+            className="mt-4 flex w-full items-center justify-center gap-3 rounded-2xl bg-[#686D76]-gradient px-5 py-4 text-sm font-semibold text-[#050505] shadow-electric transition hover:brightness-105"
           >
             <span className="text-lg">▣</span>
             Enregistrer ma carte sur mon téléphone
