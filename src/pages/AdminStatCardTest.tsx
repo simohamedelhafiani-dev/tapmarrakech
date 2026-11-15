@@ -54,7 +54,7 @@ export default function AdminStatCardTest() {
         </div>
 
         {status === 'loading' ? (
-          <p className="mt-6 text-xs font-medium text-[#6B7280]">
+          <p className="mt-6 text-xs font-medium text-[#686D76]">
             Chargement des données réelles…
           </p>
         ) : null}

@@ -1231,7 +1231,7 @@ function AdminMetric({ icon: Icon, label, value, detail }: { icon: typeof Star; 
     <div
       data-kpi-label={label}
       data-kpi-value={String(value)}
-      className="group relative overflow-hidden rounded-2xl border border-white/[0.07] bg-[linear-gradient(145deg,#171717,#0C0C0C)] p-4 shadow-[0_14px_36px_rgba(0,0,0,0.18)] transition duration-200 hover:-translate-y-0.5 hover:border-[#3B82F6]/25 sm:rounded-[22px] sm:p-5"
+      className="group relative overflow-hidden rounded-2xl border border-white/[0.07] bg-[linear-gradient(145deg,#171717,#111111)] p-4 shadow-[0_14px_36px_rgba(0,0,0,0.18)] transition duration-200 hover:-translate-y-0.5 hover:border-[#3B82F6]/25 sm:rounded-[22px] sm:p-5"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="grid h-10 w-10 place-items-center rounded-xl border border-[#3B82F6]/15 bg-[#686D76]/[0.08] text-[#3B82F6]"><Icon size={18} /></div>
@@ -2578,7 +2578,7 @@ function UnassignedResponsiblesPanel({ establishments, reload }: { establishment
           {loading ? 'Actualisation…' : 'Actualiser'}
         </button>
       </div>
-      {error ? <p className="mt-4 rounded-xl border border-red-500/20 bg-red-500/5 p-3 text-xs text-red-300">{error}</p> :
+      {error ? <p className="mt-4 rounded-xl border border-[#686D76]/20 bg-[#242424] p-3 text-xs text-[#B0B0B0]">{error}</p> :
         loading ? <p className="mt-4 text-sm text-white/40">Chargement des comptes…</p> :
         accounts.length === 0 ? <p className="mt-4 rounded-xl border border-white/5 bg-white/[0.02] p-4 text-sm text-white/45">Aucun compte responsable en attente d’attribution.</p> :
         <div className="mt-4 space-y-3">
