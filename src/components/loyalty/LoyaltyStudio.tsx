@@ -1474,6 +1474,12 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                     <input value={walletDesign.customMessage} onChange={e => setWalletDesign(current => ({...current,customMessage:e.target.value}))} maxLength={80} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
                   </Field>
                 </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <ColorField label="Fond Wallet" value={walletDesign.backgroundColor} onChange={value => setWalletDesign(current => ({...current,backgroundColor:value}))} />
+                  <ColorField label="Couleur principale" value={walletDesign.primaryColor} onChange={value => setWalletDesign(current => ({...current,primaryColor:value}))} />
+                  <ColorField label="Accent" value={walletDesign.accentColor} onChange={value => setWalletDesign(current => ({...current,accentColor:value}))} />
+                  <ColorField label="Texte" value={walletDesign.textColor} onChange={value => setWalletDesign(current => ({...current,textColor:value}))} />
+                </div>
                 <div className="mt-4 rounded-2xl border border-white/10 bg-[#0B0B0B] p-4">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
@@ -1519,6 +1525,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
             {tab === 'wallet' ? (
               <div className="w-full max-w-[300px] overflow-hidden rounded-[28px] border-[7px] border-[#E5E5E5] shadow-2xl" style={{ background: walletDesign.backgroundColor, color: walletDesign.textColor }}>
                 <div className="min-h-[430px] p-4" style={{ background: `linear-gradient(155deg, ${walletDesign.primaryColor}, ${walletDesign.backgroundColor} 76%)` }}>
+                  {walletDesign.heroImageUrl && <img src={walletDesign.heroImageUrl} alt="" className="mb-4 h-24 w-full rounded-xl object-cover" />}
                   <div className="flex items-center gap-3">
                     {walletDesign.logoUrl || design.logoUrl || establishment.logoUrl ? <img src={walletDesign.logoUrl || design.logoUrl || establishment.logoUrl || ''} alt="" className="h-10 w-10 rounded-xl bg-white object-contain p-1" /> : <div className="grid h-10 w-10 place-items-center rounded-xl text-xs font-bold" style={{ background: walletDesign.accentColor, color: walletDesign.backgroundColor }}>{establishment.name.slice(0,2).toUpperCase()}</div>}
                     <div className="min-w-0"><p className="truncate text-xs font-bold">{walletDesign.cardTitle || 'KELYANI'}</p><p className="text-[9px] uppercase tracking-wider opacity-60">{establishment.name} · {walletDesign.headerText}</p></div>
