@@ -240,7 +240,7 @@ export default function LoyaltyNotificationsPanel({ establishmentId, initialView
       <div className="rounded-3xl border border-[#242424] bg-[#111111] p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
-            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#3B82F6]/10 text-[#3B82F6]">
+            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#686D76]/10 text-[#3B82F6]">
               <Bell size={18} />
             </div>
             <div>
@@ -255,7 +255,7 @@ export default function LoyaltyNotificationsPanel({ establishmentId, initialView
             type="button"
             onClick={() => setOpen(true)}
             disabled={loading || !establishmentId}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#3B82F6] px-4 py-2.5 text-xs font-semibold text-[#0D0D0D] disabled:opacity-40"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#686D76] px-4 py-2.5 text-xs font-semibold text-[#0D0D0D] disabled:opacity-40"
           >
             <Bell size={15} />
             Nouvelle notification
@@ -263,7 +263,7 @@ export default function LoyaltyNotificationsPanel({ establishmentId, initialView
         </div>
         <div className="mt-4 flex flex-wrap gap-2 text-[11px]">
           <span className="rounded-full bg-white/[0.04] px-3 py-1.5 text-white/55">{customers.length} clients</span>
-          <span className="rounded-full bg-[#3B82F6]/10 px-3 py-1.5 text-[#3B82F6]">{customers.filter(c => c.notification_consent).length} notifications activées</span>
+          <span className="rounded-full bg-[#686D76]/10 px-3 py-1.5 text-[#3B82F6]">{customers.filter(c => c.notification_consent).length} notifications activées</span>
         </div>
       </div>
 
@@ -290,7 +290,7 @@ export default function LoyaltyNotificationsPanel({ establishmentId, initialView
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="text-sm font-semibold text-white">{campaign.title}</p>
-                      <span className="rounded-full bg-[#3B82F6]/10 px-2 py-1 text-[10px] text-[#3B82F6]">{campaign.type}</span>
+                      <span className="rounded-full bg-[#686D76]/10 px-2 py-1 text-[10px] text-[#3B82F6]">{campaign.type}</span>
                     </div>
                     <p className="mt-1 whitespace-pre-wrap text-xs leading-5 text-white/55">{campaign.message}</p>
                     <p className="mt-2 text-[10px] text-white/35">
@@ -382,7 +382,7 @@ export default function LoyaltyNotificationsPanel({ establishmentId, initialView
                 </select>
               )}
 
-              <div className="rounded-xl border border-[#3B82F6]/15 bg-[#3B82F6]/5 px-4 py-3 text-xs text-white/55">
+              <div className="rounded-xl border border-[#3B82F6]/15 bg-[#686D76]/5 px-4 py-3 text-xs text-white/55">
                 <strong className="text-[#3B82F6]">{eligibleCustomers.length}</strong> client(s) recevront la notification sur leur carte.
               </div>
 
@@ -397,7 +397,7 @@ export default function LoyaltyNotificationsPanel({ establishmentId, initialView
               <textarea value={message} onChange={e => setMessage(e.target.value)} maxLength={1000} rows={5} placeholder="Message qui apparaîtra sur la carte et dans la notification téléphone..." className="w-full resize-none rounded-xl border border-white/10 bg-[#0D0D0D] px-4 py-3 text-sm text-white outline-none focus:border-[#3B82F6]" />
               <input type="datetime-local" value={expiresAt} onChange={e => setExpiresAt(e.target.value)} className="w-full rounded-xl border border-white/10 bg-[#0D0D0D] px-4 py-3 text-sm text-white outline-none focus:border-[#3B82F6]" />
 
-              <button type="button" onClick={() => void createNotification()} disabled={saving || !title.trim() || !message.trim()} className="w-full rounded-xl bg-[#3B82F6] px-4 py-3 text-xs font-bold text-[#0D0D0D] disabled:opacity-40">
+              <button type="button" onClick={() => void createNotification()} disabled={saving || !title.trim() || !message.trim()} className="w-full rounded-xl bg-[#686D76] px-4 py-3 text-xs font-bold text-[#0D0D0D] disabled:opacity-40">
                 {saving ? 'Publication…' : 'Publier la notification'}
               </button>
             </div>
