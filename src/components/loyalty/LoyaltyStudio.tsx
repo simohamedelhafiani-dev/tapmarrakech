@@ -860,7 +860,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
             type="button"
             onClick={() => void saveAll(true)}
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#686D76]-gradient px-4 py-2.5 text-xs font-semibold text-[#050505] shadow-sm transition hover:-translate-y-0.5 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#00DFA5] to-[#14B8A6] px-4 py-2.5 text-xs font-semibold text-[#050505] shadow-sm transition hover:-translate-y-0.5 disabled:opacity-50"
           >
             <Save size={14} />
             {saving ? '...' : 'Publier'}
@@ -890,7 +890,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   const Icon = item.icon;
                   return (
                     <button key={item.id} type="button" onClick={() => setTab(item.id)} aria-current={tab === item.id ? 'page' : undefined} className={`flex min-w-0 items-center gap-2.5 rounded-xl border px-3 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DFA5] ${tab === item.id ? 'border-[#00DFA5]/50 bg-[#686D76]/10 text-[#00DFA5]' : 'border-transparent text-white/65 hover:border-white/10 hover:bg-white/[.04] hover:text-white'}`}>
-                      <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${tab === item.id ? 'bg-gradient-to-br from-[#686D76] to-[#686D76] text-[#0D0D0D]' : 'bg-white/[.06] text-[#00DFA5]'}`}>
+                      <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${tab === item.id ? 'bg-gradient-to-br from-[#00DFA5] to-[#14B8A6] text-[#0D0D0D]' : 'bg-white/[.06] text-[#00DFA5]'}`}>
                         <Icon size={18} />
                       </span>
                       <span className="min-w-0">
@@ -939,7 +939,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                         key={item.id}
                         type="button"
                         onClick={() => setProgram(current => ({ ...current, programType: item.id }))}
-                        className={`rounded-2xl border p-4 text-left transition ${active ? 'border-[#242424] bg-[#686D76]-gradient/[.04] ring-2 ring-[#00DFA5]/15' : 'border-[#242424]/10 hover:border-[#00DFA5]/30'}`}
+                        className={`rounded-2xl border p-4 text-left transition ${active ? 'border-[#242424] bg-[#686D76]/[.04] ring-2 ring-[#00DFA5]/15' : 'border-[#242424]/10 hover:border-[#00DFA5]/30'}`}
                       >
                         <Icon size={18} className={active ? 'text-[#00DFA5]' : 'text-[#FFFFFF]/35'} />
                         <p className="mt-3 text-sm font-semibold text-[#00DFA5]">{item.label}</p>
@@ -1192,7 +1192,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                       Annuler
                     </button>
                   )}
-                  <button type="button" onClick={() => void saveReward()} disabled={rewardSaving} className="inline-flex items-center gap-2 rounded-xl bg-[#686D76]-gradient px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50">
+                  <button type="button" onClick={() => void saveReward()} disabled={rewardSaving} className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#00DFA5] to-[#14B8A6] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50">
                     <Gift size={14} />
                     {rewardSaving ? 'Enregistrement...' : rewardDraft.id ? 'Mettre à jour' : 'Ajouter'}
                   </button>
@@ -1398,7 +1398,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   <Field label="Style des tampons">
                     <div className="grid grid-cols-4 gap-2">
                       {(['circles', 'squares', 'stars', 'hearts'] as const).map(style => (
-                        <button key={style} type="button" onClick={() => setDesign(current => ({ ...current, stampStyle: style }))} className={`rounded-xl border px-2 py-2.5 text-[10px] font-semibold capitalize ${design.stampStyle === style ? 'border-[#242424] bg-[#686D76]-gradient text-[#050505]' : 'border-[#242424]/10 text-[#FFFFFF]/45'}`}>
+                        <button key={style} type="button" onClick={() => setDesign(current => ({ ...current, stampStyle: style }))} className={`rounded-xl border px-2 py-2.5 text-[10px] font-semibold capitalize ${design.stampStyle === style ? 'border-[#242424] bg-gradient-to-r from-[#00DFA5] to-[#14B8A6] text-[#050505]' : 'border-[#242424]/10 text-[#FFFFFF]/45'}`}>
                           {style === 'circles' ? 'Ronds' : style === 'squares' ? 'Carrés' : style === 'stars' ? 'Étoiles' : 'Cœurs'}
                         </button>
                       ))}
@@ -1636,7 +1636,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (checked: b
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className={`relative h-7 w-12 shrink-0 rounded-full p-1 transition ${checked ? 'bg-[#686D76]-gradient' : 'bg-[#111111]/15'}`}
+      className={`relative h-7 w-12 shrink-0 rounded-full p-1 transition ${checked ? 'bg-gradient-to-r from-[#00DFA5] to-[#14B8A6]' : 'bg-[#111111]/15'}`}
     >
       <span className={`block h-5 w-5 rounded-full bg-[#111111] shadow-sm transition ${checked ? 'translate-x-5' : 'translate-x-0'}`} />
     </button>
