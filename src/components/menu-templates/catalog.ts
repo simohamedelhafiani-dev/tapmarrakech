@@ -3,10 +3,10 @@ export type MenuTemplateOption = {
   background: string; surface: string; accent: string; text: string;
 };
 export const MENU_TEMPLATE_CATALOG: MenuTemplateOption[] = [
-  {id:'editorial',name:'Editorial',description:'Mise en page éditoriale premium.',key:'editorial',background:'#F3EEE2',surface:'#FFF9EF',accent:'#C9A45C',text:'#24221D'},
-  {id:'luxury',name:'Luxury',description:'Présentation luxe et élégante.',key:'luxury',background:'#F7F3EA',surface:'#FFFFFF',accent:'#C9A45C',text:'#24221D'},
-  {id:'cards',name:'Cards',description:'Cartes modernes et visuelles.',key:'cards',background:'#F3EEE2',surface:'#FFFFFF',accent:'#C9A45C',text:'#24221D'},
-  {id:'dark',name:'Noir Signature',description:'Univers sombre et accents dorés.',key:'dark',background:'#102B24',surface:'#18382F',accent:'#D4AF37',text:'#FFF9E8'},
+  {id:'editorial',name:'Editorial',description:'Mise en page éditoriale premium.',key:'editorial',background:'#F3EEE2',surface:'#FFF9EF',accent:'#3B82F6',text:'#24221D'},
+  {id:'luxury',name:'Luxury',description:'Présentation luxe et élégante.',key:'luxury',background:'#F7F3EA',surface:'#FFFFFF',accent:'#3B82F6',text:'#24221D'},
+  {id:'cards',name:'Cards',description:'Cartes modernes et visuelles.',key:'cards',background:'#F3EEE2',surface:'#FFFFFF',accent:'#3B82F6',text:'#24221D'},
+  {id:'dark',name:'Noir Signature',description:'Univers sombre et accents bleu électrique.',key:'dark',background:'#102B24',surface:'#18382F',accent:'#3B82F6',text:'#FFF9E8'},
   {id:'01-burger-house',name:'Burger House',description:'Noir & orange · Burgers et menus.',key:'dark',background:'#080808',surface:'#171717',accent:'#F6A623',text:'#FFF4DF'},
   {id:'02-food-premium',name:'Le Gourmet',description:'Bleu nuit & corail · Carte food.',key:'cards',background:'#07131D',surface:'#102532',accent:'#FF795E',text:'#F7F3EF'},
   {id:'03-restaurant-chic',name:'Bella Vista',description:'Noir & or · Restaurant chic.',key:'luxury',background:'#080B09',surface:'#171B17',accent:'#D6B56D',text:'#F7F1E5'},
@@ -31,7 +31,7 @@ export const MENU_TEMPLATE_CATALOG: MenuTemplateOption[] = [
   {id:'22-hair-luxury',name:'Maison Capillaire',description:'Brun & champagne · Coiffure.',key:'luxury',background:'#151311',surface:'#26211D',accent:'#C7A57B',text:'#F9F1E6'},
   {id:'23-massage-spa',name:'Oasis Spa',description:'Vert profond & sable · Spa.',key:'luxury',background:'#12302C',surface:'#1B4940',accent:'#C8B78A',text:'#F4F4E9'},
   {id:'24-makeup',name:'Studio Glow',description:'Prune & rose · Maquillage.',key:'luxury',background:'#2A1525',surface:'#47233D',accent:'#E5A6C9',text:'#FFF2FA'},
-  {id:'25-perfume',name:'Maison Oud',description:'Parfumerie · Noir & doré.',key:'luxury',background:'#17100D',surface:'#2C1C16',accent:'#C9A36A',text:'#FFF4E4'},
+  {id:'25-perfume',name:'Maison Oud',description:'Parfumerie · accents bleu électrique.',key:'luxury',background:'#17100D',surface:'#2C1C16',accent:'#3B82F6',text:'#FFF4E4'},
   {id:'26-jewelry',name:'Atelier Bijoux',description:'Bijoux · Noir & or.',key:'luxury',background:'#0B0B0C',surface:'#1D1C1B',accent:'#D8BA72',text:'#FFF9E8'},
   {id:'27-shoes',name:'Step & Style',description:'Crème & brun · Chaussures.',key:'luxury',background:'#F1EDE6',surface:'#FFFFFF',accent:'#9A624B',text:'#292522'},
   {id:'28-home-decor',name:'Casa Living',description:'Neutre & bois · Maison et déco.',key:'luxury',background:'#EAE3D8',surface:'#FAF7F1',accent:'#96775B',text:'#2D2823'},
