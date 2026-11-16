@@ -619,7 +619,7 @@ export default function PublicReview() {
                   title="Rejoindre notre programme fidélité"
                   subtitle="Cumulez des points et profitez d’avantages exclusifs"
                   onClick={() => navigate('loyalty')}
-                  accent="rose"
+                  accent="gray"
                 />
               )}
 
@@ -639,7 +639,7 @@ export default function PublicReview() {
                   title="Voir le menu"
                   subtitle="Découvrez nos plats et boissons"
                   onClick={() => navigate('menu')}
-                  accent="orange"
+                  accent="gray"
                 />
               )}
 
@@ -651,7 +651,7 @@ export default function PublicReview() {
                   title="Nous trouver"
                   subtitle={[address, city].filter(Boolean).join(', ')}
                   href={directionsUrl}
-                  accent="gold"
+                  accent="blue"
                 />
               )}
 
@@ -1389,14 +1389,11 @@ function ActionRow({
   subtitle: string;
   onClick?: () => void;
   href?: string;
-  accent?: 'green' | 'rose' | 'blue' | 'orange' | 'gold';
+  accent?: 'gray' | 'blue';
 }) {
   const accentClasses = {
-    green: 'bg-emerald-50 text-emerald-600',
-    rose: 'bg-rose-50 text-rose-500',
-    blue: 'bg-blue-50 text-blue-500',
-    orange: 'bg-orange-50 text-orange-500',
-    gold: 'bg-amber-50 text-amber-600',
+    gray: 'bg-[#686D76] text-[#FFFFFF]',
+    blue: 'bg-[#686D76] text-[#3B82F6]',
   } as const;
 
   const className = "group flex w-full items-center gap-4 rounded-[24px] bg-white p-4 text-left shadow-sm ring-1 ring-ink/5 transition active:scale-[0.99]";
