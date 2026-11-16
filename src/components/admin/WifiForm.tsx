@@ -119,7 +119,7 @@ export default function WifiForm({ establishmentId }: WifiFormProps) {
               Configure le réseau qui sera proposé aux clients. Le QR est généré localement à partir des informations saisies.
             </p>
           </div>
-          <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-semibold ${active ? 'bg-[#3B82F6]/5 text-[#3B82F6]' : 'bg-[#242424] text-[#FFFFFF]/45'}`}>
+          <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-semibold ${active ? 'bg-[#686D76]/5 text-[#3B82F6]' : 'bg-[#242424] text-[#FFFFFF]/45'}`}>
             <Wifi size={13} />
             {active ? 'Actif' : 'Désactivé'}
           </span>
@@ -205,7 +205,7 @@ export default function WifiForm({ establishmentId }: WifiFormProps) {
             type="button"
             onClick={() => void handleSave()}
             disabled={engine.saving || !networkName.trim()}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#3B82F6] px-5 py-3 text-sm font-semibold text-[#050505] transition hover:bg-[#3B82F6]-light disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#686D76] px-5 py-3 text-sm font-semibold text-[#050505] transition hover:bg-[#686D76]-light disabled:cursor-not-allowed disabled:opacity-40"
           >
             {engine.saving ? <Loader2 size={16} className="animate-spin" /> : <Wifi size={16} />}
             {engine.saving ? 'Enregistrement…' : 'Enregistrer le Wi-Fi'}
@@ -213,7 +213,7 @@ export default function WifiForm({ establishmentId }: WifiFormProps) {
         </div>
       </div>
 
-      <div className="rounded-3xl border border-[#242424] bg-[#3B82F6] p-6 text-[#050505] shadow-[0_12px_40px_rgba(59,130,246,0.12)]">
+      <div className="rounded-3xl border border-[#242424] bg-[#686D76] p-6 text-[#050505] shadow-[0_12px_40px_rgba(59,130,246,0.12)]">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#3B82F6]">Accès instantané</p>
