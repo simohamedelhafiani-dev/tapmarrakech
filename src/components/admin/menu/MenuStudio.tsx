@@ -279,7 +279,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
         </div>
 
         <div className="inline-flex items-center gap-2 self-start rounded-full border border-white/10 bg-white/[.04] px-3 py-2 text-[10px] font-semibold text-white/70 shadow-soft md:self-auto">
-          <span className={menu.loading || loadingDesign ? 'h-2 w-2 animate-pulse rounded-full bg-blue-400' : 'h-2 w-2 rounded-full bg-[#3B82F6]'} />
+          <span className={menu.loading || loadingDesign ? 'h-2 w-2 animate-pulse rounded-full bg-blue-400' : 'h-2 w-2 rounded-full bg-[#686D76]'} />
           {menu.loading || loadingDesign ? 'Synchronisation…' : hasChanges ? 'Modifications locales' : 'Design publié'}
         </div>
       </div>
