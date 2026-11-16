@@ -1491,14 +1491,14 @@ export default function Employee() {
             <p className="mb-3 text-[11px] leading-5 text-white/55">Saisissez le code affiché par le gagnant sur sa carte. La récompense sera vérifiée pour cet établissement avant toute utilisation.</p>
             <div className="flex flex-col gap-2 sm:flex-row">
               <input value={raffleClaimCode} onChange={e => { setRaffleClaimCode(e.target.value.trim()); setRaffleClaim(null); }} placeholder="Code gagnant" autoComplete="off" className="min-w-0 flex-1 rounded-xl border border-white/15 bg-white/5 px-3 py-3 font-mono text-xs text-white outline-none focus:border-[#00DFA5]" />
-              <button type="button" disabled={raffleClaimBusy || !raffleClaimCode.trim()} onClick={() => void lookupRaffleClaim()} className="rounded-xl bg-[#00DFA5] px-4 py-3 text-xs font-bold text-[#00DFA5] disabled:opacity-50">{raffleClaimBusy ? 'Vérification…' : 'Vérifier le code'}</button>
+              <button type="button" disabled={raffleClaimBusy || !raffleClaimCode.trim()} onClick={() => void lookupRaffleClaim()} className="rounded-xl bg-[#00DFA5] px-4 py-3 text-xs font-bold text-[#050505] disabled:opacity-50">{raffleClaimBusy ? 'Vérification…' : 'Vérifier le code'}</button>
             </div>
             {raffleClaim && <div className="mt-4 rounded-xl border border-[#00DFA5]/20 bg-white/[0.04] p-3">
               <p className="text-[9px] font-bold uppercase tracking-wider text-[#00DFA5]">{raffleClaim.title}</p>
               <p className="mt-1 text-sm font-semibold">{raffleClaim.prize_name}</p>
               {raffleClaim.prize_description && <p className="mt-1 text-xs leading-5 text-white/60">{raffleClaim.prize_description}</p>}
               <p className="mt-2 text-[10px] text-white/50">Valable du {new Date(raffleClaim.valid_from).toLocaleDateString('fr-FR')} au {new Date(raffleClaim.valid_until).toLocaleDateString('fr-FR')}{raffleClaim.reservation_required ? ' · Réservation obligatoire' : ''}</p>
-              <button type="button" disabled={raffleClaimBusy} onClick={() => void redeemRaffleClaim()} className="mt-3 w-full rounded-xl bg-[#00DFA5] px-4 py-3 text-xs font-bold text-[#00DFA5] disabled:opacity-50">{raffleClaimBusy ? 'Validation…' : 'Utiliser la récompense'}</button>
+              <button type="button" disabled={raffleClaimBusy} onClick={() => void redeemRaffleClaim()} className="mt-3 w-full rounded-xl bg-[#00DFA5] px-4 py-3 text-xs font-bold text-[#050505] disabled:opacity-50">{raffleClaimBusy ? 'Validation…' : 'Utiliser la récompense'}</button>
             </div>}
           </div>
 
