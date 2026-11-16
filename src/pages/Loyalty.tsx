@@ -710,7 +710,7 @@ export default function Loyalty() {
           <button
             onClick={() => setShowNotificationHistory(value => !value)}
             disabled={!establishmentId}
-            className="flex items-center gap-2 rounded-xl border border-[#3B82F6]/30 bg-[#3B82F6] px-4 py-2.5 text-xs font-semibold text-[#3B82F6] transition hover:bg-[#1b1b1b] disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex items-center gap-2 rounded-xl border border-[#3B82F6]/30 bg-[#686D76] px-4 py-2.5 text-xs font-semibold text-[#3B82F6] transition hover:bg-[#1b1b1b] disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Bell size={16} />
             Historique notifications
@@ -727,7 +727,7 @@ export default function Loyalty() {
           <button
             onClick={() => setShowNewCustomer(true)}
           disabled={!establishmentId || !programSettings.enabled}
-          className="flex w-fit items-center gap-2 rounded-xl bg-[#3B82F6] px-4 py-2.5 text-xs font-semibold text-[#3B82F6] transition hover:bg-[#3B82F6] disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex w-fit items-center gap-2 rounded-xl bg-[#686D76] px-4 py-2.5 text-xs font-semibold text-[#3B82F6] transition hover:bg-[#686D76] disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Plus size={16} />
             Nouveau client
@@ -765,7 +765,7 @@ export default function Loyalty() {
           <div
             className={`rounded-full px-3 py-1.5 text-[11px] font-semibold ${
               programSettings.enabled
-                ? 'bg-[#3B82F6]/10 text-[#3B82F6]'
+                ? 'bg-[#686D76]/10 text-[#3B82F6]'
                 : 'bg-red-500/10 text-red-300'
             }`}
           >
@@ -777,14 +777,14 @@ export default function Loyalty() {
       <LoyaltyStudio establishmentId={establishmentId} />
 
       {showNotificationHistory && (
-        <section className="mb-6 rounded-2xl border border-[#3B82F6]/20 bg-[#3B82F6] p-5 text-[#3B82F6] shadow-soft">
+        <section className="mb-6 rounded-2xl border border-[#3B82F6]/20 bg-[#686D76] p-5 text-[#3B82F6] shadow-soft">
           <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#3B82F6]">Centre de notifications</p>
               <h2 className="mt-1 font-display text-2xl text-[#3B82F6]">Historique</h2>
               <p className="mt-1 text-xs text-[#3B82F6]/55">Retrouvez vos campagnes et réutilisez un ancien message.</p>
             </div>
-            <button type="button" onClick={() => setShowNotificationModal(true)} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#3B82F6] px-4 py-2.5 text-xs font-bold text-[#3B82F6] hover:bg-[#3B82F6]">
+            <button type="button" onClick={() => setShowNotificationModal(true)} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#686D76] px-4 py-2.5 text-xs font-bold text-[#3B82F6] hover:bg-[#686D76]">
               <Plus size={15} /> Nouvelle notification
             </button>
           </div>
@@ -807,7 +807,7 @@ export default function Loyalty() {
                         Publiée le {new Date(campaign.created_at).toLocaleString('fr-FR')} · {campaign.recipient_count} destinataire(s) · {campaign.status}
                       </p>
                     </div>
-                    <button type="button" onClick={() => reuseNotification(campaign)} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-[#3B82F6]/40 px-3 py-2 text-xs font-semibold text-[#3B82F6] transition hover:bg-[#3B82F6]/10">
+                    <button type="button" onClick={() => reuseNotification(campaign)} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-[#3B82F6]/40 px-3 py-2 text-xs font-semibold text-[#3B82F6] transition hover:bg-[#686D76]/10">
                       <Bell size={14} /> Réutiliser / republier
                     </button>
                   </div>
@@ -880,7 +880,7 @@ export default function Loyalty() {
           role="tab"
           aria-selected={activeLoyaltySection === 'overview'}
           onClick={() => setActiveLoyaltySection('overview')}
-          className={`rounded-xl px-4 py-2.5 text-xs font-semibold transition ${activeLoyaltySection === 'overview' ? 'bg-[#3B82F6] text-[#3B82F6]' : 'border border-white/10 bg-[#111111] text-white/65 hover:border-[#3B82F6]/40 hover:text-white'}`}
+          className={`rounded-xl px-4 py-2.5 text-xs font-semibold transition ${activeLoyaltySection === 'overview' ? 'bg-[#686D76] text-[#3B82F6]' : 'border border-white/10 bg-[#111111] text-white/65 hover:border-[#3B82F6]/40 hover:text-white'}`}
         >
           Vue d’ensemble
         </button>
@@ -889,7 +889,7 @@ export default function Loyalty() {
           role="tab"
           aria-selected={activeLoyaltySection === 'clients'}
           onClick={() => setActiveLoyaltySection('clients')}
-          className={`rounded-xl px-4 py-2.5 text-xs font-semibold transition ${activeLoyaltySection === 'clients' ? 'bg-[#3B82F6] text-[#3B82F6]' : 'border border-white/10 bg-[#111111] text-white/65 hover:border-[#3B82F6]/40 hover:text-white'}`}
+          className={`rounded-xl px-4 py-2.5 text-xs font-semibold transition ${activeLoyaltySection === 'clients' ? 'bg-[#686D76] text-[#3B82F6]' : 'border border-white/10 bg-[#111111] text-white/65 hover:border-[#3B82F6]/40 hover:text-white'}`}
         >
           Clients · {customers.length}
         </button>
@@ -917,7 +917,7 @@ export default function Loyalty() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Rechercher un client..."
-              className="w-full rounded-xl border border-ink/10 bg-[#3B82F6] text-white py-2.5 pl-9 pr-3 text-xs outline-none focus:border-[#3B82F6]"
+              className="w-full rounded-xl border border-ink/10 bg-[#686D76] text-white py-2.5 pl-9 pr-3 text-xs outline-none focus:border-[#3B82F6]"
             />
           </div>
         </div>
@@ -955,7 +955,7 @@ export default function Loyalty() {
                   </td>
 
                   <td className="px-6 py-4">
-                    <span className="rounded-full bg-[#3B82F6]/10 px-3 py-1 text-xs font-semibold text-white">
+                    <span className="rounded-full bg-[#686D76]/10 px-3 py-1 text-xs font-semibold text-white">
                       ⭐ {customer.points_balance}
                     </span>
                   </td>
@@ -982,7 +982,7 @@ export default function Loyalty() {
                           setShowPoints(customer);
                         }}
                         disabled={!programSettings.enabled}
-                        className="rounded-lg bg-[#3B82F6] text-[#3B82F6] px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-[#3B82F6] text-[#3B82F6]-light disabled:cursor-not-allowed disabled:opacity-40"
+                        className="rounded-lg bg-[#686D76] text-[#3B82F6] px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-[#686D76] text-[#3B82F6]-light disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         Ajouter
                       </button>
@@ -1001,7 +1001,7 @@ export default function Loyalty() {
                           !programSettings.enabled ||
                           rewards.length === 0
                         }
-                        className="rounded-lg border border-[#3B82F6]/30 bg-[#181818] px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-[#3B82F6]/10 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="rounded-lg border border-[#3B82F6]/30 bg-[#181818] px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-[#686D76]/10 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         Récompenses
                       </button>
