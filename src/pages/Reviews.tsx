@@ -764,7 +764,7 @@ export default function Reviews() {
                   {review.review_created_at && <span className="text-[10px] text-white/30">{new Date(review.review_created_at).toLocaleString('fr-FR')}</span>}
                 </div>
                 <p className="mt-3 text-sm leading-6 text-white/65">{review.comment || 'Avis sans commentaire.'}</p>
-                <div className="mt-4 rounded-2xl border border-[#3B82F6]/15 bg-[#3B82F6]/5 p-4">
+                <div className="mt-4 rounded-2xl border border-[#3B82F6]/15 bg-[#686D76]/5 p-4">
                   <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#3B82F6]">Réponse générée</p>
                   <p className="mt-2 text-sm leading-6 text-white/70">{review.owner_reply || 'Aucune réponse générée pour le moment.'}</p>
                   {review.owner_reply_updated_at && <p className="mt-2 text-[10px] text-white/25">{new Date(review.owner_reply_updated_at).toLocaleString('fr-FR')}</p>}
