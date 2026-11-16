@@ -997,8 +997,7 @@ function Overview({
   useEffect(() => {    console.log(
       '[EstablishmentPerformance] Admin bridge:',
       {
-        status: establishmentPerformanceLoading
-          ? 'loading'
+        status: establishmentPerformanceLoading          ? 'loading'
           : establishmentPerformanceError
             ? 'error'
             : 'success',
@@ -1766,7 +1765,7 @@ function EstablishmentWorkspace({
   const addMenuItem = async () => {
     if (!menuItem.name.trim() || !menuItem.category_id) return alert('Nom et catégorie obligatoires.');
     const { error } = await supabase.from('menu_items').insert({ establishment_id: establishment.id, category_id: menuItem.category_id, name: menuItem.name.trim(), description: menuItem.description.trim() || null, price: Number(menuItem.price) || 0, display_order: items.filter((x) => x.category_id === menuItem.category_id).length });
-    if (error) return alert(error.message); setMenuItem({ name…29091 tokens truncated…nsactions}</strong></span>
+    if (error) return alert(error.message); setMenuItem({ name: '', description: '', price: '', category_id: menuItem.category_id }); loadTab();
                       <span className="text-[#FFFFFF]/40">Points <strong className="ml-1 text-[#00DFA5]">{item.points.toLocaleString('fr-FR')}</strong></span>
                       <span className="text-[#FFFFFF]/40">Récompenses <strong className="ml-1 text-[#00DFA5]">{item.rewards}</strong></span>
                       <span className="text-[#FFFFFF]/40">Coût récompenses <strong className="ml-1 text-[#00DFA5]">{formatMad(item.rewardCost)}</strong></span>
@@ -1997,8 +1996,7 @@ function AIConfigurationSection({
 
   const deleteType = async (type: AIBusinessType) => {
     if (!window.confirm(
-      `Supprimer le type « ${type.name} » ? Les établissements qui l'utilisent conserveront leur lien mais leur type IA deviendra vide.`
-    )) {
+      `Supprimer le type « ${type.name} » ? Les établissements qui l'utilisent conserveront leur lien mais leur type IA deviendra vide.`    )) {
       return;
     }
 
@@ -2997,8 +2995,7 @@ function SystemSection({
     <div className="rounded-3xl border border-[#242424] bg-[#111111] p-5 shadow-sm">
       <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#FFFFFF]/35">{label}</p>
       <p className="mt-2 text-2xl font-semibold text-[#00DFA5]">{value}</p>
-    </div>
-  );
+    </div>  );
 
   type CheckStatus = 'checking' | 'ok' | 'error';
 
