@@ -299,7 +299,7 @@ export default function LoyaltyJoin() {
             </div>
             <div className="rounded-2xl border border-white/10 bg-[#171717] p-4">
               <p className="text-xs font-semibold text-white">Ce qui vous intéresse</p><p className="mt-1 text-[10px] leading-4 text-white/35">Choisissez ce que vous souhaitez recevoir. Cela aide l’établissement à vous envoyer des offres plus pertinentes.</p>
-              <div className="mt-3 flex flex-wrap gap-2">{interestOptions.map((interest) => { const active = interests.includes(interest); return <button key={interest} type="button" onClick={() => setInterests(current => active ? current.filter(item => item !== interest) : [...current, interest])} className={`rounded-full border px-3 py-2 text-[10px] font-semibold transition ${active ? 'border-[#3B82F6] bg-[#3B82F6]/15 text-[#3B82F6]' : 'border-white/10 bg-[#242424] text-white/45 hover:border-[#3B82F6]/40'}`}>{interest}</button>; })}</div>
+              <div className="mt-3 flex flex-wrap gap-2">{interestOptions.map((interest) => { const active = interests.includes(interest); return <button key={interest} type="button" onClick={() => setInterests(current => active ? current.filter(item => item !== interest) : [...current, interest])} className={`rounded-full border px-3 py-2 text-[10px] font-semibold transition ${active ? 'border-[#3B82F6] bg-[#686D76]/15 text-[#3B82F6]' : 'border-white/10 bg-[#242424] text-white/45 hover:border-[#3B82F6]/40'}`}>{interest}</button>; })}</div>
             </div>
             <div className="rounded-2xl border border-white/10 bg-[#171717] p-4">
               <p className="text-xs font-semibold text-white">Notifications</p>
@@ -308,7 +308,7 @@ export default function LoyaltyJoin() {
               <label className="mt-3 flex cursor-pointer items-start gap-3 text-[11px] leading-5 text-white/55"><input type="checkbox" checked={marketingConsent} onChange={e => setMarketingConsent(e.target.checked)} className="mt-1 accent-[#3B82F6]" /><span>J’accepte les communications commerciales et offres promotionnelles.</span></label>
             </div>
             {error && <div className="rounded-xl bg-red-50 px-4 py-3 text-xs leading-5 text-red-700">{error}</div>}
-            <button type="button" onClick={() => void join()} disabled={!canSubmit || loading} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#3B82F6] px-5 py-4 text-sm font-bold text-[#050505] shadow-lg transition hover:bg-[#3B82F6] disabled:cursor-not-allowed disabled:opacity-40">{loading && <Loader2 className="h-4 w-4 animate-spin" />}{loading ? 'Création de votre carte…' : 'Créer ma carte fidélité'}</button>
+            <button type="button" onClick={() => void join()} disabled={!canSubmit || loading} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#686D76] px-5 py-4 text-sm font-bold text-[#050505] shadow-lg transition hover:bg-[#686D76] disabled:cursor-not-allowed disabled:opacity-40">{loading && <Loader2 className="h-4 w-4 animate-spin" />}{loading ? 'Création de votre carte…' : 'Créer ma carte fidélité'}</button>
             <p className="text-center text-[10px] leading-4 text-white/25">Les préférences sont facultatives et servent à personnaliser les communications de l’établissement.</p>
           </div>
         </section>
