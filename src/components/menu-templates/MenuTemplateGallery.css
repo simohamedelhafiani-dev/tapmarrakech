@@ -8,5 +8,5 @@
 .kelyani-menu-template-line{height:6px;border-radius:8px;opacity:.8}
 .kelyani-menu-template-products{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .kelyani-menu-template-products span{height:27px;border-radius:6px;opacity:.72}
-.kelyani-menu-template-name{margin-top:10px;font-size:12px;font-weight:700;color:#FFFFFF}
-.kelyani-menu-template-description{margin-top:4px;font-size:10px;line-height:1.5;color:rgba(255,255,255,.56)}
+.kelyani-menu-template-name{margin-top:10px;font-size:12px;font-weight:700;color:#686D76}
+.kelyani-menu-template-description{margin-top:4px;font-size:10px;line-height:1.5;color:rgba(245,245,220,.56)}
