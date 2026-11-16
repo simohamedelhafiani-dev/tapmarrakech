@@ -41,7 +41,7 @@ function getActivityIcon(type: ActivityEventType) {
 
 function getActivityIconClass(type: ActivityEventType): string {
   if (type === 'review') return 'bg-forest/15 text-[#8b6a20]';
-  if (type === 'loyalty_customer') return 'bg-[#686D76]/10 text-[#3B82F6]';
+  if (type === 'loyalty_customer') return 'bg-[#686D76]/10 text-[#00DFA5]';
   return 'bg-[#242424] text-[#FFFFFF]/50';
 }
 
@@ -58,7 +58,7 @@ export default function RecentActivity({
     >
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#3B82F6]/45">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#00DFA5]/45">
             Activité
           </p>
           <h3 id="recent-activity-title" className="mt-1 text-lg font-semibold text-[#FFFFFF]">
@@ -67,7 +67,7 @@ export default function RecentActivity({
         </div>
 
         {!loading && !error && events.length > 0 && (
-          <span className="rounded-full bg-[#686D76]/5 px-3 py-1.5 text-[10px] font-semibold text-[#3B82F6]">
+          <span className="rounded-full bg-[#686D76]/5 px-3 py-1.5 text-[10px] font-semibold text-[#00DFA5]">
             {events.length} activité{events.length > 1 ? 's' : ''}
           </span>
         )}
@@ -106,7 +106,7 @@ export default function RecentActivity({
           </div>
         ) : events.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-[#242424] bg-[#111111] p-8 text-center">
-            <div className="mx-auto grid h-11 w-11 place-items-center rounded-xl bg-[#686D76]/5 text-[#3B82F6]">
+            <div className="mx-auto grid h-11 w-11 place-items-center rounded-xl bg-[#686D76]/5 text-[#00DFA5]">
               <RefreshCw size={18} />
             </div>
             <p className="mt-3 text-sm font-semibold text-[#FFFFFF]">
