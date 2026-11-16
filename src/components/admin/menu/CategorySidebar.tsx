@@ -44,14 +44,14 @@ export default function CategorySidebar({
   return (
     <aside className="min-w-0 rounded-3xl border border-white/5 bg-[#111111] shadow-sm lg:sticky lg:top-4 lg:self-start">
       <div className="border-b border-white/5 p-4">
-        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Navigation</p>
+        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-electric">Navigation</p>
         <div className="mt-1 flex items-center justify-between gap-2">
           <h3 className="text-base font-semibold text-forest">Catégories</h3>
           <button
             type="button"
             onClick={() => void addCategory()}
             disabled={saving}
-            className="grid h-8 w-8 place-items-center rounded-xl bg-gold text-[#0D0D0D] disabled:opacity-40"
+            className="grid h-8 w-8 place-items-center rounded-xl bg-forest text-[#0D0D0D] disabled:opacity-40"
             title="Ajouter une catégorie"
           >
             <Plus size={15} />
@@ -79,7 +79,7 @@ export default function CategorySidebar({
                 className={[
                   'flex w-full items-center gap-2 rounded-2xl px-2 py-2 transition',
                   selected
-                    ? 'bg-gold text-[#0D0D0D] shadow-sm'
+                    ? 'bg-forest text-[#0D0D0D] shadow-sm'
                     : 'text-forest hover:bg-white/[.04]',
                   !category.active ? 'opacity-60' : '',
                 ].join(' ')}
@@ -114,7 +114,7 @@ export default function CategorySidebar({
                     'grid h-8 w-8 shrink-0 place-items-center rounded-xl transition disabled:opacity-40',
                     selected
                       ? 'bg-white/10 text-white hover:bg-white/20'
-                      : 'bg-gold text-[#0D0D0D] shadow-sm hover:brightness-110',
+                      : 'bg-forest text-[#0D0D0D] shadow-sm hover:brightness-110',
                   ].join(' ')}
                 >
                   {category.active ? <CircleOff size={14} /> : <CheckCircle2 size={14} />}
