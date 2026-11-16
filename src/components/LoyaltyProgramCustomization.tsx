@@ -640,7 +640,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
       <div className="rounded-[2rem] border border-ink/5 bg-white p-5 shadow-soft md:p-7">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">Fidélité</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-electric">Fidélité</p>
             <h2 className="mt-1 font-display text-3xl text-forest">Loyalty Studio</h2>
             <p className="mt-1 text-sm text-ink/45">Structure, Design et Miroir de la carte fidélité existante de l’établissement.</p>
           </div>
@@ -671,7 +671,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
 
             <div id="loyalty-design" className="scroll-mt-6 rounded-2xl border border-ink/10 p-5">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Modèles</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-electric">Modèles</p>
                 <p className="mt-1 text-xs text-ink/45">Choisis un modèle de départ, puis personnalise-le avec tes couleurs, ton logo et ta photo.</p>
               </div>
               <div className="mt-3 grid gap-3 sm:grid-cols-3">
@@ -707,7 +707,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
               <div className="mt-5 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Bibliothèque de wallpapers</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-electric">Bibliothèque de wallpapers</p>
                     <p className="mt-1 text-[10px] text-ink/45">Ajoute plusieurs fonds premium et sélectionne celui utilisé par la carte.</p>
                   </div>
                   <button type="button" onClick={() => wallpapersInput.current?.click()} disabled={uploading === 'wallpapers'} className="inline-flex items-center gap-2 rounded-xl bg-forest px-3 py-2 text-[10px] font-semibold text-white disabled:opacity-50">
@@ -725,10 +725,10 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                       key={url}
                       type="button"
                       onClick={() => updateConfig({ background_image_url: url } as Partial<LoyaltyDesignConfig>)}
-                      className={`relative aspect-[3/4] overflow-hidden rounded-xl border-2 ${design.design_config.background_image_url === url ? 'border-gold ring-2 ring-gold/20' : 'border-transparent'}`}
+                      className={`relative aspect-[3/4] overflow-hidden rounded-xl border-2 ${design.design_config.background_image_url === url ? 'border-electric ring-2 ring-electric/20' : 'border-transparent'}`}
                     >
                       <img src={url} alt="" className="h-full w-full object-cover" />
-                      {design.design_config.background_image_url === url && <span className="absolute right-1.5 top-1.5 grid h-5 w-5 place-items-center rounded-full bg-gold text-white"><Check size={12} /></span>}
+                      {design.design_config.background_image_url === url && <span className="absolute right-1.5 top-1.5 grid h-5 w-5 place-items-center rounded-full bg-forest text-white"><Check size={12} /></span>}
                     </button>
                   ))}
                   {!design.design_config.background_image_url && !((design.design_config as LoyaltyDesignConfig & { wallpaper_library?: string[] }).wallpaper_library || []).length && (
@@ -760,7 +760,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
               </div>
 
               <div id="loyalty-structure" className="scroll-mt-6 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
-                <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Structure</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-electric">Structure</p>
                 <p className="mt-1 text-xs text-ink/45">Les réglages ci-dessous pilotent le programme de fidélité déjà utilisé par cet établissement.</p>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   <label className="text-xs font-medium text-ink/50">
@@ -864,7 +864,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
               <div id="loyalty-acquisition" className="mt-4 scroll-mt-6 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Acquisition · Parrainage</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-electric">Acquisition · Parrainage</p>
                     <p className="mt-1 text-sm font-semibold text-forest">Paramètres de parrainage</p>
                     <p className="mt-1 max-w-xl text-[10px] leading-4 text-ink/45">
                       Configure précisément la récompense du parrain, celle du filleul et la limite de parrainages.
@@ -986,7 +986,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                     </div>
                   </div>
 
-                  <div className="mt-4 rounded-2xl border border-gold/15 bg-[#fbf7ed] p-4">
+                  <div className="mt-4 rounded-2xl border border-electric/15 bg-[#fbf7ed] p-4">
                     <label className="block text-xs font-medium text-ink/50">
                       Limite de parrainages par client
                       <div className="mt-1 flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-3 py-2.5">
@@ -1040,9 +1040,9 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                 </div>
               </div>
               <div id="loyalty-content" className="mt-5 scroll-mt-6 rounded-2xl border border-ink/10 bg-[#fafaf8] p-4">
-                <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Contenu de la carte</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-electric">Contenu de la carte</p>
                 <p className="mt-1 text-[10px] text-ink/45">Modifie les avantages et les offres affichés au client.</p>
-                <p className="mt-4 text-[10px] font-semibold uppercase tracking-[.16em] text-gold">Avantages & offres</p>
+                <p className="mt-4 text-[10px] font-semibold uppercase tracking-[.16em] text-electric">Avantages & offres</p>
                 <p className="mt-1 text-[10px] text-ink/45">Ces contenus sont enregistrés dans la configuration de la carte et affichés au client.</p>
                 <div className="mt-3 grid gap-3 sm:grid-cols-3">
                   {(design.design_config.benefits || []).slice(0,3).map((benefit, index) => (
@@ -1095,7 +1095,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
 
           <div id="loyalty-preview" className="scroll-mt-6 flex min-h-[78vh] flex-col overflow-hidden rounded-[32px] border border-white/70 bg-[linear-gradient(145deg,#f8faf8_0%,#eef2ef_48%,#e5eae6_100%)] p-5 shadow-[0_24px_70px_rgba(23,61,50,0.10)] sm:p-7">
             <div className="flex items-center justify-between">
-              <div><p className="text-[10px] font-bold uppercase tracking-[.16em] text-gold">Aperçu en temps réel</p><p className="mt-1 text-xs text-ink/45">Voici exactement ce que vos clients verront.</p></div>
+              <div><p className="text-[10px] font-bold uppercase tracking-[.16em] text-electric">Aperçu en temps réel</p><p className="mt-1 text-xs text-ink/45">Voici exactement ce que vos clients verront.</p></div>
               <span className="rounded-full bg-white px-3 py-1.5 text-[10px] font-semibold text-forest shadow-sm">Client</span>
             </div>
             <div className="mt-6 flex min-h-0 w-full flex-1 flex-col items-center justify-center">
@@ -1113,7 +1113,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
               <div className="mt-4 rounded-[22px] border border-ink/10 bg-white p-4 shadow-sm">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-[9px] font-bold uppercase tracking-[.18em] text-gold">Parrainage</p>
+                    <p className="text-[9px] font-bold uppercase tracking-[.18em] text-electric">Parrainage</p>
                     <p className="mt-1 text-xs text-ink/45">Invite un proche depuis cette carte et partage ton avantage fidélité.</p>
                   </div>
                   <span className={`rounded-full px-2.5 py-1 text-[9px] font-semibold ${referralPublished.enabled ? 'bg-forest/10 text-forest' : 'bg-ink/5 text-ink/35'}`}>
@@ -1136,7 +1136,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                   <div className="w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="text-[9px] font-bold uppercase tracking-[.2em] text-gold">Invitation fidélité</p>
+                        <p className="text-[9px] font-bold uppercase tracking-[.2em] text-electric">Invitation fidélité</p>
                         <h3 className="mt-1 text-xl font-semibold text-forest">Invite un ami</h3>
                         <p className="mt-1 text-xs leading-5 text-ink/45">
                           {referralPublished.referee_bonus_value > 0
@@ -1151,7 +1151,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
 
                     {referralGenerating ? (
                       <div className="grid place-items-center py-10">
-                        <Loader2 className="animate-spin text-gold" size={28} />
+                        <Loader2 className="animate-spin text-electric" size={28} />
                         <p className="mt-3 text-xs text-ink/45">Génération du code…</p>
                       </div>
                     ) : (
@@ -1169,8 +1169,8 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                           </div>
                         </div>
 
-                        <div className="mt-4 rounded-2xl border border-gold/15 bg-[#fbf7ed] p-4">
-                          <p className="text-[9px] font-semibold uppercase tracking-[.16em] text-gold">Message prêt à partager</p>
+                        <div className="mt-4 rounded-2xl border border-electric/15 bg-[#fbf7ed] p-4">
+                          <p className="text-[9px] font-semibold uppercase tracking-[.16em] text-electric">Message prêt à partager</p>
                           <p className="mt-2 text-xs leading-5 text-ink/55">{referralCode ? referralMessage(referralCode) : '—'}</p>
                         </div>
 
@@ -1299,7 +1299,7 @@ function AssetPicker({ title, description, value, fallback, loading, inputRef }:
       </div>
       <div className="flex items-center justify-between border-t border-ink/10 bg-white px-3 py-3">
         <div><p className="text-xs font-semibold text-forest">{title}</p><p className="mt-1 text-[10px] text-ink/40">{description}</p></div>
-        {loading ? <Loader2 className="animate-spin text-gold" size={18}/> : <Upload size={16} className="text-ink/35"/>}
+        {loading ? <Loader2 className="animate-spin text-electric" size={18}/> : <Upload size={16} className="text-ink/35"/>}
       </div>
     </button>
   );
