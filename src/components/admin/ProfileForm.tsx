@@ -109,7 +109,7 @@ export default function ProfileForm({ engine, businessTypes, onSaved }: ProfileF
         <button
           type="button"
           onClick={() => void engine.reload()}
-          className="mt-4 rounded-xl bg-[#3B82F6] px-4 py-2.5 text-xs font-semibold text-[#050505]"
+          className="mt-4 rounded-xl bg-[#686D76] px-4 py-2.5 text-xs font-semibold text-[#050505]"
         >
           Réessayer
         </button>
@@ -159,7 +159,7 @@ export default function ProfileForm({ engine, businessTypes, onSaved }: ProfileF
             <h3 className="mt-1 text-lg font-semibold text-[#3B82F6]">Informations de l’établissement</h3>
             <p className="mt-1 text-xs text-[#FFFFFF]/40">Ces informations alimentent la page publique et les modules de l’établissement.</p>
           </div>
-          <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-[#3B82F6]/5 px-3 py-1.5 text-[10px] font-semibold text-[#3B82F6]">
+          <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-[#686D76]/5 px-3 py-1.5 text-[10px] font-semibold text-[#3B82F6]">
             <ShieldCheck size={13} />
             Profil sécurisé
           </span>
@@ -272,7 +272,7 @@ export default function ProfileForm({ engine, businessTypes, onSaved }: ProfileF
               type="button"
               disabled={engine.saving || !engine.isDirty || hasBlockingErrors}
               onClick={() => void handleSave()}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#3B82F6] px-5 py-3 text-sm font-semibold text-[#050505] transition hover:bg-[#3B82F6]-light disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#686D76] px-5 py-3 text-sm font-semibold text-[#050505] transition hover:bg-[#686D76]-light disabled:cursor-not-allowed disabled:opacity-40"
             >
               {engine.saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
               {engine.saving ? 'Enregistrement…' : 'Enregistrer le profil'}
