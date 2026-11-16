@@ -36,17 +36,17 @@ export type SubscriptionTheme = {
 export function getSubscriptionTheme(access: SubscriptionAccess | null | undefined): SubscriptionTheme {
   // All plans use the KELYANI visual system; subscription status changes access, not brand identity.
   if (!access || access.subscription_status === 'trial') {
-    return { primary: '#0D0D0D', primaryHover: '#1A1A1A', accent: '#D4AF37', sidebar: '#0D0D0D' };
+    return { primary: '#050505', primaryHover: '#1A1A1A', accent: '#3B82F6', sidebar: '#050505' };
   }
 
   const name = access.plan_name.trim().toLowerCase();
   if (name === 'basic') {
-    return { primary: '#0D0D0D', primaryHover: '#1A1A1A', accent: '#D4AF37', sidebar: '#0D0D0D' };
+    return { primary: '#050505', primaryHover: '#1A1A1A', accent: '#3B82F6', sidebar: '#050505' };
   }
   if (name === 'enterprise') {
-    return { primary: '#0D0D0D', primaryHover: '#1A1A1A', accent: '#D4AF37', sidebar: '#0D0D0D' };
+    return { primary: '#050505', primaryHover: '#1A1A1A', accent: '#3B82F6', sidebar: '#050505' };
   }
-  return { primary: '#0D0D0D', primaryHover: '#1A1A1A', accent: '#D4AF37', sidebar: '#0D0D0D' };
+  return { primary: '#050505', primaryHover: '#1A1A1A', accent: '#3B82F6', sidebar: '#050505' };
 }
 
 const FEATURE_ALIASES: Record<SubscriptionFeature, string[]> = {
