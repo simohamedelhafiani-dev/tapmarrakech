@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 69091)
-Total output lines: 5797
-
 import { useEffect, useMemo, useRef, useState } from 'react';
 import QRCode from 'qrcode';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip as ChartTooltip } from 'recharts';
@@ -997,8 +994,7 @@ function Overview({
     reload: reloadEstablishmentPerformance,
   } = useEstablishmentPerformance();
 
-  useEffect(() => {
-    console.log(
+  useEffect(() => {    console.log(
       '[EstablishmentPerformance] Admin bridge:',
       {
         status: establishmentPerformanceLoading
@@ -1997,8 +1993,7 @@ function AIConfigurationSection({
       return;
     }
 
-    await reload();
-  };
+    await reload();  };
 
   const deleteType = async (type: AIBusinessType) => {
     if (!window.confirm(
@@ -2997,8 +2992,7 @@ function SystemSection({
 }: {
   billing: BillingSnapshot;
   globalStats: GlobalStats;
-  establishments: Establishment[];
-}) {
+  establishments: Establishment[];}) {
   const SystemMetric = ({ label, value }: { label: string; value: string | number }) => (
     <div className="rounded-3xl border border-[#242424] bg-[#111111] p-5 shadow-sm">
       <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#FFFFFF]/35">{label}</p>
@@ -3158,4 +3152,3 @@ function SystemSection({
     </div>
   );
 }
-
