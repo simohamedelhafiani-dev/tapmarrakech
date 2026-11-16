@@ -16,7 +16,7 @@ export default function AdminOverviewV2() {
     <main className="min-h-screen bg-[#111111] px-6 py-8 text-[#686D76] sm:px-8 lg:px-10">
       <div className="mx-auto max-w-[1500px] space-y-8">
         <section className="relative overflow-hidden rounded-[32px] border border-white/80 bg-white/75 p-8 shadow-[0_20px_60px_rgba(59,130,246,0.08)] backdrop-blur-xl sm:p-10">
-          <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[#3B82F6]/10 blur-3xl" />
+          <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[#686D76]/10 blur-3xl" />
 
           <div className="relative">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#686D76]/10 bg-[#686D76]/5 px-3 py-1.5">
@@ -86,7 +86,7 @@ export default function AdminOverviewV2() {
             }
             detail="Note moyenne des avis"
             icon="★"
-            iconClass="bg-[#3B82F6]/12 text-[#3B82F6]"
+            iconClass="bg-[#686D76]/12 text-[#3B82F6]"
           />
 
           <StatCard
