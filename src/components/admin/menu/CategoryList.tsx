@@ -110,7 +110,7 @@ export default function CategoryList({
     <section className="rounded-3xl border border-ink/5 bg-white shadow-sm">
       <div className="flex flex-col gap-4 border-b border-ink/5 p-5 sm:p-6 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Structure</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-electric">Structure</p>
           <h3 className="mt-1 text-xl font-semibold text-forest">Catégories</h3>
           <p className="mt-1 text-xs text-ink/45">Organise le menu par catégories. Les articles seront gérés dans l’étape suivante.</p>
         </div>
@@ -256,7 +256,7 @@ export default function CategoryList({
       {deleteTarget && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/30 p-4">
           <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Suppression</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-electric">Suppression</p>
             <h4 className="mt-2 text-lg font-semibold text-forest">Supprimer « {deleteTarget.name} » ?</h4>
             <p className="mt-2 text-xs text-ink/50">{itemsByCategory[deleteTarget.id]?.length ?? 0} article(s) concerné(s).</p>
             {(itemsByCategory[deleteTarget.id]?.length ?? 0) > 0 && <>
