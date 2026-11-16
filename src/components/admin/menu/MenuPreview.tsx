@@ -216,8 +216,8 @@ export default function MenuPreview({
           </section>
         </div>
         {activeDraft.navigation === 'app' && <nav aria-label="Catégories du menu" className={`absolute bottom-0 left-0 right-0 z-20 flex gap-1.5 overflow-x-auto border-t px-2 pt-2 pb-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${palette.panel} ${palette.line}`}>
-          <button type="button" onClick={() => setCategoryId('all')} className={`shrink-0 rounded-full px-3 py-2 text-[9px] font-semibold ${categoryId === 'all' ? 'bg-[#3B82F6] text-[#3B82F6]' : 'border border-current/15'}`}>Tout</button>
-          {activeCategories.map(category => <button key={category.id} type="button" onClick={() => setCategoryId(category.id)} className={`shrink-0 rounded-full px-3 py-2 text-[9px] font-semibold ${categoryId === category.id ? 'bg-[#3B82F6] text-[#3B82F6]' : 'border border-current/15'}`}>{category.name}</button>)}
+          <button type="button" onClick={() => setCategoryId('all')} className={`shrink-0 rounded-full px-3 py-2 text-[9px] font-semibold ${categoryId === 'all' ? 'bg-[#686D76] text-[#3B82F6]' : 'border border-current/15'}`}>Tout</button>
+          {activeCategories.map(category => <button key={category.id} type="button" onClick={() => setCategoryId(category.id)} className={`shrink-0 rounded-full px-3 py-2 text-[9px] font-semibold ${categoryId === category.id ? 'bg-[#686D76] text-[#3B82F6]' : 'border border-current/15'}`}>{category.name}</button>)}
         </nav>}
       </div>
     </div>
