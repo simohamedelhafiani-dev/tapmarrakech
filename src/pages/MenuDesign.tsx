@@ -248,7 +248,7 @@ export default function MenuDesign() {
   if (loading && !establishments.length) {
     return (
       <div className="grid min-h-[400px] place-items-center">
-        <Loader2 className="animate-spin text-[#3B82F6]" size={22} />
+        <Loader2 className="animate-spin text-[#00DFA5]" size={22} />
       </div>
     );
   }
@@ -258,7 +258,7 @@ export default function MenuDesign() {
       <section className="rounded-[28px] bg-forest p-6 text-white shadow-xl md:p-8">
         <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#3B82F6]">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#00DFA5]">
               Menu digital
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight">
@@ -290,7 +290,7 @@ export default function MenuDesign() {
       <section className="rounded-3xl border border-[#242424]/8 bg-[#111111] p-6 shadow-sm">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#3B82F6]">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#00DFA5]">
               Bibliothèque
             </p>
             <h2 className="mt-1 text-xl font-semibold text-forest">
@@ -335,7 +335,7 @@ export default function MenuDesign() {
               className={
                 'group relative overflow-hidden rounded-2xl border-2 ' +
                 (design.background_image_url === url
-                  ? 'border-[#3B82F6] ring-2 ring-[#3B82F6]/20'
+                  ? 'border-[#00DFA5] ring-2 ring-[#00DFA5]/20'
                   : 'border-[#242424]/10')
               }
             >
@@ -368,7 +368,7 @@ export default function MenuDesign() {
 
           {!design.wallpaper_library?.length && (
             <div className="col-span-full rounded-2xl border border-dashed border-[#242424]/10 px-5 py-10 text-center">
-              <ImagePlus className="mx-auto text-[#3B82F6]" size={28} />
+              <ImagePlus className="mx-auto text-[#00DFA5]" size={28} />
               <p className="mt-3 text-sm font-semibold text-forest">
                 Aucun wallpaper
               </p>
@@ -381,7 +381,7 @@ export default function MenuDesign() {
       </section>
 
       <section className="rounded-3xl border border-[#242424]/8 bg-[#111111] p-6 shadow-sm">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#3B82F6]">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#00DFA5]">
           Aperçu
         </p>
         <h2 className="mt-1 text-xl font-semibold text-forest">Fond actif</h2>
@@ -397,7 +397,7 @@ export default function MenuDesign() {
             >
               <div className="absolute inset-0 bg-black/35" />
               <div className="relative rounded-3xl border border-white/15 bg-[#111111]/10 p-6 text-white">
-                <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#3B82F6]">
+                <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#00DFA5]">
                   Menu
                 </p>
                 <h3 className="mt-2 font-display text-4xl">
