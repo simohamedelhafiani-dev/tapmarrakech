@@ -11,10 +11,9 @@ concurrency:
   cancel-in-progress: true
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  # Automated CI is paused while the final product version is assembled.
+  # Run manually after the release candidate is ready for validation.
+  workflow_dispatch:
 
 jobs:
   validate:
