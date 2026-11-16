@@ -40,7 +40,7 @@ function getActivityIcon(type: ActivityEventType) {
 }
 
 function getActivityIconClass(type: ActivityEventType): string {
-  if (type === 'review') return 'bg-gold/15 text-[#8b6a20]';
+  if (type === 'review') return 'bg-forest/15 text-[#8b6a20]';
   if (type === 'loyalty_customer') return 'bg-[#686D76]/10 text-[#3B82F6]';
   return 'bg-[#242424] text-[#FFFFFF]/50';
 }
