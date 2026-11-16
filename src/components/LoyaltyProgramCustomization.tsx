@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 20194)
+Total output lines: 1316
+
 import { useEffect, useRef, useState } from 'react';
 import { Check, Gift, ImagePlus, Link2, Loader2, Pencil, Plus, QrCode, Share2, Stamp, Trash2, Upload, X } from 'lucide-react';
 import QRCode from 'qrcode';
@@ -37,21 +40,21 @@ type LoyaltyPreset = {
 };
 
 const LOYALTY_PRESETS: LoyaltyPreset[] = [
-  { id: 'obsidian', name: '01 — Obsidian', description: 'Fond photo immersif, contraste cinématique, accents bleu électrique et composition luxe pour restaurants et lounges.', primary: '#0A0A09', secondary: '#3B82F6', background: '#111111', text: '#FFFFFF', radius: 30, mode: 'POINTS_REWARD', title: 'Bon goût. Belles rencontres.', subtitle: 'Votre fidélité mérite une expérience à part.', stampStyle: 'circles' },
-  { id: 'editorial', name: '02 — Editorial', description: 'Direction artistique éditoriale : ivoire, typographie magazine, espace négatif et accents bleu électrique.', primary: '#3B332B', secondary: '#C9A86A', background: '#F4EDE1', text: '#17130F', radius: 30, mode: 'POINTS_REWARD', title: 'Des moments qui comptent.', subtitle: 'Une expérience pensée pour vous.', stampStyle: 'circles' },
-  { id: 'glass', name: '03 — Glass', description: 'Photo plein écran, surfaces vitrées, blur et lumière pour une esthétique wellness ultra premium.', primary: '#18372C', secondary: '#D8C28A', background: '#10251E', text: '#FFFFFF', radius: 30, mode: 'POINTS_REWARD', title: 'Prendre soin de vous, toujours.', subtitle: 'Vos avantages évoluent avec vous.', stampStyle: 'circles' },
-  { id: 'titanium', name: '04 — Titanium', description: 'Noir profond, reflets métalliques et accents bleu électrique pour une carte au caractère exclusif.', primary: '#11110F', secondary: '#3B82F6', background: '#10100F', text: '#FFFFFF', radius: 26, mode: 'POINTS_REWARD', title: 'GOOD FOOD. BETTER PEOPLE.', subtitle: 'Elevate every visit.', stampStyle: 'squares' },
-  { id: 'hospitality', name: '05 — Hospitality', description: 'Univers hôtel, restaurant et travel : photographie immersive, chaleur et statut membre.', primary: '#3A2115', secondary: '#E2B66D', background: '#2B1B13', text: '#FFFFFF', radius: 30, mode: 'POINTS_REWARD', title: 'Plus qu’un repas, une expérience.', subtitle: 'Saveurs. Partage. Souvenirs.', stampStyle: 'circles' },
-  { id: 'apple-wallet', name: '06 — Apple Wallet', description: 'Minimalisme premium, hiérarchie typographique et lecture instantanée sur mobile.', primary: '#403A32', secondary: '#3B82F6', background: '#F2EEE6', text: '#1B1A18', radius: 28, mode: 'POINTS_REWARD', title: 'Beauty in every detail.', subtitle: 'Vos privilèges, toujours avec vous.', stampStyle: 'circles' },
-  { id: 'wallet', name: '07 — Premium Wallet', description: 'Carte Wallet haut de gamme : verre fumé, lumière diagonale, hiérarchie premium et QR central.', primary: '#0B0B0B', secondary: '#3B82F6', background: '#1A1A1A', text: '#FFFFFF', radius: 36, mode: 'POINTS_REWARD', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
+  { id: 'obsidian', name: '01 — Obsidian', description: 'Fond photo immersif, contraste cinématique, accents Émeraude et Teal et composition luxe pour restaurants et lounges.', primary: '#0A0A09', secondary: '#00DFA5', background: '#111111', text: '#FFFFFF', radius: 30, mode: 'POINTS_REWARD', title: 'Bon goût. Belles rencontres.', subtitle: 'Votre fidélité mérite une expérience à part.', stampStyle: 'circles' },
+  { id: 'editorial', name: '02 — Editorial', description: 'Direction artistique éditoriale : ivoire, typographie magazine, espace négatif et accents Émeraude et Teal.', primary: '#3B332B', secondary: '#14B8A6', background: '#F4EDE1', text: '#17130F', radius: 30, mode: 'POINTS_REWARD', title: 'Des moments qui comptent.', subtitle: 'Une expérience pensée pour vous.', stampStyle: 'circles' },
+  { id: 'glass', name: '03 — Glass', description: 'Photo plein écran, surfaces vitrées, blur et lumière pour une esthétique wellness ultra premium.', primary: '#18372C', secondary: '#14B8A6', background: '#10251E', text: '#FFFFFF', radius: 30, mode: 'POINTS_REWARD', title: 'Prendre soin de vous, toujours.', subtitle: 'Vos avantages évoluent avec vous.', stampStyle: 'circles' },
+  { id: 'titanium', name: '04 — Titanium', description: 'Noir profond, reflets métalliques et accents Émeraude et Teal pour une carte au caractère exclusif.', primary: '#11110F', secondary: '#00DFA5', background: '#10100F', text: '#FFFFFF', radius: 26, mode: 'POINTS_REWARD', title: 'GOOD FOOD. BETTER PEOPLE.', subtitle: 'Elevate every visit.', stampStyle: 'squares' },
+  { id: 'hospitality', name: '05 — Hospitality', description: 'Univers hôtel, restaurant et travel : photographie immersive, chaleur et statut membre.', primary: '#3A2115', secondary: '#14B8A6', background: '#2B1B13', text: '#FFFFFF', radius: 30, mode: 'POINTS_REWARD', title: 'Plus qu’un repas, une expérience.', subtitle: 'Saveurs. Partage. Souvenirs.', stampStyle: 'circles' },
+  { id: 'apple-wallet', name: '06 — Apple Wallet', description: 'Minimalisme premium, hiérarchie typographique et lecture instantanée sur mobile.', primary: '#403A32', secondary: '#00DFA5', background: '#F2EEE6', text: '#1B1A18', radius: 28, mode: 'POINTS_REWARD', title: 'Beauty in every detail.', subtitle: 'Vos privilèges, toujours avec vous.', stampStyle: 'circles' },
+  { id: 'wallet', name: '07 — Premium Wallet', description: 'Carte Wallet haut de gamme : verre fumé, lumière diagonale, hiérarchie premium et QR central.', primary: '#0B0B0B', secondary: '#00DFA5', background: '#1A1A1A', text: '#FFFFFF', radius: 36, mode: 'POINTS_REWARD', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
   { id: 'onyx-black', name: '08 — Onyx Black', description: 'Wallet noir profond, contraste net et finition premium.', primary: '#181818', secondary: '#D7D7D7', background: '#070707', text: '#FFFFFF', radius: 36, mode: 'POINTS_REWARD', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
-  { id: 'royal-gold', name: '09 — Nardo Signature', description: 'wallet noir et signature Nardo pour une expérience luxe.', primary: '#686D76', secondary: '#3B82F6', background: '#050505', text: '#FFFFFF', radius: 36, mode: 'POINTS_REWARD', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
+  { id: 'royal-gold', name: '09 — Nardo Signature', description: 'wallet noir et signature Nardo pour une expérience luxe.', primary: '#686D76', secondary: '#00DFA5', background: '#050505', text: '#FFFFFF', radius: 36, mode: 'POINTS_REWARD', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
   { id: 'deep-ocean', name: '10 — Deep Ocean', description: 'Wallet bleu profond avec effet verre et lumière froide.', primary: '#0D4050', secondary: '#6FD3E8', background: '#061923', text: '#F4FCFF', radius: 36, mode: 'POINTS_REWARD', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
   { id: 'minimal-white', name: '11 — Minimal White', description: 'Wallet clair minimaliste, moderne et ultra lisible.', primary: '#FFFFFF', secondary: '#777777', background: '#F5F5F2', text: '#151515', radius: 36, mode: 'POINTS_REWARD', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
   { id: 'forest-green', name: '12 — Forest Green', description: 'Wallet vert profond inspiré des univers premium hospitality.', primary: '#164D3A', secondary: '#B9D8A4', background: '#071A14', text: '#F7FFF9', radius: 36, mode: 'POINTS_REWARD', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
   { id: 'ruby-red', name: '13 — Ruby Red', description: 'Wallet rouge rubis profond avec signature éditoriale.', primary: '#6D1724', secondary: '#E8A0A8', background: '#21080D', text: '#FFF5F5', radius: 36, mode: 'POINTS_REWARD', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
   { id: 'silver-chrome', name: '14 — Silver Chrome', description: 'Wallet chrome argenté avec reflets métalliques.', primary: '#BFC4C9', secondary: '#F5F5F5', background: '#777B80', text: '#FFFFFF', radius: 36, mode: 'POINTS_REWARD', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
-  { id: 'midnight-blue', name: '15 — Midnight Blue', description: 'Wallet bleu nuit avec effet verre et profondeur.', primary: '#17275F', secondary: '#9DB7FF', background: '#080D24', text: '#F4F7FF', radius: 36, mode: 'POINTS_REWARD', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
+  { id: 'midnight-blue', name: '15 — Midnight Blue', description: 'Wallet bleu nuit avec effet verre et profondeur.', primary: '#17275F', secondary: '#14B8A6', background: '#080D24', text: '#F4F7FF', radius: 36, mode: 'POINTS_REWARD', title: 'Votre fidélité, toujours avec vous.', subtitle: 'Une expérience Wallet premium.', stampStyle: 'circles' },
 ];
 
 type Design = {
@@ -69,7 +72,7 @@ type Design = {
 const baseDesign: Design = {
   template_id: 'onyx-black',
   primary_color: '#0B3327',
-  secondary_color: '#3B82F6',
+  secondary_color: '#00DFA5',
   background_color: '#F7F7F3',
   text_color: '#FFFFFF',
   button_color: '#173D32',
@@ -192,7 +195,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
           name: row.name,
           description: row.description || '',
           primary: c.primary || '#173D32',
-          secondary: c.secondary || '#D3A84C',
+          secondary: c.secondary || '#14B8A6',
           background: c.background || '#F7F7F3',
           text: c.text || '#FFFFFF',
           radius: Number(c.radius || 28),
@@ -718,17 +721,7 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                   {[
                     ...new Set([
                       design.design_config.background_image_url,
-                      ...(((design.design_config as LoyaltyDesignConfig & { wallpaper_library?: string[] }).wallpaper_library) || []),
-                    ].filter((url): url is string => Boolean(url))),
-                  ].map((url) => (
-                    <button
-                      key={url}
-                      type="button"
-                      onClick={() => updateConfig({ background_image_url: url } as Partial<LoyaltyDesignConfig>)}
-                      className={`relative aspect-[3/4] overflow-hidden rounded-xl border-2 ${design.design_config.background_image_url === url ? 'border-electric ring-2 ring-electric/20' : 'border-transparent'}`}
-                    >
-                      <img src={url} alt="" className="h-full w-full object-cover" />
-                      {design.design_config.background_image_url === url && <span className="absolute right-1.5 top-1.5 grid h-5 w-5 place-items-center rounded-full bg-forest text-white"><Check size={12} /></span>}
+                      ...(((design.design_config as LoyaltyDesignConfig & { wallpaper_library?: s…194 tokens truncated…e="absolute right-1.5 top-1.5 grid h-5 w-5 place-items-center rounded-full bg-forest text-white"><Check size={12} /></span>}
                     </button>
                   ))}
                   {!design.design_config.background_image_url && !((design.design_config as LoyaltyDesignConfig & { wallpaper_library?: string[] }).wallpaper_library || []).length && (
@@ -816,10 +809,10 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                 </div>
               </div>
 
-              <div className="mt-4 rounded-2xl border border-[#3B82F6]/25 bg-gradient-to-br from-[#173D32] to-[#102a22] p-5 text-white">
+              <div className="mt-4 rounded-2xl border border-[#00DFA5]/25 bg-gradient-to-br from-[#173D32] to-[#102a22] p-5 text-white">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
-                    <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-[#3B82F6]">Accès Client</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-[#00DFA5]">Accès Client</p>
                     <h3 className="mt-1 text-lg font-semibold">QR Code Maître</h3>
                     <p className="mt-1 max-w-xl text-[10px] leading-4 text-white/55">
                       Un seul lien permanent pour inscrire n’importe quel nouveau client. Le même lien peut être programmé dans une plaque NFC.

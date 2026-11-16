@@ -277,7 +277,7 @@ export function LoyaltyReward({ config }: { config: LoyaltyExperienceConfig }) {
 
         {stampClaimQr && <div className="fixed inset-0 z-[100] grid place-items-center bg-black/70 p-4" onClick={closeClaim}>
           <div className="w-full max-w-sm rounded-[28px] bg-white p-6 text-[#17201c] shadow-2xl" onClick={e => e.stopPropagation()}>
-            <p className="text-[9px] font-bold uppercase tracking-[.2em] text-[#D3A84C]">Cadeau fidélité</p>
+            <p className="text-[9px] font-bold uppercase tracking-[.2em] text-[#14B8A6]">Cadeau fidélité</p>
             <h3 className="mt-1 text-xl font-bold">{reward || 'Cadeau fidélité'}</h3>
             <div className="mt-5 rounded-2xl bg-[#f7f7f3] p-5 text-center"><QRCodeImage value={stampClaimQr}/><p className="mt-3 text-[10px] font-semibold uppercase tracking-[.16em] text-black/45">Présentez ce QR au responsable</p><p className="mt-2 text-[10px] text-black/35">Valable 5 minutes · utilisable une seule fois</p></div>
             <button type="button" onClick={closeClaim} className="mt-4 w-full rounded-xl bg-[#173D32] py-3.5 text-sm font-semibold text-white">Fermer</button>
@@ -310,7 +310,7 @@ export function LoyaltyReward({ config }: { config: LoyaltyExperienceConfig }) {
 
       {selectedReward && <div className="fixed inset-0 z-[100] grid place-items-center bg-black/70 p-4" onClick={closeClaim}>
         <div className="w-full max-w-sm rounded-[28px] bg-white p-6 text-[#17201c] shadow-2xl" onClick={e => e.stopPropagation()}>
-          <div className="flex items-start justify-between gap-3"><div><p className="text-[9px] font-bold uppercase tracking-[.2em] text-[#D3A84C]">Récompense</p><h3 className="mt-1 text-xl font-bold">{selectedReward.name}</h3><p className="mt-1 text-xs text-black/45">{selectedReward.points_required} points seront déduits lors de la validation.</p></div><button type="button" onClick={closeClaim} className="rounded-xl p-2 text-black/35"><X size={18}/></button></div>
+          <div className="flex items-start justify-between gap-3"><div><p className="text-[9px] font-bold uppercase tracking-[.2em] text-[#14B8A6]">Récompense</p><h3 className="mt-1 text-xl font-bold">{selectedReward.name}</h3><p className="mt-1 text-xs text-black/45">{selectedReward.points_required} points seront déduits lors de la validation.</p></div><button type="button" onClick={closeClaim} className="rounded-xl p-2 text-black/35"><X size={18}/></button></div>
           {claiming ? <div className="grid place-items-center py-12"><div className="h-8 w-8 animate-spin rounded-full border-2 border-[#173D32] border-t-transparent"/><p className="mt-3 text-xs text-black/45">Génération du QR…</p></div>
           : claimQr ? <div className="mt-5 rounded-2xl bg-[#f7f7f3] p-5 text-center"><QRCodeImage value={claimQr}/><p className="mt-3 text-[10px] font-semibold uppercase tracking-[.16em] text-black/45">Présentez ce QR au responsable</p><p className="mt-2 text-[10px] text-black/35">Valable 2 minutes · utilisable une seule fois</p></div>
           : claimError ? <div className="mt-5 rounded-2xl bg-red-50 p-4 text-center text-xs text-red-700">{claimError}</div> : null}
@@ -738,3 +738,4 @@ export function LoyaltyExperience({ config }: { config: LoyaltyExperienceConfig 
     </div>
   );
 }
+

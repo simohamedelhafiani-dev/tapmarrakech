@@ -29,7 +29,7 @@ export default function EstablishmentPerformanceTable({
     >
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#3B82F6]/45">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#00DFA5]/45">
             Pilotage
           </p>
           <h3
@@ -44,7 +44,7 @@ export default function EstablishmentPerformanceTable({
         </div>
 
         {!loading && !error && performanceData.length > 0 && (
-          <span className="shrink-0 rounded-full bg-[#686D76]/5 px-3 py-1.5 text-[10px] font-semibold text-[#3B82F6]">
+          <span className="shrink-0 rounded-full bg-[#686D76]/5 px-3 py-1.5 text-[10px] font-semibold text-[#00DFA5]">
             {performanceData.length} établissement
             {performanceData.length > 1 ? 's' : ''}
           </span>
@@ -115,7 +115,7 @@ export default function EstablishmentPerformanceTable({
           </div>
         ) : performanceData.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-[#242424] bg-[#111111] p-8 text-center">
-            <div className="mx-auto grid h-11 w-11 place-items-center rounded-xl bg-[#686D76]/5 text-[#3B82F6]">
+            <div className="mx-auto grid h-11 w-11 place-items-center rounded-xl bg-[#686D76]/5 text-[#00DFA5]">
               <Building2 size={18} />
             </div>
             <p className="mt-3 text-sm font-semibold text-[#FFFFFF]">
@@ -141,7 +141,7 @@ export default function EstablishmentPerformanceTable({
                     className="grid grid-cols-[minmax(180px,1.4fr)_repeat(5,minmax(80px,1fr))] items-center gap-4 px-4 py-4 transition hover:bg-[#111111]"
                   >
                     <div className="flex min-w-0 items-center gap-3">
-                      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#686D76]/10 text-[#3B82F6]">
+                      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#686D76]/10 text-[#00DFA5]">
                         <Building2 size={16} strokeWidth={1.9} />
                       </div>
                       <span className="truncate text-xs font-semibold text-[#FFFFFF]">
@@ -175,7 +175,7 @@ export default function EstablishmentPerformanceTable({
                   className="rounded-2xl border border-[#242424] p-4"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#686D76]/10 text-[#3B82F6]">
+                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#686D76]/10 text-[#00DFA5]">
                       <Building2 size={16} strokeWidth={1.9} />
                     </div>
                     <span className="truncate text-sm font-semibold text-[#FFFFFF]">
@@ -227,3 +227,4 @@ function Metric({
     </div>
   );
 }
+

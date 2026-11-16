@@ -450,7 +450,7 @@ export default function LoyaltyRaffles() {
                       <h2 className="truncate text-base font-semibold text-white">{raffle.title}</h2>
                       <span className={`rounded-full px-2 py-1 text-[9px] font-semibold ${raffle.status === 'SCHEDULED' ? 'bg-[#686D76]/10 text-[#00DFA5]' : raffle.status === 'DRAWN' ? 'bg-emerald-500/10 text-emerald-300' : 'bg-white/5 text-white/40'}`}>{raffle.status}</span>
                       {raffle.status === 'SCHEDULED' && raffle.last_draw_fallback_stage === 'EXTENDED_7_DAYS' && (
-                        <span className="rounded-full border border-[#00DFA5]/30 bg-blue-400/10 px-2 py-1 text-[9px] font-semibold text-[#00DFA5]">Action requise</span>
+                        <span className="rounded-full border border-[#00DFA5]/30 bg-emerald-400/10 px-2 py-1 text-[9px] font-semibold text-[#00DFA5]">Action requise</span>
                       )}
                     </div>
                     <p className="mt-1 text-xs text-[#FFFFFF]/45">Lot : {raffle.prize_name} · Tirage : {formatDate(raffle.draw_at)}</p>
@@ -469,7 +469,7 @@ export default function LoyaltyRaffles() {
                   </div>
                   {raffle.description && <p className="mt-5 text-sm leading-6 text-white/55">{raffle.description}</p>}
                   {raffle.last_draw_note && (
-                    <div role="status" className={`mt-5 rounded-2xl border p-4 text-sm leading-6 ${raffle.last_draw_fallback_stage === 'EXTENDED_7_DAYS' ? 'border-[#00DFA5]/25 bg-blue-400/5 text-[#00DFA5]' : 'border-[#00DFA5]/20 bg-[#686D76]/5 text-[#FFFFFF]/80'}`}>
+                    <div role="status" className={`mt-5 rounded-2xl border p-4 text-sm leading-6 ${raffle.last_draw_fallback_stage === 'EXTENDED_7_DAYS' ? 'border-[#00DFA5]/25 bg-emerald-400/5 text-[#00DFA5]' : 'border-[#00DFA5]/20 bg-[#686D76]/5 text-[#FFFFFF]/80'}`}>
                       <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-[#00DFA5]">
                         {raffle.last_draw_fallback_stage === 'EXTENDED_7_DAYS' ? 'Action requise · Responsable' : 'Résultat du tirage'}
                       </p>
@@ -578,3 +578,4 @@ export default function LoyaltyRaffles() {
     </div>
   );
 }
+

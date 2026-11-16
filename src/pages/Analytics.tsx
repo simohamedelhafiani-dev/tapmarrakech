@@ -129,7 +129,7 @@ export default function Analytics() {
   return (
     <div>
       <div className="mb-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#3B82F6]">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#00DFA5]">
           Comprendre votre audience
         </p>
         <h1 className="mt-2 font-display text-4xl text-forest">Analytics</h1>
@@ -258,7 +258,7 @@ export default function Analytics() {
                     <Cell
                       key={i}
                       fill={
-                        ['#3B82F6', '#686D76', '#686D76', '#686D76', '#686D76'][i]
+                        ['#00DFA5', '#686D76', '#686D76', '#686D76', '#686D76'][i]
                       }
                     />
                   ))}
@@ -279,7 +279,7 @@ export default function Analytics() {
                     className="h-2 w-2 rounded-full"
                     style={{
                       background:
-                        ['#3B82F6', '#686D76', '#686D76', '#686D76', '#686D76'][i],
+                        ['#00DFA5', '#686D76', '#686D76', '#686D76', '#686D76'][i],
                     }}
                   />
                   {item.name}
@@ -334,7 +334,7 @@ function Metric({
 }) {
   return (
     <div className="rounded-2xl border border-ink/5 bg-white p-5 shadow-soft">
-      <Icon size={18} className="text-[#3B82F6]" />
+      <Icon size={18} className="text-[#00DFA5]" />
       <p className="mt-5 text-xs text-ink/45">{label}</p>
       <p className="mt-1 font-display text-3xl text-forest">{value}</p>
       <p className="mt-1 text-[11px] text-ink/40">{detail}</p>

@@ -150,11 +150,11 @@ export default function MenuImportAssistant({ establishmentId, categories, items
   const productCount = draft?.categories.reduce((total, category) => total + category.items.length, 0) ?? 0;
 
   return (
-    <section className="rounded-3xl border border-[#3B82F6]/20 bg-[#111111] p-4 text-white shadow-soft sm:p-5">
+    <section className="rounded-3xl border border-[#00DFA5]/20 bg-[#111111] p-4 text-white shadow-soft sm:p-5">
       <div className="flex items-start gap-3">
-        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#686D76]/10 text-[#3B82F6]"><ScanText size={21} /></div>
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#686D76]/10 text-[#00DFA5]"><ScanText size={21} /></div>
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-bold uppercase tracking-[.18em] text-[#3B82F6]">Import intelligent · IA</p>
+          <p className="text-[10px] font-bold uppercase tracking-[.18em] text-[#00DFA5]">Import intelligent · IA</p>
           <h3 className="mt-1 text-lg font-semibold">Récupérer un menu existant</h3>
           <p className="mt-1 text-xs leading-5 text-white/50">Ajoute plusieurs photos ou un PDF. L’IA extrait les catégories, produits, descriptions et prix. Tu vérifies les résultats avant de les enregistrer.</p>
         </div>
@@ -180,7 +180,7 @@ export default function MenuImportAssistant({ establishmentId, categories, items
       </div>
 
       {error && <div className="mt-3 flex gap-2 rounded-xl border border-red-400/20 bg-red-500/10 p-3 text-xs text-red-200"><AlertCircle size={15} className="shrink-0" />{error}</div>}
-      {notice && <div className="mt-3 flex gap-2 rounded-xl border border-[#3B82F6]/20 bg-[#686D76]/10 p-3 text-xs text-[#3B82F6]"><CheckCircle2 size={15} className="shrink-0" />{notice}</div>}
+      {notice && <div className="mt-3 flex gap-2 rounded-xl border border-[#00DFA5]/20 bg-[#686D76]/10 p-3 text-xs text-[#00DFA5]"><CheckCircle2 size={15} className="shrink-0" />{notice}</div>}
 
       {draft && (
         <div className="mt-5 space-y-4">
@@ -188,13 +188,13 @@ export default function MenuImportAssistant({ establishmentId, categories, items
             <div><h4 className="text-sm font-semibold">Vérifier l’extraction</h4><p className="mt-1 text-[10px] text-white/40">{draft.categories.length} catégories · {productCount} produits détectés</p></div>
             <button type="button" onClick={() => setDraft(null)} className="text-xs text-white/40 underline">Annuler</button>
           </div>
-          <p className="rounded-xl bg-blue-400/10 p-3 text-[11px] leading-5 text-[#3B82F6]/80">Vérifie les prix avant l’enregistrement. Un prix absent ou illisible peut être extrait à 0.</p>
+          <p className="rounded-xl bg-emerald-400/10 p-3 text-[11px] leading-5 text-[#00DFA5]/80">Vérifie les prix avant l’enregistrement. Un prix absent ou illisible peut être extrait à 0.</p>
           {draft.categories.map((category, categoryIndex) => (
             <div key={categoryIndex} className="rounded-2xl border border-white/10 p-3 sm:p-4">
               <div className="flex items-start gap-2">
                 <div className="min-w-0 flex-1 space-y-2">
-                  <input aria-label="Nom de catégorie" value={category.name} onChange={e => updateCategory(categoryIndex,{name:e.target.value})} className="w-full rounded-lg border border-white/10 bg-white/[.04] px-3 py-2 text-sm font-semibold outline-none focus:border-[#3B82F6]" />
-                  <input aria-label="Description de catégorie" value={category.description ?? ''} onChange={e => updateCategory(categoryIndex,{description:e.target.value || null})} placeholder="Description de catégorie (facultative)" className="w-full rounded-lg border border-white/10 bg-white/[.04] px-3 py-2 text-xs outline-none focus:border-[#3B82F6]" />
+                  <input aria-label="Nom de catégorie" value={category.name} onChange={e => updateCategory(categoryIndex,{name:e.target.value})} className="w-full rounded-lg border border-white/10 bg-white/[.04] px-3 py-2 text-sm font-semibold outline-none focus:border-[#00DFA5]" />
+                  <input aria-label="Description de catégorie" value={category.description ?? ''} onChange={e => updateCategory(categoryIndex,{description:e.target.value || null})} placeholder="Description de catégorie (facultative)" className="w-full rounded-lg border border-white/10 bg-white/[.04] px-3 py-2 text-xs outline-none focus:border-[#00DFA5]" />
                 </div>
                 <button type="button" aria-label="Supprimer la catégorie" onClick={() => setDraft(current => current ? ({categories:current.categories.filter((_,i)=>i!==categoryIndex)}) : current)} className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-white/40 hover:bg-red-500/10 hover:text-red-300"><Trash2 size={15}/></button>
               </div>
@@ -202,20 +202,20 @@ export default function MenuImportAssistant({ establishmentId, categories, items
                 {category.items.map((item,itemIndex) => (
                   <div key={itemIndex} className="grid grid-cols-[minmax(0,1fr)_88px_32px] gap-2">
                     <div className="min-w-0 space-y-1.5">
-                      <input aria-label="Nom du produit" value={item.name} onChange={e=>updateItem(categoryIndex,itemIndex,{name:e.target.value})} className="w-full rounded-lg border border-white/10 bg-white/[.04] px-2.5 py-2 text-xs outline-none focus:border-[#3B82F6]" />
-                      <input aria-label="Description du produit" value={item.description ?? ''} onChange={e=>updateItem(categoryIndex,itemIndex,{description:e.target.value || null})} placeholder="Description (facultative)" className="w-full rounded-lg border border-white/10 bg-white/[.04] px-2.5 py-2 text-[10px] outline-none focus:border-[#3B82F6]" />
+                      <input aria-label="Nom du produit" value={item.name} onChange={e=>updateItem(categoryIndex,itemIndex,{name:e.target.value})} className="w-full rounded-lg border border-white/10 bg-white/[.04] px-2.5 py-2 text-xs outline-none focus:border-[#00DFA5]" />
+                      <input aria-label="Description du produit" value={item.description ?? ''} onChange={e=>updateItem(categoryIndex,itemIndex,{description:e.target.value || null})} placeholder="Description (facultative)" className="w-full rounded-lg border border-white/10 bg-white/[.04] px-2.5 py-2 text-[10px] outline-none focus:border-[#00DFA5]" />
                     </div>
                     <label className="text-[9px] text-white/40">Prix
-                      <input type="number" min="0" step="0.01" aria-label="Prix du produit" value={item.price} onChange={e=>updateItem(categoryIndex,itemIndex,{price:Math.max(0,Number(e.target.value))})} className="mt-1 w-full rounded-lg border border-white/10 bg-white/[.04] px-2 py-2 text-xs text-white outline-none focus:border-[#3B82F6]" />
+                      <input type="number" min="0" step="0.01" aria-label="Prix du produit" value={item.price} onChange={e=>updateItem(categoryIndex,itemIndex,{price:Math.max(0,Number(e.target.value))})} className="mt-1 w-full rounded-lg border border-white/10 bg-white/[.04] px-2 py-2 text-xs text-white outline-none focus:border-[#00DFA5]" />
                     </label>
                     <button type="button" aria-label="Supprimer le produit" onClick={() => updateCategory(categoryIndex,{items:category.items.filter((_,i)=>i!==itemIndex)})} className="mt-4 grid h-8 w-8 place-items-center rounded-lg text-white/40 hover:bg-red-500/10 hover:text-red-300"><Trash2 size={14}/></button>
                   </div>
                 ))}
-                <button type="button" onClick={() => updateCategory(categoryIndex,{items:[...category.items,{name:'Nouveau produit',description:null,price:0}]})} className="inline-flex items-center gap-1.5 py-1 text-[10px] font-semibold text-[#3B82F6]"><Plus size={12}/> Ajouter un produit</button>
+                <button type="button" onClick={() => updateCategory(categoryIndex,{items:[...category.items,{name:'Nouveau produit',description:null,price:0}]})} className="inline-flex items-center gap-1.5 py-1 text-[10px] font-semibold text-[#00DFA5]"><Plus size={12}/> Ajouter un produit</button>
               </div>
             </div>
           ))}
-          <button type="button" onClick={() => setDraft(current => current ? ({categories:[...current.categories,{name:'Nouvelle catégorie',description:null,items:[]}]}) : current)} className="inline-flex items-center gap-2 text-xs font-semibold text-[#3B82F6]"><Plus size={14}/> Ajouter une catégorie</button>
+          <button type="button" onClick={() => setDraft(current => current ? ({categories:[...current.categories,{name:'Nouvelle catégorie',description:null,items:[]}]}) : current)} className="inline-flex items-center gap-2 text-xs font-semibold text-[#00DFA5]"><Plus size={14}/> Ajouter une catégorie</button>
           <button type="button" onClick={() => void importDraft()} disabled={saving || !draft.categories.length} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#686D76] px-4 py-3 text-sm font-bold text-[#111] disabled:opacity-40">
             {saving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16}/>}
             {saving ? 'Enregistrement…' : 'Confirmer et ajouter au menu'}
@@ -225,3 +225,4 @@ export default function MenuImportAssistant({ establishmentId, categories, items
     </section>
   );
 }
+
