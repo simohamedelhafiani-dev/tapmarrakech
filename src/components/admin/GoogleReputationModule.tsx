@@ -322,12 +322,12 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
                 <span className="inline-flex items-center gap-2 rounded-xl border border-emerald-400/20 bg-emerald-400/5 px-3 py-2 text-xs font-semibold text-emerald-300">
                   <CheckCircle2 size={14} /> Connecté
                 </span>
-                <button type="button" onClick={() => void syncGoogle()} disabled={syncing} className="inline-flex items-center gap-2 rounded-xl bg-[#3B82F6] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50">
+                <button type="button" onClick={() => void syncGoogle()} disabled={syncing} className="inline-flex items-center gap-2 rounded-xl bg-[#686D76] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50">
                   <RefreshCw size={14} className={syncing ? 'animate-spin' : ''} /> {syncing ? 'Synchronisation…' : 'Synchroniser'}
                 </button>
               </>
             ) : (
-              <button type="button" onClick={() => void connectGoogle()} disabled={connecting} className="inline-flex items-center gap-2 rounded-xl bg-[#3B82F6] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50">
+              <button type="button" onClick={() => void connectGoogle()} disabled={connecting} className="inline-flex items-center gap-2 rounded-xl bg-[#686D76] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50">
                 <Link2 size={14} /> {connecting ? 'Connexion…' : 'Connecter Google'}
               </button>
             )}
@@ -372,7 +372,7 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
           <label className="block"><span className="mb-2 block text-xs font-semibold text-white/55">Langue</span><select value={settings.auto_reply_language} onChange={(e) => setSettings((v) => ({ ...v, auto_reply_language: e.target.value }))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white"><option value="auto">Détecter la langue de chaque avis</option><option value="fr">Français</option><option value="en">English</option><option value="ar">العربية</option></select></label>
           <label className="block"><span className="mb-2 block text-xs font-semibold text-white/55">Ton</span><select value={settings.auto_reply_tone} onChange={(e) => setSettings((v) => ({ ...v, auto_reply_tone: e.target.value }))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white"><option value="professional_warm">Professionnel & chaleureux</option><option value="professional">Professionnel</option><option value="friendly">Amical</option><option value="luxury">Premium / luxe</option></select></label>
         </div>
-        <button type="button" onClick={() => void saveSettings('ai')} disabled={saving} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#3B82F6] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50"><Save size={14} /> {saving ? 'Enregistrement…' : 'Enregistrer les paramètres'}</button>
+        <button type="button" onClick={() => void saveSettings('ai')} disabled={saving} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#686D76] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50"><Save size={14} /> {saving ? 'Enregistrement…' : 'Enregistrer les paramètres'}</button>
       </section>
 
 
@@ -398,7 +398,7 @@ export default function GoogleReputationModule({ establishmentId, mode = 'ai' }:
           <div className="flex items-center gap-2"><RefreshCw size={17} className="text-[#3B82F6]" /><h3 className="font-semibold text-white">Fréquence de synchronisation</h3></div>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-white/45">Définissez à quelle fréquence KELYANI vérifie les nouveaux avis de cet établissement. La synchronisation manuelle reste disponible dans la section de connexion.</p>
           <label className="mt-5 block max-w-xl"><span className="mb-2 block text-xs font-semibold text-white/55">Intervalle de rafraîchissement</span><select value={settings.sync_interval_minutes} onChange={(e) => setSettings((v) => ({ ...v, sync_interval_minutes: Number(e.target.value) }))} className="w-full rounded-xl border border-[#242424] bg-[#0b0b0b] px-3 py-3 text-sm text-white"><option value={5}>Toutes les 5 minutes — flux élevé</option><option value={10}>Toutes les 10 minutes — recommandé</option><option value={15}>Toutes les 15 minutes</option><option value={30}>Toutes les 30 minutes — flux modéré</option><option value={60}>Toutes les heures — flux faible</option></select><p className="mt-2 text-xs text-white/35">Le planificateur vérifie périodiquement les établissements et respecte cet intervalle configuré.</p></label>
-          <button type="button" onClick={() => void saveSettings('sync')} disabled={saving} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#3B82F6] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50"><Save size={14} /> {saving ? 'Enregistrement…' : 'Enregistrer la fréquence'}</button>
+          <button type="button" onClick={() => void saveSettings('sync')} disabled={saving} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#686D76] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50"><Save size={14} /> {saving ? 'Enregistrement…' : 'Enregistrer la fréquence'}</button>
         </section>
       )}
 
