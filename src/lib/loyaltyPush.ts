@@ -59,10 +59,15 @@ export async function enableLoyaltyPush(token: string, cardUrl: string) {
     });
   }
 
+  const parsedCardUrl = new URL(cardUrl, window.location.origin);
+  if (parsedCardUrl.origin !== window.location.origin || !/^\/loyalty(?:\/[A-Za-z0-9_-]+)?$/.test(parsedCardUrl.pathname)) {
+    throw new Error('URL de carte fidélité invalide.');
+  }
+
   const { error } = await supabase.rpc('register_loyalty_push_subscription', {
     p_access_token: token,
     p_subscription: subscription.toJSON(),
-    p_card_url: cardUrl,
+    p_card_url: parsedCardUrl.pathname,
   });
   if (error) throw error;
   return subscription;
