@@ -1,14 +1,15 @@
 import { useRef, useState, type PointerEvent } from 'react';
-import { Move, Save } from 'lucide-react';
+import { Move, Save, X } from 'lucide-react';
 
 type Props = {
   imageUrl: string;
   platform: 'google' | 'apple';
   establishmentId: string;
   onSaved: (url: string) => void;
+  onClose?: () => void;
 };
 
-export default function WalletImageCropEditor({ imageUrl, platform, establishmentId, onSaved }: Props) {
+export default function WalletImageCropEditor({ imageUrl, platform, establishmentId, onSaved, onClose }: Props) {
   const frameRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{x:number;y:number;px:number;py:number}|null>(null);
   const [zoom,setZoom] = useState(1);
@@ -65,7 +66,7 @@ export default function WalletImageCropEditor({ imageUrl, platform, establishmen
   return <div className="mt-4 rounded-2xl border border-white/10 bg-[#090909] p-3">
     <div className="mb-3 flex items-center justify-between gap-2">
       <div><p className="text-xs font-semibold text-white">Cadrage {platform === 'google' ? 'Google Wallet' : 'Apple Wallet'}</p><p className="mt-1 text-[10px] text-white/45">Glissez l’image pour la déplacer, puis ajustez le zoom.</p></div>
-      <Move size={16} className="text-[#3B82F6]" />
+      <div className="flex items-center gap-2"><Move size={16} className="text-[#3B82F6]" />{onClose && <button type="button" onClick={onClose} aria-label="Fermer le cadrage" className="rounded-lg p-1.5 text-white/60 hover:bg-white/10"><X size={15} /></button>}</div>
     </div>
     <div ref={frameRef} className="relative touch-none cursor-grab overflow-hidden rounded-xl active:cursor-grabbing" style={{aspectRatio:ratio}} onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={stopDrag} onPointerCancel={stopDrag} role="img" aria-label={`Zone de cadrage ${platform} Wallet`}><img src={imageUrl} alt="" draggable={false} className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover" style={{objectPosition:`${x}% ${y}%`,transform:`scale(${zoom})`}} /></div>
     <div className="mt-3 flex items-center gap-3"><label className="text-[10px] text-white/60">Zoom</label><input aria-label="Zoom image" type="range" min="1" max="3" step="0.01" value={zoom} onChange={event=>setZoom(Number(event.target.value))} className="min-w-0 flex-1 accent-[#3B82F6]" /><span className="w-10 text-right text-[10px] tabular-nums text-white/60">{zoom.toFixed(1)}×</span></div>
