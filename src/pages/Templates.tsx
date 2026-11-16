@@ -50,7 +50,7 @@ const PAGE_PRESETS = [
       actions: { showCall: true, showWhatsapp: true, showDirections: true, showReviews: true },
       modules: { style: 'cards', showIcons: true },
       navigation: { style: 'bottom' },
-      theme: { primary: '#173F35', accent: '#C9A45C', background: '#F7F3EA', radius: 'xl' },
+      theme: { primary: '#173F35', accent: '#00DFA5', background: '#080A0B', radius: 'xl' },
     },
   },
   {
@@ -61,7 +61,7 @@ const PAGE_PRESETS = [
       actions: { showCall: true, showWhatsapp: true, showDirections: true, showReviews: true },
       modules: { style: 'list', showIcons: false },
       navigation: { style: 'tabs' },
-      theme: { primary: '#173F35', accent: '#C9A45C', background: '#FFFFFF', radius: 'lg' },
+      theme: { primary: '#173F35', accent: '#00DFA5', background: '#FFFFFF', radius: 'lg' },
     },
   },
 ];
@@ -87,7 +87,7 @@ const MENU_PRESETS = [
       showPrices: true,
       showSearch: false,
       hero: { style: 'typographic', eyebrow: 'La carte', titleStyle: 'display' },
-      theme: { primary: '#173F35', accent: '#C9A45C', background: '#F3EEE2' },
+      theme: { primary: '#173F35', accent: '#00DFA5', background: '#080A0B' },
     },
   },
   {
@@ -101,7 +101,7 @@ const MENU_PRESETS = [
       showPrices: true,
       showSearch: false,
       hero: { style: 'image', overlay: true },
-      theme: { primary: '#173F35', accent: '#C9A45C', background: '#F7F3EA' },
+      theme: { primary: '#173F35', accent: '#00DFA5', background: '#080A0B' },
     },
   },
   {
@@ -115,7 +115,7 @@ const MENU_PRESETS = [
       showPrices: true,
       showSearch: false,
       hero: { style: 'image', fullBleed: true },
-      theme: { primary: '#173F35', accent: '#C9A45C', background: '#EBE5D8' },
+      theme: { primary: '#173F35', accent: '#00DFA5', background: '#080A0B' },
     },
   },
   {
@@ -129,7 +129,7 @@ const MENU_PRESETS = [
       showPrices: true,
       showSearch: false,
       hero: { style: 'dark', accent: 'gold' },
-      theme: { primary: '#102B24', accent: '#C9A45C', background: '#102B24' },
+      theme: { primary: '#102B24', accent: '#00DFA5', background: '#102B24' },
     },
   },
 ];
@@ -163,7 +163,7 @@ function TemplateVisualPreview({ template, compact = false }: { template: Templa
       logoUrl: null,
       coverImageUrl: c.background_image_url || null,
       primaryColor: c.primary || '#173D32',
-      secondaryColor: c.secondary || '#D3A84C',
+      secondaryColor: c.secondary || '#00DFA5',
       backgroundColor: c.background || '#F7F7F3',
       textColor: c.text || '#FFFFFF',
       borderRadius: Number(c.radius || 28),
@@ -190,9 +190,9 @@ function TemplateVisualPreview({ template, compact = false }: { template: Templa
   if (template.kind === 'menu') {
     const theme = c.theme || {};
     return (
-      <div className={`overflow-hidden rounded-[24px] bg-white shadow-xl ${compact ? 'h-[190px]' : ''}`} style={{ background: theme.background || '#F7F3EA' }}>
+      <div className={`overflow-hidden rounded-[24px] bg-white shadow-xl ${compact ? 'h-[190px]' : ''}`} style={{ background: theme.background || '#080A0B' }}>
         <div className={`relative p-6 ${compact ? 'h-[105px]' : 'h-44'}`} style={{ background: c.background_image_url ? `linear-gradient(#173F35aa,#173F35aa),url(${c.background_image_url}) center/cover` : theme.primary || '#173F35' }}>
-          <p className="text-[9px] uppercase tracking-[.28em]" style={{ color: theme.accent || '#C9A45C' }}>LA CARTE</p>
+          <p className="text-[9px] uppercase tracking-[.28em]" style={{ color: theme.accent || '#00DFA5' }}>LA CARTE</p>
           <h4 className={`mt-2 font-serif text-white ${compact ? 'text-xl' : 'text-3xl'}`}>Maison & saveurs</h4>
         </div>
         <div className={`grid gap-2 p-4 ${compact ? 'grid-cols-2' : 'sm:grid-cols-2'}`}>
@@ -206,7 +206,7 @@ function TemplateVisualPreview({ template, compact = false }: { template: Templa
   return (
     <div className={`overflow-hidden rounded-[24px] bg-white shadow-xl ${compact ? 'h-[190px]' : ''}`}>
       <div className={`p-6 ${compact ? 'h-[105px]' : 'h-44'}`} style={{ background: theme.primary || '#173F35' }}>
-        <p className="text-[9px] uppercase tracking-[.28em]" style={{ color: theme.accent || '#C9A45C' }}>EXPÉRIENCE CLIENT</p>
+        <p className="text-[9px] uppercase tracking-[.28em]" style={{ color: theme.accent || '#00DFA5' }}>EXPÉRIENCE CLIENT</p>
         <h4 className={`mt-3 font-serif text-white ${compact ? 'text-xl' : 'text-3xl'}`}>Votre établissement</h4>
       </div>
       <div className="grid gap-2 p-4 sm:grid-cols-2">
@@ -886,7 +886,7 @@ export default function Templates() {
                         <div className="grid grid-cols-2 gap-3">
                           {['primary','accent','background'].map(key => (
                             <label key={key} className="text-xs font-semibold text-ink/55">{key}
-                              <input type="color" value={String(selectedTemplate.config?.theme?.[key] || (key === 'primary' ? '#173F35' : key === 'accent' ? '#C9A45C' : '#F7F3EA'))} onChange={e => { const config={...selectedTemplate.config,theme:{...(selectedTemplate.config?.theme || {}),[key]:e.target.value}}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 h-10 w-full cursor-pointer rounded-lg border border-ink/10"/>
+                              <input type="color" value={String(selectedTemplate.config?.theme?.[key] || (key === 'primary' ? '#173F35' : key === 'accent' ? '#00DFA5' : '#080A0B'))} onChange={e => { const config={...selectedTemplate.config,theme:{...(selectedTemplate.config?.theme || {}),[key]:e.target.value}}; setSelectedTemplate({...selectedTemplate,config}); setConfigText(prettyJson(config)); }} className="mt-1 h-10 w-full cursor-pointer rounded-lg border border-ink/10"/>
                             </label>
                           ))}
                         </div>
@@ -933,7 +933,7 @@ export default function Templates() {
                     <LoyaltyCardVisual
                       design={{
                         primary_color: String(previewing.config?.primary || '#173D32'),
-                        secondary_color: String(previewing.config?.secondary || '#D3A84C'),
+                        secondary_color: String(previewing.config?.secondary || '#00DFA5'),
                         background_color: String(previewing.config?.background || '#F7F7F3'),
                         text_color: String(previewing.config?.text || '#FFFFFF'),
                         border_radius: Number(previewing.config?.radius || 28),
@@ -953,8 +953,8 @@ export default function Templates() {
                   </div>
                 ) : (
                   <div className="w-full max-w-[520px] overflow-hidden rounded-[28px] bg-white shadow-xl">
-                    <div className="h-40 p-7" style={{ background: previewing.config?.background_image_url ? `linear-gradient(#173d32aa,#173d32aa),url(${previewing.config.background_image_url}) center/cover` : String(previewing.config?.theme?.background || '#F3EEE2') }}>
-                      <p className="text-xs uppercase tracking-[.25em]" style={{ color: String(previewing.config?.theme?.accent || '#C9A45C') }}>La carte</p>
+                    <div className="h-40 p-7" style={{ background: previewing.config?.background_image_url ? `linear-gradient(#173d32aa,#173d32aa),url(${previewing.config.background_image_url}) center/cover` : String(previewing.config?.theme?.background || '#080A0B') }}>
+                      <p className="text-xs uppercase tracking-[.25em]" style={{ color: String(previewing.config?.theme?.accent || '#00DFA5') }}>La carte</p>
                       <h4 className="mt-3 text-3xl font-semibold" style={{ color: String(previewing.config?.theme?.primary || '#173D35') }}>Maison & saveurs</h4>
                     </div>
                     <div className="grid gap-3 p-6 sm:grid-cols-2">

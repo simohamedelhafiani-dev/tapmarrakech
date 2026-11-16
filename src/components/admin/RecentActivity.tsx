@@ -41,7 +41,7 @@ function getActivityIcon(type: ActivityEventType) {
 
 function getActivityIconClass(type: ActivityEventType): string {
   if (type === 'review') return 'bg-gold/15 text-[#8b6a20]';
-  if (type === 'loyalty_customer') return 'bg-[#C9A45C]/10 text-[#C9A45C]';
+  if (type === 'loyalty_customer') return 'bg-[#00DFA5]/10 text-[#00DFA5]';
   return 'bg-[#242424] text-[#FFFFFF]/50';
 }
 
@@ -58,7 +58,7 @@ export default function RecentActivity({
     >
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A45C]/45">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#00DFA5]/45">
             Activité
           </p>
           <h3 id="recent-activity-title" className="mt-1 text-lg font-semibold text-[#FFFFFF]">
@@ -67,7 +67,7 @@ export default function RecentActivity({
         </div>
 
         {!loading && !error && events.length > 0 && (
-          <span className="rounded-full bg-[#C9A45C]/5 px-3 py-1.5 text-[10px] font-semibold text-[#C9A45C]">
+          <span className="rounded-full bg-[#00DFA5]/5 px-3 py-1.5 text-[10px] font-semibold text-[#00DFA5]">
             {events.length} activité{events.length > 1 ? 's' : ''}
           </span>
         )}
@@ -98,7 +98,7 @@ export default function RecentActivity({
             <button
               type="button"
               onClick={() => void onRetry()}
-              className="mt-3 inline-flex items-center gap-2 rounded-xl bg-[#C9A45C] px-4 py-2.5 text-xs font-semibold text-[#050505] transition hover:bg-[#C9A45C]-light"
+              className="mt-3 inline-flex items-center gap-2 rounded-xl bg-[#00DFA5] px-4 py-2.5 text-xs font-semibold text-[#050505] transition hover:bg-[#00DFA5]-light"
             >
               <RefreshCw size={14} />
               Réessayer
@@ -106,7 +106,7 @@ export default function RecentActivity({
           </div>
         ) : events.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-[#242424] bg-[#111111] p-8 text-center">
-            <div className="mx-auto grid h-11 w-11 place-items-center rounded-xl bg-[#C9A45C]/5 text-[#C9A45C]">
+            <div className="mx-auto grid h-11 w-11 place-items-center rounded-xl bg-[#00DFA5]/5 text-[#00DFA5]">
               <RefreshCw size={18} />
             </div>
             <p className="mt-3 text-sm font-semibold text-[#FFFFFF]">
