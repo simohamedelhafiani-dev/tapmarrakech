@@ -15,7 +15,7 @@ export default function AdminOverviewV2() {
   return (
     <main className="min-h-screen bg-[#111111] px-6 py-8 text-[#686D76] sm:px-8 lg:px-10">
       <div className="mx-auto max-w-[1500px] space-y-8">
-        <section className="relative overflow-hidden rounded-[32px] border border-white/80 bg-white/75 p-8 shadow-[0_20px_60px_rgba(59,130,246,0.08)] backdrop-blur-xl sm:p-10">
+        <section className="relative overflow-hidden rounded-[32px] border border-white/80 bg-white/75 p-8 shadow-[0_20px_60px_rgba(0,223,165,0.08)] backdrop-blur-xl sm:p-10">
           <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[#686D76]/10 blur-3xl" />
 
           <div className="relative">
@@ -86,7 +86,7 @@ export default function AdminOverviewV2() {
             }
             detail="Note moyenne des avis"
             icon="★"
-            iconClass="bg-[#686D76]/12 text-[#3B82F6]"
+            iconClass="bg-[#686D76]/12 text-[#00DFA5]"
           />
 
           <StatCard
@@ -118,7 +118,7 @@ export default function AdminOverviewV2() {
           />
         </section>
 
-        <section className="rounded-[28px] border border-white/80 bg-white/70 p-6 shadow-[0_16px_50px_rgba(59,130,246,0.06)] backdrop-blur-xl">
+        <section className="rounded-[28px] border border-white/80 bg-white/70 p-6 shadow-[0_16px_50px_rgba(0,223,165,0.06)] backdrop-blur-xl">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#686D76]/40">
@@ -157,7 +157,7 @@ function StatCard({
   iconClass,
 }: StatCardProps) {
   return (
-    <article className="group rounded-[28px] border border-white/80 bg-white/80 p-6 shadow-[0_16px_50px_rgba(59,130,246,0.06)] backdrop-blur-xl transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_20px_60px_rgba(59,130,246,0.09)]">
+    <article className="group rounded-[28px] border border-white/80 bg-white/80 p-6 shadow-[0_16px_50px_rgba(0,223,165,0.06)] backdrop-blur-xl transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_20px_60px_rgba(0,223,165,0.09)]">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm font-medium text-[#686D76]/50">
