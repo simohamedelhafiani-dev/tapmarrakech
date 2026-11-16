@@ -75,7 +75,7 @@ export default function EstablishmentCard({
             className={[
               'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold',
               isActive
-                ? 'bg-[#3B82F6]/12 text-[#3B82F6]'
+                ? 'bg-[#686D76]/12 text-[#3B82F6]'
                 : isTrial
                   ? 'bg-[#686D76]/15 text-[#3B82F6]'
                   : 'bg-ink/5 text-ink/55',
