@@ -712,7 +712,7 @@ export default function Establishments() {
                         return;
                       }
                       window.open(data.authorization_url, '_blank', 'width=600,height=750');
-                    }} className="mt-3 rounded-xl bg-[#00DFA5] px-4 py-2.5 text-[11px] font-bold text-[#00DFA5]">
+                    }} className="mt-3 rounded-xl bg-[#00DFA5] px-4 py-2.5 text-[11px] font-bold text-[#050505]">
                       Connecter Google
                     </button>
                   </div>
