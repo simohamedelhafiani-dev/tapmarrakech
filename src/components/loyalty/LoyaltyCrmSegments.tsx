@@ -168,7 +168,7 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
         </div>
         <div className="flex gap-2">
           <button type="button" onClick={() => void load()} disabled={loading} className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2.5 text-xs font-semibold text-white/80 hover:bg-white/5 disabled:opacity-50"><RefreshCw size={14} /> Actualiser</button>
-          <button type="button" onClick={exportCsv} disabled={loading || filtered.length === 0} className="inline-flex items-center gap-2 rounded-xl bg-[#3B82F6] px-3 py-2.5 text-xs font-bold text-black hover:brightness-110 disabled:opacity-40"><Download size={14} /> Exporter CSV ({filtered.length})</button>
+          <button type="button" onClick={exportCsv} disabled={loading || filtered.length === 0} className="inline-flex items-center gap-2 rounded-xl bg-[#686D76] px-3 py-2.5 text-xs font-bold text-black hover:brightness-110 disabled:opacity-40"><Download size={14} /> Exporter CSV ({filtered.length})</button>
         </div>
       </div>
 
@@ -196,7 +196,7 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
 
       <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
         {SEGMENTS.map(item => { const Icon = item.icon; const active = segment === item.id; return (
-          <button key={item.id} type="button" onClick={() => setSegment(item.id)} className={'rounded-2xl border p-4 text-left transition ' + (active ? 'border-[#3B82F6]/60 bg-[#3B82F6]/[.08]' : 'border-white/10 bg-white/[.02] hover:border-white/20')}>
+          <button key={item.id} type="button" onClick={() => setSegment(item.id)} className={'rounded-2xl border p-4 text-left transition ' + (active ? 'border-[#3B82F6]/60 bg-[#686D76]/[.08]' : 'border-white/10 bg-white/[.02] hover:border-white/20')}>
             <div className="flex items-center gap-2"><Icon size={16} className={active ? 'text-[#3B82F6]' : 'text-white/45'} /><span className="text-sm font-semibold text-white">{item.label}</span></div>
             <p className="mt-2 text-xs leading-5 text-white/45">{item.hint}</p>
           </button>
@@ -218,7 +218,7 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
                   <td className="px-4 py-3 text-xs text-white/60">{c.birth_day && c.birth_month ? String(c.birth_day).padStart(2, '0') + '/' + String(c.birth_month).padStart(2, '0') : '—'}</td>
                   <td className="px-4 py-3"><div className="flex flex-wrap gap-1">{c.marketing_consent && <span className="rounded-full bg-emerald-400/10 px-2 py-1 text-[10px] text-emerald-200">Marketing</span>}{c.notification_consent && <span className="rounded-full bg-sky-400/10 px-2 py-1 text-[10px] text-sky-200">Notifications</span>}{!c.marketing_consent && !c.notification_consent && <span className="text-xs text-white/30">Aucun</span>}</div></td>
                   <td className="px-4 py-3">
-                    <button type="button" onClick={() => void createRecoveryQr(c)} disabled={recoveryLoadingId !== null} className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-[#3B82F6]/30 px-3 py-2 text-xs font-semibold text-[#3B82F6] transition hover:bg-[#3B82F6]/10 disabled:cursor-not-allowed disabled:opacity-50">
+                    <button type="button" onClick={() => void createRecoveryQr(c)} disabled={recoveryLoadingId !== null} className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-[#3B82F6]/30 px-3 py-2 text-xs font-semibold text-[#3B82F6] transition hover:bg-[#686D76]/10 disabled:cursor-not-allowed disabled:opacity-50">
                       {recoveryLoadingId === c.id ? <Loader2 size={13} className="animate-spin" /> : <QrCode size={13} />}
                       Récupérer
                     </button>
@@ -246,7 +246,7 @@ export default function LoyaltyCrmSegments({ establishmentId }: { establishmentI
             </div>
             <p className="mt-4 text-center text-sm text-white/70">Scannez ce QR code pour récupérer la carte fidélité.</p>
             {recoveryQr.expiresAt && <p className="mt-1 text-center text-xs text-white/40">Lien valable jusqu’au {new Date(recoveryQr.expiresAt).toLocaleString('fr-FR')}</p>}
-            <button type="button" onClick={() => window.print()} className="mt-4 w-full rounded-xl bg-[#3B82F6] px-4 py-3 text-sm font-bold text-black hover:brightness-110">Imprimer le QR code</button>
+            <button type="button" onClick={() => window.print()} className="mt-4 w-full rounded-xl bg-[#686D76] px-4 py-3 text-sm font-bold text-black hover:brightness-110">Imprimer le QR code</button>
           </div>
         </div>
       )}
