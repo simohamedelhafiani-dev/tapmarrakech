@@ -32,7 +32,7 @@ const LEGACY_MENU_TEMPLATES: MenuTemplate[] = [
   { id: 'editorial', key: 'editorial', name: '01 — Editorial', description: 'Mise en page éditoriale premium, typographie élégante et espace négatif.' },
   { id: 'luxury', key: 'luxury', name: '02 — Luxury', description: 'Présentation luxe avec visuels et cartes produits.' },
   { id: 'cards', key: 'cards', name: '03 — Cards', description: 'Présentation moderne en cartes, claire et visuelle.' },
-  { id: 'dark', key: 'dark', name: '04 — Noir Signature', description: 'Univers sombre premium avec accents dorés.' },
+  { id: 'dark', key: 'dark', name: '04 — Noir Signature', description: 'accents bleu électrique.' },
 ];
 
 type MenuCategory = {
@@ -543,7 +543,7 @@ export default function Menu() {
             {menuTemplates.map((template) => (
               <button key={template.id} type="button" onClick={() => void saveTemplate(template.id)} className={`rounded-2xl border p-4 text-left transition ${selectedTemplateId === template.id ? 'border-[#3B82F6] ring-2 ring-[#3B82F6]/15' : 'border-[#242424]/10 hover:border-[#3B82F6]/40'}`}>
                 <div className={`h-20 rounded-xl p-3 ${template.key === 'dark' ? 'bg-[#050505]' : template.key === 'luxury' ? 'bg-[#686D76]' : template.key === 'cards' ? 'bg-[#111111] border border-[#242424]/10' : 'bg-[#686D76]'}`}>
-                  <div className={`h-2 w-16 rounded-full ${template.key === 'dark' ? 'bg-[#686D76]' : 'bg-[#3B82F6]'}`} />
+                  <div className={`h-2 w-16 rounded-full ${template.key === 'dark' ? 'bg-[#686D76]' : 'bg-[#686D76]'}`} />
                   <div className={`mt-3 h-2 w-3/4 rounded-full ${template.key === 'dark' ? 'bg-[#111111]/20' : 'bg-ink/10'}`} />
                   <div className={`mt-2 h-2 w-1/2 rounded-full ${template.key === 'dark' ? 'bg-[#111111]/10' : 'bg-ink/5'}`} />
                 </div>
