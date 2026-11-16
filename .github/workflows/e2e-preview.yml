@@ -1,10 +1,9 @@
 name: E2E — Vercel Preview + Supabase Staging
 
 on:
+  # E2E is intentionally paused while the final product version is assembled.
+  # Run manually only after the user requests certification.
   workflow_dispatch:
-  pull_request:
-    branches: [main, integration/visual-theme-consolidation-2026-11, integration/kelyani-final-consolidation-2026-11]
-    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
   contents: read
