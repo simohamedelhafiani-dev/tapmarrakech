@@ -1044,7 +1044,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
             disabled={walletLoading || walletDesigns.length === 0 || !selectedWalletDesignId}
             className="flex w-full items-center justify-center gap-3 rounded-xl bg-white px-4 py-3.5 text-sm font-semibold text-[#111111] transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <span className="grid h-6 w-6 place-items-center rounded-md bg-[#3B82F6] text-xs font-black text-white">G</span>
+            <span className="grid h-6 w-6 place-items-center rounded-md bg-[#686D76] text-xs font-black text-white">G</span>
             {walletLoading ? 'Préparation de votre carte…' : 'Ajouter à Google Wallet'}
           </button>
           {walletDesigns.length === 0 && <p className="mt-2 text-center text-[10px] leading-4 text-white/40">Aucun modèle Wallet publié par cet établissement pour le moment.</p>}
