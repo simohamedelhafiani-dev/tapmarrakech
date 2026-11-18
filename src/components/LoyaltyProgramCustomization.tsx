@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 20194)
-Total output lines: 1316
-
 import { useEffect, useRef, useState } from 'react';
 import { Check, Gift, ImagePlus, Link2, Loader2, Pencil, Plus, QrCode, Share2, Stamp, Trash2, Upload, X } from 'lucide-react';
 import QRCode from 'qrcode';
@@ -721,7 +718,17 @@ export default function LoyaltyProgramCustomization({ establishmentId }: { estab
                   {[
                     ...new Set([
                       design.design_config.background_image_url,
-                      ...(((design.design_config as LoyaltyDesignConfig & { wallpaper_library?: s…194 tokens truncated…e="absolute right-1.5 top-1.5 grid h-5 w-5 place-items-center rounded-full bg-forest text-white"><Check size={12} /></span>}
+                      ...(((design.design_config as LoyaltyDesignConfig & { wallpaper_library?: string[] }).wallpaper_library) || []),
+                    ].filter((url): url is string => Boolean(url))),
+                  ].map((url) => (
+                    <button
+                      key={url}
+                      type="button"
+                      onClick={() => updateConfig({ background_image_url: url } as Partial<LoyaltyDesignConfig>)}
+                      className={`relative aspect-[3/4] overflow-hidden rounded-xl border-2 ${design.design_config.background_image_url === url ? 'border-electric ring-2 ring-electric/20' : 'border-transparent'}`}
+                    >
+                      <img src={url} alt="" className="h-full w-full object-cover" />
+                      {design.design_config.background_image_url === url && <span className="absolute right-1.5 top-1.5 grid h-5 w-5 place-items-center rounded-full bg-forest text-white"><Check size={12} /></span>}
                     </button>
                   ))}
                   {!design.design_config.background_image_url && !((design.design_config as LoyaltyDesignConfig & { wallpaper_library?: string[] }).wallpaper_library || []).length && (
