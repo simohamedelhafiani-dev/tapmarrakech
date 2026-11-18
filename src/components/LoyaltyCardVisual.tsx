@@ -1,12 +1,12 @@
 export const WALLET_TEMPLATES = {
-  'onyx-black': { id: 'onyx-black', name: 'Onyx Black', primary: '#181818', accent: '#D7D7D7', background: '#070707', text: '#FFFFFF' },
-  'royal-gold': { id: 'royal-gold', name: 'Royal Gold', primary: '#3A2A12', accent: '#E7C66A', background: '#120C05', text: '#FFF9E8' },
-  'deep-ocean': { id: 'deep-ocean', name: 'Deep Ocean', primary: '#123B4A', accent: '#8ED9E8', background: '#071B22', text: '#F2FCFF' },
-  'minimal-white': { id: 'minimal-white', name: 'Minimal White', primary: '#E9ECE8', accent: '#20352C', background: '#F8FAF7', text: '#17231D' },
-  'emerald-luxe': { id: 'emerald-luxe', name: 'Emerald Luxe', primary: '#123D2B', accent: '#C8E6B8', background: '#071D14', text: '#F5FFF8' },
-  'burgundy': { id: 'burgundy', name: 'Burgundy', primary: '#4A1725', accent: '#F0B8C5', background: '#210A11', text: '#FFF4F6' },
-  'midnight-blue': { id: 'midnight-blue', name: 'Midnight Blue', primary: '#172A52', accent: '#AFC7FF', background: '#080F22', text: '#F5F8FF' },
-  'sandstone': { id: 'sandstone', name: 'Sandstone', primary: '#8A6848', accent: '#FFF0D4', background: '#332619', text: '#FFF9EF' },
+  'onyx-black': { id: 'onyx-black', name: 'Nardo Onyx', primary: '#686D76', accent: '#00DFA5', background: '#050505', text: '#FFFFFF' },
+  'royal-gold': { id: 'royal-gold', name: 'Nardo Signature', primary: '#686D76', accent: '#00DFA5', background: '#050505', text: '#FFFFFF' },
+  'deep-ocean': { id: 'deep-ocean', name: 'Nardo Blue', primary: '#686D76', accent: '#00DFA5', background: '#050505', text: '#FFFFFF' },
+  'minimal-white': { id: 'minimal-white', name: 'Nardo Minimal', primary: '#686D76', accent: '#00DFA5', background: '#050505', text: '#FFFFFF' },
+  'emerald-luxe': { id: 'emerald-luxe', name: 'Nardo Graphite', primary: '#686D76', accent: '#00DFA5', background: '#050505', text: '#FFFFFF' },
+  'burgundy': { id: 'burgundy', name: 'Nardo Night', primary: '#686D76', accent: '#00DFA5', background: '#050505', text: '#FFFFFF' },
+  'midnight-blue': { id: 'midnight-blue', name: 'Nardo Electric', primary: '#686D76', accent: '#00DFA5', background: '#050505', text: '#FFFFFF' },
+  'sandstone': { id: 'sandstone', name: 'Nardo Stone', primary: '#686D76', accent: '#00DFA5', background: '#050505', text: '#FFFFFF' },
 } as const;
 
 import { useEffect, useMemo, useState } from 'react';
@@ -511,3 +511,4 @@ export function LoyaltyCardVisual({
     </div>
   );
 }
+

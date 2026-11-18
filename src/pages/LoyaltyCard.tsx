@@ -75,6 +75,16 @@ type Design = {
   border_radius: number;
 };
 
+type WalletCustomerDesign = {
+  id: string;
+  design_key: string;
+  display_name: string;
+  design_config: Record<string, unknown>;
+  google_class_id: string | null;
+  google_review_status: string | null;
+  apple_ready: boolean;
+};
+
 type EngagementContext = {
   google_review_url: string | null;
   tripadvisor_review_url: string | null;
@@ -91,11 +101,11 @@ export default function LoyaltyCard() {
   const [card, setCard] = useState<Card | null>(null);
   const [design, setDesign] = useState<Design>({
     template_id: 'custom',
-    primary_color: '#D4AF37',
-    secondary_color: '#E1C27A',
-    background_color: '#0D0D0D',
-    text_color: '#F5F5DC',
-    button_color: '#D4AF37',
+    primary_color: '#00DFA5',
+    secondary_color: '#00DFA5',
+    background_color: '#00DFA5',
+    text_color: '#00DFA5',
+    button_color: '#00DFA5',
     border_radius: 24,
   });
   const [designConfig, setDesignConfig] = useState(defaultLoyaltyDesignConfig);
@@ -144,6 +154,10 @@ export default function LoyaltyCard() {
   const [pushEnabled, setPushEnabled] = useState(false);
   const [pushLoading, setPushLoading] = useState(false);
   const [pushMessage, setPushMessage] = useState('');
+  const [walletLoading, setWalletLoading] = useState(false);
+  const [walletMessage, setWalletMessage] = useState('');
+  const [walletDesigns, setWalletDesigns] = useState<WalletCustomerDesign[]>([]);
+  const [selectedWalletDesignId, setSelectedWalletDesignId] = useState('');
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -159,6 +173,44 @@ export default function LoyaltyCard() {
   }, []);
 
   const cardUrl = window.location.href;
+
+  useEffect(() => {
+    if (!token) return;
+    let active = true;
+    void supabase.rpc('get_public_loyalty_wallet_designs', { p_access_token: token }).then(({ data, error: designsError }) => {
+      if (!active) return;
+      if (designsError) {
+        console.error('[KELYANI] Wallet designs unavailable:', designsError.message);
+        setWalletDesigns([]);
+        return;
+      }
+      const rows = (data ?? []) as WalletCustomerDesign[];
+      setWalletDesigns(rows);
+      setSelectedWalletDesignId(current => current && rows.some(row => row.id === current) ? current : rows[0]?.id ?? '');
+    });
+    return () => { active = false; };
+  }, [token]);
+
+  async function addToGoogleWallet() {
+    if (!token || walletLoading) return;
+    setWalletLoading(true);
+    setWalletMessage('');
+    try {
+      const { data, error: walletError } = await supabase.functions.invoke('google-wallet-create-pass', {
+        body: { access_token: token, ...(selectedWalletDesignId ? { design_id: selectedWalletDesignId } : {}) },
+      });
+      if (walletError) throw walletError;
+      if (!data?.success || !data?.save_url) {
+        throw new Error(data?.error || "Impossible de préparer Google Wallet.");
+      }
+      window.location.assign(data.save_url);
+    } catch (error) {
+      console.error('[KELYANI] Google Wallet pass generation failed:', error);
+      setWalletMessage(error instanceof Error ? error.message : "Google Wallet est momentanément indisponible.");
+    } finally {
+      setWalletLoading(false);
+    }
+  }
 
   async function loadReferralCode() {
     if (!token || referralLoading || referralCode) return;
@@ -205,7 +257,7 @@ export default function LoyaltyCard() {
       margin: 1,
       errorCorrectionLevel: 'M',
       color: {
-        dark: '#0D0D0D',
+        dark: '#00DFA5',
         light: '#FFFFFF',
       },
     }).then(dataUrl => {
@@ -459,11 +511,11 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
       if (designRow) {
         setDesign({
           template_id: designRow.template_id ?? 'custom',
-          primary_color: designRow.primary_color ?? '#173D32',
-          secondary_color: designRow.secondary_color ?? '#D3A84C',
-          background_color: designRow.background_color ?? '#F7F7F3',
+          primary_color: designRow.primary_color ?? '#686D76',
+          secondary_color: designRow.secondary_color ?? '#686D76',
+          background_color: designRow.background_color ?? '#FFFFFF',
           text_color: designRow.text_color ?? '#FFFFFF',
-          button_color: designRow.button_color ?? '#173D32',
+          button_color: designRow.button_color ?? '#686D76',
           border_radius: Number(designRow.border_radius ?? 24),
         });
         setDesignConfig({ ...defaultLoyaltyDesignConfig, ...(designRow.design_config ?? {}) });
@@ -700,11 +752,11 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
       if (designRow) {
         setDesign({
           template_id: designRow.template_id ?? 'custom',
-          primary_color: designRow.primary_color ?? '#173D32',
-          secondary_color: designRow.secondary_color ?? '#D3A84C',
-          background_color: designRow.background_color ?? '#F7F7F3',
+          primary_color: designRow.primary_color ?? '#686D76',
+          secondary_color: designRow.secondary_color ?? '#686D76',
+          background_color: designRow.background_color ?? '#FFFFFF',
           text_color: designRow.text_color ?? '#FFFFFF',
-          button_color: designRow.button_color ?? '#173D32',
+          button_color: designRow.button_color ?? '#686D76',
           border_radius: Number(designRow.border_radius ?? 24),
         });
         setDesignConfig({ ...defaultLoyaltyDesignConfig, ...(designRow.design_config ?? {}) });
@@ -901,12 +953,12 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
       <div className="flex w-full flex-col items-center gap-4">
         <div className="w-full max-w-[430px]">
         {showWelcome && (
-          <div className="mb-4 flex items-center gap-3 rounded-2xl border border-[#C9A45C]/20 bg-[#111111] px-4 py-3 shadow-soft">
-            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#D4AF37]/10 text-[#D4AF37]">
+          <div className="mb-4 flex items-center gap-3 rounded-2xl border border-[#00DFA5]/20 bg-[#111111] px-4 py-3 shadow-soft">
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#686D76]/10 text-[#00DFA5]">
               <Gift className="h-4 w-4" />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-[#E1C27A]">Bienvenue dans votre programme fidélité 🎉</p>
+              <p className="text-sm font-semibold text-[#00DFA5]">Bienvenue dans votre programme fidélité 🎉</p>
               <p className="mt-0.5 text-[10px] leading-4 text-ink/45">Votre carte est maintenant active. Gardez-la sur votre téléphone.</p>
             </div>
             <button type="button" onClick={() => setShowWelcome(false)} className="ml-auto shrink-0 p-1 text-ink/30" aria-label="Fermer">
@@ -965,13 +1017,49 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
           </div>
         </div>
 
+        <section className="mt-4 w-full max-w-[400px] rounded-2xl border border-white/10 bg-[#111111] p-4 shadow-lg">
+          {walletDesigns.length > 0 && (
+            <div className="mb-4">
+              <p className="mb-2 text-xs font-semibold text-white">Choisissez le design de votre carte</p>
+              <div className="grid grid-cols-2 gap-2">
+                {walletDesigns.map(item => {
+                  const cfg = item.design_config || {};
+                  const active = selectedWalletDesignId === item.id;
+                  return (
+                    <button key={item.id} type="button" onClick={() => setSelectedWalletDesignId(item.id)}
+                      className={`rounded-xl border p-2 text-left transition ${active ? 'border-white/70 bg-white/10' : 'border-white/10 bg-black/20'}`}>
+                      <span className="block h-12 rounded-lg p-2 text-[9px] font-bold" style={{background:String(cfg.backgroundColor || '#050505'),color:String(cfg.textColor || '#FFFFFF')}}>
+                        {String(cfg.cardTitle || item.display_name)}
+                      </span>
+                      <span className="mt-2 block text-[10px] font-medium text-white">{item.display_name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => void addToGoogleWallet()}
+            disabled={walletLoading || walletDesigns.length === 0 || !selectedWalletDesignId}
+            className="flex w-full items-center justify-center gap-3 rounded-xl bg-white px-4 py-3.5 text-sm font-semibold text-[#111111] transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <span className="grid h-6 w-6 place-items-center rounded-md bg-[#686D76] text-xs font-black text-white">G</span>
+            {walletLoading ? 'Préparation de votre carte…' : 'Ajouter à Google Wallet'}
+          </button>
+          {walletDesigns.length === 0 && <p className="mt-2 text-center text-[10px] leading-4 text-white/40">Aucun modèle Wallet publié par cet établissement pour le moment.</p>}
+          <p className="mt-2 text-center text-[10px] leading-4 text-white/40">Votre compte, vos points et vos récompenses restent identiques quel que soit le design.</p>
+          {walletMessage && <p role="alert" className="mt-3 text-center text-xs text-[#B0B0B0]">{walletMessage}</p>}
+        </section>
+
+
         {(notifications.length > 0 || raffleWins.length > 0) && (
           <section className="mt-4 w-full space-y-3" aria-label="Notifications et gains de tombola">
-            {notifications.length > 0 && <div className="overflow-hidden rounded-[1.75rem] border border-[#D4AF37]/20 bg-[#111111] shadow-luxury">
-              <div className="flex items-center justify-between border-b border-white/8 px-5 py-4"><div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]"><Bell size={18} /></span><div><h2 className="text-sm font-semibold text-white">Notifications</h2><p className="mt-0.5 text-[10px] text-white/45">Les actualités de votre programme fidélité</p></div></div>{notifications.some(item => !item.is_read) && <span className="rounded-full bg-[#D4AF37] px-2.5 py-1 text-[10px] font-bold text-[#0D0D0D]">{notifications.filter(item => !item.is_read).length} nouvelle(s)</span>}</div>
-              <div className="divide-y divide-white/8">{notifications.map(item => <button key={item.id} type="button" onClick={() => { if (!item.is_read) void markNotificationRead(item.id); }} className="flex w-full items-start gap-3 px-5 py-4 text-left transition hover:bg-white/[0.03]"><span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${item.is_read ? 'bg-white/20' : 'bg-[#D4AF37]'}`} /><span className="min-w-0 flex-1"><span className="flex flex-wrap items-center gap-2 text-xs font-semibold text-white">{item.title}{!item.is_read && <span className="text-[9px] font-bold uppercase tracking-wider text-[#D4AF37]">Nouveau</span>}</span><span className="mt-1 block whitespace-pre-line text-[11px] leading-5 text-white/60">{item.message}</span><span className="mt-2 block text-[9px] text-white/30">{new Date(item.created_at).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' })}</span></span></button>)}</div>
+            {notifications.length > 0 && <div className="overflow-hidden rounded-[1.75rem] border border-[#00DFA5]/20 bg-[#111111] shadow-luxury">
+              <div className="flex items-center justify-between border-b border-white/8 px-5 py-4"><div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-[#686D76]/10 text-[#00DFA5]"><Bell size={18} /></span><div><h2 className="text-sm font-semibold text-white">Notifications</h2><p className="mt-0.5 text-[10px] text-white/45">Les actualités de votre programme fidélité</p></div></div>{notifications.some(item => !item.is_read) && <span className="rounded-full bg-[#686D76] px-2.5 py-1 text-[10px] font-bold text-[#00DFA5]">{notifications.filter(item => !item.is_read).length} nouvelle(s)</span>}</div>
+              <div className="divide-y divide-white/8">{notifications.map(item => <button key={item.id} type="button" onClick={() => { if (!item.is_read) void markNotificationRead(item.id); }} className="flex w-full items-start gap-3 px-5 py-4 text-left transition hover:bg-white/[0.03]"><span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${item.is_read ? 'bg-white/20' : 'bg-[#686D76]'}`} /><span className="min-w-0 flex-1"><span className="flex flex-wrap items-center gap-2 text-xs font-semibold text-white">{item.title}{!item.is_read && <span className="text-[9px] font-bold uppercase tracking-wider text-[#00DFA5]">Nouveau</span>}</span><span className="mt-1 block whitespace-pre-line text-[11px] leading-5 text-white/60">{item.message}</span><span className="mt-2 block text-[9px] text-white/30">{new Date(item.created_at).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' })}</span></span></button>)}</div>
             </div>}
-            {raffleWins.length > 0 && <div className="overflow-hidden rounded-[1.75rem] border border-[#D4AF37]/25 bg-gradient-to-br from-[#1B1609] to-[#111111] shadow-luxury"><div className="flex items-center gap-3 border-b border-[#D4AF37]/15 px-5 py-4"><span className="grid h-10 w-10 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]"><Trophy size={18} /></span><div><h2 className="text-sm font-semibold text-white">Mes gains de tombola</h2><p className="mt-0.5 text-[10px] text-white/45">Vos récompenses et leur validité</p></div></div><div className="space-y-3 p-4">{raffleWins.map(win => <div key={win.id} className="rounded-2xl border border-[#D4AF37]/15 bg-black/20 p-4"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#D4AF37]">{win.title}</p><p className="mt-1 text-sm font-semibold text-white">🎁 {win.prize_name}</p>{win.prize_description && <p className="mt-1 text-[11px] leading-5 text-white/55">{win.prize_description}</p>}</div><span className={`shrink-0 rounded-full px-2 py-1 text-[9px] font-bold ${win.status === 'PENDING' ? 'bg-[#D4AF37]/15 text-[#E1C27A]' : win.status === 'REDEEMED' ? 'bg-white/10 text-white/55' : 'bg-red-500/10 text-red-300'}`}>{win.status === 'PENDING' ? 'À utiliser' : win.status === 'REDEEMED' ? 'Utilisé' : 'Expiré'}</span></div><p className="mt-3 text-[10px] text-white/45">Valable du {new Date(win.valid_from).toLocaleDateString('fr-FR')} au {new Date(win.valid_until).toLocaleDateString('fr-FR')}{win.reservation_required ? ' · Réservation obligatoire' : ''}</p>{win.status === 'PENDING' && <div className="mt-4 border-t border-[#D4AF37]/15 pt-3"><button type="button" onClick={() => setVisibleRaffleCodes(current => current.includes(win.id) ? current.filter(id => id !== win.id) : [...current, win.id])} className="flex w-full items-center justify-between gap-3 rounded-xl border border-[#D4AF37]/25 bg-[#D4AF37]/[0.07] px-3 py-3 text-left text-xs font-semibold text-[#E1C27A]"><span>{visibleRaffleCodes.includes(win.id) ? 'Masquer le code gagnant' : 'Afficher mon code gagnant'}</span><span>{visibleRaffleCodes.includes(win.id) ? '−' : '+'}</span></button>{visibleRaffleCodes.includes(win.id) && <div className="mt-3 rounded-xl bg-black/35 p-3"><p className="text-[9px] uppercase tracking-wider text-white/45">Code à présenter à l’établissement</p><p className="mt-2 break-all font-mono text-xs font-semibold tracking-wide text-white">{win.claim_token}</p><button type="button" onClick={async () => { try { await navigator.clipboard.writeText(win.claim_token); setCopiedRaffleCode(win.id); window.setTimeout(() => setCopiedRaffleCode(current => current === win.id ? null : current), 2000); } catch { setCopiedRaffleCode(null); } }} className="mt-3 rounded-lg bg-[#D4AF37] px-3 py-2 text-[10px] font-bold text-[#0D0D0D]">{copiedRaffleCode === win.id ? 'Code copié' : 'Copier le code'}</button></div>}</div>}</div>)}</div></div>}
+            {raffleWins.length > 0 && <div className="overflow-hidden rounded-[1.75rem] border border-[#00DFA5]/25 bg-gradient-to-br from-[#111111] to-[#111111] shadow-luxury"><div className="flex items-center gap-3 border-b border-[#00DFA5]/15 px-5 py-4"><span className="grid h-10 w-10 place-items-center rounded-xl bg-[#686D76]/10 text-[#00DFA5]"><Trophy size={18} /></span><div><h2 className="text-sm font-semibold text-white">Mes gains de tombola</h2><p className="mt-0.5 text-[10px] text-white/45">Vos récompenses et leur validité</p></div></div><div className="space-y-3 p-4">{raffleWins.map(win => <div key={win.id} className="rounded-2xl border border-[#00DFA5]/15 bg-black/20 p-4"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#00DFA5]">{win.title}</p><p className="mt-1 text-sm font-semibold text-white">🎁 {win.prize_name}</p>{win.prize_description && <p className="mt-1 text-[11px] leading-5 text-white/55">{win.prize_description}</p>}</div><span className={`shrink-0 rounded-full px-2 py-1 text-[9px] font-bold ${win.status === 'PENDING' ? 'bg-[#686D76]/15 text-[#00DFA5]' : win.status === 'REDEEMED' ? 'bg-white/10 text-white/55' : 'bg-[#686D76]/10 text-[#B0B0B0]'}`}>{win.status === 'PENDING' ? 'À utiliser' : win.status === 'REDEEMED' ? 'Utilisé' : 'Expiré'}</span></div><p className="mt-3 text-[10px] text-white/45">Valable du {new Date(win.valid_from).toLocaleDateString('fr-FR')} au {new Date(win.valid_until).toLocaleDateString('fr-FR')}{win.reservation_required ? ' · Réservation obligatoire' : ''}</p>{win.status === 'PENDING' && <div className="mt-4 border-t border-[#00DFA5]/15 pt-3"><button type="button" onClick={() => setVisibleRaffleCodes(current => current.includes(win.id) ? current.filter(id => id !== win.id) : [...current, win.id])} className="flex w-full items-center justify-between gap-3 rounded-xl border border-[#00DFA5]/25 bg-[#686D76]/[0.07] px-3 py-3 text-left text-xs font-semibold text-[#00DFA5]"><span>{visibleRaffleCodes.includes(win.id) ? 'Masquer le code gagnant' : 'Afficher mon code gagnant'}</span><span>{visibleRaffleCodes.includes(win.id) ? '−' : '+'}</span></button>{visibleRaffleCodes.includes(win.id) && <div className="mt-3 rounded-xl bg-black/35 p-3"><p className="text-[9px] uppercase tracking-wider text-white/45">Code à présenter à l’établissement</p><p className="mt-2 break-all font-mono text-xs font-semibold tracking-wide text-white">{win.claim_token}</p><button type="button" onClick={async () => { try { await navigator.clipboard.writeText(win.claim_token); setCopiedRaffleCode(win.id); window.setTimeout(() => setCopiedRaffleCode(current => current === win.id ? null : current), 2000); } catch { setCopiedRaffleCode(null); } }} className="mt-3 rounded-lg bg-[#686D76] px-3 py-2 text-[10px] font-bold text-[#00DFA5]">{copiedRaffleCode === win.id ? 'Code copié' : 'Copier le code'}</button></div>}</div>}</div>)}</div></div>}
           </section>
         )}
 
@@ -986,19 +1074,19 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                 </div>
                 <div className="grid gap-2 p-4 sm:grid-cols-2">
                   {engagement.google_review_url && !engagement.google_claimed && !googleLinkAlreadyOpened && (
-                    <button type="button" onClick={() => void openGoogleReview()} className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-left transition hover:border-[#D4AF37]/50">
-                      <span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]"><Star size={17} /></span><span><span className="block text-sm font-semibold text-white">Avis Google</span><span className="block text-[10px] text-white/35">Partager mon expérience</span></span></span>
+                    <button type="button" onClick={() => void openGoogleReview()} className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-left transition hover:border-[#00DFA5]/50">
+                      <span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[#686D76]/10 text-[#00DFA5]"><Star size={17} /></span><span><span className="block text-sm font-semibold text-white">Avis Google</span><span className="block text-[10px] text-white/35">Partager mon expérience</span></span></span>
                       <ExternalLink size={15} className="text-white/35" />
                     </button>
                   )}
                   {engagement.whatsapp_number && (
-                    <a href={'https://wa.me/' + engagement.whatsapp_number.replace(/\D/g, '') + '?text=' + encodeURIComponent('Bonjour, je suis titulaire de la carte fidélité de ' + (card?.establishment_name ?? 'votre établissement') + ' (' + (card?.first_name ?? 'Client') + ') et je souhaite réserver une table.')} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 rounded-2xl bg-[#D4AF37] px-4 py-3 text-xs font-semibold text-[#0D0D0D] sm:col-span-2">
+                    <a href={'https://wa.me/' + engagement.whatsapp_number.replace(/\D/g, '') + '?text=' + encodeURIComponent('Bonjour, je suis titulaire de la carte fidélité de ' + (card?.establishment_name ?? 'votre établissement') + ' (' + (card?.first_name ?? 'Client') + ') et je souhaite réserver une table.')} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 rounded-2xl bg-[#686D76] px-4 py-3 text-xs font-semibold text-[#00DFA5] sm:col-span-2">
                       <MessageCircle size={16} /> Réserver / contacter sur WhatsApp
                     </a>
                   )}
                 </div>
                 {reviewMessage && (
-                  <p className="px-5 pb-4 text-center text-xs font-medium text-[#D4AF37]" role="status" aria-live="polite">
+                  <p className="px-5 pb-4 text-center text-xs font-medium text-[#00DFA5]" role="status" aria-live="polite">
                     {reviewMessage}
                   </p>
                 )}
@@ -1018,11 +1106,11 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                 </div>
                 {!engagement.feedback_submitted && feedbackRating > 0 && (
                   <div className="mt-4 space-y-3">
-                    <textarea value={feedbackComment} onChange={e => setFeedbackComment(e.target.value)} maxLength={2000} rows={3} placeholder="Un commentaire à partager ? (facultatif)" className="w-full resize-none rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#D4AF37]" />
-                    <button type="button" onClick={() => void submitFeedback()} disabled={feedbackSaving} className="w-full rounded-2xl bg-[#D4AF37] px-4 py-3 text-xs font-semibold text-[#0D0D0D] disabled:opacity-50">{feedbackSaving ? 'Envoi…' : `Envoyer mon retour · +${engagement.feedback_bonus_points} points`}</button>
+                    <textarea value={feedbackComment} onChange={e => setFeedbackComment(e.target.value)} maxLength={2000} rows={3} placeholder="Un commentaire à partager ? (facultatif)" className="w-full resize-none rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#00DFA5]" />
+                    <button type="button" onClick={() => void submitFeedback()} disabled={feedbackSaving} className="w-full rounded-2xl bg-[#686D76] px-4 py-3 text-xs font-semibold text-[#00DFA5] disabled:opacity-50">{feedbackSaving ? 'Envoi…' : `Envoyer mon retour · +${engagement.feedback_bonus_points} points`}</button>
                   </div>
                 )}
-                  {feedbackMessage && <p className="mt-3 text-xs text-[#D4AF37]">{feedbackMessage}</p>}
+                  {feedbackMessage && <p className="mt-3 text-xs text-[#00DFA5]">{feedbackMessage}</p>}
                 </div>
               </div>
             )}
@@ -1031,16 +1119,16 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
 
         {/* Les campagnes sont envoyées par Web Push. On ne les affiche pas dans la carte fidélité. */}
         {raffleLoadError && (
-          <div role="status" className="mt-4 w-full rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-xs leading-5 text-amber-100">
+          <div role="status" className="mt-4 w-full rounded-xl border border-[#00DFA5]/30 bg-[#686D76]/10 px-4 py-3 text-xs leading-5 text-[#00DFA5]">
             {raffleLoadError}
           </div>
         )}
 
 
         {!pushEnabled && (
-          <section className="mt-4 overflow-hidden rounded-[1.75rem] border border-[#D4AF37]/20 bg-[#111111] p-5 shadow-luxury">
+          <section className="mt-4 overflow-hidden rounded-[1.75rem] border border-[#00DFA5]/20 bg-[#111111] p-5 shadow-luxury">
             <div className="flex items-start gap-3">
-              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]">
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#686D76]/10 text-[#00DFA5]">
                 <Bell className="h-4 w-4" />
               </div>
               <div className="min-w-0 flex-1">
@@ -1054,13 +1142,13 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
               type="button"
               onClick={() => void activatePushNotifications()}
               disabled={pushLoading}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#D4AF37] px-4 py-3 text-xs font-semibold text-[#0D0D0D] disabled:opacity-50"
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#686D76] px-4 py-3 text-xs font-semibold text-[#00DFA5] disabled:opacity-50"
             >
               <Bell size={15} />
               {pushLoading ? 'Activation…' : 'Activer les notifications'}
             </button>
             {pushMessage && (
-              <p className="mt-3 text-center text-[10px] leading-4 text-[#D4AF37]" role="status">
+              <p className="mt-3 text-center text-[10px] leading-4 text-[#00DFA5]" role="status">
                 {pushMessage}
               </p>
             )}
@@ -1068,7 +1156,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         )}
 
         {pushEnabled && pushMessage && (
-          <p className="mt-3 text-center text-[10px] leading-4 text-[#D4AF37]" role="status">
+          <p className="mt-3 text-center text-[10px] leading-4 text-[#00DFA5]" role="status">
             {pushMessage}
           </p>
         )}
@@ -1077,7 +1165,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
           <button
             type="button"
             onClick={() => void saveCardOnPhone()}
-            className="mt-4 flex w-full items-center justify-center gap-3 rounded-2xl bg-gold-gradient px-5 py-4 text-sm font-semibold text-[#050505] shadow-gold transition hover:brightness-105"
+            className="mt-4 flex w-full items-center justify-center gap-3 rounded-2xl bg-electric-gradient px-5 py-4 text-sm font-semibold text-[#050505] shadow-electric transition hover:brightness-105"
           >
             <span className="text-lg">▣</span>
             Enregistrer ma carte sur mon téléphone
@@ -1087,7 +1175,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
         <p className="mt-2 text-center text-[10px] text-white/35">Ajoutez-la à votre écran d’accueil ou partagez votre carte.</p>
 
         {referralOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#10231d]/55 p-3 backdrop-blur-sm sm:p-6">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#050505]/55 p-3 backdrop-blur-sm sm:p-6">
             <div
               role="dialog"
               aria-modal="true"
@@ -1115,7 +1203,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
               <div className="min-h-0 flex-1 overflow-hidden p-4">
                 {referralLoading ? (
                   <div className="flex h-full items-center justify-center">
-                    <div className="h-7 w-7 animate-spin rounded-full border-2 border-[#D4AF37] border-t-transparent" />
+                    <div className="h-7 w-7 animate-spin rounded-full border-2 border-[#00DFA5] border-t-transparent" />
                   </div>
                 ) : referralCode ? (
                   <div className="flex h-full flex-col items-center justify-center">
@@ -1138,7 +1226,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
                     </div>
                   </div>
                 ) : (
-                  <div className="flex h-full items-center justify-center text-center text-sm text-[#F5F5DC]/45">
+                  <div className="flex h-full items-center justify-center text-center text-sm text-[#00DFA5]/45">
                     Votre code de parrainage n’est pas encore disponible.
                   </div>
                 )}

@@ -21,9 +21,9 @@ async function getGoogleEmail(accessToken:string){const r=await fetch('https://w
 Deno.serve(async req=>{
  if(req.method==='OPTIONS')return new Response('ok',{headers:cors});
  try{
-  if(!clientId||!clientSecret||!redirectUri)return json({success:false,error:'Google Business Profile OAuth n’est pas configuré côté serveur.'},503);
   const u=new URL(req.url);const action=u.searchParams.get('action')??(req.method==='GET'?'callback':'start');
   if(action==='callback'){
+   if(!clientId||!clientSecret||!redirectUri)return json({success:false,error:'Google Business Profile OAuth n’est pas configuré côté serveur.'},503);
    const code=u.searchParams.get('code'),state=u.searchParams.get('state');
    if(!code||!state)return json({success:false,error:'Paramètres OAuth manquants.'},400);
    const stateHash=await sha256(state);
@@ -79,6 +79,7 @@ Deno.serve(async req=>{
    return new Response('<html><body><script>window.close();</script><p>Google Business Profile connecté. Vous pouvez fermer cette fenêtre.</p></body></html>',{headers:{'Content-Type':'text/html; charset=utf-8'}});
   }
   const auth=req.headers.get('Authorization');if(!auth)return json({success:false,error:'Session utilisateur manquante.'},401);
+  if(!clientId||!clientSecret||!redirectUri)return json({success:false,error:'Google Business Profile OAuth n’est pas configuré côté serveur.'},503);
   const bearer=auth.replace(/^Bearer\s+/i,'');
   const {data:{user},error:userError}=await db.auth.getUser(bearer);if(userError||!user)return json({success:false,code:'INVALID_SESSION',error:'Supabase a refusé la session utilisateur. Reconnectez-vous à KELYANI puis relancez cette action.'},401);
   const {data:profile,error:profileError}=await db.from('profiles').select('role').eq('id',user.id).maybeSingle();

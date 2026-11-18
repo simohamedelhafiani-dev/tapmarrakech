@@ -75,7 +75,7 @@ export default function ItemManager({ establishmentId, categories, itemsByCatego
   return (
     <section className='rounded-3xl border border-ink/5 bg-white shadow-sm'>
       <div className='border-b border-ink/5 p-5 sm:p-6'>
-        <p className='text-[10px] font-bold uppercase tracking-[0.18em] text-gold'>Gestionnaire</p>
+        <p className='text-[10px] font-bold uppercase tracking-[0.18em] text-electric'>Gestionnaire</p>
         <h3 className='mt-1 text-xl font-semibold text-forest'>Articles</h3>
         <div className='mt-4 flex flex-col gap-3 sm:flex-row'>
           <select value={selectedCategoryId} onChange={e => { setSelectedCategoryId(e.target.value); reset(); }} className='flex-1 rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm'>

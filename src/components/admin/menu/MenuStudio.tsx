@@ -60,7 +60,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
     wallpaperObjectUrl: null,
     wallpaperRemoved: false,
     overlayOpacity: 0.35,
-    themeColors: { background: '#F5F1E8', surface: '#FFFDFA', text: '#24211C', accent: '#D4AF37' },
+    themeColors: { background: '#F5F1E8', surface: '#FFFDFA', text: '#24211C', accent: '#00DFA5' },
     aiDesign: null,
   });
 
@@ -101,7 +101,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
       background: validHex(rawColors.background, '#F5F1E8'),
       surface: validHex(rawColors.surface, '#FFFDFA'),
       text: validHex(rawColors.text, '#24211C'),
-      accent: validHex(rawColors.accent, '#D4AF37'),
+      accent: validHex(rawColors.accent, '#00DFA5'),
     };
 
     setEstablishmentName(data?.name ?? '');
@@ -271,7 +271,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-gold">KELYANI · MENU STUDIO</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#00DFA5]">KELYANI · MENU STUDIO</p>
           <h3 className="mt-1 font-display text-4xl tracking-tight text-white">Construis ton menu</h3>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-white/45">
             Sépare la structure du contenu et l’apparence du menu, avec un aperçu toujours visible.
@@ -279,7 +279,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
         </div>
 
         <div className="inline-flex items-center gap-2 self-start rounded-full border border-white/10 bg-white/[.04] px-3 py-2 text-[10px] font-semibold text-white/70 shadow-soft md:self-auto">
-          <span className={menu.loading || loadingDesign ? 'h-2 w-2 animate-pulse rounded-full bg-amber-400' : 'h-2 w-2 rounded-full bg-[#D4AF37]'} />
+          <span className={menu.loading || loadingDesign ? 'h-2 w-2 animate-pulse rounded-full bg-emerald-400' : 'h-2 w-2 rounded-full bg-[#686D76]'} />
           {menu.loading || loadingDesign ? 'Synchronisation…' : hasChanges ? 'Modifications locales' : 'Design publié'}
         </div>
       </div>
@@ -296,13 +296,13 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
                 className={[
                   'group flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-xs font-semibold transition-all duration-200',
                   active
-                    ? 'bg-gold-gradient text-[#050505] shadow-gold'
+                    ? 'bg-electric-gradient text-[#050505] shadow-electric'
                     : 'text-white/45 hover:bg-white/[.06] hover:text-white',
                 ].join(' ')}
                 aria-selected={active}
                 role="tab"
               >
-                <Icon size={15} className={active ? 'text-gold' : 'text-ink/35 transition-colors group-hover:text-gold'} />
+                <Icon size={15} className={active ? 'text-[#00DFA5]' : 'text-ink/35 transition-colors group-hover:text-[#00DFA5]'} />
                 <span>{label}</span>
               </button>
             );
@@ -371,9 +371,9 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
 
         {activeTab === 'preview' ? (
           <div className="xl:col-span-2 space-y-4">
-            <section className="flex flex-col gap-4 rounded-3xl border border-gold/20 bg-[#111111] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+            <section className="flex flex-col gap-4 rounded-3xl border border-[#00DFA5]/20 bg-[#111111] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
               <div className="min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Vérification avant publication</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#00DFA5]">Vérification avant publication</p>
                 <h3 className="mt-1 text-lg font-semibold text-white">Voici le menu tel que tes clients le verront</h3>
                 <p className="mt-1 text-xs leading-5 text-white/45">
                   Vérifie les catégories, les prix, les photos et le rendu sur mobile avant de publier le design.
@@ -394,7 +394,7 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
                   type="button"
                   onClick={() => void publish()}
                   disabled={!hasChanges || publishing || loadingDesign}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gold-gradient px-4 py-3 text-xs font-bold text-[#090909] shadow-gold transition disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-electric-gradient px-4 py-3 text-xs font-bold text-[#090909] shadow-electric transition disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {publishing ? (
                     <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-black/25 border-t-black" />
@@ -427,3 +427,4 @@ export default function MenuStudio({ establishmentId }: MenuStudioProps) {
     </div>
   );
 }
+

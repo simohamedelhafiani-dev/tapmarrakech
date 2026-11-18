@@ -28,6 +28,8 @@ npm run dev
 
 Importez le projet dans Vercel, sélectionnez Vite si la détection automatique ne le fait pas, puis ajoutez les deux variables `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY` dans les variables d’environnement. Lancez un nouveau déploiement.
 
+Pour la version finale en cours, le projet Vercel existant `tapmarrakech` publie les commits de `integration/kelyani-final-consolidation-2026-11` en environnement **Preview**. Vérifiez qu’un déploiement est indiqué **Ready** avant de partager son URL. Cette branche reste séparée de Production ; aucun déploiement Production ne doit être lancé avant validation explicite.
+
 ## 6. Connecter tapmarrakech.ma
 
 Dans Vercel, ajoutez `tapmarrakech.ma` et `www.tapmarrakech.ma` dans les domaines du projet. Chez votre registrar, ajoutez les enregistrements DNS indiqués par Vercel. Après propagation, les URLs publiques fonctionneront comme `https://tapmarrakech.ma/r/riad-atlas`.

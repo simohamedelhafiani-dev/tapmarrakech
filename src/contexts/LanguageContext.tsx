@@ -145,10 +145,10 @@ const expandedUiTranslations: Record<string, { en: string; ar: string }> = {
   'Création du design…': { en: 'Creating design…', ar: 'جارٍ إنشاء التصميم…' },
   'Générer le design premium': { en: 'Generate premium design', ar: 'إنشاء تصميم فاخر' },
   'Éditorial, élégant et très lisible.': { en: 'Editorial, elegant and highly readable.', ar: 'تحريري وأنيق وسهل القراءة.' },
-  'Premium, raffiné avec accents dorés.': { en: 'Premium and refined with gold accents.', ar: 'فاخر وراقٍ مع لمسات ذهبية.' },
+  'Premium, raffiné avec accents Émeraude et Teal.': { en: 'Premium and refined with KELYANI emerald and teal accents.', ar: 'فاخر وراقٍ مع لمسات زرقاء كهربائية.' },
   'Sobre, moderne et épuré.': { en: 'Minimal, modern and clean.', ar: 'بسيط وعصري ونقي.' },
   'Épuré, élégant et très lisible.': { en: 'Clean, elegant and highly readable.', ar: 'نقي وأنيق وسهل القراءة.' },
-  'Restaurant premium avec détails dorés.': { en: 'Premium restaurant with gold details.', ar: 'مطعم فاخر بتفاصيل ذهبية.' },
+  'Restaurant premium avec détails Émeraude.': { en: 'Premium restaurant with KELYANI emerald details.', ar: 'مطعم فاخر بتفاصيل زمردية من كيلياني.' },
   'Photos produits et présentation visuelle.': { en: 'Product photos and visual presentation.', ar: 'صور المنتجات والعرض البصري.' },
   'Ambiance lounge, sombre et sophistiquée.': { en: 'Dark and sophisticated lounge atmosphere.', ar: 'أجواء لاونج داكنة وراقية.' },
   'Désactiver': { en: 'Disable', ar: 'تعطيل' },
@@ -667,3 +667,4 @@ export function useLanguage() {
   if (!context) throw new Error('useLanguage must be used inside LanguageProvider');
   return context;
 }
+

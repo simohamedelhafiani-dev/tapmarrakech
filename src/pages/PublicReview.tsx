@@ -532,7 +532,7 @@ export default function PublicReview() {
           <>
             {/* PREMIUM ESTABLISHMENT HEADER */}
             <section className="relative overflow-hidden bg-forest px-5 pb-8 pt-5 text-white">
-              <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-gold/10 blur-3xl" />
+              <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-forest/10 blur-3xl" />
               <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-black/20 blur-3xl" />
 
               <div className="relative">
@@ -555,7 +555,7 @@ export default function PublicReview() {
                       />
                     </div>
                   ) : (
-                    <div className="mx-auto grid h-24 w-24 place-items-center rounded-[26px] bg-white/10 font-display text-4xl text-gold ring-1 ring-white/10">
+                    <div className="mx-auto grid h-24 w-24 place-items-center rounded-[26px] bg-white/10 font-display text-4xl text-electric ring-1 ring-white/10">
                       {p.name?.[0] || 'E'}
                     </div>
                   )}
@@ -572,7 +572,7 @@ export default function PublicReview() {
 
                   {(googleRating || googleReviewCount) && (
                     <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/8 px-4 py-2">
-                      <Star size={14} fill="currentColor" className="text-gold" />
+                      <Star size={14} fill="currentColor" className="text-electric" />
                       <span className="text-sm font-semibold">
                         {googleRating ? Number(googleRating).toFixed(1) : 'Google'}
                       </span>
@@ -619,7 +619,7 @@ export default function PublicReview() {
                   title="Rejoindre notre programme fidélité"
                   subtitle="Cumulez des points et profitez d’avantages exclusifs"
                   onClick={() => navigate('loyalty')}
-                  accent="rose"
+                  accent="gray"
                 />
               )}
 
@@ -639,7 +639,7 @@ export default function PublicReview() {
                   title="Voir le menu"
                   subtitle="Découvrez nos plats et boissons"
                   onClick={() => navigate('menu')}
-                  accent="orange"
+                  accent="gray"
                 />
               )}
 
@@ -651,7 +651,7 @@ export default function PublicReview() {
                   title="Nous trouver"
                   subtitle={[address, city].filter(Boolean).join(', ')}
                   href={directionsUrl}
-                  accent="gold"
+                  accent="blue"
                 />
               )}
 
@@ -659,10 +659,10 @@ export default function PublicReview() {
                 <section className="pt-2">
                   <div className="mb-4 flex items-end justify-between">
                     <div>
-                      <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-gold">Offres du moment</p>
+                      <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-electric">Offres du moment</p>
                       <h2 className="mt-1 font-display text-2xl text-forest">Nos promotions</h2>
                     </div>
-                    <Sparkles size={19} className="text-gold" />
+                    <Sparkles size={19} className="text-electric" />
                   </div>
                   <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-2 scrollbar-hide">
                     {promotions.map((promotion) => (
@@ -676,11 +676,11 @@ export default function PublicReview() {
                           <h3 className="font-display text-xl">{promotion.name}</h3>
                           {promotion.description && <p className="mt-1 text-xs leading-5 text-white/50">{promotion.description}</p>}
                           <div className="mt-3 flex items-end justify-between gap-3">
-                            <span className="inline-flex rounded-full bg-gold px-3 py-1 text-[9px] font-bold uppercase tracking-wider text-forest">Offre exclusive</span>
+                            <span className="inline-flex rounded-full bg-forest px-3 py-1 text-[9px] font-bold uppercase tracking-wider text-forest">Offre exclusive</span>
                             {promotion.promo_price !== null && (
                               <div className="text-right">
                                 {promotion.normal_price !== null && <p className="text-[10px] text-white/35 line-through">{Number(promotion.normal_price).toLocaleString('fr-FR')} MAD</p>}
-                                <p className="text-lg font-bold text-gold">{Number(promotion.promo_price).toLocaleString('fr-FR')} MAD</p>
+                                <p className="text-lg font-bold text-electric">{Number(promotion.promo_price).toLocaleString('fr-FR')} MAD</p>
                               </div>
                             )}
                           </div>
@@ -794,7 +794,7 @@ export default function PublicReview() {
                     />
                   </div>
                 ) : (
-                  <div className="flex h-20 items-center font-display text-3xl text-gold">
+                  <div className="flex h-20 items-center font-display text-3xl text-electric">
                     {p.name?.[0] || 'E'}
                   </div>
                 )}
@@ -812,7 +812,7 @@ export default function PublicReview() {
               {menuDisplayMode === 'pdf' && menuPdfUrl ? (
                 <section className="mt-6">
                   <div className="mb-4">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-gold">Menu</p>
+                    <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-electric">Menu</p>
                     <h1 className="mt-1 font-display text-4xl text-white">Notre menu</h1>
                     <p className="mt-2 text-sm text-white/65">Le menu original de l’établissement.</p>
                   </div>
@@ -823,7 +823,7 @@ export default function PublicReview() {
                       className="h-[75vh] min-h-[620px] w-full"
                     />
                   </div>
-                  <a href={menuPdfUrl} target="_blank" rel="noreferrer" className="mt-4 flex items-center justify-center gap-2 rounded-full bg-gold px-5 py-3.5 text-sm font-semibold text-forest">
+                  <a href={menuPdfUrl} target="_blank" rel="noreferrer" className="mt-4 flex items-center justify-center gap-2 rounded-full bg-forest px-5 py-3.5 text-sm font-semibold text-forest">
                     Ouvrir le menu en plein écran
                     <ExternalLink size={15} />
                   </a>
@@ -861,7 +861,7 @@ export default function PublicReview() {
             <BackButton onClick={() => navigate('home')} />
 
             <div className="mt-7">
-              <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-gold">
+              <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-electric">
                 Votre expérience
               </p>
 
@@ -872,7 +872,7 @@ export default function PublicReview() {
 
             {!rating && !sent && (
               <section className="mt-8 rounded-[30px] bg-forest p-7 text-center text-white shadow-xl">
-                <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-white/10 text-gold">
+                <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-white/10 text-electric">
                   <Heart size={25} fill="currentColor" />
                 </div>
 
@@ -903,7 +903,7 @@ export default function PublicReview() {
             {rating >= place.redirect_threshold &&
               !sent && (
                 <section className="mt-8 rounded-[30px] bg-white p-7 text-center shadow-sm ring-1 ring-ink/5">
-                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-gold/10 text-gold">
+                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-forest/10 text-electric">
                     <Check size={26} />
                   </div>
 
@@ -1048,7 +1048,7 @@ export default function PublicReview() {
             <BackButton onClick={() => navigate('home')} />
 
             <div className="mt-7">
-              <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-gold">
+              <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-electric">
                 Programme exclusif
               </p>
 
@@ -1061,12 +1061,12 @@ export default function PublicReview() {
               <section className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto bg-[#f5f0e7]/95 px-4 py-6 backdrop-blur-sm">
                 <div className="w-full max-w-[420px]">
                   <div className="relative overflow-hidden rounded-[32px] bg-forest p-7 text-white shadow-2xl">
-                    <div className="absolute -right-10 -top-10 h-36 w-36 rounded-full bg-gold/10 blur-2xl" />
+                    <div className="absolute -right-10 -top-10 h-36 w-36 rounded-full bg-forest/10 blur-2xl" />
 
                     <div className="relative">
-                      <CheckCircle2 size={34} className="text-gold" />
+                      <CheckCircle2 size={34} className="text-electric" />
 
-                      <p className="mt-6 text-[9px] font-bold uppercase tracking-[0.25em] text-gold">
+                      <p className="mt-6 text-[9px] font-bold uppercase tracking-[0.25em] text-electric">
                         Bienvenue dans le programme
                       </p>
 
@@ -1087,7 +1087,7 @@ export default function PublicReview() {
                               Gardez-la sur votre téléphone pour la présenter à chaque visite.
                             </p>
                           </div>
-                          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gold/15 text-gold">
+                          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-forest/15 text-electric">
                             <Gift size={21} />
                           </div>
                         </div>
@@ -1147,7 +1147,7 @@ export default function PublicReview() {
                         }
                         await navigator.clipboard.writeText(loyaltyCardUrl);
                       }}
-                      className="mt-3 w-full rounded-full bg-gold px-5 py-3.5 text-sm font-bold text-forest"
+                      className="mt-3 w-full rounded-full bg-forest px-5 py-3.5 text-sm font-bold text-forest"
                     >
                       Partager / enregistrer ma carte
                     </button>
@@ -1164,10 +1164,10 @@ export default function PublicReview() {
             ) : (
               <>
                 <section className="relative mt-8 overflow-hidden rounded-[32px] bg-forest p-7 text-white shadow-2xl">
-                  <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-gold/10 blur-3xl" />
+                  <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-forest/10 blur-3xl" />
 
                   <div className="relative">
-                    <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gold/15 text-gold">
+                    <div className="grid h-14 w-14 place-items-center rounded-2xl bg-forest/15 text-electric">
                       <Gift size={26} />
                     </div>
 
@@ -1182,7 +1182,7 @@ export default function PublicReview() {
 
                     <button
                       onClick={() => setShowLoyaltyForm(true)}
-                      className="mt-7 flex w-full items-center justify-center gap-2 rounded-full bg-gold px-5 py-3.5 text-sm font-bold text-forest"
+                      className="mt-7 flex w-full items-center justify-center gap-2 rounded-full bg-forest px-5 py-3.5 text-sm font-bold text-forest"
                     >
                       Rejoindre gratuitement
                       <ArrowRight size={16} />
@@ -1192,7 +1192,7 @@ export default function PublicReview() {
 
                 {rewards.length > 0 && (
                   <section className="mt-8">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-gold">
+                    <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-electric">
                       Vos futures récompenses
                     </p>
 
@@ -1214,7 +1214,7 @@ export default function PublicReview() {
                             )}
                           </div>
 
-                          <span className="shrink-0 rounded-full bg-gold/10 px-3 py-1.5 text-[10px] font-bold text-gold">
+                          <span className="shrink-0 rounded-full bg-forest/10 px-3 py-1.5 text-[10px] font-bold text-electric">
                             {reward.points_required} pts
                           </span>
                         </div>
@@ -1262,7 +1262,7 @@ export default function PublicReview() {
           <div className="w-full max-w-[520px] rounded-t-[34px] bg-[#fffdf9] p-6 pb-8 shadow-2xl">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-gold">
+                <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-electric">
                   Inscription gratuite
                 </p>
 
@@ -1382,21 +1382,18 @@ function ActionRow({
   subtitle,
   onClick,
   href,
-  accent = 'green',
+  accent = 'blue',
 }: {
   icon: React.ReactNode;
   title: string;
   subtitle: string;
   onClick?: () => void;
   href?: string;
-  accent?: 'green' | 'rose' | 'blue' | 'orange' | 'gold';
+  accent?: 'gray' | 'blue';
 }) {
   const accentClasses = {
-    green: 'bg-emerald-50 text-emerald-600',
-    rose: 'bg-rose-50 text-rose-500',
-    blue: 'bg-blue-50 text-blue-500',
-    orange: 'bg-orange-50 text-orange-500',
-    gold: 'bg-amber-50 text-amber-600',
+    gray: 'bg-[#686D76] text-[#FFFFFF]',
+    blue: 'bg-[#686D76] text-[#00DFA5]',
   } as const;
 
   const className = "group flex w-full items-center gap-4 rounded-[24px] bg-white p-4 text-left shadow-sm ring-1 ring-ink/5 transition active:scale-[0.99]";
@@ -1504,7 +1501,7 @@ function AIPremiumMenu({
         page: 'bg-[#f0ece2] text-white',
         body: 'bg-[#f0ece2]',
         muted: 'text-white/65',
-        accent: 'text-gold',
+        accent: 'text-electric',
         line: 'border-white/15',
         card: 'bg-black/35 border-white/15',
         product: 'text-white',
@@ -1514,7 +1511,7 @@ function AIPremiumMenu({
           page: 'bg-[#102b24] text-white',
           body: 'bg-[#102b24]',
           muted: 'text-white/55',
-          accent: 'text-gold',
+          accent: 'text-electric',
           line: 'border-white/10',
           card: 'bg-white/[0.055] border-white/10',
           product: 'text-white',
@@ -1524,16 +1521,16 @@ function AIPremiumMenu({
             page: 'bg-[#f3eee2] text-forest',
             body: 'bg-[#f3eee2]',
             muted: 'text-ink/55',
-            accent: 'text-gold',
-            line: 'border-gold/20',
-            card: 'bg-[#fffdf7] border-gold/15',
+            accent: 'text-electric',
+            line: 'border-electric/20',
+            card: 'bg-[#fffdf7] border-electric/15',
             product: 'text-forest',
           }
         : {
               page: 'bg-[#f0ece2] text-forest',
               body: 'bg-[#f0ece2]',
               muted: 'text-ink/55',
-              accent: 'text-gold',
+              accent: 'text-electric',
               line: 'border-forest/10',
               card: 'bg-[#fffdf8] border-ink/10',
               product: 'text-forest',
@@ -1550,7 +1547,7 @@ function AIPremiumMenu({
     <div className="relative mt-2 overflow-hidden">
       <section className="relative px-5 pb-10 pt-7">
         <div className="relative">
-          <p className="text-[9px] font-bold uppercase tracking-[0.34em] text-gold">
+          <p className="text-[9px] font-bold uppercase tracking-[0.34em] text-electric">
             {design.hero?.eyebrow || place.name || 'La carte'}
           </p>
           <h1 className="mt-2 max-w-[430px] font-display text-[42px] leading-[0.94] text-white">
@@ -1589,7 +1586,7 @@ function AIPremiumMenu({
                 className={
                   'rounded-full border px-4 py-2 text-[10px] font-semibold shadow-sm ' +
                   (visibleSections.indexOf(section) === appSectionIndex
-                    ? 'border-gold/60 bg-gold text-forest'
+                    ? 'border-electric/60 bg-forest text-forest'
                     : 'border-white/20 bg-black/25 text-white')
                 }
               >
@@ -1613,7 +1610,7 @@ function AIPremiumMenu({
             >
               <ChevronLeft size={13} /> Précédent
             </button>
-            <span className="text-[10px] font-bold text-gold">
+            <span className="text-[10px] font-bold text-electric">
               Page {bookPage + 1}/{visibleSections.length}
             </span>
             <button
@@ -1679,7 +1676,7 @@ function AIPremiumMenu({
                 <div className="relative">
                   <div className="mb-5">
                   <div className="flex items-center gap-3">
-                    <span className={`h-px w-8 ${style === 'dark' ? 'bg-gold/50' : 'bg-gold'}`} />
+                    <span className={`h-px w-8 ${style === 'dark' ? 'bg-forest/50' : 'bg-forest'}`} />
                     <p className={`text-[8px] font-bold uppercase tracking-[0.3em] ${palette.accent}`}>
                       {section.type === 'featured' ? 'Les signatures' : 'La sélection'}
                     </p>
@@ -1769,7 +1766,7 @@ function AIPremiumMenu({
                             <h3 className="text-[14px] font-bold leading-5 text-white">
                               {item.name}
                             </h3>
-                            <span className="shrink-0 text-[13px] font-bold text-gold">
+                            <span className="shrink-0 text-[13px] font-bold text-electric">
                               {Number(item.price).toLocaleString('fr-FR')} MAD
                             </span>
                           </div>
@@ -1858,7 +1855,7 @@ function MenuTemplate({
   if (!visible.length) {
     return (
       <div className="mt-7">
-        <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-gold">Découvrez</p>
+        <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-electric">Découvrez</p>
         <h1 className="mt-1 font-display text-4xl text-forest">Notre menu</h1>
         <Empty icon={<UtensilsCrossed size={22} />} title="Menu bientôt disponible" text="Le contenu apparaîtra ici dès qu’il sera ajouté." />
       </div>
@@ -1877,7 +1874,7 @@ function MenuTemplate({
               className={[
                 'shrink-0 rounded-full border px-3.5 py-2 text-[10px] font-semibold transition',
                 category.id === appCategoryId
-                  ? 'border-gold bg-gold text-forest'
+                  ? 'border-electric bg-forest text-forest'
                   : 'border-ink/10 bg-white text-ink/55',
               ].join(' ')}
             >
@@ -1895,7 +1892,7 @@ function MenuTemplate({
           >
             <ChevronLeft size={13} /> Précédent
           </button>
-          <span className="text-[10px] font-bold text-gold">
+          <span className="text-[10px] font-bold text-electric">
             Page {bookPage + 1}/{visible.length}
           </span>
           <button
@@ -1914,7 +1911,7 @@ function MenuTemplate({
   if (template === 'dark') {
     return (
       <div className="mt-6 -mx-5 overflow-hidden bg-[#102b24] px-5 pb-10 pt-7 text-white">
-        <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold">Menu</p>
+        <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-electric">Menu</p>
         <h1 className="mt-2 font-display text-5xl leading-none">{place.name || 'Notre carte'}</h1>
         <p className="mt-3 text-sm text-white/45">Une carte pensée pour être consultée simplement.</p>
         {navigationControls}
@@ -1922,7 +1919,7 @@ function MenuTemplate({
           {displayCategories.map((category) => (
             <section key={category.id}>
               <div className="mb-4 flex items-end justify-between gap-4">
-                <h2 className="font-display text-2xl text-gold">{category.name}</h2>
+                <h2 className="font-display text-2xl text-electric">{category.name}</h2>
                 {category.description && <p className="max-w-[180px] text-right text-[10px] leading-4 text-white/35">{category.description}</p>}
               </div>
               <div className="divide-y divide-white/10 rounded-2xl border border-white/10 bg-white/[0.03]">
@@ -1932,7 +1929,7 @@ function MenuTemplate({
                       <h3 className="font-semibold">{item.name}</h3>
                       {item.description && <p className="mt-1 text-xs leading-5 text-white/40">{item.description}</p>}
                     </div>
-                    <span className="shrink-0 font-semibold text-gold">{Number(item.price).toLocaleString('fr-FR')} MAD</span>
+                    <span className="shrink-0 font-semibold text-electric">{Number(item.price).toLocaleString('fr-FR')} MAD</span>
                   </article>
                 ))}
               </div>
@@ -1946,7 +1943,7 @@ function MenuTemplate({
   if (template === 'cards') {
     return (
       <div className="mt-7">
-        <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold">Découvrez</p>
+        <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-electric">Découvrez</p>
         <h1 className="mt-1 font-display text-4xl text-forest">Notre carte</h1>
         <p className="mt-2 text-sm text-ink/45">Choisissez votre envie.</p>
         {navigationControls}
@@ -1966,7 +1963,7 @@ function MenuTemplate({
                     <div className="p-3.5">
                       <h3 className="line-clamp-2 text-sm font-bold text-forest">{item.name}</h3>
                       {item.description && <p className="mt-1.5 line-clamp-2 text-[10px] leading-4 text-ink/40">{item.description}</p>}
-                      <p className="mt-3 text-sm font-bold text-gold">{Number(item.price).toLocaleString('fr-FR')} MAD</p>
+                      <p className="mt-3 text-sm font-bold text-electric">{Number(item.price).toLocaleString('fr-FR')} MAD</p>
                     </div>
                   </article>
                 ))}
@@ -1981,8 +1978,8 @@ function MenuTemplate({
   if (template === 'luxury') {
     return (
       <div className="mt-7">
-        <div className="border-y border-gold/30 py-7 text-center">
-          <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-gold">La carte</p>
+        <div className="border-y border-electric/30 py-7 text-center">
+          <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-electric">La carte</p>
           <h1 className="mt-2 font-display text-5xl text-forest">{place.name || 'Menu'}</h1>
           <p className="mx-auto mt-3 max-w-xs text-xs leading-5 text-ink/45">Une sélection préparée avec soin.</p>
         </div>
@@ -1991,7 +1988,7 @@ function MenuTemplate({
           {displayCategories.map((category) => (
             <section key={category.id}>
               <div className="mb-5 text-center">
-                <span className="text-[8px] font-bold uppercase tracking-[0.35em] text-gold">Sélection</span>
+                <span className="text-[8px] font-bold uppercase tracking-[0.35em] text-electric">Sélection</span>
                 <h2 className="mt-1 font-display text-3xl text-forest">{category.name}</h2>
                 {category.description && <p className="mt-1 text-xs text-ink/40">{category.description}</p>}
               </div>
@@ -2001,7 +1998,7 @@ function MenuTemplate({
                     <div className="flex items-baseline gap-3">
                       <h3 className="text-[15px] font-semibold text-forest">{item.name}</h3>
                       <div className="h-px flex-1 border-t border-dotted border-ink/15" />
-                      <span className="text-sm font-bold text-gold">{Number(item.price).toLocaleString('fr-FR')} MAD</span>
+                      <span className="text-sm font-bold text-electric">{Number(item.price).toLocaleString('fr-FR')} MAD</span>
                     </div>
                     {item.description && <p className="mt-1.5 max-w-[85%] text-[11px] leading-5 text-ink/40">{item.description}</p>}
                   </article>
@@ -2016,7 +2013,7 @@ function MenuTemplate({
 
   return (
     <div className="mt-7">
-      <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold">Découvrez</p>
+      <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-electric">Découvrez</p>
       <h1 className="mt-1 font-display text-4xl text-forest">Notre menu</h1>
       <p className="mt-2 text-sm text-ink/45">Une sélection préparée pour vous.</p>
       {navigationControls}
@@ -2029,7 +2026,7 @@ function MenuTemplate({
                 <article key={item.id} className="flex overflow-hidden rounded-[22px] bg-white p-3 shadow-sm ring-1 ring-ink/5">
                   {photoMode === 'with_photos' && item.image_url && <img src={item.image_url} alt="" className="h-24 w-24 shrink-0 rounded-[16px] object-cover" />}
                   <div className="min-w-0 flex-1 p-2">
-                    <div className="flex items-start justify-between gap-3"><h3 className="font-semibold text-forest">{item.name}</h3><span className="shrink-0 text-sm font-bold text-gold">{Number(item.price).toLocaleString('fr-FR')} MAD</span></div>
+                    <div className="flex items-start justify-between gap-3"><h3 className="font-semibold text-forest">{item.name}</h3><span className="shrink-0 text-sm font-bold text-electric">{Number(item.price).toLocaleString('fr-FR')} MAD</span></div>
                     {item.description && <p className="mt-2 text-xs leading-5 text-ink/45">{item.description}</p>}
                   </div>
                 </article>
@@ -2095,7 +2092,7 @@ function Step({
 }) {
   return (
     <div className="flex gap-4">
-      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gold/10 text-[9px] font-bold text-gold">
+      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-forest/10 text-[9px] font-bold text-electric">
         {number}
       </div>
 

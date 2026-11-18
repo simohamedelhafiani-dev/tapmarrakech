@@ -135,11 +135,11 @@ export default function Employee() {
   const isStampProgram = loyaltyProgram.program_type === 'STAMP';
   const [loyaltyDesign, setLoyaltyDesign] = useState({
     template_id: 'luxury',
-    primary_color: '#D4AF37',
-    secondary_color: '#D3A84C',
-    background_color: '#F7F7F3',
-    text_color: '#0D0D0D',
-    button_color: '#D4AF37',
+    primary_color: '#00DFA5',
+    secondary_color: '#686D76',
+    background_color: '#111111',
+    text_color: '#00DFA5',
+    button_color: '#00DFA5',
     border_radius: 24,
     design_config: defaultLoyaltyDesignConfig,
   });
@@ -680,15 +680,15 @@ export default function Employee() {
           <title>Carte fidélité ${customer.loyalty_number}</title>
           <style>
             * { box-sizing: border-box; }
-            body { margin: 0; padding: 40px; background: #f7f7f3; font-family: Arial, sans-serif; }
-            .card { width: 640px; max-width: 100%; margin: 0 auto; padding: 34px; border-radius: 28px; background: #173f35; color: white; box-shadow: 0 20px 50px rgba(0,0,0,.16); }
+            body { margin: 0; padding: 40px; background: #111111; font-family: Arial, sans-serif; }
+            .card { width: 640px; max-width: 100%; margin: 0 auto; padding: 34px; border-radius: 28px; background: #686D76; color: white; box-shadow: 0 20px 50px rgba(0,0,0,.16); }
             .small { margin-top: 8px; color: rgba(255,255,255,.65); font-size: 12px; text-transform: uppercase; letter-spacing: 2px; }
             .brand { display: flex; align-items: center; gap: 14px; }
             .brand img { width: 58px; height: 58px; object-fit: contain; border-radius: 12px; background: #ffffff; padding: 5px; }
             .establishment { margin-top: 18px; font-size: 22px; font-weight: 700; color: #ffffff; }
             .name { margin-top: 55px; font-size: 26px; font-weight: 700; }
             .number-label { margin-top: 30px; color: rgba(255,255,255,.6); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; }
-            .number { margin-top: 6px; font-size: 30px; font-weight: 800; letter-spacing: 3px; color: #d3a84c; }
+            .number { margin-top: 6px; font-size: 30px; font-weight: 800; letter-spacing: 3px; color: #686D76; }
             .footer { margin-top: 28px; display: flex; justify-content: space-between; color: rgba(255,255,255,.55); font-size: 11px; }
             @media print { body { padding: 0; background: white; } .card { box-shadow: none; } }
           </style>
@@ -1020,7 +1020,7 @@ export default function Employee() {
 
   if (loginLoading) {
     return (
-      <div className="min-h-screen grid place-items-center bg-[#f7f7f3]">
+      <div className="min-h-screen grid place-items-center bg-[#111111]">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
       </div>
     );
@@ -1028,18 +1028,18 @@ export default function Employee() {
 
   if (!session) {
     return (
-      <div className="min-h-screen bg-[#f7f7f3] px-4 py-8">
+      <div className="min-h-screen bg-[#111111] px-4 py-8">
         <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md items-center justify-center">
           <div className="w-full rounded-[2rem] border border-ink/5 bg-white p-7 shadow-2xl md:p-9">
             <div className="mb-8 text-center">
               <div className="mb-4 flex justify-center">
                 <img
-                  src="/kelyani-final.svg"
+                  src="/kelyani-official-app-icon.webp"
                   alt="KELYANI"
                   className="h-16 w-16 object-contain"
                 />
               </div>
-              <p className="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-gold">
+              <p className="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#00DFA5]">
                 Espace employé
               </p>
               <h1 className="mt-2 font-display text-3xl text-forest">
@@ -1062,7 +1062,7 @@ export default function Employee() {
                   if (e.key === 'Enter') loginEmployee();
                 }}
                 placeholder="Code de connexion"
-                className="w-full rounded-2xl border border-ink/10 bg-[#f7f7f3] py-4 pl-12 pr-4 text-center text-lg tracking-[0.25em] outline-none focus:border-forest"
+                className="w-full rounded-2xl border border-ink/10 bg-[#111111] py-4 pl-12 pr-4 text-center text-lg tracking-[0.25em] outline-none focus:border-forest"
               />
             </div>
 
@@ -1091,14 +1091,14 @@ export default function Employee() {
 
   if (loading) {
     return (
-      <div className="min-h-screen grid place-items-center bg-[#f7f7f3]">
+      <div className="min-h-screen grid place-items-center bg-[#111111]">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f7f3] p-4 md:p-8">
+    <div className="min-h-screen bg-[#111111] p-4 md:p-8">
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 flex justify-center">
           <div className="flex items-center gap-3 rounded-2xl border border-ink/5 bg-white px-5 py-3 shadow-sm">
@@ -1120,7 +1120,7 @@ export default function Employee() {
               <p className="truncate text-base font-semibold text-forest md:text-lg">
                 {session.establishment_name || selectedEstablishmentName}
               </p>
-              <p className="mt-0.5 text-[10px] font-medium uppercase tracking-[0.18em] text-gold">
+              <p className="mt-0.5 text-[10px] font-medium uppercase tracking-[0.18em] text-[#00DFA5]">
                 Établissement
               </p>
             </div>
@@ -1148,7 +1148,7 @@ export default function Employee() {
                   setManualCustomerSearch('');
                   setShowScanner(true);
                 }}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gold px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#686D76] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90"
               >
                 <CreditCard size={17} />
                 Scanner fidélité
@@ -1258,7 +1258,7 @@ export default function Employee() {
                   </div>
 
                   <div className="flex flex-wrap items-center gap-3">
-                    <div className="rounded-xl bg-[#f7f7f3] px-4 py-2 text-center">
+                    <div className="rounded-xl bg-[#111111] px-4 py-2 text-center">
                       <p className="text-[10px] uppercase tracking-wide text-ink/40">
                         {isStampProgram ? 'Tampons' : 'Points'}
                       </p>
@@ -1269,12 +1269,12 @@ export default function Employee() {
 
                     {isStampProgram ? (
                       <>
-                        <button onClick={() => void addStamp(customer)} disabled={saving} className="inline-flex items-center gap-2 rounded-xl border border-gold/30 bg-white px-4 py-2.5 text-xs font-semibold text-forest hover:bg-gold/5 disabled:opacity-50">
+                        <button onClick={() => void addStamp(customer)} disabled={saving} className="inline-flex items-center gap-2 rounded-xl border border-[#00DFA5]/30 bg-white px-4 py-2.5 text-xs font-semibold text-forest hover:bg-[#686D76]/5 disabled:opacity-50">
                           <Gift size={16} />
                           Ajouter un tampon
                         </button>
                         {(customer.stamps_balance ?? 0) >= loyaltyProgram.stamp_goal && (
-                          <button onClick={() => void redeemStampReward(customer)} disabled={saving} className="inline-flex items-center gap-2 rounded-xl bg-gold px-4 py-2.5 text-xs font-semibold text-forest hover:opacity-90 disabled:opacity-50">
+                          <button onClick={() => void redeemStampReward(customer)} disabled={saving} className="inline-flex items-center gap-2 rounded-xl bg-[#686D76] px-4 py-2.5 text-xs font-semibold text-forest hover:opacity-90 disabled:opacity-50">
                             <Gift size={16} />
                             Réclamer récompense
                           </button>
@@ -1303,7 +1303,7 @@ export default function Employee() {
 
                     <button
                       onClick={() => setShowCard(customer)}
-                      className="inline-flex items-center gap-2 rounded-xl border border-gold/30 bg-white px-4 py-2.5 text-xs font-semibold text-forest hover:bg-gold/5"
+                      className="inline-flex items-center gap-2 rounded-xl border border-[#00DFA5]/30 bg-white px-4 py-2.5 text-xs font-semibold text-forest hover:bg-[#686D76]/5"
                     >
                       <CreditCard size={16} />
                       Carte
@@ -1327,7 +1327,7 @@ export default function Employee() {
       {showInstallHelp && (
         <Modal title="Installer le scanner" onClose={() => setShowInstallHelp(false)}>
           <div className="space-y-4 text-sm text-ink/60">
-            <div className="rounded-2xl bg-[#f7f7f3] p-4">
+            <div className="rounded-2xl bg-[#111111] p-4">
               <p className="font-semibold text-forest">Scanner fidélité</p>
               <p className="mt-1 leading-6">Ce raccourci est lié à cet établissement et ouvrira directement le scanner.</p>
             </div>
@@ -1392,7 +1392,7 @@ export default function Employee() {
             if (!saving) setEditCustomer(null);
           }}
         >
-          <div className="mb-5 rounded-2xl bg-[#f7f7f3] p-4">
+          <div className="mb-5 rounded-2xl bg-[#111111] p-4">
             <p className="text-xs text-ink/40">Numéro de fidélité</p>
             <p className="mt-1 text-xl font-bold tracking-wider text-forest">
               {editCustomer.loyalty_number}
@@ -1458,7 +1458,7 @@ export default function Employee() {
                 published: true,
               }}
             />
-            {loyaltyProgram.program_type === 'STAMP' && <button disabled={saving} onClick={() => void addStamp(showCard)} className="w-full rounded-xl bg-gold py-3.5 text-xs font-bold text-forest disabled:opacity-50">+ Ajouter 1 tampon</button>}
+            {loyaltyProgram.program_type === 'STAMP' && <button disabled={saving} onClick={() => void addStamp(showCard)} className="w-full rounded-xl bg-[#686D76] py-3.5 text-xs font-bold text-forest disabled:opacity-50">+ Ajouter 1 tampon</button>}
             {showCardLink && <button onClick={async () => { await navigator.clipboard.writeText(showCardLink); alert('Lien de la carte copié.'); }} className="w-full rounded-xl border border-ink/10 bg-white py-3 text-xs font-semibold text-forest">Copier le lien client</button>}
             <div className="flex gap-3">
               <button onClick={() => printLoyaltyCard(showCard)} className="flex-1 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white">Imprimer / PDF</button>
@@ -1483,22 +1483,22 @@ export default function Employee() {
             Scannez la carte du client pour les opérations habituelles, ou saisissez ci-dessous le code gagnant d’une tombola.
           </p>
 
-          <div className="mb-5 rounded-2xl border border-[#D4AF37]/25 bg-[#0D0D0D] p-4 text-white">
+          <div className="mb-5 rounded-2xl border border-[#00DFA5]/25 bg-[#00DFA5] p-4 text-white">
             <div className="mb-3 flex items-center gap-2">
-              <Trophy size={17} className="text-[#D4AF37]" />
+              <Trophy size={17} className="text-[#00DFA5]" />
               <h3 className="text-sm font-semibold">Valider un gain de tombola</h3>
             </div>
             <p className="mb-3 text-[11px] leading-5 text-white/55">Saisissez le code affiché par le gagnant sur sa carte. La récompense sera vérifiée pour cet établissement avant toute utilisation.</p>
             <div className="flex flex-col gap-2 sm:flex-row">
-              <input value={raffleClaimCode} onChange={e => { setRaffleClaimCode(e.target.value.trim()); setRaffleClaim(null); }} placeholder="Code gagnant" autoComplete="off" className="min-w-0 flex-1 rounded-xl border border-white/15 bg-white/5 px-3 py-3 font-mono text-xs text-white outline-none focus:border-[#D4AF37]" />
-              <button type="button" disabled={raffleClaimBusy || !raffleClaimCode.trim()} onClick={() => void lookupRaffleClaim()} className="rounded-xl bg-[#D4AF37] px-4 py-3 text-xs font-bold text-[#0D0D0D] disabled:opacity-50">{raffleClaimBusy ? 'Vérification…' : 'Vérifier le code'}</button>
+              <input value={raffleClaimCode} onChange={e => { setRaffleClaimCode(e.target.value.trim()); setRaffleClaim(null); }} placeholder="Code gagnant" autoComplete="off" className="min-w-0 flex-1 rounded-xl border border-white/15 bg-white/5 px-3 py-3 font-mono text-xs text-white outline-none focus:border-[#00DFA5]" />
+              <button type="button" disabled={raffleClaimBusy || !raffleClaimCode.trim()} onClick={() => void lookupRaffleClaim()} className="rounded-xl bg-[#00DFA5] px-4 py-3 text-xs font-bold text-[#050505] disabled:opacity-50">{raffleClaimBusy ? 'Vérification…' : 'Vérifier le code'}</button>
             </div>
-            {raffleClaim && <div className="mt-4 rounded-xl border border-[#D4AF37]/20 bg-white/[0.04] p-3">
-              <p className="text-[9px] font-bold uppercase tracking-wider text-[#D4AF37]">{raffleClaim.title}</p>
+            {raffleClaim && <div className="mt-4 rounded-xl border border-[#00DFA5]/20 bg-white/[0.04] p-3">
+              <p className="text-[9px] font-bold uppercase tracking-wider text-[#00DFA5]">{raffleClaim.title}</p>
               <p className="mt-1 text-sm font-semibold">{raffleClaim.prize_name}</p>
               {raffleClaim.prize_description && <p className="mt-1 text-xs leading-5 text-white/60">{raffleClaim.prize_description}</p>}
               <p className="mt-2 text-[10px] text-white/50">Valable du {new Date(raffleClaim.valid_from).toLocaleDateString('fr-FR')} au {new Date(raffleClaim.valid_until).toLocaleDateString('fr-FR')}{raffleClaim.reservation_required ? ' · Réservation obligatoire' : ''}</p>
-              <button type="button" disabled={raffleClaimBusy} onClick={() => void redeemRaffleClaim()} className="mt-3 w-full rounded-xl bg-[#D4AF37] px-4 py-3 text-xs font-bold text-[#0D0D0D] disabled:opacity-50">{raffleClaimBusy ? 'Validation…' : 'Utiliser la récompense'}</button>
+              <button type="button" disabled={raffleClaimBusy} onClick={() => void redeemRaffleClaim()} className="mt-3 w-full rounded-xl bg-[#00DFA5] px-4 py-3 text-xs font-bold text-[#050505] disabled:opacity-50">{raffleClaimBusy ? 'Validation…' : 'Utiliser la récompense'}</button>
             </div>}
           </div>
 
@@ -1514,7 +1514,7 @@ export default function Employee() {
             value={manualCustomerSearch}
             onChange={e => setManualCustomerSearch(e.target.value)}
             placeholder="N° fidélité, téléphone, nom..."
-            className="w-full rounded-xl border border-ink/10 bg-[#f7f7f3] px-4 py-3 text-sm outline-none focus:border-forest"
+            className="w-full rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-forest"
           />
 
           {manualMatches.length > 0 && (
@@ -1534,13 +1534,13 @@ export default function Employee() {
                     }
                     setManualCustomerSearch('');
                   }}
-                  className="flex w-full items-center justify-between border-b border-ink/5 bg-white px-4 py-3 text-left last:border-0 hover:bg-[#f7f7f3]"
+                  className="flex w-full items-center justify-between border-b border-ink/5 bg-white px-4 py-3 text-left last:border-0 hover:bg-[#111111]"
                 >
                   <span>
                     <span className="block text-sm font-semibold text-forest">{customer.first_name} {customer.last_name ?? ''}</span>
                     <span className="text-[11px] text-ink/40">{customer.loyalty_number} · {customer.phone}</span>
                   </span>
-                  <span className="text-xs font-semibold text-gold">{customer.points_balance} pts</span>
+                  <span className="text-xs font-semibold text-[#00DFA5]">{customer.points_balance} pts</span>
                 </button>
               ))}
             </div>
@@ -1567,7 +1567,7 @@ export default function Employee() {
             }
           }}
         >
-          <div className="rounded-2xl bg-[#f7f7f3] p-4">
+          <div className="rounded-2xl bg-[#111111] p-4">
             <p className="font-semibold text-forest">
               {showPoints.first_name} {showPoints.last_name ?? ''}
             </p>
@@ -1644,7 +1644,7 @@ export default function Employee() {
             }
           }}
         >
-          <div className="rounded-2xl bg-[#f7f7f3] p-4">
+          <div className="rounded-2xl bg-[#111111] p-4">
             <p className="text-xs text-ink/40">Client</p>
             <p className="mt-1 font-semibold text-forest">
               {showDiscount.first_name} {showDiscount.last_name ?? ''}
@@ -1653,8 +1653,8 @@ export default function Employee() {
             <p className="mt-1 text-xs font-medium text-forest/60">N° fidélité : {showDiscount.loyalty_number}</p>
           </div>
 
-          <div className="mt-5 rounded-2xl border border-gold/20 bg-gold/5 p-4 text-center">
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Réduction active</p>
+          <div className="mt-5 rounded-2xl border border-[#00DFA5]/20 bg-[#686D76]/5 p-4 text-center">
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#00DFA5]">Réduction active</p>
             <p className="mt-1 text-4xl font-bold text-forest">Avantage fidélité</p>
             <p className="mt-2 text-xs text-ink/50">La réduction reste utilisable sur plusieurs achats jusqu’à sa date d’expiration.</p>
           </div>
@@ -1709,7 +1709,7 @@ export default function Employee() {
                 </div>
                 <div className="mt-2 flex items-center justify-between">
                   <span>Réduction</span>
-                  <strong className="text-gold">Calculée automatiquement</strong>
+                  <strong className="text-[#00DFA5]">Calculée automatiquement</strong>
                 </div>
                 <p className="mt-2 text-xs text-ink/45">La carte reste active après cet achat.</p>
               </div>
@@ -1740,7 +1740,7 @@ export default function Employee() {
         >
           <div className="grid gap-5 md:grid-cols-[1fr_1fr]">
             <div>
-              <div className="rounded-2xl bg-[#f7f7f3] p-4">
+              <div className="rounded-2xl bg-[#111111] p-4">
                 <p className="text-xs text-ink/40">Client</p>
                 <p className="mt-1 font-semibold text-forest">
                   {showRewards.first_name} {showRewards.last_name ?? ''}
@@ -1787,7 +1787,7 @@ export default function Employee() {
                               </p>
                             )}
                           </div>
-                          <span className="shrink-0 rounded-lg bg-[#f7f7f3] px-2.5 py-1 text-xs font-semibold text-forest">
+                          <span className="shrink-0 rounded-lg bg-[#111111] px-2.5 py-1 text-xs font-semibold text-forest">
                             {reward.points_required} pts
                           </span>
                         </div>
@@ -1916,7 +1916,7 @@ function Modal({
           <h2 className="font-display text-2xl text-forest">{title}</h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-2 text-ink/40 hover:bg-[#f7f7f3]"
+            className="rounded-lg p-2 text-ink/40 hover:bg-[#111111]"
           >
             <X size={20} />
           </button>

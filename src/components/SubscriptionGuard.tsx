@@ -63,7 +63,7 @@ export default function SubscriptionGuard({
         role="status"
         aria-live="polite"
       >
-        <span className="h-7 w-7 animate-spin rounded-full border-2 border-[#D4AF37] border-t-transparent" />
+        <span className="h-7 w-7 animate-spin rounded-full border-2 border-[#00DFA5] border-t-transparent" />
         <span>Vérification de l’abonnement…</span>
       </div>
     );
@@ -115,3 +115,4 @@ export default function SubscriptionGuard({
 
   return <>{children}</>;
 }
+

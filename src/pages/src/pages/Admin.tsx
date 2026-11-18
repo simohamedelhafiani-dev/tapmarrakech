@@ -118,7 +118,7 @@ export default function Admin() {
       >
         <div className="mb-12 flex items-center justify-between px-3">
           <div className="font-display text-2xl tracking-tight">
-            Tap<span className="text-gold">Marrakech</span>
+            Tap<span className="text-electric">Marrakech</span>
           </div>
 
           <button
@@ -155,7 +155,7 @@ export default function Admin() {
 
         <div className="mt-auto border-t border-white/10 pt-5">
           <div className="mb-4 flex items-center gap-3 px-2">
-            <div className="grid h-9 w-9 place-items-center rounded-full bg-gold font-semibold text-forest">
+            <div className="grid h-9 w-9 place-items-center rounded-full bg-forest font-semibold text-forest">
               {user?.email?.[0]?.toUpperCase()}
             </div>
 

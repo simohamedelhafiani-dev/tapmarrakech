@@ -1,28 +1,25 @@
 name: E2E — Vercel Preview + Supabase Staging
 
 on:
+  # E2E is intentionally paused while the final product version is assembled.
+  # Run manually only after the user requests certification.
   workflow_dispatch:
-  pull_request:
-    branches: [main]
-    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
   contents: read
 
 concurrency:
   group: kelyani-e2e-preview-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   e2e-preview:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
-      E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
+      E2E_BASE_URL: ${{ secrets.KELYANI_FINAL_PREVIEW_URL }}
       E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
       E2E_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
-      E2E_CLIENT_EMAIL: ${{ secrets.E2E_CLIENT_EMAIL }}
-      E2E_CLIENT_PASSWORD: ${{ secrets.E2E_CLIENT_PASSWORD }}
       E2E_RESPONSIBLE_EMAIL: ${{ secrets.E2E_RESPONSIBLE_EMAIL }}
       E2E_RESPONSIBLE_PASSWORD: ${{ secrets.E2E_RESPONSIBLE_PASSWORD }}
       E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
@@ -38,17 +35,32 @@ jobs:
         shell: bash
         run: |
           missing=0
-          for name in E2E_BASE_URL E2E_SUPABASE_URL E2E_SUPABASE_ANON_KEY E2E_CLIENT_EMAIL E2E_CLIENT_PASSWORD E2E_RESPONSIBLE_EMAIL E2E_RESPONSIBLE_PASSWORD E2E_ADMIN_EMAIL E2E_ADMIN_PASSWORD; do
+          for name in E2E_BASE_URL E2E_SUPABASE_URL E2E_SUPABASE_ANON_KEY E2E_RESPONSIBLE_EMAIL E2E_RESPONSIBLE_PASSWORD E2E_ADMIN_EMAIL E2E_ADMIN_PASSWORD; do
             if [ -z "${!name}" ]; then
               echo "::error::Required Actions secret is unavailable: $name"
               missing=1
             fi
           done
           if [ "$missing" -ne 0 ]; then
-            echo "Check whether the values are Repository secrets or Environment secrets. If they are Environment secrets, bind this job to the exact existing GitHub Environment name."
+            echo "Configure KELYANI_FINAL_PREVIEW_URL and the E2E Supabase Staging secrets before certification."
             exit 1
           fi
-          node -e "const u=new URL(process.env.E2E_BASE_URL); if(!u.hostname.endsWith('.vercel.app')) process.exit(1); const s=new URL(process.env.E2E_SUPABASE_URL); if(!s.hostname.endsWith('.supabase.co')) process.exit(1)"
+          node -e "const u=new URL(process.env.E2E_BASE_URL); if(u.protocol!=='https:' || !u.hostname.endsWith('.vercel.app')) process.exit(1); const s=new URL(process.env.E2E_SUPABASE_URL); if(s.hostname!=='jsllksnmylpxcgqaeidq.supabase.co') process.exit(1); console.log('Preview host and Supabase Staging project verified.')"
+      - name: Confirm the branch-specific Preview is deployed
+        shell: bash
+        run: |
+          node -e "console.log('E2E Preview host:', new URL(process.env.E2E_BASE_URL).host)"
+          marker='name="kelyani-preview-track" content="kelyani-final-consolidation-2026-11-v1"'
+          for attempt in $(seq 1 30); do
+            if curl --connect-timeout 5 --max-time 15 -L -fsS -H "x-vercel-protection-bypass: ${VERCEL_AUTOMATION_BYPASS_SECRET}" -H "x-vercel-set-bypass-cookie: true" "$E2E_BASE_URL" | grep -Fq "$marker"; then
+              echo "Current final consolidation Preview confirmed."
+              exit 0
+            fi
+            echo "Waiting for current Preview deployment ($attempt/30)..."
+            sleep 10
+          done
+          echo "::error::E2E_BASE_URL is not serving the current Nardo/Wallet integration Preview."
+          exit 1
       - name: Install application dependencies
         run: npm ci
       - name: Install Playwright test runner and Chromium

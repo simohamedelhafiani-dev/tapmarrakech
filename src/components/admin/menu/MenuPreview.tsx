@@ -15,14 +15,14 @@ type MenuPreviewProps = {
 };
 
 const palettes = {
-  editorial: { page: 'bg-[#f5f1e8] text-[#24211c]', panel: 'bg-[#fffdf8]', accent: 'text-[#9c7a32]', muted: 'text-[#74776e]', line: 'border-[#24211c]/15', card: 'bg-white' },
-  luxury: { page: 'bg-[#11100d] text-[#f7f0df]', panel: 'bg-[#171510]', accent: 'text-[#d2b46a]', muted: 'text-white/60', line: 'border-[#c8a75d]/30', card: 'bg-[#1b1914]' },
-  cards: { page: 'bg-[#f7f7f3] text-[#24211c]', panel: 'bg-white', accent: 'text-[#a17d31]', muted: 'text-[#777b73]', line: 'border-black/10', card: 'bg-white' },
-  dark: { page: 'bg-[#0D0D0D] text-white', panel: 'bg-[#111111]', accent: 'text-[#d6b86b]', muted: 'text-white/60', line: 'border-white/15', card: 'bg-white/[0.06]' },
-  onyx: { page: 'bg-[#050505] text-white', panel: 'bg-[#101010]', accent: 'text-[#E1C27A]', muted: 'text-white/60', line: 'border-white/15', card: 'bg-white/[0.05]' },
-  'royal-gold': { page: 'bg-[#0B0906] text-[#FFF9E8]', panel: 'bg-[#17110A]', accent: 'text-[#E1C27A]', muted: 'text-[#FFF9E8]/60', line: 'border-[#E1C27A]/30', card: 'bg-[#17110A]' },
-  'deep-ocean': { page: 'bg-[#06151B] text-[#F2FCFF]', panel: 'bg-[#0A222B]', accent: 'text-[#8ED9E8]', muted: 'text-white/60', line: 'border-[#8ED9E8]/25', card: 'bg-[#0A222B]' },
-  pearl: { page: 'bg-[#F5F1E8] text-[#1B1A17]', panel: 'bg-[#fffdf8]', accent: 'text-[#9A7A3C]', muted: 'text-[#74716a]', line: 'border-[#B59A67]/25', card: 'bg-white' },
+  editorial: { page: 'bg-[#050505] text-white', panel: 'bg-[#111111]', accent: 'text-[#00DFA5]', muted: 'text-white/60', line: 'border-[#686D76]/40', card: 'bg-[#111111]' },
+  luxury: { page: 'bg-[#050505] text-white', panel: 'bg-[#111111]', accent: 'text-[#00DFA5]', muted: 'text-white/60', line: 'border-[#686D76]/40', card: 'bg-[#111111]' },
+  cards: { page: 'bg-[#050505] text-white', panel: 'bg-[#686D76]', accent: 'text-[#00DFA5]', muted: 'text-white/60', line: 'border-[#00DFA5]/25', card: 'bg-[#111111]' },
+  dark: { page: 'bg-[#050505] text-white', panel: 'bg-[#111111]', accent: 'text-[#00DFA5]', muted: 'text-white/60', line: 'border-[#686D76]/40', card: 'bg-[#111111]' },
+  onyx: { page: 'bg-[#050505] text-white', panel: 'bg-[#111111]', accent: 'text-[#00DFA5]', muted: 'text-white/60', line: 'border-[#00DFA5]/25', card: 'bg-[#111111]' },
+  'royal-gold': { page: 'bg-[#050505] text-white', panel: 'bg-[#686D76]', accent: 'text-[#00DFA5]', muted: 'text-white/60', line: 'border-[#00DFA5]/30', card: 'bg-[#111111]' },
+  'deep-ocean': { page: 'bg-[#050505] text-white', panel: 'bg-[#111111]', accent: 'text-[#00DFA5]', muted: 'text-white/60', line: 'border-[#686D76]/40', card: 'bg-[#111111]' },
+  pearl: { page: 'bg-[#050505] text-white', panel: 'bg-[#686D76]', accent: 'text-[#00DFA5]', muted: 'text-white/60', line: 'border-[#00DFA5]/25', card: 'bg-[#111111]' },
 } as const;
 
 export default function MenuPreview({
@@ -42,7 +42,7 @@ export default function MenuPreview({
     wallpaperObjectUrl: null,
     wallpaperRemoved: false,
     overlayOpacity: 0.35,
-    themeColors: { background: '#F5F1E8', surface: '#FFFDFA', text: '#24211C', accent: '#D4AF37' },
+    themeColors: { background: '#050505', surface: '#686D76', text: '#FFFFFF', accent: '#00DFA5' },
     aiDesign: null,
   };
   const family = getMenuTemplateFamily(activeDraft.template);
@@ -183,7 +183,7 @@ export default function MenuPreview({
   };
 
   return <aside className={`min-w-0 overflow-hidden border border-white/10 bg-[#111] shadow-soft ${fullScreen ? 'rounded-[32px]' : 'rounded-3xl lg:sticky lg:top-24 lg:self-start'}`}>
-    {!compact && <div className="border-b border-white/10 bg-[#111111] p-5"><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Aperçu en direct</p><h3 className="mt-1 text-base font-semibold text-white">{establishmentName || 'Menu public'}</h3><p className="mt-1 text-[11px] text-white/35">Miroir KELYANI · synchronisé avec le Studio</p></div>}
+    {!compact && <div className="border-b border-white/10 bg-[#111111] p-5"><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#00DFA5]">Aperçu en direct</p><h3 className="mt-1 text-base font-semibold text-white">{establishmentName || 'Menu public'}</h3><p className="mt-1 text-[11px] text-white/35">Miroir KELYANI · synchronisé avec le Studio</p></div>}
     <div className={compact ? 'p-0' : 'p-3 sm:p-4'}>
       <div className={`relative mx-auto h-[min(680px,78vh)] min-h-[480px] w-full max-w-[360px] overflow-hidden rounded-[28px] border-[5px] border-[#202020] shadow-xl ${palette.page}`} style={{ backgroundColor: activeDraft.themeColors.background, color: activeDraft.themeColors.text, backgroundImage: activeDraft.wallpaperUrl ? `linear-gradient(rgba(0,0,0,${activeDraft.overlayOpacity}), rgba(0,0,0,${activeDraft.overlayOpacity})), url("${activeDraft.wallpaperUrl}")` : undefined, backgroundSize: 'cover', backgroundPosition: 'center' }}>
         <div className="absolute inset-0 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" style={{ paddingBottom: activeDraft.navigation === 'app' ? 76 : 20 }}>
@@ -216,10 +216,11 @@ export default function MenuPreview({
           </section>
         </div>
         {activeDraft.navigation === 'app' && <nav aria-label="Catégories du menu" className={`absolute bottom-0 left-0 right-0 z-20 flex gap-1.5 overflow-x-auto border-t px-2 pt-2 pb-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${palette.panel} ${palette.line}`}>
-          <button type="button" onClick={() => setCategoryId('all')} className={`shrink-0 rounded-full px-3 py-2 text-[9px] font-semibold ${categoryId === 'all' ? 'bg-[#d4af37] text-[#1f3025]' : 'border border-current/15'}`}>Tout</button>
-          {activeCategories.map(category => <button key={category.id} type="button" onClick={() => setCategoryId(category.id)} className={`shrink-0 rounded-full px-3 py-2 text-[9px] font-semibold ${categoryId === category.id ? 'bg-[#d4af37] text-[#1f3025]' : 'border border-current/15'}`}>{category.name}</button>)}
+          <button type="button" onClick={() => setCategoryId('all')} className={`shrink-0 rounded-full px-3 py-2 text-[9px] font-semibold ${categoryId === 'all' ? 'bg-[#686D76] text-[#00DFA5]' : 'border border-current/15'}`}>Tout</button>
+          {activeCategories.map(category => <button key={category.id} type="button" onClick={() => setCategoryId(category.id)} className={`shrink-0 rounded-full px-3 py-2 text-[9px] font-semibold ${categoryId === category.id ? 'bg-[#686D76] text-[#00DFA5]' : 'border border-current/15'}`}>{category.name}</button>)}
         </nav>}
       </div>
     </div>
   </aside>;
 }
+

@@ -7,14 +7,15 @@ type KelyaniMarkProps = Omit<ImgHTMLAttributes<HTMLImageElement>, 'src' | 'alt' 
 export default function KelyaniMark({ size = 120, className, ...props }: KelyaniMarkProps) {
   return (
     <img
-      src="/kelyani-final.svg"
-      alt="KELYANI"
+      src="/Logo%20Kelyani%20en%20d%C3%A9grad%C3%A9%20teal%20et%20vert.png"
+      alt="KELYANI — L’art de la relation client"
       width={size}
-      height={size}
+      height={Math.round(size * 2 / 3)}
       className={className}
       style={{
         width: size,
-        height: size,
+        height: 'auto',
+        aspectRatio: '3 / 2',
         objectFit: 'contain',
         objectPosition: 'center',
         flexShrink: 0,

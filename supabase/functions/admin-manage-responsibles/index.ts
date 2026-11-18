@@ -42,6 +42,28 @@ Deno.serve(async (req) => {
       return json({ success: true, responsibles: (profiles ?? []).filter((profile) => !assigned.has(profile.id)) });
     }
 
+    if (action === 'unassign') {
+      const userId = String(body.user_id ?? '').trim();
+      if (!userId) return json({ success: false, error: 'Compte responsable obligatoire.' }, 400);
+
+      const { data: target, error: targetError } = await adminClient
+        .from('profiles')
+        .select('id, role')
+        .eq('id', userId)
+        .maybeSingle();
+      if (targetError || !target) return json({ success: false, error: 'Compte responsable introuvable.' }, 404);
+      if (target.role !== 'responsible') return json({ success: false, error: 'Seuls les comptes responsables peuvent être désattribués.' }, 400);
+
+      const { error: updateError } = await adminClient
+        .from('establishment_staff')
+        .update({ active: false })
+        .eq('user_id', userId)
+        .eq('role', 'MANAGER')
+        .eq('active', true);
+      if (updateError) return json({ success: false, error: 'Impossible de désattribuer ce responsable.', details: updateError.message }, 500);
+      return json({ success: true });
+    }
+
     if (action === 'assign') {
       const userId = String(body.user_id ?? '').trim();
       const establishmentId = String(body.establishment_id ?? '').trim();

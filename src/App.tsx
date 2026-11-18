@@ -215,15 +215,15 @@ function OnboardingGate() {
   }, [user?.id, authLoading, retry]);
 
   if (authLoading || status === 'loading') {
-    return <div className="grid min-h-screen place-items-center bg-[var(--kelyani-bg)]"><div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--kelyani-gold)] border-t-transparent" /></div>;
+    return <div className="grid min-h-screen place-items-center bg-[var(--kelyani-bg)]"><div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--kelyani-accent)] border-t-transparent" /></div>;
   }
   if (status === 'incomplete') return <Navigate to="/dashboard/onboarding" replace />;
   if (status === 'error') {
     return <div className="grid min-h-[60vh] place-items-center bg-[var(--kelyani-bg)] px-6 text-center text-[var(--kelyani-text)]">
       <div className="max-w-md rounded-2xl border border-[var(--kelyani-border)] bg-[var(--kelyani-panel)] p-6">
-        <h1 className="font-display text-xl text-[var(--kelyani-gold)]">Vérification du profil impossible</h1>
+        <h1 className="font-display text-xl text-[var(--kelyani-accent)]">Vérification du profil impossible</h1>
         <p className="mt-3 text-sm text-white/60">Nous ne pouvons pas vérifier si votre profil est terminé. Réessayez avant de continuer.</p>
-        <button type="button" onClick={() => setRetry(value => value + 1)} className="mt-5 rounded-xl bg-[var(--kelyani-gold)] px-4 py-2.5 text-sm font-semibold text-[var(--kelyani-bg)]">Réessayer</button>
+        <button type="button" onClick={() => setRetry(value => value + 1)} className="mt-5 rounded-xl bg-[var(--kelyani-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--kelyani-bg)]">Réessayer</button>
       </div>
     </div>;
   }
@@ -348,7 +348,7 @@ function RoleRedirect() {
 
   if (loading) {
     return (
-      <div className="min-h-screen grid place-items-center bg-[#f7f7f3]">
+      <div className="min-h-screen grid place-items-center bg-[var(--kelyani-bg)]">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
       </div>
     );
