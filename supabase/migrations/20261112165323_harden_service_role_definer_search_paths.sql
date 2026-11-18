@@ -5,8 +5,13 @@ ALTER FUNCTION public.claim_public_loyalty_review_bonus(text, text)
   SET search_path = pg_catalog, public, auth, extensions, storage, vault, pg_temp;
 ALTER FUNCTION public.complete_referral_after_loyalty_action()
   SET search_path = pg_catalog, public, auth, extensions, storage, vault, pg_temp;
-ALTER FUNCTION public.consume_public_review_rate_limit(text, integer, integer)
-  SET search_path = pg_catalog, public, auth, extensions, storage, vault, pg_temp;
+DO $guard$
+BEGIN
+  IF to_regprocedure('public.consume_public_review_rate_limit(text, integer, integer)') IS NOT NULL THEN
+    EXECUTE 'ALTER FUNCTION public.consume_public_review_rate_limit(text, integer, integer) SET search_path = pg_catalog, public, auth, extensions, storage, vault, pg_temp;';
+  END IF;
+END;
+$guard$;
 ALTER FUNCTION public.ensure_establishment_scanner_link()
   SET search_path = pg_catalog, public, auth, extensions, storage, vault, pg_temp;
 ALTER FUNCTION public.ensure_loyalty_customer_link()
@@ -17,3 +22,4 @@ ALTER FUNCTION public.get_public_loyalty_transactions(uuid)
   SET search_path = pg_catalog, public, auth, extensions, storage, vault, pg_temp;
 ALTER FUNCTION public.normalize_loyalty_referral_config_for_program()
   SET search_path = pg_catalog, public, auth, extensions, storage, vault, pg_temp;
+

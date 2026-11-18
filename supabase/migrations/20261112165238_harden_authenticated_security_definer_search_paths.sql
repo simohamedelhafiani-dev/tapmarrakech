@@ -3,8 +3,13 @@
 -- pg_catalog is first and pg_temp is last to prevent object shadowing.
 ALTER FUNCTION public.cancel_loyalty_raffle(uuid)
   SET search_path = pg_catalog, public, auth, extensions, storage, vault, pg_temp;
-ALTER FUNCTION public.claim_loyalty_campaign_push_delivery(uuid)
-  SET search_path = pg_catalog, public, auth, extensions, storage, vault, pg_temp;
+DO $guard$
+BEGIN
+  IF to_regprocedure('public.claim_loyalty_campaign_push_delivery(uuid)') IS NOT NULL THEN
+    EXECUTE 'ALTER FUNCTION public.claim_loyalty_campaign_push_delivery(uuid) SET search_path = pg_catalog, public, auth, extensions, storage, vault, pg_temp;';
+  END IF;
+END;
+$guard$;
 ALTER FUNCTION public.create_birthday_reward(uuid, uuid, text, text, integer, numeric)
   SET search_path = pg_catalog, public, auth, extensions, storage, vault, pg_temp;
 ALTER FUNCTION public.create_loyalty_card_recovery_session(uuid)
@@ -57,3 +62,4 @@ ALTER FUNCTION public.user_has_establishment_access(uuid)
   SET search_path = pg_catalog, public, auth, extensions, storage, vault, pg_temp;
 ALTER FUNCTION public.user_owns_establishment(uuid)
   SET search_path = pg_catalog, public, auth, extensions, storage, vault, pg_temp;
+

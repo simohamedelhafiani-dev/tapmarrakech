@@ -16,8 +16,13 @@ ALTER FUNCTION public.complete_pending_loyalty_referral(uuid)
   SET search_path = pg_catalog, public, auth, extensions, storage, vault, pg_temp;
 ALTER FUNCTION public.consume_employee_login_attempt(text)
   SET search_path = pg_catalog, public, auth, extensions, storage, vault, pg_temp;
-ALTER FUNCTION public.create_establishment_with_premium_trial(text, text)
-  SET search_path = pg_catalog, public, auth, extensions, storage, vault, pg_temp;
+DO $guard$
+BEGIN
+  IF to_regprocedure('public.create_establishment_with_premium_trial(text, text)') IS NOT NULL THEN
+    EXECUTE 'ALTER FUNCTION public.create_establishment_with_premium_trial(text, text) SET search_path = pg_catalog, public, auth, extensions, storage, vault, pg_temp;';
+  END IF;
+END;
+$guard$;
 ALTER FUNCTION public.ensure_loyalty_referral_code(uuid)
   SET search_path = pg_catalog, public, auth, extensions, storage, vault, pg_temp;
 ALTER FUNCTION public.generate_loyalty_referral_code(uuid)
@@ -62,3 +67,4 @@ ALTER FUNCTION public.set_employee_access_code_status(uuid, boolean)
   SET search_path = pg_catalog, public, auth, extensions, storage, vault, pg_temp;
 ALTER FUNCTION public.set_loyalty_admin_code(uuid, text)
   SET search_path = pg_catalog, public, auth, extensions, storage, vault, pg_temp;
+
