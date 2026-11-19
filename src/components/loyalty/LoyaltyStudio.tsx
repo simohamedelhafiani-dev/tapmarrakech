@@ -191,7 +191,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   const { role } = useAuth();
   const isAdmin = role === 'admin';
   const [ownsEstablishment, setOwnsEstablishment] = useState(false);
-  const canManageWallet = isAdmin || ownsEstablishment;
+  const canManageWallet = isAdmin || role === 'responsible' || ownsEstablishment;
   const [tab, setTab] = useState<TabId>('settings');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
