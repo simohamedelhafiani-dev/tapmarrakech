@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
-      E2E_BASE_URL: ${{ secrets.KELYANI_FINAL_PREVIEW_URL }}
+      E2E_BASE_URL: ${{ secrets.KELYANI_FINAL_PREVIEW_URL || 'https://tapmarrakech-yvzpmb12z-simohamedelhafiani-7962.vercel.app/' }}
       E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
       E2E_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
       E2E_RESPONSIBLE_EMAIL: ${{ secrets.E2E_RESPONSIBLE_EMAIL }}
