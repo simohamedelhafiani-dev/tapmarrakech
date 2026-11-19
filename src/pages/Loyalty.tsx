@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import {
   Gift,
@@ -1721,25 +1722,34 @@ function Modal({
   onClose: () => void;
   children: React.ReactNode;
 }) {
-  return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-5">
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="font-display text-2xl text-forest">
-            {title}
-          </h2>
+  return createPortal(
+    <div className="fixed inset-0 z-[110] overflow-y-auto bg-ink/40 p-4">
+      <div className="grid min-h-full place-items-center">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="loyalty-dialog-title"
+          className="my-auto max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl"
+        >
+          <div className="mb-6 flex items-center justify-between">
+            <h2 id="loyalty-dialog-title" className="font-display text-2xl text-forest">
+              {title}
+            </h2>
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="grid h-9 w-9 place-items-center rounded-full bg-[#111111] text-ink/50"
-          >
-            <X size={17} />
-          </button>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Fermer"
+              className="grid h-9 w-9 place-items-center rounded-full bg-[#111111] text-ink/50"
+            >
+              <X size={17} />
+            </button>
+          </div>
+
+          {children}
         </div>
-
-        {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

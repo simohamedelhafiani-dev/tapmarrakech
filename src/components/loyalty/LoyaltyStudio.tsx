@@ -191,7 +191,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   const { role } = useAuth();
   const isAdmin = role === 'admin';
   const [ownsEstablishment, setOwnsEstablishment] = useState(false);
-  const canManageWallet = isAdmin || ownsEstablishment;
+  const canManageWallet = isAdmin || role === 'responsible' || ownsEstablishment;
   const [tab, setTab] = useState<TabId>('settings');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -1438,8 +1438,8 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                             {saved ? saved.publication_status === 'published' ? 'Publié' : saved.publication_status === 'pending_validation' ? 'En attente Google' : saved.publication_status : 'Non publié'}
                             {saved?.google_review_status ? ' · '+saved.google_review_status : ''}
                           </span>
-                          <button type="button" onClick={() => void publishWalletTemplate(template.id)} disabled={Boolean(publishingWalletKey)} className="rounded-lg bg-[#686D76] px-3 py-2 text-[10px] font-semibold text-white disabled:opacity-40">
-                            {busy ? 'Publication…' : saved?.publication_status === 'published' ? 'Mettre à jour' : 'Publier'}
+                          <button type="button" onClick={() => void publishWalletTemplate(template.id)} disabled={Boolean(publishingWalletKey) || !isAdmin} title={!isAdmin ? 'La publication Google Wallet est réservée à l’administration.' : undefined} className="rounded-lg bg-[#686D76] px-3 py-2 text-[10px] font-semibold text-white disabled:opacity-40">
+                            {!isAdmin ? 'Publication admin' : busy ? 'Publication…' : saved?.publication_status === 'published' ? 'Mettre à jour' : 'Publier'}
                           </button>
                         </div>
                       </div>
@@ -1515,9 +1515,19 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   onClose={() => setWalletCropPlatform(null)}
                 />
               )}
-              <StudioCard eyebrow="Apple Wallet" title="Apple Wallet">
-                <p className="text-xs leading-5 text-white/55">Le catalogue est préparé, mais la publication Apple reste désactivée jusqu’à la configuration du compte Apple Developer Organisation et du certificat Pass Type ID.</p>
-                <span className="mt-3 inline-flex rounded-full border border-white/15 px-3 py-1.5 text-[10px] text-white/60">Certificats requis</span>
+              <StudioCard eyebrow="Apple Wallet" title="Préparation Apple Wallet">
+                <p className="text-xs leading-5 text-white/55">La configuration est visible et prête dans cet espace. L’ajout des cartes Apple Wallet sera activé après la configuration du compte Apple Developer Organisation et du certificat Pass Type ID.</p>
+                <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                  <div className="rounded-xl border border-white/10 bg-[#111111] p-3">
+                    <p className="text-[9px] font-bold uppercase tracking-[.14em] text-white/35">Compte développeur</p>
+                    <p className="mt-1 text-xs font-semibold text-white/70">À configurer</p>
+                  </div>
+                  <div className="rounded-xl border border-white/10 bg-[#111111] p-3">
+                    <p className="text-[9px] font-bold uppercase tracking-[.14em] text-white/35">Certificat Pass Type ID</p>
+                    <p className="mt-1 text-xs font-semibold text-white/70">À configurer</p>
+                  </div>
+                </div>
+                <span className="mt-3 inline-flex rounded-full border border-[#00DFA5]/20 bg-[#00DFA5]/5 px-3 py-1.5 text-[10px] font-semibold text-[#00DFA5]">Mode préparation · aucun pass Apple n’est émis</span>
               </StudioCard>
             </div>
           )}

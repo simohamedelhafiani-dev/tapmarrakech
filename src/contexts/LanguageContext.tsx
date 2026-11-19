@@ -37,6 +37,8 @@ const uiTranslations: Record<string, { en: string; ar: string }> = {
   'Chargement…': { en: 'Loading…', ar: 'جارٍ التحميل…' },
   'Chargement...': { en: 'Loading...', ar: 'جارٍ التحميل...' },
   'Aucun résultat': { en: 'No results', ar: 'لا توجد نتائج' },
+  'Recherche des clients…': { en: 'Searching customers…', ar: 'جارٍ البحث عن العملاء…' },
+  'Aucun client ne correspond à cette recherche.': { en: 'No customer matches this search.', ar: 'لا يوجد عميل يطابق هذا البحث.' },
   'Aucun établissement sélectionné': { en: 'No establishment selected', ar: 'لم يتم اختيار مؤسسة' },
   'Mon établissement': { en: 'My establishment', ar: 'مؤسستي' },
   'Avis & Réputation': { en: 'Reviews & Reputation', ar: 'التقييمات والسمعة' },

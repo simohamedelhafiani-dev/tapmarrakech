@@ -496,7 +496,7 @@ export default function Menu() {
     }
   }
 
-  if (loading && establishments.length === 0) {
+  if (loading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
         <div className="text-sm text-[#B0B0B0]/50">Chargement du menu…</div>
@@ -504,11 +504,20 @@ export default function Menu() {
     );
   }
 
-  if (errorMessage && establishments.length === 0) {
+  if (errorMessage) {
     return (
       <div className="rounded-3xl border border-red-200 bg-red-50 p-8 text-red-700">
         <p className="font-semibold">Impossible de charger le menu.</p>
         <p className="mt-2 text-sm">{errorMessage}</p>
+        {establishmentId && (
+          <button
+            type="button"
+            onClick={() => void loadMenu()}
+            className="mt-4 rounded-xl bg-[#686D76] px-4 py-2 text-sm font-semibold text-white"
+          >
+            Réessayer
+          </button>
+        )}
       </div>
     );
   }
