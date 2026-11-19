@@ -45,6 +45,7 @@ export default function Promotions() {
   const [establishments, setEstablishments] = useState<Establishment[]>([]);
   const [establishmentId, setEstablishmentId] = useState('');
   const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [promotionsLoading, setPromotionsLoading] = useState(true);
   const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -89,6 +90,7 @@ export default function Promotions() {
   }
 
   async function loadPromotions() {
+    setPromotionsLoading(true);
     setErrorMessage('');
 
     const { data, error } = await supabase
@@ -101,10 +103,12 @@ export default function Promotions() {
     if (error) {
       console.error('Erreur chargement promotions:', error);
       setErrorMessage(error.message);
+      setPromotionsLoading(false);
       return;
     }
 
     setPromotions((data as Promotion[]) ?? []);
+    setPromotionsLoading(false);
   }
 
   function updateForm(field: keyof typeof emptyForm, value: string) {
@@ -393,11 +397,15 @@ export default function Promotions() {
             <h2 className="mt-1 text-2xl font-semibold text-forest">Tes promotions</h2>
           </div>
           <span className="rounded-full bg-[var(--kelyani-panel)] px-3 py-1.5 text-xs font-semibold text-ink/45 ring-1 ring-ink/5">
-            {promotions.length} promotion{promotions.length > 1 ? 's' : ''}
+            {promotionsLoading ? 'Chargement…' : `${promotions.length} promotion${promotions.length > 1 ? 's' : ''}`}
           </span>
         </div>
 
-        {promotions.length === 0 ? (
+        {promotionsLoading ? (
+          <div className="rounded-3xl border border-dashed border-ink/15 bg-[var(--kelyani-panel)] p-10 text-center text-sm text-ink/45">
+            Chargement des promotions…
+          </div>
+        ) : promotions.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-ink/15 bg-[var(--kelyani-panel)] p-10 text-center">
             <Plus className="mx-auto mb-3 text-[#00DFA5]" size={28} />
             <p className="text-sm font-semibold text-forest">Aucune promotion publiée</p>
