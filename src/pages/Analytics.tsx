@@ -198,7 +198,7 @@ export default function Analytics() {
             Évolution sur les 8 dernières semaines
           </p>
 
-          <div className="mt-7 h-64">
+          <div className="relative mt-7 h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={weekly}>
                 <CartesianGrid
@@ -232,6 +232,11 @@ export default function Analytics() {
                 />
               </BarChart>
             </ResponsiveContainer>
+            {!weekly.some(item => item.total > 0) && (
+              <div className="pointer-events-none absolute inset-0 grid place-items-center text-sm text-ink/45">
+                Aucun avis reçu sur cette période.
+              </div>
+            )}
           </div>
         </section>
 
