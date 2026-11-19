@@ -1,3 +1,7 @@
+# pg_cron authenticates this endpoint with its shared secret; the handler validates it.
+[functions.google-business-sync-access-test]
+verify_jwt = false
+
 [functions.google-wallet-staging-check]
 verify_jwt = true
 
