@@ -120,7 +120,7 @@ async function generateReply(comment: string, stars: string, language: string, t
 async function publishGeneratedReply(review: any, location: any, connection: any, token: string, reply: string, onPublishAttempt?: () => void) {
   const accountId = String(location.google_account_id || connection.google_account_id || '');
   const locationId = String(location.google_location_id || '');
-  const reviewId = String(review.google_review_name || '').split('/').pop() || '';
+  const reviewId = String(review.google_review_name || review.name || '').split('/').pop() || '';
   if (!accountId || !locationId || !reviewId) throw new Error('Mapping Google incomplet pour publier la réponse.');
   const endpoint = `https://mybusiness.googleapis.com/v4/accounts/${accountId}/locations/${locationId}/reviews/${encodeURIComponent(reviewId)}/reply`;
   onPublishAttempt?.();
@@ -287,7 +287,7 @@ Deno.serve(async (req: Request) => {
         for (const review of reviewResult.reviews ?? []) {
           const googleReviewName = String(review.name ?? '');
           const { data: existing, error: existingError } = await db.from('google_business_reviews')
-            .select('id,reply_status,owner_reply,reply_draft')
+            .select('id,reply_status,owner_reply,reply_draft,auto_reply_claimed_at')
             .eq('google_review_name', googleReviewName).maybeSingle();
           if (existingError) throw existingError;
           const { data: savedReview, error: reviewError } = await db.from('google_business_reviews').upsert({
@@ -315,7 +315,9 @@ Deno.serve(async (req: Request) => {
           // The rating threshold is authoritative for autonomous mode: reviews at or
           // above the configured threshold auto-publish when auto replies are enabled.
           // Reviews below the threshold always get a draft for human approval.
-          const shouldAutoPublish = isNewReview && afterAutoReplyActivation && replySettings?.auto_reply_enabled === true &&
+          const retryableGenerationFailure = Boolean(existing && existing.reply_status === 'failed' &&
+            !existing.auto_reply_claimed_at && !existing.owner_reply);
+          const shouldAutoPublish = (isNewReview || retryableGenerationFailure) && afterAutoReplyActivation && replySettings?.auto_reply_enabled === true &&
             replySettings?.require_approval === false && reviewRating >= threshold &&
             !review.reviewReply?.comment && Boolean(review.comment?.trim());
           if (shouldAutoPublish && savedReview) {
@@ -333,7 +335,7 @@ Deno.serve(async (req: Request) => {
 
             let publishAttempted = false;
             try {
-              const draft = await generateReply(String(review.comment), String(review.starRating ?? ''), String(replySettings.auto_reply_language ?? 'fr'), String(replySettings.auto_reply_tone ?? 'professional_warm'));
+              const draft = String(existing?.reply_draft ?? '').trim() || await generateReply(String(review.comment), String(review.starRating ?? ''), String(replySettings.auto_reply_language ?? 'fr'), String(replySettings.auto_reply_tone ?? 'professional_warm'));
               const now = new Date().toISOString();
               const { error: draftError } = await db.from('google_business_reviews').update({
                 reply_draft: draft, reply_status: 'ready_to_publish', reply_error: null,
