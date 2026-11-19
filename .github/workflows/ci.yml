@@ -11,12 +11,14 @@ concurrency:
   cancel-in-progress: true
 
 on:
-  # Automated CI is paused while the final product version is assembled.
-  # Run manually after the release candidate is ready for validation.
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
 
 jobs:
   validate:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.head.ref == 'qa/precommercial-smoke-2026-11-19' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -43,6 +45,7 @@ jobs:
 
 
   database-tests:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.head.ref == 'qa/precommercial-smoke-2026-11-19' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -102,6 +105,7 @@ jobs:
         run: supabase stop --no-backup
 
   edge-function-checks:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.head.ref == 'qa/precommercial-smoke-2026-11-19' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
