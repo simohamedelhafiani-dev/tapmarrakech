@@ -873,8 +873,8 @@ export default function Dashboard() {
           </div>
           <div className="mt-8 grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
             {[
-              { label: 'Avis', value: dashboardStatsLoading ? '—' : String(dashboardStats?.reviews_count ?? 0), icon: MessageCircle },
-              { label: 'Note', value: dashboardStatsLoading ? '—' : String((dashboardStats?.average_rating ?? 0).toFixed(1)), icon: Star },
+              { label: 'Avis', value: dashboardStatsLoading ? '—' : String(reviews.length), icon: MessageCircle },
+              { label: 'Note', value: dashboardStatsLoading ? '—' : String(average), icon: Star },
               { label: 'Clients', value: dashboardStatsLoading ? '—' : String(dashboardStats?.loyalty_customers_count ?? loyaltyCustomers.length), icon: Users },
               { label: 'Retour', value: dashboardStatsLoading ? '—' : String(analytics.returningRate.toFixed(0)) + '%', icon: TrendingUp },
             ].map(({ label, value, icon: Icon }) => <div key={label} className="group rounded-2xl border border-white/[0.07] bg-black/35 px-3.5 py-4 transition duration-200 hover:border-[#00DFA5]/25 hover:bg-black/50 sm:px-4 sm:py-5"><Icon size={15} className="text-[#00DFA5]" /><p className="mt-3 text-2xl font-semibold tracking-tight text-white sm:text-[28px]">{value}</p><p className="mt-1 text-[9px] font-semibold uppercase tracking-[0.15em] text-[#B0B0B0]/40">{label}</p></div>)}
