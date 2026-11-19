@@ -26,6 +26,7 @@ import {
 } from 'recharts';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import type { Establishment, Review } from '@/lib/types';
 import { Stars } from '@/components/Stars';
 import { getMySubscriptionAccess, type SubscriptionAccess } from '@/lib/subscriptionAccess';
@@ -147,6 +148,7 @@ const ranges = [
 
 export default function Dashboard() {
   const { user, role } = useAuth();
+  const { language } = useLanguage();
 
   const [places, setPlaces] = useState<Establishment[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -861,8 +863,8 @@ export default function Dashboard() {
                 <span className="rounded-full border border-[#00DFA5]/20 bg-[#686D76]/[0.06] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-[#00DFA5]">{roleLabel}</span>
                 {establishmentName && <span className="truncate rounded-full border border-[#242424] bg-[#050505] px-2.5 py-1 text-[9px] font-semibold text-[#B0B0B0]/45">{establishmentName}</span>}
               </div>
-              <h1 className="mt-4 max-w-3xl font-display text-3xl leading-[1.02] tracking-[-0.035em] text-white sm:text-5xl">Faites de chaque client <span className="text-[#00DFA5]">un client régulier.</span></h1>
-              <p className="mt-3 max-w-xl text-sm leading-6 text-[#B0B0B0]/40">Bonjour {profileName || 'à vous'}. Votre activité, vos clients et vos avis — réunis dans une interface simple.</p>
+              <h1 className="mt-4 max-w-3xl font-display text-3xl leading-[1.02] tracking-[-0.035em] text-white sm:text-5xl">{language === 'en' ? 'Make every customer a' : language === 'ar' ? 'حوّل كل عميل إلى' : 'Faites de chaque client'} <span className="text-[#00DFA5]">{language === 'en' ? 'regular.' : language === 'ar' ? 'عميل دائم.' : 'un client régulier.'}</span></h1>
+              <p className="mt-3 max-w-xl text-sm leading-6 text-[#B0B0B0]/40">{language === 'en' ? `Hello ${profileName || 'there'}. Your business, customers, and reviews — all in one simple workspace.` : language === 'ar' ? `مرحبًا ${profileName || 'بك'}، نشاطك وعملاؤك وتقييماتك — في واجهة واحدة بسيطة.` : `Bonjour ${profileName || 'à vous'}. Votre activité, vos clients et vos avis — réunis dans une interface simple.`}</p>
             </div>
             <div className="flex w-full flex-col gap-2 sm:w-auto">
               {places.length > 0 && <select value={selectedEstablishmentId ?? ''} onChange={(event) => changeEstablishment(event.target.value)} className="h-11 min-w-[210px] rounded-2xl border border-[#242424] bg-[#050505] px-3 text-xs font-semibold text-white outline-none focus:border-[#00DFA5]/55" aria-label="Établissement actif">{places.map((place) => <option className="bg-[#111111]" key={place.id} value={place.id}>{place.name}</option>)}</select>}
