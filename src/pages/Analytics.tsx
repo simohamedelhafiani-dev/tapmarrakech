@@ -227,7 +227,7 @@ export default function Analytics() {
                 <Bar
                   dataKey="total"
                   name="Avis"
-                  fill="#686D76"
+                  fill="#00DFA5"
                   radius={[5, 5, 0, 0]}
                 />
               </BarChart>
