@@ -1,3 +1,8 @@
+# pg_cron calls this endpoint with a shared secret header, not a user JWT.
+# The handler validates that secret; interactive requests still require an admin JWT.
+[functions.google-business-sync-access-test]
+verify_jwt = false
+
 [functions.google-wallet-staging-check]
 verify_jwt = true
 
