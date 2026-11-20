@@ -8,7 +8,7 @@ create table if not exists public.smart_marketing_configs (
   )),
   enabled boolean not null default false,
   config jsonb not null default '{}'::jsonb check (jsonb_typeof(config) = 'object'),
-  updated_by uuid not null default auth.uid() references auth.users(id) on delete set null,
+  updated_by uuid default auth.uid() references auth.users(id) on delete set null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique (establishment_id, smart_id)
