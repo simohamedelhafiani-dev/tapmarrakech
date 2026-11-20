@@ -38,15 +38,27 @@ const hex = (value: unknown, fallback: string) =>
   typeof value === "string" && /^#[0-9a-fA-F]{6}$/.test(value) ? value : fallback;
 const localized = (value: string) => ({defaultValue:{language:"fr-FR",value}});
 
-const GOOGLE_CARD_LAYOUTS: Record<string, { rows: string[][]; list: string; barcodeTop: string; details: string[] }> = {
-  "google-balance-ledger": { rows: [["object.textModulesData['wallet-balance']"], ["object.accountName", "object.accountId"], ["object.textModulesData['wallet-reward']"]], list: "object.textModulesData['wallet-balance']", barcodeTop: "object.accountId", details: ["object.textModulesData['wallet-reward']", "object.textModulesData['wallet-venue']"] },
-  "google-stamp-journey": { rows: [["object.textModulesData['wallet-balance']", "object.textModulesData['wallet-reward']"], ["object.accountName", "object.accountId"]], list: "object.textModulesData['wallet-balance']", barcodeTop: "object.textModulesData['wallet-reward']", details: ["object.textModulesData['wallet-program']", "object.textModulesData['wallet-reward']"] },
-  "google-member-profile": { rows: [["object.accountName"], ["object.accountId", "object.textModulesData['wallet-balance']"], ["object.textModulesData['wallet-tier']"]], list: "object.accountName", barcodeTop: "object.accountId", details: ["object.textModulesData['wallet-tier']", "object.textModulesData['wallet-venue']"] },
-  "google-scan-first": { rows: [["object.accountId"], ["object.textModulesData['wallet-balance']", "object.accountName"]], list: "object.accountId", barcodeTop: "object.accountName", details: ["object.textModulesData['wallet-program']", "object.textModulesData['wallet-reward']"] },
-  "google-reward-board": { rows: [["object.textModulesData['wallet-reward']"], ["object.textModulesData['wallet-balance']", "object.accountName"], ["object.accountId"]], list: "object.textModulesData['wallet-reward']", barcodeTop: "object.textModulesData['wallet-balance']", details: ["object.textModulesData['wallet-reward']", "object.textModulesData['wallet-program']"] },
-  "google-tier-club": { rows: [["object.textModulesData['wallet-tier']"], ["object.accountName", "object.textModulesData['wallet-balance']"], ["object.accountId"]], list: "object.textModulesData['wallet-tier']", barcodeTop: "object.accountId", details: ["object.textModulesData['wallet-tier']", "object.textModulesData['wallet-reward']"] },
-  "google-venue-guide": { rows: [["object.textModulesData['wallet-venue']"], ["object.accountName", "object.textModulesData['wallet-balance']"], ["object.accountId"]], list: "object.textModulesData['wallet-venue']", barcodeTop: "object.accountId", details: ["object.textModulesData['wallet-venue']", "object.textModulesData['wallet-program']"] },
-  "google-offer-pass": { rows: [["object.textModulesData['wallet-offer']"], ["object.textModulesData['wallet-balance']", "object.accountName"], ["object.accountId"]], list: "object.textModulesData['wallet-offer']", barcodeTop: "object.accountId", details: ["object.textModulesData['wallet-offer']", "object.textModulesData['wallet-reward']"] },
+type GoogleWalletFieldKey = "balance" | "accountName" | "accountId" | "reward" | "tier" | "venue" | "offer" | "program";
+const GOOGLE_FIELD_PATHS: Record<GoogleWalletFieldKey, string> = {
+  balance: "object.textModulesData['wallet-balance']",
+  accountName: "object.accountName",
+  accountId: "object.accountId",
+  reward: "object.textModulesData['wallet-reward']",
+  tier: "object.textModulesData['wallet-tier']",
+  venue: "object.textModulesData['wallet-venue']",
+  offer: "object.textModulesData['wallet-offer']",
+  program: "object.textModulesData['wallet-program']",
+};
+
+const GOOGLE_CARD_LAYOUTS: Record<string, GoogleWalletFieldKey[][]> = {
+  "google-balance-ledger": [["balance"], ["accountName", "accountId"], ["reward"]],
+  "google-stamp-journey": [["balance", "reward"], ["accountName", "accountId"]],
+  "google-member-profile": [["accountName"], ["accountId", "balance"], ["tier"]],
+  "google-scan-first": [["accountId"], ["balance", "accountName"]],
+  "google-reward-board": [["reward"], ["balance", "accountName"], ["accountId"]],
+  "google-tier-club": [["tier"], ["accountName", "balance"], ["accountId"]],
+  "google-venue-guide": [["venue"], ["accountName", "balance"], ["accountId"]],
+  "google-offer-pass": [["offer"], ["balance", "accountName"], ["accountId"]],
 };
 
 function fieldSelector(fieldPath: string) {
@@ -57,25 +69,45 @@ function templateItem(fieldPath: string) {
   return { firstValue: fieldSelector(fieldPath) };
 }
 
-function googleClassTemplate(designKey: string) {
-  const layout = GOOGLE_CARD_LAYOUTS[designKey] || GOOGLE_CARD_LAYOUTS["google-balance-ledger"];
-  const cardRowTemplateInfos = layout.rows.map(fields => fields.length === 1
+function normalizeGoogleRows(value: unknown, fallback: GoogleWalletFieldKey[][]): GoogleWalletFieldKey[][] {
+  if (!Array.isArray(value)) return fallback;
+  const valid = new Set(Object.keys(GOOGLE_FIELD_PATHS));
+  const rows = value.slice(0, 3).flatMap(row => {
+    if (!Array.isArray(row)) return [];
+    const fields = row.slice(0, 3).filter((field): field is GoogleWalletFieldKey => typeof field === "string" && valid.has(field));
+    return fields.length ? [fields] : [];
+  });
+  return rows.length ? rows : fallback;
+}
+
+function googleClassTemplate(designKey: string, design: Record<string, unknown>) {
+  const fallback = GOOGLE_CARD_LAYOUTS[designKey] || GOOGLE_CARD_LAYOUTS["google-balance-ledger"];
+  const layouts = design.googleTemplateLayouts && typeof design.googleTemplateLayouts === "object"
+    ? design.googleTemplateLayouts as Record<string, unknown>
+    : {};
+  const rows = normalizeGoogleRows(layouts[designKey], fallback);
+  const fieldRows = rows.map(row => row.map(field => GOOGLE_FIELD_PATHS[field]));
+  const cardRowTemplateInfos = fieldRows.map(fields => fields.length === 1
     ? { oneItem: { item: templateItem(fields[0]) } }
     : fields.length === 2
       ? { twoItems: { startItem: templateItem(fields[0]), endItem: templateItem(fields[1]) } }
       : { threeItems: { startItem: templateItem(fields[0]), middleItem: templateItem(fields[1]), endItem: templateItem(fields[2]) } });
+  const allFields = Array.from(new Set(fieldRows.flat()));
+  const barcodeTop = allFields.includes(GOOGLE_FIELD_PATHS.accountId)
+    ? GOOGLE_FIELD_PATHS.accountId
+    : allFields[0] || GOOGLE_FIELD_PATHS.balance;
   return {
     cardTemplateOverride: { cardRowTemplateInfos },
     listTemplateOverride: {
-      firstRowOption: { fieldOption: fieldSelector(layout.list) },
+      firstRowOption: { fieldOption: fieldSelector(fieldRows[0][0]) },
       secondRowOption: fieldSelector("object.accountName"),
     },
     cardBarcodeSectionDetails: {
-      firstTopDetail: { fieldSelector: fieldSelector(layout.barcodeTop) },
+      firstTopDetail: { fieldSelector: fieldSelector(barcodeTop) },
       firstBottomDetail: { fieldSelector: fieldSelector("object.accountId") },
     },
     detailsTemplateOverride: {
-      detailsItemInfos: layout.details.map(fieldPath => ({ item: templateItem(fieldPath) })),
+      detailsItemInfos: allFields.slice(0, 6).map(fieldPath => ({ item: templateItem(fieldPath) })),
     },
   };
 }
@@ -135,7 +167,7 @@ Deno.serve(async request => {
       programLogo:{sourceUri:{uri:logo},contentDescription:localized("Logo du programme de fidélité")},
       ...(heroImage ? { heroImage:{sourceUri:{uri:heroImage},contentDescription:localized("Visuel principal de la carte")} } : {}),
       hexBackgroundColor:hex(design.backgroundColor,"#050505"),
-      classTemplateInfo:googleClassTemplate(designKey),
+      classTemplateInfo:googleClassTemplate(designKey, design),
       homepageUri:{uri:websiteUrl,description:"Découvrir l'établissement"},
       ...(phoneNumber ? {linksModuleData:{uris:[{uri:"tel:"+phoneNumber,description:"Téléphone"}]}} : {}),
       textModulesData:[
