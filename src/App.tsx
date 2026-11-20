@@ -30,6 +30,7 @@ import AdminOverviewV2 from '@/pages/AdminOverviewV2';
 import AdminStatCardTest from '@/pages/AdminStatCardTest';
 import LoyaltyScanner from '@/pages/LoyaltyScanner';
 import AssistantIA from '@/pages/AssistantIA';
+import SmartMarketingCenter from '@/pages/SmartMarketingCenter';
 
 type EstablishmentRow = {
   id: string;
@@ -262,6 +263,7 @@ function App() {
               <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/dashboard/assistant-ia" element={<AssistantIA />} />
+              <Route path="/dashboard/smart-marketing" element={<SmartMarketingCenter />} />
               <Route
                 path="/dashboard/reviews"
                 element={
