@@ -19,6 +19,7 @@ import {
   AlertTriangle,
   Check,
   Search,
+  Sparkles,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
@@ -40,6 +41,12 @@ const links = [
     to: '/dashboard/assistant-ia',
     label: 'Assistant IA',
     icon: BrainCircuit,
+    feature: null,
+  },
+  {
+    to: '/dashboard/smart-marketing',
+    label: 'Smart Marketing',
+    icon: Sparkles,
     feature: null,
   },
   {
