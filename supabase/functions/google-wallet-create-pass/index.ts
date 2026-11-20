@@ -220,6 +220,33 @@ Deno.serve(async (request) => {
           header: String(walletDesign.cardTitle || "KELYANI").slice(0, 25),
           body: String(walletDesign.headerText || "Carte de fidélité").slice(0, 40),
         },
+        {
+          id: "wallet-balance",
+          header: walletMode === "DISCOUNT" ? "Votre avantage" : walletMode === "STAMP" ? "Visites" : "Votre solde",
+          body: walletMode === "DISCOUNT"
+            ? `${walletDiscountPercent}% de réduction`
+            : walletDesign.showPoints === false ? "Présentez votre carte en caisse" : progress,
+        },
+        {
+          id: "wallet-reward",
+          header: "Prochaine récompense",
+          body: String(walletDesign.walletRewardLabel || program.stamp_reward_name || "Récompense fidélité").slice(0, 80),
+        },
+        {
+          id: "wallet-tier",
+          header: "Votre niveau",
+          body: String(walletDesign.walletTierLabel || "Membre KELYANI").slice(0, 40),
+        },
+        {
+          id: "wallet-venue",
+          header: "Établissement",
+          body: String(walletDesign.establishmentName || card.establishment_name || walletDesign.address || "Votre établissement KELYANI").slice(0, 100),
+        },
+        {
+          id: "wallet-offer",
+          header: "Avantage actif",
+          body: String(walletDesign.walletOfferLabel || (walletMode === "DISCOUNT" ? `${walletDiscountPercent}% de réduction` : walletDesign.customMessage || walletDesign.walletRewardLabel || "Avantage fidélité")).slice(0, 80),
+        },
         ...(walletMode === "DISCOUNT" ? [{
           id: "wallet-discount",
           header: "Votre avantage",
@@ -287,3 +314,4 @@ Deno.serve(async (request) => {
     return json({ success: false, error: "Impossible de préparer la carte Google Wallet pour le moment" }, 500);
   }
 });
+
