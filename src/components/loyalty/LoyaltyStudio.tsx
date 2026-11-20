@@ -40,7 +40,7 @@ import {
   GOOGLE_WALLET_FIELD_OPTIONS,
   GOOGLE_WALLET_TEMPLATES,
   getAppleWalletTemplate,
-  getGoogleWalletTemplate,
+  type GoogleWalletTemplate,
   type GoogleWalletFieldKey,
 } from './walletTemplates';
 import type { LoyaltyExperienceConfig, LoyaltyExperienceReward } from './LoyaltyExperience';
@@ -110,6 +110,7 @@ type WalletDesignState = {
   showQr: boolean;
   googleTemplateId: string;
   googleTemplateLayouts: Record<string, GoogleWalletFieldKey[][]>;
+  googleCustomTemplates: GoogleWalletTemplate[];
   appleTemplateId: string;
   googleClassId?: string;
   googleClassStatus?: string;
@@ -131,6 +132,7 @@ const DEFAULT_WALLET_DESIGN: WalletDesignState = {
   showQr: true,
   googleTemplateId: 'google-balance-ledger',
   googleTemplateLayouts: {},
+  googleCustomTemplates: [],
   appleTemplateId: 'apple-ledger',
 };
 
@@ -244,6 +246,8 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   const [walletCropPlatform, setWalletCropPlatform] = useState<'google' | 'apple' | null>(null);
   const [walletCatalog, setWalletCatalog] = useState<WalletCatalogEntry[]>([]);
   const [publishingWalletKey, setPublishingWalletKey] = useState<string | null>(null);
+  const [creatingGoogleTemplate, setCreatingGoogleTemplate] = useState(false);
+  const [newGoogleTemplateName, setNewGoogleTemplateName] = useState('');
   const [establishment, setEstablishment] = useState({
     name: 'Votre établissement',
     logoUrl: null as string | null,
@@ -254,6 +258,8 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   const previewChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const [previewChannelReady, setPreviewChannelReady] = useState(false);
   const liveDesignTimerRef = useRef<number | null>(null);
+  const googleTemplates = [...GOOGLE_WALLET_TEMPLATES, ...(walletDesign.googleCustomTemplates ?? [])];
+  const getGoogleTemplate = (id: string) => googleTemplates.find(template => template.id === id) ?? GOOGLE_WALLET_TEMPLATES[0];
 
   const load = async () => {
     if (!establishmentId) return;
@@ -622,7 +628,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
 
   const publishWalletTemplate = async (templateKey: string) => {
     if (!canManageWallet || !establishmentId || publishingWalletKey) return;
-    const template = getGoogleWalletTemplate(templateKey);
+    const template = getGoogleTemplate(templateKey);
     if (!template) return;
     setPublishingWalletKey(templateKey);
     setMessage('');
@@ -667,8 +673,32 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     }
   };
 
+  const createGoogleTemplate = () => {
+    const name = newGoogleTemplateName.trim();
+    if (!name) return;
+    const base = getGoogleTemplate(walletDesign.googleTemplateId);
+    const id = `google-custom-${Date.now().toString(36)}`;
+    const rows = (walletDesign.googleTemplateLayouts?.[base.id] ?? base.rows).map(row => [...row]);
+    const template: GoogleWalletTemplate = {
+      ...base,
+      id,
+      name: name.slice(0, 40),
+      description: 'Modèle personnalisé. Ajustez ses rangées et ses champs avant publication.',
+      rows,
+    };
+    setWalletDesign(current => ({
+      ...current,
+      googleTemplateId: id,
+      googleTemplateLayouts: { ...current.googleTemplateLayouts, [id]: rows },
+      googleCustomTemplates: [...(current.googleCustomTemplates ?? []), template],
+    }));
+    setNewGoogleTemplateName('');
+    setCreatingGoogleTemplate(false);
+    setMessage(`Modèle « ${template.name} » créé. Personnalisez-le puis publiez sa classe Google.`);
+  };
+
   const selectedGoogleRows = walletDesign.googleTemplateLayouts?.[walletDesign.googleTemplateId]
-    ?? getGoogleWalletTemplate(walletDesign.googleTemplateId).rows;
+    ?? getGoogleTemplate(walletDesign.googleTemplateId).rows;
 
   const saveGoogleRows = (rows: GoogleWalletFieldKey[][]) => {
     setWalletDesign(current => ({
@@ -1470,12 +1500,26 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
           )}
           {tab === 'googleWallet' && canManageWallet && (
             <div className="space-y-5">
-              <StudioCard eyebrow="Google Wallet · Android" title="8 modèles de cartes fidélité">
+              <StudioCard eyebrow="Google Wallet · Android" title="Modèles de cartes fidélité">
                 <p className="text-xs leading-5 text-white/55">
                   Chaque modèle définit les vraies rangées du pass Google Wallet : solde, membre, scan, récompense ou établissement. Google valide chaque classe avant qu’elle soit proposée aux clients.
                 </p>
+                <div className="mt-4 rounded-2xl border border-white/10 bg-[#0B0B0B] p-3">
+                  {!creatingGoogleTemplate ? (
+                    <button type="button" onClick={() => setCreatingGoogleTemplate(true)} className="rounded-lg border border-[#00DFA5]/25 px-3 py-2 text-[11px] font-semibold text-[#00DFA5] hover:border-[#00DFA5]/50">
+                      + Créer un modèle Google Wallet
+                    </button>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      <input autoFocus value={newGoogleTemplateName} onChange={event => setNewGoogleTemplateName(event.target.value)} onKeyDown={event => { if (event.key === 'Enter') createGoogleTemplate(); }} maxLength={40} placeholder="Nom du nouveau modèle" aria-label="Nom du nouveau modèle Google Wallet" className="h-10 min-w-[220px] flex-1 rounded-lg border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none focus:border-[#00DFA5]/40" />
+                      <button type="button" onClick={createGoogleTemplate} disabled={!newGoogleTemplateName.trim()} className="rounded-lg bg-[#00DFA5] px-3 py-2 text-[10px] font-bold text-[#050505] disabled:opacity-40">Créer</button>
+                      <button type="button" onClick={() => { setCreatingGoogleTemplate(false); setNewGoogleTemplateName(''); }} className="rounded-lg border border-white/10 px-3 py-2 text-[10px] text-white/60">Annuler</button>
+                    </div>
+                  )}
+                  <p className="mt-2 text-[10px] text-white/40">Le nouveau modèle reprend la disposition sélectionnée; tu peux ensuite la modifier et publier sa propre classe Google.</p>
+                </div>
                 <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                  {GOOGLE_WALLET_TEMPLATES.map(template => {
+                  {googleTemplates.map(template => {
                     const saved = walletCatalog.find(item => item.design_key === template.id);
                     const busy = publishingWalletKey === template.id;
                     const selected = walletDesign.googleTemplateId === template.id;
@@ -1485,7 +1529,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                           ...current, googleTemplateId: template.id, backgroundColor: template.background,
                           accentColor: template.accent, textColor: template.text, cardTitle: current.cardTitle || establishment.name,
                         }))} className="block w-full p-3 text-left">
-                          <GoogleWalletPassPreview templateId={template.id} establishmentName={establishment.name} walletDesign={walletDesign} logoUrl={walletDesign.logoUrl || establishment.logoUrl || ''} rowsOverride={walletDesign.googleTemplateLayouts?.[template.id] ?? template.rows} compact />
+                          <GoogleWalletPassPreview templateId={template.id} establishmentName={establishment.name} walletDesign={walletDesign} logoUrl={walletDesign.logoUrl || establishment.logoUrl || ''} rowsOverride={walletDesign.googleTemplateLayouts?.[template.id] ?? template.rows} customTemplates={walletDesign.googleCustomTemplates} compact />
                           <p className="mt-2 text-xs font-semibold text-white">{template.name}</p>
                           <p className="mt-1 text-[10px] leading-4 text-white/45">{template.description}</p>
                         </button>
@@ -1662,7 +1706,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
 
           <div className="flex min-h-[500px] w-full items-center justify-center overflow-visible rounded-[24px] bg-[#111111]/[.03] p-3 sm:min-h-[560px]">
             {tab === 'googleWallet' ? (
-              <GoogleWalletPassPreview templateId={walletDesign.googleTemplateId} establishmentName={establishment.name} walletDesign={walletDesign} logoUrl={walletDesign.logoUrl || establishment.logoUrl || ''} />
+              <GoogleWalletPassPreview templateId={walletDesign.googleTemplateId} establishmentName={establishment.name} walletDesign={walletDesign} logoUrl={walletDesign.logoUrl || establishment.logoUrl || ''} customTemplates={walletDesign.googleCustomTemplates} />
             ) : tab === 'appleWallet' ? (
               <AppleWalletPassPreview templateId={walletDesign.appleTemplateId} establishmentName={establishment.name} walletDesign={walletDesign} logoUrl={walletDesign.logoUrl || establishment.logoUrl || ''} />
             ) : <LoyaltyPreview config={previewConfig} />}
@@ -1699,15 +1743,16 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   );
 }
 
-function GoogleWalletPassPreview({ templateId, establishmentName, walletDesign, logoUrl, rowsOverride, compact = false }: {
+function GoogleWalletPassPreview({ templateId, establishmentName, walletDesign, logoUrl, rowsOverride, customTemplates = [], compact = false }: {
   templateId: string;
   establishmentName: string;
   walletDesign: WalletDesignState;
   logoUrl: string;
   rowsOverride?: GoogleWalletFieldKey[][];
+  customTemplates?: GoogleWalletTemplate[];
   compact?: boolean;
 }) {
-  const template = getGoogleWalletTemplate(templateId);
+  const template = [...GOOGLE_WALLET_TEMPLATES, ...customTemplates].find(item => item.id === templateId) ?? GOOGLE_WALLET_TEMPLATES[0];
   const hero = walletDesign.heroImageUrl || walletDesign.heroImageSourceUrl;
   const selectedRows = rowsOverride ?? walletDesign.googleTemplateLayouts?.[templateId] ?? template.rows;
   const extra = walletDesign as WalletDesignState & Record<string, unknown>;
