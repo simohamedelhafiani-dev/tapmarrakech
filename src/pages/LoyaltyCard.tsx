@@ -680,7 +680,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
     setPushMessage('');
 
     try {
-      await enableLoyaltyPush(token, cardUrl);
+      await enableLoyaltyPush(token, window.location.pathname);
       setPushEnabled(true);
       setPushMessage('Notifications activées. Vous recevrez les nouveaux messages même lorsque votre téléphone est verrouillé.');
     } catch (error) {
