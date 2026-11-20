@@ -83,7 +83,7 @@ export default function SmartMarketingCenter() {
    <div className="mt-5 flex items-center gap-2 rounded-xl border border-white/[.06] bg-black/30 px-3 py-2 text-[11px] text-white/45"><Sparkles size={14} className="text-[#3B82F6]"/> Automatisez vos campagnes sans avoir à les gérer chaque jour.</div>
   </section>
   <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-   {SMARTS.map(s=>{const Icon=s.icon;const isOn=!!enabled[s.id];return <article key={s.id} className={`rounded-2xl border p-4 transition-all ${isOn?'border-[#3B82F6]/35 bg-[#111111]':'border-white/[.07] bg-[#0C0C0C]}`}>
+   {SMARTS.map(s=>{const Icon=s.icon;const isOn=!!enabled[s.id];return <article key={s.id} className={`rounded-2xl border p-4 transition-all ${isOn?'border-[#3B82F6]/35 bg-[#111111]':'border-white/[.07] bg-[#0C0C0C]'}`}>
     <div className="flex items-start justify-between gap-3"><div className="grid h-11 w-11 place-items-center rounded-xl bg-white/[.04]" style={{color:s.color}}><Icon size={20}/></div><button type="button" role="switch" aria-checked={isOn} aria-label={`Activer ${s.name}`} onClick={()=>void toggle(s.id)} disabled={loading||saving||!!error} className={`relative h-6 w-11 rounded-full transition disabled:cursor-not-allowed disabled:opacity-50 ${isOn?'bg-[#3B82F6]':'bg-[#343434]'}`}><span className={`absolute top-1 h-4 w-4 rounded-full bg-white transition ${isOn?'left-6':'left-1'}`}/></button></div>
     <h2 className="mt-4 text-sm font-semibold text-white">{s.name}</h2><p className="mt-1 text-xs text-white/45">{s.tagline}</p><p className="mt-3 min-h-10 text-[11px] leading-5 text-white/35">{s.description}</p>
     <div className="mt-4 flex items-center gap-1.5 text-[10px] text-white/35"><Bell size={12}/>{s.trigger}</div>
