@@ -37,9 +37,11 @@ import LoyaltyNotificationsPanel from '@/components/admin/LoyaltyNotificationsPa
 import {
   APPLE_WALLET_FIELD_LABELS,
   APPLE_WALLET_TEMPLATES,
+  GOOGLE_WALLET_FIELD_OPTIONS,
   GOOGLE_WALLET_TEMPLATES,
   getAppleWalletTemplate,
   getGoogleWalletTemplate,
+  type GoogleWalletFieldKey,
 } from './walletTemplates';
 import type { LoyaltyExperienceConfig, LoyaltyExperienceReward } from './LoyaltyExperience';
 
@@ -107,6 +109,7 @@ type WalletDesignState = {
   showPoints: boolean;
   showQr: boolean;
   googleTemplateId: string;
+  googleTemplateLayouts: Record<string, GoogleWalletFieldKey[][]>;
   appleTemplateId: string;
   googleClassId?: string;
   googleClassStatus?: string;
@@ -127,6 +130,7 @@ const DEFAULT_WALLET_DESIGN: WalletDesignState = {
   showPoints: true,
   showQr: true,
   googleTemplateId: 'google-balance-ledger',
+  googleTemplateLayouts: {},
   appleTemplateId: 'apple-ledger',
 };
 
@@ -617,7 +621,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   };
 
   const publishWalletTemplate = async (templateKey: string) => {
-    if (!isAdmin || !establishmentId || publishingWalletKey) return;
+    if (!canManageWallet || !establishmentId || publishingWalletKey) return;
     const template = getGoogleWalletTemplate(templateKey);
     if (!template) return;
     setPublishingWalletKey(templateKey);
@@ -625,10 +629,14 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     const config = {
       ...walletDesign,
       googleTemplateId: template.id,
-      backgroundColor: template.background,
-      primaryColor: template.primary,
-      accentColor: template.accent,
-      textColor: template.text,
+      googleTemplateLayouts: {
+        ...walletDesign.googleTemplateLayouts,
+        [template.id]: walletDesign.googleTemplateLayouts[template.id] ?? template.rows,
+      },
+      backgroundColor: walletDesign.googleTemplateId === template.id ? walletDesign.backgroundColor : template.background,
+      primaryColor: walletDesign.googleTemplateId === template.id ? walletDesign.primaryColor : template.accent,
+      accentColor: walletDesign.googleTemplateId === template.id ? walletDesign.accentColor : template.accent,
+      textColor: walletDesign.googleTemplateId === template.id ? walletDesign.textColor : template.text,
       cardTitle: walletDesign.cardTitle || establishment.name,
       logoUrl: walletDesign.logoUrl || establishment.logoUrl || '',
     };
@@ -657,6 +665,45 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     } finally {
       setPublishingWalletKey(null);
     }
+  };
+
+  const selectedGoogleRows = walletDesign.googleTemplateLayouts?.[walletDesign.googleTemplateId]
+    ?? getGoogleWalletTemplate(walletDesign.googleTemplateId).rows;
+
+  const saveGoogleRows = (rows: GoogleWalletFieldKey[][]) => {
+    setWalletDesign(current => ({
+      ...current,
+      googleTemplateLayouts: { ...current.googleTemplateLayouts, [current.googleTemplateId]: rows },
+    }));
+  };
+
+  const updateGoogleField = (rowIndex: number, fieldIndex: number, value: GoogleWalletFieldKey) => {
+    saveGoogleRows(selectedGoogleRows.map((row, index) => index === rowIndex
+      ? row.map((field, position) => position === fieldIndex ? value : field)
+      : row));
+  };
+
+  const addGoogleField = (rowIndex: number) => {
+    if (selectedGoogleRows[rowIndex]?.length >= 3) return;
+    saveGoogleRows(selectedGoogleRows.map((row, index) => index === rowIndex ? [...row, 'accountId'] : row));
+  };
+
+  const removeGoogleField = (rowIndex: number, fieldIndex: number) => {
+    if (selectedGoogleRows[rowIndex]?.length === 1 && selectedGoogleRows.length === 1) return;
+    const rows = selectedGoogleRows.map((row, index) => index === rowIndex
+      ? row.filter((_, position) => position !== fieldIndex)
+      : row).filter(row => row.length > 0);
+    saveGoogleRows(rows);
+  };
+
+  const addGoogleRow = () => {
+    if (selectedGoogleRows.length >= 3) return;
+    saveGoogleRows([...selectedGoogleRows, ['balance']]);
+  };
+
+  const removeGoogleRow = (rowIndex: number) => {
+    if (selectedGoogleRows.length <= 1) return;
+    saveGoogleRows(selectedGoogleRows.filter((_, index) => index !== rowIndex));
   };
 
   const saveAll = async (publish: boolean) => {
@@ -1315,7 +1362,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
             <div className="space-y-5">
               <StudioCard eyebrow="Wallet" title="Choisir une identité">
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  {Object.values(WALLET_TEMPLATES).map(item => {
+                  {Object.values(LOYALTY_CARD_TEMPLATES).map(item => {
                     const active = design.templateId === item.id;
                     return (
                       <button
@@ -1438,7 +1485,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                           ...current, googleTemplateId: template.id, backgroundColor: template.background,
                           accentColor: template.accent, textColor: template.text, cardTitle: current.cardTitle || establishment.name,
                         }))} className="block w-full p-3 text-left">
-                          <GoogleWalletPassPreview templateId={template.id} establishmentName={establishment.name} walletDesign={walletDesign} logoUrl={walletDesign.logoUrl || establishment.logoUrl || ''} compact />
+                          <GoogleWalletPassPreview templateId={template.id} establishmentName={establishment.name} walletDesign={walletDesign} logoUrl={walletDesign.logoUrl || establishment.logoUrl || ''} rowsOverride={walletDesign.googleTemplateLayouts?.[template.id] ?? template.rows} compact />
                           <p className="mt-2 text-xs font-semibold text-white">{template.name}</p>
                           <p className="mt-1 text-[10px] leading-4 text-white/45">{template.description}</p>
                         </button>
@@ -1465,6 +1512,12 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   </Field>
                   <Field label="Sous-titre">
                     <input value={walletDesign.headerText} onChange={e => setWalletDesign(current => ({...current,headerText:e.target.value}))} maxLength={40} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
+                  </Field>
+                  <Field label="Couleur de fond réelle du pass">
+                    <div className="mt-2 flex h-11 items-center gap-2 rounded-xl border border-white/10 bg-[#111111] px-2">
+                      <input type="color" aria-label="Choisir la couleur de fond Google Wallet" value={walletDesign.backgroundColor} onChange={e => setWalletDesign(current => ({ ...current, backgroundColor: e.target.value }))} className="h-7 w-9 cursor-pointer rounded border-0 bg-transparent p-0" />
+                      <span className="px-2 text-xs text-white/70">{walletDesign.backgroundColor.toUpperCase()}</span>
+                    </div>
                   </Field>
                   <Field label="Texte complémentaire">
                     <input value={walletDesign.footerText} onChange={e => setWalletDesign(current => ({...current,footerText:e.target.value}))} maxLength={80} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
@@ -1508,6 +1561,32 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   <label className="flex items-center gap-2"><input type="checkbox" checked={walletDesign.showPoints} onChange={e => setWalletDesign(current => ({...current,showPoints:e.target.checked}))}/> Afficher les points</label>
                   <label className="flex items-center gap-2"><input type="checkbox" checked={walletDesign.showQr} onChange={e => setWalletDesign(current => ({...current,showQr:e.target.checked}))}/> Afficher le QR</label>
                 </div>
+              </StudioCard>
+
+              <StudioCard eyebrow="Mise en page Google Wallet" title="Modifier les rangées et les champs">
+                <p className="mb-4 text-xs leading-5 text-white/50">Ces rangées sont envoyées à la classe Google Wallet. Change leur ordre et les champs affichés; l’aperçu à droite suit tes choix.</p>
+                <div className="space-y-3">
+                  {selectedGoogleRows.map((row, rowIndex) => (
+                    <div key={`${walletDesign.googleTemplateId}-row-${rowIndex}`} className="rounded-2xl border border-white/10 bg-[#0B0B0B] p-3">
+                      <div className="mb-2 flex items-center justify-between">
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-white/55">Rangée {rowIndex + 1}</p>
+                        {selectedGoogleRows.length > 1 && <button type="button" onClick={() => removeGoogleRow(rowIndex)} className="text-[10px] text-white/40 hover:text-white">Supprimer la rangée</button>}
+                      </div>
+                      <div className="grid gap-2 sm:grid-cols-3">
+                        {row.map((fieldKey, fieldIndex) => (
+                          <div key={`${rowIndex}-${fieldIndex}`} className="flex min-w-0 items-center gap-1.5">
+                            <select aria-label={`Rangée ${rowIndex + 1}, champ ${fieldIndex + 1}`} value={fieldKey} onChange={e => updateGoogleField(rowIndex, fieldIndex, e.target.value as GoogleWalletFieldKey)} className="h-10 min-w-0 flex-1 rounded-lg border border-white/10 bg-[#111111] px-2 text-[10px] text-white outline-none">
+                              {GOOGLE_WALLET_FIELD_OPTIONS.map(option => <option key={option.id} value={option.id}>{option.label}</option>)}
+                            </select>
+                            {row.length > 1 && <button type="button" aria-label={`Retirer le champ ${fieldIndex + 1} de la rangée ${rowIndex + 1}`} onClick={() => removeGoogleField(rowIndex, fieldIndex)} className="grid h-8 w-8 shrink-0 place-items-center rounded-md border border-white/10 text-xs text-white/45 hover:text-white">×</button>}
+                          </div>
+                        ))}
+                      </div>
+                      {row.length < 3 && <button type="button" onClick={() => addGoogleField(rowIndex)} className="mt-2 text-[10px] font-semibold text-[#00DFA5]">+ Ajouter un champ</button>}
+                    </div>
+                  ))}
+                </div>
+                {selectedGoogleRows.length < 3 && <button type="button" onClick={addGoogleRow} className="mt-3 rounded-lg border border-white/10 px-3 py-2 text-[10px] font-semibold text-white/65 hover:border-[#00DFA5]/35 hover:text-[#00DFA5]">+ Ajouter une rangée</button>}
               </StudioCard>
 
               {walletCropPlatform && (
@@ -1620,35 +1699,54 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   );
 }
 
-function GoogleWalletPassPreview({ templateId, establishmentName, walletDesign, logoUrl, compact = false }: {
+function GoogleWalletPassPreview({ templateId, establishmentName, walletDesign, logoUrl, rowsOverride, compact = false }: {
   templateId: string;
   establishmentName: string;
   walletDesign: WalletDesignState;
   logoUrl: string;
+  rowsOverride?: GoogleWalletFieldKey[][];
   compact?: boolean;
 }) {
   const template = getGoogleWalletTemplate(templateId);
   const hero = walletDesign.heroImageUrl || walletDesign.heroImageSourceUrl;
+  const selectedRows = rowsOverride ?? walletDesign.googleTemplateLayouts?.[templateId] ?? template.rows;
+  const extra = walletDesign as WalletDesignState & Record<string, unknown>;
+  const fieldValues: Record<GoogleWalletFieldKey, { label: string; value: string }> = {
+    balance: { label: walletDesign.showPoints ? 'SOLDE / PROGRESSION' : 'EN CAISSE', value: walletDesign.showPoints ? '720 pts' : 'Présentez votre carte' },
+    accountName: { label: 'MEMBRE', value: 'Sanae Bennani' },
+    accountId: { label: 'NUMÉRO MEMBRE', value: 'KEL-2048' },
+    reward: { label: 'PROCHAINE RÉCOMPENSE', value: String(extra.walletRewardLabel || 'Cadeau fidélité') },
+    tier: { label: 'NIVEAU', value: String(extra.walletTierLabel || 'Signature') },
+    venue: { label: 'ÉTABLISSEMENT', value: establishmentName || 'KELYANI' },
+    offer: { label: 'AVANTAGE ACTIF', value: String(extra.walletOfferLabel || '10 % membre') },
+    program: { label: 'PROGRAMME', value: walletDesign.headerText || 'Carte de fidélité' },
+  };
   const qr = <div className={`${compact ? 'h-9 w-9' : 'h-16 w-16'} grid grid-cols-5 gap-[2px] rounded-lg bg-white p-1.5`}>{Array.from({ length: 25 }, (_, index) => <span key={index} className="rounded-[1px]" style={{ background: (index * 7 + 3) % 4 === 0 ? '#FFFFFF' : '#050505' }} />)}</div>;
   const cardClass = compact ? 'h-[118px] w-full' : 'min-h-[390px] w-full max-w-[330px]';
+  const backgroundColor = templateId === walletDesign.googleTemplateId ? walletDesign.backgroundColor : template.background;
   return (
-    <div className={`${cardClass} relative overflow-hidden rounded-[20px] border border-white/10 p-4 shadow-2xl`} style={{ background: template.background, color: template.text }}>
-      {hero && (template.layout === 'location' || template.layout === 'offer') && <img src={hero} alt="" className="absolute inset-0 h-full w-full object-cover opacity-25" />}
-      <div className="absolute -right-8 -top-10 h-28 w-28 rounded-full border-[18px] opacity-15" style={{ borderColor: template.accent }} />
+    <div className={`${cardClass} relative overflow-hidden rounded-[20px] border border-white/10 p-4 shadow-2xl`} style={{ background: backgroundColor, color: '#FFFFFF' }}>
+      {hero && <img src={hero} alt="" className="absolute inset-0 h-full w-full object-cover opacity-20" />}
+      <div className="absolute -right-8 -top-10 h-28 w-28 rounded-full border-[18px] opacity-15" style={{ borderColor: walletDesign.accentColor }} />
       <div className="relative z-10 flex h-full flex-col">
         <div className="flex items-center gap-2">
-          {logoUrl ? <img src={logoUrl} alt="" className={`${compact ? 'h-6 w-6' : 'h-9 w-9'} rounded-full bg-white object-contain p-1`} /> : <span className={`${compact ? 'h-6 w-6 text-[7px]' : 'h-9 w-9 text-[10px]'} grid place-items-center rounded-full font-black`} style={{ color: '#050505', background: template.accent }}>K</span>}
+          {logoUrl ? <img src={logoUrl} alt="" className={`${compact ? 'h-6 w-6' : 'h-9 w-9'} rounded-full bg-white object-contain p-1`} /> : <span className={`${compact ? 'h-6 w-6 text-[7px]' : 'h-9 w-9 text-[10px]'} grid place-items-center rounded-full font-black`} style={{ color: '#050505', background: walletDesign.accentColor }}>K</span>}
           <div className="min-w-0 flex-1"><p className={`${compact ? 'text-[8px]' : 'text-[10px]'} truncate font-bold tracking-wide`}>{walletDesign.cardTitle || establishmentName || 'Programme fidélité'}</p><p className={`${compact ? 'text-[6px]' : 'text-[8px]'} truncate opacity-55`}>{establishmentName}</p></div>
-          <span className={`${compact ? 'text-[6px]' : 'text-[8px]'} rounded-full px-2 py-1 font-semibold`} style={{ background: `${template.accent}24`, color: template.accent }}>FIDÉLITÉ</span>
+          <span className={`${compact ? 'text-[6px]' : 'text-[8px]'} rounded-full px-2 py-1 font-semibold`} style={{ background: `${walletDesign.accentColor}24`, color: walletDesign.accentColor }}>FIDÉLITÉ</span>
         </div>
-        {template.layout === 'balance' && <div className="mt-auto"><p className={`${compact ? 'text-[6px]' : 'text-[8px]'} uppercase tracking-[.2em] opacity-55`}>Solde membre</p><p className={`${compact ? 'text-xl' : 'text-4xl'} font-black`} style={{ color: template.accent }}>720 <span className={compact ? 'text-[8px]' : 'text-sm'}>PTS</span></p><div className="flex justify-between text-[8px] opacity-65"><span>Prochaine récompense</span><span>800 pts</span></div></div>}
-        {template.layout === 'stamps' && <div className="mt-auto"><p className={`${compact ? 'text-[7px]' : 'text-[9px]'} font-bold`}>Votre parcours de visites</p><div className="my-2 flex gap-1">{Array.from({ length: 8 }, (_, index) => <span key={index} className={`${compact ? 'h-2 w-2' : 'h-4 w-4'} rounded-full border`} style={{ borderColor: template.accent, background: index < 6 ? template.accent : 'transparent' }} />)}</div><p className={`${compact ? 'text-[6px]' : 'text-[8px]'} opacity-65`}>6 / 8 visites · Récompense à la prochaine étape</p></div>}
-        {template.layout === 'member' && <div className="mt-auto flex items-end justify-between"><div><p className={`${compact ? 'text-[6px]' : 'text-[8px]'} uppercase opacity-55`}>Carte membre</p><p className={`${compact ? 'text-sm' : 'text-2xl'} font-bold`}>Sanae Bennani</p><p className={`${compact ? 'text-[6px]' : 'text-[8px]'} opacity-55`}>N° KEL-2048 · 720 points</p></div><span className="rounded-lg border p-2 text-[8px]" style={{ borderColor: template.accent, color: template.accent }}>MEMBRE</span></div>}
-        {template.layout === 'barcode' && <div className="mt-auto flex items-end justify-between"><div><p className={`${compact ? 'text-[6px]' : 'text-[8px]'} uppercase opacity-55`}>Présenter en caisse</p><p className={`${compact ? 'text-[9px]' : 'text-lg'} font-bold`}>KEL-2048</p><p className={`${compact ? 'text-[6px]' : 'text-[8px]'} opacity-55`}>Code de membre</p></div>{qr}</div>}
-        {template.layout === 'reward' && <div className="mt-auto"><p className={`${compact ? 'text-[6px]' : 'text-[8px]'} uppercase tracking-[.2em] opacity-55`}>À débloquer</p><div className="mt-1 rounded-xl border p-2" style={{ borderColor: `${template.accent}80` }}><p className={`${compact ? 'text-[9px]' : 'text-lg'} font-bold`}>Cadeau fidélité</p><p className={`${compact ? 'text-[6px]' : 'text-[8px]'} opacity-60`}>Encore 80 points pour l’obtenir</p></div><p className={`${compact ? 'text-[6px]' : 'text-[8px]'} mt-1`} style={{ color: template.accent }}>720 points disponibles</p></div>}
-        {template.layout === 'tier' && <div className="mt-auto"><span className={`${compact ? 'text-[7px]' : 'text-[9px]'} rounded-full border px-2 py-1`} style={{ borderColor: template.accent, color: template.accent }}>NIVEAU SIGNATURE</span><div className="mt-2 flex items-end justify-between"><div><p className={`${compact ? 'text-[6px]' : 'text-[8px]'} opacity-55`}>Membre</p><p className={`${compact ? 'text-sm' : 'text-2xl'} font-bold`}>Sanae Bennani</p></div><p className={`${compact ? 'text-[9px]' : 'text-xl'} font-black`} style={{ color: template.accent }}>720 pts</p></div></div>}
-        {template.layout === 'location' && <div className="mt-auto rounded-xl border border-white/15 bg-black/25 p-2"><p className={`${compact ? 'text-[6px]' : 'text-[8px]'} uppercase opacity-55`}>Votre adresse fidélité</p><p className={`${compact ? 'text-[9px]' : 'text-lg'} font-bold`}>{establishmentName}</p><p className={`${compact ? 'text-[6px]' : 'text-[8px]'} opacity-65`}>720 points · Ouvert aujourd’hui</p></div>}
-        {template.layout === 'offer' && <div className="mt-auto"><span className={`${compact ? 'text-[7px]' : 'text-[9px]'} rounded-full px-2 py-1 font-bold`} style={{ background: template.accent, color: '#050505' }}>AVANTAGE MEMBRE</span><p className={`${compact ? 'text-sm' : 'text-3xl'} mt-2 font-black`}>10% de remise</p><p className={`${compact ? 'text-[6px]' : 'text-[8px]'} opacity-65`}>Avec 500 points · solde actuel 720</p></div>}
+        <div className={`${compact ? 'mt-auto space-y-1' : 'mt-auto space-y-3'} border-t border-white/15 ${compact ? 'pt-1.5' : 'pt-3'}`}>
+          {selectedRows.map((row, rowIndex) => (
+            <div key={`${templateId}-${rowIndex}`} className="grid items-center gap-2" style={{ gridTemplateColumns: `repeat(${row.length}, minmax(0, 1fr))` }}>
+              {row.map((fieldKey, fieldIndex) => {
+                const item = fieldValues[fieldKey];
+                return <div key={`${fieldKey}-${fieldIndex}`} className={`${row.length === 1 ? 'text-center' : fieldIndex === row.length - 1 ? 'text-right' : 'text-left'} min-w-0`}>
+                  <p className={`${compact ? 'text-[5px]' : 'text-[8px]'} truncate uppercase tracking-wider opacity-45`}>{item.label}</p>
+                  <p className={`${compact ? 'text-[7px]' : 'text-sm'} truncate font-semibold`} style={{ color: fieldKey === 'balance' || fieldKey === 'offer' ? walletDesign.accentColor : undefined }}>{item.value}</p>
+                </div>;
+              })}
+            </div>
+          ))}
+        </div>
         {!compact && <div className="mt-3 flex items-center justify-between border-t border-white/10 pt-3"><span className="text-[8px] opacity-50">Carte Wallet · KELYANI</span>{walletDesign.showQr && qr}</div>}
       </div>
     </div>
