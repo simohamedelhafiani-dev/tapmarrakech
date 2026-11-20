@@ -1,12 +1,12 @@
 export const WALLET_TEMPLATES = {
-  'onyx-black': { id: 'onyx-black', name: 'Black Premium', primary: '#252525', accent: '#D5DCE5', background: '#050505', text: '#FFFFFF' },
-  'royal-gold': { id: 'royal-gold', name: 'Coffee House', primary: '#684C3B', accent: '#E6C9A8', background: '#241811', text: '#FFF4E7' },
-  'deep-ocean': { id: 'deep-ocean', name: 'Ocean Blue', primary: '#164A70', accent: '#54C8F2', background: '#071B2A', text: '#F3FAFF' },
-  'minimal-white': { id: 'minimal-white', name: 'Clean Minimal', primary: '#D8DDE3', accent: '#3B82F6', background: '#F7F9FC', text: '#111827' },
-  'emerald-luxe': { id: 'emerald-luxe', name: 'Emerald Fresh', primary: '#176B54', accent: '#74E0B2', background: '#06251D', text: '#F0FFF8' },
-  'burgundy': { id: 'burgundy', name: 'Burgundy Velvet', primary: '#762D45', accent: '#F2A7C2', background: '#260D18', text: '#FFF4F8' },
-  'midnight-blue': { id: 'midnight-blue', name: 'Electric Night', primary: '#313D9B', accent: '#7B8CFF', background: '#080D2D', text: '#F5F6FF' },
-  'sandstone': { id: 'sandstone', name: 'Coral Pop', primary: '#C64D3C', accent: '#FFC2A6', background: '#39150F', text: '#FFF7F2' },
+  'onyx-black': { id: 'onyx-black', layout: 'member', name: 'Black Premium', primary: '#252525', accent: '#D5DCE5', background: '#050505', text: '#FFFFFF' },
+  'royal-gold': { id: 'royal-gold', layout: 'stamp', name: 'Coffee House', primary: '#684C3B', accent: '#E6C9A8', background: '#241811', text: '#FFF4E7' },
+  'deep-ocean': { id: 'deep-ocean', layout: 'points', name: 'Ocean Blue', primary: '#164A70', accent: '#54C8F2', background: '#071B2A', text: '#F3FAFF' },
+  'minimal-white': { id: 'minimal-white', layout: 'minimal', name: 'Clean Minimal', primary: '#D8DDE3', accent: '#3B82F6', background: '#F7F9FC', text: '#111827' },
+  'emerald-luxe': { id: 'emerald-luxe', layout: 'progress', name: 'Emerald Fresh', primary: '#176B54', accent: '#74E0B2', background: '#06251D', text: '#F0FFF8' },
+  'burgundy': { id: 'burgundy', layout: 'coupon', name: 'Burgundy Velvet', primary: '#762D45', accent: '#F2A7C2', background: '#260D18', text: '#FFF4F8' },
+  'midnight-blue': { id: 'midnight-blue', layout: 'vip', name: 'Electric Night', primary: '#313D9B', accent: '#7B8CFF', background: '#080D2D', text: '#F5F6FF' },
+  'sandstone': { id: 'sandstone', layout: 'hero', name: 'Coral Pop', primary: '#C64D3C', accent: '#FFC2A6', background: '#39150F', text: '#FFF7F2' },
 } as const;
 import { useEffect, useMemo, useState } from 'react';
 import QRCode from 'qrcode';
