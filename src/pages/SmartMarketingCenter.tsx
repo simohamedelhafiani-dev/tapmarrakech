@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { Bell, Gift, Heart, MapPin, Cake, Crown, Flame, Zap, Trophy, Users, Megaphone, Settings2, Sparkles, ArrowUpRight, X, Save } from 'lucide-react';
@@ -32,7 +32,9 @@ export default function SmartMarketingCenter() {
  const [writeError,setWriteError]=useState<string|null>(null);
  useEffect(()=>{
    let active=true;
+   let requestSequence=0;
    const load=async(id:string|null)=>{
+     const sequence=++requestSequence;
      if(!active)return;
      setEstablishmentId(id);setLoading(true);setError(null);setWriteError(null);setSaved(false);setSelected(null);setEnabled({});setConfigs({});
      if(!id){setLoading(false);setError('Aucun établissement sélectionné. Sélectionnez un établissement puis réessayez.');return;}
@@ -48,15 +50,15 @@ export default function SmartMarketingCenter() {
          const safeConfig=row.config&&typeof row.config==='object'&&!Array.isArray(row.config)?row.config:{};
          nextConfigs[row.smart_id]={...defaults,...Object.fromEntries(Object.entries(safeConfig).filter(([,v])=>typeof v==='string'))};
        }
-       if(active){setEnabled(nextEnabled);setConfigs(nextConfigs);}
-     }catch(err){if(active)setError(err instanceof Error?err.message:'Erreur lors du chargement des Smart.');}
-     finally{if(active)setLoading(false);}
+       if(active&&sequence===requestSequence){setEnabled(nextEnabled);setConfigs(nextConfigs);}
+     }catch(err){if(active&&sequence===requestSequence)setError(err instanceof Error?err.message:'Erreur lors du chargement des Smart.');}
+     finally{if(active&&sequence===requestSequence)setLoading(false);}
    };
    const getSelected=()=>{try{return user?.id?localStorage.getItem(`tapmarrakech:selected-establishment:${user.id}`):null;}catch{return null;}};
    void load(getSelected());
    const handleChange=(event:Event)=>{const detail=(event as CustomEvent<{establishmentId?:string}>).detail;void load(detail?.establishmentId??getSelected());};
    window.addEventListener('tapmarrakech:establishment-changed',handleChange);
-   return()=>{active=false;window.removeEventListener('tapmarrakech:establishment-changed',handleChange);};
+   return()=>{active=false;requestSequence++;window.removeEventListener('tapmarrakech:establishment-changed',handleChange);};
  },[user?.id]);
  const activeCount=Object.values(enabled).filter(Boolean).length;
  const openSettings=(smart:Smart)=>{setSelected(smart);setDraft(configs[smart.id]??smart.defaults);setSaved(false);setWriteError(null);};
