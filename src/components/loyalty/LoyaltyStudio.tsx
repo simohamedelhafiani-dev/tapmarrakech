@@ -1424,12 +1424,31 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                           ...current, backgroundColor: template.background, primaryColor: template.primary,
                           accentColor: template.accent, textColor: template.text, cardTitle: current.cardTitle || establishment.name,
                         }))} className="block w-full p-3 text-left">
-                          <div className="h-24 rounded-xl p-3" style={{background: template.background, color: template.text}}>
-                            <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-bold tracking-widest">KELYANI</span>
-                              <span className="h-3 w-3 rounded-full" style={{background:template.accent}} />
+                          <div className="relative h-28 overflow-hidden rounded-xl p-3" style={{background: template.background, color: template.text}}>
+                            <div className="absolute inset-0 opacity-30" style={{background: `radial-gradient(circle at 85% 20%, ${template.accent}, transparent 45%)`}} />
+                            <div className="relative flex h-full flex-col justify-between">
+                              {template.layout === 'stamp' ? (
+                                <>
+                                  <div className="flex items-center justify-between"><span className="text-[9px] font-bold tracking-widest">COFFEE HOUSE</span><span className="text-xs">☕</span></div>
+                                  <div className="flex gap-1.5">{Array.from({length:8}).map((_,i)=><span key={i} className="grid h-4 w-4 place-items-center rounded-full border text-[8px]" style={{borderColor:template.accent,color:template.accent,background:i<4?template.accent+'55':'transparent'}}>{i<4?'✓':''}</span>)}</div>
+                                  <span className="text-[9px] font-semibold">8 VISITES = 1 CADEAU</span>
+                                </>
+                              ) : template.layout === 'points' ? (
+                                <><span className="text-[9px] tracking-widest">POINTS FIDÉLITÉ</span><strong className="text-2xl leading-none">2 450 <span className="text-xs">pts</span></strong><div className="flex justify-between text-[9px]"><span>Récompense à 3 000 pts</span><span>82%</span></div><div className="h-1.5 rounded-full bg-white/20"><div className="h-full w-[82%] rounded-full" style={{background:template.accent}}/></div></>
+                              ) : template.layout === 'coupon' ? (
+                                <><span className="text-[9px] font-bold tracking-widest">OFFRE EXCLUSIVE</span><strong className="text-2xl">-20%</strong><span className="text-[9px]">SUR VOTRE PROCHAINE VISITE</span><div className="border-t border-dashed pt-1 text-[9px]" style={{borderColor:template.accent}}>CODE · FIDELITE</div></>
+                              ) : template.layout === 'vip' ? (
+                                <><div className="flex justify-between text-[9px] tracking-widest"><span>MEMBRE VIP</span><span>✦ ✦ ✦</span></div><strong className="text-xl tracking-[.2em]">EXCLUSIVE</strong><span className="text-[9px]">ACCÈS PRIVILÉGIÉ</span></>
+                              ) : template.layout === 'progress' ? (
+                                <><span className="text-[9px] tracking-widest">VOTRE PROGRESSION</span><strong className="text-xl">7 / 10 visites</strong><div className="flex gap-1">{Array.from({length:10}).map((_,i)=><span key={i} className="h-2 flex-1 rounded-sm" style={{background:i<7?template.accent:'rgba(255,255,255,.18)'}}/>)}</div><span className="text-[9px]">Plus que 3 avant votre cadeau</span></>
+                              ) : template.layout === 'hero' ? (
+                                <><span className="text-[9px] tracking-widest">VOTRE CLUB</span><strong className="text-xl">{template.name}</strong><span className="text-[9px]">Chaque visite compte ✦</span><div className="flex justify-between text-[9px]"><span>Points</span><span>QR • Carte digitale</span></div></>
+                              ) : template.layout === 'minimal' ? (
+                                <><span className="text-[9px] tracking-widest">LOYALTY MEMBER</span><strong className="text-xl tracking-tight">{template.name}</strong><span className="text-[9px] opacity-70">Une expérience simple et élégante</span></>
+                              ) : (
+                                <><div className="flex justify-between text-[9px]"><span>KELYANI</span><span>•••</span></div><strong className="text-xl">MEMBER CARD</strong><span className="text-[9px]">Fidèle depuis aujourd’hui</span><div className="flex justify-between text-[9px]"><span>CLIENT</span><span>000 024</span></div></>
+                              )}
                             </div>
-                            <p className="mt-6 text-sm font-semibold">{template.name}</p>
                           </div>
                           <p className="mt-2 text-xs font-semibold text-white">{template.name}</p>
                         </button>
