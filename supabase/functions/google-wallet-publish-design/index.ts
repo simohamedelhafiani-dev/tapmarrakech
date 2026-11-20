@@ -38,6 +38,80 @@ const hex = (value: unknown, fallback: string) =>
   typeof value === "string" && /^#[0-9a-fA-F]{6}$/.test(value) ? value : fallback;
 const localized = (value: string) => ({defaultValue:{language:"fr-FR",value}});
 
+type GoogleWalletFieldKey = "balance" | "accountName" | "accountId" | "reward" | "tier" | "venue" | "offer" | "program";
+const GOOGLE_FIELD_PATHS: Record<GoogleWalletFieldKey, string> = {
+  balance: "object.textModulesData['wallet-balance']",
+  accountName: "object.accountName",
+  accountId: "object.accountId",
+  reward: "object.textModulesData['wallet-reward']",
+  tier: "object.textModulesData['wallet-tier']",
+  venue: "object.textModulesData['wallet-venue']",
+  offer: "object.textModulesData['wallet-offer']",
+  program: "object.textModulesData['wallet-program']",
+};
+
+const GOOGLE_CARD_LAYOUTS: Record<string, GoogleWalletFieldKey[][]> = {
+  "google-balance-ledger": [["balance"], ["accountName", "accountId"], ["reward"]],
+  "google-stamp-journey": [["balance", "reward"], ["accountName", "accountId"]],
+  "google-member-profile": [["accountName"], ["accountId", "balance"], ["tier"]],
+  "google-scan-first": [["accountId"], ["balance", "accountName"]],
+  "google-reward-board": [["reward"], ["balance", "accountName"], ["accountId"]],
+  "google-tier-club": [["tier"], ["accountName", "balance"], ["accountId"]],
+  "google-venue-guide": [["venue"], ["accountName", "balance"], ["accountId"]],
+  "google-offer-pass": [["offer"], ["balance", "accountName"], ["accountId"]],
+};
+
+function fieldSelector(fieldPath: string) {
+  return { fields: [{ fieldPath }] };
+}
+
+function templateItem(fieldPath: string) {
+  return { firstValue: fieldSelector(fieldPath) };
+}
+
+function normalizeGoogleRows(value: unknown, fallback: GoogleWalletFieldKey[][]): GoogleWalletFieldKey[][] {
+  if (!Array.isArray(value)) return fallback;
+  const valid = new Set(Object.keys(GOOGLE_FIELD_PATHS));
+  const rows = value.slice(0, 3).flatMap(row => {
+    if (!Array.isArray(row)) return [];
+    const fields = row.slice(0, 3).filter((field): field is GoogleWalletFieldKey => typeof field === "string" && valid.has(field));
+    return fields.length ? [fields] : [];
+  });
+  return rows.length ? rows : fallback;
+}
+
+function googleClassTemplate(designKey: string, design: Record<string, unknown>) {
+  const fallback = GOOGLE_CARD_LAYOUTS[designKey] || GOOGLE_CARD_LAYOUTS["google-balance-ledger"];
+  const layouts = design.googleTemplateLayouts && typeof design.googleTemplateLayouts === "object"
+    ? design.googleTemplateLayouts as Record<string, unknown>
+    : {};
+  const rows = normalizeGoogleRows(layouts[designKey], fallback);
+  const fieldRows = rows.map(row => row.map(field => GOOGLE_FIELD_PATHS[field]));
+  const cardRowTemplateInfos = fieldRows.map(fields => fields.length === 1
+    ? { oneItem: { item: templateItem(fields[0]) } }
+    : fields.length === 2
+      ? { twoItems: { startItem: templateItem(fields[0]), endItem: templateItem(fields[1]) } }
+      : { threeItems: { startItem: templateItem(fields[0]), middleItem: templateItem(fields[1]), endItem: templateItem(fields[2]) } });
+  const allFields = Array.from(new Set(fieldRows.flat()));
+  const barcodeTop = allFields.includes(GOOGLE_FIELD_PATHS.accountId)
+    ? GOOGLE_FIELD_PATHS.accountId
+    : allFields[0] || GOOGLE_FIELD_PATHS.balance;
+  return {
+    cardTemplateOverride: { cardRowTemplateInfos },
+    listTemplateOverride: {
+      firstRowOption: { fieldOption: fieldSelector(fieldRows[0][0]) },
+      secondRowOption: fieldSelector("object.accountName"),
+    },
+    cardBarcodeSectionDetails: {
+      firstTopDetail: { fieldSelector: fieldSelector(barcodeTop) },
+      firstBottomDetail: { fieldSelector: fieldSelector("object.accountId") },
+    },
+    detailsTemplateOverride: {
+      detailsItemInfos: allFields.slice(0, 6).map(fieldPath => ({ item: templateItem(fieldPath) })),
+    },
+  };
+}
+
 Deno.serve(async request => {
   if (request.method === "OPTIONS") return new Response("ok", {headers:cors});
   if (request.method !== "POST") return reply({success:false,error:"Méthode non autorisée"},405);
@@ -93,6 +167,7 @@ Deno.serve(async request => {
       programLogo:{sourceUri:{uri:logo},contentDescription:localized("Logo du programme de fidélité")},
       ...(heroImage ? { heroImage:{sourceUri:{uri:heroImage},contentDescription:localized("Visuel principal de la carte")} } : {}),
       hexBackgroundColor:hex(design.backgroundColor,"#050505"),
+      classTemplateInfo:googleClassTemplate(designKey, design),
       homepageUri:{uri:websiteUrl,description:"Découvrir l'établissement"},
       ...(phoneNumber ? {linksModuleData:{uris:[{uri:"tel:"+phoneNumber,description:"Téléphone"}]}} : {}),
       textModulesData:[
@@ -121,6 +196,7 @@ Deno.serve(async request => {
         issuerName:classBody.issuerName,programName:classBody.programName,programLogo:classBody.programLogo,
         heroImage:classBody.heroImage || null,
         hexBackgroundColor:classBody.hexBackgroundColor,homepageUri:classBody.homepageUri,
+        classTemplateInfo:classBody.classTemplateInfo,
         textModulesData:classBody.textModulesData,
         linksModuleData:classBody.linksModuleData || {uris:[]},
         reviewStatus:"UNDER_REVIEW",
@@ -148,3 +224,4 @@ Deno.serve(async request => {
     return reply({success:false,error:"Impossible de publier ce modèle Wallet."},500);
   }
 });
+
