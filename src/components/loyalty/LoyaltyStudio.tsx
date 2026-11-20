@@ -616,6 +616,8 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       primaryColor: template.primary,
       accentColor: template.accent,
       textColor: template.text,
+      walletLayout: template.layout,
+      walletTemplateName: template.name,
       cardTitle: walletDesign.cardTitle || establishment.name,
       logoUrl: walletDesign.logoUrl || establishment.logoUrl || '',
     };
