@@ -96,6 +96,13 @@ Deno.serve(async request => {
       homepageUri:{uri:websiteUrl,description:"Découvrir l'établissement"},
       ...(phoneNumber ? {linksModuleData:{uris:[{uri:"tel:"+phoneNumber,description:"Téléphone"}]}} : {}),
       textModulesData:[
+        ...(design.walletLayout === "stamp" ? [{id:"wallet-layout",header:"Fidélité",body:"Collection de visites et récompense"}] :
+          design.walletLayout === "points" ? [{id:"wallet-layout",header:"Points",body:"Accumulez des points et débloquez vos avantages"}] :
+          design.walletLayout === "coupon" ? [{id:"wallet-layout",header:"Offre",body:"Votre avantage fidélité"}] :
+          design.walletLayout === "vip" ? [{id:"wallet-layout",header:"Club VIP",body:"Accès privilégié et avantages membre"}] :
+          design.walletLayout === "progress" ? [{id:"wallet-layout",header:"Progression",body:"Suivez votre fidélité et rapprochez-vous de votre récompense"}] :
+          design.walletLayout === "hero" ? [{id:"wallet-layout",header:"Club",body:"Votre carte membre digitale"}] :
+          design.walletLayout === "minimal" ? [{id:"wallet-layout",header:"Carte membre",body:"Votre fidélité, simplement"}] : []),
         ...(customMessage ? [{id:"wallet-message",header:"Bienvenue",body:customMessage}] : []),
         ...(address ? [{id:"wallet-address",header:"Adresse",body:address}] : []),
       ],
