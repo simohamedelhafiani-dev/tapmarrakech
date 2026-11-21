@@ -24,10 +24,10 @@ Deno.serve(async(req)=>{
    const tmpl=templates[q.smart_id];
    if(!tmpl){await admin.from('smart_marketing_queue').update({status:'SKIPPED',processed_at:new Date().toISOString(),last_error:'No template/delivery supported yet'}).eq('id',q.id);skipped++;continue;}
    const {data:c,error:ce}=await admin.from('loyalty_customers').select('id,notification_consent,marketing_consent').eq('id',q.customer_id).eq('establishment_id',q.establishment_id).maybeSingle();
-   if(ce||!c||!c.notification_consent|| (tmpl.type==='OFFER'&&!c.marketing_consent)){
+   if(ce||!c||!c.notification_consent|| !c.marketing_consent){
     await admin.from('smart_marketing_queue').update({status:'SKIPPED',processed_at:new Date().toISOString(),last_error:ce?'Customer validation failed':'Consent missing'}).eq('id',q.id);skipped++;continue;
    }
-   const {error:insertErr}=await admin.from('loyalty_card_notifications').insert({establishment_id:q.establishment_id,customer_id:q.customer_id,title:tmpl.title,message:tmpl.message(q.payload??{}),type:tmpl.type});
+   const {error:insertErr}=await admin.from('loyalty_card_notifications').insert({establishment_id:q.establishment_id,customer_id:q.customer_id,smart_marketing_queue_id:q.id,title:tmpl.title,message:tmpl.message(q.payload??{}),type:tmpl.type});
    if(insertErr)throw insertErr;
    await admin.from('smart_marketing_queue').update({status:'SENT',processed_at:new Date().toISOString(),last_error:null}).eq('id',q.id);
    sent++;
