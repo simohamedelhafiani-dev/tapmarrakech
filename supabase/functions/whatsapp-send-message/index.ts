@@ -38,10 +38,10 @@ Deno.serve(async (req) => {
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return reply({ error: "invalid_json" }, 400);
     body = parsed;
   } catch { return reply({ error: "invalid_json" }, 400); }
-  const establishmentId = body.establishmentId?.trim() ?? "";
-  const to = body.to?.trim() ?? "";
-  const textBody = body.text?.trim() ?? "";
-  const requestId = body.requestId?.trim() ?? "";
+  const establishmentId = typeof body.establishmentId === "string" ? body.establishmentId.trim() : "";
+  const to = typeof body.to === "string" ? body.to.trim() : "";
+  const textBody = typeof body.text === "string" ? body.text.trim() : "";
+  const requestId = typeof body.requestId === "string" ? body.requestId.trim() : "";
   const customerPhone = to.replace(/^\+/, "");
   if (!uuidPattern.test(establishmentId) || !phonePattern.test(to) || !textBody || textBody.length > 4096 || !uuidPattern.test(requestId)) {
     return reply({ error: "invalid_request_fields" }, 400);
