@@ -4,7 +4,10 @@ import { useAuth } from '@/contexts/AuthContext';
 
 type Establishment = { id: string; name?: string };
 
-declare global {\n  interface Window { FB?: { init: (options: Record<string, unknown>) => void; login: (callback: (response: any) => void, options: Record<string, unknown>) => void };\n}\n
+declare global {
+  interface Window { FB?: { init: (options: Record<string, unknown>) => void; login: (callback: (response: any) => void, options: Record<string, unknown>) => void };
+}
+
 const appId = import.meta.env.VITE_META_APP_ID as string | undefined;
 const configId = import.meta.env.VITE_META_EMBEDDED_SIGNUP_CONFIG_ID as string | undefined;
 
