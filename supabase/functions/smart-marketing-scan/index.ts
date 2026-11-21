@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
         if (elapsed >= delayDays) { trigger = `winback:${customer.last_visit_at.slice(0,10)}:${delayDays}`; payload = { inactive_days: elapsed, delay_days: delayDays }; }
       } else if (cfg.smart_id === 'vip' && customer.marketing_consent) {
         const visitThreshold = Math.max(1, num(settings.thresholdVisits ?? settings.threshold_visits ?? settings.threshold, 10));
-        if ((customer.visit_count ?? 0) >= visitThreshold) { trigger = `vip:${visitThreshold}:${customer.visit_count}`; payload = { visits: customer.visit_count, threshold: visitThreshold }; }
+        if ((customer.visit_count ?? 0) >= visitThreshold) { trigger = `vip:${visitThreshold}`; payload = { visits: customer.visit_count, threshold: visitThreshold }; }
       } else if (cfg.smart_id === 'progress' && customer.marketing_consent && !settingsError) {
         const goal = Math.max(1, num(loyaltySetting?.stamp_goal, 10));
         const progressPercent = Math.max(1, Math.min(100, num(settings.thresholdPercent ?? settings.threshold_percent ?? settings.threshold, 80)));
