@@ -104,7 +104,7 @@ Deno.serve(async (req) => {
         }
         if (!conversation) continue;
 
-        const { error: insertError } = await admin.from("whatsapp_messages").upsert({
+        const { data: insertedRows, error: insertError } = await admin.from("whatsapp_messages").upsert({
           establishment_id: connection.establishment_id,
           conversation_id: conversation.id,
           provider_message_id: providerMessageId,
@@ -113,8 +113,9 @@ Deno.serve(async (req) => {
           body: messageBody,
           delivery_status: "received",
           raw_metadata: { timestamp: message.timestamp ?? null, type },
-        }, { onConflict: "provider_message_id", ignoreDuplicates: true });
-        if (!insertError) accepted++;
+        }, { onConflict: "provider_message_id", ignoreDuplicates: true }).select("id");
+        // Count only rows actually inserted, not duplicate webhook retries.
+        if (!insertError && Array.isArray(insertedRows)) accepted += insertedRows.length;
       }
 
       const statuses = Array.isArray(value.statuses) ? value.statuses as Record<string, unknown>[] : [];
