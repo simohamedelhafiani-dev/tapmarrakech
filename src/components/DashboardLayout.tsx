@@ -44,6 +44,12 @@ const links = [
     feature: null,
   },
   {
+    to: '/dashboard/whatsapp/inbox',
+    label: 'WhatsApp',
+    icon: MessageCircle,
+    feature: null,
+  },
+  {
     to: '/dashboard/smart-marketing',
     label: 'Smart Marketing',
     icon: Sparkles,
