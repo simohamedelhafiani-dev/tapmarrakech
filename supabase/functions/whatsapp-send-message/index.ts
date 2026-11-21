@@ -31,7 +31,13 @@ Deno.serve(async (req) => {
   if (!supabaseUrl || !anonKey || !serviceKey || !graphVersion) return reply({ error: "server_configuration_missing" }, 500);
 
   let body: { establishmentId?: string; to?: string; text?: string; requestId?: string };
-  try { body = await req.json(); } catch { return reply({ error: "invalid_json" }, 400); }
+  const rawBody = await req.text();
+  if (new TextEncoder().encode(rawBody).byteLength > 32_000) return reply({ error: "payload_too_large" }, 413);
+  try {
+    const parsed = JSON.parse(rawBody);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return reply({ error: "invalid_json" }, 400);
+    body = parsed;
+  } catch { return reply({ error: "invalid_json" }, 400); }
   const establishmentId = body.establishmentId?.trim() ?? "";
   const to = body.to?.trim() ?? "";
   const textBody = body.text?.trim() ?? "";
