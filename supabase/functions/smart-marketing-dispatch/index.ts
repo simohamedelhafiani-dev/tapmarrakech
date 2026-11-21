@@ -27,9 +27,16 @@ Deno.serve(async(req)=>{
    if(ce||!c||!c.notification_consent|| !c.marketing_consent){
     await admin.from('smart_marketing_queue').update({status:'SKIPPED',processed_at:new Date().toISOString(),last_error:ce?'Customer validation failed':'Consent missing'}).eq('id',q.id);skipped++;continue;
    }
-   const {error:insertErr}=await admin.from('loyalty_card_notifications').insert({establishment_id:q.establishment_id,customer_id:q.customer_id,smart_marketing_queue_id:q.id,title:tmpl.title,message:tmpl.message(q.payload??{}),type:tmpl.type});
-   if(insertErr)throw insertErr;
-   await admin.from('smart_marketing_queue').update({status:'SENT',processed_at:new Date().toISOString(),last_error:null}).eq('id',q.id);
+   const notificationPayload={establishment_id:q.establishment_id,customer_id:q.customer_id,smart_marketing_queue_id:q.id,title:tmpl.title,message:tmpl.message(q.payload??{}),type:tmpl.type};
+   const {error:insertErr}=await admin.from('loyalty_card_notifications').insert(notificationPayload);
+   if(insertErr){
+    // A prior attempt may have created the notification before queue state was updated.
+    if(insertErr.code!=='23505')throw insertErr;
+    const {data:existing,error:lookupErr}=await admin.from('loyalty_card_notifications').select('id').eq('smart_marketing_queue_id',q.id).maybeSingle();
+    if(lookupErr||!existing)throw insertErr;
+   }
+   const {error:statusErr}=await admin.from('smart_marketing_queue').update({status:'SENT',processed_at:new Date().toISOString(),last_error:null}).eq('id',q.id);
+   if(statusErr)throw statusErr;
    sent++;
   }catch(e){
    const msg=e instanceof Error?e.message:String(e);
