@@ -42,6 +42,11 @@ Deno.serve(async (req) => {
     }
     const eligible: Array<{customer:Customer; trigger:string; payload:Record<string,unknown>}> = [];
     const settings = cfg.config ?? {};
+    const { data: loyaltySetting, error: settingsError } = cfg.smart_id === 'progress'
+      ? await admin.from('loyalty_settings').select('stamp_goal').eq('establishment_id', cfg.establishment_id).maybeSingle()
+      : { data: null, error: null };
+    const runErrors: string[] = [];
+    if (settingsError) runErrors.push('Loyalty settings lookup failed');
     for (const customer of (customers ?? []) as Customer[]) {
       scanned++;
       let trigger = '', payload: Record<string,unknown> = {};
@@ -54,8 +59,7 @@ Deno.serve(async (req) => {
       } else if (cfg.smart_id === 'vip' && customer.marketing_consent) {
         const visitThreshold = Math.max(1, num(settings.thresholdVisits ?? settings.threshold_visits, 10));
         if ((customer.visit_count ?? 0) >= visitThreshold) { trigger = `vip:${visitThreshold}:${customer.visit_count}`; payload = { visits: customer.visit_count, threshold: visitThreshold }; }
-      } else if (cfg.smart_id === 'progress' && customer.marketing_consent) {
-        const { data: loyaltySetting } = await admin.from('loyalty_settings').select('stamp_goal').eq('establishment_id', cfg.establishment_id).maybeSingle();
+      } else if (cfg.smart_id === 'progress' && customer.marketing_consent && !settingsError) {
         const goal = Math.max(1, num(loyaltySetting?.stamp_goal, 10));
         const threshold = Math.max(1, Math.ceil(goal * 0.8));
         if ((customer.stamps_balance ?? 0) >= threshold && (customer.stamps_balance ?? 0) < goal) { trigger = `progress:${goal}:${customer.stamps_balance}`; payload = { stamps: customer.stamps_balance, goal, percent: Math.round((customer.stamps_balance / goal) * 100) }; }
@@ -69,10 +73,10 @@ Deno.serve(async (req) => {
         trigger_key: item.trigger, payload: item.payload, status: 'PENDING', scheduled_at: new Date().toISOString(),
       });
       if (!insertError) added++;
-      else if (insertError.code !== '23505') errors.push(`${cfg.smart_id}: queue insert failed`);
+      else if (insertError.code !== '23505') { runErrors.push(`${cfg.smart_id}: queue insert failed`); errors.push(`${cfg.smart_id}: queue insert failed`); }
     }
     queued += added;
-    await admin.from('smart_marketing_runs').update({ status: errors.length ? 'PARTIAL' : 'COMPLETED', scanned: customers?.length ?? 0, queued: added, skipped: (customers?.length ?? 0) - eligible.length, details: { eligible: eligible.length, deduplicated: eligible.length - added }, finished_at: new Date().toISOString() }).eq('id', runId);
+    await admin.from('smart_marketing_runs').update({ status: runErrors.length ? 'PARTIAL' : 'COMPLETED', scanned: customers?.length ?? 0, queued: added, skipped: (customers?.length ?? 0) - eligible.length, details: { eligible: eligible.length, deduplicated: eligible.length, errors: runErrors }, finished_at: new Date().toISOString() }).eq('id', runId);
   }
   return json({ success: errors.length === 0, scanned, queued, supported: [...supported], skippedUnsupported, errors });
 });
