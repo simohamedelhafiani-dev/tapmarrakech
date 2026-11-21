@@ -29,7 +29,13 @@ Deno.serve(async (req) => {
   if (!supabaseUrl || !anonKey || !serviceKey) return json({ error: "server_configuration_missing" }, 500);
 
   let body: { establishmentId?: string; conversationId?: string; limit?: number };
-  try { body = await req.json(); } catch { return json({ error: "invalid_json" }, 400); }
+  const rawBody = await req.text();
+  if (new TextEncoder().encode(rawBody).byteLength > 32_000) return json({ error: "payload_too_large" }, 413);
+  try {
+    const parsed = JSON.parse(rawBody);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return json({ error: "invalid_json" }, 400);
+    body = parsed;
+  } catch { return json({ error: "invalid_json" }, 400); }
   const establishmentId = body.establishmentId?.trim() ?? "";
   const conversationId = body.conversationId?.trim() ?? "";
   const limit = Number.isInteger(body.limit) ? Math.min(Math.max(Number(body.limit), 1), 100) : 50;
