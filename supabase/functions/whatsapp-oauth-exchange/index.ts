@@ -15,7 +15,11 @@ const idPattern = /^[0-9]{5,32}$/;
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 async function graphGet(url: URL, token: string) {
-  const response = await fetch(url, { method: "GET", headers: { Authorization: `Bearer ${token}` } });
+  const response = await fetch(url, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
+    signal: AbortSignal.timeout(15_000),
+  });
   const data = await response.json().catch(() => ({}));
   return { response, data };
 }
@@ -77,8 +81,14 @@ Deno.serve(async (req) => {
   // Exchange the short-lived Embedded Signup authorization code server-side only.
   const exchangeUrl = new URL(`https://graph.facebook.com/${graphVersion}/oauth/access_token`);
   exchangeUrl.search = new URLSearchParams({ client_id: appId, client_secret: appSecret, code }).toString();
-  const exchange = await fetch(exchangeUrl, { method: "GET" });
-  const tokenData = await exchange.json().catch(() => ({}));
+  let exchange: Response;
+  let tokenData: Record<string, unknown>;
+  try {
+    exchange = await fetch(exchangeUrl, { method: "GET", signal: AbortSignal.timeout(15_000) });
+    tokenData = await exchange.json().catch(() => ({}));
+  } catch {
+    return reply({ error: "meta_code_exchange_unavailable" }, 502);
+  }
   const accessToken = typeof tokenData.access_token === "string" ? tokenData.access_token : "";
   if (!exchange.ok || !accessToken) return reply({ error: "meta_code_exchange_failed" }, 400);
 
