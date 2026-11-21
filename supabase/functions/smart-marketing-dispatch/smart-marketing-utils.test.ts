@@ -1,5 +1,5 @@
 import { assertEquals, assertMatch } from 'https://deno.land/std@0.224.0/assert/mod.ts';
-import { extractBearerToken, normalizeLimit, progressThreshold, buildTriggerKey, parseSmartConfigNumber, resolveSmartMessage } from './smart-marketing-utils.ts';
+import { extractBearerToken, normalizeLimit, progressThreshold, buildTriggerKey, parseSmartConfigNumber, resolveSmartMessage, retryDelayMinutes } from './smart-marketing-utils.ts';
 
 Deno.test('Bearer token parsing is case-insensitive and whitespace tolerant',()=>{
  assertEquals(extractBearerToken('Bearer abc123'),'abc123');
@@ -34,4 +34,14 @@ Deno.test('custom Smart message overrides fallback only when non-empty',()=>{
  assertEquals(resolveSmartMessage(' Message personnalisé ','fallback'),'Message personnalisé');
  assertEquals(resolveSmartMessage('   ','fallback'),'fallback');
  assertEquals(resolveSmartMessage(null,'fallback'),'fallback');
+});
+
+Deno.test('retry backoff grows with attempts and is capped at 30 minutes',()=>{
+ assertEquals(retryDelayMinutes(1),1);
+ assertEquals(retryDelayMinutes(2),2);
+ assertEquals(retryDelayMinutes(3),4);
+ assertEquals(retryDelayMinutes(5),16);
+ assertEquals(retryDelayMinutes(7),30);
+ assertEquals(retryDelayMinutes(0),1);
+ assertEquals(retryDelayMinutes(Number.NaN),1);
 });
