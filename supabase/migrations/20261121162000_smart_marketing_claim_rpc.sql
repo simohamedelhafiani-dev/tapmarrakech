@@ -11,8 +11,8 @@ begin
     select id from public.smart_marketing_queue
     where status='PENDING' and scheduled_at <= now()
     order by scheduled_at, created_at
-    for update skip locked
     limit greatest(1, least(coalesce(p_limit,50),200))
+    for update skip locked
   )
   update public.smart_marketing_queue q
   set status='PROCESSING'
