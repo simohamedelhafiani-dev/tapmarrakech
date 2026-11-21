@@ -35,16 +35,30 @@ Deno.serve(async (req) => {
   const { data: userData, error: userError } = await userClient.auth.getUser();
   if (userError || !userData.user) return reply({ error: "unauthorized" }, 401);
 
+  // Match the dashboard's server-owned access rule. This permits assigned
+  // responsible users without trusting a client-provided user_id.
+  const { data: accessibleEstablishments, error: accessError } = await userClient.rpc("get_my_establishments");
+
   let body: { code?: string; establishmentId?: string; wabaId?: string; phoneNumberId?: string };
   try { body = await req.json(); } catch { return reply({ error: "invalid_json" }, 400); }
   const code = body.code?.trim();
   const establishmentId = body.establishmentId?.trim();
-  if (!code || !establishmentId) return reply({ error: "code_and_establishment_required" }, 400);
+  const wabaId = body.wabaId?.trim();
+  const phoneNumberId = body.phoneNumberId?.trim() || null;
+  if (!code || !establishmentId || !wabaId) return reply({ error: "code_establishment_and_waba_required" }, 400);
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(establishmentId)
+    || !/^\d{5,32}$/.test(wabaId)
+    || (phoneNumberId && !/^\d{5,32}$/.test(phoneNumberId))) {
+    return reply({ error: "invalid_establishment_or_whatsapp_id" }, 400);
+  }
+  const hasAccess = Array.isArray(accessibleEstablishments)
+    && accessibleEstablishments.some((row: { id?: string }) => row?.id === establishmentId);
+  if (accessError || !hasAccess) return reply({ error: "establishment_access_denied" }, 403);
 
   const admin = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
-  const { data: establishment, error: ownerError } = await admin
-    .from("establishments").select("id").eq("id", establishmentId).eq("user_id", userData.user.id).maybeSingle();
-  if (ownerError || !establishment) return reply({ error: "establishment_access_denied" }, 403);
+  const { data: establishment, error: establishmentError } = await admin
+    .from("establishments").select("id").eq("id", establishmentId).maybeSingle();
+  if (establishmentError || !establishment) return reply({ error: "establishment_not_found" }, 404);
 
   const tokenUrl = new URL(`https://graph.facebook.com/${graphVersion}/oauth/access_token`);
   tokenUrl.search = new URLSearchParams({ client_id: appId, client_secret: appSecret, code }).toString();
@@ -61,12 +75,15 @@ Deno.serve(async (req) => {
     meta_access_token: tokenData.access_token,
     token_type: tokenData.token_type ?? null,
     token_expires_at: expiresAt,
-    waba_id: body.wabaId ?? null,
-    phone_number_id: body.phoneNumberId ?? null,
+    waba_id: wabaId,
+    phone_number_id: phoneNumberId,
     status: "pending",
     updated_at: new Date().toISOString(),
   }, { onConflict: "establishment_id" });
   if (saveError) return reply({ error: "token_save_failed" }, 500);
 
-  return reply({ success: true, status: "pending", message: "Token sécurisé enregistré. Identifiants WhatsApp Business à finaliser." });
+  return reply({ success: true, status: "pending", message: phoneNumberId
+    ? "Compte et numéro WhatsApp enregistrés. Les étapes d’activation Meta restent à finaliser."
+    : "Compte WhatsApp enregistré. Ajoutez un numéro dans Meta pour finaliser l’activation." });
 });
+

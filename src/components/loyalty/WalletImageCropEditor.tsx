@@ -6,9 +6,10 @@ type Props = {
   platform: 'google' | 'apple';
   establishmentId: string;
   onSaved: (url: string) => void;
+  onClose: () => void;
 };
 
-export default function WalletImageCropEditor({ imageUrl, platform, establishmentId, onSaved }: Props) {
+export default function WalletImageCropEditor({ imageUrl, platform, establishmentId, onSaved, onClose }: Props) {
   const frameRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{x:number;y:number;px:number;py:number}|null>(null);
   const [zoom,setZoom] = useState(1);
@@ -65,7 +66,7 @@ export default function WalletImageCropEditor({ imageUrl, platform, establishmen
   return <div className="mt-4 rounded-2xl border border-white/10 bg-[#090909] p-3">
     <div className="mb-3 flex items-center justify-between gap-2">
       <div><p className="text-xs font-semibold text-white">Cadrage {platform === 'google' ? 'Google Wallet' : 'Apple Wallet'}</p><p className="mt-1 text-[10px] text-white/45">Glissez l’image pour la déplacer, puis ajustez le zoom.</p></div>
-      <Move size={16} className="text-[#3B82F6]" />
+      <div className="flex items-center gap-3"><Move size={16} className="text-[#00DFA5]" /><button type="button" onClick={onClose} disabled={saving} className="text-[10px] text-white/55 hover:text-white disabled:opacity-40">Fermer</button></div>
     </div>
     <div ref={frameRef} className="relative touch-none cursor-grab overflow-hidden rounded-xl active:cursor-grabbing" style={{aspectRatio:ratio}} onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={stopDrag} onPointerCancel={stopDrag} role="img" aria-label={`Zone de cadrage ${platform} Wallet`}><img src={imageUrl} alt="" draggable={false} className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover" style={{objectPosition:`${x}% ${y}%`,transform:`scale(${zoom})`}} /></div>
     <div className="mt-3 flex items-center gap-3"><label className="text-[10px] text-white/60">Zoom</label><input aria-label="Zoom image" type="range" min="1" max="3" step="0.01" value={zoom} onChange={event=>setZoom(Number(event.target.value))} className="min-w-0 flex-1 accent-[#3B82F6]" /><span className="w-10 text-right text-[10px] tabular-nums text-white/60">{zoom.toFixed(1)}×</span></div>
@@ -73,3 +74,4 @@ export default function WalletImageCropEditor({ imageUrl, platform, establishmen
     {error && <p className="mt-2 text-[10px] text-[#B0B0B0]">{error}</p>}
   </div>;
 }
+
