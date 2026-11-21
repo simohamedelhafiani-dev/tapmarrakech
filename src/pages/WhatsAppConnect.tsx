@@ -242,6 +242,9 @@ export default function WhatsAppConnect() {
 
       const { code, assets } = await startEmbeddedSignup(facebook, configId, controller.signal);
       if (!mountedRef.current) return;
+      if (!assets.phoneNumberId) {
+        throw new Error('Meta a connecté le compte WhatsApp Business, mais aucun numéro n’a été sélectionné. Terminez l’ajout ou la sélection du numéro dans Meta, puis relancez la connexion.');
+      }
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       if (sessionError) throw sessionError;
       const token = sessionData.session?.access_token;
