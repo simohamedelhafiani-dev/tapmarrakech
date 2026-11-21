@@ -60,8 +60,11 @@ export default function WhatsAppInbox() {
     });
     if (error || !data?.success) { setNotice(data?.error === 'whatsapp_not_connected' ? 'WhatsApp n’est pas connecté pour cet établissement.' : 'Envoi impossible. Vérifie la connexion WhatsApp et réessaie.'); setSending(false); return; }
     setDraft('');
-    await openConversation(selected);
+    // Refresh the list first: loadInbox clears the selected conversation.
+    // Reopen it afterwards so the inbox remains focused on the conversation just answered.
+    const sentConversation = selected;
     await loadInbox(establishmentId);
+    await openConversation(sentConversation);
     setSending(false);
   }
 
