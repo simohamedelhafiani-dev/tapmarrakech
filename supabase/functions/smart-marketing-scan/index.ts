@@ -67,17 +67,19 @@ Deno.serve(async (req) => {
       }
       if (trigger) eligible.push({ customer, trigger, payload });
     }
-    let added = 0;
+    let added = 0, deduplicated = 0;
     for (const item of eligible) {
       const { error: insertError } = await admin.from('smart_marketing_queue').insert({
         establishment_id: cfg.establishment_id, customer_id: item.customer.id, smart_id: cfg.smart_id,
         trigger_key: item.trigger, payload: item.payload, status: 'PENDING', scheduled_at: new Date().toISOString(),
       });
       if (!insertError) added++;
-      else if (insertError.code !== '23505') { runErrors.push(`${cfg.smart_id}: queue insert failed`); errors.push(`${cfg.smart_id}: queue insert failed`); }
+      else if (insertError.code === '23505') deduplicated++;
+      else { runErrors.push(`${cfg.smart_id}: queue insert failed`); errors.push(`${cfg.smart_id}: queue insert failed`); }
     }
     queued += added;
-    await admin.from('smart_marketing_runs').update({ status: runErrors.length ? 'PARTIAL' : 'COMPLETED', scanned: customers?.length ?? 0, queued: added, skipped: (customers?.length ?? 0) - eligible.length, details: { eligible: eligible.length, deduplicated: eligible.length, errors: runErrors }, finished_at: new Date().toISOString() }).eq('id', runId);
+    const runUpdate = await admin.from('smart_marketing_runs').update({ status: runErrors.length ? 'PARTIAL' : 'COMPLETED', scanned: customers?.length ?? 0, queued: added, skipped: (customers?.length ?? 0) - eligible.length, details: { eligible: eligible.length, deduplicated, errors: runErrors }, finished_at: new Date().toISOString() }).eq('id', runId);
+    if (runUpdate.error) errors.push(`${cfg.smart_id}: run log update failed`);
   }
   return json({ success: errors.length === 0, scanned, queued, supported: [...supported], skippedUnsupported, errors });
 });
