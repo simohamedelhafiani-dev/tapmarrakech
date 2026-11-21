@@ -62,7 +62,8 @@ Deno.serve(async (req) => {
         if ((customer.visit_count ?? 0) >= visitThreshold) { trigger = `vip:${visitThreshold}:${customer.visit_count}`; payload = { visits: customer.visit_count, threshold: visitThreshold }; }
       } else if (cfg.smart_id === 'progress' && customer.marketing_consent && !settingsError) {
         const goal = Math.max(1, num(loyaltySetting?.stamp_goal, 10));
-        const progressPercent = Math.max(1, Math.min(100, num(settings.thresholdPercent ?? settings.threshold_percent ?? settings.threshold, 80)));\n        const threshold = Math.max(1, Math.ceil(goal * progressPercent / 100));
+        const progressPercent = Math.max(1, Math.min(100, num(settings.thresholdPercent ?? settings.threshold_percent ?? settings.threshold, 80)));
+        const threshold = Math.max(1, Math.ceil(goal * progressPercent / 100));
         if ((customer.stamps_balance ?? 0) >= threshold && (customer.stamps_balance ?? 0) < goal) { trigger = `progress:${goal}:${customer.stamps_balance}`; payload = { stamps: customer.stamps_balance, goal, percent: Math.round((customer.stamps_balance / goal) * 100) }; }
       }
       if (trigger) eligible.push({ customer, trigger, payload });
