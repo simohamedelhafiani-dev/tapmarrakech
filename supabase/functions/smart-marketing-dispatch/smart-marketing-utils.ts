@@ -18,3 +18,7 @@ export function parseSmartConfigNumber(value: unknown, fallback: number): number
   const parsed = typeof value === 'string' ? Number.parseFloat(value.trim()) : Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
 }
+
+export function resolveSmartMessage(customMessage: unknown, fallbackMessage: string): string {
+  return typeof customMessage === 'string' && customMessage.trim().length > 0 ? customMessage.trim() : fallbackMessage;
+}
