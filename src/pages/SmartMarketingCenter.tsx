@@ -17,6 +17,7 @@ const SMARTS: Smart[] = [
  {id:'comeback',name:'Smart Comeback',tagline:'Reconquête progressive des clients perdus',description:'Lance une séquence de relance et l’arrête dès que le client revient.',trigger:'Inactivité prolongée détectée',icon:Megaphone,color:'#818CF8',defaults:{steps:'J+30, J+37, J+45',channel:'Push / WhatsApp selon consentement',message:'Cela fait longtemps ! Nous aimerions te revoir. Profite de ton avantage de retour.'}},
 ];
 const SMART_IDS = SMARTS.map((smart) => smart.id);
+const OPERATIONAL_SMART_IDS = new Set(['winback','birthday','vip','progress']);
 type SmartConfigRow = { establishment_id: string; smart_id: string; enabled: boolean; config: Record<string, unknown> };
 export default function SmartMarketingCenter() {
  const {user}=useAuth();
@@ -62,7 +63,7 @@ export default function SmartMarketingCenter() {
    window.addEventListener('tapmarrakech:establishment-changed',handleChange);
    return()=>{active=false;requestSequence++;window.removeEventListener('tapmarrakech:establishment-changed',handleChange);};
  },[user?.id]);
- const activeCount=Object.values(enabled).filter(Boolean).length;
+ const activeCount=SMARTS.filter(s=>OPERATIONAL_SMART_IDS.has(s.id)&&enabled[s.id]).length;
  const openSettings=(smart:Smart)=>{setSelected(smart);setDraft(configs[smart.id]??smart.defaults);setSaved(false);setWriteError(null);};
  const saveRow=async(id:string,enabledValue:boolean,configValue:Record<string,string>)=>{
    if(!establishmentId){setWriteError('Établissement manquant : impossible de sauvegarder.');return false;}
@@ -87,11 +88,11 @@ export default function SmartMarketingCenter() {
    <div className="mt-5 flex items-center gap-2 rounded-xl border border-white/[.06] bg-black/30 px-3 py-2 text-[11px] text-white/45"><Sparkles size={14} className="text-[#3B82F6]"/> Automatisez vos campagnes sans avoir à les gérer chaque jour.</div>
   </section>
   <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-   {SMARTS.map(s=>{const Icon=s.icon;const isOn=!!enabled[s.id];return <article key={s.id} className={`rounded-2xl border p-4 transition-all ${isOn?'border-[#3B82F6]/35 bg-[#111111]':'border-white/[.07] bg-[#0C0C0C]'}`}>
-    <div className="flex items-start justify-between gap-3"><div className="grid h-11 w-11 place-items-center rounded-xl bg-white/[.04]" style={{color:s.color}}><Icon size={20}/></div><button type="button" role="switch" aria-checked={isOn} aria-label={`Activer ${s.name}`} onClick={()=>void toggle(s.id)} disabled={loading||saving||!!error} className={`relative h-6 w-11 rounded-full transition disabled:cursor-not-allowed disabled:opacity-50 ${isOn?'bg-[#3B82F6]':'bg-[#343434]'}`}><span className={`absolute top-1 h-4 w-4 rounded-full bg-white transition ${isOn?'left-6':'left-1'}`}/></button></div>
+   {SMARTS.map(s=>{const Icon=s.icon;const isOn=!!enabled[s.id];const operational=OPERATIONAL_SMART_IDS.has(s.id);const displayOn=operational&&isOn;return <article key={s.id} className={`rounded-2xl border p-4 transition-all ${displayOn?'border-[#3B82F6]/35 bg-[#111111]':'border-white/[.07] bg-[#0C0C0C]'}`}>
+    <div className="flex items-start justify-between gap-3"><div className="grid h-11 w-11 place-items-center rounded-xl bg-white/[.04]" style={{color:s.color}}><Icon size={20}/></div><button type="button" role="switch" aria-checked={displayOn} aria-label={`Activer ${s.name}`} onClick={()=>void toggle(s.id)} disabled={!operational||loading||saving||!!error} className={`relative h-6 w-11 rounded-full transition disabled:cursor-not-allowed disabled:opacity-50 ${displayOn?'bg-[#3B82F6]':'bg-[#343434]'}`}><span className={`absolute top-1 h-4 w-4 rounded-full bg-white transition ${displayOn?'left-6':'left-1'}`}/></button></div>
     <h2 className="mt-4 text-sm font-semibold text-white">{s.name}</h2><p className="mt-1 text-xs text-white/45">{s.tagline}</p><p className="mt-3 min-h-10 text-[11px] leading-5 text-white/35">{s.description}</p>
     <div className="mt-4 flex items-center gap-1.5 text-[10px] text-white/35"><Bell size={12}/>{s.trigger}</div>
-    <div className="mt-4 flex items-center justify-between border-t border-white/[.06] pt-3"><span className={`text-[10px] font-medium ${isOn?'text-[#60A5FA]':'text-white/25'}`}>{isOn?'Active':'Inactive'}</span><button type="button" onClick={()=>openSettings(s)} disabled={loading||saving||!!error} className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-[#60A5FA] hover:text-blue-300 disabled:cursor-not-allowed disabled:opacity-40"><Settings2 size={13}/> Configurer <ArrowUpRight size={12}/></button></div>
+    <div className="mt-4 flex items-center justify-between border-t border-white/[.06] pt-3"><span className={`text-[10px] font-medium ${displayOn?'text-[#60A5FA]':'text-white/25'}`}>{operational?(isOn?'Active':'Inactive'):'Disponible prochainement'}</span><button type="button" onClick={()=>openSettings(s)} disabled={!operational||loading||saving||!!error} className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-[#60A5FA] hover:text-blue-300 disabled:cursor-not-allowed disabled:opacity-40"><Settings2 size={13}/> Configurer <ArrowUpRight size={12}/></button></div>
    </article>})}
   </div>
   <p className="text-[10px] leading-5 text-white/30">Les paramètres sont enregistrés dans Supabase pour cet établissement. Les campagnes ne sont pas encore exécutées et aucun message n’est envoyé.</p>
