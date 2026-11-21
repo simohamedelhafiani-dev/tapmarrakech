@@ -10,6 +10,14 @@ security definer
 set search_path = pg_catalog, public
 as $$
 begin
+  -- Exhausted stale claims are terminalized so they cannot remain PROCESSING forever.
+  update public.smart_marketing_queue
+  set status='FAILED', processed_at=now(), processing_started_at=null,
+      last_error=coalesce(last_error, 'Processing lease expired after maximum attempts')
+  where status='PROCESSING'
+    and processing_started_at < now() - interval '15 minutes'
+    and attempts >= 3;
+
   return query
   with picked as (
     select id from public.smart_marketing_queue
