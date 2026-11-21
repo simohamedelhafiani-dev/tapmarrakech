@@ -13,3 +13,8 @@ export function progressThreshold(goal:number):number {
 export function buildTriggerKey(type:string,date:string,days?:number):string {
  return days===undefined ? `${type}:${date}` : `${type}:${date}:${days}`;
 }
+
+export function parseSmartConfigNumber(value: unknown, fallback: number): number {
+  const parsed = typeof value === 'string' ? Number.parseFloat(value.trim()) : Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
