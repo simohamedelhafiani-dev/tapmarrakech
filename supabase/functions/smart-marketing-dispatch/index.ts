@@ -22,10 +22,10 @@ Deno.serve(async(req)=>{
  for(const q of rows??[]){
   try{
    const tmpl=templates[q.smart_id];
-   if(!tmpl){await admin.from('smart_marketing_queue').update({status:'SKIPPED',processed_at:new Date().toISOString(),last_error:'No template/delivery supported yet'}).eq('id',q.id);skipped++;continue;}
+   if(!tmpl){await admin.from('smart_marketing_queue').update({status:'SKIPPED',processing_started_at:null,processed_at:new Date().toISOString(),last_error:'No template/delivery supported yet'}).eq('id',q.id);skipped++;continue;}
    const {data:c,error:ce}=await admin.from('loyalty_customers').select('id,notification_consent,marketing_consent').eq('id',q.customer_id).eq('establishment_id',q.establishment_id).maybeSingle();
    if(ce||!c||!c.notification_consent|| !c.marketing_consent){
-    await admin.from('smart_marketing_queue').update({status:'SKIPPED',processed_at:new Date().toISOString(),last_error:ce?'Customer validation failed':'Consent missing'}).eq('id',q.id);skipped++;continue;
+    await admin.from('smart_marketing_queue').update({status:'SKIPPED',processing_started_at:null,processed_at:new Date().toISOString(),last_error:ce?'Customer validation failed':'Consent missing'}).eq('id',q.id);skipped++;continue;
    }
    const notificationPayload={establishment_id:q.establishment_id,customer_id:q.customer_id,smart_marketing_queue_id:q.id,title:tmpl.title,message:tmpl.message(q.payload??{}),type:tmpl.type};
    const {error:insertErr}=await admin.from('loyalty_card_notifications').insert(notificationPayload);
@@ -35,13 +35,14 @@ Deno.serve(async(req)=>{
     const {data:existing,error:lookupErr}=await admin.from('loyalty_card_notifications').select('id').eq('smart_marketing_queue_id',q.id).maybeSingle();
     if(lookupErr||!existing)throw insertErr;
    }
-   const {error:statusErr}=await admin.from('smart_marketing_queue').update({status:'SENT',processed_at:new Date().toISOString(),last_error:null}).eq('id',q.id);
+   const {error:statusErr}=await admin.from('smart_marketing_queue').update({status:'SENT',processing_started_at:null,processed_at:new Date().toISOString(),last_error:null}).eq('id',q.id);
    if(statusErr)throw statusErr;
    sent++;
   }catch(e){
    const msg=e instanceof Error?e.message:String(e);
-   await admin.from('smart_marketing_queue').update({status:'FAILED',processed_at:new Date().toISOString(),last_error:msg.slice(0,500)}).eq('id',q.id);
-   failed++;
+   const retryable=(q.attempts??1)<3;
+   const {error:stateErr}=await admin.from('smart_marketing_queue').update({status:retryable?'PENDING':'FAILED',processing_started_at:null,processed_at:retryable?null:new Date().toISOString(),last_error:msg.slice(0,500)}).eq('id',q.id);
+   if(stateErr)failed++; else if(!retryable)failed++;
   }
  }
  return json({success:failed===0,claimed:rows?.length??0,created_in_app_notifications:sent,skipped,failed});
