@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
   const to = body.to?.trim() ?? "";
   const textBody = body.text?.trim() ?? "";
   const requestId = body.requestId?.trim() ?? "";
-  const customerPhone = to.replace(/^\\+/, "");
+  const customerPhone = to.replace(/^\+/, "");
   if (!uuidPattern.test(establishmentId) || !phonePattern.test(to) || !textBody || textBody.length > 4096 || !uuidPattern.test(requestId)) {
     return reply({ error: "invalid_request_fields" }, 400);
   }
