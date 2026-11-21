@@ -95,7 +95,12 @@ Deno.serve(async (req) => {
   // Verify the WABA exists and is readable by the newly exchanged token.
   const wabaUrl = new URL(`https://graph.facebook.com/${graphVersion}/${wabaId}`);
   wabaUrl.searchParams.set("fields", "id,name,timezone_id");
-  const wabaCheck = await graphGet(wabaUrl, accessToken);
+  let wabaCheck: Awaited<ReturnType<typeof graphGet>>;
+  try {
+    wabaCheck = await graphGet(wabaUrl, accessToken);
+  } catch {
+    return reply({ error: "meta_waba_verification_unavailable" }, 502);
+  }
   if (!wabaCheck.response.ok || String(wabaCheck.data.id ?? "") !== wabaId) {
     return reply({ error: "meta_waba_verification_failed" }, 403);
   }
@@ -106,7 +111,12 @@ Deno.serve(async (req) => {
   nextUrl.searchParams.set("fields", "id,display_phone_number,verified_name,status");
   nextUrl.searchParams.set("limit", "100");
   for (let page = 0; page < 5 && nextUrl; page += 1) {
-    const pageResult = await graphGet(nextUrl, accessToken);
+    let pageResult: Awaited<ReturnType<typeof graphGet>>;
+    try {
+      pageResult = await graphGet(nextUrl, accessToken);
+    } catch {
+      return reply({ error: "meta_phone_numbers_verification_unavailable" }, 502);
+    }
     if (!pageResult.response.ok) return reply({ error: "meta_phone_numbers_verification_failed" }, 403);
     const items = Array.isArray(pageResult.data.data) ? pageResult.data.data : [];
     phoneData = items.find((item: { id?: string }) => String(item?.id ?? "") === phoneNumberId) ?? phoneData;
