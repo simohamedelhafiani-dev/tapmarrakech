@@ -83,9 +83,17 @@ Deno.serve(async (req) => {
         if (findConversationError) { processingFailures += 1; continue; }
         let conversation = existingConversation;
         if (conversation) {
+          // Late webhook deliveries must not move the inbox timestamp backwards
+          // or erase a name when Meta omits contact profile data.
+          const conversationUpdate: Record<string, unknown> = {
+            last_message_at: messageTime,
+            updated_at: new Date().toISOString(),
+          };
+          if (customerName) conversationUpdate.customer_name = customerName;
           const { error: updateConversationError } = await admin.from("whatsapp_conversations")
-            .update({ customer_name: customerName, last_message_at: messageTime, updated_at: new Date().toISOString() })
-            .eq("id", conversation.id);
+            .update(conversationUpdate)
+            .eq("id", conversation.id)
+            .or("last_message_at.is.null,last_message_at.lte." + messageTime);
           if (updateConversationError) { processingFailures += 1; continue; }
         } else {
           const { data: createdConversation, error: createConversationError } = await admin.from("whatsapp_conversations")
