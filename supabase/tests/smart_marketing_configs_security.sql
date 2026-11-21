@@ -11,6 +11,7 @@ declare
   smart_ids_constraint_definition text;
   unique_constraint boolean;
   trigger_count integer;
+  trigger_definition text;
 begin
   select c.relrowsecurity into rls_enabled
   from pg_class c join pg_namespace n on n.oid=c.relnamespace
@@ -57,6 +58,13 @@ begin
   where n.nspname='public' and t.relname='smart_marketing_configs'
     and g.tgname='smart_marketing_configs_updated_at' and not g.tgisinternal;
   if trigger_count <> 1 then raise exception 'FAIL: updated_at/updated_by trigger missing'; end if;
+  select pg_get_triggerdef(g.oid) into trigger_definition
+  from pg_trigger g join pg_class t on t.oid=g.tgrelid join pg_namespace n on n.oid=t.relnamespace
+  where n.nspname='public' and t.relname='smart_marketing_configs'
+    and g.tgname='smart_marketing_configs_updated_at' and not g.tgisinternal;
+  if trigger_definition is null or trigger_definition not ilike '%INSERT%' then
+    raise exception 'FAIL: audit trigger must run on INSERT and UPDATE';
+  end if;
 
   raise notice 'PASS: RLS enabled, policies present, Smart allowlist, unique tenant key, audit trigger.';
 end $$;
