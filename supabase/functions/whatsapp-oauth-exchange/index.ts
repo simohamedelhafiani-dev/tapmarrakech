@@ -46,14 +46,12 @@ Deno.serve(async (req) => {
     .from("establishments").select("id").eq("id", establishmentId).eq("user_id", userData.user.id).maybeSingle();
   if (ownerError || !establishment) return reply({ error: "establishment_access_denied" }, 403);
 
-  const exchange = await fetch(`https://graph.facebook.com/${graphVersion}/oauth/access_token`, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({ client_id: appId, client_secret: appSecret, code }),
-  });
+  const tokenUrl = new URL(`https://graph.facebook.com/${graphVersion}/oauth/access_token`);
+  tokenUrl.search = new URLSearchParams({ client_id: appId, client_secret: appSecret, code }).toString();
+  const exchange = await fetch(tokenUrl, { method: "GET" });
   const tokenData = await exchange.json().catch(() => ({}));
   if (!exchange.ok || !tokenData.access_token) {
-    return reply({ error: "meta_code_exchange_failed", details: tokenData.error?.message ?? "Meta token exchange failed" }, 400);
+    return reply({ error: "meta_code_exchange_failed" }, 400);
   }
 
   const expiresAt = tokenData.expires_in ? new Date(Date.now() + Number(tokenData.expires_in) * 1000).toISOString() : null;
