@@ -18,6 +18,7 @@ import { EmailConfirmation, ForgotPassword, Register, ResetPassword } from '@/pa
 import Onboarding from '@/pages/Onboarding';
 import WhatsAppOAuthCallback from '@/pages/WhatsAppOAuthCallback';
 import WhatsAppConnect from '@/pages/WhatsAppConnect';
+import WhatsAppInbox from '@/pages/WhatsAppInbox';
 
 import Dashboard from '@/pages/Dashboard';
 import Reviews from '@/pages/Reviews';
@@ -268,6 +269,7 @@ function App() {
               <Route path="/dashboard/assistant-ia" element={<AssistantIA />} />
               <Route path="/dashboard/smart-marketing" element={<SmartMarketingCenter />} />
               <Route path="/dashboard/whatsapp" element={<WhatsAppConnect />} />
+              <Route path="/dashboard/whatsapp/inbox" element={<WhatsAppInbox />} />
               <Route
                 path="/dashboard/reviews"
                 element={
