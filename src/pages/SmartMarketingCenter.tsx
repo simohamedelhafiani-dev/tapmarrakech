@@ -74,7 +74,7 @@ export default function SmartMarketingCenter() {
      if(establishmentRef.current!==targetEstablishmentId)return false;
      setSaved(true);return true;
    }catch(err){if(establishmentRef.current===targetEstablishmentId)setWriteError(err instanceof Error?err.message:'Échec de sauvegarde Supabase.');return false;}
-   finally{if(establishmentRef.current===targetEstablishmentId)setSaving(false);}
+   finally{setSaving(false);}
  };
  const toggle=async(id:string)=>{const nextValue=!enabled[id];const currentConfig=configs[id]??SMARTS.find(s=>s.id===id)?.defaults??{};const ok=await saveRow(id,nextValue,currentConfig);if(ok)setEnabled(previous=>({...previous,[id]:nextValue}));};
  const saveConfig=async()=>{if(!selected)return;const ok=await saveRow(selected.id,enabled[selected.id]??false,draft);if(ok)setConfigs(previous=>({...previous,[selected.id]:draft}));};
