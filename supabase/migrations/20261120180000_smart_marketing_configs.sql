@@ -27,6 +27,8 @@ begin
   new.updated_by = auth.uid();
   if tg_op = 'INSERT' then
     new.created_at = now();
+  else
+    new.created_at = old.created_at;
   end if;
   return new;
 end;
