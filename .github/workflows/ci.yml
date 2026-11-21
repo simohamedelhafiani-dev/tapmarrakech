@@ -140,5 +140,7 @@ jobs:
             supabase/functions/google-wallet-create-pass/index.ts \
             supabase/functions/import-menu/index.ts \
             supabase/functions/send-loyalty-notification-push/index.ts \
+            supabase/functions/smart-marketing-scan/index.ts \
+            supabase/functions/smart-marketing-dispatch/index.ts \
             supabase/functions/send-promotion-push/index.ts \
             supabase/functions/submit-public-review/index.ts
