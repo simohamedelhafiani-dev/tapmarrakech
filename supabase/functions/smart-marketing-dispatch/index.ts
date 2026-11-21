@@ -15,7 +15,9 @@ Deno.serve(async(req)=>{
  const url=Deno.env.get('SUPABASE_URL'),key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
  if(!url||!key)return json({success:false,error:'Configuration Supabase absente.'},503);
  const admin=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
- const batch=normalizeLimit((await req.json().catch(()=>({limit:50}))).limit);
+ const requestBody=await req.json().catch(()=>({limit:50}));
+ const requestedLimit=requestBody&&typeof requestBody==='object'&&!Array.isArray(requestBody)?(requestBody as Record<string,unknown>).limit:50;
+ const batch=normalizeLimit(requestedLimit);
  const {data:rows,error}=await admin.rpc('claim_smart_marketing_queue',{p_limit:batch});
  if(error)return json({success:false,error:'Impossible de réserver les tâches.'},500);
  let sent=0,skipped=0,failed=0;
