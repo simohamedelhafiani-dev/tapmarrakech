@@ -15,14 +15,16 @@ const idPattern = /^[0-9]{5,32}$/;
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 async function graphGet(url: URL, token: string) {
-  url.searchParams.set("access_token", token);
-  const response = await fetch(url, { method: "GET" });
+  const response = await fetch(url, { method: "GET", headers: { Authorization: `Bearer ${token}` } });
   const data = await response.json().catch(() => ({}));
   return { response, data };
 }
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
+  if (req.method === "OPTIONS") {
+    if (!origin || req.headers.get("origin") !== origin) return new Response("origin_not_allowed", { status: 403, headers: { "Vary": "Origin" } });
+    return new Response("ok", { headers: cors });
+  }
   if (req.method !== "POST") return reply({ error: "method_not_allowed" }, 405);
   if (!origin || req.headers.get("origin") !== origin) return reply({ error: "origin_not_allowed" }, 403);
 
