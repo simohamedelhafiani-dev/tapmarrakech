@@ -9,7 +9,7 @@ const templates:Record<string,{title:string;message:(p:Record<string,unknown>)=>
 Deno.serve(async(req)=>{
  if(req.method!=='POST')return json({success:false,error:'POST requis.'},405);
  const secret=Deno.env.get('SMART_MARKETING_CRON_SECRET');
- const token=req.headers.get('Authorization')?.replace(/^Bearer\\s+/i,'');
+ const token=req.headers.get('Authorization')?.replace(/^Bearer\s+/i,'');
  if(!secret||token!==secret)return json({success:false,error:'Non autorisé.'},401);
  const url=Deno.env.get('SUPABASE_URL'),key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
  if(!url||!key)return json({success:false,error:'Configuration Supabase absente.'},503);
