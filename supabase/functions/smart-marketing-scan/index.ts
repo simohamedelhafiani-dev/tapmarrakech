@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { parseSmartConfigNumber } from '../smart-marketing-dispatch/smart-marketing-utils.ts';
 
 const headers = { 'Content-Type': 'application/json' };
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers });
@@ -6,7 +7,7 @@ const supported = new Set(['winback', 'birthday', 'vip', 'progress']);
 type ConfigRow = { establishment_id: string; smart_id: string; enabled: boolean; config: Record<string, unknown> };
 type Customer = { id: string; establishment_id: string; first_name: string | null; last_visit_at: string | null; visit_count: number | null; points_balance: number | null; birth_day: number | null; birth_month: number | null; stamps_balance: number | null; notification_consent: boolean | null; marketing_consent: boolean | null; };
 
-const num = (v: unknown, fallback: number) => { const n = typeof v === 'string' ? Number.parseFloat(v) : Number(v); return Number.isFinite(n) ? n : fallback; };
+const num = parseSmartConfigNumber;
 const localDateParts = () => {
   const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Casablanca', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
   const p = Object.fromEntries(parts.map(x => [x.type, x.value]));
