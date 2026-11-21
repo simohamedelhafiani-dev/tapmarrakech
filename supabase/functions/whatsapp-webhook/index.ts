@@ -40,7 +40,8 @@ Deno.serve(async (req) => {
   if (!appSecret || !supabaseUrl || !serviceKey) return json({ error: "server_configuration_missing" }, 500);
 
   const raw = await req.text();
-  if (raw.length > 1_000_000) return json({ error: "payload_too_large" }, 413);
+  // Enforce the cap in UTF-8 bytes (not JavaScript UTF-16 code units).
+  if (new TextEncoder().encode(raw).byteLength > 1_000_000) return json({ error: "payload_too_large" }, 413);
   if (!await validSignature(raw, req.headers.get("x-hub-signature-256"), appSecret)) {
     return json({ error: "invalid_signature" }, 401);
   }
