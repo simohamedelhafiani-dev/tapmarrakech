@@ -50,6 +50,7 @@ Deno.serve(async (req) => {
 
   const entries = Array.isArray(payload.entry) ? payload.entry : [];
   let accepted = 0;
+  let processingFailures = 0;
   for (const entry of entries) {
     const changes = Array.isArray((entry as Record<string, unknown>).changes) ? (entry as Record<string, unknown>).changes as unknown[] : [];
     for (const change of changes) {
@@ -61,7 +62,8 @@ Deno.serve(async (req) => {
       const { data: connection, error: connectionError } = await admin.from("whatsapp_connections")
         .select("id,establishment_id,status")
         .eq("phone_number_id", phoneNumberId).maybeSingle();
-      if (connectionError || !connection || connection.status !== "active") continue;
+      if (connectionError) { processingFailures += 1; continue; }
+      if (!connection || connection.status !== "active") continue;
 
       const contacts = Array.isArray(value.contacts) ? value.contacts as Record<string, unknown>[] : [];
       const messages = Array.isArray(value.messages) ? value.messages as Record<string, unknown>[] : [];
@@ -75,14 +77,15 @@ Deno.serve(async (req) => {
         const type = String(message.type ?? "unknown");
         const messageBody = type === "text" ? String((message.text as Record<string, unknown> | undefined)?.body ?? "") : null;
         const messageTime = new Date(Number(message.timestamp ?? 0) * 1000 || Date.now()).toISOString();
-        const { data: existingConversation } = await admin.from("whatsapp_conversations")
+        const { data: existingConversation, error: findConversationError } = await admin.from("whatsapp_conversations")
           .select("id").eq("connection_id", connection.id).eq("customer_phone", customerPhone).maybeSingle();
+        if (findConversationError) { processingFailures += 1; continue; }
         let conversation = existingConversation;
         if (conversation) {
           const { error: updateConversationError } = await admin.from("whatsapp_conversations")
             .update({ customer_name: customerName, last_message_at: messageTime, updated_at: new Date().toISOString() })
             .eq("id", conversation.id);
-          if (updateConversationError) continue;
+          if (updateConversationError) { processingFailures += 1; continue; }
         } else {
           const { data: createdConversation, error: createConversationError } = await admin.from("whatsapp_conversations")
             .insert({
@@ -97,12 +100,14 @@ Deno.serve(async (req) => {
             .select("id").single();
           if (createConversationError || !createdConversation) {
             // Concurrent webhook deliveries may race to create the same conversation.
-            const { data: racedConversation } = await admin.from("whatsapp_conversations")
+            const { data: racedConversation, error: raceLookupError } = await admin.from("whatsapp_conversations")
               .select("id").eq("connection_id", connection.id).eq("customer_phone", customerPhone).maybeSingle();
+            if (raceLookupError) processingFailures += 1;
             conversation = racedConversation;
+            if (!conversation && !raceLookupError) processingFailures += 1;
           } else conversation = createdConversation;
         }
-        if (!conversation) continue;
+        if (!conversation) { processingFailures += 1; continue; }
 
         const { data: insertedRows, error: insertError } = await admin.from("whatsapp_messages").upsert({
           establishment_id: connection.establishment_id,
@@ -115,7 +120,8 @@ Deno.serve(async (req) => {
           raw_metadata: { timestamp: message.timestamp ?? null, type },
         }, { onConflict: "provider_message_id", ignoreDuplicates: true }).select("id");
         // Count only rows actually inserted, not duplicate webhook retries.
-        if (!insertError && Array.isArray(insertedRows)) accepted += insertedRows.length;
+        if (insertError) processingFailures += 1;
+        else if (Array.isArray(insertedRows)) accepted += insertedRows.length;
       }
 
       const statuses = Array.isArray(value.statuses) ? value.statuses as Record<string, unknown>[] : [];
@@ -135,11 +141,15 @@ Deno.serve(async (req) => {
         };
         const previousStates = allowedPrevious[mapped];
         if (!previousStates) continue;
-        await admin.from("whatsapp_messages").update({ delivery_status: mapped })
+        const { error: statusUpdateError } = await admin.from("whatsapp_messages").update({ delivery_status: mapped })
           .eq("provider_message_id", providerMessageId)
           .in("delivery_status", previousStates);
+        if (statusUpdateError) processingFailures += 1;
       }
     }
   }
+  // Return a retryable error when persistence fails; Meta can redeliver and
+  // provider_message_id deduplication keeps successfully stored messages safe.
+  if (processingFailures > 0) return json({ error: "webhook_processing_failed", processed: accepted }, 500);
   return json({ success: true, processed: accepted });
 });
