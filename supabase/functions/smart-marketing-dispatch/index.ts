@@ -30,8 +30,9 @@ Deno.serve(async(req)=>{
    if(liveConfigError)throw liveConfigError;
    if(!liveConfig?.enabled){await markSkipped(q.id,'Smart disabled before dispatch');skipped++;continue;}
    const {data:c,error:ce}=await admin.from('loyalty_customers').select('id,notification_consent,marketing_consent,last_visit_at').eq('id',q.customer_id).eq('establishment_id',q.establishment_id).maybeSingle();
-   if(ce||!c||!c.notification_consent|| !c.marketing_consent){
-    await markSkipped(q.id,ce?'Customer validation failed':'Consent missing');skipped++;continue;
+   if(ce)throw ce;
+   if(!c||!c.notification_consent||!c.marketing_consent){
+    await markSkipped(q.id,!c?'Customer not found':'Consent missing');skipped++;continue;
    }
    if(q.smart_id==='winback'){
     const delay=Math.max(1,Math.min(365,Number.parseFloat(String(liveConfig.config?.delayDays??liveConfig.config?.delay_days??liveConfig.config?.delay??30))||30));
