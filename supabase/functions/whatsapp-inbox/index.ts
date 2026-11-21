@@ -36,8 +36,8 @@ Deno.serve(async (req) => {
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return json({ error: "invalid_json" }, 400);
     body = parsed;
   } catch { return json({ error: "invalid_json" }, 400); }
-  const establishmentId = body.establishmentId?.trim() ?? "";
-  const conversationId = body.conversationId?.trim() ?? "";
+  const establishmentId = typeof body.establishmentId === "string" ? body.establishmentId.trim() : "";
+  const conversationId = typeof body.conversationId === "string" ? body.conversationId.trim() : "";
   const limit = Number.isInteger(body.limit) ? Math.min(Math.max(Number(body.limit), 1), 100) : 50;
   if (!uuidPattern.test(establishmentId) || (conversationId && !uuidPattern.test(conversationId))) {
     return json({ error: "invalid_request_fields" }, 400);
