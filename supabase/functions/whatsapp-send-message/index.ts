@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
   const establishmentId = body.establishmentId?.trim() ?? "";
   const to = body.to?.trim() ?? "";
   const textBody = body.text?.trim() ?? "";
-  const requestId = body.requestId?.trim() ?? "";
+  const requestId = body.requestId?.trim() ?? "";\n  const customerPhone = to.replace(/^\\+/, "");
   if (!uuidPattern.test(establishmentId) || !phonePattern.test(to) || !textBody || textBody.length > 4096 || !uuidPattern.test(requestId)) {
     return reply({ error: "invalid_request_fields" }, 400);
   }
@@ -64,17 +64,17 @@ Deno.serve(async (req) => {
   if (prior) return reply({ success: true, duplicate: true, messageId: prior.id, providerMessageId: prior.provider_message_id, status: prior.delivery_status });
 
   const { data: conversation, error: conversationError } = await admin.from("whatsapp_conversations")
-    .select("id").eq("connection_id", connection.id).eq("customer_phone", to).maybeSingle();
+    .select("id").eq("connection_id", connection.id).eq("customer_phone", customerPhone).maybeSingle();
   if (conversationError) return reply({ error: "conversation_lookup_failed" }, 500);
   let conversationId = conversation?.id;
   if (!conversationId) {
     const { data: created, error: createError } = await admin.from("whatsapp_conversations")
-      .insert({ connection_id: connection.id, establishment_id: establishmentId, customer_phone: to, status: "open", last_message_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+      .insert({ connection_id: connection.id, establishment_id: establishmentId, customer_phone: customerPhone, status: "open", last_message_at: new Date().toISOString(), updated_at: new Date().toISOString() })
       .select("id").single();
     if (createError || !created) {
       // If a parallel request created the conversation, safely recover it.
       const { data: raced, error: raceError } = await admin.from("whatsapp_conversations")
-        .select("id").eq("connection_id", connection.id).eq("customer_phone", to).maybeSingle();
+        .select("id").eq("connection_id", connection.id).eq("customer_phone", customerPhone).maybeSingle();
       if (raceError || !raced) return reply({ error: "conversation_create_failed" }, 500);
       conversationId = raced.id;
     } else conversationId = created.id;
@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
     message_type: "text",
     body: textBody,
     delivery_status: "queued",
-    raw_metadata: { recipient: to },
+    raw_metadata: { recipient: customerPhone },
   }).select("id").single();
   if (queueError || !queued) {
     // Unique id conflict means another request already reserved this id. Never
@@ -103,7 +103,7 @@ Deno.serve(async (req) => {
   const { data: token, error: tokenError } = await admin.rpc("whatsapp_read_secret", { p_secret_id: connection.access_token_secret_id });
   const accessToken = typeof token === "string" ? token : "";
   if (tokenError || !accessToken) {
-    await admin.from("whatsapp_messages").update({ delivery_status: "failed", raw_metadata: { recipient: to, error: "token_read_failed" } }).eq("id", queued.id);
+    await admin.from("whatsapp_messages").update({ delivery_status: "failed", raw_metadata: { recipient: customerPhone, error: "token_read_failed" } }).eq("id", queued.id);
     return reply({ error: "whatsapp_token_unavailable", messageId: queued.id }, 500);
   }
 
@@ -114,17 +114,17 @@ Deno.serve(async (req) => {
     providerResponse = await fetch(graphUrl, {
       method: "POST",
       headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ messaging_product: "whatsapp", recipient_type: "individual", to: to.slice(1), type: "text", text: { body: textBody } }),
+      body: JSON.stringify({ messaging_product: "whatsapp", recipient_type: "individual", to: customerPhone, type: "text", text: { body: textBody } }),
     });
     providerData = await providerResponse.json().catch(() => ({}));
   } catch {
-    await admin.from("whatsapp_messages").update({ delivery_status: "failed", raw_metadata: { recipient: to, error: "provider_network_error" } }).eq("id", queued.id);
+    await admin.from("whatsapp_messages").update({ delivery_status: "failed", raw_metadata: { recipient: customerPhone, error: "provider_network_error" } }).eq("id", queued.id);
     return reply({ error: "meta_request_failed", messageId: queued.id }, 502);
   }
 
   if (!providerResponse.ok) {
     // Keep the provider error private; avoid persisting full response/token data.
-    await admin.from("whatsapp_messages").update({ delivery_status: "failed", raw_metadata: { recipient: to, error_code: (providerData.error as Record<string, unknown> | undefined)?.code ?? null } }).eq("id", queued.id);
+    await admin.from("whatsapp_messages").update({ delivery_status: "failed", raw_metadata: { recipient: customerPhone, error_code: (providerData.error as Record<string, unknown> | undefined)?.code ?? null } }).eq("id", queued.id);
     return reply({ error: "meta_send_rejected", messageId: queued.id }, 502);
   }
 
