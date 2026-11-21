@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
   }
 
   let body: { code?: string; establishmentId?: string; wabaId?: string; phoneNumberId?: string };
-  try { body = await req.json(); } catch { return reply({ error: "invalid_json" }, 400; }
+  try { body = await req.json(); } catch { return reply({ error: "invalid_json" }, 400); }
   const code = body.code?.trim();
   const establishmentId = body.establishmentId?.trim();
   const wabaId = body.wabaId?.trim();
