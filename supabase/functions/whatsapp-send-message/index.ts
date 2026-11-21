@@ -15,7 +15,10 @@ const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}
 const phonePattern = /^\+[1-9]\d{7,14}$/;
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
+  if (req.method === "OPTIONS") {
+    if (!origin || req.headers.get("origin") !== origin) return new Response("origin_not_allowed", { status: 403, headers: { "Vary": "Origin" } });
+    return new Response("ok", { headers: cors });
+  }
   if (req.method !== "POST") return reply({ error: "method_not_allowed" }, 405);
   if (!origin || req.headers.get("origin") !== origin) return reply({ error: "origin_not_allowed" }, 403);
 
