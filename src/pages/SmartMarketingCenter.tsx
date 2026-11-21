@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { Bell, Gift, Heart, MapPin, Cake, Crown, Flame, Zap, Trophy, Users, Megaphone, Settings2, Sparkles, ArrowUpRight, X, Save } from 'lucide-react';
@@ -30,12 +30,14 @@ export default function SmartMarketingCenter() {
  const [saving,setSaving]=useState(false);
  const [error,setError]=useState<string|null>(null);
  const [writeError,setWriteError]=useState<string|null>(null);
+ const establishmentRef=useRef<string|null>(null);
  useEffect(()=>{
    let active=true;
    let requestSequence=0;
    const load=async(id:string|null)=>{
      const sequence=++requestSequence;
      if(!active)return;
+     establishmentRef.current=id;
      setEstablishmentId(id);setLoading(true);setError(null);setWriteError(null);setSaved(false);setSelected(null);setEnabled({});setConfigs({});
      if(!id){setLoading(false);setError('Aucun établissement sélectionné. Sélectionnez un établissement puis réessayez.');return;}
      try{
@@ -64,13 +66,15 @@ export default function SmartMarketingCenter() {
  const openSettings=(smart:Smart)=>{setSelected(smart);setDraft(configs[smart.id]??smart.defaults);setSaved(false);setWriteError(null);};
  const saveRow=async(id:string,enabledValue:boolean,configValue:Record<string,string>)=>{
    if(!establishmentId){setWriteError('Établissement manquant : impossible de sauvegarder.');return false;}
+   const targetEstablishmentId=establishmentId;
    setSaving(true);setWriteError(null);setSaved(false);
    try{
-     const {error:saveError}=await supabase.from('smart_marketing_configs').upsert({establishment_id:establishmentId,smart_id:id,enabled:enabledValue,config:configValue},{onConflict:'establishment_id,smart_id'});
+     const {error:saveError}=await supabase.from('smart_marketing_configs').upsert({establishment_id:targetEstablishmentId,smart_id:id,enabled:enabledValue,config:configValue},{onConflict:'establishment_id,smart_id'});
      if(saveError)throw saveError;
+     if(establishmentRef.current!==targetEstablishmentId)return false;
      setSaved(true);return true;
-   }catch(err){setWriteError(err instanceof Error?err.message:'Échec de sauvegarde Supabase.');return false;}
-   finally{setSaving(false);}
+   }catch(err){if(establishmentRef.current===targetEstablishmentId)setWriteError(err instanceof Error?err.message:'Échec de sauvegarde Supabase.');return false;}
+   finally{if(establishmentRef.current===targetEstablishmentId)setSaving(false);}
  };
  const toggle=async(id:string)=>{const nextValue=!enabled[id];const currentConfig=configs[id]??SMARTS.find(s=>s.id===id)?.defaults??{};const ok=await saveRow(id,nextValue,currentConfig);if(ok)setEnabled(previous=>({...previous,[id]:nextValue}));};
  const saveConfig=async()=>{if(!selected)return;const ok=await saveRow(selected.id,enabled[selected.id]??false,draft);if(ok)setConfigs(previous=>({...previous,[selected.id]:draft}));};
