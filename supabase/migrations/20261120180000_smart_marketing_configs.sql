@@ -25,13 +25,16 @@ as $$
 begin
   new.updated_at = now();
   new.updated_by = auth.uid();
+  if tg_op = 'INSERT' then
+    new.created_at = now();
+  end if;
   return new;
 end;
 $$;
 
 drop trigger if exists smart_marketing_configs_updated_at on public.smart_marketing_configs;
 create trigger smart_marketing_configs_updated_at
-  before update on public.smart_marketing_configs
+  before insert or update on public.smart_marketing_configs
   for each row execute function public.smart_marketing_configs_set_updated_at();
 
 alter table public.smart_marketing_configs enable row level security;
