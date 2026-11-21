@@ -62,7 +62,7 @@ Deno.serve(async (req) => {
     .select("id,provider_message_id,delivery_status")
     .eq("client_request_id", requestId).maybeSingle();
   if (priorError) return reply({ error: "idempotency_lookup_failed" }, 500);
-  if (prior) return reply({ success: true, duplicate: true, messageId: prior.id, providerMessageId: prior.provider_message_id, status: prior.delivery_status });
+  if (prior) return reply({ success: prior.delivery_status !== "failed", duplicate: true, error: prior.delivery_status === "failed" ? "previous_attempt_failed" : undefined, messageId: prior.id, providerMessageId: prior.provider_message_id, status: prior.delivery_status });
 
   const { data: conversation, error: conversationError } = await admin.from("whatsapp_conversations")
     .select("id").eq("connection_id", connection.id).eq("customer_phone", customerPhone).maybeSingle();
@@ -96,7 +96,7 @@ Deno.serve(async (req) => {
     // proceed to provider send when reservation failed.
     if (queueError?.code === "23505") {
       const { data: duplicate } = await admin.from("whatsapp_messages").select("id,provider_message_id,delivery_status").eq("client_request_id", requestId).maybeSingle();
-      if (duplicate) return reply({ success: true, duplicate: true, messageId: duplicate.id, providerMessageId: duplicate.provider_message_id, status: duplicate.delivery_status });
+      if (duplicate) return reply({ success: duplicate.delivery_status !== "failed", duplicate: true, error: duplicate.delivery_status === "failed" ? "previous_attempt_failed" : undefined, messageId: duplicate.id, providerMessageId: duplicate.provider_message_id, status: duplicate.delivery_status });
     }
     return reply({ error: "message_queue_failed" }, 500);
   }
