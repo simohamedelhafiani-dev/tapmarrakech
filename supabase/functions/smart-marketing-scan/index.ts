@@ -49,7 +49,10 @@ Deno.serve(async (req) => {
       ? await admin.from('loyalty_settings').select('stamp_goal').eq('establishment_id', cfg.establishment_id).maybeSingle()
       : { data: null, error: null };
     const runErrors: string[] = [];
-    if (settingsError) runErrors.push('Loyalty settings lookup failed');
+    if (settingsError) {
+      runErrors.push('Loyalty settings lookup failed');
+      errors.push(`${cfg.smart_id}: loyalty settings lookup failed`);
+    }
     for (const customer of (customers ?? []) as Customer[]) {
       scanned++;
       let trigger = '', payload: Record<string,unknown> = {};
