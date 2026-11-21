@@ -16,7 +16,7 @@ import LoyaltyRecover from '@/pages/LoyaltyRecover';
 import Login from '@/pages/Login';
 import { EmailConfirmation, ForgotPassword, Register, ResetPassword } from '@/pages/AuthPages';
 import Onboarding from '@/pages/Onboarding';
-import WhatsAppOAuthCallback from '@/pages/WhatsAppOAuthCallback';
+import WhatsAppOAuthCallback from '@/pages/WhatsAppOAuthCallback';\nimport WhatsAppConnect from '@/pages/WhatsAppConnect';
 
 import Dashboard from '@/pages/Dashboard';
 import Reviews from '@/pages/Reviews';
@@ -265,7 +265,7 @@ function App() {
               <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/dashboard/assistant-ia" element={<AssistantIA />} />
-              <Route path="/dashboard/smart-marketing" element={<SmartMarketingCenter />} />
+              <Route path="/dashboard/smart-marketing" element={<SmartMarketingCenter />} />\n              <Route path="/dashboard/whatsapp" element={<WhatsAppConnect />} />
               <Route
                 path="/dashboard/reviews"
                 element={
