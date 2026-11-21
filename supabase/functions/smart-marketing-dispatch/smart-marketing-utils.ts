@@ -22,3 +22,8 @@ export function parseSmartConfigNumber(value: unknown, fallback: number): number
 export function resolveSmartMessage(customMessage: unknown, fallbackMessage: string): string {
   return typeof customMessage === 'string' && customMessage.trim().length > 0 ? customMessage.trim() : fallbackMessage;
 }
+
+export function retryDelayMinutes(attempts: number): number {
+  const normalized = Number.isFinite(attempts) ? Math.max(1, Math.floor(attempts)) : 1;
+  return Math.min(30, 2 ** Math.max(0, normalized - 1));
+}
