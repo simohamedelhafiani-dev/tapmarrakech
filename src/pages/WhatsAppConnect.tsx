@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 
-type Establishment = { id: string; name?: string };
+type Establishment = { id: string; name?: string };\n\ndeclare global {\n  interface Window { FB?: { init: (options: Record<string, unknown>) => void; login: (callback: (response: any) => void, options: Record<string, unknown>) => void };\n}\n
 const appId = import.meta.env.VITE_META_APP_ID as string | undefined;
 const configId = import.meta.env.VITE_META_EMBEDDED_SIGNUP_CONFIG_ID as string | undefined;
 
@@ -81,7 +81,7 @@ export default function WhatsAppConnect() {
       <p className="mt-2 text-sm text-gray-400">Chaque établissement connecte son propre compte WhatsApp Business via Meta. Votre numéro personnel n’est pas utilisé.</p>
       {loading ? <p className="mt-6 text-gray-400">Chargement des établissements…</p> : establishments.length === 0 ? <p className="mt-6 text-gray-400">Aucun établissement trouvé sur ce compte.</p> : <>
       <label className="mt-6 block text-sm font-medium" htmlFor="establishment">Établissement</label>
-      <select id="establishment" className="mt-2 w-full rounded-xl border border-[#686D76] bg-[#202020] p-3" value={selectedId} onChange={e => setSelectedId(e.target.value}>
+      <select id="establishment" className="mt-2 w-full rounded-xl border border-[#686D76] bg-[#202020] p-3" value={selectedId} onChange={e => setSelectedId(e.target.value)}>
         {establishments.map(e => <option key={e.id} value={e.id}>{e.name || e.id}</option>)}
       </select>
       <button onClick={startSignup} disabled={busy || !selectedId} className="mt-5 rounded-xl bg-[#3B82F6] px-5 py-3 font-semibold disabled:opacity-50">{busy ? 'Connexion en cours…' : 'Connecter mon WhatsApp via Meta'}</button>
