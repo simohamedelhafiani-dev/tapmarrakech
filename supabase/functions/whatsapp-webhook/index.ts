@@ -124,8 +124,20 @@ Deno.serve(async (req) => {
         const statusValue = String(status.status ?? "");
         const mapped = ["sent", "delivered", "read", "failed"].includes(statusValue) ? statusValue : null;
         if (!providerMessageId || !mapped) continue;
+        // Prevent out-of-order Meta callbacks from downgrading message state.
+        // Progression is queued -> sent -> delivered -> read; failed is only
+        // accepted before delivery is confirmed.
+        const allowedPrevious: Record<string, string[]> = {
+          sent: ["queued"],
+          delivered: ["queued", "sent"],
+          read: ["queued", "sent", "delivered"],
+          failed: ["queued", "sent"],
+        };
+        const previousStates = allowedPrevious[mapped];
+        if (!previousStates) continue;
         await admin.from("whatsapp_messages").update({ delivery_status: mapped })
-          .eq("provider_message_id", providerMessageId);
+          .eq("provider_message_id", providerMessageId)
+          .in("delivery_status", previousStates);
       }
     }
   }
