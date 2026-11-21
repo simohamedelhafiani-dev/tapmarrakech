@@ -6,7 +6,7 @@ const supported = new Set(['winback', 'birthday', 'vip', 'progress']);
 type ConfigRow = { establishment_id: string; smart_id: string; enabled: boolean; config: Record<string, unknown> };
 type Customer = { id: string; establishment_id: string; first_name: string | null; last_visit_at: string | null; visit_count: number | null; points_balance: number | null; birth_day: number | null; birth_month: number | null; stamps_balance: number | null; notification_consent: boolean | null; marketing_consent: boolean | null; };
 
-const num = (v: unknown, fallback: number) => { const n = Number(v); return Number.isFinite(n) ? n : fallback; };
+const num = (v: unknown, fallback: number) => { const n = typeof v === 'string' ? Number.parseFloat(v) : Number(v); return Number.isFinite(n) ? n : fallback; };
 const localDateParts = () => {
   const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Casablanca', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
   const p = Object.fromEntries(parts.map(x => [x.type, x.value]));
@@ -53,15 +53,15 @@ Deno.serve(async (req) => {
       if (cfg.smart_id === 'birthday' && customer.birth_day === date.day && customer.birth_month === date.month && customer.marketing_consent) {
         trigger = `birthday:${date.date}`; payload = { date: date.date, template: 'birthday' };
       } else if (cfg.smart_id === 'winback' && customer.last_visit_at && customer.marketing_consent) {
-        const delayDays = Math.max(1, Math.min(365, num(settings.delayDays ?? settings.delay_days, 30)));
+        const delayDays = Math.max(1, Math.min(365, num(settings.delayDays ?? settings.delay_days ?? settings.delay, 30)));
         const elapsed = Math.floor((Date.now() - new Date(customer.last_visit_at).getTime()) / 86400000);
         if (elapsed >= delayDays) { trigger = `winback:${customer.last_visit_at.slice(0,10)}:${delayDays}`; payload = { inactive_days: elapsed, delay_days: delayDays }; }
       } else if (cfg.smart_id === 'vip' && customer.marketing_consent) {
-        const visitThreshold = Math.max(1, num(settings.thresholdVisits ?? settings.threshold_visits, 10));
+        const visitThreshold = Math.max(1, num(settings.thresholdVisits ?? settings.threshold_visits ?? settings.threshold, 10));
         if ((customer.visit_count ?? 0) >= visitThreshold) { trigger = `vip:${visitThreshold}:${customer.visit_count}`; payload = { visits: customer.visit_count, threshold: visitThreshold }; }
       } else if (cfg.smart_id === 'progress' && customer.marketing_consent && !settingsError) {
         const goal = Math.max(1, num(loyaltySetting?.stamp_goal, 10));
-        const threshold = Math.max(1, Math.ceil(goal * 0.8));
+        const progressPercent = Math.max(1, Math.min(100, num(settings.thresholdPercent ?? settings.threshold_percent ?? settings.threshold, 80)));\n        const threshold = Math.max(1, Math.ceil(goal * progressPercent / 100));
         if ((customer.stamps_balance ?? 0) >= threshold && (customer.stamps_balance ?? 0) < goal) { trigger = `progress:${goal}:${customer.stamps_balance}`; payload = { stamps: customer.stamps_balance, goal, percent: Math.round((customer.stamps_balance / goal) * 100) }; }
       }
       if (trigger) eligible.push({ customer, trigger, payload });
