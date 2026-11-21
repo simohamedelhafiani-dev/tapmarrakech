@@ -32,7 +32,8 @@ Deno.serve(async (req) => {
   const establishmentId = body.establishmentId?.trim() ?? "";
   const to = body.to?.trim() ?? "";
   const textBody = body.text?.trim() ?? "";
-  const requestId = body.requestId?.trim() ?? "";\n  const customerPhone = to.replace(/^\\+/, "");
+  const requestId = body.requestId?.trim() ?? "";
+  const customerPhone = to.replace(/^\\+/, "");
   if (!uuidPattern.test(establishmentId) || !phonePattern.test(to) || !textBody || textBody.length > 4096 || !uuidPattern.test(requestId)) {
     return reply({ error: "invalid_request_fields" }, 400);
   }
@@ -133,7 +134,7 @@ Deno.serve(async (req) => {
   const { error: finalizeError } = await admin.from("whatsapp_messages").update({
     provider_message_id: providerMessageId,
     delivery_status: "sent",
-    raw_metadata: { recipient: to },
+    raw_metadata: { recipient: customerPhone },
   }).eq("id", queued.id);
   if (finalizeError) return reply({ error: "message_sent_but_persistence_failed", messageId: queued.id }, 500);
   await admin.from("whatsapp_conversations").update({ last_message_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", conversationId);
