@@ -55,9 +55,9 @@ Deno.serve(async (req) => {
     const { data: messages, error: messagesError } = await admin.from("whatsapp_messages")
       .select("id,provider_message_id,direction,message_type,body,delivery_status,created_at")
       .eq("conversation_id", conversationId).eq("establishment_id", establishmentId)
-      .order("created_at", { ascending: true }).limit(200);
+      .order("created_at", { ascending: false }).limit(200);
     if (messagesError) return json({ error: "messages_lookup_failed" }, 500);
-    return json({ conversation, messages: messages ?? [] });
+    return json({ conversation, messages: (messages ?? []).reverse() });
   }
 
   const { data: conversations, error: listError } = await admin.from("whatsapp_conversations")
@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
   const { data: lastMessages, error: lastMessagesError } = await admin.from("whatsapp_messages")
     .select("id,conversation_id,direction,message_type,body,delivery_status,created_at")
     .eq("establishment_id", establishmentId).in("conversation_id", ids)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false }).limit(1000);
   if (lastMessagesError) return json({ error: "inbox_messages_lookup_failed" }, 500);
   const latestByConversation = new Map<string, unknown>();
   for (const message of lastMessages ?? []) {
