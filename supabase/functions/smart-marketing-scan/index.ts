@@ -38,8 +38,10 @@ Deno.serve(async (req) => {
       .eq('establishment_id', cfg.establishment_id)
       .eq('notification_consent', true);
     if (customerError) {
-      await admin.from('smart_marketing_runs').update({ status: 'FAILED', details: { error: 'Customer scan failed' }, finished_at: new Date().toISOString() }).eq('id', runId);
-      errors.push(`${cfg.smart_id}: scan failed`); continue;
+      const { error: failLogError } = await admin.from('smart_marketing_runs').update({ status: 'FAILED', details: { error: 'Customer scan failed' }, finished_at: new Date().toISOString() }).eq('id', runId);
+      errors.push(`${cfg.smart_id}: scan failed`);
+      if (failLogError) errors.push(`${cfg.smart_id}: failure log update failed`);
+      continue;
     }
     const eligible: Array<{customer:Customer; trigger:string; payload:Record<string,unknown>}> = [];
     const settings = cfg.config ?? {};
