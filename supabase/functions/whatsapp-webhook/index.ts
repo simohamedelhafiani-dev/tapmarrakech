@@ -74,18 +74,35 @@ Deno.serve(async (req) => {
         const customerName = typeof profile?.name === "string" ? profile.name : null;
         const type = String(message.type ?? "unknown");
         const messageBody = type === "text" ? String((message.text as Record<string, unknown> | undefined)?.body ?? "") : null;
-        const { data: conversation, error: conversationError } = await admin.from("whatsapp_conversations")
-          .upsert({
-            connection_id: connection.id,
-            establishment_id: connection.establishment_id,
-            customer_phone: customerPhone,
-            customer_name: customerName,
-            status: "open",
-            last_message_at: new Date(Number(message.timestamp ?? 0) * 1000 || Date.now()).toISOString(),
-            updated_at: new Date().toISOString(),
-          }, { onConflict: "connection_id,customer_phone" })
-          .select("id").single();
-        if (conversationError || !conversation) continue;
+        const messageTime = new Date(Number(message.timestamp ?? 0) * 1000 || Date.now()).toISOString();
+        const { data: existingConversation } = await admin.from("whatsapp_conversations")
+          .select("id").eq("connection_id", connection.id).eq("customer_phone", customerPhone).maybeSingle();
+        let conversation = existingConversation;
+        if (conversation) {
+          const { error: updateConversationError } = await admin.from("whatsapp_conversations")
+            .update({ customer_name: customerName, last_message_at: messageTime, updated_at: new Date().toISOString() })
+            .eq("id", conversation.id);
+          if (updateConversationError) continue;
+        } else {
+          const { data: createdConversation, error: createConversationError } = await admin.from("whatsapp_conversations")
+            .insert({
+              connection_id: connection.id,
+              establishment_id: connection.establishment_id,
+              customer_phone: customerPhone,
+              customer_name: customerName,
+              status: "open",
+              last_message_at: messageTime,
+              updated_at: new Date().toISOString(),
+            })
+            .select("id").single();
+          if (createConversationError || !createdConversation) {
+            // Concurrent webhook deliveries may race to create the same conversation.
+            const { data: racedConversation } = await admin.from("whatsapp_conversations")
+              .select("id").eq("connection_id", connection.id).eq("customer_phone", customerPhone).maybeSingle();
+            conversation = racedConversation;
+          } else conversation = createdConversation;
+        }
+        if (!conversation) continue;
 
         const { error: insertError } = await admin.from("whatsapp_messages").upsert({
           establishment_id: connection.establishment_id,
