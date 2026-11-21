@@ -57,7 +57,8 @@ Deno.serve(async(req)=>{
   }catch(e){
    const msg=e instanceof Error?e.message:String(e);
    const retryable=(q.attempts??1)<3;
-   const {error:stateErr}=await admin.from('smart_marketing_queue').update({status:retryable?'PENDING':'FAILED',processing_started_at:null,processed_at:retryable?null:new Date().toISOString(),last_error:msg.slice(0,500)}).eq('id',q.id);
+   const retryDelayMinutes=Math.min(30,Math.max(1,2**Math.max(0,(q.attempts??1)-1)));
+   const {error:stateErr}=await admin.from('smart_marketing_queue').update({status:retryable?'PENDING':'FAILED',scheduled_at:retryable?new Date(Date.now()+retryDelayMinutes*60000).toISOString():undefined,processing_started_at:null,processed_at:retryable?null:new Date().toISOString(),last_error:msg.slice(0,500)}).eq('id',q.id);
    if(stateErr)failed++; else if(!retryable)failed++;
   }
  }
