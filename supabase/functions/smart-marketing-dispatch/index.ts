@@ -1,3 +1,4 @@
+import { extractBearerToken, normalizeLimit } from './smart-marketing-utils.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json'}});
 const templates:Record<string,{title:string;message:(p:Record<string,unknown>)=>string;type:'INFO'|'OFFER'|'REWARD'|'POINTS'}>={
@@ -9,12 +10,12 @@ const templates:Record<string,{title:string;message:(p:Record<string,unknown>)=>
 Deno.serve(async(req)=>{
  if(req.method!=='POST')return json({success:false,error:'POST requis.'},405);
  const secret=Deno.env.get('SMART_MARKETING_CRON_SECRET');
- const token=req.headers.get('Authorization')?.replace(/^Bearer\s+/i,'');
+ const token=extractBearerToken(req.headers.get('Authorization'));
  if(!secret||token!==secret)return json({success:false,error:'Non autorisé.'},401);
  const url=Deno.env.get('SUPABASE_URL'),key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
  if(!url||!key)return json({success:false,error:'Configuration Supabase absente.'},503);
  const admin=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
- const batch=Math.max(1,Math.min(Number((await req.json().catch(()=>({limit:50}))).limit)||50,200));
+ const batch=normalizeLimit((await req.json().catch(()=>({limit:50}))).limit);
  const {data:rows,error}=await admin.rpc('claim_smart_marketing_queue',{p_limit:batch});
  if(error)return json({success:false,error:'Impossible de réserver les tâches.'},500);
  let sent=0,skipped=0,failed=0;
