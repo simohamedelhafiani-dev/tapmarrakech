@@ -1,5 +1,5 @@
 import { assertEquals, assertMatch } from 'https://deno.land/std@0.224.0/assert/mod.ts';
-import { extractBearerToken, normalizeLimit, progressThreshold, buildTriggerKey, parseSmartConfigNumber } from './smart-marketing-utils.ts';
+import { extractBearerToken, normalizeLimit, progressThreshold, buildTriggerKey, parseSmartConfigNumber, resolveSmartMessage } from './smart-marketing-utils.ts';
 
 Deno.test('Bearer token parsing is case-insensitive and whitespace tolerant',()=>{
  assertEquals(extractBearerToken('Bearer abc123'),'abc123');
@@ -28,4 +28,10 @@ Deno.test('Smart config numeric values accept labels such as days and percent',(
  assertEquals(parseSmartConfigNumber('80%',50),80);
  assertEquals(parseSmartConfigNumber('invalid',12),12);
  assertEquals(parseSmartConfigNumber(7,12),7);
+});
+
+Deno.test('custom Smart message overrides fallback only when non-empty',()=>{
+ assertEquals(resolveSmartMessage(' Message personnalisé ','fallback'),'Message personnalisé');
+ assertEquals(resolveSmartMessage('   ','fallback'),'fallback');
+ assertEquals(resolveSmartMessage(null,'fallback'),'fallback');
 });
