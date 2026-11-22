@@ -16,7 +16,7 @@ begin
   set status='FAILED', processed_at=now(), processing_started_at=null,
       last_error=coalesce(last_error, 'Processing lease expired after maximum attempts')
   where status='PROCESSING'
-    and processing_started_at < now() - interval '15 minutes'
+    and coalesce(processing_started_at, created_at) < now() - interval '15 minutes'
     and attempts >= 3;
 
   return query
@@ -24,7 +24,7 @@ begin
     select id from public.smart_marketing_queue
     where (
       (status='PENDING' and scheduled_at <= now())
-      or (status='PROCESSING' and processing_started_at < now() - interval '15 minutes' and attempts < 3)
+      or (status='PROCESSING' and coalesce(processing_started_at, created_at) < now() - interval '15 minutes' and attempts < 3)
     )
     order by scheduled_at, created_at
     limit greatest(1, least(coalesce(p_limit,50),200))
