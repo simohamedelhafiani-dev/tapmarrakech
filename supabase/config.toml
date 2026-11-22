@@ -13,3 +13,6 @@ verify_jwt = false
 
 [functions.google-wallet-publish-design]
 verify_jwt = true
+
+[functions.whatsapp-webhook]
+verify_jwt = false
