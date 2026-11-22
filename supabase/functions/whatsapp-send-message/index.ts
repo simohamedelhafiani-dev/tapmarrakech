@@ -135,8 +135,11 @@ Deno.serve(async (req) => {
     });
     providerData = await providerResponse.json().catch(() => ({}));
   } catch {
-    await admin.from("whatsapp_messages").update({ delivery_status: "failed", raw_metadata: { recipient: customerPhone, error: "provider_network_error" } }).eq("id", queued.id);
-    return reply({ error: "meta_request_failed", messageId: queued.id }, 502);
+    // Network errors and timeouts are ambiguous: Meta may have accepted the
+    // message before the connection failed. Keep it queued to prevent a retry
+    // with a new request ID from silently duplicating the message.
+    await admin.from("whatsapp_messages").update({ delivery_status: "queued", raw_metadata: { recipient: customerPhone, error: "provider_network_error", delivery_unknown: true } }).eq("id", queued.id);
+    return reply({ error: "meta_request_outcome_unknown", pending: true, messageId: queued.id, status: "queued" }, 202);
   }
 
   if (!providerResponse.ok) {
