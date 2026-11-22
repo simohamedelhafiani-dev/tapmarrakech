@@ -9,7 +9,7 @@ const cors = {
   "Vary": "Origin",
 };
 const reply = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
-  status, headers: { ...cors, "Content-Type": "application/json" },
+  status, headers: { ...cors, "Content-Type": "application/json", "Cache-Control": "no-store", "Pragma": "no-cache" },
 });
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const hex = (bytes: Uint8Array) => Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
