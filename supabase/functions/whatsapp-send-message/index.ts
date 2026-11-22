@@ -125,6 +125,7 @@ Deno.serve(async (req) => {
       method: "POST",
       headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
       body: JSON.stringify({ messaging_product: "whatsapp", recipient_type: "individual", to: customerPhone, type: "text", text: { body: textBody } }),
+      signal: AbortSignal.timeout(15_000),
     });
     providerData = await providerResponse.json().catch(() => ({}));
   } catch {
