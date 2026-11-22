@@ -13,6 +13,10 @@ const reply = (body: unknown, status = 200) => new Response(JSON.stringify(body)
 });
 const idPattern = /^[0-9]{5,32}$/;
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const hex = (bytes: Uint8Array) => Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+async function sha256(value: string) {
+  return hex(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value))));
+}
 
 async function graphGet(url: URL, token: string) {
   const response = await fetch(url, {
