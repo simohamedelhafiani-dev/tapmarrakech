@@ -29,6 +29,8 @@ Deno.serve(async (req) => {
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const graphVersion = Deno.env.get("META_GRAPH_API_VERSION");
   if (!supabaseUrl || !anonKey || !serviceKey || !graphVersion) return reply({ error: "server_configuration_missing" }, 500);
+  // Keep the provider URL path safe and consistent with OAuth exchange.
+  if (!/^v[0-9]{2,3}\.[0-9]+$/.test(graphVersion)) return reply({ error: "server_configuration_invalid" }, 500);
 
   let body: { establishmentId?: string; to?: string; text?: string; requestId?: string };
   const rawBody = await req.text();
@@ -64,6 +66,11 @@ Deno.serve(async (req) => {
     .eq("establishment_id", establishmentId).maybeSingle();
   if (connectionError) return reply({ error: "connection_lookup_failed" }, 500);
   if (!connection || connection.status !== "active") return reply({ error: "whatsapp_not_connected" }, 409);
+  // Phone Number IDs are numeric Graph path segments; reject corrupt DB values
+  // before interpolating them into the provider URL.
+  if (typeof connection.phone_number_id !== "string" || !/^\d{5,32}$/.test(connection.phone_number_id)) {
+    return reply({ error: "whatsapp_connection_invalid" }, 409);
+  }
 
   // Idempotency: reserve this client request before calling Meta. If a duplicate
   // request arrives, return its record instead of sending a second message.
