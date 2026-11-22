@@ -117,8 +117,11 @@ Deno.serve(async (req) => {
   } catch {
     return reply({ error: "meta_code_exchange_unavailable" }, 502);
   }
-  const accessToken = typeof tokenData.access_token === "string" ? tokenData.access_token : "";
-  if (!exchange.ok || !accessToken) return reply({ error: "meta_code_exchange_failed" }, 400);
+  const accessToken = typeof tokenData.access_token === "string" ? tokenData.access_token.trim() : "";
+  // Reject malformed or unexpectedly large token payloads before using/storing them.
+  if (!exchange.ok || accessToken.length < 20 || accessToken.length > 4_096) {
+    return reply({ error: "meta_code_exchange_failed" }, 400);
+  }
 
   // Verify the WABA exists and is readable by the newly exchanged token.
   const wabaUrl = new URL(`https://graph.facebook.com/${graphVersion}/${wabaId}`);
