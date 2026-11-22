@@ -165,7 +165,7 @@ export default function Admin() {
     if (slug === 'reviews') return 'ai';
     const validSections: AdminSection[] = [
       'overview', 'establishments', 'responsibles', 'employees', 'reviews',
-      'analysis', 'ai', 'analytics', 'reports', 'billing', 'loyalty', 'whatsapp', 'system,
+      'analysis', 'ai', 'analytics', 'reports', 'billing', 'loyalty', 'whatsapp', 'system',
     ];
     return validSections.includes(slug as AdminSection) ? slug as AdminSection : 'overview';
   };
