@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
       if (connectionError) { processingFailures += 1; continue; }
       if (!connection || connection.status !== "active") continue;
 
-      const contacts = Array.isArray(value.contacts) ? (value.contacts as unknown[]).filter((c) => c && typeof c === "object" && !Array.isArray(c).slice(0, 100) as unknown as Record<string, unknown>[] : [];
+      const contacts = Array.isArray(value.contacts) ? (value.contacts as unknown[]).slice(0, 100).filter((c): c is Record<string, unknown> => !!c && typeof c === "object" && !Array.isArray(c)) : [];
       const messages = Array.isArray(value.messages) ? (value.messages as unknown[]).slice(0, 100) : [];
       for (const rawMessage of messages) {
         if (!rawMessage || typeof rawMessage !== "object" || Array.isArray(rawMessage)) continue;
