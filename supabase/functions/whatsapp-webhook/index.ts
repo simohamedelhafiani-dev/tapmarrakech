@@ -203,11 +203,22 @@ Deno.serve(async (req) => {
         };
         const previousStates = allowedPrevious[mapped];
         if (!previousStates) continue;
-        const { error: statusUpdateError } = await admin.from("whatsapp_messages").update({ delivery_status: mapped })
+        const { data: updatedStatusRows, error: statusUpdateError } = await admin.from("whatsapp_messages").update({ delivery_status: mapped })
           .eq("provider_message_id", providerMessageId)
           .eq("establishment_id", connection.establishment_id)
-          .in("delivery_status", previousStates);
-        if (statusUpdateError) processingFailures += 1;
+          .in("delivery_status", previousStates)
+          .select("id");
+        if (statusUpdateError) {
+          processingFailures += 1;
+        } else if (!updatedStatusRows?.length) {
+          // A callback may arrive before the send function persists Meta's ID.
+          // Retry only when the message is genuinely missing; stale callbacks
+          // for an already-existing message are harmless and should be acked.
+          const { data: existingStatusMessage, error: statusLookupError } = await admin.from("whatsapp_messages")
+            .select("id").eq("provider_message_id", providerMessageId)
+            .eq("establishment_id", connection.establishment_id).maybeSingle();
+          if (statusLookupError || !existingStatusMessage) processingFailures += 1;
+        }
       }
     }
   }
