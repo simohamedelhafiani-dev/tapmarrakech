@@ -72,6 +72,10 @@ Deno.serve(async (req) => {
   if (!code || !establishmentId || !wabaId || !phoneNumberId || !state) {
     return reply({ error: "code_establishment_waba_phone_and_state_required" }, 400);
   }
+  // Reject oversized OAuth codes and control characters before forwarding them to Meta.
+  if (code.length > 2_048 || [...code].some((char) => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)) {
+    return reply({ error: "invalid_oauth_code" }, 400);
+  }
   if (!/^[a-f0-9]{64}$/.test(state)) return reply({ error: "invalid_oauth_state" }, 400);
   if (!uuidPattern.test(establishmentId) || !idPattern.test(wabaId) || !idPattern.test(phoneNumberId)) {
     return reply({ error: "invalid_identifiers" }, 400);
