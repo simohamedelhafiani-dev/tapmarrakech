@@ -82,8 +82,11 @@ Deno.serve(async (req) => {
         const contact = contacts.find((c) => String((c.wa_id ?? "")) === customerPhone);
         const profile = contact?.profile as Record<string, unknown> | undefined;
         const customerName = typeof profile?.name === "string" ? profile.name : null;
-        const type = String(message.type ?? "unknown");
-        const messageBody = type === "text" ? String((message.text as Record<string, unknown> | undefined)?.body ?? "") : null;
+        const rawType = message.type;
+        const type = typeof rawType === "string" && rawType.length <= 64 ? rawType : "unknown";
+        const rawText = message.text as Record<string, unknown> | undefined;
+        const rawTextBody = rawText?.body;
+        const messageBody = type === "text" && typeof rawTextBody === "string" ? rawTextBody.slice(0, 4096) : null;
         const rawTimestamp = message.timestamp;
         const parsedTimestamp = typeof rawTimestamp === "string" && /^\d{1,12}$/.test(rawTimestamp)
           ? Number(rawTimestamp)
