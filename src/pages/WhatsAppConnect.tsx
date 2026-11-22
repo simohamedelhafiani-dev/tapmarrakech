@@ -82,6 +82,9 @@ function startEmbeddedSignup(facebook: NonNullable<Window['FB']>, embeddedConfig
   return new Promise<{ code: string; assets: MetaSignupAssets }>((resolve, reject) => {
     let code: string | null = null;
     let assets: MetaSignupAssets | null = null;
+    // Bind signup session messages to the first accepted popup/frame source.
+    // This narrows cross-window spoofing; Meta does not echo our server nonce here.
+    let signupMessageSource: MessageEventSource | null = null;
     let settled = false;
     let codeTimeout: number | null = null;
     const timeout = window.setTimeout(() => finish(new Error('La connexion Meta a expiré. Relancez le parcours.')), 10 * 60 * 1000);
@@ -117,6 +120,7 @@ function startEmbeddedSignup(facebook: NonNullable<Window['FB']>, embeddedConfig
       // Signup messages must originate from a separate window/frame, not from
       // arbitrary same-page scripts dispatching synthetic message events.
       if (!event.source || event.source === window) return;
+      if (signupMessageSource && event.source !== signupMessageSource) return;
 
       let message: MetaSignupMessage;
       try {
@@ -128,6 +132,7 @@ function startEmbeddedSignup(facebook: NonNullable<Window['FB']>, embeddedConfig
       }
       if (message.type !== 'WA_EMBEDDED_SIGNUP' || typeof message.event !== 'string') return;
       if (message.data && (typeof message.data !== 'object' || Array.isArray(message.data))) return;
+      if (!signupMessageSource) signupMessageSource = event.source;
 
       if (message.event === 'CANCEL') {
         finish(new Error(`Connexion Meta annulée${message.data?.current_step ? ` à l’étape ${message.data.current_step}` : ''}.`));
