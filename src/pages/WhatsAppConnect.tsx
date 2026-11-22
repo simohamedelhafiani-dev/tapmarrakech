@@ -295,6 +295,7 @@ export default function WhatsAppConnect() {
           meta_waba_verification_failed: 'Le compte WhatsApp n’a pas pu être vérifié avec les autorisations reçues.',
           meta_phone_numbers_verification_unavailable: 'La vérification du numéro a échoué temporairement. Relancez la connexion.',
           meta_phone_numbers_verification_failed: 'Meta n’a pas permis de vérifier la liste des numéros de ce compte.',
+          meta_phone_numbers_verification_incomplete: 'La liste des numéros Meta est trop longue pour être vérifiée en une seule tentative. Relancez la connexion.',
           phone_number_not_attached_to_waba: 'Le numéro choisi n’est pas rattaché au compte WhatsApp Business sélectionné.',
           secure_token_storage_failed: 'La connexion Meta est vérifiée, mais le stockage sécurisé a échoué. Contactez le support avant de recommencer.',
           connection_save_failed: 'La connexion Meta est vérifiée, mais son enregistrement a échoué. Contactez le support avant de recommencer.',
