@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
     return reply({ error: "server_configuration_missing" }, 500);
   }
 
-  let body: { code?: string; establishmentId?: string; wabaId?: string; phoneNumberId?: string };
+  let body: { code?: string; establishmentId?: string; wabaId?: string; phoneNumberId?: string; state?: string };
   const rawBody = await req.text();
   if (new TextEncoder().encode(rawBody).byteLength > 32_000) return reply({ error: "payload_too_large" }, 413);
   try {
@@ -56,9 +56,11 @@ Deno.serve(async (req) => {
   const establishmentId = typeof body.establishmentId === "string" ? body.establishmentId.trim() : "";
   const wabaId = typeof body.wabaId === "string" ? body.wabaId.trim() : "";
   const phoneNumberId = typeof body.phoneNumberId === "string" ? body.phoneNumberId.trim() : "";
-  if (!code || !establishmentId || !wabaId || !phoneNumberId) {
-    return reply({ error: "code_establishment_waba_and_phone_required" }, 400);
+  const state = typeof body.state === "string" ? body.state.trim() : "";
+  if (!code || !establishmentId || !wabaId || !phoneNumberId || !state) {
+    return reply({ error: "code_establishment_waba_phone_and_state_required" }, 400);
   }
+  if (!/^[a-f0-9]{64}$/.test(state)) return reply({ error: "invalid_oauth_state" }, 400);
   if (!uuidPattern.test(establishmentId) || !idPattern.test(wabaId) || !idPattern.test(phoneNumberId)) {
     return reply({ error: "invalid_identifiers" }, 400);
   }
@@ -74,6 +76,21 @@ Deno.serve(async (req) => {
   if (accessError || !hasAccess) return reply({ error: "establishment_access_denied" }, 403);
 
   const admin = createClient(supabaseUrl, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } });
+  // Consume the nonce atomically: only a matching, unexpired, unused row for
+  // this user and establishment can be updated. Concurrent reuse loses the race.
+  const stateHash = await sha256(state);
+  const { data: consumedState, error: stateError } = await admin.from("whatsapp_oauth_states")
+    .update({ consumed_at: new Date().toISOString() })
+    .eq("nonce_hash", stateHash)
+    .eq("user_id", userData.user.id)
+    .eq("establishment_id", establishmentId)
+    .is("consumed_at", null)
+    .gt("expires_at", new Date().toISOString())
+    .select("id")
+    .maybeSingle();
+  if (stateError) return reply({ error: "oauth_state_validation_failed" }, 500);
+  if (!consumedState) return reply({ error: "oauth_state_invalid_expired_or_used" }, 403);
+
   const { data: establishment, error: establishmentError } = await admin.from("establishments")
     .select("id").eq("id", establishmentId).maybeSingle();
   if (establishmentError || !establishment) return reply({ error: "establishment_not_found" }, 404);
