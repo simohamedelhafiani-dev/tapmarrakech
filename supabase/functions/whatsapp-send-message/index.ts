@@ -140,7 +140,12 @@ Deno.serve(async (req) => {
   }
 
   const messages = Array.isArray(providerData.messages) ? providerData.messages as Record<string, unknown>[] : [];
-  const providerMessageId = typeof messages[0]?.id === "string" ? messages[0].id : null;
+  const providerMessageId = typeof messages[0]?.id === "string" ? messages[0].id.trim() : "";
+  if (!providerMessageId || providerMessageId.length > 512) {
+    // A successful HTTP response without a usable provider ID is ambiguous:
+    // Meta may have accepted the send, so don't mark it failed or retry it.
+    return reply({ error: "meta_response_missing_message_id", messageId: queued.id }, 502);
+  }
   const { error: finalizeError } = await admin.from("whatsapp_messages").update({
     provider_message_id: providerMessageId,
     delivery_status: "sent",
