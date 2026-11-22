@@ -67,7 +67,7 @@ begin
     and q.smart_id = p_smart_id
     and q.trigger_key = p_trigger_key
     and q.status in ('FAILED', 'SKIPPED')
-    and (q.status = 'SKIPPED' or q.recovery_count < 1)
+    and q.recovery_count < 1
   for update;
 
   if queue_id is null then
@@ -82,7 +82,7 @@ begin
   end if;
 
   update public.smart_marketing_queue
-  set status='PENDING', attempts=0, recovery_count=case when status='FAILED' then recovery_count+1 else recovery_count end, scheduled_at=now(),
+  set status='PENDING', attempts=0, recovery_count=recovery_count+1, scheduled_at=now(),
       processing_started_at=null, processed_at=null, last_error=null,
       payload=coalesce(p_payload, '{}'::jsonb)
   where id=queue_id and status in ('FAILED', 'SKIPPED');
