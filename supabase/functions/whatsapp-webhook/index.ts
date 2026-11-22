@@ -95,10 +95,11 @@ Deno.serve(async (req) => {
         const rawTimestamp = message.timestamp;
         const parsedTimestamp = typeof rawTimestamp === "string" && /^\d{1,12}$/.test(rawTimestamp)
           ? Number(rawTimestamp)
-          : typeof rawTimestamp === "number" && Number.isFinite(rawTimestamp) && rawTimestamp >= 0
+          : typeof rawTimestamp === "number" && Number.isSafeInteger(rawTimestamp) && rawTimestamp >= 0
           ? rawTimestamp
           : NaN;
-        const messageTime = Number.isFinite(parsedTimestamp) && parsedTimestamp > 0
+        // Bound epoch seconds to the supported Date range before ISO conversion.
+        const messageTime = Number.isSafeInteger(parsedTimestamp) && parsedTimestamp > 0 && parsedTimestamp <= 253402300799
           ? new Date(parsedTimestamp * 1000).toISOString()
           : new Date().toISOString();
         const { data: existingConversation, error: findConversationError } = await admin.from("whatsapp_conversations")
