@@ -69,9 +69,11 @@ Deno.serve(async (req) => {
       const contacts = Array.isArray(value.contacts) ? value.contacts as Record<string, unknown>[] : [];
       const messages = Array.isArray(value.messages) ? value.messages as Record<string, unknown>[] : [];
       for (const message of messages) {
-        const customerPhone = String(message.from ?? "").trim();
-        const providerMessageId = String(message.id ?? "").trim();
-        if (!customerPhone || !providerMessageId) continue;
+        const rawCustomerPhone = message.from;
+        const rawProviderMessageId = message.id;
+        const customerPhone = typeof rawCustomerPhone === "string" ? rawCustomerPhone.trim() : "";
+        const providerMessageId = typeof rawProviderMessageId === "string" ? rawProviderMessageId.trim() : "";
+        if (!/^\d{7,20}$/.test(customerPhone) || !providerMessageId || providerMessageId.length > 255) continue;
         const contact = contacts.find((c) => String((c.wa_id ?? "")) === customerPhone);
         const profile = contact?.profile as Record<string, unknown> | undefined;
         const customerName = typeof profile?.name === "string" ? profile.name : null;
