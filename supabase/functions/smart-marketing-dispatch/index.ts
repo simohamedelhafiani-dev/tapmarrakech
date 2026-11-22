@@ -70,14 +70,14 @@ Deno.serve(async(req)=>{
     const {data:existing,error:lookupErr}=await admin.from('loyalty_card_notifications').select('id').eq('smart_marketing_queue_id',q.id).maybeSingle();
     if(lookupErr||!existing)throw insertErr;
    }
-   const {data:statusData,error:statusErr}=await admin.from('smart_marketing_queue').update({status:'SENT',processing_started_at:null,processed_at:new Date().toISOString(),last_error:null}).eq('id',q.id).eq('status','PROCESSING').eq('processing_started_at',q.processing_started_at);
+   const {data:statusData,error:statusErr}=await admin.from('smart_marketing_queue').update({status:'SENT',processing_started_at:null,processed_at:new Date().toISOString(),last_error:null}).eq('id',q.id).eq('status','PROCESSING').eq('processing_started_at',q.processing_started_at).select('id').maybeSingle();
    if(statusErr)throw statusErr;
    sent++;
   }catch(e){
    const msg=e instanceof Error?e.message:String(e);
    const retryable=(q.attempts??1)<3;
    const retryDelay=retryDelayMinutes(q.attempts??1);
-   const {data:stateData,error:stateErr}=await admin.from('smart_marketing_queue').update({status:retryable?'PENDING':'FAILED',scheduled_at:retryable?new Date(Date.now()+retryDelay*60000).toISOString():undefined,processing_started_at:null,processed_at:retryable?null:new Date().toISOString(),last_error:msg.slice(0,500)}).eq('id',q.id).eq('status','PROCESSING').eq('processing_started_at',q.processing_started_at);
+   const {data:stateData,error:stateErr}=await admin.from('smart_marketing_queue').update({status:retryable?'PENDING':'FAILED',scheduled_at:retryable?new Date(Date.now()+retryDelay*60000).toISOString():undefined,processing_started_at:null,processed_at:retryable?null:new Date().toISOString(),last_error:msg.slice(0,500)}).eq('id',q.id).eq('status','PROCESSING').eq('processing_started_at',q.processing_started_at).select('id').maybeSingle();
    if(stateErr)failed++; else if(stateData?.id){if(retryable)retried++;else failed++;}else lease_lost++;
   }
  }
