@@ -155,7 +155,10 @@ Deno.serve(async (req) => {
     if (!pageResult.response.ok) return reply({ error: "meta_phone_numbers_verification_failed" }, 403);
     const items = Array.isArray(pageResult.data.data) ? pageResult.data.data : [];
     phoneData = items.find((item: { id?: string }) => String(item?.id ?? "") === phoneNumberId) ?? phoneData;
-    const pagingNext = pageResult.data.paging?.next;
+    const paging = pageResult.data.paging;
+    const pagingNext = paging && typeof paging === "object" && !Array.isArray(paging)
+      ? (paging as Record<string, unknown>).next
+      : undefined;
     if (typeof pagingNext === "string") {
       try {
         const candidate = new URL(pagingNext);
