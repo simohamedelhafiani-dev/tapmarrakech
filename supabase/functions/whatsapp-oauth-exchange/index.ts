@@ -20,7 +20,10 @@ async function graphGet(url: URL, token: string) {
     headers: { Authorization: `Bearer ${token}` },
     signal: AbortSignal.timeout(15_000),
   });
-  const data = await response.json().catch(() => ({}));
+  const parsed = await response.json().catch(() => ({}));
+  const data = parsed && typeof parsed === "object" && !Array.isArray(parsed)
+    ? parsed as Record<string, unknown>
+    : {};
   return { response, data };
 }
 
@@ -102,7 +105,10 @@ Deno.serve(async (req) => {
   let tokenData: Record<string, unknown>;
   try {
     exchange = await fetch(exchangeUrl, { method: "GET", signal: AbortSignal.timeout(15_000) });
-    tokenData = await exchange.json().catch(() => ({}));
+    const parsed = await exchange.json().catch(() => ({}));
+    tokenData = parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? parsed as Record<string, unknown>
+      : {};
   } catch {
     return reply({ error: "meta_code_exchange_unavailable" }, 502);
   }
