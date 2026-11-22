@@ -69,7 +69,8 @@ Deno.serve(async (req) => {
         const goal = Math.max(1, num(loyaltySetting?.stamp_goal, 10));
         const progressPercent = Math.max(1, Math.min(100, num(settings.thresholdPercent ?? settings.threshold_percent ?? settings.threshold, 80)));
         const threshold = Math.max(1, Math.ceil(goal * progressPercent / 100));
-        if ((customer.stamps_balance ?? 0) >= threshold && (customer.stamps_balance ?? 0) < goal) { trigger = `progress:${goal}:${threshold}`; payload = { stamps: customer.stamps_balance, goal, threshold, percent: Math.round((customer.stamps_balance / goal) * 100) }; }
+        const stamps = customer.stamps_balance ?? 0;
+        if (stamps >= threshold && stamps < goal) { trigger = `progress:${goal}:${threshold}`; payload = { stamps, goal, threshold, percent: Math.round((stamps / goal) * 100) }; }
       }
       if (trigger) eligible.push({ customer, trigger, payload });
     }
