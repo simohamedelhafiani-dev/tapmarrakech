@@ -58,13 +58,22 @@ export default function WhatsAppInbox() {
     const { data, error } = await supabase.functions.invoke('whatsapp-send-message', {
       body: { establishmentId, to: selected.customer_phone.startsWith('+') ? selected.customer_phone : `+${selected.customer_phone}`, text: draft.trim(), requestId: crypto.randomUUID() },
     });
-    if (error || !data?.success) { setNotice(data?.error === 'whatsapp_not_connected' ? 'WhatsApp n’est pas connecté pour cet établissement.' : 'Envoi impossible. Vérifie la connexion WhatsApp et réessaie.'); setSending(false); return; }
-    setDraft('');
+    // A 202 queued response is not a send failure: Meta may have accepted the
+    // message while the network outcome is unknown. Refresh to show the persisted
+    // outbound record and avoid prompting the user to send a duplicate.
+    const pending = Boolean(data?.pending) || data?.status === 'queued';
+    if (error || (!data?.success && !pending)) {
+      setNotice(data?.error === 'whatsapp_not_connected' ? 'WhatsApp n’est pas connecté pour cet établissement.' : 'Envoi impossible. Vérifie la connexion WhatsApp et réessaie.');
+      setSending(false);
+      return;
+    }
+    if (!pending) setDraft('');
     // Refresh the list first: loadInbox clears the selected conversation.
     // Reopen it afterwards so the inbox remains focused on the conversation just answered.
     const sentConversation = selected;
     await loadInbox(establishmentId);
     await openConversation(sentConversation);
+    if (pending) setNotice('Message enregistré en attente de confirmation Meta. Ne le renvoie pas pour éviter un doublon.');
     setSending(false);
   }
 
