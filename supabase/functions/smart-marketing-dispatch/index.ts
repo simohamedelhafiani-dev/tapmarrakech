@@ -75,6 +75,14 @@ Deno.serve(async(req)=>{
    if(statusData?.id)sent++;else lease_lost++;
   }catch(e){
    const msg=e instanceof Error?e.message:String(e);
+   // If the notification was committed but queue bookkeeping failed, never retry/fail the task as if delivery had not happened.
+   const {data:alreadyNotified,error:notificationCheckError}=await admin.from('loyalty_card_notifications').select('id').eq('smart_marketing_queue_id',q.id).maybeSingle();
+   if(notificationCheckError){failed++;continue;}
+   if(alreadyNotified){
+    const {data:recoveredSent,error:recoveryError}=await admin.from('smart_marketing_queue').update({status:'SENT',processing_started_at:null,processed_at:new Date().toISOString(),last_error:null}).eq('id',q.id).eq('status','PROCESSING').eq('processing_started_at',q.processing_started_at).select('id').maybeSingle();
+    if(recoveryError)failed++;else if(recoveredSent?.id)sent++;else lease_lost++;
+    continue;
+   }
    const retryable=(q.attempts??1)<3;
    const retryDelay=retryDelayMinutes(q.attempts??1);
    const {data:stateData,error:stateErr}=await admin.from('smart_marketing_queue').update({status:retryable?'PENDING':'FAILED',scheduled_at:retryable?new Date(Date.now()+retryDelay*60000).toISOString():undefined,processing_started_at:null,processed_at:retryable?null:new Date().toISOString(),last_error:msg.slice(0,500)}).eq('id',q.id).eq('status','PROCESSING').eq('processing_started_at',q.processing_started_at).select('id').maybeSingle();
