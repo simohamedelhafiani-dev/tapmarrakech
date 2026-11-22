@@ -165,6 +165,9 @@ Deno.serve(async (req) => {
       }
     } else nextUrl = null;
   }
+  // If the page cap was reached while Meta still advertises more results, do not
+  // claim the requested phone number is absent: the verification is incomplete.
+  if (!phoneData && nextUrl) return reply({ error: "meta_phone_numbers_verification_incomplete" }, 502);
   if (!phoneData) return reply({ error: "phone_number_not_attached_to_waba" }, 403);
 
   // Never store provider access tokens in the connection table. Save to Supabase Vault
