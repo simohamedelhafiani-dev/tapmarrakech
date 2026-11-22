@@ -39,7 +39,16 @@ Deno.serve(async(req)=>{
     const lastVisit=c.last_visit_at?new Date(c.last_visit_at):null;
     if(!lastVisit||Number.isNaN(lastVisit.getTime())||Math.floor((Date.now()-lastVisit.getTime())/86400000)<delay){await markSkipped(q.id,'Customer returned or inactivity threshold no longer met');skipped++;continue;}
    }
-   if(q.smart_id==='birthday'){\n    const todayParts=new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Casablanca',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());\n    const today=Object.fromEntries(todayParts.map(x=>[x.type,x.value]));\n    const localDate=`${today.year}-${today.month}-${today.day}`;\n    if(q.trigger_key!==`birthday:${localDate}`||Number(c.birth_day)!==Number(today.day)||Number(c.birth_month)!==Number(today.month)){await markSkipped(q.id,'Birthday trigger date or customer birthday changed');skipped++;continue;}\n   }\n   if(q.smart_id==='vip'){\n    const threshold=Math.max(1,Number.parseFloat(String(liveConfig.config?.thresholdVisits??liveConfig.config?.threshold_visits??liveConfig.config?.threshold??10))||10);\n    if((c.visit_count??0)<threshold){await markSkipped(q.id,'VIP visit threshold no longer met');skipped++;continue;}\n   }
+   if(q.smart_id==='birthday'){
+    const todayParts=new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Casablanca',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+    const today=Object.fromEntries(todayParts.map(x=>[x.type,x.value]));
+    const localDate=`${today.year}-${today.month}-${today.day}`;
+    if(q.trigger_key!==`birthday:${localDate}`||Number(c.birth_day)!==Number(today.day)||Number(c.birth_month)!==Number(today.month)){await markSkipped(q.id,'Birthday trigger date or customer birthday changed');skipped++;continue;}
+   }
+   if(q.smart_id==='vip'){
+    const threshold=Math.max(1,Number.parseFloat(String(liveConfig.config?.thresholdVisits??liveConfig.config?.threshold_visits??liveConfig.config?.threshold??10))||10);
+    if((c.visit_count??0)<threshold){await markSkipped(q.id,'VIP visit threshold no longer met');skipped++;continue;}
+   }
    const messagePayload={...(q.payload??{})};
    if(q.smart_id==='progress'){
     const {data:settings,error:settingsError}=await admin.from('loyalty_settings').select('stamp_goal').eq('establishment_id',q.establishment_id).maybeSingle();
