@@ -156,10 +156,12 @@ Deno.serve(async (req) => {
         else if (Array.isArray(insertedRows)) accepted += insertedRows.length;
       }
 
-      const statuses = Array.isArray(value.statuses) ? value.statuses as Record<string, unknown>[] : [];
-      for (const status of statuses) {
-        const providerMessageId = String(status.id ?? "");
-        const statusValue = String(status.status ?? "");
+      const statuses = Array.isArray(value.statuses) ? (value.statuses as unknown[]).slice(0, 100) : [];
+      for (const rawStatus of statuses) {
+        if (!rawStatus || typeof rawStatus !== "object" || Array.isArray(rawStatus)) continue;
+        const status = rawStatus as Record<string, unknown>;
+        const providerMessageId = typeof status.id === "string" ? status.id.trim() : "";
+        const statusValue = typeof status.status === "string" ? status.status : "";
         const mapped = ["sent", "delivered", "read", "failed"].includes(statusValue) ? statusValue : null;
         if (!providerMessageId || !mapped) continue;
         // Prevent out-of-order Meta callbacks from downgrading message state.
