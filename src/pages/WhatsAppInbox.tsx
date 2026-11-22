@@ -51,7 +51,7 @@ export default function WhatsAppInbox() {
 
   async function openConversation(conversation: Conversation) {
     const requestSequence = ++conversationLoadSequence.current;
-    setSelected(conversation); setDetailLoading(true); setNotice('');
+    setSelected(conversation); setMessages([]); setDetailLoading(true); setNotice('');
     const { data, error } = await supabase.functions.invoke('whatsapp-inbox', { body: { establishmentId, conversationId: conversation.id } });
     // Rapid conversation switches can complete out of order. Ignore stale responses.
     if (requestSequence !== conversationLoadSequence.current) return;
