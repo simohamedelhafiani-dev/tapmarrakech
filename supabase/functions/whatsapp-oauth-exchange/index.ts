@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
     return reply({ error: "server_configuration_missing" }, 500);
   }
   // Keep the configured Graph API version in a strict path-safe format.
-  if (!/^v[0-9]{2,3}\\.[0-9]+$/.test(graphVersion)) {
+  if (!/^v[0-9]{2,3}\.[0-9]+$/.test(graphVersion)) {
     return reply({ error: "server_configuration_invalid" }, 500);
   }
 
