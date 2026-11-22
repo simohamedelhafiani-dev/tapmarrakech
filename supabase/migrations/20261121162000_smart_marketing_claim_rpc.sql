@@ -1,7 +1,8 @@
 -- Atomically claim a limited batch and recover abandoned PROCESSING rows.
 alter table public.smart_marketing_queue
   add column if not exists processing_started_at timestamptz,
-  add column if not exists attempts integer not null default 0 check (attempts >= 0);
+  add column if not exists attempts integer not null default 0 check (attempts >= 0),
+  add column if not exists recovery_count integer not null default 0 check (recovery_count >= 0);
 
 create or replace function public.claim_smart_marketing_queue(p_limit integer default 50)
 returns setof public.smart_marketing_queue
@@ -66,6 +67,7 @@ begin
     and q.smart_id = p_smart_id
     and q.trigger_key = p_trigger_key
     and q.status in ('FAILED', 'SKIPPED')
+    and (q.status = 'SKIPPED' or q.recovery_count < 1)
   for update;
 
   if queue_id is null then
@@ -80,7 +82,7 @@ begin
   end if;
 
   update public.smart_marketing_queue
-  set status='PENDING', attempts=0, scheduled_at=now(),
+  set status='PENDING', attempts=0, recovery_count=case when status='FAILED' then recovery_count+1 else recovery_count end, scheduled_at=now(),
       processing_started_at=null, processed_at=null, last_error=null,
       payload=coalesce(p_payload, '{}'::jsonb)
   where id=queue_id and status in ('FAILED', 'SKIPPED');
