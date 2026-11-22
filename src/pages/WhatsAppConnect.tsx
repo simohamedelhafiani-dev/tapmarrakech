@@ -198,6 +198,9 @@ export default function WhatsAppConnect() {
   const [busy, setBusy] = useState(false);
   const mountedRef = useRef(false);
   const signupAbortRef = useRef<AbortController | null>(null);
+  // Synchronous lock prevents rapid clicks from opening parallel Meta signup flows
+  // before React has committed the busy state update.
+  const signupInProgressRef = useRef(false);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -234,6 +237,8 @@ export default function WhatsAppConnect() {
   }, [user?.id]);
 
   async function startSignup() {
+    if (signupInProgressRef.current) return;
+    signupInProgressRef.current = true;
     setMessage('');
     const establishmentId = selectedId;
     if (!establishmentId) {
@@ -310,6 +315,7 @@ export default function WhatsAppConnect() {
       if (mountedRef.current) setMessage(error instanceof Error ? error.message : 'Connexion WhatsApp impossible.');
     } finally {
       if (signupAbortRef.current === controller) signupAbortRef.current = null;
+      signupInProgressRef.current = false;
       if (mountedRef.current) setBusy(false);
     }
   }
