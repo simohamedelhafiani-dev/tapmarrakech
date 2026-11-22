@@ -51,7 +51,7 @@ export default function SmartMarketingCenter() {
          nextEnabled[row.smart_id]=Boolean(row.enabled);
          const defaults=SMARTS.find(s=>s.id===row.smart_id)?.defaults??{};
          const safeConfig=row.config&&typeof row.config==='object'&&!Array.isArray(row.config)?row.config:{};
-         nextConfigs[row.smart_id]={...defaults,...Object.fromEntries(Object.entries(safeConfig).filter(([,v])=>typeof v==='string'))};
+         nextConfigs[row.smart_id]={...defaults,...Object.fromEntries(Object.entries(safeConfig).filter((entry):entry is [string,string]=>typeof entry[1]==='string'))};
        }
        if(active&&sequence===requestSequence){setEnabled(nextEnabled);setConfigs(nextConfigs);}
      }catch(err){if(active&&sequence===requestSequence)setError(err instanceof Error?err.message:'Erreur lors du chargement des Smart.');}
