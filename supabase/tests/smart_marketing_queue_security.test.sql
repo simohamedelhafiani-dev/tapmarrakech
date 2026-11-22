@@ -1,11 +1,12 @@
 begin;
-select plan(16);
+select plan(17);
 select has_table('public','smart_marketing_configs','Smart configuration table exists');
 select has_table('public','smart_marketing_queue','queue table exists');
 select has_table('public','smart_marketing_runs','run log table exists');
 select has_column('public','smart_marketing_queue','trigger_key','queue trigger key exists');
 select has_column('public','smart_marketing_queue','status','queue lifecycle status exists');
 select has_column('public','smart_marketing_queue','recovery_count','failed event recovery attempts are capped');
+select has_column('public','smart_marketing_queue','processing_started_at','processing lease timestamp exists');
 select has_column('public','loyalty_card_notifications','smart_marketing_queue_id','notification idempotency link exists');
 select has_index('public','loyalty_card_notifications','loyalty_card_notifications_smart_queue_unique','notifications are unique per Smart queue item');
 select has_function('public','claim_smart_marketing_queue','atomic queue claim function exists');
