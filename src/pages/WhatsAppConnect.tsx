@@ -238,7 +238,6 @@ export default function WhatsAppConnect() {
 
   async function startSignup() {
     if (signupInProgressRef.current) return;
-    signupInProgressRef.current = true;
     setMessage('');
     const establishmentId = selectedId;
     if (!establishmentId) {
@@ -249,6 +248,9 @@ export default function WhatsAppConnect() {
       setMessage('Configuration Meta manquante. Configurez les variables Meta requises.');
       return;
     }
+    // Acquire the lock only after all synchronous validation passes, so an
+    // early return cannot leave the signup flow permanently locked.
+    signupInProgressRef.current = true;
 
     setBusy(true);
     const controller = new AbortController();
