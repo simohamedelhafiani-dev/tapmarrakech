@@ -49,8 +49,16 @@ Deno.serve(async(req)=>{
     const stamps=Number(c.stamps_balance??0);
     if(stamps<threshold||stamps>=goal){await markSkipped(q.id,'Progress threshold no longer met');skipped++;continue;}
    }
+   const messagePayload={...(q.payload??{})};
+   if(q.smart_id==='progress'){
+    const {data:settings,error:settingsError}=await admin.from('loyalty_settings').select('stamp_goal').eq('establishment_id',q.establishment_id).maybeSingle();
+    if(settingsError)throw settingsError;
+    const goal=Math.max(1,Number(settings?.stamp_goal)||10);
+    const stamps=Number(c.stamps_balance??0);
+    messagePayload.stamps=stamps; messagePayload.goal=goal; messagePayload.percent=Math.round(stamps/goal*100);
+   }
    // Reuse the config snapshot already checked for enabled status to avoid a second read/race.
-   const customMessage=resolveSmartMessage(liveConfig.config?.message,tmpl.message(q.payload??{}));
+   const customMessage=resolveSmartMessage(liveConfig.config?.message,tmpl.message(messagePayload));
    const notificationPayload={establishment_id:q.establishment_id,customer_id:q.customer_id,smart_marketing_queue_id:q.id,title:tmpl.title,message:customMessage,type:tmpl.type};
    const {error:insertErr}=await admin.from('loyalty_card_notifications').insert(notificationPayload);
    if(insertErr){
