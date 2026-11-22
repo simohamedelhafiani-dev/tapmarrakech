@@ -287,7 +287,20 @@ export default function WhatsAppConnect() {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (result.error || !result.data?.success) {
-        throw new Error(result.data?.error || result.error?.message || 'La connexion WhatsApp n’a pas été enregistrée.');
+        const failureCode = typeof result.data?.error === 'string' ? result.data.error : '';
+        const safeMessages: Record<string, string> = {
+          meta_code_exchange_unavailable: 'Meta est temporairement inaccessible. Relancez une nouvelle connexion.',
+          meta_code_exchange_failed: 'Le code Meta est invalide ou expiré. Relancez le parcours de connexion.',
+          meta_waba_verification_unavailable: 'La vérification du compte WhatsApp a échoué temporairement. Relancez la connexion.',
+          meta_waba_verification_failed: 'Le compte WhatsApp n’a pas pu être vérifié avec les autorisations reçues.',
+          meta_phone_numbers_verification_unavailable: 'La vérification du numéro a échoué temporairement. Relancez la connexion.',
+          meta_phone_numbers_verification_failed: 'Meta n’a pas permis de vérifier la liste des numéros de ce compte.',
+          phone_number_not_attached_to_waba: 'Le numéro choisi n’est pas rattaché au compte WhatsApp Business sélectionné.',
+          secure_token_storage_failed: 'La connexion Meta est vérifiée, mais le stockage sécurisé a échoué. Contactez le support avant de recommencer.',
+          connection_save_failed: 'La connexion Meta est vérifiée, mais son enregistrement a échoué. Contactez le support avant de recommencer.',
+          oauth_state_invalid_expired_or_used: 'Cette tentative de connexion a expiré ou a déjà été utilisée. Relancez le parcours Meta.',
+        };
+        throw new Error(safeMessages[failureCode] || 'La connexion WhatsApp n’a pas été enregistrée. Relancez le parcours si nécessaire.');
       }
       if (mountedRef.current) {
         setMessage(result.data.message || 'Compte WhatsApp enregistré en attente de finalisation.');
