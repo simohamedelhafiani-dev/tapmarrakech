@@ -51,9 +51,33 @@ Deno.serve(async (req) => {
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return json({ error: "invalid_payload" }, 400);
     payload = parsed;
   } catch { return json({ error: "invalid_json" }, 400); }
+  // Preflight limits are global to the webhook payload, not per entry/change.
+  // Reject oversized batches before any database writes to avoid partial processing.
+  const entriesRaw = Array.isArray(payload.entry) ? payload.entry : [];
+  if (entriesRaw.length > 100) return json({ error: "payload_too_large" }, 413);
+  let totalChanges = 0;
+  let totalMessages = 0;
+  let totalStatuses = 0;
+  for (const rawEntry of entriesRaw) {
+    if (!rawEntry || typeof rawEntry !== "object" || Array.isArray(rawEntry)) continue;
+    const entryChanges = (rawEntry as Record<string, unknown>).changes;
+    if (!Array.isArray(entryChanges)) continue;
+    totalChanges += entryChanges.length;
+    if (totalChanges > 500) return json({ error: "payload_too_large" }, 413);
+    for (const rawChange of entryChanges) {
+      if (!rawChange || typeof rawChange !== "object" || Array.isArray(rawChange)) continue;
+      const changeValue = (rawChange as Record<string, unknown>).value;
+      if (!changeValue || typeof changeValue !== "object" || Array.isArray(changeValue)) continue;
+      const valueRecord = changeValue as Record<string, unknown>;
+      totalMessages += Array.isArray(valueRecord.messages) ? valueRecord.messages.length : 0;
+      totalStatuses += Array.isArray(valueRecord.statuses) ? valueRecord.statuses.length : 0;
+      if (totalMessages > 500 || totalStatuses > 500) return json({ error: "payload_too_large" }, 413);
+    }
+  }
+
   const admin = createClient(supabaseUrl, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } });
 
-  const entries = Array.isArray(payload.entry) ? payload.entry.slice(0, 100) : [];
+  const entries = entriesRaw;
   let accepted = 0;
   let processingFailures = 0;
   for (const entry of entries) {
