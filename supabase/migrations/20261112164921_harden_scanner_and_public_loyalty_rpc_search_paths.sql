@@ -29,13 +29,13 @@ ALTER FUNCTION public.get_public_scanner_context(uuid)
 ALTER FUNCTION public.get_public_scanner_settings(uuid)
   SET search_path = pg_catalog, public, extensions, pg_temp;
 -- This helper is not present in every schema history; harden it when available.
-DO $
+DO $$
 BEGIN
   IF to_regprocedure('public.public_establishment_exists(uuid)') IS NOT NULL THEN
     EXECUTE 'ALTER FUNCTION public.public_establishment_exists(uuid) SET search_path = pg_catalog, public, extensions, pg_temp';
   END IF;
 END
-$;
+$$;
 ALTER FUNCTION public.redeem_public_loyalty_raffle_winner_by_code(uuid, uuid)
   SET search_path = pg_catalog, public, extensions, pg_temp;
 ALTER FUNCTION public.redeem_public_loyalty_stamp_reward_claim(uuid, uuid)
