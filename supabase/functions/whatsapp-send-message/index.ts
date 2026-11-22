@@ -162,12 +162,18 @@ Deno.serve(async (req) => {
     // Meta may have accepted the send, so don't mark it failed or retry it.
     return reply({ error: "meta_response_missing_message_id", messageId: queued.id }, 502);
   }
+  // Persist the provider ID without overwriting a delivery state already advanced
+  // by an asynchronous webhook (e.g. delivered/read arriving before this handler).
   const { error: finalizeError } = await admin.from("whatsapp_messages").update({
     provider_message_id: providerMessageId,
-    delivery_status: "sent",
     raw_metadata: { recipient: customerPhone },
   }).eq("id", queued.id);
   if (finalizeError) return reply({ error: "message_sent_but_persistence_failed", messageId: queued.id }, 500);
+  // Only advance queued -> sent. Never downgrade delivered/read if a webhook won
+  // the race while the provider request was in flight.
+  const { error: statusFinalizeError } = await admin.from("whatsapp_messages").update({ delivery_status: "sent" })
+    .eq("id", queued.id).eq("delivery_status", "queued");
+  if (statusFinalizeError) return reply({ error: "message_status_persistence_failed", messageId: queued.id }, 500);
   await admin.from("whatsapp_conversations").update({ last_message_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", conversationId);
   return reply({ success: true, messageId: queued.id, providerMessageId, status: "sent" });
 });
