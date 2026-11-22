@@ -77,7 +77,15 @@ Deno.serve(async (req) => {
         const customerName = typeof profile?.name === "string" ? profile.name : null;
         const type = String(message.type ?? "unknown");
         const messageBody = type === "text" ? String((message.text as Record<string, unknown> | undefined)?.body ?? "") : null;
-        const messageTime = new Date(Number(message.timestamp ?? 0) * 1000 || Date.now()).toISOString();
+        const rawTimestamp = message.timestamp;
+        const parsedTimestamp = typeof rawTimestamp === "string" && /^\d{1,12}$/.test(rawTimestamp)
+          ? Number(rawTimestamp)
+          : typeof rawTimestamp === "number" && Number.isFinite(rawTimestamp) && rawTimestamp >= 0
+          ? rawTimestamp
+          : NaN;
+        const messageTime = Number.isFinite(parsedTimestamp) && parsedTimestamp > 0
+          ? new Date(parsedTimestamp * 1000).toISOString()
+          : new Date().toISOString();
         const { data: existingConversation, error: findConversationError } = await admin.from("whatsapp_conversations")
           .select("id").eq("connection_id", connection.id).eq("customer_phone", customerPhone).maybeSingle();
         if (findConversationError) { processingFailures += 1; continue; }
