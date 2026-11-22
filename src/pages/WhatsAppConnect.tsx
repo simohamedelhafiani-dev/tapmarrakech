@@ -111,15 +111,23 @@ function startEmbeddedSignup(facebook: NonNullable<Window['FB']>, embeddedConfig
         if (origin.protocol !== 'https:') return;
         host = origin.hostname;
       } catch { return; }
-      if (host !== 'facebook.com' && !host.endsWith('.facebook.com')) return;
+      // Accept only the known Meta origins; broad *.facebook.com checks can
+      // accidentally trust unrelated subdomains.
+      if (!['facebook.com', 'www.facebook.com', 'business.facebook.com'].includes(host)) return;
+      // Signup messages must originate from a separate window/frame, not from
+      // arbitrary same-page scripts dispatching synthetic message events.
+      if (!event.source || event.source === window) return;
 
       let message: MetaSignupMessage;
       try {
-        message = typeof event.data === 'string' ? JSON.parse(event.data) as MetaSignupMessage : event.data as MetaSignupMessage;
+        const parsed = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return;
+        message = parsed as MetaSignupMessage;
       } catch {
         return;
       }
-      if (message?.type !== 'WA_EMBEDDED_SIGNUP') return;
+      if (message.type !== 'WA_EMBEDDED_SIGNUP' || typeof message.event !== 'string') return;
+      if (message.data && (typeof message.data !== 'object' || Array.isArray(message.data))) return;
 
       if (message.event === 'CANCEL') {
         finish(new Error(`Connexion Meta annulée${message.data?.current_step ? ` à l’étape ${message.data.current_step}` : ''}.`));
