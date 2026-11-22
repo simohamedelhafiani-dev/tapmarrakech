@@ -58,6 +58,11 @@ Deno.serve(async (req) => {
   const state = hex(random);
   const stateHash = await sha256(state);
   const admin = createClient(url, service, { auth: { autoRefreshToken: false, persistSession: false } });
+  // Keep the transaction table bounded: retain expired/consumed entries for 24 hours
+  // for troubleshooting and replay evidence, then prune them during state creation.
+  const retentionCutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const { error: cleanupError } = await admin.from("whatsapp_oauth_states").delete().lt("expires_at", retentionCutoff);
+  if (cleanupError) return reply({ error: "state_cleanup_failed" }, 500);
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
   const { error: insertError } = await admin.from("whatsapp_oauth_states").insert({
     nonce_hash: stateHash,
