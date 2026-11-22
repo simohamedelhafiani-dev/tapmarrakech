@@ -46,7 +46,11 @@ Deno.serve(async (req) => {
     return json({ error: "invalid_signature" }, 401);
   }
   let payload: Record<string, unknown>;
-  try { payload = JSON.parse(raw); } catch { return json({ error: "invalid_json" }, 400); }
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return json({ error: "invalid_payload" }, 400);
+    payload = parsed;
+  } catch { return json({ error: "invalid_json" }, 400); }
   const admin = createClient(supabaseUrl, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } });
 
   const entries = Array.isArray(payload.entry) ? payload.entry : [];
@@ -58,8 +62,9 @@ Deno.serve(async (req) => {
       const value = (change as Record<string, unknown>).value as Record<string, unknown> | undefined;
       if (!value) continue;
       const metadata = value.metadata as Record<string, unknown> | undefined;
-      const phoneNumberId = String(metadata?.phone_number_id ?? "");
-      if (!phoneNumberId) continue;
+      const rawPhoneNumberId = metadata?.phone_number_id;
+      const phoneNumberId = typeof rawPhoneNumberId === "string" ? rawPhoneNumberId.trim() : "";
+      if (!/^\d{5,32}$/.test(phoneNumberId)) continue;
       const { data: connection, error: connectionError } = await admin.from("whatsapp_connections")
         .select("id,establishment_id,status")
         .eq("phone_number_id", phoneNumberId).maybeSingle();
