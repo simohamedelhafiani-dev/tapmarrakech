@@ -46,6 +46,10 @@ Deno.serve(async (req) => {
   if (!supabaseUrl || !anonKey || !serviceKey || !appId || !appSecret || !graphVersion) {
     return reply({ error: "server_configuration_missing" }, 500);
   }
+  // Keep the configured Graph API version in a strict path-safe format.
+  if (!/^v[0-9]{2,3}\\.[0-9]+$/.test(graphVersion)) {
+    return reply({ error: "server_configuration_invalid" }, 500);
+  }
 
   let body: { code?: string; establishmentId?: string; wabaId?: string; phoneNumberId?: string; state?: string };
   const rawBody = await req.text();
