@@ -132,6 +132,9 @@ function startEmbeddedSignup(facebook: NonNullable<Window['FB']>, embeddedConfig
       }
       if (message.type !== 'WA_EMBEDDED_SIGNUP' || typeof message.event !== 'string') return;
       if (message.data && (typeof message.data !== 'object' || Array.isArray(message.data))) return;
+      // Pin the sender only after a recognized event; unknown messages must not
+      // lock this signup session to an arbitrary source.
+      if (!['CANCEL', 'ERROR', 'FINISH', 'FINISH_ONLY_WABA', 'FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING', 'FINISH_GRANT_ONLY_API_ACCESS'].includes(message.event)) return;
       if (!signupMessageSource) signupMessageSource = event.source;
 
       if (message.event === 'CANCEL') {
