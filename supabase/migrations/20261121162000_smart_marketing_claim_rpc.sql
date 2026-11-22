@@ -42,8 +42,8 @@ $$;
 revoke all on function public.claim_smart_marketing_queue(integer) from public, anon, authenticated;
 grant execute on function public.claim_smart_marketing_queue(integer) to service_role;
 
--- Allow the scanner to recover terminal failures, but never resurrect a task
--- that already produced a notification. This RPC is service-role-only.
+-- Allow the scanner to re-evaluate FAILED or consent/config SKIPPED events,
+-- but never resurrect a task that already produced a notification. Service-role-only.
 create or replace function public.requeue_failed_smart_marketing_queue(
   p_establishment_id uuid,
   p_customer_id uuid,
@@ -65,7 +65,7 @@ begin
     and q.customer_id = p_customer_id
     and q.smart_id = p_smart_id
     and q.trigger_key = p_trigger_key
-    and q.status = 'FAILED'
+    and q.status in ('FAILED', 'SKIPPED')
   for update;
 
   if queue_id is null then
@@ -83,7 +83,7 @@ begin
   set status='PENDING', attempts=0, scheduled_at=now(),
       processing_started_at=null, processed_at=null, last_error=null,
       payload=coalesce(p_payload, '{}'::jsonb)
-  where id=queue_id and status='FAILED';
+  where id=queue_id and status in ('FAILED', 'SKIPPED');
 
   return found;
 end;
