@@ -86,6 +86,22 @@ Deno.serve(async (req) => {
     const key = (message as { conversation_id: string }).conversation_id;
     if (!latestByConversation.has(key)) latestByConversation.set(key, message);
   }
+
+  // The global 1000-message cap can omit quieter conversations. Fetch the latest
+  // message individually for any conversation not represented in that batch.
+  const missingConversationIds = ids.filter((id) => !latestByConversation.has(id));
+  const fallbackResults = await Promise.all(missingConversationIds.map(async (id) => {
+    const { data, error } = await admin.from("whatsapp_messages")
+      .select("id,conversation_id,direction,message_type,body,delivery_status,created_at")
+      .eq("establishment_id", establishmentId).eq("conversation_id", id)
+      .order("created_at", { ascending: false }).limit(1).maybeSingle();
+    return { id, data, error };
+  }));
+  if (fallbackResults.some((result) => result.error)) return json({ error: "inbox_messages_lookup_failed" }, 500);
+  for (const result of fallbackResults) {
+    if (result.data) latestByConversation.set(result.id, result.data);
+  }
+
   return json({ conversations: (conversations ?? []).map((conversation: { id: string }) => ({
     ...conversation, last_message: latestByConversation.get(conversation.id) ?? null,
   })) });
