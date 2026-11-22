@@ -53,6 +53,7 @@ Deno.serve(async (req) => {
   } catch { return json({ error: "invalid_json" }, 400); }
   // Preflight limits are global to the webhook payload, not per entry/change.
   // Reject oversized batches before any database writes to avoid partial processing.
+  if (payload.entry !== undefined && !Array.isArray(payload.entry)) return json({ error: "invalid_payload" }, 400);
   const entriesRaw = Array.isArray(payload.entry) ? payload.entry : [];
   if (entriesRaw.length > 100) return json({ error: "payload_too_large" }, 413);
   let totalChanges = 0;
