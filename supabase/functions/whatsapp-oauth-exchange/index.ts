@@ -142,9 +142,12 @@ Deno.serve(async (req) => {
       try {
         const candidate = new URL(pagingNext);
         // Never forward the OAuth access token to a URL outside Meta Graph.
-        if (candidate.protocol !== "https:" || candidate.hostname !== "graph.facebook.com") {
+        if (candidate.protocol !== "https:" || candidate.hostname !== "graph.facebook.com" || candidate.username || candidate.password) {
           return reply({ error: "meta_pagination_url_invalid" }, 502);
         }
+        // Pagination URLs may contain provider credentials. Strip them before the
+        // request; the token is supplied exclusively in the Authorization header.
+        candidate.searchParams.delete("access_token");
         nextUrl = candidate;
       } catch {
         return reply({ error: "meta_pagination_url_invalid" }, 502);
