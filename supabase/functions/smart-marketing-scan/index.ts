@@ -81,7 +81,22 @@ Deno.serve(async (req) => {
         trigger_key: item.trigger, payload: item.payload, status: 'PENDING', scheduled_at: new Date().toISOString(),
       });
       if (!insertError) added++;
-      else if (insertError.code === '23505') deduplicated++;
+      else if (insertError.code === '23505') {
+        // The unique event may already exist as a terminal FAILED task.
+        // Reactivate it safely; the RPC refuses rows that already created a notification.
+        const { data: requeued, error: requeueError } = await admin.rpc('requeue_failed_smart_marketing_queue', {
+          p_establishment_id: cfg.establishment_id,
+          p_customer_id: item.customer.id,
+          p_smart_id: cfg.smart_id,
+          p_trigger_key: item.trigger,
+          p_payload: item.payload,
+        });
+        if (requeueError) {
+          runErrors.push(`${cfg.smart_id}: failed queue recovery`);
+          errors.push(`${cfg.smart_id}: failed queue recovery`);
+        } else if (requeued === true) added++;
+        else deduplicated++;
+      }
       else { runErrors.push(`${cfg.smart_id}: queue insert failed`); errors.push(`${cfg.smart_id}: queue insert failed`); }
     }
     queued += added;
