@@ -53,14 +53,17 @@ Deno.serve(async (req) => {
   } catch { return json({ error: "invalid_json" }, 400); }
   const admin = createClient(supabaseUrl, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } });
 
-  const entries = Array.isArray(payload.entry) ? payload.entry : [];
+  const entries = Array.isArray(payload.entry) ? payload.entry.slice(0, 100) : [];
   let accepted = 0;
   let processingFailures = 0;
   for (const entry of entries) {
-    const changes = Array.isArray((entry as Record<string, unknown>).changes) ? (entry as Record<string, unknown>).changes as unknown[] : [];
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) continue;
+    const changes = Array.isArray((entry as Record<string, unknown>).changes) ? ((entry as Record<string, unknown>).changes as unknown[]).slice(0, 100) : [];
     for (const change of changes) {
-      const value = (change as Record<string, unknown>).value as Record<string, unknown> | undefined;
-      if (!value) continue;
+      if (!change || typeof change !== "object" || Array.isArray(change)) continue;
+      const rawValue = (change as Record<string, unknown>).value;
+      if (!rawValue || typeof rawValue !== "object" || Array.isArray(rawValue)) continue;
+      const value = rawValue as Record<string, unknown>;
       const metadata = value.metadata as Record<string, unknown> | undefined;
       const rawPhoneNumberId = metadata?.phone_number_id;
       const phoneNumberId = typeof rawPhoneNumberId === "string" ? rawPhoneNumberId.trim() : "";
@@ -71,9 +74,11 @@ Deno.serve(async (req) => {
       if (connectionError) { processingFailures += 1; continue; }
       if (!connection || connection.status !== "active") continue;
 
-      const contacts = Array.isArray(value.contacts) ? value.contacts as Record<string, unknown>[] : [];
-      const messages = Array.isArray(value.messages) ? value.messages as Record<string, unknown>[] : [];
-      for (const message of messages) {
+      const contacts = Array.isArray(value.contacts) ? (value.contacts as unknown[]).filter((c) => c && typeof c === "object" && !Array.isArray(c).slice(0, 100) as unknown as Record<string, unknown>[] : [];
+      const messages = Array.isArray(value.messages) ? (value.messages as unknown[]).slice(0, 100) : [];
+      for (const rawMessage of messages) {
+        if (!rawMessage || typeof rawMessage !== "object" || Array.isArray(rawMessage)) continue;
+        const message = rawMessage as Record<string, unknown>;
         const rawCustomerPhone = message.from;
         const rawProviderMessageId = message.id;
         const customerPhone = typeof rawCustomerPhone === "string" ? rawCustomerPhone.trim() : "";
