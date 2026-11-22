@@ -241,6 +241,21 @@ export default function WhatsAppConnect() {
     const controller = new AbortController();
     signupAbortRef.current = controller;
     try {
+      // Create an authenticated server-side nonce before opening Meta. Keep it
+      // only in this in-memory signup attempt; it is never persisted in storage.
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+      const token = sessionData.session?.access_token;
+      if (!token) throw new Error('Session KELYANI expirée. Reconnectez-vous.');
+      const stateResult = await supabase.functions.invoke('whatsapp-oauth-state', {
+        body: { establishmentId },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const state = typeof stateResult.data?.state === 'string' ? stateResult.data.state : '';
+      if (stateResult.error || !/^[a-f0-9]{64}$/.test(state)) {
+        throw new Error(stateResult.data?.error || 'Impossible de sécuriser la tentative OAuth.');
+      }
+
       const facebook = await loadFacebookSdk();
       if (!mountedRef.current) return;
       if (initializedAppId !== appId) {
@@ -253,14 +268,10 @@ export default function WhatsAppConnect() {
       if (!assets.phoneNumberId) {
         throw new Error('Meta a connecté le compte WhatsApp Business, mais aucun numéro n’a été sélectionné. Terminez l’ajout ou la sélection du numéro dans Meta, puis relancez la connexion.');
       }
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError) throw sessionError;
-      const token = sessionData.session?.access_token;
-      if (!token) throw new Error('Session KELYANI expirée. Reconnectez-vous.');
-
       const result = await supabase.functions.invoke('whatsapp-oauth-exchange', {
         body: {
           code,
+          state,
           establishmentId,
           wabaId: assets.wabaId,
           phoneNumberId: assets.phoneNumberId,
