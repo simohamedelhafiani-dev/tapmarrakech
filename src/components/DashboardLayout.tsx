@@ -72,6 +72,12 @@ const links = [
     icon: Gift,
     feature: 'loyalty' as const,
   },
+  {
+    to: '/dashboard/whatsapp',
+    label: 'WhatsApp',
+    icon: MessageCircle,
+    feature: null,
+  },
 ];
 
 type Establishment = {
