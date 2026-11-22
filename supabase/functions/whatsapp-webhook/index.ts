@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
   let processingFailures = 0;
   for (const entry of entries) {
     if (!entry || typeof entry !== "object" || Array.isArray(entry)) continue;
-    const changes = Array.isArray((entry as Record<string, unknown>).changes) ? ((entry as Record<string, unknown>).changes as unknown[]).slice(0, 100) : [];
+    const changes = Array.isArray((entry as Record<string, unknown>).changes) ? ((entry as Record<string, unknown>).changes as unknown[]) : [];
     for (const change of changes) {
       if (!change || typeof change !== "object" || Array.isArray(change)) continue;
       const rawValue = (change as Record<string, unknown>).value;
@@ -98,8 +98,8 @@ Deno.serve(async (req) => {
       if (connectionError) { processingFailures += 1; continue; }
       if (!connection || connection.status !== "active") continue;
 
-      const contacts = Array.isArray(value.contacts) ? (value.contacts as unknown[]).slice(0, 100).filter((c): c is Record<string, unknown> => !!c && typeof c === "object" && !Array.isArray(c)) : [];
-      const messages = Array.isArray(value.messages) ? (value.messages as unknown[]).slice(0, 100) : [];
+      const contacts = Array.isArray(value.contacts) ? (value.contacts as unknown[]).filter((c): c is Record<string, unknown> => !!c && typeof c === "object" && !Array.isArray(c)) : [];
+      const messages = Array.isArray(value.messages) ? (value.messages as unknown[]) : [];
       for (const rawMessage of messages) {
         if (!rawMessage || typeof rawMessage !== "object" || Array.isArray(rawMessage)) continue;
         const message = rawMessage as Record<string, unknown>;
@@ -181,7 +181,7 @@ Deno.serve(async (req) => {
         else if (Array.isArray(insertedRows)) accepted += insertedRows.length;
       }
 
-      const statuses = Array.isArray(value.statuses) ? (value.statuses as unknown[]).slice(0, 100) : [];
+      const statuses = Array.isArray(value.statuses) ? (value.statuses as unknown[]) : [];
       for (const rawStatus of statuses) {
         if (!rawStatus || typeof rawStatus !== "object" || Array.isArray(rawStatus)) continue;
         const status = rawStatus as Record<string, unknown>;
