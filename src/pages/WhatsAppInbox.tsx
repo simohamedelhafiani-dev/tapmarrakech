@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 
@@ -18,6 +18,7 @@ export default function WhatsAppInbox() {
   const [detailLoading, setDetailLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [notice, setNotice] = useState('');
+  const conversationLoadSequence = useRef(0);
 
   useEffect(() => {
     let alive = true;
@@ -34,6 +35,8 @@ export default function WhatsAppInbox() {
   }, []);
 
   const loadInbox = async (id: string) => {
+    // Invalidate pending conversation-detail responses whenever the inbox is reloaded.
+    conversationLoadSequence.current += 1;
     if (!id) { setConversations([]); setSelected(null); setMessages([]); return; }
     setLoading(true); setNotice('');
     const { data, error } = await supabase.functions.invoke('whatsapp-inbox', { body: { establishmentId: id, limit: 50 } });
@@ -45,8 +48,11 @@ export default function WhatsAppInbox() {
   useEffect(() => { void loadInbox(establishmentId); }, [establishmentId]);
 
   async function openConversation(conversation: Conversation) {
+    const requestSequence = ++conversationLoadSequence.current;
     setSelected(conversation); setDetailLoading(true); setNotice('');
     const { data, error } = await supabase.functions.invoke('whatsapp-inbox', { body: { establishmentId, conversationId: conversation.id } });
+    // Rapid conversation switches can complete out of order. Ignore stale responses.
+    if (requestSequence !== conversationLoadSequence.current) return;
     if (error || !data) setNotice('Impossible de charger cette conversation.');
     else setMessages((data.messages ?? []) as Message[]);
     setDetailLoading(false);
