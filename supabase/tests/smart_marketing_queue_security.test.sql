@@ -1,5 +1,5 @@
 begin;
-select plan(17);
+select plan(18);
 select has_table('public','smart_marketing_configs','Smart configuration table exists');
 select has_table('public','smart_marketing_queue','queue table exists');
 select has_table('public','smart_marketing_runs','run log table exists');
@@ -24,6 +24,8 @@ select ok(not has_function_privilege('anon','public.claim_smart_marketing_queue(
  and has_function_privilege('service_role','public.claim_smart_marketing_queue(integer)','EXECUTE'),
  'queue claim function is restricted to service_role');
 select has_function('public','requeue_failed_smart_marketing_queue','FAILED/SKIPPED event recovery RPC exists');
+select ok((position('q.status = ''SKIPPED'' or q.recovery_count < 1' in pg_get_functiondef('public.requeue_failed_smart_marketing_queue(uuid,uuid,text,text,jsonb)'::regprocedure)) > 0,
+ 'SKIPPED events remain re-evaluable after recovery');
 select ok(not has_function_privilege('anon','public.requeue_failed_smart_marketing_queue(uuid,uuid,text,text,jsonb)','EXECUTE')
  and not has_function_privilege('authenticated','public.requeue_failed_smart_marketing_queue(uuid,uuid,text,text,jsonb)','EXECUTE')
  and has_function_privilege('service_role','public.requeue_failed_smart_marketing_queue(uuid,uuid,text,text,jsonb)','EXECUTE'),
