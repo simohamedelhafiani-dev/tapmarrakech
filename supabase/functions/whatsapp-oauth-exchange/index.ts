@@ -121,7 +121,18 @@ Deno.serve(async (req) => {
     const items = Array.isArray(pageResult.data.data) ? pageResult.data.data : [];
     phoneData = items.find((item: { id?: string }) => String(item?.id ?? "") === phoneNumberId) ?? phoneData;
     const pagingNext = pageResult.data.paging?.next;
-    nextUrl = typeof pagingNext === "string" ? new URL(pagingNext) : null;
+    if (typeof pagingNext === "string") {
+      try {
+        const candidate = new URL(pagingNext);
+        // Never forward the OAuth access token to a URL outside Meta Graph.
+        if (candidate.protocol !== "https:" || candidate.hostname !== "graph.facebook.com") {
+          return reply({ error: "meta_pagination_url_invalid" }, 502);
+        }
+        nextUrl = candidate;
+      } catch {
+        return reply({ error: "meta_pagination_url_invalid" }, 502);
+      }
+    } else nextUrl = null;
   }
   if (!phoneData) return reply({ error: "phone_number_not_attached_to_waba" }, 403);
 
