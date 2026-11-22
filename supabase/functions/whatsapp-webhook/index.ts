@@ -152,6 +152,7 @@ Deno.serve(async (req) => {
         if (!previousStates) continue;
         const { error: statusUpdateError } = await admin.from("whatsapp_messages").update({ delivery_status: mapped })
           .eq("provider_message_id", providerMessageId)
+          .eq("establishment_id", connection.establishment_id)
           .in("delivery_status", previousStates);
         if (statusUpdateError) processingFailures += 1;
       }
