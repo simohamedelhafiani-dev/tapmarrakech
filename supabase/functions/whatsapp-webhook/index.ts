@@ -163,7 +163,9 @@ Deno.serve(async (req) => {
         const status = rawStatus as Record<string, unknown>;
         const providerMessageId = typeof status.id === "string" ? status.id.trim() : "";
         const statusValue = typeof status.status === "string" ? status.status : "";
-        const mapped = ["sent", "delivered", "read", "failed"].includes(statusValue) ? statusValue : null;
+        const mapped = ["sent", "delivered", "read", "failed"].includes(statusValue)
+          ? statusValue as "sent" | "delivered" | "read" | "failed"
+          : null;
         if (!providerMessageId || !mapped) continue;
         // Prevent out-of-order Meta callbacks from downgrading message state.
         // Progression is queued -> sent -> delivered -> read; failed is only
