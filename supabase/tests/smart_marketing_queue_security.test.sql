@@ -1,5 +1,5 @@
 begin;
-select plan(13);
+select plan(15);
 select has_table('public','smart_marketing_configs','Smart configuration table exists');
 select has_table('public','smart_marketing_queue','queue table exists');
 select has_table('public','smart_marketing_runs','run log table exists');
@@ -21,5 +21,10 @@ select ok(not has_function_privilege('anon','public.claim_smart_marketing_queue(
  and not has_function_privilege('authenticated','public.claim_smart_marketing_queue(integer)','EXECUTE')
  and has_function_privilege('service_role','public.claim_smart_marketing_queue(integer)','EXECUTE'),
  'queue claim function is restricted to service_role');
+select has_function('public','requeue_failed_smart_marketing_queue','terminal failure recovery RPC exists');
+select ok(not has_function_privilege('anon','public.requeue_failed_smart_marketing_queue(uuid,uuid,text,text,jsonb)','EXECUTE')
+ and not has_function_privilege('authenticated','public.requeue_failed_smart_marketing_queue(uuid,uuid,text,text,jsonb)','EXECUTE')
+ and has_function_privilege('service_role','public.requeue_failed_smart_marketing_queue(uuid,uuid,text,text,jsonb)','EXECUTE'),
+ 'terminal recovery RPC is restricted to service_role');
 select * from finish();
 rollback;
