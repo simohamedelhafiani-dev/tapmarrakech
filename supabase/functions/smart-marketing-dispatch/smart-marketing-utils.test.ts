@@ -12,6 +12,9 @@ Deno.test('dispatch batch limit stays between 1 and 200',()=>{
  assertEquals(normalizeLimit(0),50);
  assertEquals(normalizeLimit(300),200);
  assertEquals(normalizeLimit(12),12);
+ assertEquals(normalizeLimit(-4),50);
+ assertEquals(normalizeLimit(Number.NaN),50);
+ assertEquals(normalizeLimit(12.9),12);
 });
 Deno.test('progress thresholds use ceiling at 80 percent',()=>{
  assertEquals(progressThreshold(10),8);
@@ -42,6 +45,9 @@ Deno.test('retry backoff grows with attempts and is capped at 30 minutes',()=>{
  assertEquals(retryDelayMinutes(3),4);
  assertEquals(retryDelayMinutes(5),16);
  assertEquals(retryDelayMinutes(7),30);
+ assertEquals(retryDelayMinutes(8),30);
  assertEquals(retryDelayMinutes(0),1);
+ assertEquals(retryDelayMinutes(-3),1);
+ assertEquals(retryDelayMinutes(2.9),2);
  assertEquals(retryDelayMinutes(Number.NaN),1);
 });
