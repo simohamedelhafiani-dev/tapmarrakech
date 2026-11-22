@@ -18,6 +18,7 @@ async function graphGet(url: URL, token: string) {
   const response = await fetch(url, {
     method: "GET",
     headers: { Authorization: `Bearer ${token}` },
+    redirect: "error",
     signal: AbortSignal.timeout(15_000),
   });
   const parsed = await response.json().catch(() => ({}));
@@ -108,7 +109,7 @@ Deno.serve(async (req) => {
   let exchange: Response;
   let tokenData: Record<string, unknown>;
   try {
-    exchange = await fetch(exchangeUrl, { method: "GET", signal: AbortSignal.timeout(15_000) });
+    exchange = await fetch(exchangeUrl, { method: "GET", redirect: "error", signal: AbortSignal.timeout(15_000) });
     const parsed = await exchange.json().catch(() => ({}));
     tokenData = parsed && typeof parsed === "object" && !Array.isArray(parsed)
       ? parsed as Record<string, unknown>
