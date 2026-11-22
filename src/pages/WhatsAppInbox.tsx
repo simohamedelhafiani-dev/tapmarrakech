@@ -37,7 +37,9 @@ export default function WhatsAppInbox() {
   const loadInbox = async (id: string) => {
     // Invalidate pending conversation-detail responses whenever the inbox is reloaded.
     conversationLoadSequence.current += 1;
-    if (!id) { setConversations([]); setSelected(null); setMessages([]); return; }
+    // Clear the previous detail view immediately so stale messages are not shown on refresh/errors.
+    setSelected(null); setMessages([]); setDetailLoading(false);
+    if (!id) { setConversations([]); return; }
     setLoading(true); setNotice('');
     const { data, error } = await supabase.functions.invoke('whatsapp-inbox', { body: { establishmentId: id, limit: 50 } });
     if (error || !data) { setNotice('Boîte WhatsApp indisponible. La fonction serveur doit être déployée.'); setLoading(false); return; }
