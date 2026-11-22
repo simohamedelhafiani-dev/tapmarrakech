@@ -29,7 +29,7 @@ Deno.serve(async(req)=>{
    const {data:liveConfig,error:liveConfigError}=await admin.from('smart_marketing_configs').select('enabled,config').eq('establishment_id',q.establishment_id).eq('smart_id',q.smart_id).maybeSingle();
    if(liveConfigError)throw liveConfigError;
    if(!liveConfig?.enabled){await markSkipped(q.id,'Smart disabled before dispatch');skipped++;continue;}
-   const {data:c,error:ce}=await admin.from('loyalty_customers').select('id,notification_consent,marketing_consent,last_visit_at').eq('id',q.customer_id).eq('establishment_id',q.establishment_id).maybeSingle();
+   const {data:c,error:ce}=await admin.from('loyalty_customers').select('id,notification_consent,marketing_consent,last_visit_at,stamps_balance').eq('id',q.customer_id).eq('establishment_id',q.establishment_id).maybeSingle();
    if(ce)throw ce;
    if(!c||!c.notification_consent||!c.marketing_consent){
     await markSkipped(q.id,!c?'Customer not found':'Consent missing');skipped++;continue;
@@ -40,6 +40,15 @@ Deno.serve(async(req)=>{
     if(!lastVisit||Number.isNaN(lastVisit.getTime())||Math.floor((Date.now()-lastVisit.getTime())/86400000)<delay){await markSkipped(q.id,'Customer returned or inactivity threshold no longer met');skipped++;continue;}
    }
    if(q.smart_id==='birthday'&&q.trigger_key!==`birthday:${new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Casablanca'}).format(new Date())}`){await markSkipped(q.id,'Birthday trigger date expired');skipped++;continue;}
+   if(q.smart_id==='progress'){
+    const {data:settings,error:settingsError}=await admin.from('loyalty_settings').select('stamp_goal').eq('establishment_id',q.establishment_id).maybeSingle();
+    if(settingsError)throw settingsError;
+    const goal=Math.max(1,Number(settings?.stamp_goal)||10);
+    const percent=Math.max(1,Math.min(100,Number.parseFloat(String(liveConfig.config?.thresholdPercent??liveConfig.config?.threshold_percent??liveConfig.config?.threshold??80))||80));
+    const threshold=Math.max(1,Math.ceil(goal*percent/100));
+    const stamps=Number(c.stamps_balance??0);
+    if(stamps<threshold||stamps>=goal){await markSkipped(q.id,'Progress threshold no longer met');skipped++;continue;}
+   }
    // Reuse the config snapshot already checked for enabled status to avoid a second read/race.
    const customMessage=resolveSmartMessage(liveConfig.config?.message,tmpl.message(q.payload??{}));
    const notificationPayload={establishment_id:q.establishment_id,customer_id:q.customer_id,smart_marketing_queue_id:q.id,title:tmpl.title,message:customMessage,type:tmpl.type};
