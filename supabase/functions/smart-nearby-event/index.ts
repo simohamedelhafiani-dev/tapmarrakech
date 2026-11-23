@@ -1,0 +1,33 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+const cors={ 'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type','Access-Control-Allow-Methods':'POST, OPTIONS' };
+const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...cors,'Content-Type':'application/json'}});
+const distance=(lat1:number,lon1:number,lat2:number,lon2:number)=>{const R=6371000,rad=(v:number)=>v*Math.PI/180;const dLat=rad(lat2-lat1),dLon=rad(lon2-lon1);const a=Math.sin(dLat/2)**2+Math.cos(rad(lat1))*Math.cos(rad(lat2))*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));};
+Deno.serve(async(req)=>{
+ if(req.method==='OPTIONS')return new Response('ok',{headers:cors});
+ if(req.method!=='POST')return json({success:false,error:'POST requis'},405);
+ const url=Deno.env.get('SUPABASE_URL'),key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+ if(!url||!key)return json({success:false,error:'Configuration serveur manquante'},503);
+ const admin=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
+ const body=await req.json().catch(()=>null);
+ const token=typeof body?.access_token==='string'?body.access_token:'';
+ const lat=Number(body?.latitude),lng=Number(body?.longitude);
+ if(!token||!Number.isFinite(lat)||!Number.isFinite(lng)||lat < -90||lat>90||lng < -180||lng>180)return json({success:false,error:'Position ou jeton invalide'},400);
+ const {data:customer,error:cErr}=await admin.from('loyalty_customers').select('id,establishment_id,notification_consent,marketing_consent').eq('id',(await admin.from('loyalty_customer_links').select('customer_id').eq('access_token',token).maybeSingle()).data?.customer_id??'00000000-0000-0000-0000-000000000000').maybeSingle();
+ if(cErr||!customer)return json({success:false,error:'Carte fidélité non valide'},401);
+ if(!customer.notification_consent||!customer.marketing_consent)return json({success:true,eligible:false,reason:'consent_missing'},200);
+ const {data:config,error:cfgErr}=await admin.from('smart_marketing_configs').select('enabled,config').eq('establishment_id',customer.establishment_id).eq('smart_id','nearby').maybeSingle();
+ if(cfgErr)return json({success:false,error:'Configuration indisponible'},500);
+ if(!config?.enabled)return json({success:true,eligible:false,reason:'disabled'});
+ const c=config.config??{},centerLat=Number(c.latitude??c.lat),centerLng=Number(c.longitude??c.lng),radius=Math.min(2000,Math.max(50,Number(c.radius_m??c.radius??250)));
+ if(!Number.isFinite(centerLat)||!Number.isFinite(centerLng)||centerLat < -90||centerLat>90||centerLng < -180||centerLng>180)return json({success:false,error:'Coordonnées établissement non configurées'},409);
+ const meters=distance(lat,lng,centerLat,centerLng);
+ if(meters>radius)return json({success:true,eligible:false,distance_m:Math.round(meters)});
+ const zone=String(c.zone_key??'main').slice(0,40);
+ const {data:event,error:eventErr}=await admin.from('smart_nearby_events').insert({customer_id:customer.id,establishment_id:customer.establishment_id,zone_key:zone}).select('id').single();
+ if(eventErr?.code==='23505')return json({success:true,eligible:false,reason:'already_notified_today'});
+ if(eventErr)return json({success:false,error:'Enregistrement événement impossible'},500);
+ const title=String(c.title??'Vous êtes à proximité !').slice(0,120),message=String(c.message??'Passez nous voir, nous serons ravis de vous accueillir !').slice(0,1000);
+ const {error:notificationErr}=await admin.from('loyalty_card_notifications').insert({establishment_id:customer.establishment_id,customer_id:customer.id,title,message,type:'OFFER'});
+ if(notificationErr){await admin.from('smart_nearby_events').delete().eq('id',event.id);return json({success:false,error:'Notification non créée'},500);}
+ return json({success:true,eligible:true,distance_m:Math.round(meters),notification:'in_app'});
+});
