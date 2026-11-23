@@ -6,6 +6,11 @@ const templates:Record<string,{title:string;message:(p:Record<string,unknown>)=>
   birthday:{title:'Joyeux anniversaire 🎂',message:()=> 'Toute l’équipe vous souhaite un merveilleux anniversaire et espère vous accueillir très bientôt !',type:'INFO'},
   vip:{title:'Merci pour votre fidélité 👑',message:()=> 'Vous faites partie de nos clients les plus fidèles. Merci de votre confiance et à très bientôt !',type:'INFO'},
   progress:{title:'Plus qu’un petit effort !',message:(p)=> `Vous avez ${p.stamps ?? 0} tampons sur ${p.goal ?? 0}. Continuez, votre récompense approche !`,type:'POINTS'},
+  reward:{title:'Votre récompense vous attend 🎁',message:(p)=> `Votre récompense ${p.reward_name ?? 'est disponible'} arrive à expiration le ${String(p.expires_at ?? '').slice(0,10)}. Pensez à en profiter !`,type:'REWARD'},
+  happyhour:{title:'Happy Hour 🍹',message:(p)=> `Happy Hour en cours ! ${p.offer ?? 'Profitez de notre offre'}`,type:'OFFER'},
+  challenge:{title:'Défi fidélité 🏆',message:(p)=> `Défi réussi : ${p.visits ?? 0} visites sur ${p.goal ?? 0}. ${p.reward ?? 'Votre récompense vous attend !'}`,type:'REWARD'},
+  referral:{title:'Un parrainage en cours 🤝',message:()=> 'Merci pour votre recommandation ! Votre filleul vient de rejoindre notre programme.',type:'INFO'},
+  comeback:{title:'On aimerait vous revoir ❤️',message:(p)=> `Cela fait ${p.inactive_days ?? p.step_days ?? 0} jours. Nous serions heureux de vous accueillir à nouveau !`,type:'OFFER'},
 };
 Deno.serve(async(req)=>{
  if(req.method!=='POST')return json({success:false,error:'POST requis.'},405);
@@ -33,6 +38,42 @@ Deno.serve(async(req)=>{
    if(ce)throw ce;
    if(!c||!c.notification_consent||!c.marketing_consent){
     await markSkipped(q.id,!c?'Customer not found':'Consent missing');skipped++;continue;
+   }
+   if(q.smart_id==='reward'){
+    const claimId=String(q.payload?.claim_id??'');
+    const {data:claim,error:claimError}=await admin.from('loyalty_reward_claims').select('id,customer_id,establishment_id,reward_name,expires_at,status').eq('id',claimId).eq('customer_id',q.customer_id).eq('establishment_id',q.establishment_id).maybeSingle();
+    if(claimError)throw claimError;
+    const reminderDays=Math.max(0,Math.min(30,Number.parseFloat(String(liveConfig.config?.reminderDays??liveConfig.config?.reminder_days??2))||2));
+    if(!claim||claim.status!=='PENDING'||new Date(claim.expires_at).getTime()<=Date.now()||new Date(claim.expires_at).getTime()>Date.now()+reminderDays*86400000){await markSkipped(q.id,'Reward claim no longer eligible');skipped++;continue;}
+    messagePayload.reward_name=claim.reward_name;messagePayload.expires_at=claim.expires_at;
+   }
+   if(q.smart_id==='happyhour'){
+    const schedule=String(liveConfig.config?.schedule??'').trim();
+    const match=schedule.match(/(\\d{2}:\\d{2})\\s*-\\s*(\\d{2}:\\d{2})/);
+    const now=new Date();
+    const localTime=new Intl.DateTimeFormat('en-GB',{timeZone:'Africa/Casablanca',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(now);
+    const valid=(s:string)=>/^([01]\\d|2[0-3]):[0-5]\\d$/.test(s);
+    const weekday=Number(new Intl.DateTimeFormat('en-US',{timeZone:'Africa/Casablanca',weekday:'short'}).format(now).replace(/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)$/,m=>String(['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(m))));
+    const days=String(liveConfig.config?.days??'').split(',').map(x=>Number(x.trim())).filter(x=>Number.isInteger(x)&&x>=0&&x<=6);
+    if(!match||!valid(match[1])||!valid(match[2])||match[1]>=match[2]||localTime<match[1]||localTime>=match[2]||(days.length&&!days.includes(weekday))){await markSkipped(q.id,'Happy Hour schedule no longer active');skipped++;continue;}
+   }
+   if(q.smart_id==='challenge'){
+    const goal=Math.max(1,Math.min(1000,Number.parseFloat(String(liveConfig.config?.goalVisits??liveConfig.config?.goal_visits??liveConfig.config?.goal??3))||3));
+    if((c.visit_count??0)<goal){await markSkipped(q.id,'Challenge visit milestone no longer met');skipped++;continue;}
+   }
+   if(q.smart_id==='referral'){
+    const referralId=String(q.payload?.referral_id??'');
+    const {data:ref,error:refError}=await admin.from('loyalty_referrals').select('id,referrer_id,referee_id,status').eq('id',referralId).eq('establishment_id',q.establishment_id).maybeSingle();
+    if(refError)throw refError;
+    if(!ref||ref.status!=='pending'||ref.referrer_id!==q.customer_id){await markSkipped(q.id,'Referral no longer pending or customer mismatch');skipped++;continue;}
+   }
+   if(q.smart_id==='comeback'){
+    const rawSteps=String(liveConfig.config?.steps??'30,37,45').match(/\\d+/g)?.map(Number)??[30,37,45];
+    const steps=[...new Set(rawSteps.filter(n=>n>=1&&n<=365))].sort((a,b)=>a-b);
+    const lastVisit=c.last_visit_at?new Date(c.last_visit_at):null;
+    const elapsed=lastVisit&&!Number.isNaN(lastVisit.getTime())?Math.floor((Date.now()-lastVisit.getTime())/86400000):-1;
+    const step=steps.filter(n=>n<=elapsed).at(-1);
+    if(!step||!lastVisit||q.trigger_key!==`comeback:${c.last_visit_at?.slice(0,10)}:${step}`){await markSkipped(q.id,'Comeback step no longer eligible');skipped++;continue;}
    }
    if(q.smart_id==='winback'){
     const delay=Math.max(1,Math.min(365,Number.parseFloat(String(liveConfig.config?.delayDays??liveConfig.config?.delay_days??liveConfig.config?.delay??30))||30));
