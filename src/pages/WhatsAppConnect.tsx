@@ -30,7 +30,7 @@ declare global {
         config_id: string;
         response_type: 'code';
         override_default_response_type: true;
-        extras: { setup: Record<string, never> };
+        extras: { setup: Record<string, never>; featureType?: 'whatsapp_business_app_onboarding' };
       }) => void;
     };
   }
@@ -183,7 +183,7 @@ function startEmbeddedSignup(facebook: NonNullable<Window['FB']>, embeddedConfig
         config_id: embeddedConfigId,
         response_type: 'code',
         override_default_response_type: true,
-        extras: { setup: {} },
+        extras: { setup: {}, featureType: 'whatsapp_business_app_onboarding' },
       });
     } catch {
       finish(new Error('Impossible d’ouvrir la fenêtre Meta. Vérifiez les domaines autorisés de l’application.'));
