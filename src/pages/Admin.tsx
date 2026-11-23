@@ -894,12 +894,12 @@ export default function Admin() {
                 <p className="mt-2 max-w-2xl text-sm text-white/50">Connecte WhatsApp Business à KELYANI, puis accède à la boîte de réception pour gérer les conversations.</p>
               </header>
               <div className="grid gap-4 md:grid-cols-2">
-                <button type="button" onClick={() => navigate('/dashboard/whatsapp')} className="rounded-3xl border border-[#686D76]/30 bg-[#111111] p-6 text-left transition hover:border-[#3B82F6]/60">
+                <button type="button" onClick={() => navigate('/admin/whatsapp/connect')} className="rounded-3xl border border-[#686D76]/30 bg-[#111111] p-6 text-left transition hover:border-[#3B82F6]/60">
                   <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#686D76]/30 text-[#3B82F6]"><MessageCircle size={20} /></span>
                   <h3 className="mt-4 text-lg font-semibold text-white">Connexion & réglages</h3>
                   <p className="mt-2 text-sm text-white/45">Connecter un compte WhatsApp Business et consulter son état.</p>
                 </button>
-                <button type="button" onClick={() => navigate('/dashboard/whatsapp/inbox')} className="rounded-3xl border border-[#686D76]/30 bg-[#111111] p-6 text-left transition hover:border-[#3B82F6]/60">
+                <button type="button" onClick={() => navigate('/admin/whatsapp/inbox')} className="rounded-3xl border border-[#686D76]/30 bg-[#111111] p-6 text-left transition hover:border-[#3B82F6]/60">
                   <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#686D76]/30 text-[#3B82F6]"><MessageSquare size={20} /></span>
                   <h3 className="mt-4 text-lg font-semibold text-white">Boîte de réception</h3>
                   <p className="mt-2 text-sm text-white/45">Voir les conversations et répondre aux messages.</p>
