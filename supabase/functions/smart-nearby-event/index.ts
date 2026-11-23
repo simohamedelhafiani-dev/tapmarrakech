@@ -10,7 +10,7 @@ Deno.serve(async(req)=>{
  const admin=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
  const body=await req.json().catch(()=>null),token=typeof body?.access_token==='string'?body.access_token:'';
  const lat=Number(body?.latitude),lng=Number(body?.longitude);
- if(!token||!validCoordinate(lat,lng)return json({success:false,error:'Position ou jeton invalide'},400);
+ if(!token||!validCoordinate(lat,lng))return json({success:false,error:'Position ou jeton invalide'},400);
  const {data:link,error:linkErr}=await admin.from('loyalty_customer_links').select('customer_id').eq('access_token',token).maybeSingle();
  if(linkErr||!link)return json({success:false,error:'Carte fidélité non valide'},401);
  const {data:customer,error:cErr}=await admin.from('loyalty_customers').select('id,establishment_id,notification_consent,marketing_consent').eq('id',link.customer_id).maybeSingle();
@@ -20,7 +20,7 @@ Deno.serve(async(req)=>{
  if(cfgErr)return json({success:false,error:'Configuration indisponible'},500);
  if(!config?.enabled)return json({success:true,eligible:false,reason:'disabled'});
  const c=config.config??{},centerLat=Number(c.latitude??c.lat),centerLng=Number(c.longitude??c.lng),radius=Math.min(2000,Math.max(50,Number(c.radius_m??c.radius??250)));
- if(!validCoordinate(centerLat,centerLng)return json({success:false,error:'Coordonnées établissement non configurées'},409);
+ if(!validCoordinate(centerLat,centerLng))return json({success:false,error:'Coordonnées établissement non configurées'},409);
  const meters=distanceMeters(lat,lng,centerLat,centerLng);
  if(meters>radius)return json({success:true,eligible:false,distance_m:Math.round(meters)});
  const zone=String(c.zone_key??'main').slice(0,40);
