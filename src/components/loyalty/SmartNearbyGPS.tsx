@@ -16,7 +16,19 @@ export default function SmartNearbyGPS({ accessToken }: { accessToken: string })
    if(!active)return;
    if(error||data?.success===false){setStatus('Smart Nearby temporairement indisponible. Une nouvelle tentative sera effectuée au prochain relevé GPS.');return;}
    lastSent=Date.now();
-   setStatus('Smart Nearby activé. Position ponctuelle utilisée pour vérifier la zone, sans historique GPS.');
+   if(data?.eligible===true){
+    setStatus('Vous êtes dans la zone ! Une notification a été envoyée.');
+   }else if(data?.reason==='already_notified_today'){
+    setStatus('Zone détectée : vous avez déjà reçu la notification aujourd’hui.');
+   }else if(data?.reason==='disabled'){
+    setStatus('Smart Nearby n’est pas activé pour cet établissement.');
+   }else if(data?.reason==='consent_missing'){
+    setStatus('Notifications ou consentement marketing désactivés sur votre carte fidélité.');
+   }else if(typeof data?.distance_m==='number'){
+    setStatus('Vous êtes hors de la zone de proximité. Aucun historique GPS n’est conservé.');
+   }else{
+    setStatus('Smart Nearby vérifie ponctuellement la proximité, sans historique GPS.');
+   }
   },err=>{if(active)setStatus(err.code===1?'Autorisation GPS refusée.':'GPS indisponible.');},{enableHighAccuracy:false,maximumAge:60000,timeout:15000});
   return ()=>{active=false;navigator.geolocation.clearWatch(watch);};
  },[enabled,accessToken]);
