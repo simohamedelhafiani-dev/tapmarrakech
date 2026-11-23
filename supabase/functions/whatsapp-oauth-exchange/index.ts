@@ -83,8 +83,8 @@ Deno.serve(async (req) => {
   const wabaId = typeof body.wabaId === "string" ? body.wabaId.trim() : "";
   const phoneNumberId = typeof body.phoneNumberId === "string" ? body.phoneNumberId.trim() : null;
   const state = typeof body.state === "string" ? body.state.trim() : "";
-  if (!code || !establishmentId || !wabaId || !phoneNumberId || !state) {
-    return reply({ error: "code_establishment_waba_phone_and_state_required" }, 400);
+  if (!code || !establishmentId || !wabaId || !state) {
+    return reply({ error: "code_establishment_waba_and_state_required" }, 400);
   }
   // Reject oversized OAuth codes and control characters before forwarding them to Meta.
   if (code.length > 2_048 || [...code].some((char) => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)) {
@@ -172,7 +172,11 @@ Deno.serve(async (req) => {
     }
     if (!pageResult.response.ok) return reply({ error: "meta_phone_numbers_verification_failed" }, 403);
     const items = Array.isArray(pageResult.data.data) ? pageResult.data.data : [];
-    if (phoneNumberId) {\n      phoneData = items.find((item: { id?: string }) => String(item?.id ?? "") === phoneNumberId) ?? phoneData;\n    } else {\n      fallbackPhoneCandidates.push(...items.filter((item: { id?: string }) => typeof item?.id === "string" && idPattern.test(item.id)));\n    }
+    if (phoneNumberId) {
+      phoneData = items.find((item: { id?: string }) => String(item?.id ?? "") === phoneNumberId) ?? phoneData;
+    } else {
+      fallbackPhoneCandidates.push(...items.filter((item: { id?: string }) => typeof item?.id === "string" && idPattern.test(item.id)));
+    }
     const paging = pageResult.data.paging;
     const pagingNext = paging && typeof paging === "object" && !Array.isArray(paging)
       ? (paging as Record<string, unknown>).next
@@ -193,10 +197,12 @@ Deno.serve(async (req) => {
       }
     } else nextUrl = null;
   }
-  // If the page cap was reached while Meta still advertises more results, do not
-  // claim the requested phone number is absent: the verification is incomplete.
+  if (!phoneNumberId && !nextUrl) {
+    if (fallbackPhoneCandidates.length === 1) phoneData = fallbackPhoneCandidates[0];
+    else if (fallbackPhoneCandidates.length > 1) return reply({ error: "coexistence_multiple_phone_numbers_require_selection" }, 409);
+  }
   if (!phoneData && nextUrl) return reply({ error: "meta_phone_numbers_verification_incomplete" }, 502);
-  if (!phoneData) return reply({ error: "phone_number_not_attached_to_waba" }, 403);
+  if (!phoneData) return reply({ error: phoneNumberId ? "phone_number_not_attached_to_waba" : "coexistence_phone_number_not_found" }, 403);
 
   // Meta requires the application to subscribe to each customer WABA for
   // message and status webhooks; a configured app-level callback alone is not
