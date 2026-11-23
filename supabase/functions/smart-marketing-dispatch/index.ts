@@ -39,6 +39,7 @@ Deno.serve(async(req)=>{
    if(!c||!c.notification_consent||!c.marketing_consent){
     await markSkipped(q.id,!c?'Customer not found':'Consent missing');skipped++;continue;
    }
+   const messagePayload={...(q.payload??{})};
    if(q.smart_id==='reward'){
     const claimId=String(q.payload?.claim_id??'');
     const {data:claim,error:claimError}=await admin.from('loyalty_reward_claims').select('id,customer_id,establishment_id,reward_name,expires_at,status').eq('id',claimId).eq('customer_id',q.customer_id).eq('establishment_id',q.establishment_id).maybeSingle();
@@ -90,7 +91,6 @@ Deno.serve(async(req)=>{
     const threshold=Math.max(1,Number.parseFloat(String(liveConfig.config?.thresholdVisits??liveConfig.config?.threshold_visits??liveConfig.config?.threshold??10))||10);
     if((c.visit_count??0)<threshold){await markSkipped(q.id,'VIP visit threshold no longer met');skipped++;continue;}
    }
-   const messagePayload={...(q.payload??{})};
    if(q.smart_id==='progress'){
     const {data:settings,error:settingsError}=await admin.from('loyalty_settings').select('stamp_goal').eq('establishment_id',q.establishment_id).maybeSingle();
     if(settingsError)throw settingsError;
