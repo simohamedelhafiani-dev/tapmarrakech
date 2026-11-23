@@ -14,3 +14,8 @@ export function validCoordinateInput(lat:unknown,lng:unknown):lat is number {
  return typeof lat==='number'&&typeof lng==='number'&&validCoordinate(lat,lng);
 }
 export function normalizeRadius(value:unknown):number { const n=Number(value); return Number.isFinite(n)?Math.min(2000,Math.max(50,n)):250; }
+
+export function validConfiguredCoordinates(lat:unknown,lng:unknown):boolean {
+ if(lat==null||lng==null||String(lat).trim()===''||String(lng).trim()==='')return false; const parsedLat=typeof lat==='number'?lat:Number(lat),parsedLng=typeof lng==='number'?lng:Number(lng);
+ return validCoordinate(parsedLat,parsedLng);
+}
