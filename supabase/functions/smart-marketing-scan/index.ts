@@ -70,10 +70,10 @@ Deno.serve(async (req) => {
     // Smart Happy Hour: schedule config accepts "HH:mm-HH:mm" and optional weekdays (0-6).
     if (cfg.smart_id === 'happyhour') {
       const schedule = String(settings.schedule ?? '').trim();
-      const match = schedule.match(/(\\d{2}:\\d{2})\\s*-\\s*(\\d{2}:\\d{2})/);
+      const match = schedule.match(/(\d{2}:\d{2})\\s*-\\s*(\d{2}:\d{2})/);
       const daysRaw = String(settings.days ?? '').trim();
       const weekday = Number(new Intl.DateTimeFormat('en-US', { timeZone: 'Africa/Casablanca', weekday: 'short' }).format(new Date()).replace(/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)$/, m => String(['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(m))));
-      const validTime = (s: string) => /^([01]\\d|2[0-3]):[0-5]\\d$/.test(s);
+      const validTime = (s: string) => /^([01]\d|2[0-3]):[0-5]\d$/.test(s);
       if (match && validTime(match[1]) && validTime(match[2]) && match[1] < match[2] && localTime >= match[1] && localTime < match[2]) {
         const allowed = daysRaw.split(',').map(x => Number(x.trim())).filter(x => Number.isInteger(x) && x >= 0 && x <= 6);
         if (!allowed.length || allowed.includes(weekday)) {
@@ -97,7 +97,7 @@ Deno.serve(async (req) => {
     }
     // Smart Comeback: stepped messages at configured inactivity thresholds, deduped per visit date and step.
     if (cfg.smart_id === 'comeback') {
-      const rawSteps = String(settings.steps ?? '30,37,45').match(/\\d+/g)?.map(Number) ?? [30,37,45];
+      const rawSteps = String(settings.steps ?? '30,37,45').match(/\d+/g)?.map(Number) ?? [30,37,45];
       const steps = [...new Set(rawSteps.filter(n => n >= 1 && n <= 365))].sort((a,b)=>a-b);
       for (const customer of (customers ?? []) as Customer[]) {
         if (!customer.marketing_consent || !customer.last_visit_at || !steps.length) continue;
