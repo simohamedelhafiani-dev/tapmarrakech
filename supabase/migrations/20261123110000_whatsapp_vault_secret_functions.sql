@@ -2,6 +2,13 @@
 -- narrowly scoped service-role RPCs for the Edge Functions.
 CREATE EXTENSION IF NOT EXISTS supabase_vault WITH SCHEMA vault;
 
+-- Some environments already have a WhatsApp foundation schema whose connection
+-- table predates the repository migrations. Add the legacy-compatible columns
+-- when absent; fresh databases already receive them from the initial migration.
+ALTER TABLE public.whatsapp_connections
+  ADD COLUMN IF NOT EXISTS connected_by uuid REFERENCES auth.users(id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS meta_access_token text;
+
 -- Move any tokens saved by the earlier schema into Vault before allowing the
 -- legacy plaintext column to be null. Existing connections keep their linkage.
 DO $$
