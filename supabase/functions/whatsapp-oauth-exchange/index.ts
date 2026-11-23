@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
     return reply({ error: "server_configuration_invalid" }, 500);
   }
 
-  let body: { code?: string; establishmentId?: string; wabaId?: string; phoneNumberId?: string; state?: string };
+  let body: { code?: string; establishmentId?: string; wabaId?: string; phoneNumberId?: string | null; state?: string };
   const rawBody = await req.text();
   if (new TextEncoder().encode(rawBody).byteLength > 32_000) return reply({ error: "payload_too_large" }, 413);
   try {
@@ -81,7 +81,7 @@ Deno.serve(async (req) => {
   const code = typeof body.code === "string" ? body.code.trim() : "";
   const establishmentId = typeof body.establishmentId === "string" ? body.establishmentId.trim() : "";
   const wabaId = typeof body.wabaId === "string" ? body.wabaId.trim() : "";
-  const phoneNumberId = typeof body.phoneNumberId === "string" ? body.phoneNumberId.trim() : "";
+  const phoneNumberId = typeof body.phoneNumberId === "string" ? body.phoneNumberId.trim() : null;
   const state = typeof body.state === "string" ? body.state.trim() : "";
   if (!code || !establishmentId || !wabaId || !phoneNumberId || !state) {
     return reply({ error: "code_establishment_waba_phone_and_state_required" }, 400);
@@ -91,7 +91,7 @@ Deno.serve(async (req) => {
     return reply({ error: "invalid_oauth_code" }, 400);
   }
   if (!/^[a-f0-9]{64}$/.test(state)) return reply({ error: "invalid_oauth_state" }, 400);
-  if (!uuidPattern.test(establishmentId) || !idPattern.test(wabaId) || !idPattern.test(phoneNumberId)) {
+  if (!uuidPattern.test(establishmentId) || !idPattern.test(wabaId) || (phoneNumberId !== null && !idPattern.test(phoneNumberId))) {
     return reply({ error: "invalid_identifiers" }, 400);
   }
 
@@ -172,7 +172,7 @@ Deno.serve(async (req) => {
     }
     if (!pageResult.response.ok) return reply({ error: "meta_phone_numbers_verification_failed" }, 403);
     const items = Array.isArray(pageResult.data.data) ? pageResult.data.data : [];
-    phoneData = items.find((item: { id?: string }) => String(item?.id ?? "") === phoneNumberId) ?? phoneData;
+    if (phoneNumberId) {\n      phoneData = items.find((item: { id?: string }) => String(item?.id ?? "") === phoneNumberId) ?? phoneData;\n    } else {\n      fallbackPhoneCandidates.push(...items.filter((item: { id?: string }) => typeof item?.id === "string" && idPattern.test(item.id)));\n    }
     const paging = pageResult.data.paging;
     const pagingNext = paging && typeof paging === "object" && !Array.isArray(paging)
       ? (paging as Record<string, unknown>).next
@@ -224,7 +224,7 @@ Deno.serve(async (req) => {
     establishment_id: establishmentId,
     connected_by: userData.user.id,
     waba_id: wabaId,
-    phone_number_id: phoneNumberId,
+    phone_number_id: String(phoneData.id),
     display_phone_number: phoneData.display_phone_number ?? null,
     business_name: phoneData.verified_name ?? wabaCheck.data.name ?? null,
     access_token_secret_id: secretId,
