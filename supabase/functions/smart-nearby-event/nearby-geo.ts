@@ -1,7 +1,9 @@
 export function distanceMeters(lat1:number,lon1:number,lat2:number,lon2:number):number {
  const R=6371000,rad=(v:number)=>v*Math.PI/180;
  const dLat=rad(lat2-lat1),dLon=rad(lon2-lon1);
- const a=Math.sin(dLat/2)**2+Math.cos(rad(lat1))*Math.cos(rad(lat2))*Math.sin(dLon/2)**2;
+ const rawA=Math.sin(dLat/2)**2+Math.cos(rad(lat1))*Math.cos(rad(lat2))*Math.sin(dLon/2)**2;
+ // Floating-point rounding can push the haversine term slightly outside [0, 1].
+ const a=Math.min(1,Math.max(0,rawA));
  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
 export function validCoordinate(lat:number,lng:number):boolean {
