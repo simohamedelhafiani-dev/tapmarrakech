@@ -34,11 +34,9 @@ Deno.serve(async(req)=>{
  const meters=distanceMeters(lat,lng,centerLat,centerLng);
  if(meters>radius)return json({success:true,eligible:false,distance_m:Math.round(meters)});
  const zone=String(c.zone_key??'main').slice(0,40);
- const {data:event,error:eventErr}=await admin.from('smart_nearby_events').insert({customer_id:customer.id,establishment_id:customer.establishment_id,zone_key:zone}).select('id').single();
- if(eventErr?.code==='23505')return json({success:true,eligible:false,reason:'already_notified_today'});
- if(eventErr)return json({success:false,error:'Enregistrement événement impossible'},500);
  const title=String(c.title??'Vous êtes à proximité !').slice(0,120),message=String(c.message??'Passez nous voir, nous serons ravis de vous accueillir !').slice(0,1000);
- const {error:notificationErr}=await admin.from('loyalty_card_notifications').insert({establishment_id:customer.establishment_id,customer_id:customer.id,title,message,type:'OFFER'});
- if(notificationErr){await admin.from('smart_nearby_events').delete().eq('id',event.id);return json({success:false,error:'Notification non créée'},500);}
+ const {data:atomicResult,error:atomicError}=await admin.rpc('smart_nearby_notify_atomic',{p_customer_id:customer.id,p_establishment_id:customer.establishment_id,p_zone_key:zone,p_title:title,p_message:message});
+ if(atomicError||!Array.isArray(atomicResult)||!atomicResult[0])return json({success:false,error:'Notification non créée'},500);
+ if(atomicResult[0].created===false)return json({success:true,eligible:false,reason:'already_notified_today'});
  return json({success:true,eligible:true,distance_m:Math.round(meters),notification:'in_app'});
 });
