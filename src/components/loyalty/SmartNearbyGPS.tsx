@@ -12,9 +12,11 @@ export default function SmartNearbyGPS({ accessToken }: { accessToken: string })
   let lastSent=0,active=true;
   const watch=navigator.geolocation.watchPosition(async position=>{
    if(!active||Date.now()-lastSent<60000)return;
+   const {data,error}=await supabase.functions.invoke('smart-nearby-event',{body:{access_token:accessToken,latitude:position.coords.latitude,longitude:position.coords.longitude}});
+   if(!active)return;
+   if(error||data?.success===false){setStatus('Smart Nearby temporairement indisponible. Une nouvelle tentative sera effectuée au prochain relevé GPS.');return;}
    lastSent=Date.now();
-   const {error}=await supabase.functions.invoke('smart-nearby-event',{body:{access_token:accessToken,latitude:position.coords.latitude,longitude:position.coords.longitude}});
-   if(active)setStatus(error?'Smart Nearby temporairement indisponible':'Smart Nearby activé. Position ponctuelle utilisée pour vérifier la zone, sans historique GPS.');
+   setStatus('Smart Nearby activé. Position ponctuelle utilisée pour vérifier la zone, sans historique GPS.');
   },err=>{if(active)setStatus(err.code===1?'Autorisation GPS refusée.':'GPS indisponible.');},{enableHighAccuracy:false,maximumAge:60000,timeout:15000});
   return ()=>{active=false;navigator.geolocation.clearWatch(watch);};
  },[enabled,accessToken]);
