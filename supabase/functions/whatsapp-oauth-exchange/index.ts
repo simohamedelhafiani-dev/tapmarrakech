@@ -160,6 +160,7 @@ Deno.serve(async (req) => {
 
   // Verify the submitted Phone Number ID is actually attached to that WABA.
   let phoneData: Record<string, unknown> | null = null;
+  const fallbackPhoneCandidates: Record<string, unknown>[] = [];
   let nextUrl: URL | null = new URL(`https://graph.facebook.com/${graphVersion}/${wabaId}/phone_numbers`);
   nextUrl.searchParams.set("fields", "id,display_phone_number,verified_name,status");
   nextUrl.searchParams.set("limit", "100");
