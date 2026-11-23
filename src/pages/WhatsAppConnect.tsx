@@ -245,7 +245,7 @@ export default function WhatsAppConnect() {
       setMessage('Sélectionnez un établissement.');
       return;
     }
-    if (!appId || !configId || !/^v[0-9]{2,3}\\.[0-9]+$/.test(graphVersion)) {
+    if (!appId || !configId || !/^v[0-9]{2,3}\.[0-9]+$/.test(graphVersion)) {
       setMessage('Configuration Meta manquante. Configurez les variables Meta requises.');
       return;
     }
