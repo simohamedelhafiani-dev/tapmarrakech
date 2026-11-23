@@ -37,6 +37,12 @@ const links = [
     feature: null,
   },
   {
+    to: '/dashboard/whatsapp',
+    label: 'WhatsApp',
+    icon: MessageCircle,
+    feature: null,
+  },
+  {
     to: '/dashboard/assistant-ia',
     label: 'Assistant IA',
     icon: BrainCircuit,
@@ -71,12 +77,6 @@ const links = [
     label: 'Fidélité',
     icon: Gift,
     feature: 'loyalty' as const,
-  },
-  {
-    to: '/dashboard/whatsapp',
-    label: 'WhatsApp',
-    icon: MessageCircle,
-    feature: null,
   },
 ];
 
@@ -875,7 +875,9 @@ export function DashboardLayout() {
                 className={({ isActive }) => `kelyani-nav-link group flex min-w-[76px] flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 transition-all ${
                   isActive
                     ? 'bg-[#111111] text-[#00DFA5] shadow-[0_0_24px_rgba(0,223,165,0.10)]'
-                    : 'text-[#B0B0B0]/40 hover:bg-[#111111] hover:text-[#B0B0B0]'
+                    : to === '/dashboard/whatsapp'
+                      ? 'border border-[#00DFA5]/40 bg-[#00DFA5]/5 text-[#00DFA5] shadow-[0_0_18px_rgba(0,223,165,0.10)] hover:bg-[#00DFA5]/10'
+                      : 'text-[#B0B0B0]/65 hover:bg-[#111111] hover:text-[#B0B0B0]'
                 }`}
               >
                 <Icon size={18} strokeWidth={1.8} />
