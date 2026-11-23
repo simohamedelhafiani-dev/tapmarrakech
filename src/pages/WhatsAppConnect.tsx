@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -192,6 +193,9 @@ function startEmbeddedSignup(facebook: NonNullable<Window['FB']>, embeddedConfig
 
 export default function WhatsAppConnect() {
   const { user } = useAuth();
+  const location = useLocation();
+  const isAdminPath = location.pathname.startsWith('/admin/whatsapp');
+  const inboxPath = isAdminPath ? '/admin/whatsapp/inbox' : '/dashboard/whatsapp/inbox';
   const [establishments, setEstablishments] = useState<Establishment[]>([]);
   const [selectedId, setSelectedId] = useState('');
   const [loading, setLoading] = useState(true);
@@ -333,7 +337,7 @@ export default function WhatsAppConnect() {
         <p className="mt-2 text-sm text-gray-400">
           Chaque établissement connecte son propre compte WhatsApp Business via Meta. Votre numéro personnel n’est pas utilisé.
         </p>
-        <a href="/dashboard/whatsapp/inbox" className="mt-4 inline-flex rounded-xl border border-[#686D76] px-4 py-2 text-sm text-[#60A5FA] hover:border-[#3B82F6]">Ouvrir la boîte WhatsApp →</a>
+        <a href={inboxPath} className="mt-4 inline-flex rounded-xl border border-[#686D76] px-4 py-2 text-sm text-[#60A5FA] hover:border-[#3B82F6]">Ouvrir la boîte WhatsApp →</a>
         {loading ? (
           <p className="mt-6 text-gray-400">Chargement des établissements…</p>
         ) : establishments.length === 0 ? (
