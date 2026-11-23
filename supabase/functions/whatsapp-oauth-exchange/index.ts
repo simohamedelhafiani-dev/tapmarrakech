@@ -194,6 +194,7 @@ Deno.serve(async (req) => {
 
   const { error: saveError } = await admin.from("whatsapp_connections").upsert({
     establishment_id: establishmentId,
+    connected_by: userData.user.id,
     waba_id: wabaId,
     phone_number_id: phoneNumberId,
     display_phone_number: phoneData.display_phone_number ?? null,
