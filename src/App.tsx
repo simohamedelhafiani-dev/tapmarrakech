@@ -16,6 +16,9 @@ import LoyaltyRecover from '@/pages/LoyaltyRecover';
 import Login from '@/pages/Login';
 import { EmailConfirmation, ForgotPassword, Register, ResetPassword } from '@/pages/AuthPages';
 import Onboarding from '@/pages/Onboarding';
+import WhatsAppOAuthCallback from '@/pages/WhatsAppOAuthCallback';
+import WhatsAppConnect from '@/pages/WhatsAppConnect';
+import WhatsAppInbox from '@/pages/WhatsAppInbox';
 
 import Dashboard from '@/pages/Dashboard';
 import Reviews from '@/pages/Reviews';
@@ -246,6 +249,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/auth/callback" element={<EmailConfirmation />} />
+          <Route path="/whatsapp/callback" element={<WhatsAppOAuthCallback />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
 
@@ -262,6 +266,8 @@ function App() {
               <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/dashboard/assistant-ia" element={<AssistantIA />} />
+              <Route path="/dashboard/whatsapp" element={<WhatsAppConnect />} />
+              <Route path="/dashboard/whatsapp/inbox" element={<WhatsAppInbox />} />
               <Route
                 path="/dashboard/reviews"
                 element={
