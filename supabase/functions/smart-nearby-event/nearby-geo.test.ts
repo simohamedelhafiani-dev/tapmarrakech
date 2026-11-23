@@ -10,3 +10,5 @@ Deno.test('normalizes radius to configured bounds and falls back on malformed in
 Deno.test('rejects missing, null and stringified GPS values',()=>{assert(!validCoordinateInput(null,0));assert(!validCoordinateInput(undefined,0));assert(!validCoordinateInput('31.63',-8));assert(!validCoordinateInput(31.63,'-8'));assert(validCoordinateInput(31.63,-8));});
 
 Deno.test('distance remains finite for antipodal coordinates',()=>{const d=distanceMeters(90,0,-90,180);assert(Number.isFinite(d));assert(d>20000000&&d<20020000);});
+
+Deno.test('rejects null and blank establishment GPS config while accepting valid numeric strings',()=>{assert(!validConfiguredCoordinates(null,0));assert(!validConfiguredCoordinates('', '-8'));assert(!validConfiguredCoordinates('  ','-8'));assert(validConfiguredCoordinates('31.63','-8.0'));assert(!validConfiguredCoordinates('91','-8'));});
