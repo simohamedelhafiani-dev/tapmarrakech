@@ -9,9 +9,11 @@ export default function SmartNearbyGPS({ accessToken }: { accessToken: string })
  useEffect(()=>{
   if(!enabled||!accessToken)return;
   if(!('geolocation' in navigator)){setStatus('La géolocalisation n’est pas prise en charge.');return;}
-  let lastSent=0,active=true;
+  let lastSent=0,active=true,inFlight=false;
   const watch=navigator.geolocation.watchPosition(async position=>{
-   if(!active||Date.now()-lastSent<60000)return;
+   if(!active||inFlight||Date.now()-lastSent<60000)return;
+   inFlight=true;
+   try{
    const {data,error}=await supabase.functions.invoke('smart-nearby-event',{body:{access_token:accessToken,latitude:position.coords.latitude,longitude:position.coords.longitude}});
    if(!active)return;
    if(error||data?.success===false){setStatus('Smart Nearby temporairement indisponible. Une nouvelle tentative sera effectuée au prochain relevé GPS.');return;}
@@ -29,6 +31,7 @@ export default function SmartNearbyGPS({ accessToken }: { accessToken: string })
    }else{
     setStatus('Smart Nearby vérifie ponctuellement la proximité, sans historique GPS.');
    }
+   }finally{inFlight=false;}
   },err=>{if(active)setStatus(err.code===1?'Autorisation GPS refusée.':'GPS indisponible.');},{enableHighAccuracy:false,maximumAge:60000,timeout:15000});
   return ()=>{active=false;navigator.geolocation.clearWatch(watch);};
  },[enabled,accessToken]);
