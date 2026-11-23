@@ -1,7 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const cors={ 'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type','Access-Control-Allow-Methods':'POST, OPTIONS' };
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...cors,'Content-Type':'application/json'}});
-const distance=(lat1:number,lon1:number,lat2:number,lon2:number)=>{const R=6371000,rad=(v:number)=>v*Math.PI/180;const dLat=rad(lat2-lat1),dLon=rad(lon2-lon1);const a=Math.sin(dLat/2)**2+Math.cos(rad(lat1))*Math.cos(rad(lat2))*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));};
+import { distanceMeters, validCoordinate } from './nearby-geo.ts';
 Deno.serve(async(req)=>{
  if(req.method==='OPTIONS')return new Response('ok',{headers:cors});
  if(req.method!=='POST')return json({success:false,error:'POST requis'},405);
@@ -10,7 +10,7 @@ Deno.serve(async(req)=>{
  const admin=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
  const body=await req.json().catch(()=>null),token=typeof body?.access_token==='string'?body.access_token:'';
  const lat=Number(body?.latitude),lng=Number(body?.longitude);
- if(!token||!Number.isFinite(lat)||!Number.isFinite(lng)||lat < -90||lat>90||lng < -180||lng>180)return json({success:false,error:'Position ou jeton invalide'},400);
+ if(!token||!validCoordinate(lat,lng)return json({success:false,error:'Position ou jeton invalide'},400);
  const {data:link,error:linkErr}=await admin.from('loyalty_customer_links').select('customer_id').eq('access_token',token).maybeSingle();
  if(linkErr||!link)return json({success:false,error:'Carte fidélité non valide'},401);
  const {data:customer,error:cErr}=await admin.from('loyalty_customers').select('id,establishment_id,notification_consent,marketing_consent').eq('id',link.customer_id).maybeSingle();
@@ -20,8 +20,8 @@ Deno.serve(async(req)=>{
  if(cfgErr)return json({success:false,error:'Configuration indisponible'},500);
  if(!config?.enabled)return json({success:true,eligible:false,reason:'disabled'});
  const c=config.config??{},centerLat=Number(c.latitude??c.lat),centerLng=Number(c.longitude??c.lng),radius=Math.min(2000,Math.max(50,Number(c.radius_m??c.radius??250)));
- if(!Number.isFinite(centerLat)||!Number.isFinite(centerLng)||centerLat < -90||centerLat>90||centerLng < -180||centerLng>180)return json({success:false,error:'Coordonnées établissement non configurées'},409);
- const meters=distance(lat,lng,centerLat,centerLng);
+ if(!validCoordinate(centerLat,centerLng)return json({success:false,error:'Coordonnées établissement non configurées'},409);
+ const meters=distanceMeters(lat,lng,centerLat,centerLng);
  if(meters>radius)return json({success:true,eligible:false,distance_m:Math.round(meters)});
  const zone=String(c.zone_key??'main').slice(0,40);
  const {data:event,error:eventErr}=await admin.from('smart_nearby_events').insert({customer_id:customer.id,establishment_id:customer.establishment_id,zone_key:zone}).select('id').single();
