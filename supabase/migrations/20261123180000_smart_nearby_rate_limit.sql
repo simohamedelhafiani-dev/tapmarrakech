@@ -53,3 +53,24 @@ $$;
 
 revoke all on function public.smart_nearby_rate_limit(uuid, integer, integer) from public, anon, authenticated;
 grant execute on function public.smart_nearby_rate_limit(uuid, integer, integer) to service_role;
+
+-- Atomic deduplication + notification creation: either both commit or neither.
+create or replace function public.smart_nearby_notify_atomic(p_customer_id uuid,p_establishment_id uuid,p_zone_key text,p_title text,p_message text)
+returns table(created boolean)
+language plpgsql security definer set search_path = pg_catalog, public
+as $$
+declare v_event_id uuid;
+begin
+  begin
+    insert into public.smart_nearby_events(customer_id,establishment_id,zone_key)
+    values(p_customer_id,p_establishment_id,left(coalesce(p_zone_key,'main'),40)) returning id into v_event_id;
+  exception when unique_violation then
+    return query select false; return;
+  end;
+  insert into public.loyalty_card_notifications(establishment_id,customer_id,title,message,type)
+  values(p_establishment_id,p_customer_id,left(coalesce(p_title,'Vous êtes à proximité !'),120),left(coalesce(p_message,'Passez nous voir, nous serons ravis de vous accueillir !'),1000),'OFFER');
+  return query select true;
+end;
+$$;
+revoke all on function public.smart_nearby_notify_atomic(uuid,uuid,text,text,text) from public, anon, authenticated;
+grant execute on function public.smart_nearby_notify_atomic(uuid,uuid,text,text,text) to service_role;
