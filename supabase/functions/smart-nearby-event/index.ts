@@ -1,7 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const cors={ 'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type','Access-Control-Allow-Methods':'POST, OPTIONS' };
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...cors,'Content-Type':'application/json'}});
-import { distanceMeters, validCoordinate } from './nearby-geo.ts';
+import { distanceMeters, validCoordinate, normalizeRadius } from './nearby-geo.ts';
 Deno.serve(async(req)=>{
  if(req.method==='OPTIONS')return new Response('ok',{headers:cors});
  if(req.method!=='POST')return json({success:false,error:'POST requis'},405);
@@ -19,7 +19,7 @@ Deno.serve(async(req)=>{
  const {data:config,error:cfgErr}=await admin.from('smart_marketing_configs').select('enabled,config').eq('establishment_id',customer.establishment_id).eq('smart_id','nearby').maybeSingle();
  if(cfgErr)return json({success:false,error:'Configuration indisponible'},500);
  if(!config?.enabled)return json({success:true,eligible:false,reason:'disabled'});
- const c=config.config??{},centerLat=Number(c.latitude??c.lat),centerLng=Number(c.longitude??c.lng),radius=Math.min(2000,Math.max(50,Number(c.radius_m??c.radius??250)));
+ const c=config.config??{},centerLat=Number(c.latitude??c.lat),centerLng=Number(c.longitude??c.lng),radius=normalizeRadius(c.radius_m??c.radius??250);
  if(!validCoordinate(centerLat,centerLng))return json({success:false,error:'Coordonnées établissement non configurées'},409);
  const meters=distanceMeters(lat,lng,centerLat,centerLng);
  if(meters>radius)return json({success:true,eligible:false,distance_m:Math.round(meters)});
