@@ -1,4 +1,4 @@
-import { distanceMeters, validCoordinate, validCoordinateInput, normalizeRadius } from './nearby-geo.ts';
+import { distanceMeters, validCoordinate, validCoordinateInput, validConfiguredCoordinates, normalizeRadius } from './nearby-geo.ts';
 import { assert, assertEquals } from 'https://deno.land/std@0.224.0/assert/mod.ts';
 Deno.test('validates coordinate bounds',()=>{assert(validCoordinate(0,0));assert(validCoordinate(31.63,-8.0));assert(!validCoordinate(91,0));assert(!validCoordinate(0,181));assert(!validCoordinate(NaN,0));});
 Deno.test('distance at same point is zero',()=>assertEquals(distanceMeters(31.63,-8,31.63,-8),0));
