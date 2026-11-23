@@ -78,7 +78,7 @@ export default function SmartMarketingCenter() {
    finally{setSaving(false);}
  };
  const toggle=async(id:string)=>{const nextValue=!enabled[id];const currentConfig=configs[id]??SMARTS.find(s=>s.id===id)?.defaults??{};const ok=await saveRow(id,nextValue,currentConfig);if(ok)setEnabled(previous=>({...previous,[id]:nextValue}));};
- const saveConfig=async()=>{if(!selected)return;const ok=await saveRow(selected.id,enabled[selected.id]??false,draft);if(ok)setConfigs(previous=>({...previous,[selected.id]:draft}));};
+ const saveConfig=async()=>{if(!selected)return;if(selected.id==='nearby'){const lat=Number(draft.latitude),lng=Number(draft.longitude),radius=Number(draft.radius_m);if(draft.latitude.trim()===''||draft.longitude.trim()===''||!Number.isFinite(lat)||!Number.isFinite(lng)||lat < -90||lat>90||lng < -180||lng>180||!Number.isFinite(radius)||radius<50||radius>2000){setWriteError('Smart Nearby : coordonnées GPS valides requises et rayon entre 50 et 2 000 mètres.');return;}}const ok=await saveRow(selected.id,enabled[selected.id]??false,draft);if(ok)setConfigs(previous=>({...previous,[selected.id]:draft}));};
  return <div className="space-y-6">
   {error&&<div role="alert" className="rounded-xl border border-red-500/30 bg-red-950/30 px-4 py-3 text-xs text-red-300">Chargement impossible : {error}<button type="button" className="ml-3 underline" onClick={()=>window.dispatchEvent(new Event('tapmarrakech:establishment-changed'))}>Réessayer</button></div>}
   {writeError&&<div role="alert" className="rounded-xl border border-red-500/30 bg-red-950/30 px-4 py-3 text-xs text-red-300">Sauvegarde impossible : {writeError}</div>}
