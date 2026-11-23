@@ -17,7 +17,7 @@ WHERE status = 'connected';
 
 ALTER TABLE public.whatsapp_connections
   ADD CONSTRAINT whatsapp_connections_status_check
-  CHECK (status IN ('pending', 'active', 'connected', 'disconnected', 'error'));
+  CHECK (status IN ('pending', 'active', 'connected', 'paused', 'disconnected', 'error'));
 
 -- Prevent ambiguous webhook phone-number lookups and keep one phone ID attached
 -- to at most one connection. NULL values remain permitted for unconfigured rows.

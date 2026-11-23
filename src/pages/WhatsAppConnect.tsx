@@ -37,6 +37,7 @@ declare global {
 
 const appId = import.meta.env.VITE_META_APP_ID as string | undefined;
 const configId = import.meta.env.VITE_META_EMBEDDED_SIGNUP_CONFIG_ID as string | undefined;
+const graphVersion = (import.meta.env.VITE_META_GRAPH_API_VERSION as string | undefined) || 'v27.0';
 let initializedAppId: string | null = null;
 
 function loadFacebookSdk(): Promise<NonNullable<Window['FB']>> {
@@ -116,7 +117,7 @@ function startEmbeddedSignup(facebook: NonNullable<Window['FB']>, embeddedConfig
       } catch { return; }
       // Accept only the known Meta origins; broad *.facebook.com checks can
       // accidentally trust unrelated subdomains.
-      if (!['facebook.com', 'www.facebook.com', 'business.facebook.com'].includes(host)) return;
+      if (!['facebook.com', 'www.facebook.com', 'web.facebook.com', 'business.facebook.com'].includes(host)) return;
       // Signup messages must originate from a separate window/frame, not from
       // arbitrary same-page scripts dispatching synthetic message events.
       if (!event.source || event.source === window) return;
@@ -244,7 +245,7 @@ export default function WhatsAppConnect() {
       setMessage('Sélectionnez un établissement.');
       return;
     }
-    if (!appId || !configId) {
+    if (!appId || !configId || !/^v[0-9]{2,3}\.[0-9]+$/.test(graphVersion)) {
       setMessage('Configuration Meta manquante. Configurez les variables Meta requises.');
       return;
     }
@@ -274,7 +275,7 @@ export default function WhatsAppConnect() {
       const facebook = await loadFacebookSdk();
       if (!mountedRef.current) return;
       if (initializedAppId !== appId) {
-        facebook.init({ appId, autoLogAppEvents: true, xfbml: false, version: 'v27.0' });
+        facebook.init({ appId, autoLogAppEvents: true, xfbml: false, version: graphVersion });
         initializedAppId = appId;
       }
 
@@ -300,6 +301,8 @@ export default function WhatsAppConnect() {
           meta_code_exchange_failed: 'Le code Meta est invalide ou expiré. Relancez le parcours de connexion.',
           meta_waba_verification_unavailable: 'La vérification du compte WhatsApp a échoué temporairement. Relancez la connexion.',
           meta_waba_verification_failed: 'Le compte WhatsApp n’a pas pu être vérifié avec les autorisations reçues.',
+          meta_webhook_subscription_unavailable: 'Meta est temporairement inaccessible pendant l’activation des notifications WhatsApp. Relancez la connexion.',
+          meta_webhook_subscription_failed: 'Le compte Meta est accessible, mais l’abonnement aux notifications WhatsApp a échoué. Vérifiez les permissions et la configuration Webhooks de l’application Meta.',
           meta_phone_numbers_verification_unavailable: 'La vérification du numéro a échoué temporairement. Relancez la connexion.',
           meta_phone_numbers_verification_failed: 'Meta n’a pas permis de vérifier la liste des numéros de ce compte.',
           meta_phone_numbers_verification_incomplete: 'La liste des numéros Meta est trop longue pour être vérifiée en une seule tentative. Relancez la connexion.',

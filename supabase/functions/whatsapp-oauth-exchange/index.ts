@@ -32,6 +32,20 @@ async function graphGet(url: URL, token: string) {
   return { response, data };
 }
 
+async function graphPost(url: URL, token: string) {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    redirect: "error",
+    signal: AbortSignal.timeout(15_000),
+  });
+  const parsed = await response.json().catch(() => ({}));
+  const data = parsed && typeof parsed === "object" && !Array.isArray(parsed)
+    ? parsed as Record<string, unknown>
+    : {};
+  return { response, data };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     if (!origin || req.headers.get("origin") !== origin) return new Response("origin_not_allowed", { status: 403, headers: { "Vary": "Origin" } });
@@ -184,6 +198,20 @@ Deno.serve(async (req) => {
   if (!phoneData && nextUrl) return reply({ error: "meta_phone_numbers_verification_incomplete" }, 502);
   if (!phoneData) return reply({ error: "phone_number_not_attached_to_waba" }, 403);
 
+  // Meta requires the application to subscribe to each customer WABA for
+  // message and status webhooks; a configured app-level callback alone is not
+  // sufficient to receive that WABA's events.
+  const subscribeUrl = new URL(`https://graph.facebook.com/${graphVersion}/${wabaId}/subscribed_apps`);
+  let subscription: Awaited<ReturnType<typeof graphPost>>;
+  try {
+    subscription = await graphPost(subscribeUrl, accessToken);
+  } catch {
+    return reply({ error: "meta_webhook_subscription_unavailable" }, 502);
+  }
+  if (!subscription.response.ok || subscription.data.success !== true) {
+    return reply({ error: "meta_webhook_subscription_failed" }, 502);
+  }
+
   // Never store provider access tokens in the connection table. Save to Supabase Vault
   // through the service-role-only wrapper, then keep only the Vault secret UUID.
   const { data: secretId, error: vaultError } = await admin.rpc("whatsapp_store_secret", {
@@ -194,6 +222,7 @@ Deno.serve(async (req) => {
 
   const { error: saveError } = await admin.from("whatsapp_connections").upsert({
     establishment_id: establishmentId,
+    connected_by: userData.user.id,
     waba_id: wabaId,
     phone_number_id: phoneNumberId,
     display_phone_number: phoneData.display_phone_number ?? null,
