@@ -8,3 +8,5 @@ Deno.test('rejects invalid coordinates before geofence',()=>assert(!validCoordin
 Deno.test('normalizes radius to configured bounds and falls back on malformed input',()=>{assertEquals(normalizeRadius('250'),250);assertEquals(normalizeRadius('NaN'),250);assertEquals(normalizeRadius(-5),50);assertEquals(normalizeRadius(99999),2000);});
 
 Deno.test('rejects missing, null and stringified GPS values',()=>{assert(!validCoordinateInput(null,0));assert(!validCoordinateInput(undefined,0));assert(!validCoordinateInput('31.63',-8));assert(!validCoordinateInput(31.63,'-8'));assert(validCoordinateInput(31.63,-8));});
+
+Deno.test('distance remains finite for antipodal coordinates',()=>{const d=distanceMeters(90,0,-90,180);assert(Number.isFinite(d));assert(d>20000000&&d<20020000);});
