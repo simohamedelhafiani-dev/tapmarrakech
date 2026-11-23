@@ -914,7 +914,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
             </div>
             <div className="space-y-5">
           {tab === 'notifications' && <LoyaltyNotificationsPanel establishmentId={establishmentId} />}
-          {tab === 'smart' && <SmartMarketingCenter />}
+          {tab === 'smart' && <SmartMarketingCenter establishmentId={establishmentId} />}
 
           {tab === 'crm' && <LoyaltyCrmSegments establishmentId={establishmentId} />}
 
