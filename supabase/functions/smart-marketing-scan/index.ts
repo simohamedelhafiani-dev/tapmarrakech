@@ -54,18 +54,17 @@ Deno.serve(async (req) => {
       runErrors.push('Loyalty settings lookup failed');
       errors.push(`${cfg.smart_id}: loyalty settings lookup failed`);
     }
-    // Smart Reward: notify customers with an unredeemed reward claim expiring soon.
+    // Smart Reward: notify customers once a stamp reward is unlocked (scanner cadence, not claim expiry).
     if (cfg.smart_id === 'reward') {
-      const reminderDays = Math.max(0, Math.min(30, num(settings.reminderDays ?? settings.reminder_days, 2)));
-      const cutoff = new Date(Date.now() + reminderDays * 86400000).toISOString();
-      const { data: claims, error: claimError } = await admin.from('loyalty_reward_claims')
-        .select('id,customer_id,reward_name,expires_at,status')
-        .eq('establishment_id', cfg.establishment_id).eq('status', 'PENDING').lte('expires_at', cutoff).gt('expires_at', new Date().toISOString());
-      if (claimError) { runErrors.push('Reward claims lookup failed'); errors.push('reward: claims lookup failed'); }
-      for (const claim of claims ?? []) {
-        const customer = (customers ?? []).find((c: Customer) => c.id === claim.customer_id);
-        if (!customer?.marketing_consent) continue;
-        eligible.push({ customer, trigger: `reward:${claim.id}:${claim.expires_at}`, payload: { reward_name: claim.reward_name, expires_at: claim.expires_at, claim_id: claim.id } });
+      const { data: rewardSettings, error: rewardSettingsError } = await admin.from('loyalty_settings')
+        .select('stamp_goal,stamp_reward_name,stamp_reward_description').eq('establishment_id', cfg.establishment_id).eq('program_type', 'STAMP').eq('enabled', true).maybeSingle();
+      if (rewardSettingsError) { runErrors.push('Reward settings lookup failed'); errors.push('reward: settings lookup failed'); }
+      const goal = Math.max(1, num(rewardSettings?.stamp_goal, 10));
+      if (rewardSettings && !rewardSettingsError) {
+        for (const customer of (customers ?? []) as Customer[]) {
+          const stamps = customer.stamps_balance ?? 0;
+          if (customer.marketing_consent && stamps >= goal) eligible.push({ customer, trigger: `reward:${goal}:${stamps}`, payload: { stamps, goal, reward_name: rewardSettings.stamp_reward_name, reward_description: rewardSettings.stamp_reward_description } });
+        }
       }
     }
     // Smart Happy Hour: schedule config accepts "HH:mm-HH:mm" and optional weekdays (0-6).
