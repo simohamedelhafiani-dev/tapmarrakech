@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { Bell, Gift, Heart, MapPin, Cake, Crown, Flame, Zap, Trophy, Users, Megaphone, Settings2, Sparkles, ArrowUpRight, X, Save } from 'lucide-react';
 
@@ -19,10 +18,9 @@ const SMARTS: Smart[] = [
 const SMART_IDS = SMARTS.map((smart) => smart.id);
 const OPERATIONAL_SMART_IDS = new Set(['winback','nearby','birthday','vip','progress','reward','happyhour','challenge','referral','comeback']);
 type SmartConfigRow = { establishment_id: string; smart_id: string; enabled: boolean; config: Record<string, unknown> };
-export default function SmartMarketingCenter() {
- const {user}=useAuth();
- const [establishmentId,setEstablishmentId]=useState<string|null>(null);
- const [enabled,setEnabled]=useState<Record<string,boolean>>({});
+export default function SmartMarketingCenter({ establishmentId }: { establishmentId: string }) {
+ const [reloadKey,setReloadKey]=useState(0);
+  const [enabled,setEnabled]=useState<Record<string,boolean>>({});
  const [configs,setConfigs]=useState<Record<string,Record<string,string>>>({});
  const [selected,setSelected]=useState<Smart|null>(null);
  const [draft,setDraft]=useState<Record<string,string>>({});
@@ -34,12 +32,10 @@ export default function SmartMarketingCenter() {
  const establishmentRef=useRef<string|null>(null);
  useEffect(()=>{
    let active=true;
-   let requestSequence=0;
    const load=async(id:string|null)=>{
-     const sequence=++requestSequence;
      if(!active)return;
      establishmentRef.current=id;
-     setEstablishmentId(id);setLoading(true);setError(null);setWriteError(null);setSaved(false);setSelected(null);setEnabled({});setConfigs({});
+     setLoading(true);setError(null);setWriteError(null);setSaved(false);setSelected(null);setEnabled({});setConfigs({});
      if(!id){setLoading(false);setError('Aucun établissement sélectionné. Sélectionnez un établissement puis réessayez.');return;}
      try{
        const {data,error:queryError}=await supabase.from('smart_marketing_configs').select('establishment_id,smart_id,enabled,config').eq('establishment_id',id);
@@ -53,16 +49,13 @@ export default function SmartMarketingCenter() {
          const safeConfig=row.config&&typeof row.config==='object'&&!Array.isArray(row.config)?row.config:{};
          nextConfigs[row.smart_id]={...defaults,...Object.fromEntries(Object.entries(safeConfig).filter((entry):entry is [string,string]=>typeof entry[1]==='string'))};
        }
-       if(active&&sequence===requestSequence){setEnabled(nextEnabled);setConfigs(nextConfigs);}
-     }catch(err){if(active&&sequence===requestSequence)setError(err instanceof Error?err.message:'Erreur lors du chargement des Smart.');}
-     finally{if(active&&sequence===requestSequence)setLoading(false);}
+       if(active){setEnabled(nextEnabled);setConfigs(nextConfigs);}
+     }catch(err){if(active)setError(err instanceof Error?err.message:'Erreur lors du chargement des Smart.');}
+     finally{if(active)setLoading(false);}
    };
-   const getSelected=()=>{try{return user?.id?localStorage.getItem(`tapmarrakech:selected-establishment:${user.id}`):null;}catch{return null;}};
-   void load(getSelected());
-   const handleChange=(event:Event)=>{const detail=(event as CustomEvent<{establishmentId?:string}>).detail;void load(detail?.establishmentId??getSelected());};
-   window.addEventListener('tapmarrakech:establishment-changed',handleChange);
-   return()=>{active=false;requestSequence++;window.removeEventListener('tapmarrakech:establishment-changed',handleChange);};
- },[user?.id]);
+   void load(establishmentId);
+   return()=>{active=false;};
+ },[establishmentId,reloadKey]);
  const activeCount=SMARTS.filter(s=>OPERATIONAL_SMART_IDS.has(s.id)&&enabled[s.id]).length;
  const openSettings=(smart:Smart)=>{setSelected(smart);setDraft(configs[smart.id]??smart.defaults);setSaved(false);setWriteError(null);};
  const saveRow=async(id:string,enabledValue:boolean,configValue:Record<string,string>)=>{
@@ -80,7 +73,7 @@ export default function SmartMarketingCenter() {
  const toggle=async(id:string)=>{const nextValue=!enabled[id];const currentConfig=configs[id]??SMARTS.find(s=>s.id===id)?.defaults??{};if(id==='nearby'&&nextValue){const lat=Number(currentConfig.latitude),lng=Number(currentConfig.longitude),radius=Number(currentConfig.radius_m);if(currentConfig.latitude?.trim()===''||currentConfig.longitude?.trim()===''||!Number.isFinite(lat)||!Number.isFinite(lng)||lat < -90||lat>90||lng < -180||lng>180||!Number.isFinite(radius)||radius<50||radius>2000){setWriteError('Configurez d’abord latitude, longitude et rayon (50–2 000 m) dans Smart Nearby.');return;}}const ok=await saveRow(id,nextValue,currentConfig);if(ok)setEnabled(previous=>({...previous,[id]:nextValue}));};
  const saveConfig=async()=>{if(!selected)return;if(selected.id==='nearby'){const lat=Number(draft.latitude),lng=Number(draft.longitude),radius=Number(draft.radius_m);if(draft.latitude.trim()===''||draft.longitude.trim()===''||!Number.isFinite(lat)||!Number.isFinite(lng)||lat < -90||lat>90||lng < -180||lng>180||!Number.isFinite(radius)||radius<50||radius>2000){setWriteError('Smart Nearby : coordonnées GPS valides requises et rayon entre 50 et 2 000 mètres.');return;}}const ok=await saveRow(selected.id,enabled[selected.id]??false,draft);if(ok)setConfigs(previous=>({...previous,[selected.id]:draft}));};
  return <div className="space-y-6">
-  {error&&<div role="alert" className="rounded-xl border border-red-500/30 bg-red-950/30 px-4 py-3 text-xs text-red-300">Chargement impossible : {error}<button type="button" className="ml-3 underline" onClick={()=>window.dispatchEvent(new Event('tapmarrakech:establishment-changed'))}>Réessayer</button></div>}
+  {error&&<div role="alert" className="rounded-xl border border-red-500/30 bg-red-950/30 px-4 py-3 text-xs text-red-300">Chargement impossible : {error}<button type="button" className="ml-3 underline" onClick={()=>setReloadKey(value=>value+1)}>Réessayer</button></div>}
   {writeError&&<div role="alert" className="rounded-xl border border-red-500/30 bg-red-950/30 px-4 py-3 text-xs text-red-300">Sauvegarde impossible : {writeError}</div>}
   {loading&&<div className="rounded-xl border border-white/10 bg-[#111] px-4 py-3 text-xs text-white/45">Chargement des Smart depuis Supabase…</div>}
   <section className="rounded-[28px] border border-white/[.08] bg-[radial-gradient(ellipse_at_top_right,rgba(59,130,246,.15),transparent_55%),linear-gradient(145deg,#141414,#070707)] p-5 sm:p-7">
