@@ -19,8 +19,8 @@ Deno.serve(async(req)=>{
  const {data:config,error:cfgErr}=await admin.from('smart_marketing_configs').select('enabled,config').eq('establishment_id',customer.establishment_id).eq('smart_id','nearby').maybeSingle();
  if(cfgErr)return json({success:false,error:'Configuration indisponible'},500);
  if(!config?.enabled)return json({success:true,eligible:false,reason:'disabled'});
- const c=config.config??{},centerLat=Number(c.latitude??c.lat),centerLng=Number(c.longitude??c.lng),radius=normalizeRadius(c.radius_m??c.radius??250);
- if(!validCoordinate(centerLat,centerLng))return json({success:false,error:'Coordonnées établissement non configurées'},409);
+ const c=config.config??{},rawLat=c.latitude??c.lat,rawLng=c.longitude??c.lng,centerLat=Number(rawLat),centerLng=Number(rawLng),radius=normalizeRadius(c.radius_m??c.radius??250);
+ if(rawLat==null||rawLng==null||String(rawLat).trim()===''||String(rawLng).trim()===''||!validCoordinate(centerLat,centerLng))return json({success:false,error:'Coordonnées établissement non configurées'},409);
  const meters=distanceMeters(lat,lng,centerLat,centerLng);
  if(meters>radius)return json({success:true,eligible:false,distance_m:Math.round(meters)});
  const zone=String(c.zone_key??'main').slice(0,40);
