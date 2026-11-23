@@ -1,7 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const cors={ 'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type','Access-Control-Allow-Methods':'POST, OPTIONS' };
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...cors,'Content-Type':'application/json'}});
-import { distanceMeters, validCoordinate, validCoordinateInput, validConfiguredCoordinates, normalizeRadius } from './nearby-geo.ts';
+import { distanceMeters, validCoordinateInput, validConfiguredCoordinates, normalizeRadius } from './nearby-geo.ts';
 Deno.serve(async(req)=>{
  if(req.method==='OPTIONS')return new Response('ok',{headers:cors});
  if(req.method!=='POST')return json({success:false,error:'POST requis'},405);
