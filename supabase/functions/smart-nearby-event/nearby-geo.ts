@@ -7,3 +7,5 @@ export function distanceMeters(lat1:number,lon1:number,lat2:number,lon2:number):
 export function validCoordinate(lat:number,lng:number):boolean {
  return Number.isFinite(lat)&&Number.isFinite(lng)&&lat>=-90&&lat<=90&&lng>=-180&&lng<=180;
 }
+
+export function normalizeRadius(value:unknown):number { const n=Number(value); return Number.isFinite(n)?Math.min(2000,Math.max(50,n)):250; }
