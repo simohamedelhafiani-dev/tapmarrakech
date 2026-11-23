@@ -1,7 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const cors={ 'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type','Access-Control-Allow-Methods':'POST, OPTIONS' };
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...cors,'Content-Type':'application/json'}});
-import { distanceMeters, validCoordinate, normalizeRadius } from './nearby-geo.ts';
+import { distanceMeters, validCoordinate, validCoordinateInput, normalizeRadius } from './nearby-geo.ts';
 Deno.serve(async(req)=>{
  if(req.method==='OPTIONS')return new Response('ok',{headers:cors});
  if(req.method!=='POST')return json({success:false,error:'POST requis'},405);
@@ -9,8 +9,8 @@ Deno.serve(async(req)=>{
  if(!url||!key)return json({success:false,error:'Configuration serveur manquante'},503);
  const admin=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
  const body=await req.json().catch(()=>null),token=typeof body?.access_token==='string'?body.access_token:'';
- const lat=Number(body?.latitude),lng=Number(body?.longitude);
- if(!token||!validCoordinate(lat,lng))return json({success:false,error:'Position ou jeton invalide'},400);
+ const lat=body?.latitude,lng=body?.longitude;
+ if(!token||!validCoordinateInput(lat,lng))return json({success:false,error:'Position ou jeton invalide'},400);
  const {data:link,error:linkErr}=await admin.from('loyalty_customer_links').select('customer_id').eq('access_token',token).maybeSingle();
  if(linkErr||!link)return json({success:false,error:'Carte fidélité non valide'},401);
  const {data:customer,error:cErr}=await admin.from('loyalty_customers').select('id,establishment_id,notification_consent,marketing_consent').eq('id',link.customer_id).maybeSingle();
