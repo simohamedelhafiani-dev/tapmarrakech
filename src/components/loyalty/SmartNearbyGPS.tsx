@@ -20,7 +20,9 @@ export default function SmartNearbyGPS({ accessToken }: { accessToken: string })
  },[enabled,accessToken]);
  function toggle(){
   const next=!enabled;setEnabled(next);
-  try{if(next)localStorage.setItem(storageKey,'yes');else localStorage.removeItem(storageKey);}catch{}
+  try{if(next)localStorage.setItem(storageKey,'yes');else localStorage.removeItem(storageKey);}catch{
+   // Browser storage may be disabled; keep the consent toggle in React state for this session.
+  }
   setStatus(next?'Demande d’autorisation GPS…':'Smart Nearby désactivé.');
  }
  return <section className="mt-3 rounded-2xl border border-white/10 bg-[#101010] p-4" aria-label="Smart Nearby">
