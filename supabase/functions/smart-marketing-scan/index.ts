@@ -3,7 +3,7 @@ import { extractBearerToken, parseSmartConfigNumber } from '../smart-marketing-d
 
 const headers = { 'Content-Type': 'application/json' };
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers });
-const supported = new Set(['winback', 'birthday', 'vip', 'progress']);
+const supported = new Set(['winback', 'birthday', 'vip', 'progress', 'reward', 'happyhour', 'challenge', 'referral', 'comeback']);
 type ConfigRow = { establishment_id: string; smart_id: string; enabled: boolean; config: Record<string, unknown> };
 type Customer = { id: string; establishment_id: string; first_name: string | null; last_visit_at: string | null; visit_count: number | null; points_balance: number | null; birth_day: number | null; birth_month: number | null; stamps_balance: number | null; notification_consent: boolean | null; marketing_consent: boolean | null; };
 
@@ -24,6 +24,7 @@ Deno.serve(async (req) => {
   if (!url || !serviceKey) return json({ success: false, error: 'Configuration Supabase absente.' }, 503);
   const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
   const date = localDateParts();
+  const localTime = new Intl.DateTimeFormat('en-GB', { timeZone: 'Africa/Casablanca', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date());
   const { data: configs, error: configError } = await admin.from('smart_marketing_configs').select('establishment_id,smart_id,enabled,config').eq('enabled', true);
   if (configError) return json({ success: false, error: 'Lecture configurations impossible.' }, 500);
   let scanned = 0, queued = 0, skippedUnsupported = 0;
@@ -52,6 +53,59 @@ Deno.serve(async (req) => {
     if (settingsError) {
       runErrors.push('Loyalty settings lookup failed');
       errors.push(`${cfg.smart_id}: loyalty settings lookup failed`);
+    }
+    // Smart Reward: notify customers with an unredeemed reward claim expiring soon.
+    if (cfg.smart_id === 'reward') {
+      const reminderDays = Math.max(0, Math.min(30, num(settings.reminderDays ?? settings.reminder_days, 2)));
+      const cutoff = new Date(Date.now() + reminderDays * 86400000).toISOString();
+      const { data: claims, error: claimError } = await admin.from('loyalty_reward_claims')
+        .select('id,customer_id,reward_name,expires_at,status')
+        .eq('establishment_id', cfg.establishment_id).eq('status', 'PENDING').lte('expires_at', cutoff).gt('expires_at', new Date().toISOString());
+      if (claimError) { runErrors.push('Reward claims lookup failed'); errors.push('reward: claims lookup failed'); }
+      for (const claim of claims ?? []) {
+        const customer = (customers ?? []).find((c: Customer) => c.id === claim.customer_id);
+        if (!customer?.marketing_consent) continue;
+        eligible.push({ customer, trigger: `reward:${claim.id}:${claim.expires_at}`, payload: { reward_name: claim.reward_name, expires_at: claim.expires_at, claim_id: claim.id } });
+      }
+    }
+    // Smart Happy Hour: schedule config accepts "HH:mm-HH:mm" and optional weekdays (0-6).
+    if (cfg.smart_id === 'happyhour') {
+      const schedule = String(settings.schedule ?? '').trim();
+      const match = schedule.match(/(\\d{2}:\\d{2})\\s*-\\s*(\\d{2}:\\d{2})/);
+      const daysRaw = String(settings.days ?? '').trim();
+      const weekday = Number(new Intl.DateTimeFormat('en-US', { timeZone: 'Africa/Casablanca', weekday: 'short' }).format(new Date()).replace(/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)$/, m => String(['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(m))));
+      const validTime = (s: string) => /^([01]\\d|2[0-3]):[0-5]\\d$/.test(s);
+      if (match && validTime(match[1]) && validTime(match[2]) && match[1] < match[2] && localTime >= match[1] && localTime < match[2]) {
+        const allowed = daysRaw.split(',').map(x => Number(x.trim())).filter(x => Number.isInteger(x) && x >= 0 && x <= 6);
+        if (!allowed.length || allowed.includes(weekday)) {
+          for (const customer of (customers ?? []) as Customer[]) if (customer.marketing_consent) eligible.push({ customer, trigger: `happyhour:${date.date}:${match[1]}:${match[2]}`, payload: { schedule, offer: settings.offer ?? '' } });
+        }
+      }
+    }
+    // Smart Challenge: total visit-count milestone (not a weekly visit counter).
+    if (cfg.smart_id === 'challenge') {
+      const goal = Math.max(1, Math.min(1000, num(settings.goalVisits ?? settings.goal_visits ?? settings.goal, 3)));
+      for (const customer of (customers ?? []) as Customer[]) if (customer.marketing_consent && (customer.visit_count ?? 0) >= goal) eligible.push({ customer, trigger: `challenge:${goal}`, payload: { visits: customer.visit_count, goal, reward: settings.reward ?? '' } });
+    }
+    // Smart Referral: notify the referrer when a pending referral is created (reward remains governed by referral engine).
+    if (cfg.smart_id === 'referral') {
+      const { data: refs, error: referralError } = await admin.from('loyalty_referrals').select('id,referrer_id,referee_id,status,created_at').eq('establishment_id', cfg.establishment_id).eq('status', 'pending');
+      if (referralError) { runErrors.push('Referral lookup failed'); errors.push('referral: lookup failed'); }
+      for (const ref of refs ?? []) {
+        const customer = (customers ?? []).find((c: Customer) => c.id === ref.referrer_id);
+        if (customer?.marketing_consent) eligible.push({ customer, trigger: `referral:${ref.id}`, payload: { referral_id: ref.id, referred_customer_id: ref.referee_id } });
+      }
+    }
+    // Smart Comeback: stepped messages at configured inactivity thresholds, deduped per visit date and step.
+    if (cfg.smart_id === 'comeback') {
+      const rawSteps = String(settings.steps ?? '30,37,45').match(/\\d+/g)?.map(Number) ?? [30,37,45];
+      const steps = [...new Set(rawSteps.filter(n => n >= 1 && n <= 365))].sort((a,b)=>a-b);
+      for (const customer of (customers ?? []) as Customer[]) {
+        if (!customer.marketing_consent || !customer.last_visit_at || !steps.length) continue;
+        const elapsed = Math.floor((Date.now() - new Date(customer.last_visit_at).getTime()) / 86400000);
+        const step = steps.filter(n => n <= elapsed).at(-1);
+        if (step) eligible.push({ customer, trigger: `comeback:${customer.last_visit_at.slice(0,10)}:${step}`, payload: { inactive_days: elapsed, step_days: step, steps } });
+      }
     }
     for (const customer of (customers ?? []) as Customer[]) {
       scanned++;
