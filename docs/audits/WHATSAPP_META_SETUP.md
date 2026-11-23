@@ -9,7 +9,7 @@ Dans Meta for Developers, sélectionner l’application KELYANI utilisée pour l
 - ajouter/configurer le produit WhatsApp et le parcours Embedded Signup ;
 - créer une configuration Embedded Signup compatible avec WhatsApp Cloud API et récupérer son ID ;
 - autoriser le domaine HTTPS de KELYANI dans les réglages de l’application et les domaines/URL OAuth pertinents ;
-- demander les accès WhatsApp nécessaires à la lecture du WABA et à l’envoi/réception, notamment `whatsapp_business_management` et `whatsapp_business_messaging` ;
+- demander les accès WhatsApp nécessaires à la lecture du WABA et à l’envoi/réception, notamment `business_management`, `whatsapp_business_management` et `whatsapp_business_messaging` ;
 - effectuer la vérification de l’entreprise et la revue d’application/Advanced Access requises avant l’usage par des clients externes ;
 - configurer le produit Webhooks pour l’objet WhatsApp Business Account et s’abonner au champ `messages`.
 
@@ -36,7 +36,7 @@ Les valeurs serveur doivent être définies dans le projet Supabase auquel le fr
 
 ## 3. Appliquer et déployer
 
-1. Vérifier que les migrations WhatsApp sont appliquées dans l’ordre, dont `20261121150000_create_whatsapp_connections.sql`, `20261121170000_create_whatsapp_inbox_schema.sql`, `20261121183000_whatsapp_outbound_idempotency.sql`, `20261122180000_whatsapp_oauth_state_nonce.sql`, `20261123100000_reconcile_whatsapp_connection_schema.sql` et `20261123110000_whatsapp_vault_secret_functions.sql`;
+1. Vérifier que les migrations WhatsApp sont appliquées dans l’ordre, dont `20261121150000_create_whatsapp_connections.sql`, `20261121170000_create_whatsapp_inbox_schema.sql`, `20261121183000_whatsapp_outbound_idempotency.sql`, `20261122180000_whatsapp_oauth_state_nonce.sql`, `20261123100000_reconcile_whatsapp_connection_schema.sql` et `20261123110000_whatsapp_vault_secret_functions.sql`.
 2. Vérifier que l’extension Supabase Vault est disponible dans le projet.
 3. Déployer `whatsapp-oauth-state`, `whatsapp-oauth-exchange`, `whatsapp-webhook`, `whatsapp-inbox` et `whatsapp-send-message`.
 4. Garder la vérification JWT activée pour les quatre fonctions invoquées par un utilisateur connecté. La fonction `whatsapp-webhook` doit accepter la vérification GET de Meta sans JWT ; elle valide la signature HMAC SHA-256 des POST.
