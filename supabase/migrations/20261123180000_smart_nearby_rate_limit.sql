@@ -44,7 +44,7 @@ begin
       else current_limit.request_count + 1
     end,
     updated_at = v_now
-  returning smart_nearby_rate_limits.window_started_at, smart_nearby_rate_limits.request_count
+  returning current_limit.window_started_at, current_limit.request_count
   into v_start, v_count;
 
   return query select (v_count <= v_limit), v_count, v_start;
