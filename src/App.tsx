@@ -260,14 +260,20 @@ function App() {
             <Route path="/admin/statcard-test" element={<AdminStatCardTest />} />
           </Route>
 
+          <Route element={<ProtectedRoute allowedRoles={['admin', 'responsible']} />}>
+            <Route element={<DashboardLayout />}>
+              <Route path="/dashboard/whatsapp" element={<WhatsAppConnect />} />
+              <Route path="/dashboard/whatsapp/inbox" element={<WhatsAppInbox />} />
+            </Route>
+          </Route>
+
           <Route element={<ProtectedRoute allowedRoles={['responsible']} />}>
             <Route path="/dashboard/onboarding" element={<Onboarding />} />
             <Route element={<OnboardingGate />}>
               <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/dashboard/assistant-ia" element={<AssistantIA />} />
-              <Route path="/dashboard/whatsapp" element={<WhatsAppConnect />} />
-              <Route path="/dashboard/whatsapp/inbox" element={<WhatsAppInbox />} />
+
               <Route
                 path="/dashboard/reviews"
                 element={
