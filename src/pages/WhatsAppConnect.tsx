@@ -285,9 +285,6 @@ export default function WhatsAppConnect() {
 
       const { code, assets } = await startEmbeddedSignup(facebook, configId, controller.signal);
       if (!mountedRef.current) return;
-      if (!assets.phoneNumberId) {
-        throw new Error('Meta a connecté le compte WhatsApp Business, mais aucun numéro n’a été sélectionné. Terminez l’ajout ou la sélection du numéro dans Meta, puis relancez la connexion.');
-      }
       const result = await supabase.functions.invoke('whatsapp-oauth-exchange', {
         body: {
           code,
@@ -310,7 +307,7 @@ export default function WhatsAppConnect() {
           meta_phone_numbers_verification_unavailable: 'La vérification du numéro a échoué temporairement. Relancez la connexion.',
           meta_phone_numbers_verification_failed: 'Meta n’a pas permis de vérifier la liste des numéros de ce compte.',
           meta_phone_numbers_verification_incomplete: 'La liste des numéros Meta est trop longue pour être vérifiée en une seule tentative. Relancez la connexion.',
-          phone_number_not_attached_to_waba: 'Le numéro choisi n’est pas rattaché au compte WhatsApp Business sélectionné.',
+          phone_number_not_attached_to_waba: 'Le numéro choisi n’est pas rattaché au compte WhatsApp Business sélectionné.',\n          coexistence_multiple_phone_numbers_require_selection: 'Plusieurs numéros sont associés à ce compte WhatsApp. La sélection explicite du numéro est nécessaire avant de terminer la connexion.',\n          coexistence_phone_number_not_found: 'Aucun numéro WhatsApp n’a été trouvé sur ce compte. Terminez l’ajout du numéro dans Meta puis relancez la connexion.',
           secure_token_storage_failed: 'La connexion Meta est vérifiée, mais le stockage sécurisé a échoué. Contactez le support avant de recommencer.',
           connection_save_failed: 'La connexion Meta est vérifiée, mais son enregistrement a échoué. Contactez le support avant de recommencer.',
           oauth_state_invalid_expired_or_used: 'Cette tentative de connexion a expiré ou a déjà été utilisée. Relancez le parcours Meta.',
