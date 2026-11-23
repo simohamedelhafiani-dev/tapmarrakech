@@ -17,7 +17,7 @@ const SMARTS: Smart[] = [
  {id:'comeback',name:'Smart Comeback',tagline:'Reconquête progressive des clients perdus',description:'Lance une séquence de relance et l’arrête dès que le client revient.',trigger:'Inactivité prolongée détectée',icon:Megaphone,color:'#818CF8',defaults:{steps:'J+30, J+37, J+45',channel:'Push / WhatsApp selon consentement',message:'Cela fait longtemps ! Nous aimerions te revoir. Profite de ton avantage de retour.'}},
 ];
 const SMART_IDS = SMARTS.map((smart) => smart.id);
-const OPERATIONAL_SMART_IDS = new Set(['winback','birthday','vip','progress']);
+const OPERATIONAL_SMART_IDS = new Set(['winback','birthday','vip','progress','reward','happyhour','challenge','referral','comeback']);
 type SmartConfigRow = { establishment_id: string; smart_id: string; enabled: boolean; config: Record<string, unknown> };
 export default function SmartMarketingCenter() {
  const {user}=useAuth();
@@ -95,7 +95,7 @@ export default function SmartMarketingCenter() {
     <div className="mt-4 flex items-center justify-between border-t border-white/[.06] pt-3"><span className={`text-[10px] font-medium ${displayOn?'text-[#60A5FA]':'text-white/25'}`}>{operational?(isOn?'Active':'Inactive'):'Disponible prochainement'}</span><button type="button" onClick={()=>openSettings(s)} disabled={!operational||loading||saving||!!error} className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-[#60A5FA] hover:text-blue-300 disabled:cursor-not-allowed disabled:opacity-40"><Settings2 size={13}/> Configurer <ArrowUpRight size={12}/></button></div>
    </article>})}
   </div>
-  <p className="text-[10px] leading-5 text-white/30">Les paramètres sont enregistrés dans Supabase pour cet établissement. Les campagnes ne sont pas encore exécutées et aucun message n’est envoyé.</p>
+  <p className="text-[10px] leading-5 text-white/30">Les paramètres sont enregistrés dans Supabase pour cet établissement. 9 Smart sont prises en charge par le moteur de notifications in-app sur cette branche. Smart Nearby reste désactivée : elle nécessite une source de position client en temps réel.</p>
   {selected&&<div className="fixed inset-0 z-[100] grid place-items-center bg-black/75 p-3 backdrop-blur-sm" onClick={()=>setSelected(null)}><div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-white/[.1] bg-[#111111] p-5 shadow-2xl" onClick={e=>e.stopPropagation()}>
    <div className="flex items-start justify-between gap-3"><div><p className="text-[9px] font-bold uppercase tracking-[.18em] text-[#3B82F6]">Paramètres automation</p><h2 className="mt-1 text-lg font-semibold text-white">{selected.name}</h2></div><button onClick={()=>setSelected(null)} className="grid h-9 w-9 place-items-center rounded-full border border-white/10 text-white/60"><X size={16}/></button></div>
    <p className="mt-2 text-xs leading-5 text-white/45">{selected.description}</p>
