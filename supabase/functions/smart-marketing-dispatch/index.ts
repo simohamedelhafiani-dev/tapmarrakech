@@ -41,12 +41,11 @@ Deno.serve(async(req)=>{
    }
    const messagePayload={...(q.payload??{})};
    if(q.smart_id==='reward'){
-    const claimId=String(q.payload?.claim_id??'');
-    const {data:claim,error:claimError}=await admin.from('loyalty_reward_claims').select('id,customer_id,establishment_id,reward_name,expires_at,status').eq('id',claimId).eq('customer_id',q.customer_id).eq('establishment_id',q.establishment_id).maybeSingle();
-    if(claimError)throw claimError;
-    const reminderDays=Math.max(0,Math.min(30,Number.parseFloat(String(liveConfig.config?.reminderDays??liveConfig.config?.reminder_days??2))||2));
-    if(!claim||claim.status!=='PENDING'||new Date(claim.expires_at).getTime()<=Date.now()||new Date(claim.expires_at).getTime()>Date.now()+reminderDays*86400000){await markSkipped(q.id,'Reward claim no longer eligible');skipped++;continue;}
-    messagePayload.reward_name=claim.reward_name;messagePayload.expires_at=claim.expires_at;
+    const {data:settings,error:settingsError}=await admin.from('loyalty_settings').select('stamp_goal,stamp_reward_name,stamp_reward_description').eq('establishment_id',q.establishment_id).eq('program_type','STAMP').eq('enabled',true).maybeSingle();
+    if(settingsError)throw settingsError;
+    const goal=Math.max(1,Number(settings?.stamp_goal)||10),stamps=Number(c.stamps_balance??0);
+    if(!settings||stamps<goal||q.trigger_key!==`reward:${goal}:${stamps}`){await markSkipped(q.id,'Stamp reward no longer eligible');skipped++;continue;}
+    messagePayload.reward_name=settings.stamp_reward_name;messagePayload.reward_description=settings.stamp_reward_description;messagePayload.stamps=stamps;messagePayload.goal=goal;
    }
    if(q.smart_id==='happyhour'){
     const schedule=String(liveConfig.config?.schedule??'').trim();
