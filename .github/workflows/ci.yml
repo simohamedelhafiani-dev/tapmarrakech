@@ -11,8 +11,11 @@ concurrency:
   cancel-in-progress: true
 
 on:
-  # Automated CI is paused while the final product version is assembled.
-  # Run manually after the release candidate is ready for validation.
+  # Validate pull requests against the final consolidation base. This workflow
+  # contains checks only; it does not deploy or apply remote migrations.
+  pull_request:
+    branches:
+      - integration/kelyani-final-consolidation-2026-11
   workflow_dispatch:
 
 jobs:
@@ -116,6 +119,8 @@ jobs:
 
       - name: Test Edge Function authorization parsing
         run: deno test supabase/functions/_shared/
+      - name: Test Smart Marketing queue utilities
+        run: deno test supabase/functions/smart-marketing-dispatch/smart-marketing-utils.test.ts
 
       - name: Type-check Supabase Edge Functions
         run: |
@@ -140,5 +145,7 @@ jobs:
             supabase/functions/google-wallet-create-pass/index.ts \
             supabase/functions/import-menu/index.ts \
             supabase/functions/send-loyalty-notification-push/index.ts \
+            supabase/functions/smart-marketing-scan/index.ts \
+            supabase/functions/smart-marketing-dispatch/index.ts \
             supabase/functions/send-promotion-push/index.ts \
             supabase/functions/submit-public-review/index.ts

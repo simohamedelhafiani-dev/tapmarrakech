@@ -51,4 +51,6 @@ GRANT SELECT ON TABLE public.loyalty_settings TO anon;
 GRANT SELECT ON TABLE public.menu_categories TO anon;
 GRANT SELECT ON TABLE public.menu_items TO anon;
 GRANT SELECT ON TABLE public.promotions TO anon;
-GRANT INSERT ON TABLE public.reviews TO anon;
+-- Public review creation is routed through submit-public-review Edge Function.
+-- Keep direct Data API writes disabled for browser roles.
+REVOKE INSERT ON TABLE public.reviews FROM anon, authenticated;

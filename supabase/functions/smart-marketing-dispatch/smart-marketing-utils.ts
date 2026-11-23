@@ -1,0 +1,29 @@
+export function extractBearerToken(header:string|null):string|null {
+ if(!header)return null;
+ const match=header.match(/^Bearer\s+(.+)$/i);
+ return match?.[1]?.trim() || null;
+}
+export function normalizeLimit(value:unknown):number {
+ const n=Number(value);
+ return Number.isFinite(n)&&n>0 ? Math.max(1,Math.min(Math.floor(n),200)) : 50;
+}
+export function progressThreshold(goal:number):number {
+ return Math.max(1,Math.ceil(Math.max(1,goal)*0.8));
+}
+export function buildTriggerKey(type:string,date:string,days?:number):string {
+ return days===undefined ? `${type}:${date}` : `${type}:${date}:${days}`;
+}
+
+export function parseSmartConfigNumber(value: unknown, fallback: number): number {
+  const parsed = typeof value === 'string' ? Number.parseFloat(value.trim()) : Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+export function resolveSmartMessage(customMessage: unknown, fallbackMessage: string): string {
+  return typeof customMessage === 'string' && customMessage.trim().length > 0 ? customMessage.trim() : fallbackMessage;
+}
+
+export function retryDelayMinutes(attempts: number): number {
+  const normalized = Number.isFinite(attempts) ? Math.max(1, Math.floor(attempts)) : 1;
+  return Math.min(30, 2 ** Math.max(0, normalized - 1));
+}
