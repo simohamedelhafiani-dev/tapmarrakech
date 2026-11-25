@@ -46,6 +46,8 @@ SELECT
   (SELECT id FROM public.profiles WHERE name = 'WhatsApp access fixture 4'),
   (SELECT id FROM public.establishments WHERE name = 'WhatsApp access fixture' ORDER BY created_at DESC LIMIT 1);
 
+GRANT SELECT ON whatsapp_access_fixture TO authenticated;
+
 INSERT INTO public.establishment_staff (establishment_id, user_id, role, active)
 SELECT establishment_id, responsible_id, 'MANAGER', true FROM whatsapp_access_fixture
 UNION ALL
