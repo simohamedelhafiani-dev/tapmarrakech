@@ -41,6 +41,9 @@ Deno.serve(async(req)=>{
  const title=String(c.title??'Vous êtes à proximité !').slice(0,120),message=String(c.message??'Passez nous voir, nous serons ravis de vous accueillir !').slice(0,1000);
  const {data:atomicResult,error:atomicError}=await admin.rpc('smart_nearby_notify_atomic',{p_customer_id:customer.id,p_establishment_id:customer.establishment_id,p_zone_key:zone,p_title:title,p_message:message});
  if(atomicError||!Array.isArray(atomicResult)||!atomicResult[0])return json({success:false,error:'Notification non créée'},500);
- if(atomicResult[0].created===false)return json({success:true,eligible:false,reason:'already_notified_today'});
+ if(atomicResult[0].created===false){
+  if(atomicResult[0].consent_valid===false)return json({success:true,eligible:false,reason:'consent_revoked_or_missing'});
+  return json({success:true,eligible:false,reason:'already_notified_today'});
+ }
  return json({success:true,eligible:true,distance_m:Math.round(meters),notification:'in_app'});
 });
