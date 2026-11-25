@@ -4,6 +4,7 @@ import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip as ChartTooltip } fro
 import { useLanguage, type Language } from '@/contexts/LanguageContext';
 import {
   BarChart3,
+  MessageCircle,
   Bell,
   Building2,
   Gift,
@@ -150,6 +151,7 @@ type AdminSection =
   | 'reports'
   | 'billing'
   | 'loyalty'
+  | 'whatsapp'
   | 'system';
 
 export default function Admin() {
@@ -163,7 +165,7 @@ export default function Admin() {
     if (slug === 'reviews') return 'ai';
     const validSections: AdminSection[] = [
       'overview', 'establishments', 'responsibles', 'employees', 'reviews',
-      'analysis', 'ai', 'analytics', 'reports', 'billing', 'loyalty', 'system',
+      'analysis', 'ai', 'analytics', 'reports', 'billing', 'loyalty', 'whatsapp', 'system',
     ];
     return validSections.includes(slug as AdminSection) ? slug as AdminSection : 'overview';
   };
@@ -595,6 +597,11 @@ export default function Admin() {
       icon: Gem,
     },
     {
+      id: 'whatsapp',
+      label: 'WhatsApp',
+      icon: MessageCircle,
+    },
+    {
       id: 'system',
       label: 'Supervision technique',
       icon: Activity,
@@ -876,6 +883,28 @@ export default function Admin() {
                   <p className="mt-2 text-sm text-[#FFFFFF]/45">Créez d’abord un établissement pour configurer son programme de fidélité.</p>
                 </div>
               )}
+            </section>
+          )}
+
+          {section === 'whatsapp' && (
+            <section className="space-y-5">
+              <header className="rounded-3xl border border-[#686D76]/30 bg-[#111111] p-6">
+                <p className="text-xs font-semibold uppercase tracking-widest text-[#3B82F6]">Centre de communication</p>
+                <h2 className="mt-2 text-2xl font-semibold text-white">WhatsApp Business</h2>
+                <p className="mt-2 max-w-2xl text-sm text-white/50">Connecte WhatsApp Business à KELYANI, puis accède à la boîte de réception pour gérer les conversations.</p>
+              </header>
+              <div className="grid gap-4 md:grid-cols-2">
+                <button type="button" onClick={() => navigate('/admin/whatsapp/connect')} className="rounded-3xl border border-[#686D76]/30 bg-[#111111] p-6 text-left transition hover:border-[#3B82F6]/60">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#686D76]/30 text-[#3B82F6]"><MessageCircle size={20} /></span>
+                  <h3 className="mt-4 text-lg font-semibold text-white">Connexion & réglages</h3>
+                  <p className="mt-2 text-sm text-white/45">Connecter un compte WhatsApp Business et consulter son état.</p>
+                </button>
+                <button type="button" onClick={() => navigate('/admin/whatsapp/inbox')} className="rounded-3xl border border-[#686D76]/30 bg-[#111111] p-6 text-left transition hover:border-[#3B82F6]/60">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#686D76]/30 text-[#3B82F6]"><MessageSquare size={20} /></span>
+                  <h3 className="mt-4 text-lg font-semibold text-white">Boîte de réception</h3>
+                  <p className="mt-2 text-sm text-white/45">Voir les conversations et répondre aux messages.</p>
+                </button>
+              </div>
             </section>
           )}
 
