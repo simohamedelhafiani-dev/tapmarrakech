@@ -1,4 +1,4 @@
-import { extractBearerToken, normalizeLimit, resolveSmartMessage, retryDelayMinutes, parseHappyHourSchedule } from './smart-marketing-utils.ts';
+import { extractBearerToken, normalizeLimit, resolveSmartMessage, retryDelayMinutes, parseHappyHourSchedule, resolveRewardClaimCycle } from './smart-marketing-utils.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json'}});
 const templates:Record<string,{title:string;message:(p:Record<string,unknown>)=>string;type:'INFO'|'OFFER'|'REWARD'|'POINTS'}>={
@@ -53,10 +53,8 @@ Deno.serve(async(req)=>{
       .limit(1)
       .maybeSingle();
     if(claimError)throw claimError;
-    const pendingActive=latestClaim?.status==='PENDING'&&Date.parse(latestClaim.expires_at)>Date.now();
-    const cycleStatus=latestClaim?(latestClaim.status==='PENDING'&&!pendingActive?'EXPIRED':latestClaim.status):'INITIAL';
-    const cycleKey=latestClaim?`${latestClaim.id}:${cycleStatus}`:'initial';
-    if(!settings||stamps<goal||pendingActive||q.trigger_key!==`reward:${goal}:${cycleKey}`){await markSkipped(q.id,'Stamp reward cycle is no longer eligible');skipped++;continue;}
+    const cycle=resolveRewardClaimCycle(goal,latestClaim);
+    if(!settings||stamps<goal||cycle.pendingActive||q.trigger_key!==cycle.triggerKey){await markSkipped(q.id,'Stamp reward cycle is no longer eligible');skipped++;continue;}
     messagePayload.reward_name=settings.stamp_reward_name;messagePayload.reward_description=settings.stamp_reward_description;messagePayload.stamps=stamps;messagePayload.goal=goal;
    }
    if(q.smart_id==='happyhour'){
