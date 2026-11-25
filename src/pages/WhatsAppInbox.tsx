@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 
 type Establishment = { id: string; name?: string };
@@ -8,6 +8,9 @@ type Conversation = { id: string; customer_phone: string; customer_name: string 
 const dateLabel = (value: string) => new Intl.DateTimeFormat('fr-FR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value));
 
 export default function WhatsAppInbox() {
+  const location = useLocation();
+  const isAdminPath = location.pathname.startsWith('/admin/whatsapp');
+  const connectPath = isAdminPath ? '/admin/whatsapp/connect' : '/dashboard/whatsapp';
   const [establishments, setEstablishments] = useState<Establishment[]>([]);
   const [establishmentId, setEstablishmentId] = useState('');
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -90,7 +93,7 @@ export default function WhatsAppInbox() {
     <main className="mx-auto w-full max-w-7xl p-4 text-white md:p-8">
       <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div><p className="text-xs font-semibold uppercase tracking-widest text-[#3B82F6]">KELYANI WhatAI</p><h1 className="mt-1 text-2xl font-semibold">Boîte WhatsApp</h1><p className="mt-1 text-sm text-white/45">Conversations entrantes et réponses manuelles.</p></div>
-        <Link to="/dashboard/whatsapp" className="rounded-xl border border-[#686D76] px-4 py-2 text-sm text-white/70 hover:text-white">Connexion WhatsApp</Link>
+        <Link to={connectPath} className="rounded-xl border border-[#686D76] px-4 py-2 text-sm text-white/70 hover:text-white">Connexion WhatsApp</Link>
       </header>
       {establishments.length > 1 && <label className="mb-4 block max-w-md text-xs text-white/60">Établissement<select value={establishmentId} onChange={e=>setEstablishmentId(e.target.value)} className="mt-2 w-full rounded-xl border border-[#686D76] bg-[#161616] p-3 text-sm text-white">{establishments.map(x=><option key={x.id} value={x.id}>{x.name||x.id}</option>)}</select></label>}
       {notice && <p role="status" className="mb-4 rounded-xl border border-[#686D76] p-3 text-sm text-white/70">{notice}</p>}

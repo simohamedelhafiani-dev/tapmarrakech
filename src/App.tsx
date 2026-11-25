@@ -254,10 +254,19 @@ function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
 
           <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+            <Route path="/admin/whatsapp/connect" element={<WhatsAppConnect />} />
+            <Route path="/admin/whatsapp/inbox" element={<WhatsAppInbox />} />
             <Route path="/admin/*" element={<Admin />} />
             <Route path="/admin/overview-test" element={<AdminOverview />} />
             <Route path="/admin/overview-v2" element={<AdminOverviewV2 />} />
             <Route path="/admin/statcard-test" element={<AdminStatCardTest />} />
+          </Route>
+
+          <Route element={<ProtectedRoute allowedRoles={['admin', 'responsible']} />}>
+            <Route element={<DashboardLayout />}>
+              <Route path="/dashboard/whatsapp" element={<WhatsAppConnect />} />
+              <Route path="/dashboard/whatsapp/inbox" element={<WhatsAppInbox />} />
+            </Route>
           </Route>
 
           <Route element={<ProtectedRoute allowedRoles={['responsible']} />}>
@@ -266,8 +275,7 @@ function App() {
               <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/dashboard/assistant-ia" element={<AssistantIA />} />
-              <Route path="/dashboard/whatsapp" element={<WhatsAppConnect />} />
-              <Route path="/dashboard/whatsapp/inbox" element={<WhatsAppInbox />} />
+
               <Route
                 path="/dashboard/reviews"
                 element={
