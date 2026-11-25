@@ -44,3 +44,20 @@ export function formatLocalDateKey(year: unknown, month: unknown, day: unknown):
   if (!/^\d{4}$/.test(y) || !/^\d{2}$/.test(m) || !/^\d{2}$/.test(d)) return '';
   return `${y}-${m}-${d}`;
 }
+
+export function resolveRewardClaimCycle(
+  goal: number,
+  claim: { id?: unknown; claim_id?: unknown; status?: unknown; claim_status?: unknown; expires_at?: unknown } | null | undefined,
+  nowMs = Date.now(),
+): { pendingActive: boolean; triggerKey: string } {
+  if (!claim) return { pendingActive: false, triggerKey: `reward:${goal}:initial` };
+  const claimId = String(claim.claim_id ?? claim.id ?? '');
+  const status = String(claim.claim_status ?? claim.status ?? '').toUpperCase();
+  const expiry = Date.parse(String(claim.expires_at ?? ''));
+  const pendingActive = status === 'PENDING' && Number.isFinite(expiry) && expiry > nowMs;
+  const cycleStatus = status === 'PENDING' && !pendingActive ? 'EXPIRED' : (status || 'UNKNOWN');
+  return {
+    pendingActive,
+    triggerKey: `reward:${goal}:${claimId ? `${claimId}:${cycleStatus}` : 'initial'}`,
+  };
+}
