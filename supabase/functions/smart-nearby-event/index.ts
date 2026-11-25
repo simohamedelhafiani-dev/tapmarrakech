@@ -13,9 +13,11 @@ Deno.serve(async(req)=>{
  if(!token||!validCoordinateInput(lat,lng))return json({success:false,error:'Position ou jeton invalide'},400);
  const {data:link,error:linkErr}=await admin.from('loyalty_customer_links').select('customer_id').eq('access_token',token).maybeSingle();
  if(linkErr||!link)return json({success:false,error:'Carte fidélité non valide'},401);
- const {data:customer,error:cErr}=await admin.from('loyalty_customers').select('id,establishment_id,notification_consent,marketing_consent').eq('id',link.customer_id).maybeSingle();
+ const {data:customer,error:cErr}=await admin.from('loyalty_customers').select('id,establishment_id,notification_consent,marketing_consent,gps_consent').eq('id',link.customer_id).maybeSingle();
  if(cErr||!customer)return json({success:false,error:'Client introuvable'},401);
- // Reject customers without the required existing consents before consuming their rate-limit budget.
+ // GPS consent is independent of marketing and notification preferences and must be present on the server.
+ if(!customer.gps_consent)return json({success:true,eligible:false,reason:'gps_consent_missing'});
+ // Reject customers without the required communication consents before consuming their rate-limit budget.
  if(!customer.notification_consent||!customer.marketing_consent)return json({success:true,eligible:false,reason:'consent_missing'});
  // Atomically limit consented customer calls across Edge instances: 10 per 60-second window.
  // Fail closed if the limiter RPC is unavailable to avoid bypassing the protection.
