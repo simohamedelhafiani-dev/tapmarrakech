@@ -1,47 +1,43 @@
-DO $test$
-DECLARE
-  v_scan_command text;
-  v_dispatch_command text;
-  v_scan_active boolean;
-  v_dispatch_active boolean;
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_net') THEN
-    RAISE EXCEPTION 'pg_net extension is not installed';
-  END IF;
+BEGIN;
+SELECT plan(8);
 
-  SELECT command, active INTO v_scan_command, v_scan_active
-  FROM cron.job WHERE jobname = 'kelyani-smart-marketing-scan';
-  IF v_scan_command IS NULL THEN
-    RAISE EXCEPTION 'Smart Marketing scan cron job is missing';
-  END IF;
+SELECT ok(EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_net'), 'pg_net extension is installed');
 
-  SELECT command, active INTO v_dispatch_command, v_dispatch_active
-  FROM cron.job WHERE jobname = 'kelyani-smart-marketing-dispatch';
-  IF v_dispatch_command IS NULL THEN
-    RAISE EXCEPTION 'Smart Marketing dispatch cron job is missing';
-  END IF;
+SELECT ok(EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'kelyani-smart-marketing-scan'), 'Smart Marketing scan cron job exists');
+SELECT ok(EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'kelyani-smart-marketing-dispatch'), 'Smart Marketing dispatch cron job exists');
 
-  IF v_scan_command ILIKE '%tehhhdtfbonneqbyvlwx%'
-     OR v_dispatch_command ILIKE '%tehhhdtfbonneqbyvlwx%'
-     OR v_scan_command ILIKE '%https://%.supabase.co/functions/%'
-     OR v_dispatch_command ILIKE '%https://%.supabase.co/functions/%' THEN
-    RAISE EXCEPTION 'Smart Marketing scheduler contains a hardcoded project URL';
-  END IF;
+SELECT ok(
+  (SELECT command ILIKE '%kelyani_supabase_url%' AND command ILIKE '%smart_marketing_cron_secret%'
+   FROM cron.job WHERE jobname = 'kelyani-smart-marketing-scan'),
+  'scan job resolves its project URL and bearer secret from Vault'
+);
+SELECT ok(
+  (SELECT command ILIKE '%kelyani_supabase_url%' AND command ILIKE '%smart_marketing_cron_secret%'
+   FROM cron.job WHERE jobname = 'kelyani-smart-marketing-dispatch'),
+  'dispatch job resolves its project URL and bearer secret from Vault'
+);
+SELECT ok(
+  NOT EXISTS (
+    SELECT 1 FROM cron.job
+    WHERE jobname IN ('kelyani-smart-marketing-scan','kelyani-smart-marketing-dispatch')
+      AND (command ILIKE '%tehhhdtfbonneqbyvlwx%' OR command ILIKE '%https://%.supabase.co/functions/%')
+  ),
+  'scheduler commands contain no hardcoded project URL'
+);
+SELECT ok(
+  NOT EXISTS (SELECT 1 FROM vault.decrypted_secrets WHERE name = 'smart_marketing_cron_secret')
+  AND NOT EXISTS (
+    SELECT 1 FROM cron.job
+    WHERE jobname IN ('kelyani-smart-marketing-scan','kelyani-smart-marketing-dispatch')
+      AND active
+  ),
+  'jobs remain inactive when the project cron secret is not provisioned'
+);
+SELECT is(
+  (SELECT count(*)::integer FROM cron.job WHERE jobname IN ('kelyani-smart-marketing-scan','kelyani-smart-marketing-dispatch')),
+  2,
+  'exactly two Smart Marketing scheduler jobs exist'
+);
 
-  IF v_scan_command NOT ILIKE '%kelyani_supabase_url%'
-     OR v_dispatch_command NOT ILIKE '%kelyani_supabase_url%'
-     OR v_scan_command NOT ILIKE '%smart_marketing_cron_secret%'
-     OR v_dispatch_command NOT ILIKE '%smart_marketing_cron_secret%' THEN
-    RAISE EXCEPTION 'Smart Marketing scheduler is not resolving URL and secret from Vault';
-  END IF;
-
-  IF NOT EXISTS (SELECT 1 FROM vault.decrypted_secrets WHERE name = 'smart_marketing_cron_secret')
-     AND (v_scan_active OR v_dispatch_active) THEN
-    RAISE EXCEPTION 'Smart Marketing jobs must remain inactive without the Vault cron secret';
-  END IF;
-
-  IF (SELECT count(*) FROM cron.job WHERE jobname IN ('kelyani-smart-marketing-scan','kelyani-smart-marketing-dispatch')) <> 2 THEN
-    RAISE EXCEPTION 'Duplicate or missing Smart Marketing cron jobs';
-  END IF;
-END
-$test$;
+SELECT * FROM finish();
+ROLLBACK;
