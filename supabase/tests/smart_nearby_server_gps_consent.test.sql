@@ -7,7 +7,7 @@ SELECT ok(pg_get_function_result('public.set_public_loyalty_gps_consent(uuid,boo
 SELECT ok(pg_get_functiondef('public.set_public_loyalty_gps_consent(uuid,boolean)'::regprocedure) ILIKE '%loyalty_customer_links%' AND pg_get_functiondef('public.set_public_loyalty_gps_consent(uuid,boolean)'::regprocedure) ILIKE '%access_token%', 'GPS consent is resolved from the bearer card token');
 SELECT ok(has_function_privilege('anon', 'public.set_public_loyalty_gps_consent(uuid,boolean)', 'EXECUTE'), 'anonymous card holder can set their consent with the card token');
 SELECT ok(has_function_privilege('authenticated', 'public.set_public_loyalty_gps_consent(uuid,boolean)', 'EXECUTE'), 'authenticated card holder can set their consent with the card token');
-SELECT ok(not has_function_privilege('public', 'public.set_public_loyalty_gps_consent(uuid,boolean)', 'EXECUTE'), 'PUBLIC has no direct execute grant');
+SELECT ok(NOT EXISTS (SELECT 1 FROM aclexplode(coalesce((SELECT proacl FROM pg_proc WHERE oid='public.set_public_loyalty_gps_consent(uuid,boolean)'::regprocedure), acldefault('f',(SELECT proowner FROM pg_proc WHERE oid='public.set_public_loyalty_gps_consent(uuid,boolean)'::regprocedure)))) AS acl WHERE acl.grantee=0 AND acl.privilege_type='EXECUTE'), 'PUBLIC has no direct execute grant');
 SELECT ok((SELECT column_default LIKE '%false%' FROM information_schema.columns WHERE table_schema='public' AND table_name='loyalty_customers' AND column_name='gps_consent'), 'GPS consent defaults to false');
 
 SELECT * FROM finish();
