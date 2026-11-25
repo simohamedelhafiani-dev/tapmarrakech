@@ -127,6 +127,13 @@ Deno.serve(async (req) => {
         const pending = duplicate.delivery_status === "queued";
         return reply({ success: duplicate.delivery_status !== "failed", duplicate: true, pending, error: duplicate.delivery_status === "failed" ? "previous_attempt_failed" : undefined, messageId: duplicate.id, providerMessageId: duplicate.provider_message_id, status: duplicate.delivery_status }, pending ? 202 : 200);
       }
+      // The database index is global, not establishment-scoped. A UUID already
+      // reserved by another establishment must never be treated as a send failure
+      // or reveal the other tenant's message; return a generic idempotency conflict.
+      const { data: globallyReserved, error: globalLookupError } = await admin.from("whatsapp_messages")
+        .select("id").eq("client_request_id", requestId).maybeSingle();
+      if (globalLookupError) return reply({ error: "idempotency_lookup_failed" }, 500);
+      if (globallyReserved) return reply({ error: "idempotency_key_conflict" }, 409);
     }
     return reply({ error: "message_queue_failed" }, 500);
   }
