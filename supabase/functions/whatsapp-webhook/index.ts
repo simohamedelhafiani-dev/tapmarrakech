@@ -109,8 +109,10 @@ async function persistMessage(
 async function processStatuses(db: any, connection: any, statuses: any[]) {
   for (const event of statuses) {
     const id = typeof event.id === 'string' ? event.id : '';
-    const status = mapDeliveryStatus(event.status, 'outbound');
-    if (!id || !deliveryStatuses.has(status)) continue;
+    const rawStatus = typeof event.status === 'string' ? event.status.toLowerCase() : '';
+    if (!id || !['sent', 'delivered', 'read', 'failed', 'played'].includes(rawStatus)) continue;
+    const status = mapDeliveryStatus(rawStatus, 'outbound');
+    if (!deliveryStatuses.has(status)) continue;
     const { error } = await db.from('whatsapp_messages').update({
       delivery_status: status,
       raw_metadata: { status_timestamp: event.timestamp ?? null, recipient_id: event.recipient_id ?? null, errors: event.errors ?? null },
