@@ -65,7 +65,7 @@ BEGIN
   WHERE name = 'smart_marketing_cron_secret'
   LIMIT 1;
 
-  v_ready := v_project_url ~ '^https://[a-z0-9-]+\.supabase\.co/?$'
+  v_ready := coalesce(v_project_url ~ '^https://[a-z0-9-]+\.supabase\.co/?$', false)
     AND v_cron_secret IS NOT NULL
     AND length(v_cron_secret) >= 32;
 
