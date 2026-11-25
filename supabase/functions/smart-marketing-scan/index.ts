@@ -70,11 +70,10 @@ Deno.serve(async (req) => {
     // Smart Happy Hour: schedule config accepts "HH:mm-HH:mm" and optional weekdays (0-6).
     if (cfg.smart_id === 'happyhour') {
       const schedule = String(settings.schedule ?? '').trim();
-      const match = schedule.match(/(\d{2}:\d{2})\\s*-\\s*(\d{2}:\d{2})/);
+      const match = parseHappyHourSchedule(schedule);
       const daysRaw = String(settings.days ?? '').trim();
       const weekday = Number(new Intl.DateTimeFormat('en-US', { timeZone: 'Africa/Casablanca', weekday: 'short' }).format(new Date()).replace(/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)$/, m => String(['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(m))));
-      const validTime = (s: string) => /^([01]\d|2[0-3]):[0-5]\d$/.test(s);
-      if (match && validTime(match[1]) && validTime(match[2]) && match[1] < match[2] && localTime >= match[1] && localTime < match[2]) {
+      if (match && localTime >= match.start && localTime < match.end) {
         const allowed = daysRaw.split(',').map(x => Number(x.trim())).filter(x => Number.isInteger(x) && x >= 0 && x <= 6);
         if (!allowed.length || allowed.includes(weekday)) {
           for (const customer of (customers ?? []) as Customer[]) if (customer.marketing_consent) eligible.push({ customer, trigger: `happyhour:${date.date}:${match.start}:${match.end}`, payload: { schedule, offer: settings.offer ?? '' } });
