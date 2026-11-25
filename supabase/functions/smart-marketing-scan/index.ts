@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
         errors.push('reward: claim-cycle lookup failed');
       }
       if (rewardSettings && !rewardSettingsError && !rewardCyclesError) {
-        const latestClaimByCustomer = new Map((rewardCycles ?? []).map((claim: { customer_id: string; claim_id: string; claim_status: string; expires_at: string }) => [claim.customer_id, claim]));
+        const latestClaimByCustomer = new Map<string, { customer_id: string; claim_id: string; claim_status: string; expires_at: string }>((rewardCycles ?? []).map((claim: { customer_id: string; claim_id: string; claim_status: string; expires_at: string }) => [claim.customer_id, claim] as const));
         for (const customer of (customers ?? []) as Customer[]) {
           const stamps = customer.stamps_balance ?? 0;
           const latestClaim = latestClaimByCustomer.get(customer.id) as { claim_id: string; claim_status: string; expires_at: string } | undefined;
