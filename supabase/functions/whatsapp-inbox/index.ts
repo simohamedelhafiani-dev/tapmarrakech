@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
     if (conversationError) return json({ error: "conversation_lookup_failed" }, 500);
     if (!conversation) return json({ error: "conversation_not_found" }, 404);
     const { data: messages, error: messagesError } = await admin.from("whatsapp_messages")
-      .select("id,provider_message_id,direction,message_type,body,delivery_status,created_at")
+      .select("id,provider_message_id,direction,message_type,body,delivery_status,raw_metadata,created_at")
       .eq("conversation_id", conversationId).eq("establishment_id", establishmentId)
       .order("created_at", { ascending: false }).limit(200);
     if (messagesError) return json({ error: "messages_lookup_failed" }, 500);

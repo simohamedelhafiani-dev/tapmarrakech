@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 
 type Establishment = { id: string; name?: string };
-type Message = { id: string; direction: 'inbound' | 'outbound'; message_type: string; body: string | null; delivery_status: string; created_at: string };
+type Message = { id: string; direction: 'inbound' | 'outbound'; message_type: string; body: string | null; delivery_status: string; raw_metadata?: Record<string, unknown> | null; created_at: string };
 type Conversation = { id: string; customer_phone: string; customer_name: string | null; status: string; last_message_at: string; last_message?: Message | null };
 const dateLabel = (value: string) => new Intl.DateTimeFormat('fr-FR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value));
 
@@ -132,7 +132,7 @@ export default function WhatsAppInbox() {
         <section className="flex min-h-[560px] flex-col">
           {!selected ? <div className="grid flex-1 place-items-center p-8 text-center text-sm text-white/35">Sélectionne une conversation pour afficher les messages.</div> : <>
             <div className="border-b border-[#262626] p-4"><h2 className="font-semibold">{selectedLabel}</h2><p className="mt-1 text-xs text-white/35">{selected.customer_phone}</p></div>
-            <div className="flex-1 space-y-3 overflow-y-auto p-4">{detailLoading ? <p className="text-sm text-white/40">Chargement…</p> : messages.map(m=><div key={m.id} className={`flex ${m.direction==='outbound'?'justify-end':'justify-start'}`}><div className={`max-w-[85%] rounded-2xl p-3 ${m.direction==='outbound'?'bg-[#686D76] text-black':'bg-[#202020] text-white'}`}><p className="whitespace-pre-wrap break-words text-sm">{m.body||`Message ${m.message_type}`}</p><p className="mt-1 text-right text-[9px] opacity-50">{dateLabel(m.created_at)} · {m.delivery_status}</p></div></div>)}</div>
+            <div className="flex-1 space-y-3 overflow-y-auto p-4">{detailLoading ? <p className="text-sm text-white/40">Chargement…</p> : messages.map(m=><div key={m.id} className={`flex ${m.direction==='outbound'?'justify-end':'justify-start'}`}><div className={`max-w-[85%] rounded-2xl p-3 ${m.direction==='outbound'?'bg-[#686D76] text-black':'bg-[#202020] text-white'}`}><p className="whitespace-pre-wrap break-words text-sm">{m.body||`Message ${m.message_type}`}</p><p className="mt-1 text-right text-[9px] opacity-50">{dateLabel(m.created_at)} · {m.raw_metadata?.delivery_unknown === true ? 'résultat d’envoi inconnu — vérification requise' : m.delivery_status}</p></div></div>)}</div>
             <div className="border-t border-[#262626] p-3"><textarea value={draft} onChange={e=>setDraft(e.target.value)} rows={2} maxLength={4096} placeholder="Écrire un message…" className="w-full resize-none rounded-xl border border-[#333] bg-[#080808] p-3 text-sm outline-none focus:border-[#3B82F6]" /><div className="mt-2 flex justify-end"><button type="button" onClick={()=>void sendMessage()} disabled={sending||!draft.trim()||messages.some(m=>m.direction==='outbound'&&m.delivery_status==='queued')} className="rounded-xl bg-[#3B82F6] px-4 py-2 text-sm font-semibold text-white disabled:opacity-40">{sending?'Envoi…':messages.some(m=>m.direction==='outbound'&&m.delivery_status==='queued')?'Envoi en attente':'Envoyer'}</button></div><p className="mt-2 text-[10px] text-white/25">L’envoi dépend de la fonction WhatsApp serveur et de l’activation Meta.</p></div>
           </>}
         </section>
