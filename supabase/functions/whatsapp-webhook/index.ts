@@ -79,7 +79,18 @@ async function persistMessage(
   if (!providerMessageId || phone.length < 5 || phone.length > 32) return;
   const type = typeof message.type === 'string' ? message.type : 'unknown';
   const at = toIsoTimestamp(message.timestamp);
-  const conversationId = await upsertConversation(db, connection, phone, contacts.get(phone) ?? null, at);
+  let customerName = contacts.get(phone) ?? null;
+  if (!customerName) {
+    const { data: savedContact, error: contactLookupError } = await db.from('whatsapp_contacts')
+      .select('customer_name')
+      .eq('connection_id', connection.id)
+      .eq('customer_phone', phone)
+      .eq('active', true)
+      .maybeSingle();
+    if (contactLookupError) throw new Error('contact_lookup_failed');
+    customerName = typeof savedContact?.customer_name === 'string' ? savedContact.customer_name : null;
+  }
+  const conversationId = await upsertConversation(db, connection, phone, customerName, at);
   const status = mapDeliveryStatus(message.history_context?.status, direction);
   const body = messageBody(message, type).slice(0, 50_000);
   const { error } = await db.from('whatsapp_messages').upsert({
