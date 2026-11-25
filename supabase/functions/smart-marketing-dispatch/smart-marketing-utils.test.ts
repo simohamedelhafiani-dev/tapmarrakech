@@ -1,5 +1,5 @@
 import { assertEquals, assertMatch } from 'https://deno.land/std@0.224.0/assert/mod.ts';
-import { extractBearerToken, normalizeLimit, progressThreshold, buildTriggerKey, parseSmartConfigNumber, resolveSmartMessage, retryDelayMinutes, parseHappyHourSchedule } from './smart-marketing-utils.ts';
+import { extractBearerToken, normalizeLimit, progressThreshold, buildTriggerKey, parseSmartConfigNumber, resolveSmartMessage, retryDelayMinutes, parseHappyHourSchedule, formatLocalDateKey } from './smart-marketing-utils.ts';
 
 Deno.test('Bearer token parsing is case-insensitive and whitespace tolerant',()=>{
  assertEquals(extractBearerToken('Bearer abc123'),'abc123');
@@ -59,4 +59,11 @@ Deno.test('Happy Hour schedule parses HH:mm ranges with optional spaces and reje
  assertEquals(parseHappyHourSchedule('19:00-17:00'),null);
  assertEquals(parseHappyHourSchedule('17:00'),null);
  assertEquals(parseHappyHourSchedule(null),null);
+});
+
+Deno.test('local date keys stay ISO-padded for single-digit days and months',()=>{
+ assertEquals(formatLocalDateKey('2026','11','5'),'2026-11-05');
+ assertEquals(formatLocalDateKey('2026','2','9'),'2026-02-09');
+ assertEquals(formatLocalDateKey('2026','12','31'),'2026-12-31');
+ assertEquals(formatLocalDateKey('bad','2','9'),'');
 });
