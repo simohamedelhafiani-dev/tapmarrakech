@@ -1,0 +1,18 @@
+BEGIN;
+SELECT plan(12);
+
+SELECT ok((SELECT relrowsecurity FROM pg_class WHERE oid='public.smart_marketing_configs'::regclass), 'Smart Marketing config RLS is enabled');
+SELECT ok(NOT has_table_privilege('anon','public.smart_marketing_configs','SELECT'), 'anon cannot select Smart Marketing configs');
+SELECT ok(NOT has_table_privilege('anon','public.smart_marketing_configs','INSERT'), 'anon cannot insert Smart Marketing configs');
+SELECT ok(NOT has_table_privilege('anon','public.smart_marketing_configs','UPDATE'), 'anon cannot update Smart Marketing configs');
+SELECT ok(NOT has_table_privilege('anon','public.smart_marketing_configs','DELETE'), 'anon cannot delete Smart Marketing configs');
+SELECT ok(NOT has_table_privilege('anon','public.smart_marketing_configs','TRUNCATE'), 'anon cannot truncate Smart Marketing configs');
+SELECT ok(NOT has_table_privilege('anon','public.smart_marketing_configs','TRIGGER'), 'anon cannot create triggers on Smart Marketing configs');
+SELECT ok(NOT has_table_privilege('anon','public.smart_marketing_configs','REFERENCES'), 'anon cannot create references to Smart Marketing configs');
+SELECT ok(has_table_privilege('authenticated','public.smart_marketing_configs','SELECT'), 'authenticated can select through RLS');
+SELECT ok(has_table_privilege('authenticated','public.smart_marketing_configs','INSERT'), 'authenticated can insert through RLS');
+SELECT ok(has_table_privilege('authenticated','public.smart_marketing_configs','UPDATE'), 'authenticated can update through RLS');
+SELECT ok(has_table_privilege('authenticated','public.smart_marketing_configs','DELETE') AND NOT has_table_privilege('authenticated','public.smart_marketing_configs','TRUNCATE'), 'authenticated can delete through RLS but cannot bypass it with TRUNCATE');
+
+SELECT * FROM finish();
+ROLLBACK;
