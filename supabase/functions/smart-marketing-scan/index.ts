@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { extractBearerToken, parseSmartConfigNumber } from '../smart-marketing-dispatch/smart-marketing-utils.ts';
+import { extractBearerToken, parseSmartConfigNumber, parseHappyHourSchedule } from '../smart-marketing-dispatch/smart-marketing-utils.ts';
 
 const headers = { 'Content-Type': 'application/json' };
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers });
@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
       if (match && validTime(match[1]) && validTime(match[2]) && match[1] < match[2] && localTime >= match[1] && localTime < match[2]) {
         const allowed = daysRaw.split(',').map(x => Number(x.trim())).filter(x => Number.isInteger(x) && x >= 0 && x <= 6);
         if (!allowed.length || allowed.includes(weekday)) {
-          for (const customer of (customers ?? []) as Customer[]) if (customer.marketing_consent) eligible.push({ customer, trigger: `happyhour:${date.date}:${match[1]}:${match[2]}`, payload: { schedule, offer: settings.offer ?? '' } });
+          for (const customer of (customers ?? []) as Customer[]) if (customer.marketing_consent) eligible.push({ customer, trigger: `happyhour:${date.date}:${match.start}:${match.end}`, payload: { schedule, offer: settings.offer ?? '' } });
         }
       }
     }
