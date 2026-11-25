@@ -16,3 +16,11 @@ verify_jwt = true
 
 [functions.whatsapp-webhook]
 verify_jwt = false
+
+# Smart Marketing cron endpoints use a project-specific bearer secret validated
+# inside each Edge Function; the gateway must not expect a Supabase JWT.
+[functions.smart-marketing-scan]
+verify_jwt = false
+
+[functions.smart-marketing-dispatch]
+verify_jwt = false
