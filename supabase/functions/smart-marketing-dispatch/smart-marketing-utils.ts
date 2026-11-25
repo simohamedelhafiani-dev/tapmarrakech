@@ -36,3 +36,11 @@ export function parseHappyHourSchedule(value: unknown): { start: string; end: st
   if (!valid(match[1]) || !valid(match[2]) || match[1] >= match[2]) return null;
   return { start: match[1], end: match[2] };
 }
+
+export function formatLocalDateKey(year: unknown, month: unknown, day: unknown): string {
+  const y = String(year ?? '').trim();
+  const m = String(month ?? '').trim().padStart(2, '0');
+  const d = String(day ?? '').trim().padStart(2, '0');
+  if (!/^\\d{4}$/.test(y) || !/^\\d{2}$/.test(m) || !/^\\d{2}$/.test(d)) return '';
+  return `${y}-${m}-${d}`;
+}
