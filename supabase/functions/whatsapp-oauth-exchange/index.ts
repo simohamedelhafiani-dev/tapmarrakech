@@ -101,9 +101,10 @@ Deno.serve(async (req) => {
   });
   const { data: userData, error: userError } = await userClient.auth.getUser();
   if (userError || !userData.user) return reply({ error: "unauthorized" }, 401);
-  const { data: accessible, error: accessError } = await userClient.rpc("get_my_establishments");
-  const hasAccess = Array.isArray(accessible) && accessible.some((row: { id?: string }) => row?.id === establishmentId);
-  if (accessError || !hasAccess) return reply({ error: "establishment_access_denied" }, 403);
+  const { data: canManageWhatsApp, error: accessError } = await userClient.rpc("user_can_manage_whatsapp", {
+    target_establishment_id: establishmentId,
+  });
+  if (accessError || canManageWhatsApp !== true) return reply({ error: "establishment_access_denied" }, 403);
 
   const admin = createClient(supabaseUrl, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } });
   // Consume the nonce atomically: only a matching, unexpired, unused row for

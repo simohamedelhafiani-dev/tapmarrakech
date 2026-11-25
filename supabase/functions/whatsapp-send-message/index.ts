@@ -55,8 +55,10 @@ Deno.serve(async (req) => {
   });
   const { data: user, error: authError } = await userClient.auth.getUser();
   if (authError || !user.user) return reply({ error: "unauthorized" }, 401);
-  const { data: accessible, error: accessError } = await userClient.rpc("get_my_establishments");
-  if (accessError || !Array.isArray(accessible) || !accessible.some((row: { id?: string }) => row?.id === establishmentId)) {
+  const { data: canManageWhatsApp, error: accessError } = await userClient.rpc("user_can_manage_whatsapp", {
+    target_establishment_id: establishmentId,
+  });
+  if (accessError || canManageWhatsApp !== true) {
     return reply({ error: "establishment_access_denied" }, 403);
   }
 
