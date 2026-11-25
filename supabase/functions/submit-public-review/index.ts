@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { getTrustedClientIp } from '../_shared/public-review-ip.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -67,31 +68,6 @@ function cleanOptionalText(
   }
 
   return trimmed;
-}
-
-function getClientIp(request: Request): string {
-  const cloudflareIp = request.headers.get('cf-connecting-ip')?.trim();
-
-  if (cloudflareIp) {
-    return cloudflareIp;
-  }
-
-  const forwardedFor = request.headers.get('x-forwarded-for');
-
-  if (forwardedFor) {
-    const firstIp = forwardedFor
-      .split(',')
-      .map((value) => value.trim())
-      .find(Boolean);
-
-    if (firstIp) {
-      return firstIp;
-    }
-  }
-
-  const realIp = request.headers.get('x-real-ip')?.trim();
-
-  return realIp || 'unknown';
 }
 
 async function sha256(value: string): Promise<string> {
@@ -329,7 +305,21 @@ Deno.serve(async (request) => {
       );
     }
 
-    const clientIp = getClientIp(request);
+    const clientIp = getTrustedClientIp(request);
+
+    // Never fall back to caller-controlled forwarding headers for the IP quota.
+    // If the trusted ingress header is missing or ambiguous, fail closed.
+    if (!clientIp) {
+      console.error('Public review request missing trusted client IP header');
+      return json(
+        {
+          success: false,
+          error: 'Service temporairement indisponible.',
+        },
+        503
+      );
+    }
+
     const ipAllowed = await consumeRateLimit(
       serviceClient,
       `ip:${establishmentId}:${clientIp}`,
