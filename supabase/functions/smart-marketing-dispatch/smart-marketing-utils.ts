@@ -30,9 +30,9 @@ export function retryDelayMinutes(attempts: number): number {
 
 export function parseHappyHourSchedule(value: unknown): { start: string; end: string } | null {
   if (typeof value !== 'string') return null;
-  const match = value.trim().match(/^(\\d{2}:\\d{2})\\s*-\\s*(\\d{2}:\\d{2})$/);
+  const match = value.trim().match(/^(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})$/);
   if (!match) return null;
-  const valid = (time: string) => /^([01]\\d|2[0-3]):[0-5]\\d$/.test(time);
+  const valid = (time: string) => /^([01]\d|2[0-3]):[0-5]\d$/.test(time);
   if (!valid(match[1]) || !valid(match[2]) || match[1] >= match[2]) return null;
   return { start: match[1], end: match[2] };
 }
