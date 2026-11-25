@@ -144,7 +144,7 @@ Deno.serve(async (req) => {
   const rawExpiresIn = tokenData.expires_in;
   const expiresInSeconds = typeof rawExpiresIn === "number" && Number.isSafeInteger(rawExpiresIn) && rawExpiresIn > 0
     ? rawExpiresIn
-    : typeof rawExpiresIn === "string" && /^\\d{1,10}$/.test(rawExpiresIn) && Number.isSafeInteger(Number(rawExpiresIn)) && Number(rawExpiresIn) > 0
+    : typeof rawExpiresIn === "string" && /^\d{1,10}$/.test(rawExpiresIn) && Number.isSafeInteger(Number(rawExpiresIn)) && Number(rawExpiresIn) > 0
     ? Number(rawExpiresIn)
     : null;
   const tokenExpiresAt = expiresInSeconds === null
