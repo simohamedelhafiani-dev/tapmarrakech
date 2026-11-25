@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { extractBearerToken, parseSmartConfigNumber, parseHappyHourSchedule } from '../smart-marketing-dispatch/smart-marketing-utils.ts';
+import { extractBearerToken, parseSmartConfigNumber, parseHappyHourSchedule, formatLocalDateKey } from '../smart-marketing-dispatch/smart-marketing-utils.ts';
 
 const headers = { 'Content-Type': 'application/json' };
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers });
@@ -11,7 +11,7 @@ const num = parseSmartConfigNumber;
 const localDateParts = () => {
   const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Casablanca', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
   const p = Object.fromEntries(parts.map(x => [x.type, x.value]));
-  return { day: Number(p.day), month: Number(p.month), date: `${p.year}-${p.month}-${p.day}` };
+  return { day: Number(p.day), month: Number(p.month), date: formatLocalDateKey(p.year, p.month, p.day) };
 };
 
 Deno.serve(async (req) => {
