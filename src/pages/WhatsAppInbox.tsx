@@ -95,7 +95,7 @@ export default function WhatsAppInbox() {
       // Keep the key for transport/unknown failures so a retry cannot create a
       // second outbound row. A provider rejection or pre-send token failure is
       // definitive and may be retried as a new deliberate send.
-      if (data?.error === 'meta_send_rejected' || data?.error === 'whatsapp_token_unavailable') {
+      if (data?.error === 'meta_send_rejected' || data?.error === 'whatsapp_token_unavailable' || data?.error === 'previous_attempt_failed') {
         pendingSendRef.current = null;
       }
       setNotice(data?.error === 'whatsapp_not_connected' ? 'WhatsApp n’est pas connecté pour cet établissement.' : 'Envoi impossible ou résultat incertain. Réessaie avec le même message pour éviter un doublon.');
