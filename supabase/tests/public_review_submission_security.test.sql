@@ -3,9 +3,9 @@ begin;
 -- Keep this deterministic test key isolated and ensure the first-hit assertions
 -- start from an absent row. The surrounding transaction rolls the fixture back.
 delete from public.public_review_rate_limits
-where key_hash = repeat('e', 64);
+where key_hash in (repeat('e', 64), repeat('f', 64), repeat('a', 64), repeat('b', 64));
 
-select plan(16);
+select plan(19);
 
 select ok(
   to_regprocedure('public.consume_public_review_rate_limit(text,integer,integer)') is not null,
@@ -120,6 +120,21 @@ select ok(
 select ok(
   not public.consume_public_review_rate_limit(repeat('e', 64), 1, 900),
   'a subsequent request observes and enforces the existing limit'
+);
+
+select ok(
+  public.consume_public_review_rate_limit(repeat('f', 64), 100, 900),
+  'the global IP bucket accepts its first request'
+);
+
+select ok(
+  public.consume_public_review_rate_limit(repeat('f', 64), 100, 900),
+  'the same global IP bucket accumulates requests independently of establishment IDs'
+);
+
+select ok(
+  public.consume_public_review_rate_limit(repeat('a', 64), 5, 900),
+  'a separate establishment-scoped bucket remains available alongside the global bucket'
 );
 
 select * from finish();
