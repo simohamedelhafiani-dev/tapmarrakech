@@ -8,18 +8,6 @@ export default function SmartNearbyGPS({ accessToken }: { accessToken: string })
  const [consentBusy,setConsentBusy]=useState(false);
 
  useEffect(()=>{
-  let active=true;
-  if(!accessToken){setEnabled(false);return;}
-  // The server is authoritative. Do not restore consent from localStorage.
-  void supabase.from('loyalty_customers')
-   .select('gps_consent')
-   .eq('id','')
-   .maybeSingle()
-   .then(()=>{if(active)setEnabled(false);});
-  return ()=>{active=false;};
- },[accessToken]);
-
- useEffect(()=>{
   if(!enabled||!accessToken)return;
   if(!('geolocation' in navigator)){setStatus('La géolocalisation n’est pas prise en charge.');return;}
   let lastSent=0,active=true,inFlight=false;
