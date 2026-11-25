@@ -1,6 +1,6 @@
 begin;
 
-select plan(8);
+select plan(10);
 
 select ok(
   to_regprocedure('public.consume_public_review_rate_limit(text,integer,integer)') is not null,
@@ -44,6 +44,11 @@ select ok(
 );
 
 select ok(
+  has_table_privilege('service_role', 'public.reviews', 'INSERT'),
+  'the trusted Edge Function service role retains review INSERT access'
+);
+
+select ok(
   not exists (
     select 1
     from pg_policies
@@ -52,6 +57,17 @@ select ok(
       and policyname = 'reviews_public_insert'
   ),
   'the legacy public review INSERT policy is removed'
+);
+
+select ok(
+  not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public'
+      and tablename = 'reviews'
+      and cmd = 'INSERT'
+  ),
+  'no direct INSERT RLS policy remains on public reviews'
 );
 
 select ok(
