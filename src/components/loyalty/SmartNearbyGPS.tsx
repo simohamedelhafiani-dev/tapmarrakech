@@ -48,8 +48,9 @@ export default function SmartNearbyGPS({ accessToken }: { accessToken: string })
     }else if(data?.reason==='gps_consent_missing'){
      setEnabled(false);
      setStatus('Le consentement GPS doit être activé pour utiliser Smart Nearby.');
-    }else if(data?.reason==='consent_missing'){
-     setStatus('Notifications ou consentement marketing désactivés sur votre carte fidélité.');
+    }else if(data?.reason==='consent_missing'||data?.reason==='consent_revoked_or_missing'){
+     setEnabled(false);
+     setStatus('Un consentement requis a été désactivé. Smart Nearby est arrêté. Vérifiez vos préférences avant de le réactiver.');
     }else if(typeof data?.distance_m==='number'){
      setStatus('Vous êtes hors de la zone de proximité. Aucun historique GPS n’est conservé.');
     }else{
