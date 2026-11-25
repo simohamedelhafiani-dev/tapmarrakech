@@ -36,8 +36,8 @@ BEGIN
     RAISE EXCEPTION 'user_can_manage_whatsapp must pin its search_path';
   END IF;
 
-  IF has_function_privilege('anon', v_function, 'EXECUTE')
-     OR has_function_privilege('public', v_function, 'EXECUTE') THEN
+  -- anon inherits any PUBLIC EXECUTE grant, so this also detects PUBLIC access.
+  IF has_function_privilege('anon', v_function, 'EXECUTE') THEN
     RAISE EXCEPTION 'anon/PUBLIC must not execute user_can_manage_whatsapp';
   END IF;
   IF NOT has_function_privilege('authenticated', v_function, 'EXECUTE') THEN
