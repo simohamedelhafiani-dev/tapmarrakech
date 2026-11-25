@@ -60,10 +60,26 @@ Deno.serve(async (req) => {
         .select('stamp_goal,stamp_reward_name,stamp_reward_description').eq('establishment_id', cfg.establishment_id).eq('program_type', 'STAMP').eq('enabled', true).maybeSingle();
       if (rewardSettingsError) { runErrors.push('Reward settings lookup failed'); errors.push('reward: settings lookup failed'); }
       const goal = Math.max(1, num(rewardSettings?.stamp_goal, 10));
-      if (rewardSettings && !rewardSettingsError) {
+      const { data: rewardCycles, error: rewardCyclesError } = rewardSettings && !rewardSettingsError
+        ? await admin.rpc('get_smart_marketing_reward_cycles', { p_establishment_id: cfg.establishment_id })
+        : { data: [], error: null };
+      if (rewardCyclesError) {
+        runErrors.push('Reward claim-cycle lookup failed');
+        errors.push('reward: claim-cycle lookup failed');
+      }
+      if (rewardSettings && !rewardSettingsError && !rewardCyclesError) {
+        const latestClaimByCustomer = new Map((rewardCycles ?? []).map((claim: { customer_id: string; claim_id: string; claim_status: string; expires_at: string }) => [claim.customer_id, claim]));
         for (const customer of (customers ?? []) as Customer[]) {
           const stamps = customer.stamps_balance ?? 0;
-          if (customer.marketing_consent && stamps >= goal) eligible.push({ customer, trigger: `reward:${goal}:${stamps}`, payload: { stamps, goal, reward_name: rewardSettings.stamp_reward_name, reward_description: rewardSettings.stamp_reward_description } });
+          const latestClaim = latestClaimByCustomer.get(customer.id) as { claim_id: string; claim_status: string; expires_at: string } | undefined;
+          const pendingActive = latestClaim?.claim_status === 'PENDING' && Date.parse(latestClaim.expires_at) > Date.now();
+          const cycleStatus = latestClaim
+            ? latestClaim.claim_status === 'PENDING' && !pendingActive ? 'EXPIRED' : latestClaim.claim_status
+            : 'INITIAL';
+          const cycleKey = latestClaim ? `${latestClaim.claim_id}:${cycleStatus}` : 'initial';
+          if (customer.marketing_consent && stamps >= goal && !pendingActive) {
+            eligible.push({ customer, trigger: `reward:${goal}:${cycleKey}`, payload: { stamps, goal, reward_name: rewardSettings.stamp_reward_name, reward_description: rewardSettings.stamp_reward_description } });
+          }
         }
       }
     }
