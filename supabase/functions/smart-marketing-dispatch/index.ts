@@ -49,10 +49,9 @@ Deno.serve(async(req)=>{
    }
    if(q.smart_id==='happyhour'){
     const schedule=String(liveConfig.config?.schedule??'').trim();
-    const match=schedule.match(/(\d{2}:\d{2})\\s*-\\s*(\d{2}:\d{2})/);
+    const match=parseHappyHourSchedule(schedule);
     const now=new Date();
     const localTime=new Intl.DateTimeFormat('en-GB',{timeZone:'Africa/Casablanca',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(now);
-    const valid=(s:string)=>/^([01]\d|2[0-3]):[0-5]\d$/.test(s);
     const weekday=Number(new Intl.DateTimeFormat('en-US',{timeZone:'Africa/Casablanca',weekday:'short'}).format(now).replace(/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)$/,m=>String(['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(m))));
     const days=String(liveConfig.config?.days??'').split(',').map(x=>Number(x.trim())).filter(x=>Number.isInteger(x)&&x>=0&&x<=6);
     if(!match||localTime<match.start||localTime>=match.end||(days.length&&!days.includes(weekday))){await markSkipped(q.id,'Happy Hour schedule no longer active');skipped++;continue;}
