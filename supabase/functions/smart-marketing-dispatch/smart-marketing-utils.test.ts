@@ -1,5 +1,5 @@
 import { assertEquals, assertMatch } from 'https://deno.land/std@0.224.0/assert/mod.ts';
-import { extractBearerToken, normalizeLimit, progressThreshold, buildTriggerKey, parseSmartConfigNumber, resolveSmartMessage, retryDelayMinutes } from './smart-marketing-utils.ts';
+import { extractBearerToken, normalizeLimit, progressThreshold, buildTriggerKey, parseSmartConfigNumber, resolveSmartMessage, retryDelayMinutes, parseHappyHourSchedule } from './smart-marketing-utils.ts';
 
 Deno.test('Bearer token parsing is case-insensitive and whitespace tolerant',()=>{
  assertEquals(extractBearerToken('Bearer abc123'),'abc123');
@@ -50,4 +50,13 @@ Deno.test('retry backoff grows with attempts and is capped at 30 minutes',()=>{
  assertEquals(retryDelayMinutes(-3),1);
  assertEquals(retryDelayMinutes(2.9),2);
  assertEquals(retryDelayMinutes(Number.NaN),1);
+});
+
+Deno.test('Happy Hour schedule parses HH:mm ranges with optional spaces and rejects invalid ranges',()=>{
+ assertEquals(parseHappyHourSchedule('17:00-19:30'),{start:'17:00',end:'19:30'});
+ assertEquals(parseHappyHourSchedule(' 17:00 - 19:30 '),{start:'17:00',end:'19:30'});
+ assertEquals(parseHappyHourSchedule('25:00-26:00'),null);
+ assertEquals(parseHappyHourSchedule('19:00-17:00'),null);
+ assertEquals(parseHappyHourSchedule('17:00'),null);
+ assertEquals(parseHappyHourSchedule(null),null);
 });
