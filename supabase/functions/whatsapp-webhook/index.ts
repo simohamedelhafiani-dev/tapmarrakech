@@ -1,229 +1,273 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { getMessageDirection, mapDeliveryStatus, normalizePhone, toIsoTimestamp } from '../_shared/whatsapp-coexistence.ts';
 
-const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
-  status,
-  headers: { "Content-Type": "application/json" },
-});
-const hex = (bytes: Uint8Array) => Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
-const constantTimeEqual = (a: string, b: string) => {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return diff === 0;
-};
-async function validSignature(raw: string, signature: string | null, appSecret: string) {
-  if (!signature?.startsWith("sha256=")) return false;
-  const supplied = signature.slice(7).toLowerCase();
-  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(appSecret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-  const digest = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(raw));
-  return constantTimeEqual(hex(new Uint8Array(digest)), supplied);
+const MAX_BODY_BYTES = 1_000_000;
+const deliveryStatuses = new Set(['sent', 'delivered', 'read', 'failed']);
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
+
+function toHex(bytes: Uint8Array) {
+  return [...bytes].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
+async function validSignature(rawBody: string, supplied: string, appSecret: string) {
+  if (!appSecret || !supplied.startsWith('sha256=')) return false;
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(appSecret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const digest = new Uint8Array(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(rawBody)));
+  const expected = toHex(digest);
+  const actual = supplied.slice(7);
+  if (!/^[a-f0-9]{64}$/i.test(actual) || expected.length !== actual.length) return false;
+  let mismatch = 0;
+  for (let i = 0; i < expected.length; i += 1) mismatch |= expected.charCodeAt(i) ^ actual.charCodeAt(i);
+  return mismatch === 0;
+}
+
+function asArray(value: unknown): any[] {
+  return Array.isArray(value) ? value : [];
+}
+
+function messageBody(message: Record<string, any>, type: string): string {
+  switch (type) {
+    case 'text': return String(message.text?.body ?? '');
+    case 'button': return String(message.button?.text ?? '');
+    case 'interactive': return String(message.interactive?.button_reply?.title ?? message.interactive?.list_reply?.title ?? '');
+    case 'image':
+    case 'video':
+    case 'audio':
+    case 'document':
+    case 'sticker': return String(message[type]?.caption ?? message[type]?.filename ?? '');
+    case 'location': return [message.location?.name, message.location?.address, message.location?.latitude, message.location?.longitude].filter(Boolean).join(' — ');
+    case 'contacts': return (message.contacts ?? []).map((contact: any) => contact.name?.formatted_name ?? contact.phones?.[0]?.phone ?? 'Contact partagé').join(', ');
+    case 'reaction': return String(message.reaction?.emoji ?? '');
+    default: return '';
+  }
+}
+
+async function findConnection(db: any, phoneNumberId: string) {
+  const { data, error } = await db.from('whatsapp_connections')
+    .select('id,establishment_id,status,display_phone_number')
+    .eq('phone_number_id', phoneNumberId)
+    .in('status', ['active', 'pending'])
+    .maybeSingle();
+  if (error) throw new Error('connection_lookup_failed');
+  return data;
+}
+
+async function upsertConversation(db: any, connection: any, customerPhone: string, customerName: string | null, at: string) {
+  const { data, error } = await db.rpc('upsert_whatsapp_conversation', {
+    p_establishment_id: connection.establishment_id,
+    p_connection_id: connection.id,
+    p_customer_phone: customerPhone,
+    p_customer_name: customerName,
+    p_message_at: at,
+  });
+  if (error || typeof data !== 'string') throw new Error('conversation_write_failed');
+  return data;
+}
+
+async function persistMessage(
+  db: any,
+  connection: any,
+  message: Record<string, any>,
+  customerPhone: string,
+  direction: 'inbound' | 'outbound',
+  metadata: Record<string, unknown>,
+  contacts: Map<string, string>,
+) {
+  const providerMessageId = typeof message.id === 'string' ? message.id : '';
+  const phone = normalizePhone(customerPhone);
+  if (!providerMessageId || phone.length < 5 || phone.length > 32) return;
+  const type = typeof message.type === 'string' ? message.type : 'unknown';
+  const at = toIsoTimestamp(message.timestamp);
+  const conversationId = await upsertConversation(db, connection, phone, contacts.get(phone) ?? null, at);
+  const status = mapDeliveryStatus(message.history_context?.status, direction);
+  const body = messageBody(message, type).slice(0, 50_000);
+  const { error } = await db.from('whatsapp_messages').upsert({
+    establishment_id: connection.establishment_id,
+    conversation_id: conversationId,
+    provider_message_id: providerMessageId,
+    direction,
+    message_type: type,
+    body,
+    delivery_status: status,
+    raw_metadata: metadata,
+  }, { onConflict: 'provider_message_id', ignoreDuplicates: true });
+  if (error) throw new Error('message_write_failed');
+}
+
+async function processStatuses(db: any, connection: any, statuses: any[]) {
+  for (const event of statuses) {
+    const id = typeof event.id === 'string' ? event.id : '';
+    const status = mapDeliveryStatus(event.status, 'outbound');
+    if (!id || !deliveryStatuses.has(status)) continue;
+    const { error } = await db.from('whatsapp_messages').update({
+      delivery_status: status,
+      raw_metadata: { status_timestamp: event.timestamp ?? null, recipient_id: event.recipient_id ?? null, errors: event.errors ?? null },
+    }).eq('provider_message_id', id).eq('establishment_id', connection.establishment_id);
+    if (error) throw new Error('status_update_failed');
+  }
+}
+
+async function processHistory(db: any, connection: any, value: any, businessPhone: string) {
+  for (const chunk of asArray(value.history)) {
+    const meta = chunk.metadata ?? {};
+    const phaseRaw = Number(meta.phase);
+    const orderRaw = Number(meta.chunk_order);
+    const phase = Number.isInteger(phaseRaw) && phaseRaw >= 0 && phaseRaw <= 2 ? phaseRaw : -1;
+    const chunkOrder = Number.isInteger(orderRaw) && orderRaw >= 0 ? orderRaw : -1;
+    const progressRaw = Number(meta.progress);
+    const progress = Number.isInteger(progressRaw) ? Math.max(0, Math.min(100, progressRaw)) : 0;
+    const errors = asArray(chunk.errors);
+    const status = errors.length ? 'declined' : phase === 2 && progress === 100 ? 'completed' : 'received';
+    const errorCode = Number(errors[0]?.code);
+    const { error: chunkError } = await db.from('whatsapp_history_sync_chunks').upsert({
+      establishment_id: connection.establishment_id,
+      connection_id: connection.id,
+      phase,
+      chunk_order: chunkOrder,
+      progress,
+      status,
+      error_code: Number.isInteger(errorCode) ? errorCode : null,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'connection_id,phase,chunk_order' });
+    if (chunkError) throw new Error('history_chunk_write_failed');
+
+    for (const thread of asArray(chunk.threads)) {
+      const threadPhone = normalizePhone(thread.id);
+      if (!threadPhone) continue;
+      for (const message of asArray(thread.messages)) {
+        const direction = getMessageDirection(message, businessPhone);
+        const customerPhone = direction === 'outbound' ? message.to : (message.from || threadPhone);
+        await persistMessage(db, connection, message, String(customerPhone ?? threadPhone), direction, {
+          source: 'coexistence_history',
+          phase,
+          chunk_order: chunkOrder,
+          progress,
+          history_status: message.history_context?.status ?? null,
+        }, new Map());
+      }
+      for (const message of asArray(thread.message_echoes)) {
+        await persistMessage(db, connection, message, String(message.to ?? threadPhone), 'outbound', {
+          source: 'coexistence_history_echo',
+          phase,
+          chunk_order: chunkOrder,
+          progress,
+          history_status: message.history_context?.status ?? null,
+        }, new Map());
+      }
+    }
+  }
+}
+
+async function processContactSync(db: any, connection: any, events: any[]) {
+  for (const event of events) {
+    if (event.type !== 'contact') continue;
+    const contact = event.contact ?? {};
+    const phone = normalizePhone(contact.phone_number ?? contact.wa_id);
+    if (phone.length < 5 || phone.length > 32) continue;
+    const action = String(event.action ?? '').toLowerCase();
+    if (action !== 'add' && action !== 'remove') continue;
+    const eventAt = toIsoTimestamp(event.metadata?.timestamp);
+    const name = action === 'add' ? String(contact.full_name ?? contact.first_name ?? '').trim().slice(0, 160) : null;
+    const { data: applied, error } = await db.rpc('apply_whatsapp_contact_sync_event', {
+      p_establishment_id: connection.establishment_id,
+      p_connection_id: connection.id,
+      p_customer_phone: phone,
+      p_customer_name: name,
+      p_active: action === 'add',
+      p_event_at: eventAt,
+    });
+    if (error) throw new Error('contact_sync_write_failed');
+    if (applied === true) {
+      const { error: conversationError } = await db.from('whatsapp_conversations')
+        .update({ customer_name: name, updated_at: new Date().toISOString() })
+        .eq('connection_id', connection.id)
+        .eq('customer_phone', phone);
+      if (conversationError) throw new Error('contact_conversation_update_failed');
+    }
+  }
 }
 
 Deno.serve(async (req) => {
-  if (req.method === "GET") {
-    const verifyToken = Deno.env.get("META_WEBHOOK_VERIFY_TOKEN");
+  const verifyToken = Deno.env.get('WHATSAPP_WEBHOOK_VERIFY_TOKEN') ?? '';
+  const appSecret = Deno.env.get('WHATSAPP_APP_SECRET') ?? '';
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+
+  if (req.method === 'GET') {
     const url = new URL(req.url);
-    const mode = url.searchParams.get("hub.mode");
-    const token = url.searchParams.get("hub.verify_token");
-    const challenge = url.searchParams.get("hub.challenge");
-    if (mode === "subscribe" && verifyToken && token && constantTimeEqual(token, verifyToken) && challenge) {
-      return new Response(challenge, { status: 200, headers: { "Content-Type": "text/plain" } });
+    const mode = url.searchParams.get('hub.mode');
+    const token = url.searchParams.get('hub.verify_token');
+    const challenge = url.searchParams.get('hub.challenge');
+    if (!verifyToken) return new Response('Webhook verification is not configured', { status: 503 });
+    if (mode === 'subscribe' && token === verifyToken && challenge) {
+      return new Response(challenge, { status: 200, headers: { 'Content-Type': 'text/plain', 'Cache-Control': 'no-store' } });
     }
-    return json({ error: "webhook_verification_failed" }, 403);
+    return new Response('Forbidden', { status: 403 });
   }
-  if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
 
-  const appSecret = Deno.env.get("META_APP_SECRET");
-  const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  if (!appSecret || !supabaseUrl || !serviceKey) return json({ error: "server_configuration_missing" }, 500);
+  if (req.method !== 'POST') return json({ error: 'method_not_allowed' }, 405);
+  const contentLength = Number(req.headers.get('content-length') ?? 0);
+  if (Number.isFinite(contentLength) && contentLength > MAX_BODY_BYTES) return json({ error: 'payload_too_large' }, 413);
+  const rawBytes = new Uint8Array(await req.arrayBuffer());
+  if (rawBytes.byteLength > MAX_BODY_BYTES) return json({ error: 'payload_too_large' }, 413);
+  const rawBody = new TextDecoder().decode(rawBytes);
+  if (!await validSignature(rawBody, req.headers.get('x-hub-signature-256') ?? '', appSecret)) return json({ error: 'invalid_signature' }, 401);
+  if (!supabaseUrl || !serviceKey) return json({ error: 'server_configuration_invalid' }, 503);
 
-  const raw = await req.text();
-  // Enforce the cap in UTF-8 bytes (not JavaScript UTF-16 code units).
-  if (new TextEncoder().encode(raw).byteLength > 1_000_000) return json({ error: "payload_too_large" }, 413);
-  if (!await validSignature(raw, req.headers.get("x-hub-signature-256"), appSecret)) {
-    return json({ error: "invalid_signature" }, 401);
-  }
-  let payload: Record<string, unknown>;
+  let payload: any;
   try {
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return json({ error: "invalid_payload" }, 400);
-    payload = parsed;
-  } catch { return json({ error: "invalid_json" }, 400); }
-  // Preflight limits are global to the webhook payload, not per entry/change.
-  // Reject oversized batches before any database writes to avoid partial processing.
-  if (payload.entry !== undefined && !Array.isArray(payload.entry)) return json({ error: "invalid_payload" }, 400);
-  const entriesRaw = Array.isArray(payload.entry) ? payload.entry : [];
-  if (entriesRaw.length > 100) return json({ error: "payload_too_large" }, 413);
-  let totalChanges = 0;
-  let totalMessages = 0;
-  let totalStatuses = 0;
-  for (const rawEntry of entriesRaw) {
-    if (!rawEntry || typeof rawEntry !== "object" || Array.isArray(rawEntry)) continue;
-    const entryChanges = (rawEntry as Record<string, unknown>).changes;
-    if (!Array.isArray(entryChanges)) continue;
-    totalChanges += entryChanges.length;
-    if (totalChanges > 500) return json({ error: "payload_too_large" }, 413);
-    for (const rawChange of entryChanges) {
-      if (!rawChange || typeof rawChange !== "object" || Array.isArray(rawChange)) continue;
-      const changeValue = (rawChange as Record<string, unknown>).value;
-      if (!changeValue || typeof changeValue !== "object" || Array.isArray(changeValue)) continue;
-      const valueRecord = changeValue as Record<string, unknown>;
-      totalMessages += Array.isArray(valueRecord.messages) ? valueRecord.messages.length : 0;
-      totalStatuses += Array.isArray(valueRecord.statuses) ? valueRecord.statuses.length : 0;
-      if (totalMessages > 500 || totalStatuses > 500) return json({ error: "payload_too_large" }, 413);
-    }
+    payload = JSON.parse(rawBody);
+  } catch {
+    return json({ error: 'invalid_json' }, 400);
   }
+  if (payload?.object !== 'whatsapp_business_account') return json({ ok: true, ignored: true });
+  const db = createClient(supabaseUrl, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } });
 
-  const admin = createClient(supabaseUrl, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } });
+  try {
+    for (const entry of asArray(payload.entry)) {
+      for (const change of asArray(entry?.changes)) {
+        const value = change?.value ?? {};
+        const phoneNumberId = String(value.metadata?.phone_number_id ?? '');
+        if (!phoneNumberId) continue;
+        const connection = await findConnection(db, phoneNumberId);
+        if (!connection) continue;
 
-  const entries = entriesRaw;
-  let accepted = 0;
-  let processingFailures = 0;
-  for (const entry of entries) {
-    if (!entry || typeof entry !== "object" || Array.isArray(entry)) continue;
-    const changes = Array.isArray((entry as Record<string, unknown>).changes) ? ((entry as Record<string, unknown>).changes as unknown[]) : [];
-    for (const change of changes) {
-      if (!change || typeof change !== "object" || Array.isArray(change)) continue;
-      const rawValue = (change as Record<string, unknown>).value;
-      if (!rawValue || typeof rawValue !== "object" || Array.isArray(rawValue)) continue;
-      const value = rawValue as Record<string, unknown>;
-      const metadata = value.metadata as Record<string, unknown> | undefined;
-      const rawPhoneNumberId = metadata?.phone_number_id;
-      const phoneNumberId = typeof rawPhoneNumberId === "string" ? rawPhoneNumberId.trim() : "";
-      if (!/^\d{5,32}$/.test(phoneNumberId)) continue;
-      const { data: connection, error: connectionError } = await admin.from("whatsapp_connections")
-        .select("id,establishment_id,status")
-        .eq("phone_number_id", phoneNumberId).maybeSingle();
-      if (connectionError) { processingFailures += 1; continue; }
-      if (!connection || connection.status !== "active") continue;
-
-      const contacts = Array.isArray(value.contacts) ? (value.contacts as unknown[]).filter((c): c is Record<string, unknown> => !!c && typeof c === "object" && !Array.isArray(c)) : [];
-      const messages = Array.isArray(value.messages) ? (value.messages as unknown[]) : [];
-      for (const rawMessage of messages) {
-        if (!rawMessage || typeof rawMessage !== "object" || Array.isArray(rawMessage)) continue;
-        const message = rawMessage as Record<string, unknown>;
-        const rawCustomerPhone = message.from;
-        const rawProviderMessageId = message.id;
-        const customerPhone = typeof rawCustomerPhone === "string" ? rawCustomerPhone.trim() : "";
-        const providerMessageId = typeof rawProviderMessageId === "string" ? rawProviderMessageId.trim() : "";
-        if (!/^\d{7,20}$/.test(customerPhone) || !providerMessageId || providerMessageId.length > 255) continue;
-        const contact = contacts.find((c) => String((c.wa_id ?? "")) === customerPhone);
-        const profile = contact?.profile as Record<string, unknown> | undefined;
-        const customerName = typeof profile?.name === "string" ? profile.name : null;
-        const rawType = message.type;
-        const type = typeof rawType === "string" && rawType.length <= 64 ? rawType : "unknown";
-        const rawText = message.text as Record<string, unknown> | undefined;
-        const rawTextBody = rawText?.body;
-        const messageBody = type === "text" && typeof rawTextBody === "string" ? rawTextBody.slice(0, 4096) : null;
-        const rawTimestamp = message.timestamp;
-        const parsedTimestamp = typeof rawTimestamp === "string" && /^\d{1,12}$/.test(rawTimestamp)
-          ? Number(rawTimestamp)
-          : typeof rawTimestamp === "number" && Number.isSafeInteger(rawTimestamp) && rawTimestamp >= 0
-          ? rawTimestamp
-          : NaN;
-        // Bound epoch seconds to the supported Date range before ISO conversion.
-        const messageTime = Number.isSafeInteger(parsedTimestamp) && parsedTimestamp > 0 && parsedTimestamp <= 253402300799
-          ? new Date(parsedTimestamp * 1000).toISOString()
-          : new Date().toISOString();
-        const { data: existingConversation, error: findConversationError } = await admin.from("whatsapp_conversations")
-          .select("id").eq("connection_id", connection.id).eq("customer_phone", customerPhone).maybeSingle();
-        if (findConversationError) { processingFailures += 1; continue; }
-        let conversation = existingConversation;
-        if (conversation) {
-          // Late webhook deliveries must not move the inbox timestamp backwards
-          // or erase a name when Meta omits contact profile data.
-          const conversationUpdate: Record<string, unknown> = {
-            last_message_at: messageTime,
-            updated_at: new Date().toISOString(),
-          };
-          if (customerName) conversationUpdate.customer_name = customerName;
-          const { error: updateConversationError } = await admin.from("whatsapp_conversations")
-            .update(conversationUpdate)
-            .eq("id", conversation.id)
-            .or("last_message_at.is.null,last_message_at.lte." + messageTime);
-          if (updateConversationError) { processingFailures += 1; continue; }
-        } else {
-          const { data: createdConversation, error: createConversationError } = await admin.from("whatsapp_conversations")
-            .insert({
-              connection_id: connection.id,
-              establishment_id: connection.establishment_id,
-              customer_phone: customerPhone,
-              customer_name: customerName,
-              status: "open",
-              last_message_at: messageTime,
-              updated_at: new Date().toISOString(),
-            })
-            .select("id").single();
-          if (createConversationError || !createdConversation) {
-            // Concurrent webhook deliveries may race to create the same conversation.
-            const { data: racedConversation, error: raceLookupError } = await admin.from("whatsapp_conversations")
-              .select("id").eq("connection_id", connection.id).eq("customer_phone", customerPhone).maybeSingle();
-            if (raceLookupError) processingFailures += 1;
-            conversation = racedConversation;
-            if (!conversation && !raceLookupError) processingFailures += 1;
-          } else conversation = createdConversation;
-        }
-        if (!conversation) { processingFailures += 1; continue; }
-
-        const { data: insertedRows, error: insertError } = await admin.from("whatsapp_messages").upsert({
-          establishment_id: connection.establishment_id,
-          conversation_id: conversation.id,
-          provider_message_id: providerMessageId,
-          direction: "inbound",
-          message_type: type,
-          body: messageBody,
-          delivery_status: "received",
-          raw_metadata: { timestamp: message.timestamp ?? null, type },
-        }, { onConflict: "provider_message_id", ignoreDuplicates: true }).select("id");
-        // Count only rows actually inserted, not duplicate webhook retries.
-        if (insertError) processingFailures += 1;
-        else if (Array.isArray(insertedRows)) accepted += insertedRows.length;
-      }
-
-      const statuses = Array.isArray(value.statuses) ? (value.statuses as unknown[]) : [];
-      for (const rawStatus of statuses) {
-        if (!rawStatus || typeof rawStatus !== "object" || Array.isArray(rawStatus)) continue;
-        const status = rawStatus as Record<string, unknown>;
-        const providerMessageId = typeof status.id === "string" ? status.id.trim() : "";
-        const statusValue = typeof status.status === "string" ? status.status : "";
-        const mapped = ["sent", "delivered", "read", "failed"].includes(statusValue)
-          ? statusValue as "sent" | "delivered" | "read" | "failed"
-          : null;
-        if (!providerMessageId || !mapped) continue;
-        // Prevent out-of-order Meta callbacks from downgrading message state.
-        // Progression is queued -> sent -> delivered -> read; failed is only
-        // accepted before delivery is confirmed.
-        const allowedPrevious: Record<string, string[]> = {
-          sent: ["queued"],
-          delivered: ["queued", "sent"],
-          read: ["queued", "sent", "delivered"],
-          failed: ["queued", "sent"],
-        };
-        const previousStates = allowedPrevious[mapped];
-        if (!previousStates) continue;
-        const { data: updatedStatusRows, error: statusUpdateError } = await admin.from("whatsapp_messages").update({ delivery_status: mapped })
-          .eq("provider_message_id", providerMessageId)
-          .eq("establishment_id", connection.establishment_id)
-          .in("delivery_status", previousStates)
-          .select("id");
-        if (statusUpdateError) {
-          processingFailures += 1;
-        } else if (!updatedStatusRows?.length) {
-          // A callback may arrive before the send function persists Meta's ID.
-          // Retry only when the message is genuinely missing; stale callbacks
-          // for an already-existing message are harmless and should be acked.
-          const { data: existingStatusMessage, error: statusLookupError } = await admin.from("whatsapp_messages")
-            .select("id").eq("provider_message_id", providerMessageId)
-            .eq("establishment_id", connection.establishment_id).maybeSingle();
-          if (statusLookupError || !existingStatusMessage) processingFailures += 1;
+        if (change.field === 'messages') {
+          await processStatuses(db, connection, asArray(value.statuses));
+          const contacts = new Map<string, string>();
+          for (const contact of asArray(value.contacts)) {
+            const phone = normalizePhone(contact.wa_id);
+            const name = String(contact.profile?.name ?? '').trim();
+            if (phone && name) contacts.set(phone, name.slice(0, 160));
+          }
+          for (const message of asArray(value.messages)) {
+            await persistMessage(db, connection, message, String(message.from ?? ''), 'inbound', {
+              source: 'cloud_api',
+              timestamp: message.timestamp ?? null,
+              context: message.context ?? null,
+              referral: message.referral ?? null,
+            }, contacts);
+          }
+        } else if (change.field === 'smb_message_echoes') {
+          for (const message of asArray(value.message_echoes)) {
+            await persistMessage(db, connection, message, String(message.to ?? ''), 'outbound', {
+              source: 'whatsapp_business_app',
+              timestamp: message.timestamp ?? null,
+            }, new Map());
+          }
+        } else if (change.field === 'history') {
+          await processHistory(db, connection, value, String(value.metadata?.display_phone_number ?? connection.display_phone_number ?? ''));
+        } else if (change.field === 'smb_app_state_sync') {
+          await processContactSync(db, connection, asArray(value.state_sync));
         }
       }
     }
+  } catch (error) {
+    console.error('WhatsApp webhook processing failed', error);
+    const message = error instanceof Error ? error.message : 'webhook_processing_failed';
+    return json({ error: message }, 500);
   }
-  // Return a retryable error when persistence fails; Meta can redeliver and
-  // provider_message_id deduplication keeps successfully stored messages safe.
-  if (processingFailures > 0) return json({ error: "webhook_processing_failed", processed: accepted }, 500);
-  return json({ success: true, processed: accepted });
+
+  return json({ ok: true });
 });
