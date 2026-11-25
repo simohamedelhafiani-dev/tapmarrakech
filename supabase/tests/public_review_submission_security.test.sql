@@ -1,6 +1,11 @@
 begin;
 
-select plan(10);
+-- Keep this deterministic test key isolated and ensure the first-hit assertions
+-- start from an absent row. The surrounding transaction rolls the fixture back.
+delete from public.public_review_rate_limits
+where key_hash = repeat('e', 64);
+
+select plan(13);
 
 select ok(
   to_regprocedure('public.consume_public_review_rate_limit(text,integer,integer)') is not null,
@@ -76,6 +81,24 @@ select ok(
   and not has_table_privilege('anon', 'public.public_review_rate_limits', 'UPDATE')
   and not has_table_privilege('authenticated', 'public.public_review_rate_limits', 'UPDATE'),
   'browser roles cannot read or alter stored review rate-limit state'
+);
+
+select ok(
+  position(
+    'ON CONFLICT (key_hash) DO NOTHING'
+    in pg_get_functiondef('public.consume_public_review_rate_limit(text,integer,integer)'::regprocedure)
+  ) > 0,
+  'first-hit initialization uses an atomic primary-key conflict path'
+);
+
+select ok(
+  public.consume_public_review_rate_limit(repeat('e', 64), 1, 900),
+  'the first request for a new key is accepted'
+);
+
+select ok(
+  not public.consume_public_review_rate_limit(repeat('e', 64), 1, 900),
+  'a subsequent request observes and enforces the existing limit'
 );
 
 select * from finish();
