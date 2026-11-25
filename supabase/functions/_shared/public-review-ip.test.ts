@@ -1,5 +1,10 @@
-import { assertEquals } from 'https://deno.land/std@0.224.0/assert/mod.ts';
 import { getTrustedClientIp } from './public-review-ip.ts';
+
+function assertEquals(actual: unknown, expected: unknown) {
+  if (actual !== expected) {
+    throw new Error(`Expected ${String(expected)}, received ${String(actual)}`);
+  }
+}
 
 Deno.test('uses cf-connecting-ip and ignores caller-controlled forwarding headers', () => {
   const request = new Request('https://example.test', {
