@@ -160,7 +160,14 @@ Deno.serve(async (req) => {
     // Network errors and timeouts are ambiguous: Meta may have accepted the
     // message before the connection failed. Keep it queued to prevent a retry
     // with a new request ID from silently duplicating the message.
-    await admin.from("whatsapp_messages").update({ delivery_status: "queued", raw_metadata: { recipient: customerPhone, error: "provider_network_error", delivery_unknown: true } }).eq("id", queued.id);
+    const { error: unknownPersistError } = await admin.from("whatsapp_messages")
+      .update({ delivery_status: "queued", raw_metadata: { recipient: customerPhone, error: "provider_network_error", delivery_unknown: true } })
+      .eq("id", queued.id);
+    if (unknownPersistError) {
+      // The row was already reserved as queued before contacting Meta. Do not
+      // claim that the ambiguity marker was saved when its persistence failed.
+      return reply({ error: "message_outcome_unknown_persistence_failed", messageId: queued.id }, 500);
+    }
     return reply({ error: "meta_request_outcome_unknown", pending: true, messageId: queued.id, status: "queued" }, 202);
   }
 
@@ -175,7 +182,11 @@ Deno.serve(async (req) => {
   if (!providerMessageId || providerMessageId.length > 512) {
     // A successful HTTP response without a usable provider ID is ambiguous:
     // Meta may have accepted the send, so don't mark it failed or retry it.
-    return reply({ error: "meta_response_missing_message_id", messageId: queued.id }, 502);
+    const { error: unknownPersistError } = await admin.from("whatsapp_messages")
+      .update({ delivery_status: "queued", raw_metadata: { recipient: customerPhone, error: "provider_response_missing_message_id", delivery_unknown: true } })
+      .eq("id", queued.id);
+    if (unknownPersistError) return reply({ error: "message_outcome_unknown_persistence_failed", messageId: queued.id }, 500);
+    return reply({ error: "meta_response_missing_message_id", pending: true, messageId: queued.id, status: "queued" }, 202);
   }
   // Persist the provider ID without overwriting a delivery state already advanced
   // by an asynchronous webhook (e.g. delivered/read arriving before this handler).
