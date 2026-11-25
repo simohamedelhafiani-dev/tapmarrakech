@@ -191,7 +191,7 @@ async function processContactSync(db: any, connection: any, events: any[]) {
       p_event_at: eventAt,
     });
     if (error) throw new Error('contact_sync_write_failed');
-    if (applied === true) {
+    if (applied === true && (action === 'remove' || name)) {
       const { error: conversationError } = await db.from('whatsapp_conversations')
         .update({ customer_name: name, updated_at: new Date().toISOString() })
         .eq('connection_id', connection.id)
