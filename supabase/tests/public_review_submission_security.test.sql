@@ -5,7 +5,7 @@ begin;
 delete from public.public_review_rate_limits
 where key_hash = repeat('e', 64);
 
-select plan(13);
+select plan(15);
 
 select ok(
   to_regprocedure('public.consume_public_review_rate_limit(text,integer,integer)') is not null,
@@ -89,6 +89,20 @@ select ok(
     in pg_get_functiondef('public.consume_public_review_rate_limit(text,integer,integer)'::regprocedure)
   ) > 0,
   'first-hit initialization uses an atomic primary-key conflict path'
+);
+
+select throws_ok(
+  'SELECT public.consume_public_review_rate_limit(repeat(''d'', 64), NULL, 900)',
+  'P0001',
+  'invalid_rate_limit_parameters',
+  'a NULL request limit is rejected instead of disabling quota enforcement'
+);
+
+select throws_ok(
+  'SELECT public.consume_public_review_rate_limit(repeat(''c'', 64), 1, NULL)',
+  'P0001',
+  'invalid_rate_limit_parameters',
+  'a NULL rate-limit window is rejected'
 );
 
 select ok(
