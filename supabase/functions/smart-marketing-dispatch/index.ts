@@ -1,4 +1,4 @@
-import { extractBearerToken, normalizeLimit, resolveSmartMessage, retryDelayMinutes } from './smart-marketing-utils.ts';
+import { extractBearerToken, normalizeLimit, resolveSmartMessage, retryDelayMinutes, parseHappyHourSchedule } from './smart-marketing-utils.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json'}});
 const templates:Record<string,{title:string;message:(p:Record<string,unknown>)=>string;type:'INFO'|'OFFER'|'REWARD'|'POINTS'}>={
@@ -55,7 +55,7 @@ Deno.serve(async(req)=>{
     const valid=(s:string)=>/^([01]\d|2[0-3]):[0-5]\d$/.test(s);
     const weekday=Number(new Intl.DateTimeFormat('en-US',{timeZone:'Africa/Casablanca',weekday:'short'}).format(now).replace(/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)$/,m=>String(['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(m))));
     const days=String(liveConfig.config?.days??'').split(',').map(x=>Number(x.trim())).filter(x=>Number.isInteger(x)&&x>=0&&x<=6);
-    if(!match||!valid(match[1])||!valid(match[2])||match[1]>=match[2]||localTime<match[1]||localTime>=match[2]||(days.length&&!days.includes(weekday))){await markSkipped(q.id,'Happy Hour schedule no longer active');skipped++;continue;}
+    if(!match||localTime<match.start||localTime>=match.end||(days.length&&!days.includes(weekday))){await markSkipped(q.id,'Happy Hour schedule no longer active');skipped++;continue;}
    }
    if(q.smart_id==='challenge'){
     const goal=Math.max(1,Math.min(1000,Number.parseFloat(String(liveConfig.config?.goalVisits??liveConfig.config?.goal_visits??liveConfig.config?.goal??3))||3));
