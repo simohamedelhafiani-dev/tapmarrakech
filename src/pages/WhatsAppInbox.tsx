@@ -22,6 +22,10 @@ export default function WhatsAppInbox() {
   const [sending, setSending] = useState(false);
   const [notice, setNotice] = useState('');
   const conversationLoadSequence = useRef(0);
+  // Reuse the same idempotency key when the same send has an ambiguous outcome.
+  // A fresh UUID on every click would let a second click duplicate a Meta-accepted
+  // message whose first HTTP response was lost.
+  const pendingSendRef = useRef<{ fingerprint: string; requestId: string } | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -66,19 +70,35 @@ export default function WhatsAppInbox() {
   async function sendMessage() {
     if (!selected || !draft.trim() || sending) return;
     setSending(true); setNotice('');
+    const recipient = selected.customer_phone.startsWith('+') ? selected.customer_phone : `+${selected.customer_phone}`;
+    const messageText = draft.trim();
+    const fingerprint = JSON.stringify([establishmentId, recipient, messageText]);
+    if (!pendingSendRef.current || pendingSendRef.current.fingerprint !== fingerprint) {
+      pendingSendRef.current = { fingerprint, requestId: crypto.randomUUID() };
+    }
+    const requestId = pendingSendRef.current.requestId;
     const { data, error } = await supabase.functions.invoke('whatsapp-send-message', {
-      body: { establishmentId, to: selected.customer_phone.startsWith('+') ? selected.customer_phone : `+${selected.customer_phone}`, text: draft.trim(), requestId: crypto.randomUUID() },
+      body: { establishmentId, to: recipient, text: messageText, requestId },
     });
     // A 202 queued response is not a send failure: Meta may have accepted the
     // message while the network outcome is unknown. Refresh to show the persisted
     // outbound record and avoid prompting the user to send a duplicate.
     const pending = Boolean(data?.pending) || data?.status === 'queued';
     if (error || (!data?.success && !pending)) {
-      setNotice(data?.error === 'whatsapp_not_connected' ? 'WhatsApp n’est pas connecté pour cet établissement.' : 'Envoi impossible. Vérifie la connexion WhatsApp et réessaie.');
+      // Keep the key for transport/unknown failures so a retry cannot create a
+      // second outbound row. A provider rejection or pre-send token failure is
+      // definitive and may be retried as a new deliberate send.
+      if (data?.error === 'meta_send_rejected' || data?.error === 'whatsapp_token_unavailable') {
+        pendingSendRef.current = null;
+      }
+      setNotice(data?.error === 'whatsapp_not_connected' ? 'WhatsApp n’est pas connecté pour cet établissement.' : 'Envoi impossible ou résultat incertain. Réessaie avec le même message pour éviter un doublon.');
       setSending(false);
       return;
     }
-    if (!pending) setDraft('');
+    if (!pending) {
+      pendingSendRef.current = null;
+      setDraft('');
+    }
     // Refresh the list first: loadInbox clears the selected conversation.
     // Reopen it afterwards so the inbox remains focused on the conversation just answered.
     const sentConversation = selected;
