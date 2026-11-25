@@ -41,6 +41,6 @@ export function formatLocalDateKey(year: unknown, month: unknown, day: unknown):
   const y = String(year ?? '').trim();
   const m = String(month ?? '').trim().padStart(2, '0');
   const d = String(day ?? '').trim().padStart(2, '0');
-  if (!/^\\d{4}$/.test(y) || !/^\\d{2}$/.test(m) || !/^\\d{2}$/.test(d)) return '';
+  if (!/^\d{4}$/.test(y) || !/^\d{2}$/.test(m) || !/^\d{2}$/.test(d)) return '';
   return `${y}-${m}-${d}`;
 }
