@@ -24,3 +24,8 @@ verify_jwt = false
 
 [functions.smart-marketing-dispatch]
 verify_jwt = false
+
+# Smart Nearby validates the public loyalty-card access token inside the handler.
+# It must not require a Supabase Auth JWT from the card holder.
+[functions.smart-nearby-event]
+verify_jwt = false
