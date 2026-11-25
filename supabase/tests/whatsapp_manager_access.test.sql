@@ -24,14 +24,28 @@ WITH users AS (
 numbered AS (
   SELECT id, email, row_number() OVER (ORDER BY id) AS rn FROM users
 )
-INSERT INTO public.profiles (id, email, name, role)
-SELECT id, email, 'WhatsApp access fixture ' || rn,
-       CASE WHEN rn = 1 THEN 'admin'
-            WHEN rn = 3 THEN 'responsible'
-            WHEN rn = 4 THEN 'employee'
-            ELSE 'responsible' END
-FROM numbered
-ON CONFLICT (id) DO UPDATE SET role = EXCLUDED.role;
+INSERT INTO public.profiles (id, email, name)
+SELECT id, email, 'WhatsApp access fixture ' || rn
+FROM (
+  SELECT id, email, row_number() OVER (ORDER BY id) AS rn
+  FROM auth.users
+  WHERE email LIKE 'whatsapp-access-%@test.invalid'
+) numbered
+ON CONFLICT (id) DO UPDATE
+SET email = EXCLUDED.email,
+    name = EXCLUDED.name;
+
+-- The role-authority trigger reserves privileged role assignment for trusted
+-- server-side provisioning; model that trusted setup explicitly in the fixture.
+SELECT set_config('request.jwt.claims', '{"role":"service_role"}', true);
+UPDATE public.profiles
+SET role = CASE
+  WHEN name = 'WhatsApp access fixture 1' THEN 'admin'
+  WHEN name = 'WhatsApp access fixture 4' THEN 'employee'
+  ELSE 'responsible'
+END
+WHERE name LIKE 'WhatsApp access fixture %';
+SELECT set_config('request.jwt.claims', '{}', true);
 
 INSERT INTO public.establishments (user_id, name, slug)
 SELECT p.id, 'WhatsApp access fixture', 'wa-access-' || replace(gen_random_uuid()::text, '-', '')
