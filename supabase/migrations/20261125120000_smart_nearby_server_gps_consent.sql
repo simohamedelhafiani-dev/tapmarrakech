@@ -45,3 +45,20 @@ revoke all on function public.set_public_loyalty_gps_consent(uuid, boolean) from
 grant execute on function public.set_public_loyalty_gps_consent(uuid, boolean) to anon, authenticated;
 
 notify pgrst, 'reload schema';
+
+create or replace function public.get_public_loyalty_gps_consent(p_access_token uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = pg_catalog, public
+as $$
+  select coalesce(c.gps_consent, false)
+  from public.loyalty_customer_links l
+  join public.loyalty_customers c on c.id = l.customer_id
+  where l.access_token = p_access_token
+  limit 1;
+$$;
+
+revoke all on function public.get_public_loyalty_gps_consent(uuid) from public, anon, authenticated;
+grant execute on function public.get_public_loyalty_gps_consent(uuid) to anon, authenticated;
