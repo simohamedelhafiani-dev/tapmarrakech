@@ -15,7 +15,9 @@ Deno.serve(async(req)=>{
  if(linkErr||!link)return json({success:false,error:'Carte fidélité non valide'},401);
  const {data:customer,error:cErr}=await admin.from('loyalty_customers').select('id,establishment_id,notification_consent,marketing_consent').eq('id',link.customer_id).maybeSingle();
  if(cErr||!customer)return json({success:false,error:'Client introuvable'},401);
- // Atomically limit authenticated customer calls across Edge instances: 10 per 60-second window.
+ // Reject customers without the required existing consents before consuming their rate-limit budget.
+ if(!customer.notification_consent||!customer.marketing_consent)return json({success:true,eligible:false,reason:'consent_missing'});
+ // Atomically limit consented customer calls across Edge instances: 10 per 60-second window.
  // Fail closed if the limiter RPC is unavailable to avoid bypassing the protection.
  const {data:limitRows,error:limitError}=await admin.rpc('smart_nearby_rate_limit',{p_customer_id:customer.id,p_limit:10,p_window_seconds:60});
  if(limitError||!Array.isArray(limitRows)||!limitRows[0])return json({success:false,error:'Protection anti-abus indisponible'},503);
@@ -25,7 +27,6 @@ Deno.serve(async(req)=>{
   const retryAfter=Number.isFinite(started)?Math.max(1,Math.ceil((started+60000-Date.now())/1000)):60;
   return json({success:false,error:'Trop de requêtes Smart Nearby. Réessayez plus tard.',retry_after:retryAfter},429,{'Retry-After':String(retryAfter)});
  }
- if(!customer.notification_consent||!customer.marketing_consent)return json({success:true,eligible:false,reason:'consent_missing'});
  const {data:config,error:cfgErr}=await admin.from('smart_marketing_configs').select('enabled,config').eq('establishment_id',customer.establishment_id).eq('smart_id','nearby').maybeSingle();
  if(cfgErr)return json({success:false,error:'Configuration indisponible'},500);
  if(!config?.enabled)return json({success:true,eligible:false,reason:'disabled'});
