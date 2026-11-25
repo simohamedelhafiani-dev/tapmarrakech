@@ -29,7 +29,7 @@ SELECT id, email, 'WhatsApp access fixture ' || rn,
        CASE WHEN rn = 1 THEN 'admin'
             WHEN rn = 3 THEN 'responsible'
             WHEN rn = 4 THEN 'employee'
-            ELSE 'owner' END
+            ELSE 'responsible' END
 FROM numbered
 ON CONFLICT (id) DO UPDATE SET role = EXCLUDED.role;
 
