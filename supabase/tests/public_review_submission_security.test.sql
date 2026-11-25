@@ -5,7 +5,7 @@ begin;
 delete from public.public_review_rate_limits
 where key_hash in (repeat('e', 64), repeat('f', 64), repeat('a', 64), repeat('b', 64));
 
-select plan(19);
+select plan(18);
 
 select ok(
   to_regprocedure('public.consume_public_review_rate_limit(text,integer,integer)') is not null,
@@ -123,13 +123,15 @@ select ok(
 );
 
 select ok(
-  public.consume_public_review_rate_limit(repeat('f', 64), 100, 900),
-  'the global IP bucket accepts its first request'
-);
-
-select ok(
-  public.consume_public_review_rate_limit(repeat('f', 64), 100, 900),
-  'the same global IP bucket accumulates requests independently of establishment IDs'
+  (
+    select count(*) filter (where allowed) = 100
+    from (
+      select public.consume_public_review_rate_limit(repeat('f', 64), 100, 900) as allowed
+      from generate_series(1, 100)
+    ) hits
+  )
+  and not public.consume_public_review_rate_limit(repeat('f', 64), 100, 900),
+  'the global IP bucket allows 100 hits and rejects the 101st within one window'
 );
 
 select ok(
