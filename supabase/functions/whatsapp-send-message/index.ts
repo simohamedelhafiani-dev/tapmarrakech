@@ -64,10 +64,16 @@ Deno.serve(async (req) => {
 
   const admin = createClient(supabaseUrl, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } });
   const { data: connection, error: connectionError } = await admin.from("whatsapp_connections")
-    .select("id,establishment_id,phone_number_id,access_token_secret_id,status")
+    .select("id,establishment_id,phone_number_id,access_token_secret_id,token_expires_at,status")
     .eq("establishment_id", establishmentId).maybeSingle();
   if (connectionError) return reply({ error: "connection_lookup_failed" }, 500);
   if (!connection || connection.status !== "active") return reply({ error: "whatsapp_not_connected" }, 409);
+  if (typeof connection.token_expires_at === "string") {
+    const expiry = Date.parse(connection.token_expires_at);
+    if (!Number.isFinite(expiry) || expiry <= Date.now() + 60_000) {
+      return reply({ error: "whatsapp_token_expired_reconnect_required" }, 409);
+    }
+  }
   // Phone Number IDs are numeric Graph path segments; reject corrupt DB values
   // before interpolating them into the provider URL.
   if (typeof connection.phone_number_id !== "string" || !/^\d{5,32}$/.test(connection.phone_number_id)) {

@@ -141,6 +141,15 @@ Deno.serve(async (req) => {
     return reply({ error: "meta_code_exchange_unavailable" }, 502);
   }
   const accessToken = typeof tokenData.access_token === "string" ? tokenData.access_token.trim() : "";
+  const rawExpiresIn = tokenData.expires_in;
+  const expiresInSeconds = typeof rawExpiresIn === "number" && Number.isSafeInteger(rawExpiresIn) && rawExpiresIn > 0
+    ? rawExpiresIn
+    : typeof rawExpiresIn === "string" && /^\\d{1,10}$/.test(rawExpiresIn) && Number.isSafeInteger(Number(rawExpiresIn)) && Number(rawExpiresIn) > 0
+    ? Number(rawExpiresIn)
+    : null;
+  const tokenExpiresAt = expiresInSeconds === null
+    ? null
+    : new Date(Date.now() + expiresInSeconds * 1000).toISOString();
   // Reject malformed or unexpectedly large token payloads before using/storing them.
   if (!exchange.ok || accessToken.length < 20 || accessToken.length > 4_096) {
     return reply({ error: "meta_code_exchange_failed" }, 400);
@@ -236,6 +245,7 @@ Deno.serve(async (req) => {
     display_phone_number: phoneData.display_phone_number ?? null,
     business_name: phoneData.verified_name ?? wabaCheck.data.name ?? null,
     access_token_secret_id: secretId,
+    token_expires_at: tokenExpiresAt,
     status: "active",
     auto_reply_enabled: false,
     updated_at: new Date().toISOString(),
