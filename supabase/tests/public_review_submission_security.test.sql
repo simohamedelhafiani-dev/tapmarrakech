@@ -5,7 +5,7 @@ begin;
 delete from public.public_review_rate_limits
 where key_hash = repeat('e', 64);
 
-select plan(15);
+select plan(16);
 
 select ok(
   to_regprocedure('public.consume_public_review_rate_limit(text,integer,integer)') is not null,
@@ -103,6 +103,13 @@ select throws_ok(
   'P0001',
   'invalid_rate_limit_parameters',
   'a NULL rate-limit window is rejected'
+);
+
+select throws_ok(
+  'SELECT public.consume_public_review_rate_limit(repeat(''b'', 64), 1, 86401)',
+  'P0001',
+  'invalid_rate_limit_parameters',
+  'rate-limit windows longer than one day are rejected'
 );
 
 select ok(
