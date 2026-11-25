@@ -1,6 +1,6 @@
 begin;
 
-select plan(7);
+select plan(8);
 
 select ok(
   to_regprocedure('public.consume_public_review_rate_limit(text,integer,integer)') is not null,
@@ -41,6 +41,17 @@ select ok(
       and privilege_type = 'INSERT'
   ),
   'PUBLIC and browser roles have no column-level review INSERT grants'
+);
+
+select ok(
+  not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public'
+      and tablename = 'reviews'
+      and policyname = 'reviews_public_insert'
+  ),
+  'the legacy public review INSERT policy is removed'
 );
 
 select ok(
