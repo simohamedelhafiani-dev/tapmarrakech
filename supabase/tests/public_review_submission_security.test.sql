@@ -1,6 +1,6 @@
 begin;
 
-select plan(6);
+select plan(7);
 
 select ok(
   to_regprocedure('public.consume_public_review_rate_limit(text,integer,integer)') is not null,
@@ -29,6 +29,18 @@ select ok(
   not has_table_privilege('anon', 'public.reviews', 'INSERT')
   and not has_table_privilege('authenticated', 'public.reviews', 'INSERT'),
   'public reviews cannot be inserted directly through the Data API'
+);
+
+select ok(
+  not exists (
+    select 1
+    from information_schema.column_privileges
+    where table_schema = 'public'
+      and table_name = 'reviews'
+      and grantee in ('PUBLIC', 'anon', 'authenticated')
+      and privilege_type = 'INSERT'
+  ),
+  'PUBLIC and browser roles have no column-level review INSERT grants'
 );
 
 select ok(
