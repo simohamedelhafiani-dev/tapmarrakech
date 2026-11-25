@@ -23,14 +23,14 @@ export const GOOGLE_WALLET_FIELD_OPTIONS: { id: GoogleWalletFieldKey; label: str
 ];
 
 export const GOOGLE_WALLET_TEMPLATES: GoogleWalletTemplate[] = [
-  { id: 'google-balance-ledger', name: 'Solde en vedette', description: 'Solde principal, identité membre et avantage suivant.', layout: 'balance', rows: [['balance'], ['accountName', 'accountId'], ['reward']], background: '#050505', accent: '#00DFA5', text: '#FFFFFF' },
-  { id: 'google-stamp-journey', name: 'Parcours de visites', description: 'Progression de tampons, objectif et récompense dans cet ordre.', layout: 'stamps', rows: [['balance', 'reward'], ['accountName', 'accountId']], background: '#111111', accent: '#14B8A6', text: '#FFFFFF' },
+  { id: 'google-balance-ledger', name: 'Solde en vedette', description: 'Solde principal, identité membre et avantage suivant.', layout: 'balance', rows: [['balance'], ['accountName', 'accountId'], ['reward']], background: '#050505', accent: '#3B82F6', text: '#FFFFFF' },
+  { id: 'google-stamp-journey', name: 'Parcours de visites', description: 'Progression de tampons, objectif et récompense dans cet ordre.', layout: 'stamps', rows: [['balance', 'reward'], ['accountName', 'accountId']], background: '#111111', accent: '#3B82F6', text: '#FFFFFF' },
   { id: 'google-member-profile', name: 'Profil membre', description: 'Nom et numéro de membre avant le solde et le QR.', layout: 'member', rows: [['accountName'], ['accountId', 'balance'], ['tier']], background: '#050505', accent: '#686D76', text: '#FFFFFF' },
-  { id: 'google-scan-first', name: 'Scan immédiat', description: 'Identifiant et code de scan mis en avant pour le passage en caisse.', layout: 'barcode', rows: [['accountId'], ['balance', 'accountName']], background: '#111111', accent: '#00DFA5', text: '#FFFFFF' },
-  { id: 'google-reward-board', name: 'Récompense à débloquer', description: 'Prochaine récompense en premier, solde et identité ensuite.', layout: 'reward', rows: [['reward'], ['balance', 'accountName'], ['accountId']], background: '#050505', accent: '#14B8A6', text: '#FFFFFF' },
-  { id: 'google-tier-club', name: 'Club par niveau', description: 'Niveau de fidélité, membre et solde présentés en trois rangées.', layout: 'tier', rows: [['tier'], ['accountName', 'balance'], ['accountId']], background: '#111111', accent: '#00DFA5', text: '#FFFFFF' },
+  { id: 'google-scan-first', name: 'Scan immédiat', description: 'Identifiant et code de scan mis en avant pour le passage en caisse.', layout: 'barcode', rows: [['accountId'], ['balance', 'accountName']], background: '#111111', accent: '#3B82F6', text: '#FFFFFF' },
+  { id: 'google-reward-board', name: 'Récompense à débloquer', description: 'Prochaine récompense en premier, solde et identité ensuite.', layout: 'reward', rows: [['reward'], ['balance', 'accountName'], ['accountId']], background: '#050505', accent: '#3B82F6', text: '#FFFFFF' },
+  { id: 'google-tier-club', name: 'Club par niveau', description: 'Niveau de fidélité, membre et solde présentés en trois rangées.', layout: 'tier', rows: [['tier'], ['accountName', 'balance'], ['accountId']], background: '#111111', accent: '#3B82F6', text: '#FFFFFF' },
   { id: 'google-venue-guide', name: 'Carte établissement', description: 'Établissement, informations utiles, solde et accès au scan.', layout: 'location', rows: [['venue'], ['accountName', 'balance'], ['accountId']], background: '#050505', accent: '#686D76', text: '#FFFFFF' },
-  { id: 'google-offer-pass', name: 'Avantage actif', description: 'Offre, échéance et solde avec une image de couverture.', layout: 'offer', rows: [['offer'], ['balance', 'accountName'], ['accountId']], background: '#111111', accent: '#14B8A6', text: '#FFFFFF' },
+  { id: 'google-offer-pass', name: 'Avantage actif', description: 'Offre, échéance et solde avec une image de couverture.', layout: 'offer', rows: [['offer'], ['balance', 'accountName'], ['accountId']], background: '#111111', accent: '#3B82F6', text: '#FFFFFF' },
 ];
 
 export type AppleWalletField = 'accountName' | 'accountId' | 'points' | 'visits' | 'reward' | 'tier' | 'establishment' | 'offer';
