@@ -44,7 +44,19 @@ Deno.serve(async(req)=>{
     const {data:settings,error:settingsError}=await admin.from('loyalty_settings').select('stamp_goal,stamp_reward_name,stamp_reward_description').eq('establishment_id',q.establishment_id).eq('program_type','STAMP').eq('enabled',true).maybeSingle();
     if(settingsError)throw settingsError;
     const goal=Math.max(1,Number(settings?.stamp_goal)||10),stamps=Number(c.stamps_balance??0);
-    if(!settings||stamps<goal||q.trigger_key!==`reward:${goal}:${stamps}`){await markSkipped(q.id,'Stamp reward no longer eligible');skipped++;continue;}
+    const {data:latestClaim,error:claimError}=await admin.from('loyalty_stamp_reward_claims')
+      .select('id,status,expires_at')
+      .eq('establishment_id',q.establishment_id)
+      .eq('customer_id',q.customer_id)
+      .order('created_at',{ascending:false})
+      .order('id',{ascending:false})
+      .limit(1)
+      .maybeSingle();
+    if(claimError)throw claimError;
+    const pendingActive=latestClaim?.status==='PENDING'&&Date.parse(latestClaim.expires_at)>Date.now();
+    const cycleStatus=latestClaim?(latestClaim.status==='PENDING'&&!pendingActive?'EXPIRED':latestClaim.status):'INITIAL';
+    const cycleKey=latestClaim?`${latestClaim.id}:${cycleStatus}`:'initial';
+    if(!settings||stamps<goal||pendingActive||q.trigger_key!==`reward:${goal}:${cycleKey}`){await markSkipped(q.id,'Stamp reward cycle is no longer eligible');skipped++;continue;}
     messagePayload.reward_name=settings.stamp_reward_name;messagePayload.reward_description=settings.stamp_reward_description;messagePayload.stamps=stamps;messagePayload.goal=goal;
    }
    if(q.smart_id==='happyhour'){
