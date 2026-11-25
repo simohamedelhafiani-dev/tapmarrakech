@@ -8,6 +8,7 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
+const GLOBAL_IP_LIMIT = 100;
 const IP_LIMIT = 5;
 const SESSION_LIMIT = 2;
 const RATE_LIMIT_WINDOW_SECONDS = 15 * 60;
@@ -276,6 +277,39 @@ Deno.serve(async (request) => {
       }
     );
 
+    const clientIp = getTrustedClientIp(request);
+
+    // The global IP bucket is independent of establishment_id and runs before
+    // any database lookup. This prevents rotating establishment UUIDs to evade
+    // the lookup protection. The higher shared-network allowance reduces NAT
+    // impact; the existing per-establishment and per-session limits still apply.
+    if (!clientIp) {
+      console.error('Public review request missing trusted client IP header');
+      return json(
+        {
+          success: false,
+          error: 'Service temporairement indisponible.',
+        },
+        503
+      );
+    }
+
+    const globalIpAllowed = await consumeRateLimit(
+      serviceClient,
+      `ip-global:${clientIp}`,
+      GLOBAL_IP_LIMIT
+    );
+
+    if (!globalIpAllowed) {
+      return json(
+        {
+          success: false,
+          error: 'Trop de tentatives. Veuillez réessayer plus tard.',
+        },
+        429
+      );
+    }
+
     const { data: establishment, error: establishmentError } =
       await serviceClient
         .from('establishments')
@@ -302,21 +336,6 @@ Deno.serve(async (request) => {
       return json(
         { success: false, error: 'Établissement introuvable.' },
         404
-      );
-    }
-
-    const clientIp = getTrustedClientIp(request);
-
-    // Never fall back to caller-controlled forwarding headers for the IP quota.
-    // If the trusted ingress header is missing or ambiguous, fail closed.
-    if (!clientIp) {
-      console.error('Public review request missing trusted client IP header');
-      return json(
-        {
-          success: false,
-          error: 'Service temporairement indisponible.',
-        },
-        503
       );
     }
 
