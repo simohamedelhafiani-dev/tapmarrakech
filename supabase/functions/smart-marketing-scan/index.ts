@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { extractBearerToken, parseSmartConfigNumber, parseHappyHourSchedule, formatLocalDateKey } from '../smart-marketing-dispatch/smart-marketing-utils.ts';
+import { extractBearerToken, parseSmartConfigNumber, parseHappyHourSchedule, formatLocalDateKey, resolveRewardClaimCycle } from '../smart-marketing-dispatch/smart-marketing-utils.ts';
 
 const headers = { 'Content-Type': 'application/json' };
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers });
@@ -71,14 +71,10 @@ Deno.serve(async (req) => {
         const latestClaimByCustomer = new Map<string, { customer_id: string; claim_id: string; claim_status: string; expires_at: string }>((rewardCycles ?? []).map((claim: { customer_id: string; claim_id: string; claim_status: string; expires_at: string }) => [claim.customer_id, claim] as const));
         for (const customer of (customers ?? []) as Customer[]) {
           const stamps = customer.stamps_balance ?? 0;
-          const latestClaim = latestClaimByCustomer.get(customer.id) as { claim_id: string; claim_status: string; expires_at: string } | undefined;
-          const pendingActive = latestClaim?.claim_status === 'PENDING' && Date.parse(latestClaim.expires_at) > Date.now();
-          const cycleStatus = latestClaim
-            ? latestClaim.claim_status === 'PENDING' && !pendingActive ? 'EXPIRED' : latestClaim.claim_status
-            : 'INITIAL';
-          const cycleKey = latestClaim ? `${latestClaim.claim_id}:${cycleStatus}` : 'initial';
-          if (customer.marketing_consent && stamps >= goal && !pendingActive) {
-            eligible.push({ customer, trigger: `reward:${goal}:${cycleKey}`, payload: { stamps, goal, reward_name: rewardSettings.stamp_reward_name, reward_description: rewardSettings.stamp_reward_description } });
+          const latestClaim = latestClaimByCustomer.get(customer.id);
+          const cycle = resolveRewardClaimCycle(goal, latestClaim);
+          if (customer.marketing_consent && stamps >= goal && !cycle.pendingActive) {
+            eligible.push({ customer, trigger: cycle.triggerKey, payload: { stamps, goal, reward_name: rewardSettings.stamp_reward_name, reward_description: rewardSettings.stamp_reward_description } });
           }
         }
       }
