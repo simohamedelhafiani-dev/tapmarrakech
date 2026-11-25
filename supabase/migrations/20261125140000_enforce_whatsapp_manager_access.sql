@@ -5,7 +5,7 @@ RETURNS boolean
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
-SET search_path = pg_catalog, public, auth
+SET search_path = pg_catalog, public, auth, pg_temp
 AS $function$
   SELECT auth.uid() IS NOT NULL
     AND target_establishment_id IS NOT NULL

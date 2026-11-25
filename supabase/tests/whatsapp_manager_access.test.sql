@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(4);
+SELECT plan(6);
 
 CREATE TEMP TABLE whatsapp_access_fixture (
   admin_id uuid NOT NULL,
@@ -66,6 +66,15 @@ INSERT INTO public.establishment_staff (establishment_id, user_id, role, active)
 SELECT establishment_id, responsible_id, 'MANAGER', true FROM whatsapp_access_fixture
 UNION ALL
 SELECT establishment_id, staff_id, 'STAFF', true FROM whatsapp_access_fixture;
+
+SELECT ok(
+  NOT has_function_privilege('anon', 'public.user_can_manage_whatsapp(uuid)', 'EXECUTE'),
+  'anonymous clients cannot execute the WhatsApp manager authorization helper'
+);
+SELECT ok(
+  has_function_privilege('authenticated', 'public.user_can_manage_whatsapp(uuid)', 'EXECUTE'),
+  'authenticated sessions can execute the WhatsApp manager authorization helper'
+);
 
 SET LOCAL ROLE authenticated;
 
