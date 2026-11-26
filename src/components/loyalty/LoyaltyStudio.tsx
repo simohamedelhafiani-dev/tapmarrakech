@@ -40,6 +40,7 @@ import {
   GOOGLE_WALLET_FIELD_OPTIONS,
   GOOGLE_WALLET_TEMPLATES,
   getAppleWalletTemplate,
+  normalizeNardoBackgroundColor,
   type GoogleWalletTemplate,
   type GoogleWalletFieldKey,
 } from './walletTemplates';
@@ -319,13 +320,13 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       const row = Array.isArray(designData) ? designData[0] : designData;
       if (row) {
         const cfg = row.design_config ?? {};
-        setWalletDesign({ ...DEFAULT_WALLET_DESIGN, ...(cfg.wallet_design ?? {}) });
+        setWalletDesign({ ...DEFAULT_WALLET_DESIGN, ...(cfg.wallet_design ?? {}), backgroundColor: normalizeNardoBackgroundColor(cfg.wallet_design?.backgroundColor ?? DEFAULT_WALLET_DESIGN.backgroundColor) });
         setDesign({
           ...DEFAULT_DESIGN,
           templateId: row.template_id ?? DEFAULT_DESIGN.templateId,
           primaryColor: row.primary_color ?? DEFAULT_DESIGN.primaryColor,
           secondaryColor: row.secondary_color ?? DEFAULT_DESIGN.secondaryColor,
-          backgroundColor: row.background_color ?? DEFAULT_DESIGN.backgroundColor,
+          backgroundColor: normalizeNardoBackgroundColor(row.background_color ?? DEFAULT_DESIGN.backgroundColor),
           textColor: row.text_color ?? DEFAULT_DESIGN.textColor,
           buttonColor: row.button_color ?? DEFAULT_DESIGN.buttonColor,
           borderRadius: Number(row.border_radius ?? DEFAULT_DESIGN.borderRadius),
@@ -536,7 +537,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   };
 
   const updateColor = (key: keyof Pick<DesignState, 'primaryColor' | 'secondaryColor' | 'backgroundColor' | 'textColor' | 'buttonColor'>, value: string) => {
-    setDesign(current => ({ ...current, templateId: 'custom', [key]: value }));
+    setDesign(current => ({ ...current, templateId: 'custom', [key]: key === 'backgroundColor' ? normalizeNardoBackgroundColor(value) : value }));
   };
 
   const uploadWallpaper = async (file: File) => {
@@ -657,7 +658,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       });
       if (error) throw error;
       if (!data?.success) throw new Error(data?.error || 'Publication Wallet impossible.');
-      setWalletDesign(config);
+      setWalletDesign({ ...config, backgroundColor: normalizeNardoBackgroundColor(config.backgroundColor) });
       setMessage(data.message || 'Modèle traité.');
       const { data: rows, error: rowsError } = await supabase
         .from('loyalty_wallet_design_catalog')
@@ -1559,7 +1560,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   </Field>
                   <Field label="Couleur de fond réelle du pass">
                     <div className="mt-2 flex h-11 items-center gap-2 rounded-xl border border-white/10 bg-[#111111] px-2">
-                      <input type="color" aria-label="Choisir la couleur de fond Google Wallet" value={walletDesign.backgroundColor} onChange={e => setWalletDesign(current => ({ ...current, backgroundColor: e.target.value }))} className="h-7 w-9 cursor-pointer rounded border-0 bg-transparent p-0" />
+                      <input type="color" aria-label="Choisir la couleur de fond Google Wallet" value={walletDesign.backgroundColor} onChange={e => setWalletDesign(current => ({ ...current, backgroundColor: normalizeNardoBackgroundColor(e.target.value) }))} className="h-7 w-9 cursor-pointer rounded border-0 bg-transparent p-0" />
                       <span className="px-2 text-xs text-white/70">{walletDesign.backgroundColor.toUpperCase()}</span>
                     </div>
                   </Field>
