@@ -33,11 +33,12 @@ import LoyaltyRaffleStudio from './LoyaltyRaffleStudio';
 import LoyaltyTierStudio from './LoyaltyTierStudio';
 import LoyaltyCrmSegments from './LoyaltyCrmSegments';
 import LoyaltyNotificationsPanel from '@/components/admin/LoyaltyNotificationsPanel';
+import SmartMarketingCenter from '@/pages/SmartMarketingCenter';
 import { WALLET_TEMPLATES } from '@/components/LoyaltyCardVisual';
 import type { LoyaltyExperienceConfig, LoyaltyExperienceReward } from './LoyaltyExperience';
 
 type Props = { establishmentId: string };
-type TabId = 'settings' | 'rewards' | 'referral' | 'tiers' | 'raffle' | 'crm' | 'notifications' | 'design' | 'wallet';
+type TabId = 'settings' | 'rewards' | 'referral' | 'tiers' | 'raffle' | 'crm' | 'notifications' | 'design' | 'wallet' | 'smart';
 type RewardType = 'GIFT' | 'DISCOUNT';
 
 type WalletCatalogEntry = {
@@ -143,7 +144,8 @@ const TABS: { id: TabId; label: string; caption: string; icon: typeof Settings2 
   { id: 'crm', label: 'Mes clients', caption: 'Clients & segments', icon: UsersRound },
   { id: 'notifications', label: 'Notifications', caption: 'Communication', icon: Bell },
   { id: 'design', label: 'Carte KELYANI', caption: 'Carte fidélité', icon: Palette },
-  { id: 'wallet', label: 'Carte Wallet', caption: 'Google & Apple Wallet', icon: CreditCard },
+  { id: 'wallet', label: 'Apple & Google Wallet', caption: 'Gestion Wallet', icon: CreditCard },
+  { id: 'smart', label: 'Smart Marketing', caption: '10 automations', icon: Sparkles },
 ];
 
 const TYPES: {
@@ -912,6 +914,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
             </div>
             <div className="space-y-5">
           {tab === 'notifications' && <LoyaltyNotificationsPanel establishmentId={establishmentId} />}
+          {tab === 'smart' && <SmartMarketingCenter establishmentId={establishmentId} />}
 
           {tab === 'crm' && <LoyaltyCrmSegments establishmentId={establishmentId} />}
 
