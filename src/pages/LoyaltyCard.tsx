@@ -194,11 +194,15 @@ export default function LoyaltyCard() {
 
   async function addToGoogleWallet() {
     if (!token || walletLoading) return;
+    if (!selectedWalletDesignId || !walletDesigns.some(item => item.id === selectedWalletDesignId)) {
+      setWalletMessage("Aucun modèle Google Wallet publié n'est disponible pour cette carte.");
+      return;
+    }
     setWalletLoading(true);
     setWalletMessage('');
     try {
       const { data, error: walletError } = await supabase.functions.invoke('google-wallet-create-pass', {
-        body: { access_token: token, ...(selectedWalletDesignId ? { design_id: selectedWalletDesignId } : {}) },
+        body: { access_token: token, design_id: selectedWalletDesignId },
       });
       if (walletError) throw walletError;
       if (!data?.success || !data?.save_url) {
