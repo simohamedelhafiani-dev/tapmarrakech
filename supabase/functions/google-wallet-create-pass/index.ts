@@ -121,9 +121,10 @@ Deno.serve(async (request) => {
       publicClient.rpc("get_public_loyalty_card", { p_access_token: accessToken }),
       publicClient.rpc("get_public_loyalty_card_config", { p_access_token: accessToken }),
       publicClient.rpc("get_public_loyalty_program_context", { p_access_token: accessToken }),
-      requestedDesignId
-        ? publicClient.rpc("get_public_loyalty_wallet_design", { p_access_token: accessToken, p_design_id: requestedDesignId })
-        : publicClient.rpc("get_public_loyalty_wallet_config", { p_access_token: accessToken }),
+      publicClient.rpc("get_public_loyalty_wallet_design", {
+        p_access_token: accessToken,
+        p_design_id: requestedDesignId,
+      }),
     ]);
 
     if (cardError || !cardRows?.[0]) {
@@ -140,16 +141,14 @@ Deno.serve(async (request) => {
     const rawWalletDesign = walletDesignResult && typeof walletDesignResult === "object"
       ? walletDesignResult as Record<string, unknown>
       : {};
-    const walletDesign = requestedDesignId
-      ? {
-          ...((rawWalletDesign.design_config && typeof rawWalletDesign.design_config === "object") ? rawWalletDesign.design_config as Record<string, unknown> : {}),
-          googleClassId: rawWalletDesign.googleClassId,
-          googleClassStatus: rawWalletDesign.googleClassStatus,
-          designKey: rawWalletDesign.design_key,
-          selectedDesignId: rawWalletDesign.id,
-        }
-      : rawWalletDesign;
-    if (requestedDesignId && !walletDesign.selectedDesignId) {
+    const walletDesign = {
+      ...((rawWalletDesign.design_config && typeof rawWalletDesign.design_config === "object") ? rawWalletDesign.design_config as Record<string, unknown> : {}),
+      googleClassId: rawWalletDesign.googleClassId,
+      googleClassStatus: rawWalletDesign.googleClassStatus,
+      designKey: rawWalletDesign.design_key,
+      selectedDesignId: rawWalletDesign.id,
+    };
+    if (!walletDesign.selectedDesignId) {
       return json({ success: false, error: "Ce modèle Wallet n'est pas publié ou n'est pas disponible pour cette carte." }, 404);
     }
     // Prefer the establishment-specific class saved by the KELYANI Admin.
@@ -158,10 +157,8 @@ Deno.serve(async (request) => {
     if (!classId) {
       return json({
         success: false,
-        error: requestedDesignId
-          ? "Ce modèle n'est pas encore approuvé pour Google Wallet."
-          : "La classe Google Wallet ne correspond pas à l'émetteur configuré.",
-      }, requestedDesignId ? 409 : 503);
+        error: "Ce modèle n'est pas encore approuvé pour Google Wallet.",
+      }, 409);
     }
     const clientName = [card.first_name, card.last_name].filter(Boolean).join(" ").slice(0, 20) || "Client KELYANI";
     const loyaltyNumber = String(card.loyalty_number || card.customer_id).slice(0, 20);
