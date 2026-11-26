@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { resolveGoogleWalletClassId } from "./wallet-design.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -150,9 +151,14 @@ Deno.serve(async (request) => {
     }
     // Prefer the establishment-specific class saved by the KELYANI Admin.
     // Keep the approved demo class as a controlled fallback until a dedicated class is approved.
-    const classId = String(walletDesign.googleClassId || configuredClassId).trim();
-    if (!classId.startsWith(`${issuerId}.`)) {
-      return json({ success: false, error: "La classe Google Wallet ne correspond pas à l'émetteur configuré." }, 503);
+    const classId = resolveGoogleWalletClassId(walletDesign, issuerId, configuredClassId, requestedDesignId);
+    if (!classId) {
+      return json({
+        success: false,
+        error: requestedDesignId
+          ? "Ce modèle n'est pas encore approuvé pour Google Wallet."
+          : "La classe Google Wallet ne correspond pas à l'émetteur configuré.",
+      }, requestedDesignId ? 409 : 503);
     }
     const clientName = [card.first_name, card.last_name].filter(Boolean).join(" ").slice(0, 20) || "Client KELYANI";
     const loyaltyNumber = String(card.loyalty_number || card.customer_id).slice(0, 20);
@@ -219,6 +225,33 @@ Deno.serve(async (request) => {
           id: "wallet-program",
           header: String(walletDesign.cardTitle || "KELYANI").slice(0, 25),
           body: String(walletDesign.headerText || "Carte de fidélité").slice(0, 40),
+        },
+        {
+          id: "wallet-balance",
+          header: walletMode === "DISCOUNT" ? "Votre avantage" : walletMode === "STAMP" ? "Visites" : "Votre solde",
+          body: walletMode === "DISCOUNT"
+            ? `${walletDiscountPercent}% de réduction`
+            : walletDesign.showPoints === false ? "Présentez votre carte en caisse" : progress,
+        },
+        {
+          id: "wallet-reward",
+          header: "Prochaine récompense",
+          body: String(walletDesign.walletRewardLabel || program.stamp_reward_name || "Récompense fidélité").slice(0, 80),
+        },
+        {
+          id: "wallet-tier",
+          header: "Votre niveau",
+          body: String(walletDesign.walletTierLabel || "Membre KELYANI").slice(0, 40),
+        },
+        {
+          id: "wallet-venue",
+          header: "Établissement",
+          body: String(walletDesign.establishmentName || card.establishment_name || walletDesign.address || "Votre établissement KELYANI").slice(0, 100),
+        },
+        {
+          id: "wallet-offer",
+          header: "Avantage actif",
+          body: String(walletDesign.walletOfferLabel || (walletMode === "DISCOUNT" ? `${walletDiscountPercent}% de réduction` : walletDesign.customMessage || walletDesign.walletRewardLabel || "Avantage fidélité")).slice(0, 80),
         },
         ...(walletMode === "DISCOUNT" ? [{
           id: "wallet-discount",
@@ -287,3 +320,4 @@ Deno.serve(async (request) => {
     return json({ success: false, error: "Impossible de préparer la carte Google Wallet pour le moment" }, 500);
   }
 });
+
