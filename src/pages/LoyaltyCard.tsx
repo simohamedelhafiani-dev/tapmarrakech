@@ -20,6 +20,7 @@ import type { LoyaltyExperienceReward } from '@/components/loyalty/LoyaltyExperi
 import { LoyaltyCardVisual, type LoyaltyDesignConfig } from '@/components/LoyaltyCardVisual';
 import { supabase } from '@/lib/supabase';
 import { enableLoyaltyPush, getLoyaltyPushSubscription } from '@/lib/loyaltyPush';
+import SmartNearbyGPS from '@/components/loyalty/SmartNearbyGPS';
 
 type Card = {
   customer_id: string;
@@ -1234,6 +1235,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
             </div>
           </div>
         )}
+        <SmartNearbyGPS accessToken={token} />
         </div>
       </div>
     </main>
