@@ -1,4 +1,4 @@
-import { extractBearerToken, normalizeLimit, resolveSmartMessage, retryDelayMinutes, parseHappyHourSchedule, resolveRewardClaimCycle } from './smart-marketing-utils.ts';
+import { extractBearerToken, constantTimeEqual, normalizeLimit, resolveSmartMessage, retryDelayMinutes, parseHappyHourSchedule, resolveRewardClaimCycle } from './smart-marketing-utils.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json'}});
 const templates:Record<string,{title:string;message:(p:Record<string,unknown>)=>string;type:'INFO'|'OFFER'|'REWARD'|'POINTS'}>={
@@ -16,7 +16,7 @@ Deno.serve(async(req)=>{
  if(req.method!=='POST')return json({success:false,error:'POST requis.'},405);
  const secret=Deno.env.get('SMART_MARKETING_CRON_SECRET');
  const token=extractBearerToken(req.headers.get('Authorization'));
- if(!secret||token!==secret)return json({success:false,error:'Non autorisé.'},401);
+ if(!secret||secret.length<32||!token||!constantTimeEqual(token,secret))return json({success:false,error:'Non autorisé.'},401);
  const url=Deno.env.get('SUPABASE_URL'),key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
  if(!url||!key)return json({success:false,error:'Configuration Supabase absente.'},503);
  const admin=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
