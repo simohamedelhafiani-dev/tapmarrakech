@@ -111,17 +111,18 @@ Deno.serve(async(req)=>{
    }
    // Reuse the config snapshot already checked for enabled status to avoid a second read/race.
    const customMessage=resolveSmartMessage(liveConfig.config?.message,tmpl.message(messagePayload));
-   const notificationPayload={establishment_id:q.establishment_id,customer_id:q.customer_id,smart_marketing_queue_id:q.id,title:tmpl.title,message:customMessage,type:tmpl.type};
-   const {error:insertErr}=await admin.from('loyalty_card_notifications').insert(notificationPayload);
-   if(insertErr){
-    // A prior attempt may have created the notification before queue state was updated.
-    if(insertErr.code!=='23505')throw insertErr;
-    const {data:existing,error:lookupErr}=await admin.from('loyalty_card_notifications').select('id').eq('smart_marketing_queue_id',q.id).maybeSingle();
-    if(lookupErr||!existing)throw insertErr;
-   }
-   const {error:statusErr}=await admin.from('smart_marketing_queue').update({status:'SENT',processing_started_at:null,processed_at:new Date().toISOString(),last_error:null}).eq('id',q.id);
-   if(statusErr)throw statusErr;
-   sent++;
+   // Re-check both consents and create the notification while holding the customer row lock.
+   // This makes dispatch atomic with a concurrent consent revocation.
+   const {data:deliveryRows,error:deliveryError}=await admin.rpc('smart_marketing_dispatch_notification_atomic',{
+    p_queue_id:q.id,
+    p_title:tmpl.title,
+    p_message:customMessage,
+    p_type:tmpl.type,
+   });
+   if(deliveryError)throw deliveryError;
+   if(!Array.isArray(deliveryRows)||!deliveryRows[0])throw new Error('Atomic notification result unavailable');
+   if(deliveryRows[0].consent_valid!==true){skipped++;continue;}
+   if(deliveryRows[0].created===true)sent++;else skipped++;
   }catch(e){
    const msg=e instanceof Error?e.message:String(e);
    const retryable=(q.attempts??1)<3;
