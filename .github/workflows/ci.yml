@@ -51,7 +51,7 @@ jobs:
           fi
           grep -q "accent: '#686D76'" src/components/LoyaltyCardVisual.tsx
           grep -q "normalizeNardoCardColor(row.primary_color" src/components/loyalty/LoyaltyStudio.tsx
-          grep -q "legacyColors = new Set" src/components/loyalty/walletTemplates.ts
+          grep -q "export function normalizeNardoCardColor" src/components/loyalty/walletTemplates.ts
 
 
   database-tests:
