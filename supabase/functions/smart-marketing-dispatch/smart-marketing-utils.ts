@@ -4,9 +4,13 @@ export function extractBearerToken(header:string|null):string|null {
  return match?.[1]?.trim() || null;
 }
 export function constantTimeEqual(actual: string, expected: string): boolean {
- if (actual.length !== expected.length) return false;
- let mismatch = 0;
- for (let i = 0; i < actual.length; i += 1) mismatch |= actual.charCodeAt(i) ^ expected.charCodeAt(i);
+ let mismatch = actual.length ^ expected.length;
+ mismatch |= Number(actual.length > 512 || expected.length > 512);
+ for (let i = 0; i < 512; i += 1) {
+  const actualCode = i < actual.length ? actual.charCodeAt(i) : 0;
+  const expectedCode = i < expected.length ? expected.charCodeAt(i) : 0;
+  mismatch |= actualCode ^ expectedCode;
+ }
  return mismatch === 0;
 }
 
