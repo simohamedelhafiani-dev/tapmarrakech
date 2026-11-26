@@ -5,6 +5,23 @@ import { supabase } from '@/lib/supabase';
 type Establishment = { id: string; name?: string };
 type Message = { id: string; direction: 'inbound' | 'outbound'; message_type: string; body: string | null; delivery_status: string; raw_metadata?: Record<string, unknown> | null; created_at: string };
 type Conversation = { id: string; customer_phone: string; customer_name: string | null; status: string; last_message_at: string; last_message?: Message | null };
+async function getFunctionErrorCode(data: unknown, error: unknown): Promise<string | undefined> {
+  if (data && typeof data === 'object' && typeof (data as { error?: unknown }).error === 'string') {
+    return (data as { error: string }).error;
+  }
+  if (!error || typeof error !== 'object') return undefined;
+  const context = (error as { context?: unknown }).context;
+  if (!context || typeof context !== 'object' || typeof (context as Response).clone !== 'function') return undefined;
+  try {
+    const payload: unknown = await (context as Response).clone().json();
+    if (payload && typeof payload === 'object' && typeof (payload as { error?: unknown }).error === 'string') {
+      return (payload as { error: string }).error;
+    }
+  } catch {
+    // Some Functions errors have no JSON response body; keep the idempotency key.
+  }
+  return undefined;
+}
 const dateLabel = (value: string) => new Intl.DateTimeFormat('fr-FR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value));
 
 export default function WhatsAppInbox() {
@@ -91,14 +108,16 @@ export default function WhatsAppInbox() {
     // message while the network outcome is unknown. Refresh to show the persisted
     // outbound record and avoid prompting the user to send a duplicate.
     const pending = Boolean(data?.pending) || data?.status === 'queued';
+    const functionErrorCode = await getFunctionErrorCode(data, error);
     if (error || (!data?.success && !pending)) {
-      // Keep the key for transport/unknown failures so a retry cannot create a
-      // second outbound row. A provider rejection or pre-send token failure is
-      // definitive and may be retried as a new deliberate send.
-      if (data?.error === 'meta_send_rejected' || data?.error === 'whatsapp_token_unavailable' || data?.error === 'previous_attempt_failed') {
+      // Supabase FunctionsHttpError places non-2xx JSON in error.context, not
+      // in data. Read that response before deciding whether a retry is safe.
+      // Keep the key for transport/unknown failures; reset it only for a
+      // definitive provider/token rejection or a previously failed reservation.
+      if (functionErrorCode === 'meta_send_rejected' || functionErrorCode === 'whatsapp_token_unavailable' || functionErrorCode === 'previous_attempt_failed') {
         pendingSendRef.current = null;
       }
-      setNotice(data?.error === 'whatsapp_not_connected' ? 'WhatsApp n’est pas connecté pour cet établissement.' : 'Envoi impossible ou résultat incertain. Réessaie avec le même message pour éviter un doublon.');
+      setNotice(functionErrorCode === 'whatsapp_not_connected' ? 'WhatsApp n’est pas connecté pour cet établissement.' : 'Envoi impossible ou résultat incertain. Réessaie avec le même message pour éviter un doublon.');
       setSending(false);
       return;
     }
