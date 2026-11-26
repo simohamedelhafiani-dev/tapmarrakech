@@ -3,6 +3,13 @@ export function extractBearerToken(header:string|null):string|null {
  const match=header.match(/^Bearer\s+(.+)$/i);
  return match?.[1]?.trim() || null;
 }
+export function constantTimeEqual(actual: string, expected: string): boolean {
+ if (actual.length !== expected.length) return false;
+ let mismatch = 0;
+ for (let i = 0; i < actual.length; i += 1) mismatch |= actual.charCodeAt(i) ^ expected.charCodeAt(i);
+ return mismatch === 0;
+}
+
 export function normalizeLimit(value:unknown):number {
  const n=Number(value);
  return Number.isFinite(n)&&n>0 ? Math.max(1,Math.min(Math.floor(n),200)) : 50;
