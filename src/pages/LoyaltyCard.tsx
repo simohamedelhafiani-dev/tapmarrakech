@@ -516,11 +516,11 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
       if (designRow) {
         setDesign({
           template_id: designRow.template_id ?? 'custom',
-          primary_color: designRow.primary_color ?? '#686D76',
-          secondary_color: designRow.secondary_color ?? '#686D76',
-          background_color: designRow.background_color ?? '#050505',
-          text_color: designRow.text_color ?? '#FFFFFF',
-          button_color: designRow.button_color ?? '#686D76',
+          primary_color: designRow.primary_color === '#173D32' ? '#686D76' : designRow.primary_color ?? '#686D76',
+          secondary_color: designRow.secondary_color === '#D3A84C' ? '#686D76' : designRow.secondary_color ?? '#686D76',
+          background_color: designRow.background_color === '#F7F7F3' ? '#050505' : designRow.background_color ?? '#050505',
+          text_color: designRow.text_color === '#173D32' ? '#FFFFFF' : designRow.text_color ?? '#FFFFFF',
+          button_color: designRow.button_color === '#173D32' ? '#686D76' : designRow.button_color ?? '#686D76',
           border_radius: Number(designRow.border_radius ?? 24),
         });
         setDesignConfig({ ...defaultLoyaltyDesignConfig, ...(designRow.design_config ?? {}) });
@@ -757,11 +757,11 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
       if (designRow) {
         setDesign({
           template_id: designRow.template_id ?? 'custom',
-          primary_color: designRow.primary_color ?? '#686D76',
-          secondary_color: designRow.secondary_color ?? '#686D76',
-          background_color: designRow.background_color ?? '#050505',
-          text_color: designRow.text_color ?? '#FFFFFF',
-          button_color: designRow.button_color ?? '#686D76',
+          primary_color: designRow.primary_color === '#173D32' ? '#686D76' : designRow.primary_color ?? '#686D76',
+          secondary_color: designRow.secondary_color === '#D3A84C' ? '#686D76' : designRow.secondary_color ?? '#686D76',
+          background_color: designRow.background_color === '#F7F7F3' ? '#050505' : designRow.background_color ?? '#050505',
+          text_color: designRow.text_color === '#173D32' ? '#FFFFFF' : designRow.text_color ?? '#FFFFFF',
+          button_color: designRow.button_color === '#173D32' ? '#686D76' : designRow.button_color ?? '#686D76',
           border_radius: Number(designRow.border_radius ?? 24),
         });
         setDesignConfig({ ...defaultLoyaltyDesignConfig, ...(designRow.design_config ?? {}) });
