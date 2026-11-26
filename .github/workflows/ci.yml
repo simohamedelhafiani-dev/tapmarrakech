@@ -11,8 +11,11 @@ concurrency:
   cancel-in-progress: true
 
 on:
-  # Automated CI remains paused while the final product version is assembled.
-  # Run manually on this release-candidate branch after the user requests validation.
+  # Validate every update to this release-candidate branch. This workflow only
+  # builds/tests code and a disposable local Supabase stack; it never deploys.
+  push:
+    branches:
+      - integration/smart-marketing-clean-2026-11
   workflow_dispatch:
 jobs:
   validate:
