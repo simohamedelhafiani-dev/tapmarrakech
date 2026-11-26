@@ -114,12 +114,10 @@ Deno.serve(async (request) => {
 
     const [
       { data: cardRows, error: cardError },
-      { data: designRows },
       { data: programRows },
       { data: walletDesignResult, error: walletDesignError },
     ] = await Promise.all([
       publicClient.rpc("get_public_loyalty_card", { p_access_token: accessToken }),
-      publicClient.rpc("get_public_loyalty_card_config", { p_access_token: accessToken }),
       publicClient.rpc("get_public_loyalty_program_context", { p_access_token: accessToken }),
       publicClient.rpc("get_public_loyalty_wallet_design", {
         p_access_token: accessToken,
@@ -136,7 +134,6 @@ Deno.serve(async (request) => {
     }
 
     const card = cardRows[0];
-    const design = designRows?.[0] ?? {};
     const program = programRows?.[0] ?? {};
     const rawWalletDesign = walletDesignResult && typeof walletDesignResult === "object"
       ? walletDesignResult as Record<string, unknown>
