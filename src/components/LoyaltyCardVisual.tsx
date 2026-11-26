@@ -1,12 +1,12 @@
 export const WALLET_TEMPLATES = {
-  'onyx-black': { id: 'onyx-black', name: 'Nardo Onyx', primary: '#686D76', accent: '#00DFA5', background: '#050505', text: '#FFFFFF' },
-  'royal-gold': { id: 'royal-gold', name: 'Nardo Signature', primary: '#686D76', accent: '#00DFA5', background: '#050505', text: '#FFFFFF' },
-  'deep-ocean': { id: 'deep-ocean', name: 'Nardo Blue', primary: '#686D76', accent: '#00DFA5', background: '#050505', text: '#FFFFFF' },
-  'minimal-white': { id: 'minimal-white', name: 'Nardo Minimal', primary: '#686D76', accent: '#00DFA5', background: '#050505', text: '#FFFFFF' },
-  'emerald-luxe': { id: 'emerald-luxe', name: 'Nardo Graphite', primary: '#686D76', accent: '#00DFA5', background: '#050505', text: '#FFFFFF' },
-  'burgundy': { id: 'burgundy', name: 'Nardo Night', primary: '#686D76', accent: '#00DFA5', background: '#050505', text: '#FFFFFF' },
-  'midnight-blue': { id: 'midnight-blue', name: 'Nardo Electric', primary: '#686D76', accent: '#00DFA5', background: '#050505', text: '#FFFFFF' },
-  'sandstone': { id: 'sandstone', name: 'Nardo Stone', primary: '#686D76', accent: '#00DFA5', background: '#050505', text: '#FFFFFF' },
+  'onyx-black': { id: 'onyx-black', name: 'Nardo Onyx', primary: '#686D76', accent: '#3B82F6', background: '#050505', text: '#FFFFFF' },
+  'royal-gold': { id: 'royal-gold', name: 'Nardo Signature', primary: '#686D76', accent: '#3B82F6', background: '#050505', text: '#FFFFFF' },
+  'deep-ocean': { id: 'deep-ocean', name: 'Nardo Blue', primary: '#686D76', accent: '#3B82F6', background: '#050505', text: '#FFFFFF' },
+  'minimal-white': { id: 'minimal-white', name: 'Nardo Minimal', primary: '#686D76', accent: '#3B82F6', background: '#050505', text: '#FFFFFF' },
+  'emerald-luxe': { id: 'emerald-luxe', name: 'Nardo Graphite', primary: '#686D76', accent: '#3B82F6', background: '#050505', text: '#FFFFFF' },
+  'burgundy': { id: 'burgundy', name: 'Nardo Night', primary: '#686D76', accent: '#3B82F6', background: '#050505', text: '#FFFFFF' },
+  'midnight-blue': { id: 'midnight-blue', name: 'Nardo Electric', primary: '#686D76', accent: '#3B82F6', background: '#050505', text: '#FFFFFF' },
+  'sandstone': { id: 'sandstone', name: 'Nardo Stone', primary: '#686D76', accent: '#3B82F6', background: '#050505', text: '#FFFFFF' },
 } as const;
 
 import { useEffect, useMemo, useState } from 'react';
