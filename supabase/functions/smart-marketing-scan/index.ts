@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { extractBearerToken, parseSmartConfigNumber, parseHappyHourSchedule, formatLocalDateKey, resolveRewardClaimCycle } from '../smart-marketing-dispatch/smart-marketing-utils.ts';
+import { extractBearerToken, constantTimeEqual, parseSmartConfigNumber, parseHappyHourSchedule, formatLocalDateKey, resolveRewardClaimCycle } from '../smart-marketing-dispatch/smart-marketing-utils.ts';
 
 const headers = { 'Content-Type': 'application/json' };
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers });
@@ -18,7 +18,7 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') return json({ success: false, error: 'POST requis.' }, 405);
   const secret = Deno.env.get('SMART_MARKETING_CRON_SECRET');
   const token = extractBearerToken(req.headers.get('Authorization'));
-  if (!secret || !token || token !== secret) return json({ success: false, error: 'Non autorisé.' }, 401);
+  if (!secret || secret.length < 32 || !token || !constantTimeEqual(token, secret)) return json({ success: false, error: 'Non autorisé.' }, 401);
   const url = Deno.env.get('SUPABASE_URL');
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
   if (!url || !serviceKey) return json({ success: false, error: 'Configuration Supabase absente.' }, 503);
