@@ -82,6 +82,9 @@ Deno.serve(async (request) => {
     if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(accessToken)) {
       return json({ success: false, error: "Lien de carte invalide" }, 400);
     }
+    if (!requestedDesignId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(requestedDesignId)) {
+      return json({ success: false, error: "Aucun modèle Google Wallet publié n'est disponible pour cette carte." }, 409);
+    }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
