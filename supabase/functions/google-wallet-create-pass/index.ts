@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { resolveGoogleWalletClassId } from "./wallet-design.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -150,9 +151,14 @@ Deno.serve(async (request) => {
     }
     // Prefer the establishment-specific class saved by the KELYANI Admin.
     // Keep the approved demo class as a controlled fallback until a dedicated class is approved.
-    const classId = String(walletDesign.googleClassId || configuredClassId).trim();
-    if (!classId.startsWith(`${issuerId}.`)) {
-      return json({ success: false, error: "La classe Google Wallet ne correspond pas à l'émetteur configuré." }, 503);
+    const classId = resolveGoogleWalletClassId(walletDesign, issuerId, configuredClassId, requestedDesignId);
+    if (!classId) {
+      return json({
+        success: false,
+        error: requestedDesignId
+          ? "Ce modèle n'est pas encore approuvé pour Google Wallet."
+          : "La classe Google Wallet ne correspond pas à l'émetteur configuré.",
+      }, requestedDesignId ? 409 : 503);
     }
     const clientName = [card.first_name, card.last_name].filter(Boolean).join(" ").slice(0, 20) || "Client KELYANI";
     const loyaltyNumber = String(card.loyalty_number || card.customer_id).slice(0, 20);
