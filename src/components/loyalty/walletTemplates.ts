@@ -82,23 +82,26 @@ export const APPLE_WALLET_FIELD_LABELS: Record<AppleWalletField, string> = {
 };
 
 
-/** Normalize stored legacy card colors without changing custom Nardo-compatible values. */
+function hasChromaticColor(hexColor: string): boolean {
+  const channels = [1, 3, 5].map(offset => Number.parseInt(hexColor.slice(offset, offset + 2), 16));
+  const maximum = Math.max(...channels);
+  const minimum = Math.min(...channels);
+  return maximum > 0 && (maximum - minimum) / maximum >= 0.18;
+}
+
+/** Keep card copy and decorative accents neutral on dark surfaces. */
 export function normalizeNardoCardColor(value: unknown, fallback = '#686D76'): string {
   const candidate = typeof value === 'string' && /^#[0-9a-fA-F]{6}$/.test(value)
     ? value.toUpperCase()
     : fallback;
-  const legacyColors = new Set(['#173D32', '#D3A84C', '#D4AF37', '#C5A059', '#B8860B', '#00DFA5']);
-  return legacyColors.has(candidate) ? '#686D76' : candidate;
+  return hasChromaticColor(candidate) ? '#686D76' : candidate;
 }
 
-/** Keep Electric Blue as an accent only; blue-toned surfaces fall back to Nardo grey. */
+/** Card backgrounds stay neutral; the historic light surface becomes absolute black. */
 export function normalizeNardoBackgroundColor(value: unknown, fallback = '#686D76'): string {
   const candidate = typeof value === 'string' && /^#[0-9a-fA-F]{6}$/.test(value)
     ? value.toUpperCase()
     : fallback;
   if (candidate === '#F7F7F3') return '#050505';
-  const red = Number.parseInt(candidate.slice(1, 3), 16);
-  const green = Number.parseInt(candidate.slice(3, 5), 16);
-  const blue = Number.parseInt(candidate.slice(5, 7), 16);
-  return blue - red >= 35 && blue - green >= 35 ? '#686D76' : candidate;
+  return hasChromaticColor(candidate) ? '#686D76' : candidate;
 }
