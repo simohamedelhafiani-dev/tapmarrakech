@@ -42,6 +42,7 @@ import {
   GOOGLE_WALLET_TEMPLATES,
   getAppleWalletTemplate,
   normalizeNardoBackgroundColor,
+  normalizeNardoCardColor,
   type GoogleWalletTemplate,
   type GoogleWalletFieldKey,
 } from './walletTemplates';
@@ -140,11 +141,11 @@ const DEFAULT_WALLET_DESIGN: WalletDesignState = {
 
 const DEFAULT_DESIGN: DesignState = {
   templateId: 'onyx-black',
-  primaryColor: '#181818',
-  secondaryColor: '#D7D7D7',
-  backgroundColor: '#070707',
+  primaryColor: '#686D76',
+  secondaryColor: '#686D76',
+  backgroundColor: '#050505',
   textColor: '#FFFFFF',
-  buttonColor: '#181818',
+  buttonColor: '#686D76',
   borderRadius: 34,
   wallpaperUrl: null,
   wallpaperUrls: [],
@@ -326,11 +327,11 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
         setDesign({
           ...DEFAULT_DESIGN,
           templateId: row.template_id ?? DEFAULT_DESIGN.templateId,
-          primaryColor: row.primary_color ?? DEFAULT_DESIGN.primaryColor,
-          secondaryColor: row.secondary_color ?? DEFAULT_DESIGN.secondaryColor,
-          backgroundColor: normalizeNardoBackgroundColor(row.background_color ?? DEFAULT_DESIGN.backgroundColor),
+          primaryColor: normalizeNardoCardColor(row.primary_color, DEFAULT_DESIGN.primaryColor),
+          secondaryColor: normalizeNardoCardColor(row.secondary_color, DEFAULT_DESIGN.secondaryColor),
+          backgroundColor: normalizeNardoBackgroundColor(row.background_color ?? DEFAULT_DESIGN.backgroundColor, DEFAULT_DESIGN.backgroundColor),
           textColor: row.text_color ?? DEFAULT_DESIGN.textColor,
-          buttonColor: row.button_color ?? DEFAULT_DESIGN.buttonColor,
+          buttonColor: normalizeNardoCardColor(row.button_color, DEFAULT_DESIGN.buttonColor),
           borderRadius: Number(row.border_radius ?? DEFAULT_DESIGN.borderRadius),
           wallpaperUrl: cfg.background_image_url ?? cfg.wallpaperUrl ?? null,
           wallpaperUrls: Array.isArray(cfg.wallpaper_urls)
