@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { WALLET_TEMPLATES as LOYALTY_CARD_TEMPLATES } from '@/components/LoyaltyCardVisual';
 import {
   useLoyaltyManager,
   type LoyaltyProgramType,
@@ -34,11 +35,20 @@ import LoyaltyTierStudio from './LoyaltyTierStudio';
 import LoyaltyCrmSegments from './LoyaltyCrmSegments';
 import LoyaltyNotificationsPanel from '@/components/admin/LoyaltyNotificationsPanel';
 import SmartMarketingCenter from '@/pages/SmartMarketingCenter';
-import { WALLET_TEMPLATES } from '@/components/LoyaltyCardVisual';
+import {
+  APPLE_WALLET_FIELD_LABELS,
+  APPLE_WALLET_TEMPLATES,
+  GOOGLE_WALLET_FIELD_OPTIONS,
+  GOOGLE_WALLET_TEMPLATES,
+  getAppleWalletTemplate,
+  normalizeNardoBackgroundColor,
+  type GoogleWalletTemplate,
+  type GoogleWalletFieldKey,
+} from './walletTemplates';
 import type { LoyaltyExperienceConfig, LoyaltyExperienceReward } from './LoyaltyExperience';
 
 type Props = { establishmentId: string };
-type TabId = 'settings' | 'rewards' | 'referral' | 'tiers' | 'raffle' | 'crm' | 'notifications' | 'design' | 'wallet' | 'smart';
+type TabId = 'settings' | 'rewards' | 'referral' | 'tiers' | 'raffle' | 'crm' | 'notifications' | 'design' | 'googleWallet' | 'appleWallet' | 'smart';
 type RewardType = 'GIFT' | 'DISCOUNT';
 
 type WalletCatalogEntry = {
@@ -100,6 +110,10 @@ type WalletDesignState = {
   footerText: string;
   showPoints: boolean;
   showQr: boolean;
+  googleTemplateId: string;
+  googleTemplateLayouts: Record<string, GoogleWalletFieldKey[][]>;
+  googleCustomTemplates: GoogleWalletTemplate[];
+  appleTemplateId: string;
   googleClassId?: string;
   googleClassStatus?: string;
 };
@@ -107,7 +121,7 @@ type WalletDesignState = {
 const DEFAULT_WALLET_DESIGN: WalletDesignState = {
   backgroundColor: '#050505',
   primaryColor: '#686D76',
-  accentColor: '#00DFA5',
+  accentColor: '#3B82F6',
   textColor: '#FFFFFF',
   logoUrl: '',
   heroImageSourceUrl: '',
@@ -118,6 +132,10 @@ const DEFAULT_WALLET_DESIGN: WalletDesignState = {
   footerText: 'Présentez votre carte à chaque visite',
   showPoints: true,
   showQr: true,
+  googleTemplateId: 'google-balance-ledger',
+  googleTemplateLayouts: {},
+  googleCustomTemplates: [],
+  appleTemplateId: 'apple-ledger',
 };
 
 const DEFAULT_DESIGN: DesignState = {
@@ -143,9 +161,10 @@ const TABS: { id: TabId; label: string; caption: string; icon: typeof Settings2 
   { id: 'raffle', label: 'Tombola', caption: 'Gagnants', icon: Trophy },
   { id: 'crm', label: 'Mes clients', caption: 'Clients & segments', icon: UsersRound },
   { id: 'notifications', label: 'Notifications', caption: 'Communication', icon: Bell },
-  { id: 'design', label: 'Carte KELYANI', caption: 'Carte fidélité', icon: Palette },
-  { id: 'wallet', label: 'Apple & Google Wallet', caption: 'Gestion Wallet', icon: CreditCard },
   { id: 'smart', label: 'Smart Marketing', caption: '10 automations', icon: Sparkles },
+  { id: 'design', label: 'Carte KELYANI', caption: 'Carte fidélité', icon: Palette },
+  { id: 'googleWallet', label: 'Google Wallet', caption: 'Carte Android', icon: CreditCard },
+  { id: 'appleWallet', label: 'Apple Wallet', caption: 'Carte iPhone', icon: CreditCard },
 ];
 
 const TYPES: {
@@ -230,6 +249,8 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   const [walletCropPlatform, setWalletCropPlatform] = useState<'google' | 'apple' | null>(null);
   const [walletCatalog, setWalletCatalog] = useState<WalletCatalogEntry[]>([]);
   const [publishingWalletKey, setPublishingWalletKey] = useState<string | null>(null);
+  const [creatingGoogleTemplate, setCreatingGoogleTemplate] = useState(false);
+  const [newGoogleTemplateName, setNewGoogleTemplateName] = useState('');
   const [establishment, setEstablishment] = useState({
     name: 'Votre établissement',
     logoUrl: null as string | null,
@@ -240,6 +261,8 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   const previewChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const [previewChannelReady, setPreviewChannelReady] = useState(false);
   const liveDesignTimerRef = useRef<number | null>(null);
+  const googleTemplates = [...GOOGLE_WALLET_TEMPLATES, ...(walletDesign.googleCustomTemplates ?? [])];
+  const getGoogleTemplate = (id: string) => googleTemplates.find(template => template.id === id) ?? GOOGLE_WALLET_TEMPLATES[0];
 
   const load = async () => {
     if (!establishmentId) return;
@@ -299,13 +322,13 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       const row = Array.isArray(designData) ? designData[0] : designData;
       if (row) {
         const cfg = row.design_config ?? {};
-        setWalletDesign({ ...DEFAULT_WALLET_DESIGN, ...(cfg.wallet_design ?? {}) });
+        setWalletDesign({ ...DEFAULT_WALLET_DESIGN, ...(cfg.wallet_design ?? {}), backgroundColor: normalizeNardoBackgroundColor(cfg.wallet_design?.backgroundColor ?? DEFAULT_WALLET_DESIGN.backgroundColor) });
         setDesign({
           ...DEFAULT_DESIGN,
           templateId: row.template_id ?? DEFAULT_DESIGN.templateId,
           primaryColor: row.primary_color ?? DEFAULT_DESIGN.primaryColor,
           secondaryColor: row.secondary_color ?? DEFAULT_DESIGN.secondaryColor,
-          backgroundColor: row.background_color ?? DEFAULT_DESIGN.backgroundColor,
+          backgroundColor: normalizeNardoBackgroundColor(row.background_color ?? DEFAULT_DESIGN.backgroundColor),
           textColor: row.text_color ?? DEFAULT_DESIGN.textColor,
           buttonColor: row.button_color ?? DEFAULT_DESIGN.buttonColor,
           borderRadius: Number(row.border_radius ?? DEFAULT_DESIGN.borderRadius),
@@ -340,7 +363,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   }, [isAdmin, establishmentId]);
 
   useEffect(() => {
-    if (!canManageWallet && (tab === 'design' || tab === 'wallet')) setTab('settings');
+    if (!canManageWallet && (tab === 'design' || tab === 'googleWallet' || tab === 'appleWallet')) setTab('settings');
   }, [canManageWallet, tab]);
 
   useEffect(() => {
@@ -501,7 +524,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   }, [establishmentId, design, walletDesign, establishment.logoUrl, program, rewards, previewChannelReady]);
 
   const selectTemplate = (id: string) => {
-    const template = WALLET_TEMPLATES[id as keyof typeof WALLET_TEMPLATES];
+    const template = LOYALTY_CARD_TEMPLATES[id as keyof typeof LOYALTY_CARD_TEMPLATES];
     if (!template) return;
 
     setDesign(current => ({
@@ -516,7 +539,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   };
 
   const updateColor = (key: keyof Pick<DesignState, 'primaryColor' | 'secondaryColor' | 'backgroundColor' | 'textColor' | 'buttonColor'>, value: string) => {
-    setDesign(current => ({ ...current, templateId: 'custom', [key]: value }));
+    setDesign(current => ({ ...current, templateId: 'custom', [key]: key === 'backgroundColor' ? normalizeNardoBackgroundColor(value) : value }));
   };
 
   const uploadWallpaper = async (file: File) => {
@@ -607,17 +630,22 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   };
 
   const publishWalletTemplate = async (templateKey: string) => {
-    if (!isAdmin || !establishmentId || publishingWalletKey) return;
-    const template = WALLET_TEMPLATES[templateKey as keyof typeof WALLET_TEMPLATES];
+    if (!canManageWallet || !establishmentId || publishingWalletKey) return;
+    const template = getGoogleTemplate(templateKey);
     if (!template) return;
     setPublishingWalletKey(templateKey);
     setMessage('');
     const config = {
       ...walletDesign,
-      backgroundColor: template.background,
-      primaryColor: template.primary,
-      accentColor: template.accent,
-      textColor: template.text,
+      googleTemplateId: template.id,
+      googleTemplateLayouts: {
+        ...walletDesign.googleTemplateLayouts,
+        [template.id]: walletDesign.googleTemplateLayouts[template.id] ?? template.rows,
+      },
+      backgroundColor: walletDesign.googleTemplateId === template.id ? walletDesign.backgroundColor : template.background,
+      primaryColor: walletDesign.googleTemplateId === template.id ? walletDesign.primaryColor : template.accent,
+      accentColor: walletDesign.googleTemplateId === template.id ? walletDesign.accentColor : template.accent,
+      textColor: walletDesign.googleTemplateId === template.id ? walletDesign.textColor : template.text,
       cardTitle: walletDesign.cardTitle || establishment.name,
       logoUrl: walletDesign.logoUrl || establishment.logoUrl || '',
     };
@@ -632,7 +660,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       });
       if (error) throw error;
       if (!data?.success) throw new Error(data?.error || 'Publication Wallet impossible.');
-      setWalletDesign(config);
+      setWalletDesign({ ...config, backgroundColor: normalizeNardoBackgroundColor(config.backgroundColor) });
       setMessage(data.message || 'Modèle traité.');
       const { data: rows, error: rowsError } = await supabase
         .from('loyalty_wallet_design_catalog')
@@ -646,6 +674,69 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     } finally {
       setPublishingWalletKey(null);
     }
+  };
+
+  const createGoogleTemplate = () => {
+    const name = newGoogleTemplateName.trim();
+    if (!name) return;
+    const base = getGoogleTemplate(walletDesign.googleTemplateId);
+    const id = `google-custom-${Date.now().toString(36)}`;
+    const rows = (walletDesign.googleTemplateLayouts?.[base.id] ?? base.rows).map(row => [...row]);
+    const template: GoogleWalletTemplate = {
+      ...base,
+      id,
+      name: name.slice(0, 40),
+      description: 'Modèle personnalisé. Ajustez ses rangées et ses champs avant publication.',
+      rows,
+    };
+    setWalletDesign(current => ({
+      ...current,
+      googleTemplateId: id,
+      googleTemplateLayouts: { ...current.googleTemplateLayouts, [id]: rows },
+      googleCustomTemplates: [...(current.googleCustomTemplates ?? []), template],
+    }));
+    setNewGoogleTemplateName('');
+    setCreatingGoogleTemplate(false);
+    setMessage(`Modèle « ${template.name} » créé. Personnalisez-le puis publiez sa classe Google.`);
+  };
+
+  const selectedGoogleRows = walletDesign.googleTemplateLayouts?.[walletDesign.googleTemplateId]
+    ?? getGoogleTemplate(walletDesign.googleTemplateId).rows;
+
+  const saveGoogleRows = (rows: GoogleWalletFieldKey[][]) => {
+    setWalletDesign(current => ({
+      ...current,
+      googleTemplateLayouts: { ...current.googleTemplateLayouts, [current.googleTemplateId]: rows },
+    }));
+  };
+
+  const updateGoogleField = (rowIndex: number, fieldIndex: number, value: GoogleWalletFieldKey) => {
+    saveGoogleRows(selectedGoogleRows.map((row, index) => index === rowIndex
+      ? row.map((field, position) => position === fieldIndex ? value : field)
+      : row));
+  };
+
+  const addGoogleField = (rowIndex: number) => {
+    if (selectedGoogleRows[rowIndex]?.length >= 3) return;
+    saveGoogleRows(selectedGoogleRows.map((row, index) => index === rowIndex ? [...row, 'accountId'] : row));
+  };
+
+  const removeGoogleField = (rowIndex: number, fieldIndex: number) => {
+    if (selectedGoogleRows[rowIndex]?.length === 1 && selectedGoogleRows.length === 1) return;
+    const rows = selectedGoogleRows.map((row, index) => index === rowIndex
+      ? row.filter((_, position) => position !== fieldIndex)
+      : row).filter(row => row.length > 0);
+    saveGoogleRows(rows);
+  };
+
+  const addGoogleRow = () => {
+    if (selectedGoogleRows.length >= 3) return;
+    saveGoogleRows([...selectedGoogleRows, ['balance']]);
+  };
+
+  const removeGoogleRow = (rowIndex: number) => {
+    if (selectedGoogleRows.length <= 1) return;
+    saveGoogleRows(selectedGoogleRows.filter((_, index) => index !== rowIndex));
   };
 
   const saveAll = async (publish: boolean) => {
@@ -824,13 +915,13 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     );
   };
 
-  const visibleTabs = canManageWallet ? TABS : TABS.filter(item => item.id !== 'design' && item.id !== 'wallet');
-  const selectedTemplate = WALLET_TEMPLATES[design.templateId as keyof typeof WALLET_TEMPLATES];
+  const visibleTabs = canManageWallet ? TABS : TABS.filter(item => item.id !== 'design' && item.id !== 'googleWallet' && item.id !== 'appleWallet');
+  const selectedTemplate = LOYALTY_CARD_TEMPLATES[design.templateId as keyof typeof LOYALTY_CARD_TEMPLATES];
 
   if (loading) {
     return (
       <div className="grid min-h-[560px] place-items-center rounded-3xl bg-[#111111]">
-        <Loader2 className="animate-spin text-[#00DFA5]" />
+        <Loader2 className="animate-spin text-[#3B82F6]" />
       </div>
     );
   }
@@ -839,22 +930,22 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     <section className="rounded-3xl border border-[#242424] bg-[#050505] p-4 shadow-soft md:p-6">
       <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[.22em] text-[#00DFA5]">Loyalty Studio</p>
-          <h2 className="mt-1 font-display text-3xl text-[#00DFA5]">Carte fidélité</h2>
+          <p className="text-[10px] font-bold uppercase tracking-[.22em] text-[#3B82F6]">Loyalty Studio</p>
+          <h2 className="mt-1 font-display text-3xl text-[#3B82F6]">Carte fidélité</h2>
           <p className="mt-1 max-w-xl text-sm text-[#FFFFFF]/45">
             Un espace unique pour piloter le programme, l’acquisition et l’identité de la carte.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className={`hidden rounded-full px-3 py-1.5 text-[10px] font-semibold sm:inline-flex ${design.published ? 'bg-[#111111] text-[#00DFA5]' : 'bg-[#111111] text-[#00DFA5]'}`}>
+          <span className={`hidden rounded-full px-3 py-1.5 text-[10px] font-semibold sm:inline-flex ${design.published ? 'bg-[#111111] text-[#3B82F6]' : 'bg-[#111111] text-[#3B82F6]'}`}>
             {design.published ? 'Publié' : 'Brouillon'}
           </span>
           <button
             type="button"
             onClick={() => void saveAll(false)}
             disabled={saving}
-            className="rounded-xl border border-[#00DFA5]/20 bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#00DFA5] transition hover:bg-[#242424] disabled:opacity-50"
+            className="rounded-xl border border-[#3B82F6]/20 bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#3B82F6] transition hover:bg-[#242424] disabled:opacity-50"
           >
             Enregistrer
           </button>
@@ -862,7 +953,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
             type="button"
             onClick={() => void saveAll(true)}
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#00DFA5] to-[#14B8A6] px-4 py-2.5 text-xs font-semibold text-[#050505] shadow-sm transition hover:-translate-y-0.5 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#686D76] px-4 py-2.5 text-xs font-semibold text-[#3B82F6] shadow-sm transition hover:-translate-y-0.5 disabled:opacity-50"
           >
             <Save size={14} />
             {saving ? '...' : 'Publier'}
@@ -871,7 +962,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       </div>
 
       {message && (
-        <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl bg-[#242424] px-4 py-3 text-xs text-[#00DFA5]">
+        <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl bg-[#242424] px-4 py-3 text-xs text-[#3B82F6]">
           <span>{message}</span>
           <button type="button" onClick={() => setMessage('')} className="text-[#FFFFFF]/30 hover:text-[#FFFFFF]/60">
             <X size={14} />
@@ -884,15 +975,15 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
           <div className="min-w-0">
             <aside className="mb-5 rounded-2xl border border-white/10 bg-[#0D0D0D] p-2 xl:sticky xl:top-5 xl:mb-0 xl:p-3">
               <div className="mb-3 hidden px-3 pt-2 xl:block">
-                <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#00DFA5]">KELYANI</p>
+                <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#3B82F6]">KELYANI</p>
                 <p className="mt-1 text-xs text-white/45">Loyalty Studio</p>
               </div>
               <nav aria-label="Applications fidélité" className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 xl:flex xl:flex-col">
                 {visibleTabs.map(item => {
                   const Icon = item.icon;
                   return (
-                    <button key={item.id} type="button" onClick={() => setTab(item.id)} aria-current={tab === item.id ? 'page' : undefined} className={`flex min-w-0 items-center gap-2.5 rounded-xl border px-3 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DFA5] ${tab === item.id ? 'border-[#00DFA5]/50 bg-[#686D76]/10 text-[#00DFA5]' : 'border-transparent text-white/65 hover:border-white/10 hover:bg-white/[.04] hover:text-white'}`}>
-                      <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${tab === item.id ? 'bg-gradient-to-br from-[#00DFA5] to-[#14B8A6] text-[#0D0D0D]' : 'bg-white/[.06] text-[#00DFA5]'}`}>
+                    <button key={item.id} type="button" onClick={() => setTab(item.id)} aria-current={tab === item.id ? 'page' : undefined} className={`flex min-w-0 items-center gap-2.5 rounded-xl border px-3 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3B82F6] ${tab === item.id ? 'border-[#3B82F6]/50 bg-[#686D76]/10 text-[#3B82F6]' : 'border-transparent text-white/65 hover:border-white/10 hover:bg-white/[.04] hover:text-white'}`}>
+                      <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${tab === item.id ? 'bg-[#686D76] text-[#3B82F6]' : 'bg-white/[.06] text-[#3B82F6]'}`}>
                         <Icon size={18} />
                       </span>
                       <span className="min-w-0">
@@ -908,7 +999,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
           <div className="min-w-0">
             <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#00DFA5]">Loyalty Studio</p>
+                <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#3B82F6]">Loyalty Studio</p>
                 <h3 className="mt-1 text-2xl font-semibold text-white sm:text-3xl">{tab === 'crm' ? 'Mes clients' : visibleTabs.find(item => item.id === tab)?.label}</h3>
               </div>
             </div>
@@ -923,7 +1014,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
               <StudioCard eyebrow="Activation" title="Piloter le programme">
                 <div className="flex items-center justify-between gap-4 rounded-2xl bg-[#242424] p-4">
                   <div>
-                    <p className="text-sm font-semibold text-[#00DFA5]">Programme fidélité</p>
+                    <p className="text-sm font-semibold text-[#3B82F6]">Programme fidélité</p>
                     <p className="mt-1 text-[10px] leading-4 text-[#FFFFFF]/40">
                       Les clients peuvent utiliser leur carte lorsque le programme est actif.
                     </p>
@@ -942,10 +1033,10 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                         key={item.id}
                         type="button"
                         onClick={() => setProgram(current => ({ ...current, programType: item.id }))}
-                        className={`rounded-2xl border p-4 text-left transition ${active ? 'border-[#242424] bg-[#686D76]/[.04] ring-2 ring-[#00DFA5]/15' : 'border-[#242424]/10 hover:border-[#00DFA5]/30'}`}
+                        className={`rounded-2xl border p-4 text-left transition ${active ? 'border-[#242424] bg-[#686D76]/[.04] ring-2 ring-[#3B82F6]/15' : 'border-[#242424]/10 hover:border-[#3B82F6]/30'}`}
                       >
-                        <Icon size={18} className={active ? 'text-[#00DFA5]' : 'text-[#FFFFFF]/35'} />
-                        <p className="mt-3 text-sm font-semibold text-[#00DFA5]">{item.label}</p>
+                        <Icon size={18} className={active ? 'text-[#3B82F6]' : 'text-[#FFFFFF]/35'} />
+                        <p className="mt-3 text-sm font-semibold text-[#3B82F6]">{item.label}</p>
                         <p className="mt-1 text-[10px] leading-4 text-[#FFFFFF]/45">{item.description}</p>
                       </button>
                     );
@@ -969,7 +1060,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                           pointsPerCurrency: Math.max(0.01, conversionPoints / mad),
                         }));
                       }}
-                      className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#00DFA5] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#00DFA5]/15 placeholder:text-[#FFFFFF]/25"
+                      className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#3B82F6] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#3B82F6]/15 placeholder:text-[#FFFFFF]/25"
                     />
                   </Field>
                   <span className="hidden pb-3 text-xs font-bold text-[#FFFFFF]/25 md:block">=</span>
@@ -987,7 +1078,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                           pointsPerCurrency: Math.max(0.01, points / conversionMad),
                         }));
                       }}
-                      className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#00DFA5] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#00DFA5]/15 placeholder:text-[#FFFFFF]/25"
+                      className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#3B82F6] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#3B82F6]/15 placeholder:text-[#FFFFFF]/25"
                     />
                   </Field>
                 </div>
@@ -1010,7 +1101,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                             ...current,
                             stampGoal: Math.min(10, Math.max(1, Number(e.target.value) || 1)),
                           }))}
-                          className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#00DFA5] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#00DFA5]/15 placeholder:text-[#FFFFFF]/25"
+                          className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#3B82F6] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#3B82F6]/15 placeholder:text-[#FFFFFF]/25"
                         />
                       </Field>
                       <p className="mt-3 rounded-xl bg-[#242424] px-3 py-2.5 text-[10px] leading-4 text-[#FFFFFF]/45">
@@ -1026,7 +1117,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                           value={program.stampRewardName}
                           onChange={e => setProgram(current => ({ ...current, stampRewardName: e.target.value }))}
                           placeholder="Ex. Café offert, dessert offert..."
-                          className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#00DFA5] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#00DFA5]/15 placeholder:text-[#FFFFFF]/25"
+                          className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#3B82F6] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#3B82F6]/15 placeholder:text-[#FFFFFF]/25"
                         />
                       </Field>
                       <Field label="Description de la récompense">
@@ -1034,12 +1125,12 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                           value={program.stampRewardDescription}
                           onChange={e => setProgram(current => ({ ...current, stampRewardDescription: e.target.value }))}
                           placeholder="Ex. Un café ou un dessert au choix"
-                          className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#00DFA5] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#00DFA5]/15 placeholder:text-[#FFFFFF]/25"
+                          className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#3B82F6] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#3B82F6]/15 placeholder:text-[#FFFFFF]/25"
                         />
                       </Field>
                     </div>
-                    <div className="mt-4 rounded-xl border border-[#00DFA5]/20 bg-[#686D76]/5 px-4 py-3">
-                      <p className="text-[10px] font-semibold text-[#00DFA5]">Récompense dédiée aux tampons</p>
+                    <div className="mt-4 rounded-xl border border-[#3B82F6]/20 bg-[#686D76]/5 px-4 py-3">
+                      <p className="text-[10px] font-semibold text-[#3B82F6]">Récompense dédiée aux tampons</p>
                       <p className="mt-1 text-[10px] leading-4 text-[#FFFFFF]/40">
                         Cette récompense est indépendante du catalogue des récompenses en points.
                       </p>
@@ -1060,7 +1151,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                           ...current,
                           discountPointsThreshold: Math.max(1, Number(e.target.value) || 1),
                         }))}
-                        className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#00DFA5] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#00DFA5]/15 placeholder:text-[#FFFFFF]/25"
+                        className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#3B82F6] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#3B82F6]/15 placeholder:text-[#FFFFFF]/25"
                       />
                     </Field>
                     <Field label="Réduction">
@@ -1074,7 +1165,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                             ...current,
                             discountPercent: Math.min(100, Math.max(1, Number(e.target.value) || 1)),
                           }))}
-                          className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#00DFA5] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#00DFA5]/15 placeholder:text-[#FFFFFF]/25 pr-10"
+                          className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#3B82F6] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#3B82F6]/15 placeholder:text-[#FFFFFF]/25 pr-10"
                         />
                         <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-[#FFFFFF]/35">%</span>
                       </div>
@@ -1086,7 +1177,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                           ...current,
                           discountValidDays: Number(e.target.value),
                         }))}
-                        className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#00DFA5] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#00DFA5]/15"
+                        className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#3B82F6] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#3B82F6]/15"
                       >
                         <option value={1}>24 heures</option>
                         <option value={7}>7 jours</option>
@@ -1121,20 +1212,20 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   {rewards.length === 0 && (
                     <div className="rounded-2xl border border-dashed border-[#242424]/10 px-5 py-10 text-center">
                       <Gift className="mx-auto text-[#FFFFFF]/20" size={22} />
-                      <p className="mt-3 text-sm font-semibold text-[#00DFA5]">Votre catalogue est vide</p>
+                      <p className="mt-3 text-sm font-semibold text-[#3B82F6]">Votre catalogue est vide</p>
                       <p className="mt-1 text-[10px] text-[#FFFFFF]/40">Ajoutez votre première récompense ci-dessous.</p>
                     </div>
                   )}
 
                   {rewards.map(reward => (
                     <div key={reward.id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-[#242424]/8 bg-[#111111] p-3">
-                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#111111] text-[#00DFA5] shadow-sm">
+                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#111111] text-[#3B82F6] shadow-sm">
                         {reward.reward_type === 'DISCOUNT' ? <Percent size={16} /> : <Gift size={16} />}
                       </span>
                       <div className="min-w-[150px] flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-xs font-semibold text-[#00DFA5]">{reward.name}</p>
-                          <span className={`rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-[.12em] ${reward.active ? 'bg-[#111111] text-[#00DFA5]' : 'bg-[#111111]/5 text-[#FFFFFF]/35'}`}>
+                          <p className="text-xs font-semibold text-[#3B82F6]">{reward.name}</p>
+                          <span className={`rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-[.12em] ${reward.active ? 'bg-[#111111] text-[#3B82F6]' : 'bg-[#111111]/5 text-[#FFFFFF]/35'}`}>
                             {reward.active ? 'Active' : 'Inactive'}
                           </span>
                         </div>
@@ -1144,13 +1235,13 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                         {reward.description && <p className="mt-1 truncate text-[10px] text-[#FFFFFF]/30">{reward.description}</p>}
                       </div>
                       <div className="flex items-center gap-1">
-                        <button type="button" onClick={() => void toggleReward(reward)} className="rounded-lg px-2.5 py-2 text-[10px] font-semibold text-[#FFFFFF]/45 hover:bg-[#111111] hover:text-[#00DFA5]">
+                        <button type="button" onClick={() => void toggleReward(reward)} className="rounded-lg px-2.5 py-2 text-[10px] font-semibold text-[#FFFFFF]/45 hover:bg-[#111111] hover:text-[#3B82F6]">
                           {reward.active ? 'Désactiver' : 'Activer'}
                         </button>
-                        <button type="button" onClick={() => editReward(reward)} className="rounded-lg px-2.5 py-2 text-[10px] font-semibold text-[#00DFA5] hover:bg-[#111111]">
+                        <button type="button" onClick={() => editReward(reward)} className="rounded-lg px-2.5 py-2 text-[10px] font-semibold text-[#3B82F6] hover:bg-[#111111]">
                           Modifier
                         </button>
-                        <button type="button" onClick={() => void deleteReward(reward.id)} className="rounded-lg p-2 text-[#FFFFFF]/25 hover:bg-[#111111] hover:text-[#00DFA5]">
+                        <button type="button" onClick={() => void deleteReward(reward.id)} className="rounded-lg p-2 text-[#FFFFFF]/25 hover:bg-[#111111] hover:text-[#3B82F6]">
                           <Trash2 size={14} />
                         </button>
                       </div>
@@ -1162,13 +1253,13 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
               <StudioCard eyebrow={rewardDraft.id ? 'Édition' : 'Nouveau'} title={rewardDraft.id ? 'Modifier la récompense' : 'Ajouter une récompense'}>
                 <div className="grid gap-4 md:grid-cols-2">
                   <Field label="Nom">
-                    <input value={rewardDraft.name} onChange={e => setRewardDraft(current => ({ ...current, name: e.target.value }))} placeholder="Ex. Dessert offert" className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#00DFA5] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#00DFA5]/15 placeholder:text-[#FFFFFF]/25" />
+                    <input value={rewardDraft.name} onChange={e => setRewardDraft(current => ({ ...current, name: e.target.value }))} placeholder="Ex. Dessert offert" className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#3B82F6] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#3B82F6]/15 placeholder:text-[#FFFFFF]/25" />
                   </Field>
                   <Field label="Points requis">
-                    <input type="number" min="1" value={rewardDraft.pointsRequired} onChange={e => setRewardDraft(current => ({ ...current, pointsRequired: Math.max(1, Number(e.target.value) || 1) }))} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#00DFA5] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#00DFA5]/15 placeholder:text-[#FFFFFF]/25" />
+                    <input type="number" min="1" value={rewardDraft.pointsRequired} onChange={e => setRewardDraft(current => ({ ...current, pointsRequired: Math.max(1, Number(e.target.value) || 1) }))} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#3B82F6] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#3B82F6]/15 placeholder:text-[#FFFFFF]/25" />
                   </Field>
                   <Field label="Type">
-                    <select value={rewardDraft.rewardType} onChange={e => setRewardDraft(current => ({ ...current, rewardType: e.target.value as RewardType }))} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#00DFA5] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#00DFA5]/15 placeholder:text-[#FFFFFF]/25">
+                    <select value={rewardDraft.rewardType} onChange={e => setRewardDraft(current => ({ ...current, rewardType: e.target.value as RewardType }))} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#3B82F6] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#3B82F6]/15 placeholder:text-[#FFFFFF]/25">
                       <option value="GIFT">Cadeau</option>
                       <option value="DISCOUNT">Réduction</option>
                     </select>
@@ -1176,16 +1267,16 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   {rewardDraft.rewardType === 'DISCOUNT' && (
                     <>
                       <Field label="Pourcentage de réduction">
-                        <input type="number" min="1" max="20" value={rewardDraft.discountPercent} onChange={e => setRewardDraft(current => ({ ...current, discountPercent: Math.min(20, Math.max(1, Number(e.target.value) || 1)) }))} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#00DFA5] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#00DFA5]/15 placeholder:text-[#FFFFFF]/25" />
+                        <input type="number" min="1" max="20" value={rewardDraft.discountPercent} onChange={e => setRewardDraft(current => ({ ...current, discountPercent: Math.min(20, Math.max(1, Number(e.target.value) || 1)) }))} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#3B82F6] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#3B82F6]/15 placeholder:text-[#FFFFFF]/25" />
                       </Field>
                       <Field label="Plafond de réduction (MAD)">
-                        <input type="number" min="0" value={rewardDraft.discountMaxAmount ?? ''} onChange={e => setRewardDraft(current => ({ ...current, discountMaxAmount: e.target.value === '' ? null : Math.max(0, Number(e.target.value)) }))} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#00DFA5] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#00DFA5]/15 placeholder:text-[#FFFFFF]/25" placeholder="Optionnel" />
+                        <input type="number" min="0" value={rewardDraft.discountMaxAmount ?? ''} onChange={e => setRewardDraft(current => ({ ...current, discountMaxAmount: e.target.value === '' ? null : Math.max(0, Number(e.target.value)) }))} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#3B82F6] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#3B82F6]/15 placeholder:text-[#FFFFFF]/25" placeholder="Optionnel" />
                       </Field>
                     </>
                   )}
                   <div className="md:col-span-2">
                     <Field label="Description">
-                      <textarea value={rewardDraft.description} onChange={e => setRewardDraft(current => ({ ...current, description: e.target.value }))} rows={3} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#00DFA5] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#00DFA5]/15 placeholder:text-[#FFFFFF]/25 resize-none" placeholder="Ce que le client reçoit..." />
+                      <textarea value={rewardDraft.description} onChange={e => setRewardDraft(current => ({ ...current, description: e.target.value }))} rows={3} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#3B82F6] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#3B82F6]/15 placeholder:text-[#FFFFFF]/25 resize-none" placeholder="Ce que le client reçoit..." />
                     </Field>
                   </div>
                 </div>
@@ -1195,7 +1286,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                       Annuler
                     </button>
                   )}
-                  <button type="button" onClick={() => void saveReward()} disabled={rewardSaving} className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#00DFA5] to-[#14B8A6] px-4 py-2.5 text-xs font-semibold text-[#050505] disabled:opacity-50">
+                  <button type="button" onClick={() => void saveReward()} disabled={rewardSaving} className="inline-flex items-center gap-2 rounded-xl bg-[#686D76] px-4 py-2.5 text-xs font-semibold text-[#3B82F6] disabled:opacity-50">
                     <Gift size={14} />
                     {rewardSaving ? 'Enregistrement...' : rewardDraft.id ? 'Mettre à jour' : 'Ajouter'}
                   </button>
@@ -1209,11 +1300,11 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
               <StudioCard eyebrow="Acquisition" title="Transformer les clients en ambassadeurs">
                 <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
                   <div className="flex min-w-0 items-center gap-3 rounded-2xl bg-[#242424] p-4">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#111111] text-[#00DFA5] shadow-sm">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#111111] text-[#3B82F6] shadow-sm">
                       <UserPlus size={17} />
                     </span>
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-[#00DFA5]">Programme de parrainage</p>
+                      <p className="text-sm font-semibold text-[#3B82F6]">Programme de parrainage</p>
                       <p className="mt-1 text-[10px] leading-4 text-[#FFFFFF]/50">
                         Récompensez le parrain et le nouveau client après leur mise en relation.
                       </p>
@@ -1226,11 +1317,11 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                     aria-checked={referral.enabled}
                     aria-label={referral.enabled ? 'Désactiver le programme de parrainage' : 'Activer le programme de parrainage'}
                     onClick={() => setReferral(current => ({ ...current, enabled: !current.enabled }))}
-                    className={`group flex w-full items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DFA5] sm:min-w-[190px] sm:w-auto ${referral.enabled ? 'border-[#00DFA5]/40 bg-[#686D76]/10 hover:bg-[#686D76]/15' : 'border-[#FFFFFF]/15 bg-[#111111] hover:border-[#00DFA5]/40 hover:bg-[#181818]'}`}
+                    className={`group flex w-full items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3B82F6] sm:min-w-[190px] sm:w-auto ${referral.enabled ? 'border-[#3B82F6]/40 bg-[#686D76]/10 hover:bg-[#686D76]/15' : 'border-[#FFFFFF]/15 bg-[#111111] hover:border-[#3B82F6]/40 hover:bg-[#181818]'}`}
                     title="Cliquer pour activer ou désactiver le parrainage"
                   >
                     <div>
-                      <p className="text-xs font-semibold text-[#00DFA5]">
+                      <p className="text-xs font-semibold text-[#3B82F6]">
                         {referral.enabled ? 'Parrainage activé' : 'Parrainage désactivé'}
                       </p>
                       <p className="mt-1 text-[10px] text-[#FFFFFF]/55">
@@ -1273,7 +1364,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                           max_referrals: e.target.value === '' ? null : Math.max(0, Math.floor(Number(e.target.value) || 0)),
                         }))}
                         placeholder="Illimité"
-                        className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#00DFA5] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#00DFA5]/15 placeholder:text-[#FFFFFF]/25 pr-20"
+                        className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#3B82F6] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#3B82F6]/15 placeholder:text-[#FFFFFF]/25 pr-20"
                       />
                       <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[#FFFFFF]/30">par client</span>
                     </div>
@@ -1288,7 +1379,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
               </StudioCard>
 
               <div className="rounded-2xl border border-[#242424]/8 bg-[#242424] p-4 text-[10px] leading-5 text-[#FFFFFF]/45">
-                Les changements sont conservés avec le bouton <strong className="text-[#00DFA5]">Enregistrer</strong>. Le miroir de droite reflète immédiatement les paramètres qui modifient la carte.
+                Les changements sont conservés avec le bouton <strong className="text-[#3B82F6]">Enregistrer</strong>. Le miroir de droite reflète immédiatement les paramètres qui modifient la carte.
               </div>
             </div>
           )}
@@ -1305,20 +1396,20 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
             <div className="space-y-5">
               <StudioCard eyebrow="Wallet" title="Choisir une identité">
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  {Object.values(WALLET_TEMPLATES).map(item => {
+                  {Object.values(LOYALTY_CARD_TEMPLATES).map(item => {
                     const active = design.templateId === item.id;
                     return (
                       <button
                         key={item.id}
                         type="button"
                         onClick={() => selectTemplate(item.id)}
-                        className={`overflow-hidden rounded-2xl border text-left transition ${active ? 'border-[#242424] ring-2 ring-[#00DFA5]/15' : 'border-[#242424]/10 hover:border-[#00DFA5]/30'}`}
+                        className={`overflow-hidden rounded-2xl border text-left transition ${active ? 'border-[#242424] ring-2 ring-[#3B82F6]/15' : 'border-[#242424]/10 hover:border-[#3B82F6]/30'}`}
                       >
                         <div className="relative h-20 overflow-hidden" style={{ background: item.background }}>
                           <div className="absolute inset-x-3 bottom-3 h-1 rounded-full" style={{ background: item.accent }} />
                         </div>
                         <div className="bg-[#111111] px-3 py-2.5">
-                          <p className="text-[10px] font-semibold text-[#00DFA5]">{item.name}</p>
+                          <p className="text-[10px] font-semibold text-[#3B82F6]">{item.name}</p>
                         </div>
                       </button>
                     );
@@ -1326,7 +1417,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                 </div>
                 {selectedTemplate && (
                   <p className="mt-3 text-[10px] text-[#FFFFFF]/35">
-                    Template actif : <span className="font-semibold text-[#00DFA5]">{selectedTemplate.name}</span>
+                    Template actif : <span className="font-semibold text-[#3B82F6]">{selectedTemplate.name}</span>
                   </p>
                 )}
               </StudioCard>
@@ -1334,12 +1425,12 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
               <StudioCard eyebrow="Wallpaper" title="Arrière-plan de la carte">
                 <div className="grid gap-4 md:grid-cols-[1fr_220px] md:items-center">
                   <div>
-                    <p className="text-sm font-semibold text-[#00DFA5]">Image immersive</p>
+                    <p className="text-sm font-semibold text-[#3B82F6]">Image immersive</p>
                     <p className="mt-1 text-[10px] leading-4 text-[#FFFFFF]/40">
                       Ajoutez plusieurs wallpapers et choisissez celui qui sera actif sur la carte.
                     </p>
                     <div className="mt-4 flex flex-wrap gap-2">
-                      <button type="button" onClick={() => wallpaperInput.current?.click()} className="inline-flex items-center gap-2 rounded-xl border border-[#00DFA5]/20 bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#00DFA5]">
+                      <button type="button" onClick={() => wallpaperInput.current?.click()} className="inline-flex items-center gap-2 rounded-xl border border-[#3B82F6]/20 bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#3B82F6]">
                         <ImagePlus size={14} />
                         Ajouter un wallpaper
                       </button>
@@ -1347,7 +1438,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                         <button type="button" onClick={() => setDesign(current => {
                           const wallpaperUrls = current.wallpaperUrls.filter(url => url !== current.wallpaperUrl);
                           return { ...current, wallpaperUrl: wallpaperUrls[0] ?? null, wallpaperUrls, published: false };
-                        })} className="rounded-xl border border-[#242424] px-4 py-2.5 text-xs font-semibold text-[#00DFA5]">
+                        })} className="rounded-xl border border-[#242424] px-4 py-2.5 text-xs font-semibold text-[#3B82F6]">
                           Retirer l'actif
                         </button>
                       )}
@@ -1365,7 +1456,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                         <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#FFFFFF]/45">Bibliothèque de wallpapers</p>
                         <p className="mt-1 text-[10px] text-[#FFFFFF]/30">Cliquez sur une image pour la rendre active.</p>
                       </div>
-                      <span className="rounded-full bg-[#686D76]/10 px-2.5 py-1 text-[9px] font-semibold text-[#00DFA5]">
+                      <span className="rounded-full bg-[#686D76]/10 px-2.5 py-1 text-[9px] font-semibold text-[#3B82F6]">
                         {design.wallpaperUrls.length}
                       </span>
                     </div>
@@ -1373,7 +1464,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                       {design.wallpaperUrls.map(url => {
                         const active = url === design.wallpaperUrl;
                         return (
-                          <button key={url} type="button" onClick={() => setDesign(current => ({ ...current, wallpaperUrl: url, published: false }))} className={`relative aspect-[3/4] overflow-hidden rounded-xl border ${active ? 'border-[#00DFA5] ring-2 ring-[#00DFA5]/20' : 'border-[#242424]'}`}>
+                          <button key={url} type="button" onClick={() => setDesign(current => ({ ...current, wallpaperUrl: url, published: false }))} className={`relative aspect-[3/4] overflow-hidden rounded-xl border ${active ? 'border-[#3B82F6] ring-2 ring-[#3B82F6]/20' : 'border-[#242424]'}`}>
                             <img src={url} alt="" className="h-full w-full object-cover transition group-hover:scale-105" />
                             {active && <span className="absolute bottom-1.5 left-1.5 rounded-full bg-[#686D76] px-2 py-0.5 text-[8px] font-bold text-[#111111]">ACTIF</span>}
                           </button>
@@ -1394,14 +1485,14 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                 </div>
                 <div className="mt-5">
                   <Field label={`Rayon des angles · ${design.borderRadius}px`}>
-                    <input type="range" min="8" max="40" value={design.borderRadius} onChange={e => setDesign(current => ({ ...current, templateId: 'custom', borderRadius: Number(e.target.value) }))} className="w-full accent-[#00DFA5]" />
+                    <input type="range" min="8" max="40" value={design.borderRadius} onChange={e => setDesign(current => ({ ...current, templateId: 'custom', borderRadius: Number(e.target.value) }))} className="w-full accent-[#3B82F6]" />
                   </Field>
                 </div>
                 <div className="mt-5">
                   <Field label="Style des tampons">
                     <div className="grid grid-cols-4 gap-2">
                       {(['circles', 'squares', 'stars', 'hearts'] as const).map(style => (
-                        <button key={style} type="button" onClick={() => setDesign(current => ({ ...current, stampStyle: style }))} className={`rounded-xl border px-2 py-2.5 text-[10px] font-semibold capitalize ${design.stampStyle === style ? 'border-[#242424] bg-gradient-to-r from-[#00DFA5] to-[#14B8A6] text-[#050505]' : 'border-[#242424]/10 text-[#FFFFFF]/45'}`}>
+                        <button key={style} type="button" onClick={() => setDesign(current => ({ ...current, stampStyle: style }))} className={`rounded-xl border px-2 py-2.5 text-[10px] font-semibold capitalize ${design.stampStyle === style ? 'border-[#242424] bg-[#686D76] text-[#050505]' : 'border-[#242424]/10 text-[#FFFFFF]/45'}`}>
                           {style === 'circles' ? 'Ronds' : style === 'squares' ? 'Carrés' : style === 'stars' ? 'Étoiles' : 'Cœurs'}
                         </button>
                       ))}
@@ -1411,30 +1502,40 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
               </StudioCard>
             </div>
           )}
-          {tab === 'wallet' && canManageWallet && (
+          {tab === 'googleWallet' && canManageWallet && (
             <div className="space-y-5">
-              <StudioCard eyebrow="Catalogue Wallet" title="Bibliothèque de modèles">
+              <StudioCard eyebrow="Google Wallet · Android" title="Modèles de cartes fidélité">
                 <p className="text-xs leading-5 text-white/55">
-                  Choisissez un modèle, prévisualisez-le puis publiez-le. Une classe Google indépendante est créée pour chaque modèle et établissement. Les modèles en attente de validation ne sont pas visibles par les clients.
+                  Chaque modèle définit les vraies rangées du pass Google Wallet : solde, membre, scan, récompense ou établissement. Google valide chaque classe avant qu’elle soit proposée aux clients.
                 </p>
+                <div className="mt-4 rounded-2xl border border-white/10 bg-[#0B0B0B] p-3">
+                  {!creatingGoogleTemplate ? (
+                    <button type="button" onClick={() => setCreatingGoogleTemplate(true)} className="rounded-lg border border-[#3B82F6]/25 px-3 py-2 text-[11px] font-semibold text-[#3B82F6] hover:border-[#3B82F6]/50">
+                      + Créer un modèle Google Wallet
+                    </button>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      <input autoFocus value={newGoogleTemplateName} onChange={event => setNewGoogleTemplateName(event.target.value)} onKeyDown={event => { if (event.key === 'Enter') createGoogleTemplate(); }} maxLength={40} placeholder="Nom du nouveau modèle" aria-label="Nom du nouveau modèle Google Wallet" className="h-10 min-w-[220px] flex-1 rounded-lg border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none focus:border-[#3B82F6]/40" />
+                      <button type="button" onClick={createGoogleTemplate} disabled={!newGoogleTemplateName.trim()} className="rounded-lg bg-[#686D76] px-3 py-2 text-[10px] font-bold text-[#3B82F6] disabled:opacity-40">Créer</button>
+                      <button type="button" onClick={() => { setCreatingGoogleTemplate(false); setNewGoogleTemplateName(''); }} className="rounded-lg border border-white/10 px-3 py-2 text-[10px] text-white/60">Annuler</button>
+                    </div>
+                  )}
+                  <p className="mt-2 text-[10px] text-white/40">Le nouveau modèle reprend la disposition sélectionnée; tu peux ensuite la modifier et publier sa propre classe Google.</p>
+                </div>
                 <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                  {Object.values(WALLET_TEMPLATES).map(template => {
+                  {googleTemplates.map(template => {
                     const saved = walletCatalog.find(item => item.design_key === template.id);
                     const busy = publishingWalletKey === template.id;
+                    const selected = walletDesign.googleTemplateId === template.id;
                     return (
-                      <div key={template.id} className="overflow-hidden rounded-2xl border border-white/10 bg-[#0B0B0B]">
+                      <div key={template.id} className={`overflow-hidden rounded-2xl border bg-[#0B0B0B] ${selected ? 'border-[#3B82F6]/50 ring-1 ring-[#3B82F6]/20' : 'border-white/10'}`}>
                         <button type="button" onClick={() => setWalletDesign(current => ({
-                          ...current, backgroundColor: template.background, primaryColor: template.primary,
+                          ...current, googleTemplateId: template.id, backgroundColor: template.background,
                           accentColor: template.accent, textColor: template.text, cardTitle: current.cardTitle || establishment.name,
                         }))} className="block w-full p-3 text-left">
-                          <div className="h-24 rounded-xl p-3" style={{background: template.background, color: template.text}}>
-                            <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-bold tracking-widest">KELYANI</span>
-                              <span className="h-3 w-3 rounded-full" style={{background:template.accent}} />
-                            </div>
-                            <p className="mt-6 text-sm font-semibold">{template.name}</p>
-                          </div>
+                          <GoogleWalletPassPreview templateId={template.id} establishmentName={establishment.name} walletDesign={walletDesign} logoUrl={walletDesign.logoUrl || establishment.logoUrl || ''} rowsOverride={walletDesign.googleTemplateLayouts?.[template.id] ?? template.rows} customTemplates={walletDesign.googleCustomTemplates} compact />
                           <p className="mt-2 text-xs font-semibold text-white">{template.name}</p>
+                          <p className="mt-1 text-[10px] leading-4 text-white/45">{template.description}</p>
                         </button>
                         <div className="flex items-center justify-between gap-2 border-t border-white/10 p-3">
                           <span className="text-[10px] text-white/45">
@@ -1452,13 +1553,19 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
               </StudioCard>
 
               <StudioCard eyebrow="Options du modèle" title="Personnalisation">
-                <p className="mb-4 text-xs leading-5 text-white/50">Les réglages ci-dessous s’appliquent au modèle sélectionné avant publication.</p>
+                <p className="mb-4 text-xs leading-5 text-white/50">Le logo, le visuel principal, les textes et les informations de la carte complètent la structure Google du modèle sélectionné.</p>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Field label="Titre Wallet">
                     <input value={walletDesign.cardTitle} onChange={e => setWalletDesign(current => ({...current,cardTitle:e.target.value}))} maxLength={25} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
                   </Field>
                   <Field label="Sous-titre">
                     <input value={walletDesign.headerText} onChange={e => setWalletDesign(current => ({...current,headerText:e.target.value}))} maxLength={40} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
+                  </Field>
+                  <Field label="Couleur de fond réelle du pass">
+                    <div className="mt-2 flex h-11 items-center gap-2 rounded-xl border border-white/10 bg-[#111111] px-2">
+                      <input type="color" aria-label="Choisir la couleur de fond Google Wallet" value={walletDesign.backgroundColor} onChange={e => setWalletDesign(current => ({ ...current, backgroundColor: normalizeNardoBackgroundColor(e.target.value) }))} className="h-7 w-9 cursor-pointer rounded border-0 bg-transparent p-0" />
+                      <span className="px-2 text-xs text-white/70">{walletDesign.backgroundColor.toUpperCase()}</span>
+                    </div>
                   </Field>
                   <Field label="Texte complémentaire">
                     <input value={walletDesign.footerText} onChange={e => setWalletDesign(current => ({...current,footerText:e.target.value}))} maxLength={80} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none" />
@@ -1485,7 +1592,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                       }}
                     />
                     <div className="mt-2 flex flex-wrap gap-2">
-                      <button type="button" onClick={() => walletHeroInput.current?.click()} disabled={saving} className="rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-[10px] font-semibold text-[#00DFA5] disabled:opacity-40">
+                      <button type="button" onClick={() => walletHeroInput.current?.click()} disabled={saving} className="rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-[10px] font-semibold text-[#3B82F6] disabled:opacity-40">
                         Importer une image
                       </button>
                       <button type="button" onClick={() => setWalletCropPlatform('google')} disabled={!(walletDesign.heroImageSourceUrl || walletDesign.heroImageUrl) || saving} className="rounded-lg bg-[#686D76] px-3 py-2 text-[10px] font-semibold text-white disabled:opacity-40">
@@ -1504,6 +1611,32 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                 </div>
               </StudioCard>
 
+              <StudioCard eyebrow="Mise en page Google Wallet" title="Modifier les rangées et les champs">
+                <p className="mb-4 text-xs leading-5 text-white/50">Ces rangées sont envoyées à la classe Google Wallet. Change leur ordre et les champs affichés; l’aperçu à droite suit tes choix.</p>
+                <div className="space-y-3">
+                  {selectedGoogleRows.map((row, rowIndex) => (
+                    <div key={`${walletDesign.googleTemplateId}-row-${rowIndex}`} className="rounded-2xl border border-white/10 bg-[#0B0B0B] p-3">
+                      <div className="mb-2 flex items-center justify-between">
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-white/55">Rangée {rowIndex + 1}</p>
+                        {selectedGoogleRows.length > 1 && <button type="button" onClick={() => removeGoogleRow(rowIndex)} className="text-[10px] text-white/40 hover:text-white">Supprimer la rangée</button>}
+                      </div>
+                      <div className="grid gap-2 sm:grid-cols-3">
+                        {row.map((fieldKey, fieldIndex) => (
+                          <div key={`${rowIndex}-${fieldIndex}`} className="flex min-w-0 items-center gap-1.5">
+                            <select aria-label={`Rangée ${rowIndex + 1}, champ ${fieldIndex + 1}`} value={fieldKey} onChange={e => updateGoogleField(rowIndex, fieldIndex, e.target.value as GoogleWalletFieldKey)} className="h-10 min-w-0 flex-1 rounded-lg border border-white/10 bg-[#111111] px-2 text-[10px] text-white outline-none">
+                              {GOOGLE_WALLET_FIELD_OPTIONS.map(option => <option key={option.id} value={option.id}>{option.label}</option>)}
+                            </select>
+                            {row.length > 1 && <button type="button" aria-label={`Retirer le champ ${fieldIndex + 1} de la rangée ${rowIndex + 1}`} onClick={() => removeGoogleField(rowIndex, fieldIndex)} className="grid h-8 w-8 shrink-0 place-items-center rounded-md border border-white/10 text-xs text-white/45 hover:text-white">×</button>}
+                          </div>
+                        ))}
+                      </div>
+                      {row.length < 3 && <button type="button" onClick={() => addGoogleField(rowIndex)} className="mt-2 text-[10px] font-semibold text-[#3B82F6]">+ Ajouter un champ</button>}
+                    </div>
+                  ))}
+                </div>
+                {selectedGoogleRows.length < 3 && <button type="button" onClick={addGoogleRow} className="mt-3 rounded-lg border border-white/10 px-3 py-2 text-[10px] font-semibold text-white/65 hover:border-[#3B82F6]/35 hover:text-[#3B82F6]">+ Ajouter une rangée</button>}
+              </StudioCard>
+
               {walletCropPlatform && (
                 <WalletImageCropEditor
                   imageUrl={walletDesign.heroImageSourceUrl || walletDesign.heroImageUrl}
@@ -1518,9 +1651,42 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   onClose={() => setWalletCropPlatform(null)}
                 />
               )}
-              <StudioCard eyebrow="Apple Wallet" title="Apple Wallet">
-                <p className="text-xs leading-5 text-white/55">Le catalogue est préparé, mais la publication Apple reste désactivée jusqu’à la configuration du compte Apple Developer Organisation et du certificat Pass Type ID.</p>
-                <span className="mt-3 inline-flex rounded-full border border-white/15 px-3 py-1.5 text-[10px] text-white/60">Certificats requis</span>
+            </div>
+          )}
+          {tab === 'appleWallet' && canManageWallet && (
+            <div className="space-y-5">
+              <StudioCard eyebrow="Apple Wallet · PassKit" title="8 modèles Store Card natifs">
+                <p className="text-xs leading-5 text-white/55">
+                  Ces modèles utilisent les zones réelles d’une carte Apple Wallet : en-tête, champ principal, champs secondaires et auxiliaires, verso et composition de bandeau. Choisissez une hiérarchie de contenu, pas seulement une couleur.
+                </p>
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  {APPLE_WALLET_TEMPLATES.map(template => {
+                    const selected = walletDesign.appleTemplateId === template.id;
+                    return (
+                      <div key={template.id} className={`overflow-hidden rounded-2xl border bg-[#0B0B0B] ${selected ? 'border-[#3B82F6]/50 ring-1 ring-[#3B82F6]/20' : 'border-white/10'}`}>
+                        <button type="button" onClick={() => setWalletDesign(current => ({ ...current, appleTemplateId: template.id }))} className="block w-full p-3 text-left">
+                          <AppleWalletPassPreview templateId={template.id} establishmentName={establishment.name} walletDesign={walletDesign} logoUrl={walletDesign.logoUrl || establishment.logoUrl || ''} compact />
+                          <p className="mt-2 text-xs font-semibold text-white">{template.name}</p>
+                          <p className="mt-1 text-[10px] leading-4 text-white/45">{template.description}</p>
+                        </button>
+                        <div className="flex flex-wrap gap-1.5 border-t border-white/10 p-3">
+                          {(['header', 'primary', 'secondary', 'auxiliary', 'back'] as const).map(group => (
+                            <span key={group} className="rounded-full bg-[#111111] px-2 py-1 text-[9px] text-white/50">{group === 'header' ? 'En-tête' : group === 'primary' ? 'Principal' : group === 'secondary' ? 'Secondaires' : group === 'auxiliary' ? 'Auxiliaires' : 'Verso'} · {template.fields[group].length}</span>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="mt-5 rounded-2xl border border-[#686D76]/30 bg-[#111111] p-4">
+                  <p className="text-xs font-semibold text-white">Modèle sélectionné · {getAppleWalletTemplate(walletDesign.appleTemplateId).name}</p>
+                  <p className="mt-1 text-[10px] leading-4 text-white/45">Apple impose le format Store Card et ses champs PassKit. La distribution d’un vrai fichier .pkpass nécessite le certificat Pass Type ID et la clé privée Apple Developer de KELYANI.</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {getAppleWalletTemplate(walletDesign.appleTemplateId).fields.primary.map(field => <span key={field} className="rounded-lg bg-[#050505] px-2.5 py-1.5 text-[10px] text-[#3B82F6]">Principal : {APPLE_WALLET_FIELD_LABELS[field]}</span>)}
+                    {getAppleWalletTemplate(walletDesign.appleTemplateId).fields.secondary.map(field => <span key={field} className="rounded-lg bg-[#050505] px-2.5 py-1.5 text-[10px] text-white/65">{APPLE_WALLET_FIELD_LABELS[field]}</span>)}
+                  </div>
+                  <span className="mt-3 inline-flex rounded-full border border-[#686D76]/40 px-3 py-1.5 text-[10px] text-white/60">Modèle PassKit enregistré · signature Apple à configurer</span>
+                </div>
               </StudioCard>
             </div>
           )}
@@ -1534,45 +1700,27 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
         <aside className="sticky top-6 h-fit overflow-hidden rounded-3xl bg-[#050505] p-4 sm:p-5">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[.24em] text-[#00DFA5]">Le Miroir</p>
+              <p className="text-[10px] font-bold uppercase tracking-[.24em] text-[#3B82F6]">Le Miroir</p>
               <p className="mt-1 text-xs text-[#FFFFFF]/40">Aperçu permanent et synchronisé</p>
             </div>
-            <span className="rounded-full bg-[#111111] px-3 py-1.5 text-[9px] font-bold uppercase tracking-[.12em] text-[#00DFA5]">
+            <span className="rounded-full bg-[#111111] px-3 py-1.5 text-[9px] font-bold uppercase tracking-[.12em] text-[#3B82F6]">
               {visibleTabs.find(item => item.id === tab)?.label}
             </span>
           </div>
 
           <div className="flex min-h-[500px] w-full items-center justify-center overflow-visible rounded-[24px] bg-[#111111]/[.03] p-3 sm:min-h-[560px]">
-            {tab === 'wallet' ? (
-              <div className="w-full max-w-[300px] overflow-hidden rounded-[28px] border-[7px] border-[#E5E5E5] shadow-2xl" style={{ background: walletDesign.backgroundColor, color: walletDesign.textColor }}>
-                <div className="relative min-h-[430px] overflow-hidden p-4" style={{ background: `linear-gradient(155deg, ${walletDesign.primaryColor}, ${walletDesign.backgroundColor} 76%)` }}>
-                  {(walletDesign.heroImageUrl || walletDesign.heroImageSourceUrl) && <img src={walletDesign.heroImageUrl || walletDesign.heroImageSourceUrl} alt="" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-30" />}
-                  <div className="relative z-10">
-                  <div className="flex items-center gap-3">
-                    {walletDesign.logoUrl || design.logoUrl || establishment.logoUrl ? <img src={walletDesign.logoUrl || design.logoUrl || establishment.logoUrl || ''} alt="" className="h-10 w-10 rounded-xl bg-white object-contain p-1" /> : <div className="grid h-10 w-10 place-items-center rounded-xl text-xs font-bold" style={{ background: walletDesign.accentColor, color: walletDesign.backgroundColor }}>{establishment.name.slice(0,2).toUpperCase()}</div>}
-                    <div className="min-w-0"><p className="truncate text-xs font-bold">{walletDesign.cardTitle || 'KELYANI'}</p><p className="text-[9px] uppercase tracking-wider opacity-60">{establishment.name} · {walletDesign.headerText}</p></div>
-                  </div>
-                  {walletDesign.showPoints && <div className="mt-10 text-center"><p className="text-[9px] uppercase tracking-[.2em]" style={{ color: walletDesign.accentColor }}>Votre solde</p><p className="mt-1 text-4xl font-black">720</p><p className="text-[10px]" style={{ color: walletDesign.accentColor }}>POINTS</p></div>}
-                  <div className="mt-8 rounded-xl border p-3" style={{ borderColor: walletDesign.accentColor + '88', background: '#00000022' }}><p className="text-[10px] font-semibold">Prochaine récompense</p><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/20"><div className="h-full w-[72%]" style={{ background: walletDesign.accentColor }} /></div></div>
-                  {walletDesign.showQr && <div className="mt-7 flex justify-center"><div className="grid h-16 w-16 grid-cols-5 gap-[2px] rounded-lg bg-white p-2">{Array.from({length:25},(_,i)=><span key={i} className="rounded-[1px]" style={{background:(i*7)%3===0?'#111111':'#FFFFFF'}} />)}</div></div>}
-                  <p className="mt-5 text-center text-[9px] opacity-55">{walletDesign.footerText}</p>
-                  </div>
-                </div>
-              </div>
+            {tab === 'googleWallet' ? (
+              <GoogleWalletPassPreview templateId={walletDesign.googleTemplateId} establishmentName={establishment.name} walletDesign={walletDesign} logoUrl={walletDesign.logoUrl || establishment.logoUrl || ''} customTemplates={walletDesign.googleCustomTemplates} />
+            ) : tab === 'appleWallet' ? (
+              <AppleWalletPassPreview templateId={walletDesign.appleTemplateId} establishmentName={establishment.name} walletDesign={walletDesign} logoUrl={walletDesign.logoUrl || establishment.logoUrl || ''} />
             ) : <LoyaltyPreview config={previewConfig} />}
           </div>
-          {tab === 'wallet' && (
+          {(tab === 'googleWallet' || tab === 'appleWallet') && (
             <div className="mt-3 space-y-2">
-              <p className="text-center text-[9px] text-white/35">Aperçu du pass Wallet · simulation synchronisée avec le design</p>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-xl border border-white/10 bg-[#111111] p-3 text-center">
-                  <p className="text-[10px] font-semibold text-white">Google Wallet</p>
-                  <p className="mt-1 text-[9px] text-white/40">Mode test</p>
-                </div>
-                <div className="rounded-xl border border-white/10 bg-[#111111] p-3 text-center">
-                  <p className="text-[10px] font-semibold text-white">Apple Wallet</p>
-                  <p className="mt-1 text-[9px] text-white/40">À configurer</p>
-                </div>
+              <p className="text-center text-[9px] text-white/35">Aperçu du modèle {tab === 'googleWallet' ? 'Google Loyalty Class' : 'Apple PassKit Store Card'} sélectionné</p>
+              <div className="rounded-xl border border-white/10 bg-[#111111] p-3 text-center">
+                <p className="text-[10px] font-semibold text-white">{tab === 'googleWallet' ? 'Structure Google Wallet prête à soumettre' : 'Structure Apple Wallet prête à signer'}</p>
+                <p className="mt-1 text-[9px] text-white/40">{tab === 'googleWallet' ? `${walletCatalog.filter(item => item.publication_status === 'published').length} modèle(s) approuvé(s)` : 'Certificat Pass Type ID requis pour générer le .pkpass'}</p>
               </div>
             </div>
           )}
@@ -1580,8 +1728,8 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
           <div className="mt-4 rounded-2xl bg-[#111111] p-4">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-[9px] uppercase tracking-[.16em] text-[#00DFA5]">Carte actuelle</p>
-                <p className="mt-1 text-sm font-semibold text-[#00DFA5]">{establishment.name}</p>
+                <p className="text-[9px] uppercase tracking-[.16em] text-[#3B82F6]">Carte actuelle</p>
+                <p className="mt-1 text-sm font-semibold text-[#3B82F6]">{establishment.name}</p>
               </div>
               <span className={`h-2.5 w-2.5 rounded-full ${previewChannelReady ? 'bg-[#686D76]' : 'bg-[#686D76]'}`} title={previewChannelReady ? 'Synchronisation active' : 'Connexion en cours'} />
             </div>
@@ -1599,12 +1747,125 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   );
 }
 
+function GoogleWalletPassPreview({ templateId, establishmentName, walletDesign, logoUrl, rowsOverride, customTemplates = [], compact = false }: {
+  templateId: string;
+  establishmentName: string;
+  walletDesign: WalletDesignState;
+  logoUrl: string;
+  rowsOverride?: GoogleWalletFieldKey[][];
+  customTemplates?: GoogleWalletTemplate[];
+  compact?: boolean;
+}) {
+  const template = [...GOOGLE_WALLET_TEMPLATES, ...customTemplates].find(item => item.id === templateId) ?? GOOGLE_WALLET_TEMPLATES[0];
+  const hero = walletDesign.heroImageUrl || walletDesign.heroImageSourceUrl;
+  const selectedRows = rowsOverride ?? walletDesign.googleTemplateLayouts?.[templateId] ?? template.rows;
+  const extra = walletDesign as WalletDesignState & Record<string, unknown>;
+  const fieldValues: Record<GoogleWalletFieldKey, { label: string; value: string }> = {
+    balance: { label: walletDesign.showPoints ? 'SOLDE / PROGRESSION' : 'EN CAISSE', value: walletDesign.showPoints ? '720 pts' : 'Présentez votre carte' },
+    accountName: { label: 'MEMBRE', value: 'Sanae Bennani' },
+    accountId: { label: 'NUMÉRO MEMBRE', value: 'KEL-2048' },
+    reward: { label: 'PROCHAINE RÉCOMPENSE', value: String(extra.walletRewardLabel || 'Cadeau fidélité') },
+    tier: { label: 'NIVEAU', value: String(extra.walletTierLabel || 'Signature') },
+    venue: { label: 'ÉTABLISSEMENT', value: establishmentName || 'KELYANI' },
+    offer: { label: 'AVANTAGE ACTIF', value: String(extra.walletOfferLabel || '10 % membre') },
+    program: { label: 'PROGRAMME', value: walletDesign.headerText || 'Carte de fidélité' },
+  };
+  const qr = <div className={`${compact ? 'h-9 w-9' : 'h-16 w-16'} grid grid-cols-5 gap-[2px] rounded-lg bg-white p-1.5`}>{Array.from({ length: 25 }, (_, index) => <span key={index} className="rounded-[1px]" style={{ background: (index * 7 + 3) % 4 === 0 ? '#FFFFFF' : '#050505' }} />)}</div>;
+  const cardClass = compact ? 'h-[118px] w-full' : 'min-h-[390px] w-full max-w-[330px]';
+  const backgroundColor = templateId === walletDesign.googleTemplateId ? walletDesign.backgroundColor : template.background;
+  return (
+    <div className={`${cardClass} relative overflow-hidden rounded-[20px] border border-white/10 p-4 shadow-2xl`} style={{ background: backgroundColor, color: '#FFFFFF' }}>
+      {hero && <img src={hero} alt="" className="absolute inset-0 h-full w-full object-cover opacity-20" />}
+      <div className="absolute -right-8 -top-10 h-28 w-28 rounded-full border-[18px] opacity-15" style={{ borderColor: walletDesign.accentColor }} />
+      <div className="relative z-10 flex h-full flex-col">
+        <div className="flex items-center gap-2">
+          {logoUrl ? <img src={logoUrl} alt="" className={`${compact ? 'h-6 w-6' : 'h-9 w-9'} rounded-full bg-white object-contain p-1`} /> : <span className={`${compact ? 'h-6 w-6 text-[7px]' : 'h-9 w-9 text-[10px]'} grid place-items-center rounded-full font-black`} style={{ color: '#050505', background: walletDesign.accentColor }}>K</span>}
+          <div className="min-w-0 flex-1"><p className={`${compact ? 'text-[8px]' : 'text-[10px]'} truncate font-bold tracking-wide`}>{walletDesign.cardTitle || establishmentName || 'Programme fidélité'}</p><p className={`${compact ? 'text-[6px]' : 'text-[8px]'} truncate opacity-55`}>{establishmentName}</p></div>
+          <span className={`${compact ? 'text-[6px]' : 'text-[8px]'} rounded-full px-2 py-1 font-semibold`} style={{ background: `${walletDesign.accentColor}24`, color: walletDesign.accentColor }}>FIDÉLITÉ</span>
+        </div>
+        <div className={`${compact ? 'mt-auto space-y-1' : 'mt-auto space-y-3'} border-t border-white/15 ${compact ? 'pt-1.5' : 'pt-3'}`}>
+          {selectedRows.map((row, rowIndex) => (
+            <div key={`${templateId}-${rowIndex}`} className="grid items-center gap-2" style={{ gridTemplateColumns: `repeat(${row.length}, minmax(0, 1fr))` }}>
+              {row.map((fieldKey, fieldIndex) => {
+                const item = fieldValues[fieldKey];
+                return <div key={`${fieldKey}-${fieldIndex}`} className={`${row.length === 1 ? 'text-center' : fieldIndex === row.length - 1 ? 'text-right' : 'text-left'} min-w-0`}>
+                  <p className={`${compact ? 'text-[5px]' : 'text-[8px]'} truncate uppercase tracking-wider opacity-45`}>{item.label}</p>
+                  <p className={`${compact ? 'text-[7px]' : 'text-sm'} truncate font-semibold`} style={{ color: fieldKey === 'balance' || fieldKey === 'offer' ? walletDesign.accentColor : undefined }}>{item.value}</p>
+                </div>;
+              })}
+            </div>
+          ))}
+        </div>
+        {!compact && <div className="mt-3 flex items-center justify-between border-t border-white/10 pt-3"><span className="text-[8px] opacity-50">Carte Wallet · KELYANI</span>{walletDesign.showQr && qr}</div>}
+      </div>
+    </div>
+  );
+}
+
+function AppleWalletPassPreview({ templateId, establishmentName, walletDesign, logoUrl, compact = false }: {
+  templateId: string;
+  establishmentName: string;
+  walletDesign: WalletDesignState;
+  logoUrl: string;
+  compact?: boolean;
+}) {
+  const template = getAppleWalletTemplate(templateId);
+  const values: Record<string, string> = {
+    accountName: 'Sanae Bennani', accountId: 'KEL-2048', points: '720 pts', visits: '6 / 8',
+    reward: 'Cadeau fidélité', tier: 'Signature', establishment: establishmentName || 'Établissement', offer: '10 % membre',
+  };
+  const labels: Record<string, string> = { accountName: 'MEMBRE', accountId: 'CARTE', points: 'POINTS', visits: 'VISITES', reward: 'RÉCOMPENSE', tier: 'NIVEAU', establishment: 'ÉTABLISSEMENT', offer: 'AVANTAGE' };
+  const artwork: Record<string, string> = {
+    ribbon: 'linear-gradient(135deg, #050505 0 42%, #686D76 42% 51%, #111111 51%)',
+    stack: 'repeating-linear-gradient(0deg, #050505 0 14px, #111111 14px 26px, #686D76 26px 28px, #050505 28px 42px)',
+    grid: 'linear-gradient(90deg, transparent 49%, #686D76 50%, transparent 51%), linear-gradient(0deg, transparent 49%, #686D76 50%, transparent 51%), #050505',
+    barcode: 'repeating-linear-gradient(90deg, #050505 0 6px, #111111 6px 12px, #686D76 12px 14px)',
+    reward: 'radial-gradient(ellipse at 75% 25%, #686D7644, transparent 48%), linear-gradient(135deg, #050505, #111111 70%)',
+    monogram: 'radial-gradient(circle at 80% 20%, #686D7655 0 18%, transparent 19%), linear-gradient(135deg, #050505, #111111)',
+    arch: 'radial-gradient(ellipse at 50% 120%, #686D7666 0 30%, transparent 31%), linear-gradient(135deg, #050505, #111111)',
+    editorial: 'linear-gradient(150deg, #050505 0 65%, #686D76 65% 68%, #050505 68%)',
+  };
+  const field = (key: string, prominent = false) => (
+    <div key={key} className="min-w-0">
+      <p className={`${compact ? 'text-[5px]' : 'text-[7px]'} truncate tracking-[.12em] opacity-55`}>{labels[key]}</p>
+      <p className={`${compact ? 'text-[7px]' : prominent ? 'text-xl' : 'text-[9px]'} truncate font-semibold`}>{values[key]}</p>
+    </div>
+  );
+  const header = template.fields.header;
+  const primary = template.fields.primary;
+  const secondary = template.fields.secondary;
+  const auxiliary = template.fields.auxiliary;
+  return (
+    <div className={`${compact ? 'h-[118px] w-full' : 'w-full max-w-[350px]'} relative overflow-hidden rounded-[20px] border border-white/10 shadow-2xl`} style={{ background: walletDesign.backgroundColor, color: walletDesign.textColor }}>
+      <div className={`${compact ? 'h-[30px]' : 'h-[82px]'} relative overflow-hidden`} style={{ background: walletDesign.appleHeroImageUrl ? `linear-gradient(90deg, #05050588, #05050522), url("${walletDesign.appleHeroImageUrl}") center/cover` : artwork[template.artwork] }}>
+        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'linear-gradient(115deg, transparent 0 45%, #686D76 45% 46%, transparent 46% 68%, #686D76 68% 69%, transparent 69%)' }} />
+      </div>
+      <div className={`${compact ? 'px-3 pb-2 pt-1.5' : 'px-5 pb-4 pt-3'} relative`}>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-2">
+            {logoUrl ? <img src={logoUrl} alt="" className={`${compact ? 'h-5 w-5' : 'h-8 w-8'} rounded-md bg-white object-contain p-0.5`} /> : <span className={`${compact ? 'h-5 w-5 text-[6px]' : 'h-8 w-8 text-[9px]'} grid place-items-center rounded-md bg-[#686D76] font-bold text-white`}>K</span>}
+            <div className="min-w-0"><p className={`${compact ? 'text-[7px]' : 'text-[10px]'} truncate font-bold`}>{establishmentName || walletDesign.cardTitle || 'KELYANI'}</p><p className={`${compact ? 'text-[5px]' : 'text-[7px]'} uppercase tracking-wider opacity-50`}>CARTE DE FIDÉLITÉ</p></div>
+          </div>
+          <div className="flex gap-2 text-right">{header.map(key => field(key))}</div>
+        </div>
+        <div className={`${compact ? 'mt-2' : 'mt-5'} flex items-end justify-between gap-3`}>
+          <div className="min-w-0">{primary.map(key => field(key, true))}</div>
+          {!compact && walletDesign.showQr && <div className="grid h-12 w-12 grid-cols-5 gap-[1px] rounded bg-white p-1">{Array.from({ length: 25 }, (_, index) => <span key={index} className="rounded-[1px]" style={{ background: (index * 5 + 2) % 3 ? '#050505' : '#FFFFFF' }} />)}</div>}
+        </div>
+        <div className={`${compact ? 'mt-1' : 'mt-3'} grid grid-cols-4 gap-x-2 border-t border-white/10 ${compact ? 'pt-1' : 'pt-2'}`}>
+          {[...secondary, ...auxiliary].slice(0, 4).map(key => field(key))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function StudioCard({ eyebrow, title, children }: { eyebrow: string; title: string; children: React.ReactNode }) {
   return (
     <section className="rounded-[24px] border border-[#242424]/8 bg-[#111111] p-5 shadow-[0_10px_35px_rgba(104,109,118,0.035)]">
       <div className="mb-5">
-        <p className="text-[9px] font-bold uppercase tracking-[.2em] text-[#00DFA5]">{eyebrow}</p>
-        <h3 className="mt-1 text-lg font-semibold text-[#00DFA5]">{title}</h3>
+        <p className="text-[9px] font-bold uppercase tracking-[.2em] text-[#3B82F6]">{eyebrow}</p>
+        <h3 className="mt-1 text-lg font-semibold text-[#3B82F6]">{title}</h3>
       </div>
       {children}
     </section>
@@ -1627,7 +1888,7 @@ function Metric({ label, value, icon }: { label: string; value: string | number;
         {icon}
         {label}
       </div>
-      <p className="mt-2 text-lg font-semibold text-[#00DFA5]">{value}</p>
+      <p className="mt-2 text-lg font-semibold text-[#3B82F6]">{value}</p>
     </div>
   );
 }
@@ -1639,7 +1900,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (checked: b
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className={`relative h-7 w-12 shrink-0 rounded-full p-1 transition ${checked ? 'bg-gradient-to-r from-[#00DFA5] to-[#14B8A6]' : 'bg-[#111111]/15'}`}
+      className={`relative h-7 w-12 shrink-0 rounded-full p-1 transition ${checked ? 'bg-[#686D76]' : 'bg-[#111111]/15'}`}
     >
       <span className={`block h-5 w-5 rounded-full bg-[#111111] shadow-sm transition ${checked ? 'translate-x-5' : 'translate-x-0'}`} />
     </button>
@@ -1652,7 +1913,7 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
       {label}
       <div className="mt-2 flex items-center gap-2 rounded-xl border border-[#242424]/10 bg-[#111111] p-2">
         <input type="color" value={value} onChange={e => onChange(e.target.value)} className="h-9 w-10 cursor-pointer rounded-lg border-0 bg-transparent p-0" />
-        <input value={value} onChange={e => onChange(e.target.value)} className="min-w-0 flex-1 bg-transparent px-1 text-xs font-semibold uppercase text-[#00DFA5] outline-none" />
+        <input value={value} onChange={e => onChange(e.target.value)} className="min-w-0 flex-1 bg-transparent px-1 text-xs font-semibold uppercase text-[#3B82F6] outline-none" />
       </div>
     </label>
   );
@@ -1673,7 +1934,7 @@ function ReferralField({
     <div>
       <p className="text-xs font-semibold text-[#FFFFFF]/55">{label}</p>
       <div className="mt-2 grid grid-cols-[1fr_110px] gap-2">
-        <select value={type} onChange={e => onChange(e.target.value as LoyaltyReferralBonusType, value)} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#00DFA5] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#00DFA5]/15 placeholder:text-[#FFFFFF]/25">
+        <select value={type} onChange={e => onChange(e.target.value as LoyaltyReferralBonusType, value)} className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#3B82F6] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#3B82F6]/15 placeholder:text-[#FFFFFF]/25">
           <option value="POINTS">Points</option>
           <option value="STAMP">Tampons</option>
           <option value="REDUCTION">Réduction</option>
@@ -1683,9 +1944,10 @@ function ReferralField({
           min="0"
           value={value}
           onChange={e => onChange(type, Math.max(0, Number(e.target.value) || 0))}
-          className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#00DFA5] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#00DFA5]/15 placeholder:text-[#FFFFFF]/25"
+          className="h-12 w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 text-sm font-medium text-[#3B82F6] outline-none transition focus:border-[#242424]/40 focus:ring-2 focus:ring-[#3B82F6]/15 placeholder:text-[#FFFFFF]/25"
         />
       </div>
     </div>
   );
 }
+
