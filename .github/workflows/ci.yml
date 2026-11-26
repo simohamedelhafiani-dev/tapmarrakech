@@ -119,6 +119,8 @@ jobs:
         run: deno test supabase/functions/google-wallet-create-pass/wallet-design.test.ts
       - name: Test Nardo Wallet background palette
         run: deno test supabase/functions/google-wallet-publish-design/wallet-background.test.ts
+      - name: Test Google Wallet publication authorization
+        run: deno test supabase/functions/google-wallet-publish-design/wallet-authorization.test.ts
       - name: Test Smart Marketing queue utilities
         run: deno test supabase/functions/smart-marketing-dispatch/smart-marketing-utils.test.ts
 
