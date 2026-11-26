@@ -141,7 +141,7 @@ Deno.serve(async (request) => {
     const rawWalletDesign = walletDesignResult && typeof walletDesignResult === "object"
       ? walletDesignResult as Record<string, unknown>
       : {};
-    const walletDesign = {
+    const walletDesign: Record<string, unknown> = {
       ...((rawWalletDesign.design_config && typeof rawWalletDesign.design_config === "object") ? rawWalletDesign.design_config as Record<string, unknown> : {}),
       googleClassId: rawWalletDesign.googleClassId,
       googleClassStatus: rawWalletDesign.googleClassStatus,
