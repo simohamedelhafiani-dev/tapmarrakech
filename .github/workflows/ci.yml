@@ -11,14 +11,9 @@ concurrency:
   cancel-in-progress: true
 
 on:
-  # Validate pull requests against the final consolidation base. This workflow
-  # contains checks only; it does not deploy or apply remote migrations.
-  pull_request:
-    branches:
-      - main
-      - integration/kelyani-final-consolidation-2026-11
+  # Automated CI remains paused while the final product version is assembled.
+  # Run manually on this release-candidate branch after the user requests validation.
   workflow_dispatch:
-
 jobs:
   validate:
     runs-on: ubuntu-latest
