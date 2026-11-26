@@ -1,0 +1,21 @@
+export function distanceMeters(lat1:number,lon1:number,lat2:number,lon2:number):number {
+ const R=6371000,rad=(v:number)=>v*Math.PI/180;
+ const dLat=rad(lat2-lat1),dLon=rad(lon2-lon1);
+ const rawA=Math.sin(dLat/2)**2+Math.cos(rad(lat1))*Math.cos(rad(lat2))*Math.sin(dLon/2)**2;
+ // Floating-point rounding can push the haversine term slightly outside [0, 1].
+ const a=Math.min(1,Math.max(0,rawA));
+ return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+export function validCoordinate(lat:number,lng:number):boolean {
+ return Number.isFinite(lat)&&Number.isFinite(lng)&&lat>=-90&&lat<=90&&lng>=-180&&lng<=180;
+}
+// Reject missing, null, and stringified coordinates before numeric conversion.
+export function validCoordinateInput(lat:unknown,lng:unknown):lat is number {
+ return typeof lat==='number'&&typeof lng==='number'&&validCoordinate(lat,lng);
+}
+export function normalizeRadius(value:unknown):number { if(value==null||typeof value==='string'&&value.trim()==='')return 250; const n=Number(value); return Number.isFinite(n)?Math.min(2000,Math.max(50,n)):250; }
+
+export function validConfiguredCoordinates(lat:unknown,lng:unknown):boolean {
+ if(lat==null||lng==null||String(lat).trim()===''||String(lng).trim()==='')return false; const parsedLat=typeof lat==='number'?lat:Number(lat),parsedLng=typeof lng==='number'?lng:Number(lng);
+ return validCoordinate(parsedLat,parsedLng);
+}
