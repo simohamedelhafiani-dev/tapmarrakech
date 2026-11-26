@@ -43,13 +43,15 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Verify Nardo loyalty template palette
+      - name: Verify Nardo loyalty card palette
         run: |
-          if grep -Eiq '#00DFA5|#D4AF37|#C5A059|#B8860B' src/components/LoyaltyCardVisual.tsx; then
-            echo "Legacy teal/gold palette detected in LoyaltyCardVisual."
+          if grep -Eiq '#00DFA5|#173D32|#D3A84C|#D4AF37|#C5A059|#B8860B|#F7F7F3' src/components/LoyaltyCardVisual.tsx src/components/loyalty/LoyaltyStudio.tsx; then
+            echo "Legacy teal/green/gold card palette detected in the active UI."
             exit 1
           fi
-          grep -q "accent: '#3B82F6'" src/components/LoyaltyCardVisual.tsx
+          grep -q "accent: '#686D76'" src/components/LoyaltyCardVisual.tsx
+          grep -q "normalizeNardoCardColor(row.primary_color" src/components/loyalty/LoyaltyStudio.tsx
+          grep -q "legacyColors = new Set" src/components/loyalty/walletTemplates.ts
 
 
   database-tests:
