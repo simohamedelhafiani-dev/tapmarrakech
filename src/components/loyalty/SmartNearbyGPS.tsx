@@ -30,15 +30,17 @@ export default function SmartNearbyGPS({ accessToken }: { accessToken: string })
  useEffect(()=>{
   if(!enabled||!accessToken)return;
   if(!('geolocation' in navigator)){setStatus('La géolocalisation n’est pas prise en charge.');return;}
-  let lastSent=0,active=true,inFlight=false;
+  // Throttle every attempt, not only successful calls: a network/429 failure must
+  // not cause every GPS callback to hammer the Edge Function.
+  let lastAttemptAt=0,active=true,inFlight=false;
   const watch=navigator.geolocation.watchPosition(async position=>{
-   if(!active||inFlight||Date.now()-lastSent<60000)return;
+   if(!active||inFlight||Date.now()-lastAttemptAt<60000)return;
    inFlight=true;
+   lastAttemptAt=Date.now();
    try{
     const {data,error}=await supabase.functions.invoke('smart-nearby-event',{body:{access_token:accessToken,latitude:position.coords.latitude,longitude:position.coords.longitude}});
     if(!active)return;
-    if(error||data?.success===false){setStatus('Smart Nearby temporairement indisponible. Une nouvelle tentative sera effectuée au prochain relevé GPS.');return;}
-    lastSent=Date.now();
+    if(error||data?.success===false){setStatus('Smart Nearby temporairement indisponible. Une nouvelle tentative sera effectuée après le délai de sécurité.');return;}
     if(data?.eligible===true){
      setStatus('Vous êtes dans la zone ! Une notification a été envoyée.');
     }else if(data?.reason==='already_notified_today'){
@@ -56,6 +58,8 @@ export default function SmartNearbyGPS({ accessToken }: { accessToken: string })
     }else{
      setStatus('Smart Nearby vérifie ponctuellement la proximité, sans historique GPS.');
     }
+   }catch{
+    if(active)setStatus('Connexion Smart Nearby indisponible. Une nouvelle tentative sera effectuée après le délai de sécurité.');
    }finally{inFlight=false;}
   },err=>{if(active)setStatus(err.code===1?'Autorisation GPS refusée.':'GPS indisponible.');},{enableHighAccuracy:false,maximumAge:60000,timeout:15000});
   return ()=>{active=false;navigator.geolocation.clearWatch(watch);};
