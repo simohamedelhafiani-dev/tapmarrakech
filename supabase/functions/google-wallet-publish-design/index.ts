@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { normalizeNardoBackgroundColor } from "./wallet-background.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -166,7 +167,7 @@ Deno.serve(async request => {
       programName:String(design.cardTitle || displayName).slice(0,20),
       programLogo:{sourceUri:{uri:logo},contentDescription:localized("Logo du programme de fidélité")},
       ...(heroImage ? { heroImage:{sourceUri:{uri:heroImage},contentDescription:localized("Visuel principal de la carte")} } : {}),
-      hexBackgroundColor:hex(design.backgroundColor,"#050505"),
+      hexBackgroundColor:normalizeNardoBackgroundColor(design.backgroundColor,"#050505"),
       classTemplateInfo:googleClassTemplate(designKey, design),
       homepageUri:{uri:websiteUrl,description:"Découvrir l'établissement"},
       ...(phoneNumber ? {linksModuleData:{uris:[{uri:"tel:"+phoneNumber,description:"Téléphone"}]}} : {}),
