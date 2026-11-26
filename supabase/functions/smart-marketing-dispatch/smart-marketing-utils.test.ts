@@ -1,5 +1,5 @@
 import { assertEquals, assertMatch } from 'https://deno.land/std@0.224.0/assert/mod.ts';
-import { extractBearerToken, normalizeLimit, progressThreshold, buildTriggerKey, parseSmartConfigNumber, resolveSmartMessage, retryDelayMinutes, parseHappyHourSchedule, formatLocalDateKey, resolveRewardClaimCycle } from './smart-marketing-utils.ts';
+import { extractBearerToken, constantTimeEqual, normalizeLimit, progressThreshold, buildTriggerKey, parseSmartConfigNumber, resolveSmartMessage, retryDelayMinutes, parseHappyHourSchedule, formatLocalDateKey, resolveRewardClaimCycle } from './smart-marketing-utils.ts';
 
 Deno.test('Bearer token parsing is case-insensitive and whitespace tolerant',()=>{
  assertEquals(extractBearerToken('Bearer abc123'),'abc123');
@@ -74,4 +74,10 @@ Deno.test('Smart Reward trigger remains stable until a claim cycle changes',()=>
  assertEquals(resolveRewardClaimCycle(10,{id:'claim-1',status:'PENDING',expires_at:'2026-11-26T12:00:00.000Z'},now),{pendingActive:true,triggerKey:'reward:10:claim-1:PENDING'});
  assertEquals(resolveRewardClaimCycle(10,{id:'claim-1',status:'PENDING',expires_at:'2026-11-24T12:00:00.000Z'},now),{pendingActive:false,triggerKey:'reward:10:claim-1:EXPIRED'});
  assertEquals(resolveRewardClaimCycle(10,{claim_id:'claim-2',claim_status:'REDEEMED',expires_at:'2026-11-24T12:00:00.000Z'},now),{pendingActive:false,triggerKey:'reward:10:claim-2:REDEEMED'});
+});
+
+Deno.test('cron bearer secret comparison rejects mismatches and accepts exact matches',()=>{
+ assertEquals(constantTimeEqual('secret-value','secret-value'),true);
+ assertEquals(constantTimeEqual('secret-value','secret-valUe'),false);
+ assertEquals(constantTimeEqual('short','longer'),false);
 });
