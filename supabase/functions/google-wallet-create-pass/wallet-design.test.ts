@@ -30,6 +30,10 @@ Deno.test("selected design cannot point to a different Google Wallet issuer", ()
   }, "issuer123", "issuer123.default", "design-other-issuer"), null);
 });
 
-Deno.test("legacy/default pass may use the configured class when no design was selected", () => {
-  assertEquals(resolveGoogleWalletClassId({}, "issuer123", "issuer123.default", ""), "issuer123.default");
+Deno.test("pass issuance fails closed when no published design was selected", () => {
+  assertEquals(resolveGoogleWalletClassId({
+    googleClassId: "issuer123.legacy_unpublished",
+    googleClassStatus: "APPROVED",
+  }, "issuer123", "issuer123.default", ""), null);
+  assertEquals(resolveGoogleWalletClassId({}, "issuer123", "issuer123.default", ""), null);
 });
