@@ -15,6 +15,7 @@ on:
   # contains checks only; it does not deploy or apply remote migrations.
   pull_request:
     branches:
+      - main
       - integration/kelyani-final-consolidation-2026-11
   workflow_dispatch:
 
