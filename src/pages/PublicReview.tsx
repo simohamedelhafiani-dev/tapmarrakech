@@ -463,7 +463,7 @@ export default function PublicReview() {
 
   if (loading) {
     return (
-      <div className="grid min-h-screen place-items-center bg-[#f5f0e7]">
+      <div className="grid min-h-screen place-items-center bg-[#050505]">
         <div className="h-9 w-9 animate-spin rounded-full border-2 border-forest border-t-transparent" />
       </div>
     );
@@ -471,7 +471,7 @@ export default function PublicReview() {
 
   if (!place) {
     return (
-      <div className="grid min-h-screen place-items-center bg-[#f5f0e7] px-6 text-center">
+      <div className="grid min-h-screen place-items-center bg-[#050505] px-6 text-center">
         <div>
           <p className="font-display text-3xl text-forest">
             Établissement introuvable
@@ -523,8 +523,8 @@ export default function PublicReview() {
       : '';
 
   return (
-    <div className="min-h-screen bg-[#f5f0e7] text-ink">
-      <div className="mx-auto min-h-screen w-full max-w-[520px] overflow-hidden bg-[#f5f0e7] pb-24 shadow-2xl">
+    <div className="ky-site-bg min-h-screen bg-[#050505] text-ink">
+      <div className="mx-auto min-h-screen w-full max-w-[520px] overflow-hidden bg-[#050505] pb-24 shadow-2xl">
 
         {/* =====================================================
             HOME
@@ -548,7 +548,7 @@ export default function PublicReview() {
 
                 <div className="mt-8 text-center">
                   {p.logo_url ? (
-                    <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-[26px] bg-white p-2 shadow-2xl">
+                    <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-[26px] bg-[#0B0C0C] border border-white/[0.08] p-2 shadow-2xl">
                       <img
                         src={p.logo_url}
                         alt={p.name}
@@ -590,7 +590,7 @@ export default function PublicReview() {
                   {phone && (
                     <a
                       href={`tel:${phone}`}
-                      className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-xs font-semibold text-forest"
+                      className="inline-flex items-center gap-2 rounded-full bg-[#0B0C0C] border border-white/[0.08] px-4 py-2.5 text-xs font-semibold text-forest"
                     >
                       <Phone size={14} />
                       Appeler
@@ -904,7 +904,7 @@ export default function PublicReview() {
 
             {rating >= place.redirect_threshold &&
               !sent && (
-                <section className="mt-8 rounded-[30px] bg-white p-7 text-center shadow-sm ring-1 ring-ink/5">
+                <section className="mt-8 rounded-[30px] bg-[#0B0C0C] border border-white/[0.08] p-7 text-center shadow-sm ring-1 ring-ink/5">
                   <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-forest/10 text-electric">
                     <Check size={26} />
                   </div>
@@ -934,7 +934,7 @@ export default function PublicReview() {
             {rating > 0 &&
               rating < place.redirect_threshold &&
               !sent && (
-                <section className="mt-8 rounded-[30px] bg-white p-7 shadow-sm ring-1 ring-ink/5">
+                <section className="mt-8 rounded-[30px] bg-[#0B0C0C] border border-white/[0.08] p-7 shadow-sm ring-1 ring-ink/5">
                   <h2 className="font-display text-2xl text-forest">
                     Parlons-en.
                   </h2>
@@ -959,7 +959,7 @@ export default function PublicReview() {
                         })
                       }
                       placeholder="Que pouvons-nous améliorer ?"
-                      className="w-full resize-none rounded-2xl border border-ink/10 bg-[#faf9f6] p-4 text-sm outline-none focus:border-forest"
+                      className="w-full resize-none rounded-2xl border border-ink/10 bg-[#0B0C0C] p-4 text-sm outline-none focus:border-forest"
                     />
 
                     <div
@@ -993,7 +993,7 @@ export default function PublicReview() {
                           })
                         }
                         placeholder="Nom"
-                        className="rounded-2xl border border-ink/10 bg-[#faf9f6] p-3.5 text-sm outline-none focus:border-forest"
+                        className="rounded-2xl border border-ink/10 bg-[#0B0C0C] p-3.5 text-sm outline-none focus:border-forest"
                       />
 
                       <input
@@ -1005,7 +1005,7 @@ export default function PublicReview() {
                           })
                         }
                         placeholder="Téléphone"
-                        className="rounded-2xl border border-ink/10 bg-[#faf9f6] p-3.5 text-sm outline-none focus:border-forest"
+                        className="rounded-2xl border border-ink/10 bg-[#0B0C0C] p-3.5 text-sm outline-none focus:border-forest"
                       />
                     </div>
 
@@ -1024,7 +1024,7 @@ export default function PublicReview() {
               )}
 
             {sent && (
-              <section className="mt-8 rounded-[30px] bg-white p-8 text-center shadow-sm ring-1 ring-ink/5">
+              <section className="mt-8 rounded-[30px] bg-[#0B0C0C] border border-white/[0.08] p-8 text-center shadow-sm ring-1 ring-ink/5">
                 <CheckCircle2
                   size={42}
                   className="mx-auto text-forest"
@@ -1060,7 +1060,7 @@ export default function PublicReview() {
             </div>
 
             {loyaltyCreated ? (
-              <section className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto bg-[#f5f0e7]/95 px-4 py-6 backdrop-blur-sm">
+              <section className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto bg-[#050505]/90 px-4 py-6 backdrop-blur-sm">
                 <div className="w-full max-w-[420px]">
                   <div className="relative overflow-hidden rounded-[32px] bg-forest p-7 text-white shadow-2xl">
                     <div className="absolute -right-10 -top-10 h-36 w-36 rounded-full bg-forest/10 blur-2xl" />
@@ -1128,7 +1128,7 @@ export default function PublicReview() {
                       <button
                         type="button"
                         onClick={() => navigator.clipboard.writeText(loyaltyCardUrl)}
-                        className="rounded-full border border-ink/10 bg-white px-4 py-3 text-sm font-semibold text-forest"
+                        className="rounded-full border border-ink/10 bg-[#0B0C0C] px-4 py-3 text-sm font-semibold text-forest"
                       >
                         Copier le lien
                       </button>
@@ -1157,7 +1157,7 @@ export default function PublicReview() {
 
                   <button
                     onClick={() => setLoyaltyCreated(null)}
-                    className="mt-3 w-full rounded-full border border-ink/10 bg-white py-3 text-sm font-semibold text-forest"
+                    className="mt-3 w-full rounded-full border border-ink/10 bg-[#0B0C0C] py-3 text-sm font-semibold text-forest"
                   >
                     Retour au programme
                   </button>
@@ -1202,7 +1202,7 @@ export default function PublicReview() {
                       {rewards.map((reward) => (
                         <div
                           key={reward.id}
-                          className="flex items-center justify-between gap-4 rounded-[22px] bg-white p-4 shadow-sm ring-1 ring-ink/5"
+                          className="flex items-center justify-between gap-4 rounded-[22px] bg-[#0B0C0C] border border-white/[0.08] p-4 shadow-sm ring-1 ring-ink/5"
                         >
                           <div>
                             <h3 className="font-semibold text-forest">
@@ -1225,7 +1225,7 @@ export default function PublicReview() {
                   </section>
                 )}
 
-                <section className="mt-8 rounded-[28px] bg-white p-6 ring-1 ring-ink/5">
+                <section className="mt-8 rounded-[28px] bg-[#0B0C0C] border border-white/[0.08] p-6 ring-1 ring-ink/5">
                   <h3 className="font-display text-xl text-forest">
                     Comment ça marche ?
                   </h3>
@@ -1261,7 +1261,7 @@ export default function PublicReview() {
       ===================================================== */}
       {showLoyaltyForm && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink/50 p-0 backdrop-blur-sm">
-          <div className="w-full max-w-[520px] rounded-t-[34px] bg-[#fffdf9] p-6 pb-8 shadow-2xl">
+          <div className="w-full max-w-[520px] rounded-t-[34px] bg-[#0B0C0C] p-6 pb-8 shadow-2xl">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-electric">
@@ -1296,7 +1296,7 @@ export default function PublicReview() {
                     })
                   }
                   placeholder="Prénom"
-                  className="rounded-2xl border border-ink/10 bg-white px-4 py-3.5 text-sm outline-none focus:border-forest"
+                  className="rounded-2xl border border-ink/10 bg-[#0B0C0C] px-4 py-3.5 text-sm outline-none focus:border-forest"
                 />
 
                 <input
@@ -1309,7 +1309,7 @@ export default function PublicReview() {
                     })
                   }
                   placeholder="Nom"
-                  className="rounded-2xl border border-ink/10 bg-white px-4 py-3.5 text-sm outline-none focus:border-forest"
+                  className="rounded-2xl border border-ink/10 bg-[#0B0C0C] px-4 py-3.5 text-sm outline-none focus:border-forest"
                 />
               </div>
 
@@ -1324,7 +1324,7 @@ export default function PublicReview() {
                   })
                 }
                 placeholder="Numéro de téléphone"
-                className="w-full rounded-2xl border border-ink/10 bg-white px-4 py-3.5 text-sm outline-none focus:border-forest"
+                className="w-full rounded-2xl border border-ink/10 bg-[#0B0C0C] px-4 py-3.5 text-sm outline-none focus:border-forest"
               />
 
               <div>
@@ -1342,7 +1342,7 @@ export default function PublicReview() {
                       birth_date: e.target.value,
                     })
                   }
-                  className="w-full rounded-2xl border border-ink/10 bg-white px-4 py-3.5 text-sm outline-none focus:border-forest"
+                  className="w-full rounded-2xl border border-ink/10 bg-[#0B0C0C] px-4 py-3.5 text-sm outline-none focus:border-forest"
                 />
               </div>
 
@@ -1403,7 +1403,7 @@ function ActionRow({
     blue: 'bg-[#475569] text-[#10B981]',
   } as const;
 
-  const className = "group flex w-full items-center gap-4 rounded-[24px] bg-white p-4 text-left shadow-sm ring-1 ring-ink/5 transition active:scale-[0.99]";
+  const className = "group flex w-full items-center gap-4 rounded-[24px] bg-[#0B0C0C] border border-white/[0.08] p-4 text-left shadow-sm ring-1 ring-ink/5 transition active:scale-[0.99]";
 
   const contentNode = (
     <>
@@ -1505,8 +1505,8 @@ function AIPremiumMenu({
 
   const palette = wallpaper
     ? {
-        page: 'bg-[#f0ece2] text-white',
-        body: 'bg-[#f0ece2]',
+        page: 'bg-[#0B0C0C] text-white',
+        body: 'bg-[#0B0C0C]',
         muted: 'text-white/65',
         accent: 'text-electric',
         line: 'border-white/15',
@@ -1525,21 +1525,21 @@ function AIPremiumMenu({
         }
       : style === 'luxury'
         ? {
-            page: 'bg-[#f3eee2] text-forest',
-            body: 'bg-[#f3eee2]',
+            page: 'bg-[#0B0C0C] text-forest',
+            body: 'bg-[#0B0C0C]',
             muted: 'text-ink/55',
             accent: 'text-electric',
             line: 'border-electric/20',
-            card: 'bg-[#fffdf7] border-electric/15',
+            card: 'bg-[#0B0C0C] border-electric/15',
             product: 'text-forest',
           }
         : {
-              page: 'bg-[#f0ece2] text-forest',
-              body: 'bg-[#f0ece2]',
+              page: 'bg-[#0B0C0C] text-forest',
+              body: 'bg-[#0B0C0C]',
               muted: 'text-ink/55',
               accent: 'text-electric',
               line: 'border-forest/10',
-              card: 'bg-[#fffdf8] border-ink/10',
+              card: 'bg-[#0B0C0C] border-ink/10',
               product: 'text-forest',
             };
 
@@ -1872,7 +1872,7 @@ function MenuTemplate({
   const navigationControls = navigation !== 'scroll' ? (
     <div className="mt-5 mb-7">
       {navigation === 'app' ? (
-        <div className="sticky top-0 z-30 -mx-2 flex gap-2 overflow-x-auto bg-[#fffdf9]/95 px-2 py-2 pb-3 backdrop-blur-md">
+        <div className="sticky top-0 z-30 -mx-2 flex gap-2 overflow-x-auto bg-[#0B0C0C]/95 px-2 py-2 pb-3 backdrop-blur-md">
           {visible.map(category => (
             <button
               key={category.id}
@@ -1882,7 +1882,7 @@ function MenuTemplate({
                 'shrink-0 rounded-full border px-3.5 py-2 text-[10px] font-semibold transition',
                 category.id === appCategoryId
                   ? 'border-electric bg-forest text-forest'
-                  : 'border-ink/10 bg-white text-ink/55',
+                  : 'border-ink/10 bg-[#0B0C0C] border border-white/[0.08] text-ink/55',
               ].join(' ')}
             >
               {category.name}
@@ -1890,7 +1890,7 @@ function MenuTemplate({
           ))}
         </div>
       ) : (
-        <div className="flex items-center justify-between gap-3 rounded-2xl border border-ink/10 bg-white px-3 py-2.5">
+        <div className="flex items-center justify-between gap-3 rounded-2xl border border-ink/10 bg-[#0B0C0C] px-3 py-2.5">
           <button
             type="button"
             disabled={bookPage === 0}
@@ -1963,7 +1963,7 @@ function MenuTemplate({
               </div>
               <div className="grid grid-cols-2 gap-3">
                 {(itemsByCategory[category.id] ?? []).map((item) => (
-                  <article key={item.id} className="overflow-hidden rounded-[24px] bg-white shadow-sm ring-1 ring-ink/5">
+                  <article key={item.id} className="overflow-hidden rounded-[24px] bg-[#0B0C0C] border border-white/[0.08] shadow-sm ring-1 ring-ink/5">
                     <div className="aspect-[1.15] overflow-hidden bg-[#eee9df]">
                       {photoMode === 'with_photos' && item.image_url ? <img src={item.image_url} alt="" className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-ink/15"><UtensilsCrossed size={25} /></div>}
                     </div>
@@ -2030,7 +2030,7 @@ function MenuTemplate({
             <h2 className="mb-4 font-display text-2xl text-forest">{category.name}</h2>
             <div className="space-y-3">
               {(itemsByCategory[category.id] ?? []).map((item) => (
-                <article key={item.id} className="flex overflow-hidden rounded-[22px] bg-white p-3 shadow-sm ring-1 ring-ink/5">
+                <article key={item.id} className="flex overflow-hidden rounded-[22px] bg-[#0B0C0C] border border-white/[0.08] p-3 shadow-sm ring-1 ring-ink/5">
                   {photoMode === 'with_photos' && item.image_url && <img src={item.image_url} alt="" className="h-24 w-24 shrink-0 rounded-[16px] object-cover" />}
                   <div className="min-w-0 flex-1 p-2">
                     <div className="flex items-start justify-between gap-3"><h3 className="font-semibold text-forest">{item.name}</h3><span className="shrink-0 text-sm font-bold text-electric">{Number(item.price).toLocaleString('fr-FR')} MAD</span></div>
@@ -2072,7 +2072,7 @@ function Empty({
   text: string;
 }) {
   return (
-    <div className="mt-8 rounded-[28px] bg-white p-8 text-center ring-1 ring-ink/5">
+    <div className="mt-8 rounded-[28px] bg-[#0B0C0C] border border-white/[0.08] p-8 text-center ring-1 ring-ink/5">
       <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-forest/5 text-forest">
         {icon}
       </div>
@@ -2179,7 +2179,7 @@ function WifiActionRow({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="group flex w-full items-center gap-4 rounded-[24px] bg-white p-4 text-left shadow-sm ring-1 ring-ink/5 transition active:scale-[0.99]"
+        className="group flex w-full items-center gap-4 rounded-[24px] bg-[#0B0C0C] border border-white/[0.08] p-4 text-left shadow-sm ring-1 ring-ink/5 transition active:scale-[0.99]"
       >
         <div className="grid h-12 w-12 shrink-0 place-items-center rounded-[17px] bg-emerald-50 text-emerald-600">
           <Wifi size={22} />
@@ -2197,7 +2197,7 @@ function WifiActionRow({
 
       {open && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-ink/50 px-4 py-6 backdrop-blur-sm">
-          <div className="w-full max-w-[380px] rounded-[30px] bg-[#fffdf9] p-6 shadow-2xl">
+          <div className="w-full max-w-[380px] rounded-[30px] bg-[#0B0C0C] p-6 shadow-2xl">
             <button
               type="button"
               onClick={() => setOpen(false)}
@@ -2219,21 +2219,21 @@ function WifiActionRow({
               Connectez votre téléphone au réseau ci-dessous.
             </p>
 
-            <div className="mt-5 rounded-2xl border border-ink/5 bg-[#f7f7f3] p-4">
+            <div className="mt-5 rounded-2xl border border-ink/5 bg-[#0B0C0C] p-4">
               <p className="text-[10px] uppercase tracking-[0.14em] text-ink/40">Réseau Wi-Fi</p>
               <div className="mt-2 flex items-center gap-2">
                 <p className="min-w-0 flex-1 break-all text-sm font-bold text-forest">{wifi.network_name}</p>
                 <button
                   type="button"
                   onClick={() => copy(wifi.network_name, 'network')}
-                  className="shrink-0 rounded-full bg-white px-3 py-2 text-[10px] font-semibold text-forest ring-1 ring-ink/5"
+                  className="shrink-0 rounded-full bg-[#0B0C0C] border border-white/[0.08] px-3 py-2 text-[10px] font-semibold text-forest ring-1 ring-ink/5"
                 >
                   {copied === 'network' ? 'Copié' : 'Copier'}
                 </button>
               </div>
             </div>
 
-            <div className="mt-3 rounded-2xl border border-ink/5 bg-[#f7f7f3] p-4">
+            <div className="mt-3 rounded-2xl border border-ink/5 bg-[#0B0C0C] p-4">
               <p className="text-[10px] uppercase tracking-[0.14em] text-ink/40">Mot de passe</p>
               <div className="mt-2 flex items-center gap-2">
                 <p className="min-w-0 flex-1 break-all text-sm font-bold text-forest">
@@ -2243,7 +2243,7 @@ function WifiActionRow({
                   <button
                     type="button"
                     onClick={() => copy(wifi.wifi_password, 'password')}
-                    className="shrink-0 rounded-full bg-white px-3 py-2 text-[10px] font-semibold text-forest ring-1 ring-ink/5"
+                    className="shrink-0 rounded-full bg-[#0B0C0C] border border-white/[0.08] px-3 py-2 text-[10px] font-semibold text-forest ring-1 ring-ink/5"
                   >
                     {copied === 'password' ? 'Copié' : 'Copier'}
                   </button>
