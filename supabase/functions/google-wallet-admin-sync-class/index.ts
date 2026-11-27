@@ -48,7 +48,7 @@ Deno.serve(async (request) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const issuerId = (Deno.env.get("GOOGLE_WALLET_ISSUER_ID") || Deno.env.get("WALLET_ISSUER_ID") || "").trim();
     const serviceAccountRaw = Deno.env.get("GOOGLE_WALLET_SERVICE_ACCOUNT_JSON") || Deno.env.get("GOOGLE_WALLET_SERVICE_ACCOUNT") || Deno.env.get("GOOGLE_SERVICE_ACCOUNT_JSON") || "";
-    if (!supabaseUrl || !serviceRoleKey || !issuerId || !serviceAccountRaw) return json({ success: false, error: "Configuration Wallet incomplète sur Staging." }, 503);
+    if (!supabaseUrl || !serviceRoleKey || !issuerId || !serviceAccountRaw) return json({ success: false, error: "Configuration Google Wallet incomplète." }, 503);
 
     const admin = createClient(supabaseUrl, serviceRoleKey, { auth: { autoRefreshToken: false, persistSession: false } });
     const { data: { user }, error: authError } = await admin.auth.getUser(authorization.slice(7));
