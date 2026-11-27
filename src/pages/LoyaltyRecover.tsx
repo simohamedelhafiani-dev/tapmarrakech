@@ -67,7 +67,7 @@ export default function LoyaltyRecover() {
   }, [token]);
 
   return (
-    <div className="min-h-screen bg-[#050505] px-5 py-10 text-white">
+    <div className="ky-site-bg min-h-screen bg-[#050505] px-5 py-10 text-white">
       <div className="mx-auto flex min-h-[80vh] max-w-md items-center justify-center">
         <div className="w-full rounded-[32px] border border-[#242424] bg-[#111111] p-7 text-center shadow-[0_30px_100px_rgba(0,0,0,.55)]">
           {status === 'loading' && (

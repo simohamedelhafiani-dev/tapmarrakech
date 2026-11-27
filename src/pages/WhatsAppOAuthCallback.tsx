@@ -10,7 +10,7 @@ export default function WhatsAppOAuthCallback() {
   }, []);
 
   return (
-    <main className="min-h-screen grid place-items-center bg-[#050505] px-6">
+    <main className="ky-site-bg min-h-screen grid place-items-center bg-[#050505] px-6">
       <section className="w-full max-w-lg rounded-2xl border border-[#475569] bg-[#171717] p-8 text-center text-white shadow-xl">
         <h1 className="text-2xl font-semibold">Connexion WhatsApp — KELYANI</h1>
         {status === 'error' ? (

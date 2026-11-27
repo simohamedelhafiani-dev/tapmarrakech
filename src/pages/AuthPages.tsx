@@ -8,7 +8,7 @@ import { HeroScene } from '@/components/motion/HeroScene';
 
 function AuthShell({ children, title, eyebrow }: { children: React.ReactNode; title: string; eyebrow: string }) {
   return (
-    <div className="relative isolate grid min-h-screen overflow-hidden bg-[#050505] lg:grid-cols-[1fr_1.1fr]">
+    <div className="ky-site-bg relative isolate grid min-h-screen overflow-hidden bg-[#050505] lg:grid-cols-[1fr_1.1fr]">
       <HeroScene className="opacity-70" />
       <div className="hidden bg-transparent p-12 text-white lg:flex lg:flex-col lg:justify-between border-r border-[#10B981]/15">
         <div className="font-display text-2xl tracking-[0.12em] text-[#10B981]">KELYANI</div>

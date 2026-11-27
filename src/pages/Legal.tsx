@@ -253,7 +253,7 @@ export default function Legal() {
   const Content = CONTENT[current.slug];
 
   return (
-    <main className="min-h-screen bg-[#050505] px-4 py-10 text-white sm:px-6">
+    <main className="ky-site-bg min-h-screen bg-[#050505] px-4 py-10 text-white sm:px-6">
       <div className="mx-auto max-w-3xl">
         <Link to="/" className="font-display text-2xl tracking-[0.12em] text-[#10B981]">KELYANI</Link>
         <nav aria-label="Documents légaux" className="mt-8 flex flex-wrap gap-2">

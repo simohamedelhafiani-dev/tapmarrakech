@@ -180,7 +180,7 @@ export default function LoyaltyJoin() {
 
   if (!referralCode && !establishmentId) {
     return (
-      <main className="min-h-screen bg-[#111111] px-4 py-8">
+      <main className="ky-site-bg min-h-screen bg-[#050505] px-4 py-8">
         <div className="mx-auto max-w-md rounded-[2rem] bg-[#111111] p-7 text-center shadow-xl">
           <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#1A1A1A] text-[#10B981]">
             <Gift className="h-6 w-6" />
@@ -196,7 +196,7 @@ export default function LoyaltyJoin() {
 
   if (loadingContext) {
     return (
-      <main className="grid min-h-screen place-items-center bg-[#050505] px-4">
+      <main className="ky-site-bg grid min-h-screen place-items-center bg-[#050505] px-4">
         <div className="text-center">
           <div className="mx-auto h-9 w-9 animate-spin rounded-full border-2 border-[#10B981] border-t-transparent" />
           <p className="mt-4 text-sm text-[#10B981]/55">Préparation de votre inscription…</p>
@@ -207,7 +207,7 @@ export default function LoyaltyJoin() {
 
   if (error && isGlobalEnrollment && !establishmentName) {
     return (
-      <main className="grid min-h-screen place-items-center bg-[#050505] px-4 py-8">
+      <main className="ky-site-bg grid min-h-screen place-items-center bg-[#050505] px-4 py-8">
         <div className="w-full max-w-md rounded-[2rem] bg-[#111111] p-7 text-center shadow-xl">
           <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-red-50 text-red-600">
             <Gift className="h-6 w-6" />
@@ -225,7 +225,7 @@ export default function LoyaltyJoin() {
     : 'Vous avez été invité par un client. Créez votre carte fidélité pour recevoir vos avantages.';
 
   return (
-    <main className="min-h-screen bg-[#050505] px-3 py-5 sm:px-4 sm:py-8">
+    <main className="ky-site-bg min-h-screen bg-[#050505] px-3 py-5 sm:px-4 sm:py-8">
       <div className="mx-auto max-w-md">
         <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-[#111111] shadow-luxury">
           <div className="bg-[#111111] px-6 py-7 text-white">

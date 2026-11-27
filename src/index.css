@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 :root {
   color-scheme: dark;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
   color: var(--kelyani-text);
   background: var(--kelyani-bg);
   font-synthesis: none;
@@ -27,7 +27,7 @@
 }
 body { margin: 0; min-width: 320px; }
 button, input, textarea, select { font: inherit; }
-.font-display { font-family: 'Playfair Display', serif; }
+.font-display { font-family: 'Inter', system-ui, sans-serif; font-weight: 800; letter-spacing: -0.045em; }
 @layer utilities { .bg-cream { background-color: var(--kelyani-panel); } .text-ink { color: var(--kelyani-text); } .bg-forest { background-color: var(--kelyani-bg); } .text-forest { color: var(--kelyani-accent); } .bg-electric { background-color: var(--kelyani-panel); color: var(--kelyani-accent); } .text-electric { color: var(--kelyani-accent); } .border-electric { border-color: var(--kelyani-accent); } .bg-forest-light { background-color: var(--kelyani-panel-raised); } }
 
 
@@ -678,147 +678,5 @@ table {
 }
 
 
-/* KELYANI — noir dominant, gris en soutien, bleu du logo et profondeur 3D */
-:root {
-  color-scheme: dark;
-  --primary: #06B6D4;
-  --secondary: #111214;
-  --accent: #06B6D4;
-  --kelyani-bg: #050505;
-  --kelyani-panel: #111214;
-  --kelyani-panel-raised: #191B20;
-  --kelyani-steel: #475569;
-  --kelyani-border: rgba(6, 182, 212, .2);
-  --kelyani-text: #FFFFFF;
-  --kelyani-muted: #A3A7AE;
-  --kelyani-accent: #06B6D4;
-  --kelyani-accent-soft: #00E5FF;
-  --kelyani-accent-cyan: #00E5FF;
-  --kelyani-gradient: linear-gradient(125deg, #008DFF 0%, #06B6D4 48%, #00E5FF 100%);
-}
-html, body, #root { min-height: 100%; background: #050505; color: #FFFFFF; }
-body { background: #050505; color: #FFFFFF; }
-::selection { color: #FFFFFF; background: rgba(6, 182, 212, .38); }
-:focus-visible { outline: 2px solid #06B6D4 !important; outline-offset: 3px; }
+/* The brand theme lives in src/styles/site-theme.css (same identity as www.kelyani.com). */
 
-/* Real app surfaces stay near black; steel gray is reserved for fine details. */
-.bg-cream, .bg-forest-light { background-color: #15171B; }
-.bg-forest { background-color: #050505; }
-.bg-electric { background: #15171B; color: #06B6D4; }
-.text-forest, .text-electric { color: #06B6D4; }
-.border-electric { border-color: rgba(6, 182, 212, .55); }
-.kelyani-panel,
-.kelyani-home-panel-section article,
-.kelyani-home-section article {
-  background: #111214;
-  border: 1px solid rgba(6, 182, 212, .2);
-  box-shadow: 0 20px 52px rgba(0, 0, 0, .62), 0 0 22px rgba(6, 182, 212, .08);
-}
-.kelyani-panel:hover,
-.kelyani-home-panel-section article:hover {
-  border-color: rgba(6, 182, 212, .48);
-  box-shadow: 0 26px 62px rgba(0, 0, 0, .68), 0 0 28px rgba(6, 182, 212, .16);
-}
-.kelyani-nav-glass, [role="menu"], [role="dialog"],
-[data-radix-popper-content-wrapper] > * {
-  background: rgba(13, 14, 17, .94) !important;
-  border-color: rgba(6, 182, 212, .22) !important;
-  -webkit-backdrop-filter: blur(14px) saturate(135%);
-  backdrop-filter: blur(14px) saturate(135%);
-}
-.dashboard-depth-shell, .admin-depth-shell {
-  --depth-shadow: 0 22px 56px -18px rgba(0, 0, 0, .78), 0 0 20px rgba(6, 182, 212, .10);
-  --depth-shadow-hover: 0 30px 70px -20px rgba(0, 0, 0, .82), 0 0 30px rgba(6, 182, 212, .2);
-}
-.dashboard-depth-shell .text-forest, .admin-depth-shell .text-forest { color: #06B6D4 !important; }
-.dashboard-depth-shell .bg-forest, .admin-depth-shell .bg-forest { background: #050505 !important; }
-.dashboard-depth-shell [class*="border-ink/"], .admin-depth-shell [class*="border-ink/"] { border-color: rgba(6, 182, 212, .2) !important; }
-.dashboard-depth-shell [class*="text-ink/"], .admin-depth-shell [class*="text-ink/"] { color: #A3A7AE !important; }
-.dashboard-depth-shell [class*="bg-white"], .admin-depth-shell [class*="bg-white"] { background-color: #191B20 !important; }
-.dashboard-depth-shell input, .dashboard-depth-shell textarea, .dashboard-depth-shell select,
-.admin-depth-shell input, .admin-depth-shell textarea, .admin-depth-shell select {
-  color: #FFFFFF !important; color-scheme: dark;
-}
-.dashboard-depth-shell input::placeholder, .dashboard-depth-shell textarea::placeholder,
-.admin-depth-shell input::placeholder, .admin-depth-shell textarea::placeholder { color: #888D96 !important; }
-
-/* Keep existing card geometry and transforms; add restrained blue depth without gray fills. */
-#root [class*="rounded-2xl"][class*="border"],
-#root [class*="rounded-3xl"][class*="border"],
-#root [class*="rounded-[24px]"][class*="border"],
-#root [class*="rounded-[28px]"][class*="border"] {
-  border-color: rgba(6, 182, 212, .2);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, .52), 0 0 18px rgba(6, 182, 212, .07);
-}
-#root [class*="rounded-2xl"][class*="border"]:hover,
-#root [class*="rounded-3xl"][class*="border"]:hover,
-#root [class*="rounded-[24px]"][class*="border"]:hover,
-#root [class*="rounded-[28px]"][class*="border"]:hover {
-  border-color: rgba(6, 182, 212, .42);
-  box-shadow: 0 24px 56px rgba(0, 0, 0, .64), 0 0 26px rgba(6, 182, 212, .14);
-}
-
-/* Blue from the KELYANI mark replaces the old green accent in interface copy. */
-#root [class*="text-[#10B981]"],
-#root [class*="text-[#14B8A6]"],
-#root [class*="text-[#06B6D4]"],
-#root .text-forest, #root .text-electric,
-#root [class*="border-[#10B981]"],
-#root [class*="border-[#14B8A6]"],
-#root [class*="border-forest"],
-#root [class*="ring-[#10B981]"] {
-  color: #06B6D4 !important;
-  border-color: rgba(6, 182, 212, .46) !important;
-}
-#root [class*="bg-[#475569]/"],
-#root [class*="bg-[#10B981]/"],
-#root [class*="bg-[#14B8A6]/"],
-#root [class*="bg-[#06B6D4]/"],
-#root [class*="bg-forest/"] {
-  background-color: rgba(71, 85, 105, .12) !important;
-  background-image: none !important;
-}
-#root [class~="bg-[#475569]"]:not(button):not(a),
-#root [class~="bg-[#10B981]"]:not(button):not(a),
-#root [class~="bg-[#14B8A6]"]:not(button):not(a),
-#root [class~="bg-electric"]:not(button):not(a) {
-  background-color: #191B20 !important;
-  background-image: none !important;
-}
-#root button[class*="bg-[#475569]"],
-#root a[class*="bg-[#475569]"],
-#root button[class*="bg-[#10B981]"],
-#root a[class*="bg-[#10B981]"],
-#root button[class*="bg-electric"],
-#root a[class*="bg-electric"] {
-  background: var(--kelyani-gradient) !important;
-  color: #041014 !important;
-  border-color: rgba(6, 182, 212, .55) !important;
-  box-shadow: 0 10px 28px rgba(6, 182, 212, .18), inset 0 1px 0 rgba(255,255,255,.28);
-}
-#root button[class*="bg-[#475569]"]:hover,
-#root a[class*="bg-[#475569]"]:hover,
-#root button[class*="bg-[#10B981]"]:hover,
-#root a[class*="bg-[#10B981]"]:hover {
-  box-shadow: 0 14px 34px rgba(6, 182, 212, .28), inset 0 1px 0 rgba(255,255,255,.34);
-  transform: translateY(-1px);
-}
-
-/* Typography keeps content white/soft gray; brand labels and controls use logo blue. */
-#root { color: #FFFFFF; }
-#root h1, #root h2, #root h3, #root h4, #root h5, #root h6,
-#root [data-typography="primary"] { color: #FFFFFF; }
-#root p, #root small, #root label, #root th, #root [data-typography="secondary"] { color: #A3A7AE; }
-#root [class~="text-gray-400"], #root [class~="text-gray-500"], #root [class~="text-gray-600"],
-#root [class~="text-slate-400"], #root [class~="text-slate-500"], #root [class~="text-slate-600"],
-#root [class~="text-zinc-400"], #root [class~="text-zinc-500"],
-#root [class~="text-neutral-400"], #root [class~="text-neutral-500"],
-#root [class~="text-stone-400"], #root [class~="text-stone-500"] { color: #A3A7AE !important; }
-#root input::placeholder, #root textarea::placeholder { color: #888D96 !important; opacity: .82; }
-
-/* Shared 3D highlight: subtle perspective-ready light along raised edges. */
-[class*="depth-card"], [class*="3d-card"], .kelyani-home-panel-section article,
-.dashboard-depth-shell [class*="rounded-2xl"][class*="border"],
-.admin-depth-shell [class*="rounded-2xl"][class*="border"] {
-  box-shadow: 0 24px 58px rgba(0,0,0,.62), 0 0 22px rgba(6, 182, 212,.12), inset 0 1px 0 rgba(255,255,255,.035);
-}

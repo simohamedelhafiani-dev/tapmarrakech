@@ -18,8 +18,8 @@ export default {
         'surface-2': '#343A40',
       },
       fontFamily: {
-        display: ['Playfair Display', 'serif'],
-        sans: ['DM Sans', 'sans-serif'],
+        display: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
         soft: '0 24px 70px rgba(0,0,0,0.42)',

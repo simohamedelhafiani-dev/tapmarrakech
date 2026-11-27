@@ -101,7 +101,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white">
+    <div className="ky-site-bg min-h-screen bg-[#050505] text-white">
       <div className="mx-auto flex min-h-screen max-w-[1600px] flex-col lg:flex-row">
         <section className="relative isolate flex min-h-[42vh] flex-col overflow-hidden border-b border-white/[0.07] px-5 py-6 sm:px-8 lg:min-h-screen lg:w-[54%] lg:border-b-0 lg:border-r lg:border-white/[0.07] lg:px-12 lg:py-8 xl:px-16">
           <HeroScene />

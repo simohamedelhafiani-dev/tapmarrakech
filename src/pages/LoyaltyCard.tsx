@@ -955,7 +955,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
     rewardName?: string;
   };
   return (
-    <main className="min-h-screen bg-[#050505] px-3 py-5 text-[#EDE9DF] sm:px-6 sm:py-8">
+    <main className="ky-site-bg min-h-screen bg-[#050505] px-3 py-5 text-[#EDE9DF] sm:px-6 sm:py-8">
       <div className="flex w-full flex-col items-center gap-4">
         <div className="w-full max-w-[430px]">
         {showWelcome && (
@@ -1271,7 +1271,7 @@ function withLiveVersion(url: string, version: number) {
 }
 
 function PageShell({ children }: { children: ReactNode }) {
-  return <main className="min-h-screen bg-[#050505] px-4 py-6 text-[#EDE9DF] sm:py-10"><div className="mx-auto w-full max-w-md">{children}</div></main>;
+  return <main className="ky-site-bg min-h-screen bg-[#050505] px-4 py-6 text-[#EDE9DF] sm:py-10"><div className="mx-auto w-full max-w-md">{children}</div></main>;
 }
 
 function Loader() {

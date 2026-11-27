@@ -1028,7 +1028,7 @@ export default function Employee() {
 
   if (!session) {
     return (
-      <div className="min-h-screen bg-[#111111] px-4 py-8">
+      <div className="ky-site-bg min-h-screen bg-[#050505] px-4 py-8">
         <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md items-center justify-center">
           <div className="w-full rounded-[2rem] border border-ink/5 bg-white p-7 shadow-2xl md:p-9">
             <div className="mb-8 text-center">
@@ -1098,7 +1098,7 @@ export default function Employee() {
   }
 
   return (
-    <div className="min-h-screen bg-[#111111] p-4 md:p-8">
+    <div className="ky-site-bg min-h-screen bg-[#050505] p-4 md:p-8">
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 flex justify-center">
           <div className="flex items-center gap-3 rounded-2xl border border-ink/5 bg-white px-5 py-3 shadow-sm">
