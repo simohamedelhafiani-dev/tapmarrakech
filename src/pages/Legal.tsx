@@ -67,8 +67,8 @@ function Cgv() {
 
     <H2>3. Formules et prix</H2>
     <UL items={[
-      <>Basic : 399 MAD TTC par mois — page publique, avis et réputation, contact.</>,
-      <>Premium : 599 MAD TTC par mois — Basic, plus fidélité, menu, promotions et statistiques.</>,
+      <>Basic : 399 MAD TTC par mois — page publique, avis et réputation, contact, carte de fidélité.</>,
+      <>Premium : 599 MAD TTC par mois — Basic, plus menu, promotions et statistiques.</>,
       <>Enterprise : 899 MAD TTC par mois — Premium, plus assistant IA et gestion avancée.</>,
     ]} />
     <P>Les prix sont exprimés en dirhams marocains, toutes taxes comprises (TVA de 20 % incluse). Chaque facture indique le montant hors taxes et la TVA. Les frais bancaires et de change éventuels sont à la charge de l’Établissement. Le Prestataire peut modifier ses prix en prévenant l’Établissement par email au moins 30 jours avant ; le nouveau prix s’applique à la période suivante, et l’Établissement peut résilier avant.</P>
