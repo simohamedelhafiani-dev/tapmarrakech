@@ -1,4 +1,7 @@
 -- Run after the environment-safe scheduler migration has been applied.
+BEGIN;
+SELECT plan(1);
+
 DO $test$
 DECLARE
   v_command text;
@@ -40,3 +43,8 @@ BEGIN
   END IF;
 END
 $test$;
+
+SELECT pass('Google Business scheduler resolves its endpoint from Vault and stays disabled without secrets');
+
+SELECT * FROM finish();
+ROLLBACK;
