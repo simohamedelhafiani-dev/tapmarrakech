@@ -28,8 +28,15 @@ ALTER FUNCTION public.get_public_scanner_context(uuid)
   SET search_path = pg_catalog, public, extensions, pg_temp;
 ALTER FUNCTION public.get_public_scanner_settings(uuid)
   SET search_path = pg_catalog, public, extensions, pg_temp;
-ALTER FUNCTION public.public_establishment_exists(uuid)
-  SET search_path = pg_catalog, public, extensions, pg_temp;
+-- Some clean databases do not contain this legacy helper, while older
+-- Staging histories do. Harden it when present without aborting fresh installs.
+DO $migration$
+BEGIN
+  IF pg_catalog.to_regprocedure('public.public_establishment_exists(uuid)') IS NOT NULL THEN
+    EXECUTE 'ALTER FUNCTION public.public_establishment_exists(uuid) SET search_path = pg_catalog, public, extensions, pg_temp';
+  END IF;
+END
+$migration$;
 ALTER FUNCTION public.redeem_public_loyalty_raffle_winner_by_code(uuid, uuid)
   SET search_path = pg_catalog, public, extensions, pg_temp;
 ALTER FUNCTION public.redeem_public_loyalty_stamp_reward_claim(uuid, uuid)
