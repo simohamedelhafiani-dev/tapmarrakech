@@ -10,6 +10,7 @@ import { supabase } from '@/lib/supabase';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
 import PublicReview from '@/pages/PublicReview';
+import Legal from '@/pages/Legal';
 import LoyaltyCard from '@/pages/LoyaltyCard';
 import LoyaltyJoin from '@/pages/LoyaltyJoin';
 import LoyaltyRecover from '@/pages/LoyaltyRecover';
@@ -236,6 +237,8 @@ function App() {
       <BrowserRouter>
         <AuthProvider>
           <Routes>
+          <Route path="/legal" element={<Legal />} />
+          <Route path="/legal/:doc" element={<Legal />} />
           <Route path="/r/:slug" element={<PublicReview />} />
           <Route path="/p/:slug/:section" element={<PublicReview />} />
           <Route path="/p/:slug" element={<PublicReview />} />

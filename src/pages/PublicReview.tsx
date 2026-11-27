@@ -1,3 +1,4 @@
+import LegalLinks from '@/components/LegalLinks';
 import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft,
@@ -20,7 +21,7 @@ import {
   Wifi,
   X,
 } from 'lucide-react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import type { Establishment } from '@/lib/types';
 import { Stars } from '@/components/Stars';
@@ -751,9 +752,10 @@ export default function PublicReview() {
               <footer className="pb-4 pt-6 text-center">
                 <div className="flex items-center justify-center gap-2 text-[9px] font-semibold uppercase tracking-[0.18em] text-ink/25">
                   <div className="h-px w-12 bg-ink/10" />
-                  <span>Propulsé par <strong className="text-ink/45">TapMarrakech</strong></span>
+                  <span>Propulsé par <strong className="text-ink/45">Kelyani</strong></span>
                   <div className="h-px w-12 bg-ink/10" />
                 </div>
+                <LegalLinks className="mt-3 text-ink/40" />
               </footer>
             </main>
           </>
@@ -1349,6 +1351,11 @@ export default function PublicReview() {
                   {loyaltyError}
                 </div>
               )}
+
+              <label className="flex cursor-pointer items-start gap-3 text-[11px] leading-5 text-ink/60">
+                <input type="checkbox" required className="mt-1 accent-forest" />
+                <span>J’accepte les <Link to="/legal/cgu" target="_blank" rel="noopener" className="underline">conditions d’utilisation</Link> et la <Link to="/legal/confidentialite" target="_blank" rel="noopener" className="underline">politique de confidentialité</Link>, y compris l’hébergement de mes données hors du Maroc par les prestataires techniques de Kelyani.</span>
+              </label>
 
               <button
                 disabled={loyaltyLoading}

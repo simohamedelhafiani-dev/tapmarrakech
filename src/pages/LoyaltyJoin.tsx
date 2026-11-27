@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Gift, Loader2 } from 'lucide-react';
-import { Navigate, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 
 type EnrollmentResult = {
@@ -34,6 +34,7 @@ export default function LoyaltyJoin() {
   const [visitFrequency, setVisitFrequency] = useState<'WEEKLY' | 'MONTHLY' | 'OCCASIONAL' | ''>('');
   const [notificationConsent, setNotificationConsent] = useState(false);
   const [marketingConsent, setMarketingConsent] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const interestOptions = ['Promotions', 'Nouveautés', 'Événements', 'Récompenses', 'Offres anniversaire', 'Menu & nouveautés', 'Bien-être', 'Sport', 'Beauté'];
   const [loading, setLoading] = useState(false);
@@ -94,9 +95,10 @@ export default function LoyaltyJoin() {
         firstName.trim() &&
         lastName.trim() &&
         phone.trim() &&
+        acceptedTerms &&
         (isGlobalEnrollment ? Boolean(establishmentName) : Boolean(referralCode)),
       ),
-    [loadingContext, firstName, lastName, phone, isGlobalEnrollment, referralCode, establishmentName],
+    [loadingContext, firstName, lastName, phone, acceptedTerms, isGlobalEnrollment, referralCode, establishmentName],
   );
 
   async function join() {
@@ -308,8 +310,10 @@ export default function LoyaltyJoin() {
               <label className="mt-3 flex cursor-pointer items-start gap-3 text-[11px] leading-5 text-white/55"><input type="checkbox" checked={marketingConsent} onChange={e => setMarketingConsent(e.target.checked)} className="mt-1 accent-[#00DFA5]" /><span>J’accepte les communications commerciales et offres promotionnelles.</span></label>
             </div>
             {error && <div className="rounded-xl bg-red-50 px-4 py-3 text-xs leading-5 text-red-700">{error}</div>}
+            <label className="flex cursor-pointer items-start gap-3 text-[11px] leading-5 text-white/60"><input type="checkbox" required checked={acceptedTerms} onChange={e => setAcceptedTerms(e.target.checked)} className="mt-1 accent-[#00DFA5]" /><span>J’accepte les <Link to="/legal/cgu" target="_blank" rel="noopener" className="underline">conditions d’utilisation</Link> et la <Link to="/legal/confidentialite" target="_blank" rel="noopener" className="underline">politique de confidentialité</Link>, y compris l’hébergement de mes données hors du Maroc par les prestataires techniques de Kelyani. *</span></label>
             <button type="button" onClick={() => void join()} disabled={!canSubmit || loading} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#686D76] px-5 py-4 text-sm font-bold text-[#050505] shadow-lg transition hover:bg-[#686D76] disabled:cursor-not-allowed disabled:opacity-40">{loading && <Loader2 className="h-4 w-4 animate-spin" />}{loading ? 'Création de votre carte…' : 'Créer ma carte fidélité'}</button>
             <p className="text-center text-[10px] leading-4 text-white/25">Les préférences sont facultatives et servent à personnaliser les communications de l’établissement.</p>
+
           </div>
         </section>
       </div>
