@@ -99,7 +99,11 @@ async function consumeRateLimit(
   // The repository does not ship generated Database types for this RPC. Keep the
   // function name and parameter contract explicitly typed instead of using the
   // generic ReturnType<typeof createClient>, which collapses its schema to never.
-  const consumeRateLimitRpc = serviceClient.rpc as unknown as PublicReviewRateLimitRpc;
+  // Bind to the client: SupabaseClient.rpc relies on `this`, so a detached
+  // reference throws at runtime and every public review submission fails.
+  const consumeRateLimitRpc = serviceClient.rpc.bind(
+    serviceClient
+  ) as unknown as PublicReviewRateLimitRpc;
   const { data, error } = await consumeRateLimitRpc(
     'consume_public_review_rate_limit',
     {
