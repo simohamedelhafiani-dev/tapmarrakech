@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { getTrustedClientIp } from '../_shared/public-review-ip.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -7,6 +8,7 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
+const GLOBAL_IP_LIMIT = 100;
 const IP_LIMIT = 5;
 const SESSION_LIMIT = 2;
 const RATE_LIMIT_WINDOW_SECONDS = 15 * 60;
@@ -69,31 +71,6 @@ function cleanOptionalText(
   return trimmed;
 }
 
-function getClientIp(request: Request): string {
-  const cloudflareIp = request.headers.get('cf-connecting-ip')?.trim();
-
-  if (cloudflareIp) {
-    return cloudflareIp;
-  }
-
-  const forwardedFor = request.headers.get('x-forwarded-for');
-
-  if (forwardedFor) {
-    const firstIp = forwardedFor
-      .split(',')
-      .map((value) => value.trim())
-      .find(Boolean);
-
-    if (firstIp) {
-      return firstIp;
-    }
-  }
-
-  const realIp = request.headers.get('x-real-ip')?.trim();
-
-  return realIp || 'unknown';
-}
-
 async function sha256(value: string): Promise<string> {
   const data = new TextEncoder().encode(value);
   const digest = await crypto.subtle.digest('SHA-256', data);
@@ -122,7 +99,11 @@ async function consumeRateLimit(
   // The repository does not ship generated Database types for this RPC. Keep the
   // function name and parameter contract explicitly typed instead of using the
   // generic ReturnType<typeof createClient>, which collapses its schema to never.
-  const consumeRateLimitRpc = serviceClient.rpc as unknown as PublicReviewRateLimitRpc;
+  // Bind to the client: SupabaseClient.rpc relies on `this`, so a detached
+  // reference throws at runtime and every public review submission fails.
+  const consumeRateLimitRpc = serviceClient.rpc.bind(
+    serviceClient
+  ) as unknown as PublicReviewRateLimitRpc;
   const { data, error } = await consumeRateLimitRpc(
     'consume_public_review_rate_limit',
     {
@@ -300,6 +281,39 @@ Deno.serve(async (request) => {
       }
     );
 
+    const clientIp = getTrustedClientIp(request);
+
+    // The global IP bucket is independent of establishment_id and runs before
+    // any database lookup. This prevents rotating establishment UUIDs to evade
+    // the lookup protection. The higher shared-network allowance reduces NAT
+    // impact; the existing per-establishment and per-session limits still apply.
+    if (!clientIp) {
+      console.error('Public review request missing trusted client IP header');
+      return json(
+        {
+          success: false,
+          error: 'Service temporairement indisponible.',
+        },
+        503
+      );
+    }
+
+    const globalIpAllowed = await consumeRateLimit(
+      serviceClient,
+      `ip-global:${clientIp}`,
+      GLOBAL_IP_LIMIT
+    );
+
+    if (!globalIpAllowed) {
+      return json(
+        {
+          success: false,
+          error: 'Trop de tentatives. Veuillez réessayer plus tard.',
+        },
+        429
+      );
+    }
+
     const { data: establishment, error: establishmentError } =
       await serviceClient
         .from('establishments')
@@ -329,7 +343,6 @@ Deno.serve(async (request) => {
       );
     }
 
-    const clientIp = getClientIp(request);
     const ipAllowed = await consumeRateLimit(
       serviceClient,
       `ip:${establishmentId}:${clientIp}`,

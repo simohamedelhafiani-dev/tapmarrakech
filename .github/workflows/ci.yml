@@ -11,11 +11,14 @@ concurrency:
   cancel-in-progress: true
 
 on:
-  # Validate every update to this release-candidate branch. This workflow only
-  # builds/tests code and a disposable local Supabase stack; it never deploys.
+  # Validate every pull request targeting main and every update of main,
+  # so no change reaches production without typecheck, lint, build and DB tests.
+  pull_request:
+    branches:
+      - main
   push:
     branches:
-      - integration/smart-marketing-clean-2026-11
+      - main
   workflow_dispatch:
 jobs:
   validate:
