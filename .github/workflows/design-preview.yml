@@ -1,0 +1,29 @@
+# TEMPORARY: builds design/** branches against a mock backend so the theme can be
+# screenshotted offline. Remove before merging.
+name: Design preview build
+on:
+  push:
+    branches: ['design/**']
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+        env:
+          VITE_SUPABASE_URL: https://mock.supabase.co
+          VITE_SUPABASE_ANON_KEY: mock-anon-key
+      - name: Publish dist to design-preview-dist
+        run: |
+          cd dist
+          git init -q -b design-preview-dist
+          git -c user.name=ci -c user.email=ci@example.com add -A
+          git -c user.name=ci -c user.email=ci@example.com commit -q -m "preview ${GITHUB_SHA}"
+          git push -f -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" design-preview-dist
