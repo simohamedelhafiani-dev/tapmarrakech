@@ -6,14 +6,14 @@ export const LEGAL_UPDATED_AT = '28 novembre 2026';
 
 export const LEGAL = {
   brand: 'Kelyani',
-  ownerName: '',
+  ownerName: 'Mohamed Elhafiani',
   legalStatus: 'Auto-entrepreneur (personne physique), Maroc',
-  address: '',
+  address: '861 Lot Maatalah, Askejour, Marrakech, Maroc',
   ice: '',
   fiscalId: '',
   rnaeNumber: '',
   email: '',
-  phone: '',
+  phone: '+212 6 30 35 91 76',
   cndpReceipt: '',
   website: 'https://app.kelyani.com',
   court: 'Marrakech',

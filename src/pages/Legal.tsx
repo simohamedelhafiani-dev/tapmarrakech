@@ -20,7 +20,11 @@ function Identity() {
     <UL items={[
       <>Éditeur et vendeur : {LEGAL.ownerName}, {LEGAL.legalStatus}, exploitant la marque {LEGAL.brand}</>,
       <>Adresse : {LEGAL.address}</>,
-      <>ICE : {LEGAL.ice} · Identifiant fiscal : {LEGAL.fiscalId} · Registre national de l’auto-entrepreneur : {LEGAL.rnaeNumber}</>,
+      <>{[
+        LEGAL.ice && `ICE : ${LEGAL.ice}`,
+        LEGAL.fiscalId && `Identifiant fiscal : ${LEGAL.fiscalId}`,
+        LEGAL.rnaeNumber && `Registre national de l’auto-entrepreneur : ${LEGAL.rnaeNumber}`,
+      ].filter(Boolean).join(' · ')}</>,
       <>Contact : <Mail />{LEGAL.phone ? <> · {LEGAL.phone}</> : null}</>,
     ]} />
   );
