@@ -4,24 +4,26 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import LegalLinks from '@/components/LegalLinks';
 import { LEGAL_VERSION } from '@/config/legal';
+import { HeroScene } from '@/components/motion/HeroScene';
 
 function AuthShell({ children, title, eyebrow }: { children: React.ReactNode; title: string; eyebrow: string }) {
   return (
-    <div className="grid min-h-screen bg-[#475569] lg:grid-cols-[1fr_1.1fr]">
-      <div className="hidden bg-[#475569] p-12 text-white lg:flex lg:flex-col lg:justify-between border-r border-[#10B981]/15">
+    <div className="relative isolate grid min-h-screen overflow-hidden bg-[#050505] lg:grid-cols-[1fr_1.1fr]">
+      <HeroScene className="opacity-70" />
+      <div className="hidden bg-transparent p-12 text-white lg:flex lg:flex-col lg:justify-between border-r border-[#10B981]/15">
         <div className="font-display text-2xl tracking-[0.12em] text-[#10B981]">KELYANI</div>
         <div>
           <p className="mb-5 text-xs font-semibold uppercase tracking-[0.25em] text-[#10B981]">La voix de vos clients</p>
-          <h2 className="max-w-md font-display text-5xl leading-[1.1] text-[#10B981]">Transformez chaque retour en fidélité.</h2>
+          <h2 className="ky-gradient-title max-w-md font-display text-5xl leading-[1.1] text-[#10B981]">Transformez chaque retour en fidélité.</h2>
           <p className="mt-6 max-w-sm text-sm leading-7 text-white/55">Une expérience simple pour vos clients. Des insights précieux pour votre établissement.</p>
         </div>
         <p className="text-xs text-white/35">© 2026 KELYANI</p>
       </div>
-      <div className="flex items-center justify-center bg-[#475569] px-6 py-12">
+      <div className="flex items-center justify-center bg-[#050505]/60 px-6 py-12 backdrop-blur-sm">
         <div className="w-full max-w-[420px]">
           <div className="mb-10 lg:hidden"><div className="font-display text-2xl tracking-[0.12em] text-[#10B981]">KELYANI</div></div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#10B981]">{eyebrow}</p>
-          <h1 className="mt-3 font-display text-4xl text-[#10B981]">{title}</h1>
+          <h1 className="ky-gradient-title mt-3 font-display text-4xl text-[#10B981]">{title}</h1>
           {children}
           <LegalLinks className="mt-10 text-white/45" />
         </div>

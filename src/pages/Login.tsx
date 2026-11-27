@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { HeroScene } from '@/components/motion/HeroScene';
 import {
   Star,
   Heart,
@@ -102,7 +103,8 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-[#050505] text-white">
       <div className="mx-auto flex min-h-screen max-w-[1600px] flex-col lg:flex-row">
-        <section className="relative flex min-h-[42vh] flex-col overflow-hidden border-b border-white/[0.07] px-5 py-6 sm:px-8 lg:min-h-screen lg:w-[54%] lg:border-b-0 lg:border-r lg:border-white/[0.07] lg:px-12 lg:py-8 xl:px-16">
+        <section className="relative isolate flex min-h-[42vh] flex-col overflow-hidden border-b border-white/[0.07] px-5 py-6 sm:px-8 lg:min-h-screen lg:w-[54%] lg:border-b-0 lg:border-r lg:border-white/[0.07] lg:px-12 lg:py-8 xl:px-16">
+          <HeroScene />
           <div className="pointer-events-none absolute -left-28 -top-28 h-72 w-72 rounded-full border border-[#10B981]/10" />
           <div className="pointer-events-none absolute right-[-20%] top-[18%] h-[520px] w-[520px] rounded-full border border-[#10B981]/[0.07]" />
           <div className="pointer-events-none absolute bottom-[-20%] left-[20%] h-[480px] w-[480px] rounded-full bg-[#475569]/[0.035] blur-[100px]" />

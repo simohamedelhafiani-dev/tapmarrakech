@@ -41,21 +41,9 @@
   }
 }
 
-/* Primary buttons: light sweep on hover */
-[class~="bg-[#10B981]"],
-[class*="from-[#10B981]"] {
-  background-size: 220% 100%;
-}
-@media (hover: hover) and (pointer: fine) {
-  button[class~="bg-[#10B981]"]:hover,
-  a[class~="bg-[#10B981]"]:hover {
-    background-image: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, .28) 50%, transparent 70%);
-    animation: ky-sheen 900ms ease forwards;
-  }
-}
 @keyframes ky-sheen {
-  from { background-position: 120% 0; }
-  to { background-position: -20% 0; }
+  from { background-position: 120% 0, 0 0; }
+  to { background-position: -20% 0, 0 0; }
 }
 
 /* Gentle reveal for page blocks (set by AppMotion; content stays visible without JS) */
@@ -85,4 +73,79 @@
   .admin-depth-shell::before { animation: none; }
   .ky-reveal:not(.ky-in) { opacity: 1; transform: none; }
   .ky-progress { display: none; }
+}
+
+/* ---- Stronger site identity ---- */
+
+/* 3D sphere (login) */
+.ky-hero-scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Page titles in the logo gradient (icons keep their own color) */
+.dashboard-depth-main h1,
+.admin-depth-shell main h1,
+.ky-gradient-title {
+  background: linear-gradient(100deg, #FFFFFF 0%, #10B981 38%, #14B8A6 62%, #06B6D4 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: ky-title-flow 9s ease-in-out infinite alternate;
+}
+@keyframes ky-title-flow {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
+
+/* Primary buttons in the logo gradient */
+[class~="bg-[#10B981]"] {
+  background-image: linear-gradient(110deg, #10B981 0%, #14B8A6 55%, #06B6D4 100%);
+  box-shadow: 0 10px 28px -14px rgba(16, 185, 129, .75);
+}
+@media (hover: hover) and (pointer: fine) {
+  button[class~="bg-[#10B981]"]:hover,
+  a[class~="bg-[#10B981]"]:hover {
+    background-image:
+      linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, .3) 50%, transparent 70%),
+      linear-gradient(110deg, #10B981 0%, #14B8A6 55%, #06B6D4 100%);
+    background-size: 220% 100%, 100% 100%;
+    animation: ky-sheen 900ms ease forwards;
+  }
+}
+
+/* Cards: thin logo-colored light on the top edge, like the site */
+.dashboard-depth-shell [class*="rounded-2xl"][class*="border"],
+.dashboard-depth-shell [class*="rounded-3xl"][class*="border"],
+.admin-depth-shell [class*="rounded-2xl"][class*="border"],
+.admin-depth-shell [class*="rounded-3xl"][class*="border"] {
+  box-shadow:
+    var(--depth-shadow),
+    inset 0 1px 0 rgba(16, 185, 129, .28),
+    inset 0 0 0 1px rgba(20, 184, 166, .05) !important;
+}
+
+/* Top bar: gradient underline */
+.dashboard-depth-topbar {
+  box-shadow: 0 1px 0 rgba(16, 185, 129, .22), 0 12px 30px -20px rgba(6, 182, 212, .35);
+}
+
+/* Stronger background glow */
+.dashboard-depth-shell::before,
+.admin-depth-shell::before {
+  background:
+    radial-gradient(42vw 34vh at 10% 6%, rgba(16, 185, 129, .24), transparent 70%),
+    radial-gradient(38vw 30vh at 90% 16%, rgba(6, 182, 212, .17), transparent 70%),
+    radial-gradient(46vw 36vh at 55% 108%, rgba(20, 184, 166, .15), transparent 70%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-depth-main h1,
+  .admin-depth-shell main h1,
+  .ky-gradient-title { animation: none; }
 }
