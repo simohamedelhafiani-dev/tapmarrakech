@@ -28,9 +28,6 @@ import LoyaltyRaffles from '@/pages/LoyaltyRaffles';
 import Menu from '@/pages/Menu';
 import Promotions from '@/pages/Promotions';
 import Admin from '@/pages/Admin';
-import AdminOverview from '@/pages/AdminOverview';
-import AdminOverviewV2 from '@/pages/AdminOverviewV2';
-import AdminStatCardTest from '@/pages/AdminStatCardTest';
 import LoyaltyScanner from '@/pages/LoyaltyScanner';
 import AssistantIA from '@/pages/AssistantIA';
 
@@ -257,9 +254,6 @@ function App() {
             <Route path="/admin/whatsapp/connect" element={<WhatsAppConnect />} />
             <Route path="/admin/whatsapp/inbox" element={<WhatsAppInbox />} />
             <Route path="/admin/*" element={<Admin />} />
-            <Route path="/admin/overview-test" element={<AdminOverview />} />
-            <Route path="/admin/overview-v2" element={<AdminOverviewV2 />} />
-            <Route path="/admin/statcard-test" element={<AdminStatCardTest />} />
           </Route>
 
           <Route element={<ProtectedRoute allowedRoles={['admin', 'responsible']} />}>
