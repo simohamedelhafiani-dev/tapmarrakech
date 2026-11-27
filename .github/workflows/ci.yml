@@ -20,7 +20,6 @@ on:
     branches:
       - main
   workflow_dispatch:
-
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -46,6 +45,16 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Verify Nardo loyalty card palette
+        run: |
+          if grep -Eiq '#00DFA5|#173D32|#D3A84C|#D4AF37|#C5A059|#B8860B|#F7F7F3' src/components/LoyaltyCardVisual.tsx src/components/loyalty/LoyaltyStudio.tsx; then
+            echo "Legacy teal/green/gold card palette detected in the active UI."
+            exit 1
+          fi
+          grep -q "accent: '#686D76'" src/components/LoyaltyCardVisual.tsx
+          grep -q "normalizeNardoCardColor(row.primary_color" src/components/loyalty/LoyaltyStudio.tsx
+          grep -q "export function normalizeNardoCardColor" src/components/loyalty/walletTemplates.ts
 
 
   database-tests:
@@ -120,9 +129,21 @@ jobs:
         with:
           deno-version: v2.1.4
 
+      - name: Test Nardo loyalty card palette normalization
+        run: deno test supabase/functions/_shared/nardo-palette.test.ts
       - name: Test Edge Function authorization parsing
         run: deno test supabase/functions/_shared/
+      - name: Test Google Wallet design approval gate
+        run: deno test supabase/functions/google-wallet-create-pass/wallet-design.test.ts
+      - name: Test Nardo Wallet background palette
+        run: deno test supabase/functions/google-wallet-publish-design/wallet-background.test.ts
+      - name: Test Google Wallet publication authorization
+        run: deno test supabase/functions/google-wallet-publish-design/wallet-authorization.test.ts
+      - name: Test Smart Marketing queue utilities
+        run: deno test supabase/functions/smart-marketing-dispatch/smart-marketing-utils.test.ts
 
+      - name: Test Smart Nearby geofence utilities
+        run: deno test supabase/functions/smart-nearby-event/nearby-geo.test.ts
       - name: Type-check Supabase Edge Functions
         run: |
           deno check --no-lock --node-modules-dir=auto \
@@ -144,7 +165,11 @@ jobs:
             supabase/functions/google-business-webhook/index.ts \
             supabase/functions/google-wallet-admin-sync-class/index.ts \
             supabase/functions/google-wallet-create-pass/index.ts \
+            supabase/functions/google-wallet-publish-design/index.ts \
             supabase/functions/import-menu/index.ts \
             supabase/functions/send-loyalty-notification-push/index.ts \
+            supabase/functions/smart-marketing-scan/index.ts \
+            supabase/functions/smart-marketing-dispatch/index.ts \
+            supabase/functions/smart-nearby-event/index.ts \
             supabase/functions/send-promotion-push/index.ts \
             supabase/functions/submit-public-review/index.ts

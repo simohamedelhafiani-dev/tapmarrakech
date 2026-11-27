@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { resolveGoogleWalletClassId } from "./wallet-design.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -81,6 +82,9 @@ Deno.serve(async (request) => {
     if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(accessToken)) {
       return json({ success: false, error: "Lien de carte invalide" }, 400);
     }
+    if (!requestedDesignId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(requestedDesignId)) {
+      return json({ success: false, error: "Aucun modèle Google Wallet publié n'est disponible pour cette carte." }, 409);
+    }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
@@ -110,16 +114,15 @@ Deno.serve(async (request) => {
 
     const [
       { data: cardRows, error: cardError },
-      { data: designRows },
       { data: programRows },
       { data: walletDesignResult, error: walletDesignError },
     ] = await Promise.all([
       publicClient.rpc("get_public_loyalty_card", { p_access_token: accessToken }),
-      publicClient.rpc("get_public_loyalty_card_config", { p_access_token: accessToken }),
       publicClient.rpc("get_public_loyalty_program_context", { p_access_token: accessToken }),
-      requestedDesignId
-        ? publicClient.rpc("get_public_loyalty_wallet_design", { p_access_token: accessToken, p_design_id: requestedDesignId })
-        : publicClient.rpc("get_public_loyalty_wallet_config", { p_access_token: accessToken }),
+      publicClient.rpc("get_public_loyalty_wallet_design", {
+        p_access_token: accessToken,
+        p_design_id: requestedDesignId,
+      }),
     ]);
 
     if (cardError || !cardRows?.[0]) {
@@ -131,28 +134,28 @@ Deno.serve(async (request) => {
     }
 
     const card = cardRows[0];
-    const design = designRows?.[0] ?? {};
     const program = programRows?.[0] ?? {};
     const rawWalletDesign = walletDesignResult && typeof walletDesignResult === "object"
       ? walletDesignResult as Record<string, unknown>
       : {};
-    const walletDesign = requestedDesignId
-      ? {
-          ...((rawWalletDesign.design_config && typeof rawWalletDesign.design_config === "object") ? rawWalletDesign.design_config as Record<string, unknown> : {}),
-          googleClassId: rawWalletDesign.googleClassId,
-          googleClassStatus: rawWalletDesign.googleClassStatus,
-          designKey: rawWalletDesign.design_key,
-          selectedDesignId: rawWalletDesign.id,
-        }
-      : rawWalletDesign;
-    if (requestedDesignId && !walletDesign.selectedDesignId) {
+    const walletDesign: Record<string, unknown> = {
+      ...((rawWalletDesign.design_config && typeof rawWalletDesign.design_config === "object") ? rawWalletDesign.design_config as Record<string, unknown> : {}),
+      googleClassId: rawWalletDesign.googleClassId,
+      googleClassStatus: rawWalletDesign.googleClassStatus,
+      designKey: rawWalletDesign.design_key,
+      selectedDesignId: rawWalletDesign.id,
+    };
+    if (!walletDesign.selectedDesignId) {
       return json({ success: false, error: "Ce modèle Wallet n'est pas publié ou n'est pas disponible pour cette carte." }, 404);
     }
     // Prefer the establishment-specific class saved by the KELYANI Admin.
     // Keep the approved demo class as a controlled fallback until a dedicated class is approved.
-    const classId = String(walletDesign.googleClassId || configuredClassId).trim();
-    if (!classId.startsWith(`${issuerId}.`)) {
-      return json({ success: false, error: "La classe Google Wallet ne correspond pas à l'émetteur configuré." }, 503);
+    const classId = resolveGoogleWalletClassId(walletDesign, issuerId, configuredClassId, requestedDesignId);
+    if (!classId) {
+      return json({
+        success: false,
+        error: "Ce modèle n'est pas encore approuvé pour Google Wallet.",
+      }, 409);
     }
     const clientName = [card.first_name, card.last_name].filter(Boolean).join(" ").slice(0, 20) || "Client KELYANI";
     const loyaltyNumber = String(card.loyalty_number || card.customer_id).slice(0, 20);
@@ -219,6 +222,33 @@ Deno.serve(async (request) => {
           id: "wallet-program",
           header: String(walletDesign.cardTitle || "KELYANI").slice(0, 25),
           body: String(walletDesign.headerText || "Carte de fidélité").slice(0, 40),
+        },
+        {
+          id: "wallet-balance",
+          header: walletMode === "DISCOUNT" ? "Votre avantage" : walletMode === "STAMP" ? "Visites" : "Votre solde",
+          body: walletMode === "DISCOUNT"
+            ? `${walletDiscountPercent}% de réduction`
+            : walletDesign.showPoints === false ? "Présentez votre carte en caisse" : progress,
+        },
+        {
+          id: "wallet-reward",
+          header: "Prochaine récompense",
+          body: String(walletDesign.walletRewardLabel || program.stamp_reward_name || "Récompense fidélité").slice(0, 80),
+        },
+        {
+          id: "wallet-tier",
+          header: "Votre niveau",
+          body: String(walletDesign.walletTierLabel || "Membre KELYANI").slice(0, 40),
+        },
+        {
+          id: "wallet-venue",
+          header: "Établissement",
+          body: String(walletDesign.establishmentName || card.establishment_name || walletDesign.address || "Votre établissement KELYANI").slice(0, 100),
+        },
+        {
+          id: "wallet-offer",
+          header: "Avantage actif",
+          body: String(walletDesign.walletOfferLabel || (walletMode === "DISCOUNT" ? `${walletDiscountPercent}% de réduction` : walletDesign.customMessage || walletDesign.walletRewardLabel || "Avantage fidélité")).slice(0, 80),
         },
         ...(walletMode === "DISCOUNT" ? [{
           id: "wallet-discount",
@@ -287,3 +317,4 @@ Deno.serve(async (request) => {
     return json({ success: false, error: "Impossible de préparer la carte Google Wallet pour le moment" }, 500);
   }
 });
+
