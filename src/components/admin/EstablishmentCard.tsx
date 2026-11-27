@@ -9,7 +9,7 @@ type EstablishmentCardProps = {
 function formatPrice(price: number | null, interval: string | null) {
   if (price == null) return null;
   const suffix = interval === 'year' ? '/an' : '/mois';
-  return `${price.toLocaleString('fr-FR')} MAD${suffix}`;
+  return `${price.toLocaleString('fr-FR')} MAD TTC${suffix}`;
 }
 
 export default function EstablishmentCard({

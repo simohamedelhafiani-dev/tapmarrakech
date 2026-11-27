@@ -18,12 +18,12 @@ const DocLink = ({ slug, children }: { slug: LegalDocSlug; children: ReactNode }
 function Identity() {
   return (
     <UL items={[
-      <>Éditeur et vendeur : {LEGAL.ownerName}, {LEGAL.legalStatus}, exploitant la marque {LEGAL.brand}</>,
-      <>Adresse : {LEGAL.address}</>,
+      <>Éditeur et vendeur : {LEGAL.companyName}, {LEGAL.legalForm}{LEGAL.capital ? `, au capital de ${LEGAL.capital}` : ''}, exploitant la marque {LEGAL.brand}, représentée par son gérant {LEGAL.representative}</>,
+      <>Siège social : {LEGAL.address}</>,
       <>{[
         LEGAL.ice && `ICE : ${LEGAL.ice}`,
         LEGAL.fiscalId && `Identifiant fiscal : ${LEGAL.fiscalId}`,
-        LEGAL.rnaeNumber && `Registre national de l’auto-entrepreneur : ${LEGAL.rnaeNumber}`,
+        LEGAL.rc && `RC : ${LEGAL.rc}`,
       ].filter(Boolean).join(' · ')}</>,
       <>Contact : <Mail />{LEGAL.phone ? <> · {LEGAL.phone}</> : null}</>,
     ]} />
@@ -34,7 +34,7 @@ function MentionsLegales() {
   return <>
     <H2>Éditeur</H2>
     <Identity />
-    <P>Directeur de la publication : {LEGAL.ownerName}.</P>
+    <P>Directeur de la publication : {LEGAL.representative}, gérant.</P>
     {LEGAL.cndpReceipt && <P>Traitements de données déclarés auprès de la Commission nationale de contrôle de la protection des données à caractère personnel (CNDP) sous le récépissé n° {LEGAL.cndpReceipt}.</P>}
 
     <H2>Hébergement</H2>
@@ -67,11 +67,11 @@ function Cgv() {
 
     <H2>3. Formules et prix</H2>
     <UL items={[
-      <>Basic : 299 MAD par mois — page publique, avis et réputation, contact.</>,
-      <>Premium : 499 MAD par mois — Basic, plus fidélité, menu, promotions et statistiques.</>,
-      <>Enterprise : 799 MAD par mois — Premium, plus assistant IA et gestion avancée.</>,
+      <>Basic : 399 MAD TTC par mois — page publique, avis et réputation, contact.</>,
+      <>Premium : 599 MAD TTC par mois — Basic, plus fidélité, menu, promotions et statistiques.</>,
+      <>Enterprise : 899 MAD TTC par mois — Premium, plus assistant IA et gestion avancée.</>,
     ]} />
-    <P>Les prix sont exprimés en dirhams marocains. Le Prestataire, auto-entrepreneur, est hors du champ d’application de la TVA : les prix sont nets, sans TVA. Les frais bancaires et de change éventuels sont à la charge de l’Établissement. Le Prestataire peut modifier ses prix en prévenant l’Établissement par email au moins 30 jours avant ; le nouveau prix s’applique à la période suivante, et l’Établissement peut résilier avant.</P>
+    <P>Les prix sont exprimés en dirhams marocains, toutes taxes comprises (TVA de 20 % incluse). Chaque facture indique le montant hors taxes et la TVA. Les frais bancaires et de change éventuels sont à la charge de l’Établissement. Le Prestataire peut modifier ses prix en prévenant l’Établissement par email au moins 30 jours avant ; le nouveau prix s’applique à la période suivante, et l’Établissement peut résilier avant.</P>
     <P>Une période d’essai gratuite peut être accordée ; sa durée est indiquée dans l’espace de l’Établissement. À la fin de l’essai, l’accès aux fonctions payantes est suspendu tant que le premier paiement n’est pas reçu.</P>
 
     <H2>4. Paiement et facturation</H2>
