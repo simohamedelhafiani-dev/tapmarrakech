@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
     return reply({ error: "server_configuration_invalid" }, 500);
   }
 
-  let body: { code?: string; establishmentId?: string; wabaId?: string; phoneNumberId?: string; state?: string };
+  let body: { code?: string; establishmentId?: string; wabaId?: string; phoneNumberId?: string | null; state?: string };
   const rawBody = await req.text();
   if (new TextEncoder().encode(rawBody).byteLength > 32_000) return reply({ error: "payload_too_large" }, 413);
   try {
@@ -81,17 +81,17 @@ Deno.serve(async (req) => {
   const code = typeof body.code === "string" ? body.code.trim() : "";
   const establishmentId = typeof body.establishmentId === "string" ? body.establishmentId.trim() : "";
   const wabaId = typeof body.wabaId === "string" ? body.wabaId.trim() : "";
-  const phoneNumberId = typeof body.phoneNumberId === "string" ? body.phoneNumberId.trim() : "";
+  const phoneNumberId = typeof body.phoneNumberId === "string" ? body.phoneNumberId.trim() : null;
   const state = typeof body.state === "string" ? body.state.trim() : "";
-  if (!code || !establishmentId || !wabaId || !phoneNumberId || !state) {
-    return reply({ error: "code_establishment_waba_phone_and_state_required" }, 400);
+  if (!code || !establishmentId || !wabaId || !state) {
+    return reply({ error: "code_establishment_waba_and_state_required" }, 400);
   }
   // Reject oversized OAuth codes and control characters before forwarding them to Meta.
   if (code.length > 2_048 || [...code].some((char) => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)) {
     return reply({ error: "invalid_oauth_code" }, 400);
   }
   if (!/^[a-f0-9]{64}$/.test(state)) return reply({ error: "invalid_oauth_state" }, 400);
-  if (!uuidPattern.test(establishmentId) || !idPattern.test(wabaId) || !idPattern.test(phoneNumberId)) {
+  if (!uuidPattern.test(establishmentId) || !idPattern.test(wabaId) || (phoneNumberId !== null && !idPattern.test(phoneNumberId))) {
     return reply({ error: "invalid_identifiers" }, 400);
   }
 
@@ -101,9 +101,10 @@ Deno.serve(async (req) => {
   });
   const { data: userData, error: userError } = await userClient.auth.getUser();
   if (userError || !userData.user) return reply({ error: "unauthorized" }, 401);
-  const { data: accessible, error: accessError } = await userClient.rpc("get_my_establishments");
-  const hasAccess = Array.isArray(accessible) && accessible.some((row: { id?: string }) => row?.id === establishmentId);
-  if (accessError || !hasAccess) return reply({ error: "establishment_access_denied" }, 403);
+  const { data: canManageWhatsApp, error: accessError } = await userClient.rpc("user_can_manage_whatsapp", {
+    target_establishment_id: establishmentId,
+  });
+  if (accessError || canManageWhatsApp !== true) return reply({ error: "establishment_access_denied" }, 403);
 
   const admin = createClient(supabaseUrl, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } });
   // Consume the nonce atomically: only a matching, unexpired, unused row for
@@ -140,6 +141,15 @@ Deno.serve(async (req) => {
     return reply({ error: "meta_code_exchange_unavailable" }, 502);
   }
   const accessToken = typeof tokenData.access_token === "string" ? tokenData.access_token.trim() : "";
+  const rawExpiresIn = tokenData.expires_in;
+  const expiresInSeconds = typeof rawExpiresIn === "number" && Number.isSafeInteger(rawExpiresIn) && rawExpiresIn > 0
+    ? rawExpiresIn
+    : typeof rawExpiresIn === "string" && /^\d{1,10}$/.test(rawExpiresIn) && Number.isSafeInteger(Number(rawExpiresIn)) && Number(rawExpiresIn) > 0
+    ? Number(rawExpiresIn)
+    : null;
+  const tokenExpiresAt = expiresInSeconds === null
+    ? null
+    : new Date(Date.now() + expiresInSeconds * 1000).toISOString();
   // Reject malformed or unexpectedly large token payloads before using/storing them.
   if (!exchange.ok || accessToken.length < 20 || accessToken.length > 4_096) {
     return reply({ error: "meta_code_exchange_failed" }, 400);
@@ -160,6 +170,7 @@ Deno.serve(async (req) => {
 
   // Verify the submitted Phone Number ID is actually attached to that WABA.
   let phoneData: Record<string, unknown> | null = null;
+  const fallbackPhoneCandidates: Record<string, unknown>[] = [];
   let nextUrl: URL | null = new URL(`https://graph.facebook.com/${graphVersion}/${wabaId}/phone_numbers`);
   nextUrl.searchParams.set("fields", "id,display_phone_number,verified_name,status");
   nextUrl.searchParams.set("limit", "100");
@@ -172,7 +183,11 @@ Deno.serve(async (req) => {
     }
     if (!pageResult.response.ok) return reply({ error: "meta_phone_numbers_verification_failed" }, 403);
     const items = Array.isArray(pageResult.data.data) ? pageResult.data.data : [];
-    phoneData = items.find((item: { id?: string }) => String(item?.id ?? "") === phoneNumberId) ?? phoneData;
+    if (phoneNumberId) {
+      phoneData = items.find((item: { id?: string }) => String(item?.id ?? "") === phoneNumberId) ?? phoneData;
+    } else {
+      fallbackPhoneCandidates.push(...items.filter((item: { id?: string }) => typeof item?.id === "string" && idPattern.test(item.id)));
+    }
     const paging = pageResult.data.paging;
     const pagingNext = paging && typeof paging === "object" && !Array.isArray(paging)
       ? (paging as Record<string, unknown>).next
@@ -193,10 +208,12 @@ Deno.serve(async (req) => {
       }
     } else nextUrl = null;
   }
-  // If the page cap was reached while Meta still advertises more results, do not
-  // claim the requested phone number is absent: the verification is incomplete.
+  if (!phoneNumberId && !nextUrl) {
+    if (fallbackPhoneCandidates.length === 1) phoneData = fallbackPhoneCandidates[0];
+    else if (fallbackPhoneCandidates.length > 1) return reply({ error: "coexistence_multiple_phone_numbers_require_selection" }, 409);
+  }
   if (!phoneData && nextUrl) return reply({ error: "meta_phone_numbers_verification_incomplete" }, 502);
-  if (!phoneData) return reply({ error: "phone_number_not_attached_to_waba" }, 403);
+  if (!phoneData) return reply({ error: phoneNumberId ? "phone_number_not_attached_to_waba" : "coexistence_phone_number_not_found" }, 403);
 
   // Meta requires the application to subscribe to each customer WABA for
   // message and status webhooks; a configured app-level callback alone is not
@@ -224,10 +241,11 @@ Deno.serve(async (req) => {
     establishment_id: establishmentId,
     connected_by: userData.user.id,
     waba_id: wabaId,
-    phone_number_id: phoneNumberId,
+    phone_number_id: String(phoneData.id),
     display_phone_number: phoneData.display_phone_number ?? null,
     business_name: phoneData.verified_name ?? wabaCheck.data.name ?? null,
     access_token_secret_id: secretId,
+    token_expires_at: tokenExpiresAt,
     status: "active",
     auto_reply_enabled: false,
     updated_at: new Date().toISOString(),

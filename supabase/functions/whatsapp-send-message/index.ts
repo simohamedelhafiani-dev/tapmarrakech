@@ -55,17 +55,25 @@ Deno.serve(async (req) => {
   });
   const { data: user, error: authError } = await userClient.auth.getUser();
   if (authError || !user.user) return reply({ error: "unauthorized" }, 401);
-  const { data: accessible, error: accessError } = await userClient.rpc("get_my_establishments");
-  if (accessError || !Array.isArray(accessible) || !accessible.some((row: { id?: string }) => row?.id === establishmentId)) {
+  const { data: canManageWhatsApp, error: accessError } = await userClient.rpc("user_can_manage_whatsapp", {
+    target_establishment_id: establishmentId,
+  });
+  if (accessError || canManageWhatsApp !== true) {
     return reply({ error: "establishment_access_denied" }, 403);
   }
 
   const admin = createClient(supabaseUrl, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } });
   const { data: connection, error: connectionError } = await admin.from("whatsapp_connections")
-    .select("id,establishment_id,phone_number_id,access_token_secret_id,status")
+    .select("id,establishment_id,phone_number_id,access_token_secret_id,token_expires_at,status")
     .eq("establishment_id", establishmentId).maybeSingle();
   if (connectionError) return reply({ error: "connection_lookup_failed" }, 500);
   if (!connection || connection.status !== "active") return reply({ error: "whatsapp_not_connected" }, 409);
+  if (typeof connection.token_expires_at === "string") {
+    const expiry = Date.parse(connection.token_expires_at);
+    if (!Number.isFinite(expiry) || expiry <= Date.now() + 60_000) {
+      return reply({ error: "whatsapp_token_expired_reconnect_required" }, 409);
+    }
+  }
   // Phone Number IDs are numeric Graph path segments; reject corrupt DB values
   // before interpolating them into the provider URL.
   if (typeof connection.phone_number_id !== "string" || !/^\d{5,32}$/.test(connection.phone_number_id)) {
@@ -119,6 +127,13 @@ Deno.serve(async (req) => {
         const pending = duplicate.delivery_status === "queued";
         return reply({ success: duplicate.delivery_status !== "failed", duplicate: true, pending, error: duplicate.delivery_status === "failed" ? "previous_attempt_failed" : undefined, messageId: duplicate.id, providerMessageId: duplicate.provider_message_id, status: duplicate.delivery_status }, pending ? 202 : 200);
       }
+      // The database index is global, not establishment-scoped. A UUID already
+      // reserved by another establishment must never be treated as a send failure
+      // or reveal the other tenant's message; return a generic idempotency conflict.
+      const { data: globallyReserved, error: globalLookupError } = await admin.from("whatsapp_messages")
+        .select("id").eq("client_request_id", requestId).maybeSingle();
+      if (globalLookupError) return reply({ error: "idempotency_lookup_failed" }, 500);
+      if (globallyReserved) return reply({ error: "idempotency_key_conflict" }, 409);
     }
     return reply({ error: "message_queue_failed" }, 500);
   }
@@ -145,7 +160,14 @@ Deno.serve(async (req) => {
     // Network errors and timeouts are ambiguous: Meta may have accepted the
     // message before the connection failed. Keep it queued to prevent a retry
     // with a new request ID from silently duplicating the message.
-    await admin.from("whatsapp_messages").update({ delivery_status: "queued", raw_metadata: { recipient: customerPhone, error: "provider_network_error", delivery_unknown: true } }).eq("id", queued.id);
+    const { error: unknownPersistError } = await admin.from("whatsapp_messages")
+      .update({ delivery_status: "queued", raw_metadata: { recipient: customerPhone, error: "provider_network_error", delivery_unknown: true } })
+      .eq("id", queued.id);
+    if (unknownPersistError) {
+      // The row was already reserved as queued before contacting Meta. Do not
+      // claim that the ambiguity marker was saved when its persistence failed.
+      return reply({ error: "message_outcome_unknown_persistence_failed", messageId: queued.id }, 500);
+    }
     return reply({ error: "meta_request_outcome_unknown", pending: true, messageId: queued.id, status: "queued" }, 202);
   }
 
@@ -160,7 +182,11 @@ Deno.serve(async (req) => {
   if (!providerMessageId || providerMessageId.length > 512) {
     // A successful HTTP response without a usable provider ID is ambiguous:
     // Meta may have accepted the send, so don't mark it failed or retry it.
-    return reply({ error: "meta_response_missing_message_id", messageId: queued.id }, 502);
+    const { error: unknownPersistError } = await admin.from("whatsapp_messages")
+      .update({ delivery_status: "queued", raw_metadata: { recipient: customerPhone, error: "provider_response_missing_message_id", delivery_unknown: true } })
+      .eq("id", queued.id);
+    if (unknownPersistError) return reply({ error: "message_outcome_unknown_persistence_failed", messageId: queued.id }, 500);
+    return reply({ error: "meta_response_missing_message_id", pending: true, messageId: queued.id, status: "queued" }, 202);
   }
   // Persist the provider ID without overwriting a delivery state already advanced
   // by an asynchronous webhook (e.g. delivered/read arriving before this handler).
