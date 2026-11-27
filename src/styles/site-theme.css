@@ -100,18 +100,22 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
 #root .ky-gradient-title {
   font-weight: 800;
   letter-spacing: -0.05em;
-  background: var(--ky-gradient);
-  background-size: 180% 100%;
+  background: linear-gradient(110deg, #10B981 0%, #14B8A6 35%, #06B6D4 60%, #14B8A6 80%, #10B981 100%);
+  background-size: 200% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: ky-title-flow 10s ease-in-out infinite alternate;
+  animation: ky-title-flow 7s ease-in-out infinite alternate;
+  display: inline-block;
+  max-width: 100%;
   filter: drop-shadow(0 0 22px rgba(16, 185, 129, .22));
 }
 @keyframes ky-title-flow {
   from { background-position: 0% 50%; }
   to { background-position: 100% 50%; }
 }
+/* h1 titles are display-sized like on the site */
+#root h1:not([style*="color"]) { line-height: 1.02; }
 /* Spans inside titles keep the gradient instead of their old flat color */
 #root h1:not([style*="color"]) *,
 #root h2.font-display:not([style*="color"]) * { -webkit-text-fill-color: transparent; }
