@@ -1,4 +1,7 @@
 -- Structural regression checks for the stamp-reward lock ordering.
+BEGIN;
+SELECT plan(1);
+
 DO $test$
 DECLARE
   v_create_definition text;
@@ -36,3 +39,8 @@ BEGIN
   END IF;
 END
 $test$;
+
+SELECT pass('stamp reward claims lock customer before claim and revalidate after waiting');
+
+SELECT * FROM finish();
+ROLLBACK;
