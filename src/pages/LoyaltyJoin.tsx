@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Gift, Loader2 } from 'lucide-react';
-import { Navigate, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 
 type EnrollmentResult = {
@@ -310,6 +310,7 @@ export default function LoyaltyJoin() {
             {error && <div className="rounded-xl bg-red-50 px-4 py-3 text-xs leading-5 text-red-700">{error}</div>}
             <button type="button" onClick={() => void join()} disabled={!canSubmit || loading} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#686D76] px-5 py-4 text-sm font-bold text-[#050505] shadow-lg transition hover:bg-[#686D76] disabled:cursor-not-allowed disabled:opacity-40">{loading && <Loader2 className="h-4 w-4 animate-spin" />}{loading ? 'Création de votre carte…' : 'Créer ma carte fidélité'}</button>
             <p className="text-center text-[10px] leading-4 text-white/25">Les préférences sont facultatives et servent à personnaliser les communications de l’établissement.</p>
+            <p className="text-center text-[10px] leading-4 text-white/40">En créant ma carte, j’accepte les <Link to="/legal/cgu" target="_blank" rel="noopener" className="underline">conditions d’utilisation</Link> et je reconnais avoir lu la <Link to="/legal/confidentialite" target="_blank" rel="noopener" className="underline">politique de confidentialité</Link>.</p>
           </div>
         </section>
       </div>

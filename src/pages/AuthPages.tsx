@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { ArrowRight, Check, LockKeyhole, Mail, UserRound } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
+import LegalLinks from '@/components/LegalLinks';
+import { LEGAL_VERSION } from '@/config/legal';
 
 function AuthShell({ children, title, eyebrow }: { children: React.ReactNode; title: string; eyebrow: string }) {
   return (
@@ -21,6 +23,7 @@ function AuthShell({ children, title, eyebrow }: { children: React.ReactNode; ti
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#00DFA5]">{eyebrow}</p>
           <h1 className="mt-3 font-display text-4xl text-[#00DFA5]">{title}</h1>
           {children}
+          <LegalLinks className="mt-10 text-white/45" />
         </div>
       </div>
     </div>
@@ -95,6 +98,7 @@ export function Login() {
 export function Register() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: '', email: '', password: '' });
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [error, setError] = useState('');
   const [pendingVerification, setPendingVerification] = useState(false);
   const [enterExistingCode, setEnterExistingCode] = useState(false);
@@ -113,7 +117,7 @@ export function Register() {
     const { data, error: authError } = await supabase.auth.signUp({
       email: form.email.trim(),
       password: form.password,
-      options: { data: { name: form.name.trim() } },
+      options: { data: { name: form.name.trim(), terms_version: LEGAL_VERSION, terms_accepted_at: new Date().toISOString() } },
     });
     if (authError) {
       setError(authError.message.toLowerCase().includes('already')
@@ -197,8 +201,12 @@ export function Register() {
           <Field icon={UserRound} required placeholder="Votre nom" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
           <Field icon={Mail} type="email" required placeholder="Adresse email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
           <Field icon={LockKeyhole} type="password" minLength={8} required placeholder="Mot de passe (8 caractères minimum)" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
+          <label className="flex cursor-pointer items-start gap-3 text-xs leading-5 text-white/60">
+            <input type="checkbox" required checked={acceptedTerms} onChange={e => setAcceptedTerms(e.target.checked)} className="mt-1 accent-[#00DFA5]" />
+            <span>J’accepte les <Link to="/legal/cgv" target="_blank" rel="noopener" className="font-semibold text-[#00DFA5] underline">conditions générales de vente</Link> et la <Link to="/legal/confidentialite" target="_blank" rel="noopener" className="font-semibold text-[#00DFA5] underline">politique de confidentialité</Link>.</span>
+          </label>
           {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
-          <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#686D76] py-3.5 text-sm font-semibold text-[#00DFA5] transition hover:bg-[#686D76]">Créer mon compte <ArrowRight size={16} /></button>
+          <button disabled={!acceptedTerms} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#686D76] py-3.5 text-sm font-semibold text-[#00DFA5] transition hover:bg-[#686D76] disabled:opacity-50">Créer mon compte <ArrowRight size={16} /></button>
         </form>
         <button type="button" onClick={() => { setEnterExistingCode(true); setPendingVerification(false); setError(''); setNotice(''); setToken(''); }} className="mt-5 w-full text-center text-sm font-semibold text-[#00DFA5] hover:text-[#00DFA5]">J’ai déjà un code de validation</button>
         <p className="mt-4 text-center text-xs text-white/50">Déjà inscrit ? <Link to="/login" className="font-semibold text-[#00DFA5]">Se connecter</Link></p>

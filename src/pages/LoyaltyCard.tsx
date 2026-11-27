@@ -1,3 +1,4 @@
+import LegalLinks from '@/components/LegalLinks';
 import { useEffect, useState } from 'react';
 import {
   Bell,
@@ -1240,6 +1241,7 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
           </div>
         )}
         <SmartNearbyGPS accessToken={token} />
+        <LegalLinks className="mt-8 pb-2 text-white/45" />
         </div>
       </div>
     </main>
