@@ -71,7 +71,7 @@ function Cgv() {
       <>Premium : 499 MAD par mois — Basic, plus fidélité, menu, promotions et statistiques.</>,
       <>Enterprise : 799 MAD par mois — Premium, plus assistant IA et gestion avancée.</>,
     ]} />
-    <P>Les prix sont exprimés en dirhams marocains. Le Prestataire, auto-entrepreneur, est hors du champ d’application de la TVA marocaine : les prix sont nets, sans TVA. Pour un Établissement situé dans l’Union européenne, la TVA éventuellement due dans son pays est autoliquidée par l’Établissement. Les frais bancaires et de change éventuels sont à la charge de l’Établissement. Le Prestataire peut modifier ses prix en prévenant l’Établissement par email au moins 30 jours avant ; le nouveau prix s’applique à la période suivante, et l’Établissement peut résilier avant.</P>
+    <P>Les prix sont exprimés en dirhams marocains. Le Prestataire, auto-entrepreneur, est hors du champ d’application de la TVA : les prix sont nets, sans TVA. Les frais bancaires et de change éventuels sont à la charge de l’Établissement. Le Prestataire peut modifier ses prix en prévenant l’Établissement par email au moins 30 jours avant ; le nouveau prix s’applique à la période suivante, et l’Établissement peut résilier avant.</P>
     <P>Une période d’essai gratuite peut être accordée ; sa durée est indiquée dans l’espace de l’Établissement. À la fin de l’essai, l’accès aux fonctions payantes est suspendu tant que le premier paiement n’est pas reçu.</P>
 
     <H2>4. Paiement et facturation</H2>
@@ -100,7 +100,7 @@ function Cgv() {
     <P>Le Prestataire est tenu d’une obligation de moyens. Il n’est pas responsable des dommages indirects (perte de chiffre d’affaires, de clientèle ou d’image), ni des contenus publiés par l’Établissement ou ses clients, ni des défaillances de services tiers. Dans tous les cas, sa responsabilité totale est limitée aux sommes payées par l’Établissement au cours des 12 derniers mois. Ces limites ne s’appliquent pas en cas de faute lourde ou intentionnelle.</P>
 
     <H2>10. Données personnelles et sous-traitance</H2>
-    <P>Pour les données de ses propres clients (cartes de fidélité, avis, contacts), l’Établissement est responsable du traitement et le Prestataire agit comme sous-traitant, au sens de la loi marocaine n° 09-08 et, le cas échéant, de l’article 28 du règlement européen 2016/679 (RGPD). À ce titre, le Prestataire s’engage à :</P>
+    <P>Pour les données de ses propres clients (cartes de fidélité, avis, contacts), l’Établissement est responsable du traitement et le Prestataire agit comme sous-traitant, au sens de la loi n° 09-08 relative à la protection des personnes physiques à l’égard du traitement des données à caractère personnel. À ce titre, le Prestataire s’engage à :</P>
     <UL items={[
       'traiter ces données uniquement pour fournir le service et selon les instructions de l’Établissement données via l’application ;',
       'garantir la confidentialité des données et limiter leur accès aux personnes qui en ont besoin ;',
@@ -120,7 +120,7 @@ function Cgv() {
     <P>Le Prestataire peut modifier les CGV. L’Établissement est informé par email au moins 30 jours avant l’entrée en vigueur ; s’il n’accepte pas, il peut résilier avant cette date.</P>
 
     <H2>13. Droit applicable et litiges</H2>
-    <P>Les CGV sont soumises au droit marocain. En cas de différend, les parties recherchent d’abord une solution amiable pendant 30 jours. À défaut, le litige est porté devant les tribunaux compétents de {LEGAL.court}. Si l’Établissement est situé dans l’Union européenne, les dispositions impératives de son pays restent applicables.</P>
+    <P>Les CGV sont soumises au droit marocain. En cas de différend, les parties recherchent d’abord une solution amiable pendant 30 jours. À défaut, le litige est porté devant les tribunaux compétents de {LEGAL.court}.</P>
   </>;
 }
 
@@ -157,13 +157,13 @@ function Cgu() {
     <P>La manière dont vos données sont utilisées et vos droits sont décrits dans la <DocLink slug="confidentialite">politique de confidentialité</DocLink>.</P>
 
     <H2>8. Responsabilité et droit applicable</H2>
-    <P>{LEGAL.brand} met en œuvre les moyens raisonnables pour que le service fonctionne, sans garantir une disponibilité permanente. Ces conditions sont soumises au droit marocain, sans vous priver des protections impératives de votre pays de résidence. Contact : <Mail />.</P>
+    <P>{LEGAL.brand} met en œuvre les moyens raisonnables pour que le service fonctionne, sans garantir une disponibilité permanente. Ces conditions sont soumises au droit marocain, notamment à la loi n° 31-08 édictant des mesures de protection du consommateur. Contact : <Mail />.</P>
   </>;
 }
 
 function Confidentialite() {
   return <>
-    <P>Cette politique explique quelles données sont traitées par {LEGAL.brand}, pourquoi, combien de temps et quels sont vos droits. Elle respecte la loi marocaine n° 09-08 relative à la protection des personnes physiques à l’égard du traitement des données à caractère personnel et, pour les personnes situées dans l’Union européenne, le règlement général sur la protection des données (RGPD).</P>
+    <P>Cette politique explique quelles données sont traitées par {LEGAL.brand}, pourquoi, combien de temps et quels sont vos droits. Elle respecte la loi n° 09-08 relative à la protection des personnes physiques à l’égard du traitement des données à caractère personnel et les décisions de la Commission nationale de contrôle de la protection des données à caractère personnel (CNDP).</P>
 
     <H2>1. Qui est responsable</H2>
     <UL items={[
@@ -212,14 +212,14 @@ function Confidentialite() {
       'Services de notification des navigateurs (Google, Apple, Mozilla) : acheminement des notifications du téléphone.',
     ]} />
 
-    <H2>5. Transferts hors du Maroc et de l’Union européenne</H2>
-    <P>Certains prestataires sont situés hors du Maroc, et certains hors de l’Union européenne. Ces transferts sont nécessaires au fonctionnement du service et sont encadrés, selon le cas, par l’autorisation ou la notification auprès de la CNDP prévue par la loi 09-08, par les clauses contractuelles types de la Commission européenne ou par le cadre de protection des données UE–États-Unis. En utilisant le service, vous êtes informé de ces transferts.</P>
+    <H2>5. Transferts hors du Maroc</H2>
+    <P>Les données sont hébergées en Irlande (Union européenne) et certains prestataires sont situés aux États-Unis. Ces transferts sont nécessaires au fonctionnement du service. Ils sont réalisés conformément aux articles 43 et 44 de la loi n° 09-08, dans le cadre de l’autorisation demandée à la CNDP, et avec des prestataires qui appliquent des engagements contractuels de protection des données. En créant votre carte, vous êtes informé de ces transferts et y consentez.</P>
 
     <H2>6. Durées de conservation</H2>
     <UL items={[
-      'Carte de fidélité : tant qu’elle est active, puis suppression au plus tard 3 ans après la dernière activité, ou plus tôt sur demande.',
-      'Avis et retours privés : 3 ans au maximum.',
-      'Consentements et leur preuve : pendant la durée d’utilisation, puis 3 ans.',
+      'Carte de fidélité : tant que l’établissement utilise Kelyani, ou jusqu’à votre demande de suppression.',
+      'Avis et retours privés : tant que l’établissement utilise Kelyani, ou jusqu’à votre demande de suppression.',
+      'Consentements et leur preuve : pendant toute la durée d’utilisation de la carte.',
       'Données d’un établissement et de ses clients après la fin de l’abonnement : 30 jours, puis suppression.',
       'Factures et pièces comptables : 10 ans, conformément à la loi.',
     ]} />
@@ -228,8 +228,8 @@ function Confidentialite() {
     <P>Les échanges sont chiffrés (HTTPS). Les accès sont cloisonnés par établissement et contrôlés au niveau de la base de données. Les mots de passe sont chiffrés. Les cartes sont accessibles par un lien personnel non devinable.</P>
 
     <H2>8. Vos droits</H2>
-    <P>Vous disposez d’un droit d’accès, de rectification, d’opposition (y compris à la prospection, sans justification), de suppression, de limitation et de portabilité, ainsi que du droit de retirer votre consentement à tout moment. Pour un programme de fidélité, adressez-vous de préférence à l’établissement ; vous pouvez aussi écrire à <Mail /> et nous transmettrons ou traiterons la demande dans un délai d’un mois. Une preuve d’identité peut être demandée en cas de doute.</P>
-    <P>Vous pouvez introduire une réclamation auprès de la CNDP (www.cndp.ma) au Maroc ou, si vous résidez dans l’Union européenne, auprès de votre autorité de protection des données (en France : la CNIL, www.cnil.fr).</P>
+    <P>Conformément aux articles 7 à 9 de la loi n° 09-08, vous disposez d’un droit d’information, d’accès, de rectification, de suppression et d’opposition, y compris à la prospection commerciale, sans avoir à vous justifier. Vous pouvez retirer votre consentement à tout moment. Pour un programme de fidélité, adressez-vous de préférence à l’établissement ; vous pouvez aussi écrire à <Mail /> et nous transmettrons ou traiterons la demande dans un délai d’un mois. Une preuve d’identité peut être demandée en cas de doute.</P>
+    <P>Vous pouvez introduire une réclamation auprès de la CNDP (www.cndp.ma).</P>
 
     <H2>9. Cookies et stockage local</H2>
     <P>{LEGAL.brand} n’utilise ni cookie publicitaire, ni outil de mesure d’audience tiers. L’application utilise uniquement le stockage local du navigateur, strictement nécessaire à son fonctionnement : maintien de votre session, accès à votre carte et préférences d’affichage. Ce stockage ne nécessite pas de consentement ; vous pouvez l’effacer depuis les réglages de votre navigateur, ce qui vous déconnectera.</P>

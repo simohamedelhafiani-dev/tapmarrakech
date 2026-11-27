@@ -21,7 +21,7 @@ import {
   Wifi,
   X,
 } from 'lucide-react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import type { Establishment } from '@/lib/types';
 import { Stars } from '@/components/Stars';
@@ -1351,6 +1351,11 @@ export default function PublicReview() {
                   {loyaltyError}
                 </div>
               )}
+
+              <label className="flex cursor-pointer items-start gap-3 text-[11px] leading-5 text-ink/60">
+                <input type="checkbox" required className="mt-1 accent-forest" />
+                <span>J’accepte les <Link to="/legal/cgu" target="_blank" rel="noopener" className="underline">conditions d’utilisation</Link> et la <Link to="/legal/confidentialite" target="_blank" rel="noopener" className="underline">politique de confidentialité</Link>, y compris l’hébergement de mes données hors du Maroc par les prestataires techniques de Kelyani.</span>
+              </label>
 
               <button
                 disabled={loyaltyLoading}
