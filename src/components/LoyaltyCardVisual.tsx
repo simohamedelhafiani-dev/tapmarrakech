@@ -11,6 +11,8 @@ export const WALLET_TEMPLATES = {
 
 import { useEffect, useMemo, useState } from 'react';
 import QRCode from 'qrcode';
+import { getCategoryTemplate } from '@/components/loyalty/cardTemplates';
+import { WalletPassCard } from '@/components/loyalty/WalletPassCard';
 
 export type LoyaltyDesignConfig = {
   logo_x: number;
@@ -128,7 +130,7 @@ function StampMark({ filled, style, accent }: { filled: boolean; style: LoyaltyD
   );
 }
 
-export function LoyaltyCardVisual({
+function ClassicCardVisual({
   design,
   card,
   side = 'front',
@@ -512,3 +514,22 @@ export function LoyaltyCardVisual({
   );
 }
 
+/** Category templates render as a Wallet-style pass; older templates keep the classic card. */
+export function LoyaltyCardVisual(props: Parameters<typeof ClassicCardVisual>[0]) {
+  const template = getCategoryTemplate(props.design.template_id);
+  if (template) {
+    const config = { ...defaultLoyaltyDesignConfig, ...(props.design.config ?? {}) };
+    return (
+      <WalletPassCard
+        template={template}
+        config={config}
+        card={props.card}
+        mode={normalizeMode(props.design, props.programType ?? 'POINTS')}
+        side={props.side}
+        cardWidth={props.cardWidth}
+        onInviteFriend={props.onInviteFriend}
+      />
+    );
+  }
+  return <ClassicCardVisual {...props} />;
+}

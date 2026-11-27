@@ -22,6 +22,8 @@ import {
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { WALLET_TEMPLATES as LOYALTY_CARD_TEMPLATES } from '@/components/LoyaltyCardVisual';
+import { CARD_CATEGORY_TEMPLATES, getCategoryTemplate, isCategoryTemplate } from '@/components/loyalty/cardTemplates';
+import { WalletPassCard } from '@/components/loyalty/WalletPassCard';
 import {
   useLoyaltyManager,
   type LoyaltyProgramType,
@@ -208,6 +210,15 @@ function normalizeReward(row: Record<string, unknown>): Reward {
   };
 }
 
+/** Same rule as the Google Wallet publisher: any color except blue-dominant ones. */
+function normalizeWalletBackgroundColor(value: unknown, fallback = '#050505'): string {
+  const candidate = typeof value === 'string' && /^#[0-9a-fA-F]{6}$/.test(value) ? value.toUpperCase() : fallback;
+  const red = Number.parseInt(candidate.slice(1, 3), 16);
+  const green = Number.parseInt(candidate.slice(3, 5), 16);
+  const blue = Number.parseInt(candidate.slice(5, 7), 16);
+  return blue - red >= 35 && blue - green >= 35 ? '#686D76' : candidate;
+}
+
 export default function LoyaltyStudio({ establishmentId }: Props) {
   const manager = useLoyaltyManager(establishmentId);
   const { role } = useAuth();
@@ -323,15 +334,16 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       const row = Array.isArray(designData) ? designData[0] : designData;
       if (row) {
         const cfg = row.design_config ?? {};
-        setWalletDesign({ ...DEFAULT_WALLET_DESIGN, ...(cfg.wallet_design ?? {}), backgroundColor: normalizeNardoBackgroundColor(cfg.wallet_design?.backgroundColor ?? DEFAULT_WALLET_DESIGN.backgroundColor) });
+        const categoryTemplate = isCategoryTemplate(row.template_id);
+        setWalletDesign({ ...DEFAULT_WALLET_DESIGN, ...(cfg.wallet_design ?? {}), backgroundColor: categoryTemplate ? normalizeWalletBackgroundColor(cfg.wallet_design?.backgroundColor ?? DEFAULT_WALLET_DESIGN.backgroundColor) : normalizeNardoBackgroundColor(cfg.wallet_design?.backgroundColor ?? DEFAULT_WALLET_DESIGN.backgroundColor) });
         setDesign({
           ...DEFAULT_DESIGN,
           templateId: row.template_id ?? DEFAULT_DESIGN.templateId,
-          primaryColor: normalizeNardoCardColor(row.primary_color, DEFAULT_DESIGN.primaryColor),
-          secondaryColor: normalizeNardoCardColor(row.secondary_color, DEFAULT_DESIGN.secondaryColor),
-          backgroundColor: normalizeNardoBackgroundColor(row.background_color ?? DEFAULT_DESIGN.backgroundColor, DEFAULT_DESIGN.backgroundColor),
+          primaryColor: categoryTemplate ? (row.primary_color ?? DEFAULT_DESIGN.primaryColor) : normalizeNardoCardColor(row.primary_color, DEFAULT_DESIGN.primaryColor),
+          secondaryColor: categoryTemplate ? (row.secondary_color ?? DEFAULT_DESIGN.secondaryColor) : normalizeNardoCardColor(row.secondary_color, DEFAULT_DESIGN.secondaryColor),
+          backgroundColor: categoryTemplate ? (row.background_color ?? DEFAULT_DESIGN.backgroundColor) : normalizeNardoBackgroundColor(row.background_color ?? DEFAULT_DESIGN.backgroundColor, DEFAULT_DESIGN.backgroundColor),
           textColor: row.text_color ?? DEFAULT_DESIGN.textColor,
-          buttonColor: normalizeNardoCardColor(row.button_color, DEFAULT_DESIGN.buttonColor),
+          buttonColor: categoryTemplate ? (row.button_color ?? DEFAULT_DESIGN.buttonColor) : normalizeNardoCardColor(row.button_color, DEFAULT_DESIGN.buttonColor),
           borderRadius: Number(row.border_radius ?? DEFAULT_DESIGN.borderRadius),
           wallpaperUrl: cfg.background_image_url ?? cfg.wallpaperUrl ?? null,
           wallpaperUrls: Array.isArray(cfg.wallpaper_urls)
@@ -525,6 +537,22 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   }, [establishmentId, design, walletDesign, establishment.logoUrl, program, rewards, previewChannelReady]);
 
   const selectTemplate = (id: string) => {
+    const category = getCategoryTemplate(id);
+    if (category) {
+      setDesign(current => ({
+        ...current,
+        templateId: id,
+        primaryColor: category.backgroundEnd,
+        secondaryColor: category.accent,
+        backgroundColor: category.background,
+        textColor: category.text,
+        buttonColor: category.accent,
+        published: false,
+      }));
+      // Google Wallet follows the same color; the admin still publishes it from its tab.
+      setWalletDesign(current => ({ ...current, backgroundColor: normalizeWalletBackgroundColor(category.background) }));
+      return;
+    }
     const template = LOYALTY_CARD_TEMPLATES[id as keyof typeof LOYALTY_CARD_TEMPLATES];
     if (!template) return;
 
@@ -1395,6 +1423,40 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
 
           {tab === 'design' && isAdmin && (
             <div className="space-y-5">
+              <StudioCard eyebrow="Modèles par catégorie" title="Carte façon Wallet">
+                <p className="-mt-1 mb-4 text-xs leading-5 text-[#FFFFFF]/50">
+                  Choisissez le style adapté au commerce. La photo ajoutée plus bas s’affiche dans le bandeau de la carte, comme sur Google Wallet et Apple Wallet.
+                </p>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
+                  {CARD_CATEGORY_TEMPLATES.map(item => {
+                    const active = design.templateId === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => selectTemplate(item.id)}
+                        aria-pressed={active}
+                        className={`group rounded-2xl border p-2 text-left transition ${active ? 'border-[#10B981] ring-2 ring-[#10B981]/30' : 'border-white/[0.08] hover:border-[#10B981]/40'}`}
+                      >
+                        <div className="pointer-events-none">
+                          <WalletPassCard
+                            template={item}
+                            config={{ show_qr: false, background_image_url: active ? design.wallpaperUrl : null, logo_url: design.logoUrl }}
+                            card={{ establishmentName: establishment.name || 'Votre commerce', points: 240, stampsBalance: 6, stampGoal: 10, rewardName: 'Cadeau offert', stampRewardName: 'Cadeau offert', rewardPointsRequired: 400, customerName: 'Sara B.' }}
+                            mode={program.programType === 'STAMP' ? 'STAMP' : program.programType === 'POINTS_DISCOUNT' ? 'DISCOUNT' : 'POINTS'}
+                            cardWidth="100%"
+                          />
+                        </div>
+                        <div className="mt-2 px-1">
+                          <p className="text-xs font-semibold text-white">{item.name}</p>
+                          <p className="text-[10px] text-[#FFFFFF]/45">{item.category}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </StudioCard>
+
               <StudioCard eyebrow="Wallet" title="Choisir une identité">
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                   {Object.values(LOYALTY_CARD_TEMPLATES).map(item => {
