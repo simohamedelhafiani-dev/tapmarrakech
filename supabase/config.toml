@@ -29,3 +29,17 @@ verify_jwt = false
 # It must not require a Supabase Auth JWT from the card holder.
 [functions.smart-nearby-event]
 verify_jwt = false
+
+# These functions are called by Google (webhook, OAuth return) or do their own
+# auth checks, so they must keep verify_jwt = false as in Production.
+[functions.google-business-webhook]
+verify_jwt = false
+
+[functions.google-business-oauth]
+verify_jwt = false
+
+[functions.google-business-admin-dashboard]
+verify_jwt = false
+
+[functions.create-staff-account]
+verify_jwt = false
