@@ -25,7 +25,7 @@ export const CARD_CATEGORY_TEMPLATES: CardCategoryTemplate[] = [
   { id: 'cat-beaute', name: 'Beauté rosé', category: 'Salon de beauté', background: '#4A1D33', backgroundEnd: '#7A3355', accent: '#F6AFC2', text: '#FFF0F5', motif: '💅' },
   { id: 'cat-boutique', name: 'Boutique champagne', category: 'Boutique', background: '#111111', backgroundEnd: '#2A2622', accent: '#E8CBA0', text: '#FFFFFF', motif: '🛍️' },
   { id: 'cat-boulangerie', name: 'Boulangerie blé', category: 'Boulangerie', background: '#F2E2C2', backgroundEnd: '#E2C48F', accent: '#A85A1E', text: '#43290F', motif: '🥐', light: true },
-  { id: 'cat-riad', name: 'Riad zellige', category: 'Hôtel & riad', background: '#0F3D3E', backgroundEnd: '#1C5B57', accent: '#E3BC78', text: '#F6EFE2', motif: '🕌' },
+  { id: 'cat-riad', name: 'Riad zellige', category: 'Hôtel & riad', background: '#0F3D3E', backgroundEnd: '#1C5B57', accent: '#E3BC78', text: '#F6EFE2', motif: '🛎️' },
   { id: 'cat-garage', name: 'Garage carbone', category: 'Garage & auto', background: '#1C1C1E', backgroundEnd: '#34343A', accent: '#FF6A2B', text: '#FFFFFF', motif: '🚗' },
   { id: 'cat-snack', name: 'Snack pop', category: 'Snack & fast-food', background: '#C8231B', backgroundEnd: '#E8462A', accent: '#FFD84A', text: '#FFFFFF', motif: '🍔' },
   { id: 'cat-sport', name: 'Sport énergie', category: 'Salle de sport', background: '#121417', backgroundEnd: '#1F2A1A', accent: '#B8F23F', text: '#FFFFFF', motif: '💪' },
