@@ -1,4 +1,7 @@
 -- Coexistence webhook persistence contract and tenant-safe service-only access.
+BEGIN;
+SELECT plan(1);
+
 DO $test$
 DECLARE
   v_upsert oid;
@@ -37,3 +40,8 @@ BEGIN
   END IF;
 END
 $test$;
+
+SELECT pass('WhatsApp coexistence sync storage is service-only and tenant-safe');
+
+SELECT * FROM finish();
+ROLLBACK;

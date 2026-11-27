@@ -10,6 +10,10 @@ CREATE TEMP TABLE whatsapp_access_fixture (
   establishment_id uuid NOT NULL
 ) ON COMMIT DROP;
 
+-- Track the fixture users by id: profile names can be rewritten by profile
+-- triggers, so they are not a reliable lookup key.
+CREATE TEMP TABLE whatsapp_access_users (rn integer PRIMARY KEY, id uuid NOT NULL) ON COMMIT DROP;
+
 WITH users AS (
   INSERT INTO auth.users (
     id, aud, role, email, encrypted_password, email_confirmed_at,
@@ -19,18 +23,15 @@ WITH users AS (
          'whatsapp-access-' || replace(gen_random_uuid()::text, '-', '') || '@test.invalid',
          '', now(), '{}'::jsonb, '{}'::jsonb, now(), now()
   FROM generate_series(1, 4)
-  RETURNING id, email
-),
-numbered AS (
-  SELECT id, email, row_number() OVER (ORDER BY id) AS rn FROM users
+  RETURNING id
 )
+INSERT INTO whatsapp_access_users (rn, id)
+SELECT row_number() OVER (ORDER BY id), id FROM users;
+
 INSERT INTO public.profiles (id, email, name)
-SELECT id, email, 'WhatsApp access fixture ' || rn
-FROM (
-  SELECT id, email, row_number() OVER (ORDER BY id) AS rn
-  FROM auth.users
-  WHERE email LIKE 'whatsapp-access-%@test.invalid'
-) numbered
+SELECT u.id, au.email, 'WhatsApp access fixture ' || u.rn
+FROM whatsapp_access_users u
+JOIN auth.users au ON au.id = u.id
 ON CONFLICT (id) DO UPDATE
 SET email = EXCLUDED.email,
     name = EXCLUDED.name;
@@ -38,27 +39,30 @@ SET email = EXCLUDED.email,
 -- The role-authority trigger reserves privileged role assignment for trusted
 -- server-side provisioning; model that trusted setup explicitly in the fixture.
 SELECT set_config('request.jwt.claims', '{"role":"service_role"}', true);
-UPDATE public.profiles
-SET role = CASE
-  WHEN name = 'WhatsApp access fixture 1' THEN 'admin'
-  WHEN name = 'WhatsApp access fixture 4' THEN 'employee'
+UPDATE public.profiles p
+SET role = CASE u.rn
+  WHEN 1 THEN 'admin'
+  WHEN 4 THEN 'employee'
   ELSE 'responsible'
 END
-WHERE name LIKE 'WhatsApp access fixture %';
+FROM whatsapp_access_users u
+WHERE p.id = u.id;
 SELECT set_config('request.jwt.claims', '{}', true);
 
 INSERT INTO public.establishments (user_id, name, slug)
-SELECT p.id, 'WhatsApp access fixture', 'wa-access-' || replace(gen_random_uuid()::text, '-', '')
-FROM public.profiles p
-WHERE p.name = 'WhatsApp access fixture 2';
+SELECT u.id, 'WhatsApp access fixture', 'wa-access-' || replace(gen_random_uuid()::text, '-', '')
+FROM whatsapp_access_users u
+WHERE u.rn = 2;
 
 INSERT INTO whatsapp_access_fixture
 SELECT
-  (SELECT id FROM public.profiles WHERE name = 'WhatsApp access fixture 1'),
-  (SELECT id FROM public.profiles WHERE name = 'WhatsApp access fixture 2'),
-  (SELECT id FROM public.profiles WHERE name = 'WhatsApp access fixture 3'),
-  (SELECT id FROM public.profiles WHERE name = 'WhatsApp access fixture 4'),
-  (SELECT id FROM public.establishments WHERE name = 'WhatsApp access fixture' ORDER BY created_at DESC LIMIT 1);
+  (SELECT id FROM whatsapp_access_users WHERE rn = 1),
+  (SELECT id FROM whatsapp_access_users WHERE rn = 2),
+  (SELECT id FROM whatsapp_access_users WHERE rn = 3),
+  (SELECT id FROM whatsapp_access_users WHERE rn = 4),
+  (SELECT e.id FROM public.establishments e
+     JOIN whatsapp_access_users u ON u.id = e.user_id AND u.rn = 2
+   ORDER BY e.created_at DESC LIMIT 1);
 
 GRANT SELECT ON whatsapp_access_fixture TO authenticated;
 

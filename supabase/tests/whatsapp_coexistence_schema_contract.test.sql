@@ -1,4 +1,7 @@
 -- Contract tests for WhatsApp manager access and OAuth token expiry storage.
+BEGIN;
+SELECT plan(1);
+
 DO $test$
 DECLARE
   v_function oid;
@@ -48,3 +51,8 @@ BEGIN
   END IF;
 END
 $test$;
+
+SELECT pass('WhatsApp coexistence schema contract holds');
+
+SELECT * FROM finish();
+ROLLBACK;
