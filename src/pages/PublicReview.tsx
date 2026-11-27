@@ -1399,8 +1399,8 @@ function ActionRow({
   accent?: 'gray' | 'blue';
 }) {
   const accentClasses = {
-    gray: 'bg-[#686D76] text-[#FFFFFF]',
-    blue: 'bg-[#686D76] text-[#00DFA5]',
+    gray: 'bg-[#475569] text-[#FFFFFF]',
+    blue: 'bg-[#475569] text-[#10B981]',
   } as const;
 
   const className = "group flex w-full items-center gap-4 rounded-[24px] bg-white p-4 text-left shadow-sm ring-1 ring-ink/5 transition active:scale-[0.99]";

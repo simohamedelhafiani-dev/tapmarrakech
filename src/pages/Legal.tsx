@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { LEGAL, LEGAL_DOCS, LEGAL_UPDATED_AT, type LegalDocSlug } from '@/config/legal';
 
-const H2 = ({ children }: { children: ReactNode }) => <h2 className="mt-10 font-display text-2xl text-[#00DFA5]">{children}</h2>;
+const H2 = ({ children }: { children: ReactNode }) => <h2 className="mt-10 font-display text-2xl text-[#10B981]">{children}</h2>;
 const H3 = ({ children }: { children: ReactNode }) => <h3 className="mt-6 text-base font-semibold text-white">{children}</h3>;
 const P = ({ children }: { children: ReactNode }) => <p className="mt-3 text-sm leading-7 text-white/70">{children}</p>;
 const UL = ({ items }: { items: ReactNode[] }) => (
@@ -10,9 +10,9 @@ const UL = ({ items }: { items: ReactNode[] }) => (
     {items.map((item, index) => <li key={index}>{item}</li>)}
   </ul>
 );
-const Mail = () => <a className="text-[#00DFA5] underline" href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>;
+const Mail = () => <a className="text-[#10B981] underline" href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>;
 const DocLink = ({ slug, children }: { slug: LegalDocSlug; children: ReactNode }) => (
-  <Link className="text-[#00DFA5] underline" to={`/legal/${slug}`}>{children}</Link>
+  <Link className="text-[#10B981] underline" to={`/legal/${slug}`}>{children}</Link>
 );
 
 function Identity() {
@@ -255,13 +255,13 @@ export default function Legal() {
   return (
     <main className="min-h-screen bg-[#050505] px-4 py-10 text-white sm:px-6">
       <div className="mx-auto max-w-3xl">
-        <Link to="/" className="font-display text-2xl tracking-[0.12em] text-[#00DFA5]">KELYANI</Link>
+        <Link to="/" className="font-display text-2xl tracking-[0.12em] text-[#10B981]">KELYANI</Link>
         <nav aria-label="Documents légaux" className="mt-8 flex flex-wrap gap-2">
           {LEGAL_DOCS.map(item => (
             <Link
               key={item.slug}
               to={`/legal/${item.slug}`}
-              className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${item.slug === current.slug ? 'border-[#00DFA5] bg-[#00DFA5] text-[#050505]' : 'border-white/15 text-white/60 hover:border-[#00DFA5] hover:text-[#00DFA5]'}`}
+              className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${item.slug === current.slug ? 'border-[#10B981] bg-[#10B981] text-[#050505]' : 'border-white/15 text-white/60 hover:border-[#10B981] hover:text-[#10B981]'}`}
             >
               {item.title}
             </Link>

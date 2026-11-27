@@ -332,7 +332,7 @@ export default function Establishments() {
         width: 900,
         margin: 2,
         color: {
-          dark: '#686D76',
+          dark: '#475569',
           light: '#ffffff',
         },
       }
@@ -384,7 +384,7 @@ export default function Establishments() {
 
       <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#00DFA5]">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#10B981]">
             Réseau
           </p>
 
@@ -427,7 +427,7 @@ export default function Establishments() {
       {places.length === 0 && role === 'responsible' && (
         <div className="rounded-2xl border border-dashed border-ink/15 bg-white px-6 py-20 text-center">
           <Building2
-            className="mx-auto text-[#00DFA5]"
+            className="mx-auto text-[#10B981]"
             size={36}
           />
 
@@ -447,7 +447,7 @@ export default function Establishments() {
       {places.length === 0 && role === 'admin' && (
         <div className="rounded-2xl border border-dashed border-ink/15 bg-white px-6 py-20 text-center">
           <Building2
-            className="mx-auto text-[#00DFA5]"
+            className="mx-auto text-[#10B981]"
             size={36}
           />
 
@@ -485,7 +485,7 @@ export default function Establishments() {
               className="rounded-2xl border border-ink/5 bg-white p-5 shadow-soft"
             >
               <div className="flex items-start gap-4">
-                <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-forest font-display text-2xl text-[#00DFA5]">
+                <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-forest font-display text-2xl text-[#10B981]">
                   {place.logo_url ? (
                     <img
                       src={place.logo_url}
@@ -509,7 +509,7 @@ export default function Establishments() {
 
                 <button
                   onClick={() => openEdit(place)}
-                  className="text-xs font-semibold text-[#00DFA5]"
+                  className="text-xs font-semibold text-[#10B981]"
                 >
                   Modifier
                 </button>
@@ -518,7 +518,7 @@ export default function Establishments() {
               <div className="mt-5 rounded-2xl border border-forest/10 bg-white p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div><p className="text-xs font-bold uppercase tracking-[0.14em] text-forest">Liens publics</p><p className="mt-1 text-[11px] text-ink/50">Générez un lien séparé pour chaque fonctionnalité.</p></div>
-                  <Link2 size={20} className="shrink-0 text-[#00DFA5]" />
+                  <Link2 size={20} className="shrink-0 text-[#10B981]" />
                 </div>
                 <div className="mt-4 space-y-2">
                   {publicLinks(place).map((link) => {
@@ -536,7 +536,7 @@ export default function Establishments() {
                   })}
                 </div>
               </div>
-              <div className="mt-5 rounded-2xl border border-[#00DFA5]/20 bg-[#111111] p-4">
+              <div className="mt-5 rounded-2xl border border-[#10B981]/20 bg-[#111111] p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[0.14em] text-forest">
@@ -546,7 +546,7 @@ export default function Establishments() {
                       Lien permanent pour les employés
                     </p>
                   </div>
-                  <QrCode size={20} className="shrink-0 text-[#00DFA5]" />
+                  <QrCode size={20} className="shrink-0 text-[#10B981]" />
                 </div>
 
                 <div className="mt-3 rounded-xl bg-white px-3 py-2.5">
@@ -691,18 +691,18 @@ export default function Establishments() {
                       })
                     }
                     placeholder={placeholder}
-                    className="mt-2 w-full rounded-xl border border-ink/10 bg-[#fbfaf7] p-3 text-sm font-normal outline-none focus:ring-2 focus:ring-[#00DFA5]"
+                    className="mt-2 w-full rounded-xl border border-ink/10 bg-[#fbfaf7] p-3 text-sm font-normal outline-none focus:ring-2 focus:ring-[#10B981]"
                   />
                 </label>
               ))}
 
-              <div className="rounded-2xl border border-[#00DFA5]/20 bg-[#111111] p-4 text-white">
+              <div className="rounded-2xl border border-[#10B981]/20 bg-[#111111] p-4 text-white">
                 <div className="flex items-start gap-3">
-                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#00DFA5]/10 text-[#00DFA5]">
+                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#10B981]/10 text-[#10B981]">
                     <Bot size={18} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#00DFA5]">Google Business Profile</p>
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#10B981]">Google Business Profile</p>
                     <p className="mt-1 text-[11px] text-white/50">Connectez le compte Google qui gère cette fiche pour synchroniser les avis et permettre à KELYANI de répondre automatiquement.</p>
                     <button type="button" onClick={async () => {
                       if (!editing) return;
@@ -712,16 +712,16 @@ export default function Establishments() {
                         return;
                       }
                       window.open(data.authorization_url, '_blank', 'width=600,height=750');
-                    }} className="mt-3 rounded-xl bg-[#00DFA5] px-4 py-2.5 text-[11px] font-bold text-[#050505]">
+                    }} className="mt-3 rounded-xl bg-[#10B981] px-4 py-2.5 text-[11px] font-bold text-[#050505]">
                       Connecter Google
                     </button>
                   </div>
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-[#00DFA5]/20 bg-[#111111] p-4">
+              <div className="rounded-2xl border border-[#10B981]/20 bg-[#111111] p-4">
                 <div className="flex items-start gap-3">
-                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-[#00DFA5]">
+                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-[#10B981]">
                     <Bot size={18} />
                   </div>
                   <div className="flex-1">
@@ -733,7 +733,7 @@ export default function Establishments() {
                       <button
                         type="button"
                         onClick={() => setGoogleAutoReply((v) => !v)}
-                        className={`relative h-6 w-11 shrink-0 rounded-full transition ${googleAutoReply ? 'bg-[#686D76]' : 'bg-ink/15'}`}
+                        className={`relative h-6 w-11 shrink-0 rounded-full transition ${googleAutoReply ? 'bg-[#475569]' : 'bg-ink/15'}`}
                         aria-label="Activer la réponse automatique Google"
                       >
                         <span className={`absolute top-1 h-4 w-4 rounded-full bg-white transition ${googleAutoReply ? 'left-6' : 'left-1'}`} />
@@ -743,7 +743,7 @@ export default function Establishments() {
                       <div className="mt-4 space-y-3">
                         <label className="block text-[11px] font-semibold text-ink/65">
                           Langue
-                          <select value={googleReplyLanguage} onChange={(e) => setGoogleReplyLanguage(e.target.value)} className="mt-1.5 w-full rounded-xl border border-ink/10 bg-white p-2.5 text-xs outline-none focus:ring-2 focus:ring-[#00DFA5]">
+                          <select value={googleReplyLanguage} onChange={(e) => setGoogleReplyLanguage(e.target.value)} className="mt-1.5 w-full rounded-xl border border-ink/10 bg-white p-2.5 text-xs outline-none focus:ring-2 focus:ring-[#10B981]">
                             <option>français</option>
                             <option>anglais</option>
                             <option>arabe</option>
@@ -752,7 +752,7 @@ export default function Establishments() {
                         </label>
                         <label className="block text-[11px] font-semibold text-ink/65">
                           Ton
-                          <select value={googleReplyTone} onChange={(e) => setGoogleReplyTone(e.target.value)} className="mt-1.5 w-full rounded-xl border border-ink/10 bg-white p-2.5 text-xs outline-none focus:ring-2 focus:ring-[#00DFA5]">
+                          <select value={googleReplyTone} onChange={(e) => setGoogleReplyTone(e.target.value)} className="mt-1.5 w-full rounded-xl border border-ink/10 bg-white p-2.5 text-xs outline-none focus:ring-2 focus:ring-[#10B981]">
                             <option>professionnel et chaleureux</option>
                             <option>premium et élégant</option>
                             <option>amical et naturel</option>
@@ -782,7 +782,7 @@ export default function Establishments() {
                       ),
                     })
                   }
-                  className="mt-2 w-full rounded-xl border border-ink/10 bg-[#fbfaf7] p-3 text-sm font-normal outline-none focus:ring-2 focus:ring-[#00DFA5]"
+                  className="mt-2 w-full rounded-xl border border-ink/10 bg-[#fbfaf7] p-3 text-sm font-normal outline-none focus:ring-2 focus:ring-[#10B981]"
                 >
                   {[1, 2, 3, 4, 5].map((n) => (
                     <option key={n} value={n}>
@@ -858,7 +858,7 @@ function QRCodePreview({ url }: { url: string }) {
       width: 240,
       margin: 2,
       color: {
-        dark: '#686D76',
+        dark: '#475569',
         light: '#ffffff',
       },
     }).then(setSrc);

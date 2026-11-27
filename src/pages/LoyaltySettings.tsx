@@ -426,7 +426,7 @@ export default function LoyaltySettings() {
       {/* ATTRIBUTION DES POINTS */}
       <section className="mt-6 rounded-2xl border border-ink/5 bg-[#1A1A1A] p-6 shadow-soft md:p-8">
         <div className="flex items-start gap-4">
-          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#686D76] text-electric">
+          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#475569] text-electric">
             <Coins size={20} />
           </div>
 
@@ -554,7 +554,7 @@ export default function LoyaltySettings() {
               >
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div className="flex items-start gap-4">
-                    <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#686D76] text-electric">
+                    <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#475569] text-electric">
                       <Gift size={19} />
                     </div>
 
@@ -636,7 +636,7 @@ export default function LoyaltySettings() {
         <button
           onClick={saveSettings}
           disabled={saving || !establishmentId}
-          className="flex items-center gap-2 rounded-xl bg-electric px-5 py-3 text-xs font-semibold text-forest transition hover:bg-[#686D76] disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex items-center gap-2 rounded-xl bg-electric px-5 py-3 text-xs font-semibold text-forest transition hover:bg-[#475569] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {saved ? (
             <>

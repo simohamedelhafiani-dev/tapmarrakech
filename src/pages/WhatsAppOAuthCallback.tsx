@@ -11,7 +11,7 @@ export default function WhatsAppOAuthCallback() {
 
   return (
     <main className="min-h-screen grid place-items-center bg-[#050505] px-6">
-      <section className="w-full max-w-lg rounded-2xl border border-[#686D76] bg-[#171717] p-8 text-center text-white shadow-xl">
+      <section className="w-full max-w-lg rounded-2xl border border-[#475569] bg-[#171717] p-8 text-center text-white shadow-xl">
         <h1 className="text-2xl font-semibold">Connexion WhatsApp — KELYANI</h1>
         {status === 'error' ? (
           <>
@@ -24,7 +24,7 @@ export default function WhatsAppOAuthCallback() {
         ) : (
           <p className="mt-4 text-sm text-gray-300">Aucun retour de connexion Meta détecté dans cette adresse.</p>
         )}
-        <Link className="mt-6 inline-flex rounded-lg bg-[#686D76] px-4 py-2 text-white hover:opacity-90" to="/login">Retour à KELYANI</Link>
+        <Link className="mt-6 inline-flex rounded-lg bg-[#475569] px-4 py-2 text-white hover:opacity-90" to="/login">Retour à KELYANI</Link>
       </section>
     </main>
   );
