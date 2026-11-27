@@ -121,7 +121,7 @@ type WalletDesignState = {
 
 const DEFAULT_WALLET_DESIGN: WalletDesignState = {
   backgroundColor: '#050505',
-  primaryColor: '#475569',
+  primaryColor: '#686D76',
   accentColor: '#06B6D4',
   textColor: '#FFFFFF',
   logoUrl: '',
@@ -141,11 +141,11 @@ const DEFAULT_WALLET_DESIGN: WalletDesignState = {
 
 const DEFAULT_DESIGN: DesignState = {
   templateId: 'onyx-black',
-  primaryColor: '#475569',
-  secondaryColor: '#475569',
+  primaryColor: '#686D76',
+  secondaryColor: '#686D76',
   backgroundColor: '#050505',
   textColor: '#FFFFFF',
-  buttonColor: '#475569',
+  buttonColor: '#686D76',
   borderRadius: 34,
   wallpaperUrl: null,
   wallpaperUrls: [],
@@ -954,7 +954,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
             type="button"
             onClick={() => void saveAll(true)}
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#475569] px-4 py-2.5 text-xs font-semibold text-[#06B6D4] shadow-sm transition hover:-translate-y-0.5 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#686D76] px-4 py-2.5 text-xs font-semibold text-[#06B6D4] shadow-sm transition hover:-translate-y-0.5 disabled:opacity-50"
           >
             <Save size={14} />
             {saving ? '...' : 'Publier'}
@@ -983,8 +983,8 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                 {visibleTabs.map(item => {
                   const Icon = item.icon;
                   return (
-                    <button key={item.id} type="button" onClick={() => setTab(item.id)} aria-current={tab === item.id ? 'page' : undefined} className={`flex min-w-0 items-center gap-2.5 rounded-xl border px-3 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#06B6D4] ${tab === item.id ? 'border-[#06B6D4]/50 bg-[#475569]/10 text-[#06B6D4]' : 'border-transparent text-white/65 hover:border-white/10 hover:bg-white/[.04] hover:text-white'}`}>
-                      <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${tab === item.id ? 'bg-[#475569] text-[#06B6D4]' : 'bg-white/[.06] text-[#06B6D4]'}`}>
+                    <button key={item.id} type="button" onClick={() => setTab(item.id)} aria-current={tab === item.id ? 'page' : undefined} className={`flex min-w-0 items-center gap-2.5 rounded-xl border px-3 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#06B6D4] ${tab === item.id ? 'border-[#06B6D4]/50 bg-[#686D76]/10 text-[#06B6D4]' : 'border-transparent text-white/65 hover:border-white/10 hover:bg-white/[.04] hover:text-white'}`}>
+                      <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${tab === item.id ? 'bg-[#686D76] text-[#06B6D4]' : 'bg-white/[.06] text-[#06B6D4]'}`}>
                         <Icon size={18} />
                       </span>
                       <span className="min-w-0">
@@ -1034,7 +1034,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                         key={item.id}
                         type="button"
                         onClick={() => setProgram(current => ({ ...current, programType: item.id }))}
-                        className={`rounded-2xl border p-4 text-left transition ${active ? 'border-[#242424] bg-[#475569]/[.04] ring-2 ring-[#06B6D4]/15' : 'border-[#242424]/10 hover:border-[#06B6D4]/30'}`}
+                        className={`rounded-2xl border p-4 text-left transition ${active ? 'border-[#242424] bg-[#686D76]/[.04] ring-2 ring-[#06B6D4]/15' : 'border-[#242424]/10 hover:border-[#06B6D4]/30'}`}
                       >
                         <Icon size={18} className={active ? 'text-[#06B6D4]' : 'text-[#FFFFFF]/35'} />
                         <p className="mt-3 text-sm font-semibold text-[#06B6D4]">{item.label}</p>
@@ -1130,7 +1130,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                         />
                       </Field>
                     </div>
-                    <div className="mt-4 rounded-xl border border-[#06B6D4]/20 bg-[#475569]/5 px-4 py-3">
+                    <div className="mt-4 rounded-xl border border-[#06B6D4]/20 bg-[#686D76]/5 px-4 py-3">
                       <p className="text-[10px] font-semibold text-[#06B6D4]">Récompense dédiée aux tampons</p>
                       <p className="mt-1 text-[10px] leading-4 text-[#FFFFFF]/40">
                         Cette récompense est indépendante du catalogue des récompenses en points.
@@ -1287,7 +1287,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                       Annuler
                     </button>
                   )}
-                  <button type="button" onClick={() => void saveReward()} disabled={rewardSaving} className="inline-flex items-center gap-2 rounded-xl bg-[#475569] px-4 py-2.5 text-xs font-semibold text-[#06B6D4] disabled:opacity-50">
+                  <button type="button" onClick={() => void saveReward()} disabled={rewardSaving} className="inline-flex items-center gap-2 rounded-xl bg-[#686D76] px-4 py-2.5 text-xs font-semibold text-[#06B6D4] disabled:opacity-50">
                     <Gift size={14} />
                     {rewardSaving ? 'Enregistrement...' : rewardDraft.id ? 'Mettre à jour' : 'Ajouter'}
                   </button>
@@ -1318,7 +1318,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                     aria-checked={referral.enabled}
                     aria-label={referral.enabled ? 'Désactiver le programme de parrainage' : 'Activer le programme de parrainage'}
                     onClick={() => setReferral(current => ({ ...current, enabled: !current.enabled }))}
-                    className={`group flex w-full items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#06B6D4] sm:min-w-[190px] sm:w-auto ${referral.enabled ? 'border-[#06B6D4]/40 bg-[#475569]/10 hover:bg-[#475569]/15' : 'border-[#FFFFFF]/15 bg-[#111111] hover:border-[#06B6D4]/40 hover:bg-[#181818]'}`}
+                    className={`group flex w-full items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#06B6D4] sm:min-w-[190px] sm:w-auto ${referral.enabled ? 'border-[#06B6D4]/40 bg-[#686D76]/10 hover:bg-[#686D76]/15' : 'border-[#FFFFFF]/15 bg-[#111111] hover:border-[#06B6D4]/40 hover:bg-[#181818]'}`}
                     title="Cliquer pour activer ou désactiver le parrainage"
                   >
                     <div>
@@ -1331,7 +1331,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                     </div>
                     <span
                       aria-hidden="true"
-                      className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${referral.enabled ? 'bg-[#475569]' : 'bg-[#444444]'}`}
+                      className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${referral.enabled ? 'bg-[#686D76]' : 'bg-[#444444]'}`}
                     >
                       <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${referral.enabled ? 'translate-x-6' : 'translate-x-1'}`} />
                     </span>
@@ -1457,7 +1457,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                         <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#FFFFFF]/45">Bibliothèque de wallpapers</p>
                         <p className="mt-1 text-[10px] text-[#FFFFFF]/30">Cliquez sur une image pour la rendre active.</p>
                       </div>
-                      <span className="rounded-full bg-[#475569]/10 px-2.5 py-1 text-[9px] font-semibold text-[#06B6D4]">
+                      <span className="rounded-full bg-[#686D76]/10 px-2.5 py-1 text-[9px] font-semibold text-[#06B6D4]">
                         {design.wallpaperUrls.length}
                       </span>
                     </div>
@@ -1467,7 +1467,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                         return (
                           <button key={url} type="button" onClick={() => setDesign(current => ({ ...current, wallpaperUrl: url, published: false }))} className={`relative aspect-[3/4] overflow-hidden rounded-xl border ${active ? 'border-[#06B6D4] ring-2 ring-[#06B6D4]/20' : 'border-[#242424]'}`}>
                             <img src={url} alt="" className="h-full w-full object-cover transition group-hover:scale-105" />
-                            {active && <span className="absolute bottom-1.5 left-1.5 rounded-full bg-[#475569] px-2 py-0.5 text-[8px] font-bold text-[#111111]">ACTIF</span>}
+                            {active && <span className="absolute bottom-1.5 left-1.5 rounded-full bg-[#686D76] px-2 py-0.5 text-[8px] font-bold text-[#111111]">ACTIF</span>}
                           </button>
                         );
                       })}
@@ -1493,7 +1493,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   <Field label="Style des tampons">
                     <div className="grid grid-cols-4 gap-2">
                       {(['circles', 'squares', 'stars', 'hearts'] as const).map(style => (
-                        <button key={style} type="button" onClick={() => setDesign(current => ({ ...current, stampStyle: style }))} className={`rounded-xl border px-2 py-2.5 text-[10px] font-semibold capitalize ${design.stampStyle === style ? 'border-[#242424] bg-[#475569] text-[#050505]' : 'border-[#242424]/10 text-[#FFFFFF]/45'}`}>
+                        <button key={style} type="button" onClick={() => setDesign(current => ({ ...current, stampStyle: style }))} className={`rounded-xl border px-2 py-2.5 text-[10px] font-semibold capitalize ${design.stampStyle === style ? 'border-[#242424] bg-[#686D76] text-[#050505]' : 'border-[#242424]/10 text-[#FFFFFF]/45'}`}>
                           {style === 'circles' ? 'Ronds' : style === 'squares' ? 'Carrés' : style === 'stars' ? 'Étoiles' : 'Cœurs'}
                         </button>
                       ))}
@@ -1517,7 +1517,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                   ) : (
                     <div className="flex flex-wrap gap-2">
                       <input autoFocus value={newGoogleTemplateName} onChange={event => setNewGoogleTemplateName(event.target.value)} onKeyDown={event => { if (event.key === 'Enter') createGoogleTemplate(); }} maxLength={40} placeholder="Nom du nouveau modèle" aria-label="Nom du nouveau modèle Google Wallet" className="h-10 min-w-[220px] flex-1 rounded-lg border border-white/10 bg-[#111111] px-3 text-xs text-white outline-none focus:border-[#06B6D4]/40" />
-                      <button type="button" onClick={createGoogleTemplate} disabled={!newGoogleTemplateName.trim()} className="rounded-lg bg-[#475569] px-3 py-2 text-[10px] font-bold text-[#06B6D4] disabled:opacity-40">Créer</button>
+                      <button type="button" onClick={createGoogleTemplate} disabled={!newGoogleTemplateName.trim()} className="rounded-lg bg-[#686D76] px-3 py-2 text-[10px] font-bold text-[#06B6D4] disabled:opacity-40">Créer</button>
                       <button type="button" onClick={() => { setCreatingGoogleTemplate(false); setNewGoogleTemplateName(''); }} className="rounded-lg border border-white/10 px-3 py-2 text-[10px] text-white/60">Annuler</button>
                     </div>
                   )}
@@ -1543,7 +1543,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                             {saved ? saved.publication_status === 'published' ? 'Publié' : saved.publication_status === 'pending_validation' ? 'En attente Google' : saved.publication_status : 'Non publié'}
                             {saved?.google_review_status ? ' · '+saved.google_review_status : ''}
                           </span>
-                          <button type="button" onClick={() => void publishWalletTemplate(template.id)} disabled={Boolean(publishingWalletKey)} className="rounded-lg bg-[#475569] px-3 py-2 text-[10px] font-semibold text-white disabled:opacity-40">
+                          <button type="button" onClick={() => void publishWalletTemplate(template.id)} disabled={Boolean(publishingWalletKey)} className="rounded-lg bg-[#686D76] px-3 py-2 text-[10px] font-semibold text-white disabled:opacity-40">
                             {busy ? 'Publication…' : saved?.publication_status === 'published' ? 'Mettre à jour' : 'Publier'}
                           </button>
                         </div>
@@ -1596,7 +1596,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                       <button type="button" onClick={() => walletHeroInput.current?.click()} disabled={saving} className="rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-[10px] font-semibold text-[#06B6D4] disabled:opacity-40">
                         Importer une image
                       </button>
-                      <button type="button" onClick={() => setWalletCropPlatform('google')} disabled={!(walletDesign.heroImageSourceUrl || walletDesign.heroImageUrl) || saving} className="rounded-lg bg-[#475569] px-3 py-2 text-[10px] font-semibold text-white disabled:opacity-40">
+                      <button type="button" onClick={() => setWalletCropPlatform('google')} disabled={!(walletDesign.heroImageSourceUrl || walletDesign.heroImageUrl) || saving} className="rounded-lg bg-[#686D76] px-3 py-2 text-[10px] font-semibold text-white disabled:opacity-40">
                         Recadrer Google
                       </button>
                       <button type="button" onClick={() => setWalletCropPlatform('apple')} disabled={!walletDesign.heroImageSourceUrl || saving} className="rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-[10px] font-semibold text-white disabled:opacity-40">
@@ -1679,14 +1679,14 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                     );
                   })}
                 </div>
-                <div className="mt-5 rounded-2xl border border-[#475569]/30 bg-[#111111] p-4">
+                <div className="mt-5 rounded-2xl border border-[#686D76]/30 bg-[#111111] p-4">
                   <p className="text-xs font-semibold text-white">Modèle sélectionné · {getAppleWalletTemplate(walletDesign.appleTemplateId).name}</p>
                   <p className="mt-1 text-[10px] leading-4 text-white/45">Apple impose le format Store Card et ses champs PassKit. La distribution d’un vrai fichier .pkpass nécessite le certificat Pass Type ID et la clé privée Apple Developer de KELYANI.</p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {getAppleWalletTemplate(walletDesign.appleTemplateId).fields.primary.map(field => <span key={field} className="rounded-lg bg-[#050505] px-2.5 py-1.5 text-[10px] text-[#06B6D4]">Principal : {APPLE_WALLET_FIELD_LABELS[field]}</span>)}
                     {getAppleWalletTemplate(walletDesign.appleTemplateId).fields.secondary.map(field => <span key={field} className="rounded-lg bg-[#050505] px-2.5 py-1.5 text-[10px] text-white/65">{APPLE_WALLET_FIELD_LABELS[field]}</span>)}
                   </div>
-                  <span className="mt-3 inline-flex rounded-full border border-[#475569]/40 px-3 py-1.5 text-[10px] text-white/60">Modèle PassKit enregistré · signature Apple à configurer</span>
+                  <span className="mt-3 inline-flex rounded-full border border-[#686D76]/40 px-3 py-1.5 text-[10px] text-white/60">Modèle PassKit enregistré · signature Apple à configurer</span>
                 </div>
               </StudioCard>
             </div>
@@ -1732,7 +1732,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                 <p className="text-[9px] uppercase tracking-[.16em] text-[#06B6D4]">Carte actuelle</p>
                 <p className="mt-1 text-sm font-semibold text-[#06B6D4]">{establishment.name}</p>
               </div>
-              <span className={`h-2.5 w-2.5 rounded-full ${previewChannelReady ? 'bg-[#475569]' : 'bg-[#475569]'}`} title={previewChannelReady ? 'Synchronisation active' : 'Connexion en cours'} />
+              <span className={`h-2.5 w-2.5 rounded-full ${previewChannelReady ? 'bg-[#686D76]' : 'bg-[#686D76]'}`} title={previewChannelReady ? 'Synchronisation active' : 'Connexion en cours'} />
             </div>
             <p className="mt-2 text-[10px] leading-4 text-[#FFFFFF]/35">
               {program.programType === 'STAMP'
@@ -1817,14 +1817,14 @@ function AppleWalletPassPreview({ templateId, establishmentName, walletDesign, l
   };
   const labels: Record<string, string> = { accountName: 'MEMBRE', accountId: 'CARTE', points: 'POINTS', visits: 'VISITES', reward: 'RÉCOMPENSE', tier: 'NIVEAU', establishment: 'ÉTABLISSEMENT', offer: 'AVANTAGE' };
   const artwork: Record<string, string> = {
-    ribbon: 'linear-gradient(135deg, #050505 0 42%, #475569 42% 51%, #111111 51%)',
-    stack: 'repeating-linear-gradient(0deg, #050505 0 14px, #111111 14px 26px, #475569 26px 28px, #050505 28px 42px)',
-    grid: 'linear-gradient(90deg, transparent 49%, #475569 50%, transparent 51%), linear-gradient(0deg, transparent 49%, #475569 50%, transparent 51%), #050505',
-    barcode: 'repeating-linear-gradient(90deg, #050505 0 6px, #111111 6px 12px, #475569 12px 14px)',
-    reward: 'radial-gradient(ellipse at 75% 25%, #47556944, transparent 48%), linear-gradient(135deg, #050505, #111111 70%)',
-    monogram: 'radial-gradient(circle at 80% 20%, #47556955 0 18%, transparent 19%), linear-gradient(135deg, #050505, #111111)',
-    arch: 'radial-gradient(ellipse at 50% 120%, #47556966 0 30%, transparent 31%), linear-gradient(135deg, #050505, #111111)',
-    editorial: 'linear-gradient(150deg, #050505 0 65%, #475569 65% 68%, #050505 68%)',
+    ribbon: 'linear-gradient(135deg, #050505 0 42%, #686D76 42% 51%, #111111 51%)',
+    stack: 'repeating-linear-gradient(0deg, #050505 0 14px, #111111 14px 26px, #686D76 26px 28px, #050505 28px 42px)',
+    grid: 'linear-gradient(90deg, transparent 49%, #686D76 50%, transparent 51%), linear-gradient(0deg, transparent 49%, #686D76 50%, transparent 51%), #050505',
+    barcode: 'repeating-linear-gradient(90deg, #050505 0 6px, #111111 6px 12px, #686D76 12px 14px)',
+    reward: 'radial-gradient(ellipse at 75% 25%, #686D7644, transparent 48%), linear-gradient(135deg, #050505, #111111 70%)',
+    monogram: 'radial-gradient(circle at 80% 20%, #686D7655 0 18%, transparent 19%), linear-gradient(135deg, #050505, #111111)',
+    arch: 'radial-gradient(ellipse at 50% 120%, #686D7666 0 30%, transparent 31%), linear-gradient(135deg, #050505, #111111)',
+    editorial: 'linear-gradient(150deg, #050505 0 65%, #686D76 65% 68%, #050505 68%)',
   };
   const field = (key: string, prominent = false) => (
     <div key={key} className="min-w-0">
@@ -1839,12 +1839,12 @@ function AppleWalletPassPreview({ templateId, establishmentName, walletDesign, l
   return (
     <div className={`${compact ? 'h-[118px] w-full' : 'w-full max-w-[350px]'} relative overflow-hidden rounded-[20px] border border-white/10 shadow-2xl`} style={{ background: walletDesign.backgroundColor, color: walletDesign.textColor }}>
       <div className={`${compact ? 'h-[30px]' : 'h-[82px]'} relative overflow-hidden`} style={{ background: walletDesign.appleHeroImageUrl ? `linear-gradient(90deg, #05050588, #05050522), url("${walletDesign.appleHeroImageUrl}") center/cover` : artwork[template.artwork] }}>
-        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'linear-gradient(115deg, transparent 0 45%, #475569 45% 46%, transparent 46% 68%, #475569 68% 69%, transparent 69%)' }} />
+        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'linear-gradient(115deg, transparent 0 45%, #686D76 45% 46%, transparent 46% 68%, #686D76 68% 69%, transparent 69%)' }} />
       </div>
       <div className={`${compact ? 'px-3 pb-2 pt-1.5' : 'px-5 pb-4 pt-3'} relative`}>
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-center gap-2">
-            {logoUrl ? <img src={logoUrl} alt="" className={`${compact ? 'h-5 w-5' : 'h-8 w-8'} rounded-md bg-white object-contain p-0.5`} /> : <span className={`${compact ? 'h-5 w-5 text-[6px]' : 'h-8 w-8 text-[9px]'} grid place-items-center rounded-md bg-[#475569] font-bold text-white`}>K</span>}
+            {logoUrl ? <img src={logoUrl} alt="" className={`${compact ? 'h-5 w-5' : 'h-8 w-8'} rounded-md bg-white object-contain p-0.5`} /> : <span className={`${compact ? 'h-5 w-5 text-[6px]' : 'h-8 w-8 text-[9px]'} grid place-items-center rounded-md bg-[#686D76] font-bold text-white`}>K</span>}
             <div className="min-w-0"><p className={`${compact ? 'text-[7px]' : 'text-[10px]'} truncate font-bold`}>{establishmentName || walletDesign.cardTitle || 'KELYANI'}</p><p className={`${compact ? 'text-[5px]' : 'text-[7px]'} uppercase tracking-wider opacity-50`}>CARTE DE FIDÉLITÉ</p></div>
           </div>
           <div className="flex gap-2 text-right">{header.map(key => field(key))}</div>
@@ -1863,7 +1863,7 @@ function AppleWalletPassPreview({ templateId, establishmentName, walletDesign, l
 
 function StudioCard({ eyebrow, title, children }: { eyebrow: string; title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-[24px] border border-[#242424]/8 bg-[#111111] p-5 shadow-[0_10px_35px_rgba(71, 85, 105,0.035)]">
+    <section className="rounded-[24px] border border-[#242424]/8 bg-[#111111] p-5 shadow-[0_10px_35px_rgba(104,109,118,0.035)]">
       <div className="mb-5">
         <p className="text-[9px] font-bold uppercase tracking-[.2em] text-[#06B6D4]">{eyebrow}</p>
         <h3 className="mt-1 text-lg font-semibold text-[#06B6D4]">{title}</h3>
@@ -1901,7 +1901,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (checked: b
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className={`relative h-7 w-12 shrink-0 rounded-full p-1 transition ${checked ? 'bg-[#475569]' : 'bg-[#111111]/15'}`}
+      className={`relative h-7 w-12 shrink-0 rounded-full p-1 transition ${checked ? 'bg-[#686D76]' : 'bg-[#111111]/15'}`}
     >
       <span className={`block h-5 w-5 rounded-full bg-[#111111] shadow-sm transition ${checked ? 'translate-x-5' : 'translate-x-0'}`} />
     </button>
