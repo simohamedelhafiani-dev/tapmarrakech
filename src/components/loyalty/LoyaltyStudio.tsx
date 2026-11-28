@@ -22,7 +22,7 @@ import {
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { WALLET_TEMPLATES as LOYALTY_CARD_TEMPLATES } from '@/components/LoyaltyCardVisual';
-import { CARD_CATEGORY_TEMPLATES, getCategoryTemplate, isCategoryTemplate } from '@/components/loyalty/cardTemplates';
+import { CARD_CATEGORY_TEMPLATES, QR_FRAMES, QR_SIZES, getCategoryTemplate, isCategoryTemplate, type QrFrame, type QrSize } from '@/components/loyalty/cardTemplates';
 import { WalletPassCard } from '@/components/loyalty/WalletPassCard';
 import {
   useLoyaltyManager,
@@ -96,6 +96,8 @@ type DesignState = {
   wallpaperUrls: string[];
   logoUrl: string | null;
   stampStyle: 'circles' | 'squares' | 'stars' | 'hearts';
+  qrSize: QrSize;
+  qrFrame: QrFrame;
   published: boolean;
 };
 
@@ -153,6 +155,8 @@ const DEFAULT_DESIGN: DesignState = {
   wallpaperUrls: [],
   logoUrl: null,
   stampStyle: 'circles',
+  qrSize: 'medium',
+  qrFrame: 'white',
   published: false,
 };
 
@@ -351,6 +355,8 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
             : (cfg.background_image_url ?? cfg.wallpaperUrl ? [cfg.background_image_url ?? cfg.wallpaperUrl] : []),
           logoUrl: cfg.logo_url ?? place?.logo_url ?? null,
           stampStyle: cfg.stamp_style ?? 'circles',
+          qrSize: cfg.qr_size ?? 'medium',
+          qrFrame: cfg.qr_frame ?? 'white',
           published: Boolean(row.published),
         });
       }
@@ -452,6 +458,8 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
         loyaltyType: program.programType,
         card_mode: program.programType,
         stamp_style: design.stampStyle,
+        qr_size: design.qrSize,
+        qr_frame: design.qrFrame,
         rewardName: program.stampRewardName || rewards[0]?.name || 'Cadeau fidélité',
         rewardDescription: program.stampRewardDescription,
         pointsPerCurrency: program.pointsPerCurrency,
@@ -525,6 +533,8 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
           loyaltyType: program.programType,
           card_mode: program.programType,
           stamp_style: design.stampStyle,
+          qr_size: design.qrSize,
+          qr_frame: design.qrFrame,
           rewardName: program.stampRewardName || rewards[0]?.name || 'Cadeau fidélité',
           rewardDescription: program.stampRewardDescription,
           pointsPerCurrency: program.pointsPerCurrency,
@@ -809,6 +819,8 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       loyaltyType: program.programType,
       card_mode: program.programType,
       stamp_style: design.stampStyle,
+      qr_size: design.qrSize,
+      qr_frame: design.qrFrame,
       rewardName: program.stampRewardName || rewards[0]?.name || 'Cadeau fidélité',
       rewardDescription: program.stampRewardDescription,
       pointsPerCurrency: program.pointsPerCurrency,
@@ -1423,9 +1435,9 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
 
           {tab === 'design' && isAdmin && (
             <div className="space-y-5">
-              <StudioCard eyebrow="Modèles par catégorie" title="Carte façon Wallet">
+              <StudioCard eyebrow="Modèles de carte" title="Carte façon Wallet">
                 <p className="-mt-1 mb-4 text-xs leading-5 text-[#FFFFFF]/50">
-                  Choisissez le style adapté au commerce. La photo ajoutée plus bas s’affiche dans le bandeau de la carte, comme sur Google Wallet et Apple Wallet.
+                  15 modèles utilisables pour tout type de commerce. La photo ajoutée plus bas s’affiche sur la carte, comme sur Google Wallet et Apple Wallet. Le type de carte (tampons, points ou réduction) suit les paramètres du programme.
                 </p>
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
                   {CARD_CATEGORY_TEMPLATES.map(item => {
@@ -1441,7 +1453,7 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                         <div className="pointer-events-none">
                           <WalletPassCard
                             template={item}
-                            config={{ show_qr: false, background_image_url: active ? design.wallpaperUrl : null, logo_url: design.logoUrl }}
+                            config={{ show_qr: false, stamp_style: design.stampStyle, background_image_url: active ? design.wallpaperUrl : null, logo_url: design.logoUrl }}
                             card={{ establishmentName: establishment.name || 'Votre commerce', points: 240, stampsBalance: 6, stampGoal: 10, rewardName: 'Cadeau offert', stampRewardName: 'Cadeau offert', rewardPointsRequired: 400, customerName: 'Sara B.' }}
                             mode={program.programType === 'STAMP' ? 'STAMP' : program.programType === 'POINTS_DISCOUNT' ? 'DISCOUNT' : 'POINTS'}
                             cardWidth="100%"
@@ -1454,6 +1466,26 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                       </button>
                     );
                   })}
+                </div>
+                <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                  <Field label="Taille du QR code">
+                    <div className="grid grid-cols-3 gap-2">
+                      {QR_SIZES.map(size => (
+                        <button key={size.id} type="button" onClick={() => setDesign(current => ({ ...current, qrSize: size.id }))} className={`rounded-xl border px-2 py-2.5 text-[11px] font-semibold ${design.qrSize === size.id ? 'border-[#10B981] bg-[#10B981] text-[#04120D]' : 'border-white/[0.08] text-[#FFFFFF]/55'}`}>
+                          {size.label}
+                        </button>
+                      ))}
+                    </div>
+                  </Field>
+                  <Field label="Cadre du QR code">
+                    <div className="grid grid-cols-3 gap-2">
+                      {QR_FRAMES.map(frame => (
+                        <button key={frame.id} type="button" onClick={() => setDesign(current => ({ ...current, qrFrame: frame.id }))} className={`rounded-xl border px-2 py-2.5 text-[11px] font-semibold ${design.qrFrame === frame.id ? 'border-[#10B981] bg-[#10B981] text-[#04120D]' : 'border-white/[0.08] text-[#FFFFFF]/55'}`}>
+                          {frame.label}
+                        </button>
+                      ))}
+                    </div>
+                  </Field>
                 </div>
               </StudioCard>
 

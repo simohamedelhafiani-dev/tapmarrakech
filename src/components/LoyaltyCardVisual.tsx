@@ -25,6 +25,8 @@ export type LoyaltyDesignConfig = {
   show_points: boolean;
   showQr?: boolean;
   stamp_style: 'circles' | 'squares' | 'stars' | 'hearts';
+  qr_size?: 'small' | 'medium' | 'large';
+  qr_frame?: 'white' | 'accent' | 'glass';
   background_image_url: string | null;
   logo_url?: string | null;
   ai_prompt?: string;
