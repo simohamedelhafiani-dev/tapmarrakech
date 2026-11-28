@@ -1,0 +1,18 @@
+{
+  "name": "KELYANI",
+  "short_name": "KELYANI",
+  "description": "L’art de la relation client",
+  "start_url": "/loyalty",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "icons": [
+    {
+      "src": "/kelyani-official-app-icon.webp",
+      "sizes": "128x128",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    }
+  ]
+}
