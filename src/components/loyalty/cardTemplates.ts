@@ -43,6 +43,27 @@ export function getCategoryTemplate(id: string | null | undefined): CardCategory
   return id ? BY_ID.get(id) ?? null : null;
 }
 
+// The former card templates are retired: each old id now opens its closest pass, and
+// anything unknown (including 'custom') falls back to the KELYANI Signature pass.
+const LEGACY_TEMPLATE_MAP: Record<string, string> = {
+  'onyx-black': 'pass-onyx',
+  'royal-gold': 'pass-or-noir',
+  'deep-ocean': 'pass-lagon',
+  'minimal-white': 'pass-ivoire',
+  'emerald-luxe': 'pass-kelyani',
+  burgundy: 'pass-bordeaux',
+  'midnight-blue': 'pass-prune',
+  sandstone: 'pass-sable',
+};
+
+export const DEFAULT_PASS_TEMPLATE_ID = 'pass-kelyani';
+
+export function resolvePassTemplate(id: string | null | undefined): CardCategoryTemplate {
+  return getCategoryTemplate(id)
+    ?? getCategoryTemplate(id ? LEGACY_TEMPLATE_MAP[id] : null)
+    ?? (BY_ID.get(DEFAULT_PASS_TEMPLATE_ID) as CardCategoryTemplate);
+}
+
 export function isCategoryTemplate(id: string | null | undefined): boolean {
   return Boolean(id && BY_ID.has(id));
 }

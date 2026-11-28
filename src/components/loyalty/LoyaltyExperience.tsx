@@ -59,6 +59,8 @@ export type LoyaltyExperienceConfig = {
   templateId?: string | null;
   published?: boolean;
   stampStyle?: 'circles' | 'squares' | 'stars' | 'hearts';
+  qrSize?: 'small' | 'medium' | 'large';
+  qrFrame?: 'white' | 'accent' | 'glass';
 };
 
 function clamp(value: number, min: number, max: number) {

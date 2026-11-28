@@ -22,7 +22,7 @@ import {
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import QrScanner from '@/components/QrScanner';
 import { defaultLoyaltyDesignConfig } from '@/components/LoyaltyCardVisual';
-import { LoyaltyExperience } from '@/components/loyalty/LoyaltyExperience';
+import { LoyaltyCardVisual } from '@/components/LoyaltyCardVisual';
 import { supabase } from '@/lib/supabase';
 
 type Establishment = {
@@ -1421,43 +1421,33 @@ export default function Employee() {
       {showCard && (
         <Modal title="Carte de fidélité" onClose={() => setShowCard(null)}>
           <div className="space-y-4">
-            <LoyaltyExperience
-              config={{
-                type: loyaltyProgram.program_type === 'STAMP' ? 'STAMP' : 'POINTS',
-                businessType: loyaltyDesign.design_config.business_type || 'restaurant',
-                establishmentName: session.establishment_name,
-                logoUrl: loyaltyDesign.design_config.logo_url || establishmentLogoUrl,
-                coverImageUrl:
-                  loyaltyDesign.design_config.background_image_url ||
-                  (loyaltyDesign.design_config as typeof loyaltyDesign.design_config & { wallpaper_library?: string[] }).wallpaper_library?.[0] ||
-                  null,
-                primaryColor: loyaltyDesign.primary_color,
-                secondaryColor: loyaltyDesign.secondary_color,
-                backgroundColor: loyaltyDesign.background_color,
-                textColor: loyaltyDesign.text_color,
-                borderRadius: loyaltyDesign.border_radius,
-                customerName: `${showCard.first_name} ${showCard.last_name ?? ''}`.trim(),
-                pointsBalance: showCard.points_balance,
-                pointsGoal: Math.max(1000, rewards[rewards.length - 1]?.points_required ?? 1000),
-                visits: (showCard as LoyaltyCustomer & { stamps_balance?: number }).stamps_balance ?? showCard.visit_count,
-                visitGoal: loyaltyProgram.stamp_goal,
-                rewardName: loyaltyDesign.design_config.rewardName || rewards[0]?.name || 'Cadeau fidélité',
-                rewardDescription: loyaltyDesign.design_config.rewardDescription || rewards[0]?.description || null,
-                rewards: rewards.map(reward => ({
-                  id: reward.id,
-                  name: reward.name,
-                  description: reward.description,
-                  points_required: reward.points_required,
-                  reward_type: reward.reward_type,
-                  discount_percent: reward.discount_percent,
-                  discount_max_amount: reward.discount_max_amount,
-                })),
-                intro: loyaltyDesign.design_config.front_subtitle,
-                qrValue: showCardLink,
-                templateId: loyaltyDesign.template_id,
-                published: true,
-              }}
-            />
+            <div className="flex justify-center">
+              <LoyaltyCardVisual
+                design={{
+                  template_id: loyaltyDesign.template_id ?? undefined,
+                  primary_color: loyaltyDesign.primary_color,
+                  secondary_color: loyaltyDesign.secondary_color,
+                  background_color: loyaltyDesign.background_color,
+                  text_color: loyaltyDesign.text_color,
+                  border_radius: loyaltyDesign.border_radius,
+                  config: { ...loyaltyDesign.design_config, show_qr: true },
+                }}
+                card={{
+                  establishmentName: session.establishment_name,
+                  logoUrl: loyaltyDesign.design_config.logo_url || establishmentLogoUrl,
+                  points: showCard.points_balance,
+                  stampsBalance: (showCard as LoyaltyCustomer & { stamps_balance?: number }).stamps_balance ?? showCard.visit_count,
+                  stampGoal: loyaltyProgram.stamp_goal,
+                  stampRewardName: loyaltyDesign.design_config.rewardName || rewards[0]?.name || 'Cadeau fidélité',
+                  rewardName: rewards[0]?.name || loyaltyDesign.design_config.rewardName || 'Cadeau fidélité',
+                  rewardPointsRequired: rewards[0]?.points_required,
+                  customerName: `${showCard.first_name} ${showCard.last_name ?? ''}`.trim(),
+                  cardUrl: showCardLink || undefined,
+                }}
+                programType={loyaltyProgram.program_type === 'STAMP' ? 'STAMP' : 'POINTS'}
+                cardWidth="min(100%, 340px)"
+              />
+            </div>
             {loyaltyProgram.program_type === 'STAMP' && <button disabled={saving} onClick={() => void addStamp(showCard)} className="w-full rounded-xl bg-[#475569] py-3.5 text-xs font-bold text-forest disabled:opacity-50">+ Ajouter 1 tampon</button>}
             {showCardLink && <button onClick={async () => { await navigator.clipboard.writeText(showCardLink); alert('Lien de la carte copié.'); }} className="w-full rounded-xl border border-ink/10 bg-white py-3 text-xs font-semibold text-forest">Copier le lien client</button>}
             <div className="flex gap-3">

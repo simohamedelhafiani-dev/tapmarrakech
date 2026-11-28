@@ -22,7 +22,7 @@ import {
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { WALLET_TEMPLATES as LOYALTY_CARD_TEMPLATES } from '@/components/LoyaltyCardVisual';
-import { CARD_CATEGORY_TEMPLATES, QR_FRAMES, QR_SIZES, getCategoryTemplate, isCategoryTemplate, type QrFrame, type QrSize } from '@/components/loyalty/cardTemplates';
+import { CARD_CATEGORY_TEMPLATES, DEFAULT_PASS_TEMPLATE_ID, QR_FRAMES, QR_SIZES, getCategoryTemplate, isCategoryTemplate, resolvePassTemplate, type QrFrame, type QrSize } from '@/components/loyalty/cardTemplates';
 import { WalletPassCard } from '@/components/loyalty/WalletPassCard';
 import {
   useLoyaltyManager,
@@ -144,7 +144,7 @@ const DEFAULT_WALLET_DESIGN: WalletDesignState = {
 };
 
 const DEFAULT_DESIGN: DesignState = {
-  templateId: 'onyx-black',
+  templateId: DEFAULT_PASS_TEMPLATE_ID,
   primaryColor: '#686D76',
   secondaryColor: '#686D76',
   backgroundColor: '#050505',
@@ -338,11 +338,11 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
       const row = Array.isArray(designData) ? designData[0] : designData;
       if (row) {
         const cfg = row.design_config ?? {};
-        const categoryTemplate = isCategoryTemplate(row.template_id);
+        const categoryTemplate = isCategoryTemplate(resolvePassTemplate(row.template_id).id);
         setWalletDesign({ ...DEFAULT_WALLET_DESIGN, ...(cfg.wallet_design ?? {}), backgroundColor: categoryTemplate ? normalizeWalletBackgroundColor(cfg.wallet_design?.backgroundColor ?? DEFAULT_WALLET_DESIGN.backgroundColor) : normalizeNardoBackgroundColor(cfg.wallet_design?.backgroundColor ?? DEFAULT_WALLET_DESIGN.backgroundColor) });
         setDesign({
           ...DEFAULT_DESIGN,
-          templateId: row.template_id ?? DEFAULT_DESIGN.templateId,
+          templateId: resolvePassTemplate(row.template_id).id,
           primaryColor: categoryTemplate ? (row.primary_color ?? DEFAULT_DESIGN.primaryColor) : normalizeNardoCardColor(row.primary_color, DEFAULT_DESIGN.primaryColor),
           secondaryColor: categoryTemplate ? (row.secondary_color ?? DEFAULT_DESIGN.secondaryColor) : normalizeNardoCardColor(row.secondary_color, DEFAULT_DESIGN.secondaryColor),
           backgroundColor: categoryTemplate ? (row.background_color ?? DEFAULT_DESIGN.backgroundColor) : normalizeNardoBackgroundColor(row.background_color ?? DEFAULT_DESIGN.backgroundColor, DEFAULT_DESIGN.backgroundColor),
@@ -438,6 +438,8 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
     templateId: design.templateId,
     published: design.published,
     stampStyle: design.stampStyle,
+    qrSize: design.qrSize,
+    qrFrame: design.qrFrame,
   }), [program, design, establishment, rewards]);
 
   useEffect(() => {
@@ -957,7 +959,6 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
   };
 
   const visibleTabs = canManageWallet ? TABS : TABS.filter(item => item.id !== 'design' && item.id !== 'googleWallet' && item.id !== 'appleWallet');
-  const selectedTemplate = LOYALTY_CARD_TEMPLATES[design.templateId as keyof typeof LOYALTY_CARD_TEMPLATES];
 
   if (loading) {
     return (
@@ -1489,34 +1490,6 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                 </div>
               </StudioCard>
 
-              <StudioCard eyebrow="Wallet" title="Choisir une identité">
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  {Object.values(LOYALTY_CARD_TEMPLATES).map(item => {
-                    const active = design.templateId === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => selectTemplate(item.id)}
-                        className={`overflow-hidden rounded-2xl border text-left transition ${active ? 'border-[#242424] ring-2 ring-[#06B6D4]/15' : 'border-[#242424]/10 hover:border-[#06B6D4]/30'}`}
-                      >
-                        <div className="relative h-20 overflow-hidden" style={{ background: item.background }}>
-                          <div className="absolute inset-x-3 bottom-3 h-1 rounded-full" style={{ background: item.accent }} />
-                        </div>
-                        <div className="bg-[#111111] px-3 py-2.5">
-                          <p className="text-[10px] font-semibold text-[#06B6D4]">{item.name}</p>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-                {selectedTemplate && (
-                  <p className="mt-3 text-[10px] text-[#FFFFFF]/35">
-                    Template actif : <span className="font-semibold text-[#06B6D4]">{selectedTemplate.name}</span>
-                  </p>
-                )}
-              </StudioCard>
-
               <StudioCard eyebrow="Wallpaper" title="Arrière-plan de la carte">
                 <div className="grid gap-4 md:grid-cols-[1fr_220px] md:items-center">
                   <div>
@@ -1570,20 +1543,8 @@ export default function LoyaltyStudio({ establishmentId }: Props) {
                 )}
               </StudioCard>
 
-              <StudioCard eyebrow="Palette" title="Couleurs personnalisées">
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  <ColorField label="Primaire" value={design.primaryColor} onChange={value => updateColor('primaryColor', value)} />
-                  <ColorField label="Secondaire / accent" value={design.secondaryColor} onChange={value => updateColor('secondaryColor', value)} />
-                  <ColorField label="Fond" value={design.backgroundColor} onChange={value => updateColor('backgroundColor', value)} />
-                  <ColorField label="Texte" value={design.textColor} onChange={value => updateColor('textColor', value)} />
-                  <ColorField label="Bouton" value={design.buttonColor} onChange={value => updateColor('buttonColor', value)} />
-                </div>
-                <div className="mt-5">
-                  <Field label={`Rayon des angles · ${design.borderRadius}px`}>
-                    <input type="range" min="8" max="40" value={design.borderRadius} onChange={e => setDesign(current => ({ ...current, templateId: 'custom', borderRadius: Number(e.target.value) }))} className="w-full accent-[#06B6D4]" />
-                  </Field>
-                </div>
-                <div className="mt-5">
+              <StudioCard eyebrow="Tampons" title="Forme des tampons">
+                <div>
                   <Field label="Style des tampons">
                     <div className="grid grid-cols-4 gap-2">
                       {(['circles', 'squares', 'stars', 'hearts'] as const).map(style => (
