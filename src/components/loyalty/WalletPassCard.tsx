@@ -111,7 +111,7 @@ export function WalletPassCard({
       return;
     }
     let active = true;
-    void QRCode.toDataURL(card.cardUrl, { width: 512, margin: 1, errorCorrectionLevel: 'M', color: { dark: '#000000', light: '#FFFFFF' } })
+    void QRCode.toDataURL(card.cardUrl, { width: 512, margin: 2, errorCorrectionLevel: 'M', color: { dark: '#000000', light: '#FFFFFF' } })
       .then(value => { if (active) setQr(value); })
       .catch(() => { if (active) setQr(''); });
     return () => { active = false; };

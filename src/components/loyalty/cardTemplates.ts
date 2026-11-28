@@ -72,7 +72,7 @@ export type QrSize = 'small' | 'medium' | 'large';
 export type QrFrame = 'white' | 'accent' | 'glass';
 
 export const QR_SIZES: { id: QrSize; label: string; width: number }[] = [
-  { id: 'small', label: 'Petit', width: 20 },
+  { id: 'small', label: 'Petit', width: 22 },
   { id: 'medium', label: 'Moyen', width: 25 },
   { id: 'large', label: 'Grand', width: 31 },
 ];

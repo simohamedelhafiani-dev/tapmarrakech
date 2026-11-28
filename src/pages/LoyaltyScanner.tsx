@@ -70,6 +70,55 @@ export default function LoyaltyScanner() {
   const [rewardInvoiceAmount, setRewardInvoiceAmount] = useState('');
   const [rewardInvoiceNumber, setRewardInvoiceNumber] = useState('');
   const [redeemingReward, setRedeemingReward] = useState(false);
+  const [discount, setDiscount] = useState<{ discount_percent: number; expires_at: string } | null>(null);
+  const [discountAmount, setDiscountAmount] = useState('');
+  const [applyingDiscount, setApplyingDiscount] = useState(false);
+
+  // Live balances (stamps are not in the card/search results) and the unlocked discount.
+  useEffect(() => {
+    setDiscount(null);
+    setDiscountAmount('');
+    if (!customer || !scannerToken) return;
+    let active = true;
+    const customerId = customer.customer_id;
+    void supabase.rpc('get_scanner_customer_status', { p_scanner_token: scannerToken, p_customer_id: customerId })
+      .then(({ data, error }) => {
+        if (!active || error) return;
+        const row = Array.isArray(data) ? data[0] : data;
+        if (!row) return;
+        setCustomer(current => current && current.customer_id === customerId
+          ? { ...current, points_balance: Number(row.points_balance ?? current.points_balance), stamps_balance: Number(row.stamps_balance ?? 0) }
+          : current);
+        if (row.discount_percent != null) setDiscount({ discount_percent: Number(row.discount_percent), expires_at: String(row.discount_expires_at) });
+      });
+    return () => { active = false; };
+  }, [customer?.customer_id, scannerToken]);
+
+  async function applyDiscount() {
+    if (!customer || !discount) return;
+    const invoiceAmount = Number(discountAmount);
+    if (!Number.isFinite(invoiceAmount) || invoiceAmount <= 0) {
+      setMessage('Saisissez le montant de la facture pour appliquer la réduction.');
+      return;
+    }
+    setApplyingDiscount(true);
+    setMessage('');
+    const { data, error } = await supabase.rpc('redeem_loyalty_discount_by_scanner', {
+      p_scanner_token: scannerToken,
+      p_customer_id: customer.customer_id,
+      p_invoice_amount: invoiceAmount,
+      p_invoice_number: invoiceNumber.trim() || null,
+    });
+    setApplyingDiscount(false);
+    if (error) {
+      setMessage(error.message);
+      return;
+    }
+    const row = Array.isArray(data) ? data[0] : data;
+    alert(`Réduction appliquée : -${Number(row?.discount_amount ?? 0).toFixed(2)} ${settings.currency}\nMontant à payer : ${Number(row?.amount_paid ?? 0).toFixed(2)} ${settings.currency}`);
+    setDiscountAmount('');
+    setMessage('Réduction enregistrée. Ajoutez les points de cet achat ci-dessous si besoin.');
+  }
 
   useEffect(() => {
     if (!scannerToken) {
@@ -286,6 +335,7 @@ export default function LoyaltyScanner() {
     setAmount('');
     setInvoiceNumber('');
     setShowScanner(false);
+
   }
 
   async function redeemPendingReward() {
@@ -477,6 +527,33 @@ export default function LoyaltyScanner() {
     );
   }
 
+  const discountPreview = discount && Number(discountAmount) > 0
+    ? { saved: Math.round(Number(discountAmount) * discount.discount_percent) / 100, }
+    : null;
+  const discountPanel = discount ? (
+    <div className="mb-3 rounded-[28px] border border-[#10B981]/35 bg-[#10B981]/[.06] p-5 shadow-2xl">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-[9px] font-bold uppercase tracking-[.18em] text-[#10B981]">Réduction fidélité débloquée</p>
+          <p className="mt-1 text-2xl font-semibold text-white">-{discount.discount_percent}%</p>
+        </div>
+        <p className="text-right text-[10px] leading-4 text-white/45">Valable jusqu’au<br />{new Date(discount.expires_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}</p>
+      </div>
+      <label className="mt-4 block text-[9px] font-bold uppercase tracking-[.12em] text-white/35">Montant de la facture · {settings.currency}
+        <input type="number" min="0" step="0.01" value={discountAmount} onChange={e => setDiscountAmount(e.target.value)} placeholder="250" className="mt-2 h-12 w-full rounded-2xl border border-[#242424] bg-[#050505] px-4 text-base font-semibold text-white outline-none placeholder:text-white/15 focus:border-[#10B981]/45" />
+      </label>
+      {discountPreview && (
+        <div className="mt-3 flex items-center justify-between rounded-2xl border border-white/10 bg-[#050505] px-4 py-3 text-xs">
+          <span className="text-white/45">Remise {discountPreview.saved.toFixed(2)} {settings.currency}</span>
+          <strong className="text-sm text-[#10B981]">À payer : {Math.max(0, Number(discountAmount) - discountPreview.saved).toFixed(2)} {settings.currency}</strong>
+        </div>
+      )}
+      <button type="button" disabled={applyingDiscount} onClick={() => void applyDiscount()} className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#10B981] py-3.5 text-sm font-bold text-[#04120D] disabled:opacity-50">
+        <Gift size={17} /> {applyingDiscount ? 'Application…' : 'Appliquer la réduction'}
+      </button>
+    </div>
+  ) : null;
+
   const resetCustomer = () => {
     setCustomer(null); setManualSearch(''); setManualMatches([]); setAmount(''); setInvoiceNumber(''); setMessage('');
   };
@@ -520,7 +597,7 @@ export default function LoyaltyScanner() {
               {settings.program_type === 'STAMP' ? (
                 <div className="rounded-[28px] border border-[#242424] bg-[#111111] p-5 shadow-2xl"><p className="text-[9px] font-bold uppercase tracking-[.18em] text-[#10B981]">Programme à tampons</p><div className="mt-4 rounded-2xl bg-[#475569]/[.06] p-5 text-center"><p className="font-display text-4xl text-[#10B981]">{customer.stamps_balance ?? 0}<span className="text-xl text-white/25"> / {settings.stamp_goal}</span></p><p className="mt-2 text-[10px] text-white/35">1 tampon sera ajouté à cette visite.</p></div><button disabled={saving} onClick={() => void addStamp()} className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#475569] py-4 text-sm font-bold text-[#050505] disabled:opacity-50"><CheckCircle2 size={18} /> {saving ? 'Enregistrement…' : 'Ajouter 1 tampon'}</button><button disabled={saving} onClick={resetCustomer} className="mt-2 flex w-full items-center justify-center gap-2 py-3 text-[10px] font-bold uppercase tracking-[.12em] text-white/30"><ArrowLeft size={14} /> Changer de client</button></div>
               ) : (
-                <div className="rounded-[28px] border border-[#242424] bg-[#111111] p-5 shadow-2xl"><div className="flex items-center gap-2"><ReceiptText size={16} className="text-[#10B981]" /><p className="text-[9px] font-bold uppercase tracking-[.18em] text-[#10B981]">Nouvelle visite</p></div><label className="mt-5 block text-[9px] font-bold uppercase tracking-[.12em] text-white/35">Montant de la facture · {settings.currency}<input autoFocus type="number" min="0" step="0.01" value={amount} onChange={e => setAmount(e.target.value)} placeholder="500" className="mt-2 h-14 w-full rounded-2xl border border-[#242424] bg-[#050505] px-4 text-lg font-semibold text-white outline-none placeholder:text-white/15 focus:border-[#10B981]/45" /></label><label className="mt-4 block text-[9px] font-bold uppercase tracking-[.12em] text-white/35">Numéro de facture <span className="font-normal normal-case tracking-normal text-white/20">(optionnel)</span><input value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} placeholder="FAC-2026-001" className="mt-2 h-12 w-full rounded-2xl border border-[#242424] bg-[#050505] px-4 text-sm text-white outline-none placeholder:text-white/15 focus:border-[#10B981]/45" /></label>{amount && Number(amount) > 0 && <div className="mt-4 flex items-center justify-between rounded-2xl border border-[#10B981]/15 bg-[#475569]/[.05] px-4 py-3"><span className="text-[10px] text-white/40">Points générés</span><strong className="text-sm text-[#10B981]">+{Math.floor(Number(amount) * Number(settings.points_per_currency))} pts</strong></div>}<button disabled={saving} onClick={addPoints} className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#475569] py-4 text-sm font-bold text-[#050505] disabled:opacity-50"><CheckCircle2 size={18} /> {saving ? 'Enregistrement…' : 'Ajouter les points'}</button><button disabled={saving} onClick={resetCustomer} className="mt-2 flex w-full items-center justify-center gap-2 py-3 text-[10px] font-bold uppercase tracking-[.12em] text-white/30"><ArrowLeft size={14} /> Changer de client</button></div>
+                <>{discountPanel}<div className="rounded-[28px] border border-[#242424] bg-[#111111] p-5 shadow-2xl"><div className="flex items-center gap-2"><ReceiptText size={16} className="text-[#10B981]" /><p className="text-[9px] font-bold uppercase tracking-[.18em] text-[#10B981]">Nouvelle visite</p></div><label className="mt-5 block text-[9px] font-bold uppercase tracking-[.12em] text-white/35">Montant de la facture · {settings.currency}<input autoFocus type="number" min="0" step="0.01" value={amount} onChange={e => setAmount(e.target.value)} placeholder="500" className="mt-2 h-14 w-full rounded-2xl border border-[#242424] bg-[#050505] px-4 text-lg font-semibold text-white outline-none placeholder:text-white/15 focus:border-[#10B981]/45" /></label><label className="mt-4 block text-[9px] font-bold uppercase tracking-[.12em] text-white/35">Numéro de facture <span className="font-normal normal-case tracking-normal text-white/20">(optionnel)</span><input value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} placeholder="FAC-2026-001" className="mt-2 h-12 w-full rounded-2xl border border-[#242424] bg-[#050505] px-4 text-sm text-white outline-none placeholder:text-white/15 focus:border-[#10B981]/45" /></label>{amount && Number(amount) > 0 && <div className="mt-4 flex items-center justify-between rounded-2xl border border-[#10B981]/15 bg-[#475569]/[.05] px-4 py-3"><span className="text-[10px] text-white/40">Points générés</span><strong className="text-sm text-[#10B981]">+{Math.floor(Number(amount) * Number(settings.points_per_currency))} pts</strong></div>}<button disabled={saving} onClick={addPoints} className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#475569] py-4 text-sm font-bold text-[#050505] disabled:opacity-50"><CheckCircle2 size={18} /> {saving ? 'Enregistrement…' : 'Ajouter les points'}</button><button disabled={saving} onClick={resetCustomer} className="mt-2 flex w-full items-center justify-center gap-2 py-3 text-[10px] font-bold uppercase tracking-[.12em] text-white/30"><ArrowLeft size={14} /> Changer de client</button></div></>
               )}
             </section>
           )}
