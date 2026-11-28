@@ -38,7 +38,33 @@ const emptyForm = {
   description: '',
   normal_price: '',
   promo_price: '',
+  start_date: '',
+  end_date: '',
 };
+
+/** 'YYYY-MM-DD' typed by the merchant -> start/end of that day in the browser's time zone. */
+function validityRange(startDate: string, endDate: string) {
+  return {
+    start_at: startDate ? new Date(`${startDate}T00:00:00`).toISOString() : null,
+    end_at: endDate ? new Date(`${endDate}T23:59:59`).toISOString() : null,
+  };
+}
+
+function toDateInput(value: string | null) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+function formatValidity(start: string | null, end: string | null) {
+  const fmt = (value: string) => new Date(value).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+  if (start && end) return `Du ${fmt(start)} au ${fmt(end)}`;
+  if (end) return `Jusqu’au ${fmt(end)}`;
+  if (start) return `À partir du ${fmt(start)}`;
+  return 'Sans date de fin';
+}
 
 export default function Promotions() {
   const { user } = useAuth();
@@ -118,6 +144,8 @@ export default function Promotions() {
       description: promotion.description ?? '',
       normal_price: promotion.normal_price == null ? '' : String(promotion.normal_price),
       promo_price: promotion.promo_price == null ? '' : String(promotion.promo_price),
+      start_date: toDateInput(promotion.start_at),
+      end_date: toDateInput(promotion.end_at),
     });
     setErrorMessage('');
   }
@@ -138,11 +166,15 @@ export default function Promotions() {
         (promoPrice !== null && (!Number.isFinite(promoPrice) || promoPrice < 0))) {
       setErrorMessage('Les prix doivent être des nombres positifs.'); return;
     }
+    if (form.start_date && form.end_date && form.end_date < form.start_date) {
+      setErrorMessage('La date de fin doit être après la date de début.'); return;
+    }
     setSaving(true);
     setErrorMessage('');
     const { error } = await supabase.from('promotions').update({
       name, description: form.description.trim() || null,
       normal_price: normalPrice, promo_price: promoPrice,
+      ...validityRange(form.start_date, form.end_date),
     }).eq('id', editingId).eq('establishment_id', establishmentId);
     if (error) { setErrorMessage(error.message); setSaving(false); return; }
     setEditingId(null); setForm(emptyForm);
@@ -155,6 +187,10 @@ export default function Promotions() {
 
     if (!establishmentId || !name) {
       setErrorMessage('Le nom de la promotion est obligatoire.');
+      return;
+    }
+    if (form.start_date && form.end_date && form.end_date < form.start_date) {
+      setErrorMessage('La date de fin doit être après la date de début.');
       return;
     }
 
@@ -183,6 +219,14 @@ export default function Promotions() {
       );
       setSaving(false);
       return;
+    }
+
+    const createdId = data?.promotion?.id ? String(data.promotion.id) : '';
+    if (createdId && (form.start_date || form.end_date)) {
+      const { error: validityError } = await supabase.from('promotions')
+        .update(validityRange(form.start_date, form.end_date))
+        .eq('id', createdId).eq('establishment_id', establishmentId);
+      if (validityError) setErrorMessage(`Promotion publiée, mais les dates n’ont pas pu être enregistrées : ${validityError.message}`);
     }
 
     setForm(emptyForm);
@@ -366,6 +410,27 @@ export default function Promotions() {
               className="w-full rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-forest"
             />
           </label>
+
+          <label className="block">
+            <span className="mb-1.5 block text-xs font-semibold text-ink/60">Valable à partir du (facultatif)</span>
+            <input
+              value={form.start_date}
+              onChange={(event) => updateForm('start_date', event.target.value)}
+              type="date"
+              className="w-full rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-forest"
+            />
+          </label>
+
+          <label className="block">
+            <span className="mb-1.5 block text-xs font-semibold text-ink/60">Valable jusqu’au (facultatif)</span>
+            <input
+              value={form.end_date}
+              min={form.start_date || undefined}
+              onChange={(event) => updateForm('end_date', event.target.value)}
+              type="date"
+              className="w-full rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-forest"
+            />
+          </label>
         </div>
 
         <div className="mt-5 flex flex-wrap justify-end gap-2">
@@ -438,6 +503,10 @@ export default function Promotions() {
                       {promotion.active ? 'Publiée' : 'Masquée'}
                     </span>
                   </div>
+                  <p className="mt-2 text-[11px] font-medium text-ink/45">
+                    {formatValidity(promotion.start_at, promotion.end_at)}
+                    {promotion.end_at && new Date(promotion.end_at).getTime() < Date.now() ? ' · expirée' : ''}
+                  </p>
 
                   <div className="mt-4 flex items-center justify-between gap-3">
                     <div>

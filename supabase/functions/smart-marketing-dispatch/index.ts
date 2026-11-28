@@ -1,5 +1,6 @@
 import { extractBearerToken, constantTimeEqual, normalizeLimit, resolveSmartMessage, retryDelayMinutes, parseHappyHourSchedule, resolveRewardClaimCycle } from './smart-marketing-utils.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createWalletDelivery } from './wallet-delivery.ts';
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json'}});
 const templates:Record<string,{title:string;message:(p:Record<string,unknown>)=>string;type:'INFO'|'OFFER'|'REWARD'|'POINTS'}>={
   winback:{title:'On vous attend !',message:()=> 'Cela fait quelque temps que nous ne vous avons pas vu. Passez nous rendre visite, nous serons ravis de vous retrouver !',type:'OFFER'},
@@ -25,7 +26,8 @@ Deno.serve(async(req)=>{
  const batch=normalizeLimit(requestedLimit);
  const {data:rows,error}=await admin.rpc('claim_smart_marketing_queue',{p_limit:batch});
  if(error)return json({success:false,error:'Impossible de réserver les tâches.'},500);
- let sent=0,skipped=0,failed=0;
+ let sent=0,skipped=0,failed=0,walletSent=0;
+ const deliverToWallet=createWalletDelivery(admin);
  const markSkipped=async(id:string,reason:string)=>{const {error}=await admin.from('smart_marketing_queue').update({status:'SKIPPED',processing_started_at:null,processed_at:new Date().toISOString(),last_error:reason}).eq('id',id);if(error)throw error;};
  for(const q of rows??[]){
   try{
@@ -122,7 +124,11 @@ Deno.serve(async(req)=>{
    if(deliveryError)throw deliveryError;
    if(!Array.isArray(deliveryRows)||!deliveryRows[0])throw new Error('Atomic notification result unavailable');
    if(deliveryRows[0].consent_valid!==true){skipped++;continue;}
-   if(deliveryRows[0].created===true)sent++;else skipped++;
+   if(deliveryRows[0].created===true){
+    sent++;
+    // Same message on the customer's Google Wallet pass when that channel is on.
+    walletSent+=await deliverToWallet(q.establishment_id,q.customer_id,q.id,tmpl.title,customMessage);
+   }else skipped++;
   }catch(e){
    const msg=e instanceof Error?e.message:String(e);
    const retryable=(q.attempts??1)<3;
@@ -131,5 +137,5 @@ Deno.serve(async(req)=>{
    if(stateErr)failed++; else if(!retryable)failed++;
   }
  }
- return json({success:failed===0,claimed:rows?.length??0,created_in_app_notifications:sent,skipped,failed});
+ return json({success:failed===0,claimed:rows?.length??0,created_in_app_notifications:sent,google_wallet_messages:walletSent,skipped,failed});
 });

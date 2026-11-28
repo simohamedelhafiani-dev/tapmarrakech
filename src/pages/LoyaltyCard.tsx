@@ -22,6 +22,7 @@ import { LoyaltyCardVisual, type LoyaltyDesignConfig } from '@/components/Loyalt
 import { supabase } from '@/lib/supabase';
 import { enableLoyaltyPush, getLoyaltyPushSubscription } from '@/lib/loyaltyPush';
 import SmartNearbyGPS from '@/components/loyalty/SmartNearbyGPS';
+import SmartCardOffers from '@/components/loyalty/SmartCardOffers';
 
 type Card = {
   customer_id: string;
@@ -1022,6 +1023,8 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
             />
           </div>
         </div>
+
+        <SmartCardOffers accessToken={token} />
 
         <section className="mt-4 w-full max-w-[400px] rounded-2xl border border-white/10 bg-[#111111] p-4 shadow-lg">
           {walletDesigns.length > 0 && (

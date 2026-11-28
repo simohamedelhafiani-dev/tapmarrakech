@@ -119,3 +119,7 @@ $$;
 
 revoke all on function public.set_loyalty_notification_channels(uuid, boolean, boolean, boolean) from public, anon;
 grant execute on function public.set_loyalty_notification_channels(uuid, boolean, boolean, boolean) to authenticated;
+
+-- Smart Marketing dispatch (service role) reads the channels before mirroring to Google Wallet.
+grant execute on function public.loyalty_wallet_channels_included(uuid) to service_role;
+grant select on public.loyalty_notification_channels to service_role;
