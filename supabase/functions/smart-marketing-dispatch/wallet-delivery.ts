@@ -61,7 +61,7 @@ export function createWalletDelivery(admin: Admin) {
         const { data: catalog } = await admin.from('loyalty_wallet_design_catalog').select('google_class_id').eq('establishment_id', establishmentId).not('google_class_id', 'is', null);
         const headers = { Authorization: `Bearer ${await getToken()}` };
         const prefix = `${issuerId}.kelyani_${establishmentId.replace(/-/g, '')}_`;
-        for (const classId of new Set((catalog ?? []).map((row: { google_class_id: string }) => String(row.google_class_id)))) {
+        for (const classId of new Set<string>((catalog ?? []).map((row: { google_class_id: string }) => String(row.google_class_id)))) {
           let pageToken = '';
           for (let page = 0; page < 25; page++) {
             const response = await fetch(`${API}/loyaltyObject?classId=${encodeURIComponent(classId)}&maxResults=200${pageToken ? `&token=${encodeURIComponent(pageToken)}` : ''}`, { headers });
