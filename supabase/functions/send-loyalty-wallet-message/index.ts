@@ -119,7 +119,8 @@ Deno.serve(async (req) => {
         headers,
         body: JSON.stringify({
           message: {
-            id: `campaign_${String(campaign.id).replace(/-/g, "")}`,
+            // A resend needs a new id: Google rejects a message id already on the pass.
+            id: `campaign_${String(campaign.id).replace(/-/g, "")}_${start.getTime()}`,
             header: String(campaign.title).slice(0, 80),
             body: String(campaign.message).slice(0, 500),
             messageType: "TEXT_AND_NOTIFY",
