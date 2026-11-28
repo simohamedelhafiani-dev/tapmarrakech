@@ -308,8 +308,8 @@ export function WalletPassCard({
     return (
       <div style={shell}>
         {header}
-        <div style={{ padding: '1cqw 5.5cqw 4cqw' }}>{value(text, accent)}</div>
-        <div style={{ position: 'relative', height: '30cqw', flex: '0 0 30cqw', margin: '0 5.5cqw', borderRadius: '4cqw', overflow: 'hidden' }}>
+        <div style={{ padding: '1cqw 5.5cqw 3cqw' }}>{value(text, accent)}</div>
+        <div style={{ position: 'relative', height: mode === 'STAMP' && goal > 6 ? '16cqw' : '30cqw', flex: `0 0 ${mode === 'STAMP' && goal > 6 ? 16 : 30}cqw`, margin: '0 5.5cqw', borderRadius: '4cqw', overflow: 'hidden' }}>
           {art(photo ? 'linear-gradient(180deg, transparent 50%, rgba(0,0,0,.25) 100%)' : 'transparent')}
         </div>
         {body(<>{stampsGrid}{fields}</>)}
