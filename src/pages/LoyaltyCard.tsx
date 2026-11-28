@@ -22,7 +22,7 @@ import { LoyaltyCardVisual, type LoyaltyDesignConfig } from '@/components/Loyalt
 import { supabase } from '@/lib/supabase';
 import { enableLoyaltyPush, getLoyaltyPushSubscription } from '@/lib/loyaltyPush';
 import SmartNearbyGPS from '@/components/loyalty/SmartNearbyGPS';
-import SmartCardOffers from '@/components/loyalty/SmartCardOffers';
+import SmartCardOffers, { buildSmartMessages, useSmartOffers } from '@/components/loyalty/SmartCardOffers';
 
 type Card = {
   customer_id: string;
@@ -131,6 +131,7 @@ export default function LoyaltyCard() {
   const [referralQrDataUrl, setReferralQrDataUrl] = useState('');
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [notifications, setNotifications] = useState<CardNotification[]>([]);
+  const smartOffers = useSmartOffers(token);
   const [raffleWins, setRaffleWins] = useState<RaffleWinner[]>([]);
   const [activeRaffle, setActiveRaffle] = useState<ActiveRaffle | null>(null);
   const [raffleLoadError, setRaffleLoadError] = useState('');
@@ -955,6 +956,12 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
     discountValidDays?: number;
     rewardName?: string;
   };
+  // Wallet-style message zone inside the card: latest unread notification, then Smart offers.
+  const latestUnread = notifications.find(item => !item.is_read && (!item.expires_at || new Date(item.expires_at).getTime() > Date.now()));
+  const cardMessages = [
+    ...(latestUnread ? [{ id: `notif-${latestUnread.id}`, icon: '🔔', title: latestUnread.title, text: latestUnread.message }] : []),
+    ...buildSmartMessages(smartOffers),
+  ];
   return (
     <main className="ky-site-bg min-h-screen bg-[#050505] px-3 py-5 text-[#EDE9DF] sm:px-6 sm:py-8">
       <div className="flex w-full flex-col items-center gap-4">
@@ -1020,11 +1027,12 @@ Scanne le QR code ou ouvre ce lien pour rejoindre le programme fidélité.`
               programType={mode}
               cardWidth="min(100%, 400px)"
               onInviteFriend={program.referral_enabled === true && cardSaved ? () => { void openReferral(); } : undefined}
+              messages={cardMessages}
             />
           </div>
         </div>
 
-        <SmartCardOffers accessToken={token} />
+        <SmartCardOffers offers={smartOffers} />
 
         <section className="mt-4 w-full max-w-[400px] rounded-2xl border border-white/10 bg-[#111111] p-4 shadow-lg">
           {walletDesigns.length > 0 && (

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Cake, Clock3, Crown, Flame, Tag } from 'lucide-react';
+import { Clock3, Tag } from 'lucide-react';
+import type { PassMessage } from '@/components/loyalty/WalletPassCard';
 import { supabase } from '@/lib/supabase';
 
 type Promotion = {
@@ -13,7 +14,7 @@ type Promotion = {
   end_at: string | null;
 };
 
-type SmartOffers = {
+export type SmartOffers = {
   promotions?: Promotion[];
   happy_hour?: { start: string; end: string; days: number[]; offer: string | null; message: string | null; active_now: boolean };
   birthday?: { is_today: boolean; offer: string | null; message: string | null };
@@ -34,88 +35,79 @@ function validity(promotion: Promotion) {
   return 'Offre en cours';
 }
 
-/**
- * Smart Marketing on the customer's card: current promotions with their validity, Happy Hour
- * during its slot, birthday gift, VIP status and progress encouragement. Display only.
- */
-export default function SmartCardOffers({ accessToken }: { accessToken: string }) {
+/** Loads the Smart Marketing offers of the card holder; refreshed every 5 minutes for Happy Hour. */
+export function useSmartOffers(accessToken: string) {
   const [offers, setOffers] = useState<SmartOffers | null>(null);
-
   useEffect(() => {
     if (!accessToken) return;
     let active = true;
     const load = async () => {
       const { data, error } = await supabase.rpc('get_public_loyalty_smart_offers', { p_access_token: accessToken });
-      if (!active || error) return;
-      setOffers((data ?? null) as SmartOffers | null);
+      if (active && !error) setOffers((data ?? null) as SmartOffers | null);
     };
     void load();
-    // Happy Hour switches on and off with the clock: refresh every few minutes.
     const timer = window.setInterval(() => { void load(); }, 5 * 60 * 1000);
     return () => { active = false; window.clearInterval(timer); };
   }, [accessToken]);
+  return offers;
+}
 
-  if (!offers) return null;
-  const promotions = offers.promotions ?? [];
-  const highlights: { key: string; icon: typeof Cake; tone: string; title: string; text: string }[] = [];
-
+/** Messages shown inside the card (Wallet-style message zone next to the QR code). */
+export function buildSmartMessages(offers: SmartOffers | null): PassMessage[] {
+  if (!offers) return [];
+  const messages: PassMessage[] = [];
   if (offers.birthday) {
-    highlights.push({
-      key: 'birthday',
-      icon: Cake,
-      tone: '#F472B6',
-      title: offers.birthday.is_today ? 'Joyeux anniversaire ! 🎂' : 'C’est votre mois d’anniversaire 🎂',
+    messages.push({
+      id: 'birthday',
+      icon: '🎂',
+      title: offers.birthday.is_today ? 'Joyeux anniversaire !' : 'C’est votre mois d’anniversaire',
       text: [offers.birthday.offer, offers.birthday.message].filter(Boolean).join(' · ') || 'Une attention vous attend lors de votre prochaine visite.',
     });
   }
   if (offers.happy_hour?.active_now) {
-    highlights.push({
-      key: 'happyhour',
-      icon: Clock3,
-      tone: '#F59E0B',
-      title: `Happy Hour en cours · jusqu’à ${offers.happy_hour.end}`,
+    messages.push({
+      id: 'happyhour',
+      icon: '⏰',
+      title: `Happy Hour jusqu’à ${offers.happy_hour.end}`,
       text: offers.happy_hour.offer || offers.happy_hour.message || 'Profitez de votre avantage pendant ce créneau.',
     });
   }
   if (offers.vip?.is_vip) {
-    highlights.push({
-      key: 'vip',
-      icon: Crown,
-      tone: '#E8C57E',
-      title: 'Vous êtes client VIP 👑',
-      text: offers.vip.benefit || offers.vip.message || 'Merci pour votre fidélité, profitez de vos avantages exclusifs.',
+    messages.push({
+      id: 'vip',
+      icon: '👑',
+      title: 'Vous êtes client VIP',
+      text: offers.vip.benefit || offers.vip.message || 'Merci pour votre fidélité.',
     });
   }
   if (offers.progress?.near) {
-    highlights.push({
-      key: 'progress',
-      icon: Flame,
-      tone: '#10B981',
-      title: offers.progress.remaining === 1 ? 'Plus qu’un tampon avant votre cadeau !' : `Plus que ${offers.progress.remaining} tampons avant votre cadeau`,
-      text: offers.progress.message || 'Encore un petit effort, votre récompense approche.',
+    messages.push({
+      id: 'progress',
+      icon: '🔥',
+      title: offers.progress.remaining === 1 ? 'Plus qu’un tampon !' : `Plus que ${offers.progress.remaining} tampons`,
+      text: offers.progress.message || 'Votre cadeau approche.',
     });
   }
+  for (const promotion of (offers.promotions ?? []).slice(0, 2)) {
+    messages.push({
+      id: `promo-${promotion.id}`,
+      icon: '🏷️',
+      title: promotion.promo_price != null ? `${promotion.name} · ${promotion.promo_price} MAD` : promotion.name,
+      text: validity(promotion),
+    });
+  }
+  return messages;
+}
 
+/** Details under the card: current promotions (photo, price, validity) and the Happy Hour slot. */
+export default function SmartCardOffers({ offers }: { offers: SmartOffers | null }) {
+  if (!offers) return null;
+  const promotions = offers.promotions ?? [];
   const upcomingHappyHour = offers.happy_hour && !offers.happy_hour.active_now ? offers.happy_hour : null;
-  if (!highlights.length && !promotions.length && !upcomingHappyHour) return null;
+  if (!promotions.length && !upcomingHappyHour) return null;
 
   return (
     <section className="mt-4 w-full max-w-[400px] space-y-3">
-      {highlights.map(item => {
-        const Icon = item.icon;
-        return (
-          <div key={item.key} className="flex items-start gap-3 rounded-2xl border bg-[#111111] p-4 shadow-lg" style={{ borderColor: `${item.tone}55` }}>
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl" style={{ background: `${item.tone}1F`, color: item.tone }}>
-              <Icon className="h-5 w-5" />
-            </span>
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-white">{item.title}</p>
-              <p className="mt-0.5 text-xs leading-5 text-white/55">{item.text}</p>
-            </div>
-          </div>
-        );
-      })}
-
       {promotions.length > 0 && (
         <div className="rounded-2xl border border-white/10 bg-[#111111] p-4 shadow-lg">
           <div className="mb-3 flex items-center gap-2">

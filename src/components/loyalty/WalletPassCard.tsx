@@ -18,6 +18,8 @@ type PassConfig = {
   qr_frame?: QrFrame;
 };
 
+export type PassMessage = { id: string; icon: string; title: string; text?: string | null };
+
 type PassCard = {
   establishmentName: string;
   logoUrl?: string | null;
@@ -81,6 +83,7 @@ export function WalletPassCard({
   side = 'front',
   cardWidth,
   onInviteFriend,
+  messages = [],
 }: {
   template: CardCategoryTemplate;
   config: PassConfig;
@@ -89,7 +92,16 @@ export function WalletPassCard({
   side?: 'front' | 'back';
   cardWidth?: string;
   onInviteFriend?: () => void;
+  /** Wallet-style message zone next to the QR code; several messages take turns. */
+  messages?: PassMessage[];
 }) {
+  const [messageIndex, setMessageIndex] = useState(0);
+  useEffect(() => {
+    setMessageIndex(0);
+    if (messages.length < 2) return;
+    const timer = window.setInterval(() => setMessageIndex(index => (index + 1) % messages.length), 5000);
+    return () => window.clearInterval(timer);
+  }, [messages.length]);
   const showQr = Boolean(config.show_qr || config.showQr);
   const [qr, setQr] = useState('');
 
@@ -268,14 +280,71 @@ export function WalletPassCard({
       ? { background: 'rgba(255,255,255,.92)', border: '0.6cqw solid rgba(255,255,255,.45)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }
       : { background: '#FFFFFF' };
 
-  const barcode = (
-    <div style={{ position: 'relative', marginTop: 'auto', padding: '2.5cqw 0 4.5cqw', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+  const currentMessage = messages.length ? messages[messageIndex % messages.length] : null;
+  const onPhoto = immersive && Boolean(photo);
+  const messagePanel = currentMessage ? (
+    <div
+      key={currentMessage.id}
+      style={{
+        flex: 1,
+        minWidth: 0,
+        alignSelf: 'stretch',
+        minHeight: showQr ? `${qrWidth}cqw` : '18cqw',
+        boxSizing: 'border-box',
+        padding: '2.4cqw 2.8cqw',
+        borderRadius: '3cqw',
+        background: onPhoto ? 'rgba(0,0,0,.38)' : `${text}12`,
+        border: `1px solid ${accent}55`,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1cqw',
+        backdropFilter: onPhoto ? 'blur(6px)' : undefined,
+        WebkitBackdropFilter: onPhoto ? 'blur(6px)' : undefined,
+        animation: 'kyPassMessage .45s ease',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '2cqw' }}>
+        <span style={label(onPhoto ? '#FFFFFFCC' : accent)}>Message</span>
+        {messages.length > 1 && (
+          <span style={{ display: 'flex', gap: '0.8cqw' }}>
+            {messages.map((item, index) => (
+              <span key={item.id} style={{ width: '1.3cqw', height: '1.3cqw', borderRadius: '50%', background: index === messageIndex % messages.length ? accent : faint }} />
+            ))}
+          </span>
+        )}
+      </div>
+      <div style={{ display: 'flex', gap: '1.6cqw', alignItems: 'flex-start' }}>
+        <span style={{ fontSize: '4.2cqw', lineHeight: 1.1 }}>{currentMessage.icon}</span>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: '3.3cqw', fontWeight: 800, lineHeight: 1.25, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{currentMessage.title}</div>
+          {currentMessage.text && (
+            <div style={{ marginTop: '0.6cqw', fontSize: '2.7cqw', lineHeight: 1.35, color: muted, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{currentMessage.text}</div>
+          )}
+        </div>
+      </div>
+    </div>
+  ) : null;
+
+  const qrBlock = (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: '0 0 auto' }}>
       {showQr && (
         <div style={{ width: `${qrWidth}cqw`, aspectRatio: '1', padding: '1.6cqw', borderRadius: '3cqw', boxSizing: 'border-box', boxShadow: '0 10px 26px rgba(0,0,0,.25)', ...frameStyle }}>
           {qr ? <img src={qr} alt="QR Code fidélité" style={{ width: '100%', height: '100%', display: 'block' }} /> : null}
         </div>
       )}
-      {card.loyaltyNumber && <div style={{ marginTop: '1.2cqw', fontSize: '2.4cqw', letterSpacing: '.18em', color: muted }}>{card.loyaltyNumber}</div>}
+      {card.loyaltyNumber && <div style={{ marginTop: '1.2cqw', fontSize: '2.4cqw', letterSpacing: '.18em', color: muted, whiteSpace: 'nowrap' }}>{card.loyaltyNumber}</div>}
+    </div>
+  );
+
+  const barcode = (
+    <div style={{ position: 'relative', marginTop: 'auto', padding: messagePanel ? '2.5cqw 5.5cqw 4.5cqw' : '2.5cqw 0 4.5cqw', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <style>{'@keyframes kyPassMessage{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}'}</style>
+      {messagePanel ? (
+        <div style={{ display: 'flex', gap: '3cqw', alignItems: 'flex-start', width: '100%' }}>
+          {messagePanel}
+          {qrBlock}
+        </div>
+      ) : qrBlock}
       {onInviteFriend && (
         <button type="button" onClick={onInviteFriend} style={{ marginTop: '1.8cqw', padding: '1.4cqw 4cqw', borderRadius: '999px', border: 'none', background: accent, color: template.light ? '#FFFFFF' : background, fontSize: '2.8cqw', fontWeight: 800, cursor: 'pointer' }}>
           🎁 Inviter un ami

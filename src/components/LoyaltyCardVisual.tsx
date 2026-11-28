@@ -10,7 +10,7 @@ export const WALLET_TEMPLATES = {
 } as const;
 
 import { resolvePassTemplate } from '@/components/loyalty/cardTemplates';
-import { WalletPassCard } from '@/components/loyalty/WalletPassCard';
+import { WalletPassCard, type PassMessage } from '@/components/loyalty/WalletPassCard';
 
 export type LoyaltyDesignConfig = {
   logo_x: number;
@@ -114,6 +114,7 @@ export function LoyaltyCardVisual(props: {
   programType?: 'STAMP' | 'DISCOUNT' | 'POINTS' | 'REWARD' | 'TIER';
   cardWidth?: string;
   onInviteFriend?: () => void;
+  messages?: PassMessage[];
 }) {
   const config = { ...defaultLoyaltyDesignConfig, ...(props.design.config ?? {}) };
   return (
@@ -125,6 +126,7 @@ export function LoyaltyCardVisual(props: {
       side={props.side}
       cardWidth={props.cardWidth}
       onInviteFriend={props.onInviteFriend}
+      messages={props.messages}
     />
   );
 }
