@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Bell, X, RotateCcw, History } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { sendLoyaltyNotificationPush } from '@/lib/loyaltyNotificationPush';
+import { sendLoyaltyNotificationPush, sendLoyaltyWalletMessage } from '@/lib/loyaltyNotificationPush';
+import NotificationChannelsCard, { useNotificationChannels } from '@/components/admin/NotificationChannelsCard';
 
 type Customer = {
   id: string;
@@ -23,6 +24,8 @@ type Props = { establishmentId: string; initialView?: 'campaigns' | 'history' };
 
 export default function LoyaltyNotificationsPanel({ establishmentId, initialView = 'campaigns' }: Props) {
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const channelState = useNotificationChannels(establishmentId);
+  const googleWalletOn = channelState.channels.google_wallet;
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -71,6 +74,7 @@ export default function LoyaltyNotificationsPanel({ establishmentId, initialView
     setResendingId(campaign.id);
     try {
       const result = await sendLoyaltyNotificationPush(campaign.id);
+      if (googleWalletOn) await sendLoyaltyWalletMessage(campaign.id);
       if (result.success && result.sent > 0) {
         alert(`Push renvoyé à ${result.sent} appareil(s).`);
       } else if (result.push_subscribers === 0) {
@@ -198,33 +202,33 @@ export default function LoyaltyNotificationsPanel({ establishmentId, initialView
         pushResult = await sendLoyaltyNotificationPush(campaignId);
         console.log('Résultat Web Push KELYANI:', pushResult);
       }
+      const walletResult = campaignId && googleWalletOn ? await sendLoyaltyWalletMessage(campaignId) : null;
+      const walletNote = !walletResult
+        ? ''
+        : walletResult.sent > 0
+          ? ` Google Wallet : message affiché sur ${walletResult.sent} carte(s).`
+          : walletResult.error
+            ? ` Google Wallet : envoi non confirmé (${walletResult.error}).`
+            : ' Google Wallet : aucun destinataire n’a encore ajouté sa carte.';
 
       await loadHistory();
       reset();
       setOpen(false);
 
       if (!pushResult) {
-        alert(`Notification publiée sur ${count} carte(s) fidélité. Le canal de notification système n'a pas pu être déclenché.`);
+        alert(`Notification publiée sur ${count} carte(s) fidélité. Le canal de notification système n'a pas pu être déclenché.` + walletNote);
       } else if (pushResult.success && pushResult.sent > 0) {
-        alert(
-          `Notification publiée sur ${count} carte(s) fidélité. 📱 Push système envoyé à ${pushResult.sent} appareil(s).`
-        );
+        alert(`Notification publiée sur ${count} carte(s) fidélité. 📱 Push système envoyé à ${pushResult.sent} appareil(s).` + walletNote);
       } else if (pushResult.push_subscribers === 0) {
-        alert(
-          `Notification publiée sur ${count} carte(s) fidélité, mais aucun abonnement de notification système actif n'a été trouvé.`
-        );
+        alert(`Notification publiée sur ${count} carte(s) fidélité, mais aucun abonnement de notification système actif n'a été trouvé.` + walletNote);
       } else if (pushResult.failed > 0) {
         const detail =
           pushResult.errors?.[0]?.message ||
           pushResult.error ||
           'Erreur Web Push inconnue.';
-        alert(
-          `Notification publiée sur ${count} carte(s), mais le Push système a échoué.\\n\\n${detail}`
-        );
+        alert(`Notification publiée sur ${count} carte(s), mais le Push système a échoué.\\n\\n${detail}` + walletNote);
       } else {
-        alert(
-          `Notification publiée sur ${count} carte(s) fidélité. Aucun Push système n'a été confirmé.`
-        );
+        alert(`Notification publiée sur ${count} carte(s) fidélité. Aucun Push système n'a été confirmé.` + walletNote);
       }
     } catch (error) {
       console.error('Erreur notification fidélité:', error);
@@ -236,6 +240,7 @@ export default function LoyaltyNotificationsPanel({ establishmentId, initialView
 
   return (
     <>
+      {initialView !== 'history' && <NotificationChannelsCard establishmentId={establishmentId} state={channelState} />}
       {initialView !== 'history' && (
       <div className="rounded-3xl border border-[#242424] bg-[#111111] p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
