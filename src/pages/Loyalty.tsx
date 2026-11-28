@@ -683,7 +683,7 @@ export default function Loyalty() {
       {/* HEADER */}
       <div className="mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-end">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#00DFA5]">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#10B981]">
             Fidélité
           </p>
 
@@ -699,7 +699,7 @@ export default function Loyalty() {
         <div className="flex flex-wrap items-center gap-2">
           <Link
             to="/dashboard/loyalty/raffles"
-            className="flex items-center gap-2 rounded-xl border border-[#00DFA5]/30 bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#00DFA5] transition hover:bg-[#1B1B1B]"
+            className="flex items-center gap-2 rounded-xl border border-[#10B981]/30 bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#10B981] transition hover:bg-[#1B1B1B]"
           >
             <Ticket size={16} />
             Tombola & niveaux
@@ -710,7 +710,7 @@ export default function Loyalty() {
           <button
             onClick={() => setShowNotificationHistory(value => !value)}
             disabled={!establishmentId}
-            className="flex items-center gap-2 rounded-xl border border-[#00DFA5]/30 bg-[#686D76] px-4 py-2.5 text-xs font-semibold text-[#00DFA5] transition hover:bg-[#1b1b1b] disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex items-center gap-2 rounded-xl border border-[#10B981]/30 bg-[#475569] px-4 py-2.5 text-xs font-semibold text-[#10B981] transition hover:bg-[#1b1b1b] disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Bell size={16} />
             Historique notifications
@@ -718,7 +718,7 @@ export default function Loyalty() {
           <button
             onClick={() => setShowNotificationModal(true)}
             disabled={!establishmentId || !programSettings.enabled}
-            className="flex items-center gap-2 rounded-xl border border-[#00DFA5]/30 bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#00DFA5] transition hover:bg-[#1B1B1B] disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex items-center gap-2 rounded-xl border border-[#10B981]/30 bg-[#111111] px-4 py-2.5 text-xs font-semibold text-[#10B981] transition hover:bg-[#1B1B1B] disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Bell size={16} />
             Notification carte
@@ -727,7 +727,7 @@ export default function Loyalty() {
           <button
             onClick={() => setShowNewCustomer(true)}
           disabled={!establishmentId || !programSettings.enabled}
-          className="flex w-fit items-center gap-2 rounded-xl bg-[#686D76] px-4 py-2.5 text-xs font-semibold text-[#00DFA5] transition hover:bg-[#686D76] disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex w-fit items-center gap-2 rounded-xl bg-[#475569] px-4 py-2.5 text-xs font-semibold text-[#10B981] transition hover:bg-[#475569] disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Plus size={16} />
             Nouveau client
@@ -739,13 +739,13 @@ export default function Loyalty() {
       <div
         className={`mb-6 rounded-2xl border p-5 shadow-soft ${
           programSettings.enabled
-            ? 'border-[#00DFA5]/20 bg-[#111111]'
+            ? 'border-[#10B981]/20 bg-[#111111]'
             : 'border-red-500/25 bg-[#180F0F]'
         }`}
       >
         <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#00DFA5]">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#10B981]">
               Programme fidélité
             </p>
 
@@ -765,7 +765,7 @@ export default function Loyalty() {
           <div
             className={`rounded-full px-3 py-1.5 text-[11px] font-semibold ${
               programSettings.enabled
-                ? 'bg-[#686D76]/10 text-[#00DFA5]'
+                ? 'bg-[#475569]/10 text-[#10B981]'
                 : 'bg-red-500/10 text-red-300'
             }`}
           >
@@ -777,21 +777,21 @@ export default function Loyalty() {
       <LoyaltyStudio establishmentId={establishmentId} />
 
       {showNotificationHistory && (
-        <section className="mb-6 rounded-2xl border border-[#00DFA5]/20 bg-[#686D76] p-5 text-[#00DFA5] shadow-soft">
+        <section className="mb-6 rounded-2xl border border-[#10B981]/20 bg-[#475569] p-5 text-[#10B981] shadow-soft">
           <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#00DFA5]">Centre de notifications</p>
-              <h2 className="mt-1 font-display text-2xl text-[#00DFA5]">Historique</h2>
-              <p className="mt-1 text-xs text-[#00DFA5]/55">Retrouvez vos campagnes et réutilisez un ancien message.</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#10B981]">Centre de notifications</p>
+              <h2 className="mt-1 font-display text-2xl text-[#10B981]">Historique</h2>
+              <p className="mt-1 text-xs text-[#10B981]/55">Retrouvez vos campagnes et réutilisez un ancien message.</p>
             </div>
-            <button type="button" onClick={() => setShowNotificationModal(true)} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#686D76] px-4 py-2.5 text-xs font-bold text-[#00DFA5] hover:bg-[#686D76]">
+            <button type="button" onClick={() => setShowNotificationModal(true)} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#475569] px-4 py-2.5 text-xs font-bold text-[#10B981] hover:bg-[#475569]">
               <Plus size={15} /> Nouvelle notification
             </button>
           </div>
           {historyLoading ? (
-            <div className="rounded-xl border border-white/10 p-6 text-sm text-[#00DFA5]/60">Chargement de l’historique…</div>
+            <div className="rounded-xl border border-white/10 p-6 text-sm text-[#10B981]/60">Chargement de l’historique…</div>
           ) : notificationHistory.length === 0 ? (
-            <div className="rounded-xl border border-white/10 p-6 text-sm text-[#00DFA5]/60">Aucune notification publiée pour le moment.</div>
+            <div className="rounded-xl border border-white/10 p-6 text-sm text-[#10B981]/60">Aucune notification publiée pour le moment.</div>
           ) : (
             <div className="space-y-3">
               {notificationHistory.map(campaign => (
@@ -799,15 +799,15 @@ export default function Loyalty() {
                   <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-semibold text-[#00DFA5]">{campaign.title}</h3>
-                        <span className="rounded-full border border-[#00DFA5]/30 px-2 py-0.5 text-[10px] uppercase tracking-wide text-[#00DFA5]">{campaign.type}</span>
+                        <h3 className="font-semibold text-[#10B981]">{campaign.title}</h3>
+                        <span className="rounded-full border border-[#10B981]/30 px-2 py-0.5 text-[10px] uppercase tracking-wide text-[#10B981]">{campaign.type}</span>
                       </div>
-                      <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[#00DFA5]/70">{campaign.message}</p>
-                      <p className="mt-3 text-[11px] text-[#00DFA5]/45">
+                      <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[#10B981]/70">{campaign.message}</p>
+                      <p className="mt-3 text-[11px] text-[#10B981]/45">
                         Publiée le {new Date(campaign.created_at).toLocaleString('fr-FR')} · {campaign.recipient_count} destinataire(s) · {campaign.status}
                       </p>
                     </div>
-                    <button type="button" onClick={() => reuseNotification(campaign)} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-[#00DFA5]/40 px-3 py-2 text-xs font-semibold text-[#00DFA5] transition hover:bg-[#686D76]/10">
+                    <button type="button" onClick={() => reuseNotification(campaign)} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-[#10B981]/40 px-3 py-2 text-xs font-semibold text-[#10B981] transition hover:bg-[#475569]/10">
                       <Bell size={14} /> Réutiliser / republier
                     </button>
                   </div>
@@ -880,7 +880,7 @@ export default function Loyalty() {
           role="tab"
           aria-selected={activeLoyaltySection === 'overview'}
           onClick={() => setActiveLoyaltySection('overview')}
-          className={`rounded-xl px-4 py-2.5 text-xs font-semibold transition ${activeLoyaltySection === 'overview' ? 'bg-[#686D76] text-[#00DFA5]' : 'border border-white/10 bg-[#111111] text-white/65 hover:border-[#00DFA5]/40 hover:text-white'}`}
+          className={`rounded-xl px-4 py-2.5 text-xs font-semibold transition ${activeLoyaltySection === 'overview' ? 'bg-[#475569] text-[#10B981]' : 'border border-white/10 bg-[#111111] text-white/65 hover:border-[#10B981]/40 hover:text-white'}`}
         >
           Vue d’ensemble
         </button>
@@ -889,7 +889,7 @@ export default function Loyalty() {
           role="tab"
           aria-selected={activeLoyaltySection === 'clients'}
           onClick={() => setActiveLoyaltySection('clients')}
-          className={`rounded-xl px-4 py-2.5 text-xs font-semibold transition ${activeLoyaltySection === 'clients' ? 'bg-[#686D76] text-[#00DFA5]' : 'border border-white/10 bg-[#111111] text-white/65 hover:border-[#00DFA5]/40 hover:text-white'}`}
+          className={`rounded-xl px-4 py-2.5 text-xs font-semibold transition ${activeLoyaltySection === 'clients' ? 'bg-[#475569] text-[#10B981]' : 'border border-white/10 bg-[#111111] text-white/65 hover:border-[#10B981]/40 hover:text-white'}`}
         >
           Clients · {customers.length}
         </button>
@@ -917,7 +917,7 @@ export default function Loyalty() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Rechercher un client..."
-              className="w-full rounded-xl border border-ink/10 bg-[#686D76] text-white py-2.5 pl-9 pr-3 text-xs outline-none focus:border-[#00DFA5]"
+              className="w-full rounded-xl border border-ink/10 bg-[#475569] text-white py-2.5 pl-9 pr-3 text-xs outline-none focus:border-[#10B981]"
             />
           </div>
         </div>
@@ -955,7 +955,7 @@ export default function Loyalty() {
                   </td>
 
                   <td className="px-6 py-4">
-                    <span className="rounded-full bg-[#686D76]/10 px-3 py-1 text-xs font-semibold text-white">
+                    <span className="rounded-full bg-[#475569]/10 px-3 py-1 text-xs font-semibold text-white">
                       ⭐ {customer.points_balance}
                     </span>
                   </td>
@@ -982,7 +982,7 @@ export default function Loyalty() {
                           setShowPoints(customer);
                         }}
                         disabled={!programSettings.enabled}
-                        className="rounded-lg bg-[#686D76] text-[#00DFA5] px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-[#686D76] text-[#00DFA5]-light disabled:cursor-not-allowed disabled:opacity-40"
+                        className="rounded-lg bg-[#475569] text-[#10B981] px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-[#475569] text-[#10B981]-light disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         Ajouter
                       </button>
@@ -1001,7 +1001,7 @@ export default function Loyalty() {
                           !programSettings.enabled ||
                           rewards.length === 0
                         }
-                        className="rounded-lg border border-[#00DFA5]/30 bg-[#181818] px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-[#686D76]/10 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="rounded-lg border border-[#10B981]/30 bg-[#181818] px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-[#475569]/10 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         Récompenses
                       </button>
@@ -1009,7 +1009,7 @@ export default function Loyalty() {
                         type="button"
                         onClick={() => void createRecoveryQr(customer)}
                         disabled={recoveryLoading}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-ink/10 px-3 py-2 text-[11px] font-semibold text-white/60 transition hover:border-[#00DFA5]/40 hover:text-[#00DFA5] disabled:opacity-40"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-ink/10 px-3 py-2 text-[11px] font-semibold text-white/60 transition hover:border-[#10B981]/40 hover:text-[#10B981] disabled:opacity-40"
                       >
                         <QrCode size={13} /> Récupérer
                       </button>
@@ -1045,12 +1045,12 @@ export default function Loyalty() {
           <div className="space-y-4">
             <div className="rounded-xl bg-[#111111] p-4">
               <div className="flex items-start gap-3">
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#1A1A1A] text-[#00DFA5]">
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#1A1A1A] text-[#10B981]">
                   <Bell size={18} />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-[#00DFA5]">Message client</p>
-                  <p className="mt-1 text-[11px] leading-5 text-[#00DFA5]/45">
+                  <p className="text-sm font-semibold text-[#10B981]">Message client</p>
+                  <p className="mt-1 text-[11px] leading-5 text-[#10B981]/45">
                     La notification apparaîtra directement dans la carte fidélité du client.
                   </p>
                 </div>
@@ -1059,11 +1059,11 @@ export default function Loyalty() {
 
             <div>
 
-              <label className="text-xs font-medium text-[#00DFA5]/60">Ciblage</label>
+              <label className="text-xs font-medium text-[#10B981]/60">Ciblage</label>
               <select
                 value={notificationAudience}
                 onChange={e => setNotificationAudience(e.target.value as typeof notificationAudience)}
-                className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#00DFA5] outline-none transition placeholder:text-[#00DFA5]/30 focus:border-[#00DFA5] bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#00DFA5]"
+                className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#10B981] outline-none transition placeholder:text-[#10B981]/30 focus:border-[#10B981] bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#10B981]"
               >
                 <option value="ALL">Tous les clients ayant accepté les notifications</option>
                 <option value="INTEREST">Par centre d’intérêt</option>
@@ -1076,11 +1076,11 @@ export default function Loyalty() {
 
             {notificationAudience === 'INTEREST' && (
               <div>
-                <label className="text-xs font-medium text-[#00DFA5]/60">Centre d’intérêt</label>
+                <label className="text-xs font-medium text-[#10B981]/60">Centre d’intérêt</label>
                 <select
                   value={notificationInterest}
                   onChange={e => setNotificationInterest(e.target.value)}
-                  className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#00DFA5] outline-none transition placeholder:text-[#00DFA5]/30 focus:border-[#00DFA5] bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#00DFA5]"
+                  className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#10B981] outline-none transition placeholder:text-[#10B981]/30 focus:border-[#10B981] bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#10B981]"
                 >
                   <option value="">Sélectionner</option>
                   {notificationInterests.map(interest => (
@@ -1092,11 +1092,11 @@ export default function Loyalty() {
 
             {notificationAudience === 'FREQUENCY' && (
               <div>
-                <label className="text-xs font-medium text-[#00DFA5]/60">Fréquence de visite</label>
+                <label className="text-xs font-medium text-[#10B981]/60">Fréquence de visite</label>
                 <select
                   value={notificationFrequency}
                   onChange={e => setNotificationFrequency(e.target.value)}
-                  className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#00DFA5] outline-none transition placeholder:text-[#00DFA5]/30 focus:border-[#00DFA5] bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#00DFA5]"
+                  className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#10B981] outline-none transition placeholder:text-[#10B981]/30 focus:border-[#10B981] bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#10B981]"
                 >
                   <option value="">Sélectionner</option>
                   <option value="WEEKLY">Hebdomadaire</option>
@@ -1108,14 +1108,14 @@ export default function Loyalty() {
 
             {notificationAudience === 'POINTS' && (
               <div>
-                <label className="text-xs font-medium text-[#00DFA5]/60">Minimum de points</label>
+                <label className="text-xs font-medium text-[#10B981]/60">Minimum de points</label>
                 <input
                   type="number"
                   min="0"
                   value={notificationMinPoints}
                   onChange={e => setNotificationMinPoints(e.target.value)}
                   placeholder="100"
-                  className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#00DFA5] outline-none transition placeholder:text-[#00DFA5]/30 focus:border-[#00DFA5] px-4 py-3 text-sm outline-none focus:border-[#00DFA5]"
+                  className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#10B981] outline-none transition placeholder:text-[#10B981]/30 focus:border-[#10B981] px-4 py-3 text-sm outline-none focus:border-[#10B981]"
                 />
               </div>
             )}
@@ -1123,25 +1123,25 @@ export default function Loyalty() {
             {notificationAudience === 'VISITS' && (
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-[#00DFA5]/60">Minimum de visites</label>
+                  <label className="text-xs font-medium text-[#10B981]/60">Minimum de visites</label>
                   <input
                     type="number"
                     min="0"
                     value={notificationMinVisits}
                     onChange={e => setNotificationMinVisits(e.target.value)}
                     placeholder="3"
-                    className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#00DFA5] outline-none transition placeholder:text-[#00DFA5]/30 focus:border-[#00DFA5] px-4 py-3 text-sm outline-none focus:border-[#00DFA5]"
+                    className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#10B981] outline-none transition placeholder:text-[#10B981]/30 focus:border-[#10B981] px-4 py-3 text-sm outline-none focus:border-[#10B981]"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-[#00DFA5]/60">Vu il y a moins de (jours)</label>
+                  <label className="text-xs font-medium text-[#10B981]/60">Vu il y a moins de (jours)</label>
                   <input
                     type="number"
                     min="0"
                     value={notificationLastVisitDays}
                     onChange={e => setNotificationLastVisitDays(e.target.value)}
                     placeholder="30"
-                    className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#00DFA5] outline-none transition placeholder:text-[#00DFA5]/30 focus:border-[#00DFA5] px-4 py-3 text-sm outline-none focus:border-[#00DFA5]"
+                    className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#10B981] outline-none transition placeholder:text-[#10B981]/30 focus:border-[#10B981] px-4 py-3 text-sm outline-none focus:border-[#10B981]"
                   />
                 </div>
               </div>
@@ -1149,11 +1149,11 @@ export default function Loyalty() {
 
             {notificationAudience === 'CUSTOMER' && (
               <div>
-                <label className="text-xs font-medium text-[#00DFA5]/60">Client</label>
+                <label className="text-xs font-medium text-[#10B981]/60">Client</label>
                 <select
                   value={notificationCustomerId}
                   onChange={e => setNotificationCustomerId(e.target.value)}
-                  className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#00DFA5] outline-none transition placeholder:text-[#00DFA5]/30 focus:border-[#00DFA5] bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#00DFA5]"
+                  className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#10B981] outline-none transition placeholder:text-[#10B981]/30 focus:border-[#10B981] bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#10B981]"
                 >
                   <option value="">Sélectionner</option>
                   {customers.filter(c => c.notification_consent).map(customer => (
@@ -1165,18 +1165,18 @@ export default function Loyalty() {
               </div>
             )}
 
-            <div className="rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-xs text-[#00DFA5]/55">
-              <strong className="text-[#00DFA5]">{notificationEligibleCustomers.length}</strong> client(s) ciblé(s).
+            <div className="rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-xs text-[#10B981]/55">
+              <strong className="text-[#10B981]">{notificationEligibleCustomers.length}</strong> client(s) ciblé(s).
               <span className="ml-1">Seuls les clients ayant accepté les notifications recevront le message.</span>
             </div>
 
 
             <div>
-              <label className="text-xs font-medium text-[#00DFA5]/60">Type</label>
+              <label className="text-xs font-medium text-[#10B981]/60">Type</label>
               <select
                 value={notificationType}
                 onChange={e => setNotificationType(e.target.value as typeof notificationType)}
-                className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#00DFA5] outline-none transition placeholder:text-[#00DFA5]/30 focus:border-[#00DFA5] bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#00DFA5]"
+                className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#10B981] outline-none transition placeholder:text-[#10B981]/30 focus:border-[#10B981] bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#10B981]"
               >
                 <option value="INFO">Information</option>
                 <option value="OFFER">Offre</option>
@@ -1186,35 +1186,35 @@ export default function Loyalty() {
             </div>
 
             <div>
-              <label className="text-xs font-medium text-[#00DFA5]/60">Titre</label>
+              <label className="text-xs font-medium text-[#10B981]/60">Titre</label>
               <input
                 value={notificationTitle}
                 onChange={e => setNotificationTitle(e.target.value)}
                 maxLength={120}
                 placeholder="Ex. Nouvelle offre disponible"
-                className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#00DFA5] outline-none transition placeholder:text-[#00DFA5]/30 focus:border-[#00DFA5] px-4 py-3 text-sm outline-none focus:border-[#00DFA5]"
+                className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#10B981] outline-none transition placeholder:text-[#10B981]/30 focus:border-[#10B981] px-4 py-3 text-sm outline-none focus:border-[#10B981]"
               />
             </div>
 
             <div>
-              <label className="text-xs font-medium text-[#00DFA5]/60">Message</label>
+              <label className="text-xs font-medium text-[#10B981]/60">Message</label>
               <textarea
                 value={notificationMessage}
                 onChange={e => setNotificationMessage(e.target.value)}
                 maxLength={1000}
                 rows={4}
                 placeholder="Écrivez le message qui apparaîtra sur la carte..."
-                className="mt-2 w-full resize-none rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#00DFA5] outline-none transition placeholder:text-[#00DFA5]/30 focus:border-[#00DFA5] px-4 py-3 text-sm outline-none focus:border-[#00DFA5]"
+                className="mt-2 w-full resize-none rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#10B981] outline-none transition placeholder:text-[#10B981]/30 focus:border-[#10B981] px-4 py-3 text-sm outline-none focus:border-[#10B981]"
               />
             </div>
 
             <div>
-              <label className="text-xs font-medium text-[#00DFA5]/60">Expiration (facultative)</label>
+              <label className="text-xs font-medium text-[#10B981]/60">Expiration (facultative)</label>
               <input
                 type="datetime-local"
                 value={notificationExpiresAt}
                 onChange={e => setNotificationExpiresAt(e.target.value)}
-                className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#00DFA5] outline-none transition placeholder:text-[#00DFA5]/30 focus:border-[#00DFA5] px-4 py-3 text-sm outline-none focus:border-[#00DFA5]"
+                className="mt-2 w-full rounded-xl border border-[#242424] bg-[#111111] px-4 py-3 text-sm text-[#10B981] outline-none transition placeholder:text-[#10B981]/30 focus:border-[#10B981] px-4 py-3 text-sm outline-none focus:border-[#10B981]"
               />
             </div>
 
@@ -1235,17 +1235,17 @@ export default function Loyalty() {
           <div className="w-full max-w-sm rounded-3xl border border-[#242424] bg-[#111111] p-6 text-center shadow-2xl">
             <div className="flex items-center justify-between">
               <div className="text-left">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#00DFA5]">Récupération</p>
-                <h2 className="mt-1 font-display text-xl text-[#00DFA5]">Carte de {recoveryQr.name}</h2>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#10B981]">Récupération</p>
+                <h2 className="mt-1 font-display text-xl text-[#10B981]">Carte de {recoveryQr.name}</h2>
               </div>
               <button type="button" onClick={() => setRecoveryQr(null)} className="rounded-full border border-[#242424] p-2 text-ink/50 hover:text-ink" aria-label="Fermer">×</button>
             </div>
             <div className="mx-auto mt-5 w-fit rounded-3xl bg-white p-3 shadow-sm">
               <img src={recoveryQr.url} alt="QR code de récupération de carte" className="h-64 w-64" />
             </div>
-            <p className="mt-4 text-sm font-semibold text-[#00DFA5]">Le client scanne ce QR avec son téléphone</p>
-            <p className="mt-1 text-xs leading-5 text-[#00DFA5]/45">Ce QR est valable 5 minutes et ne peut être utilisé qu'une seule fois.</p>
-            <p className="mt-3 text-[10px] font-medium text-[#00DFA5]">Expiration : {new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' }).format(new Date(recoveryQr.expiresAt))}</p>
+            <p className="mt-4 text-sm font-semibold text-[#10B981]">Le client scanne ce QR avec son téléphone</p>
+            <p className="mt-1 text-xs leading-5 text-[#10B981]/45">Ce QR est valable 5 minutes et ne peut être utilisé qu'une seule fois.</p>
+            <p className="mt-3 text-[10px] font-medium text-[#10B981]">Expiration : {new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' }).format(new Date(recoveryQr.expiresAt))}</p>
           </div>
         </div>
       )}
@@ -1266,7 +1266,7 @@ export default function Loyalty() {
                 value={firstName}
                 onChange={e => setFirstName(e.target.value)}
                 placeholder="Mohamed"
-                className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-[#00DFA5]"
+                className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-[#10B981]"
               />
             </div>
 
@@ -1279,7 +1279,7 @@ export default function Loyalty() {
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
                 placeholder="06 XX XX XX XX"
-                className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-[#00DFA5]"
+                className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-[#10B981]"
               />
             </div>
 
@@ -1312,7 +1312,7 @@ export default function Loyalty() {
                 {showPoints.phone}
               </p>
 
-              <p className="mt-3 text-sm font-semibold text-[#00DFA5]">
+              <p className="mt-3 text-sm font-semibold text-[#10B981]">
                 ⭐ {showPoints.points_balance} points
               </p>
             </div>
@@ -1330,7 +1330,7 @@ export default function Loyalty() {
                   value={amount}
                   onChange={e => setAmount(e.target.value)}
                   placeholder="250"
-                  className="w-full rounded-xl border border-ink/10 px-4 py-3 pr-16 text-sm outline-none focus:border-[#00DFA5]"
+                  className="w-full rounded-xl border border-ink/10 px-4 py-3 pr-16 text-sm outline-none focus:border-[#10B981]"
                 />
 
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-ink/40">
@@ -1347,7 +1347,7 @@ export default function Loyalty() {
                 value={invoiceNumber}
                 onChange={e => setInvoiceNumber(e.target.value)}
                 placeholder="FAC-2026-001"
-                className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-[#00DFA5]"
+                className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-[#10B981]"
               />
             </div>
 
@@ -1360,7 +1360,7 @@ export default function Loyalty() {
                 value={pointsResponsibleCode}
                 onChange={e => setPointsResponsibleCode(e.target.value)}
                 placeholder="Code de validation"
-                className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-center text-lg tracking-[0.25em] outline-none focus:border-[#00DFA5]"
+                className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-center text-lg tracking-[0.25em] outline-none focus:border-[#10B981]"
               />
             </div>
 
@@ -1376,7 +1376,7 @@ export default function Loyalty() {
             </div>
 
             {Number(amount) > 0 && (
-              <div className="rounded-xl border border-[#00DFA5]/30 bg-[#686D76] p-4">
+              <div className="rounded-xl border border-[#10B981]/30 bg-[#475569] p-4">
                 <div className="flex justify-between text-xs">
                   <span>Points gagnés</span>
 
@@ -1439,16 +1439,16 @@ export default function Loyalty() {
               </p>
 
               <div className="mt-3 flex items-center gap-2">
-                <Coins size={15} className="text-[#00DFA5]" />
+                <Coins size={15} className="text-[#10B981]" />
 
-                <span className="text-sm font-semibold text-[#00DFA5]">
+                <span className="text-sm font-semibold text-[#10B981]">
                   {showRewards.points_balance} points disponibles
                 </span>
               </div>
             </div>
 
             <div>
-              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-[#00DFA5]">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-[#10B981]">
                 Récompenses disponibles
               </p>
 
@@ -1464,7 +1464,7 @@ export default function Loyalty() {
                       className="rounded-xl border border-ink/5 bg-[#111111] p-4"
                     >
                       <div className="flex items-start gap-3">
-                        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#686D76] text-[#00DFA5]">
+                        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#475569] text-[#10B981]">
                           <Gift size={18} />
                         </div>
 
@@ -1479,7 +1479,7 @@ export default function Loyalty() {
                             </p>
                           )}
 
-                          <p className="mt-2 text-xs font-semibold text-[#00DFA5]">
+                          <p className="mt-2 text-xs font-semibold text-[#10B981]">
                             ⭐ {reward.points_required} points
                           </p>
 
@@ -1526,9 +1526,9 @@ export default function Loyalty() {
             onClose={closeRewardCode}
           >
             <div className="space-y-5">
-              <div className="rounded-xl border border-[#00DFA5]/30 bg-[#fdf9ef] p-4">
+              <div className="rounded-xl border border-[#10B981]/30 bg-[#fdf9ef] p-4">
                 <div className="flex items-center gap-3">
-                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#686D76] text-[#00DFA5]">
+                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#475569] text-[#10B981]">
                     <LockKeyhole size={18} />
                   </div>
 
@@ -1553,7 +1553,7 @@ export default function Loyalty() {
                   {selectedReward.name}
                 </p>
 
-                <p className="mt-2 text-xs font-semibold text-[#00DFA5]">
+                <p className="mt-2 text-xs font-semibold text-[#10B981]">
                   ⭐ {selectedReward.points_required} points
                 </p>
               </div>
@@ -1570,7 +1570,7 @@ export default function Loyalty() {
                   placeholder="Entrez le code"
                   autoFocus
                   disabled={redeeming}
-                  className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-center text-lg tracking-[0.25em] outline-none focus:border-[#00DFA5] disabled:opacity-50"
+                  className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-center text-lg tracking-[0.25em] outline-none focus:border-[#10B981] disabled:opacity-50"
                   onKeyDown={e => {
                     if (e.key === 'Enter') {
                       redeemReward();
@@ -1588,7 +1588,7 @@ export default function Loyalty() {
                   onChange={e => setInvoiceNumber(e.target.value)}
                   placeholder="FAC-2026-001"
                   disabled={redeeming}
-                  className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-[#00DFA5] disabled:opacity-50"
+                  className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-[#10B981] disabled:opacity-50"
                 />
               </div>
 
@@ -1604,7 +1604,7 @@ export default function Loyalty() {
                   onChange={e => setInvoiceAmount(e.target.value)}
                   placeholder="250"
                   disabled={redeeming}
-                  className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-[#00DFA5] disabled:opacity-50"
+                  className="mt-2 w-full rounded-xl border border-ink/10 px-4 py-3 text-sm outline-none focus:border-[#10B981] disabled:opacity-50"
                 />
               </div>
 
@@ -1616,7 +1616,7 @@ export default function Loyalty() {
                   value={paymentMethod}
                   onChange={e => setPaymentMethod(e.target.value as 'CASH' | 'CARD' | 'OTHER')}
                   disabled={redeeming}
-                  className="mt-2 w-full rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm outline-none focus:border-[#00DFA5] disabled:opacity-50"
+                  className="mt-2 w-full rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm outline-none focus:border-[#10B981] disabled:opacity-50"
                 >
                   <option value="CASH">Espèces</option>
                   <option value="CARD">Carte bancaire</option>
@@ -1640,7 +1640,7 @@ export default function Loyalty() {
                     Solde actuel
                   </span>
 
-                  <strong className="text-[#00DFA5]">
+                  <strong className="text-[#10B981]">
                     {showRewards.points_balance} points
                   </strong>
                 </div>

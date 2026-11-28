@@ -43,3 +43,6 @@ verify_jwt = false
 
 [functions.create-staff-account]
 verify_jwt = false
+
+[functions.send-loyalty-wallet-message]
+verify_jwt = true

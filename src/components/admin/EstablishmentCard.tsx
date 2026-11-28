@@ -22,8 +22,8 @@ export default function EstablishmentCard({
   const price = formatPrice(subscription?.price_mad ?? null, subscription?.interval ?? null);
 
   return (
-    <article className="group relative overflow-hidden rounded-[26px] border border-ink/6 bg-[#141414] p-5 text-left shadow-[0_8px_30px_rgba(0,0,0,0.045)] transition duration-300 hover:-translate-y-1 hover:border-forest/15 hover:shadow-[0_18px_45px_rgba(0,223,165,0.12)] sm:p-6">
-      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-forest via-forest/70 to-[#686D76] opacity-70" />
+    <article className="group relative overflow-hidden rounded-[26px] border border-ink/6 bg-[#141414] p-5 text-left shadow-[0_8px_30px_rgba(0,0,0,0.045)] transition duration-300 hover:-translate-y-1 hover:border-forest/15 hover:shadow-[0_18px_45px_rgba(16, 185, 129,0.12)] sm:p-6">
+      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-forest via-forest/70 to-[#475569] opacity-70" />
 
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-center gap-4">
@@ -34,9 +34,9 @@ export default function EstablishmentCard({
               className="h-14 w-14 shrink-0 rounded-2xl border border-ink/5 bg-[#1A1A1A] object-cover"
             />
           ) : (
-            <div className="relative grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[#0D0D0D] text-[#00DFA5] shadow-lg shadow-forest/10">
+            <div className="relative grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[#0D0D0D] text-[#10B981] shadow-lg shadow-forest/10">
               <Building2 size={21} strokeWidth={1.8} />
-              <span className="absolute -bottom-1 -right-1 grid h-5 w-5 place-items-center rounded-full border-2 border-[#00DFA5] bg-[#686D76]">
+              <span className="absolute -bottom-1 -right-1 grid h-5 w-5 place-items-center rounded-full border-2 border-[#10B981] bg-[#475569]">
                 <Sparkles size={9} className="text-forest" />
               </span>
             </div>
@@ -75,9 +75,9 @@ export default function EstablishmentCard({
             className={[
               'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold',
               isActive
-                ? 'bg-[#686D76]/12 text-[#00DFA5]'
+                ? 'bg-[#475569]/12 text-[#10B981]'
                 : isTrial
-                  ? 'bg-[#686D76]/15 text-[#00DFA5]'
+                  ? 'bg-[#475569]/15 text-[#10B981]'
                   : 'bg-ink/5 text-ink/55',
             ].join(' ')}
           >

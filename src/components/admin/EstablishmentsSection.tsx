@@ -58,8 +58,8 @@ export default function EstablishmentsSection({
 
   return (
     <div className="space-y-7">
-      <div className="relative overflow-hidden rounded-[28px] border border-ink/5 bg-forest p-6 text-white shadow-[0_18px_60px_rgba(0,223,165,0.14)] sm:p-8">
-        <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-[#686D76]/10 blur-2xl" />
+      <div className="relative overflow-hidden rounded-[28px] border border-ink/5 bg-forest p-6 text-white shadow-[0_18px_60px_rgba(16, 185, 129,0.14)] sm:p-8">
+        <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-[#475569]/10 blur-2xl" />
         <div className="absolute -bottom-24 left-1/3 h-48 w-48 rounded-full bg-[#141414]/5 blur-3xl" />
 
         <div className="relative flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
@@ -113,12 +113,12 @@ export default function EstablishmentsSection({
           </p>
         </div>
 
-        <div className="rounded-2xl border border-[#00DFA5]/20 bg-[#1A1A1A] p-4 shadow-soft">
+        <div className="rounded-2xl border border-[#10B981]/20 bg-[#1A1A1A] p-4 shadow-soft">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink/40">
               Vue
             </span>
-            <Activity size={16} className="text-[#00DFA5]" />
+            <Activity size={16} className="text-[#10B981]" />
           </div>
           <p className="mt-2 text-2xl font-semibold text-ink">{filtered.length}</p>
           <p className="mt-1 text-[10px] text-ink/35">
@@ -166,8 +166,8 @@ export default function EstablishmentsSection({
       </div>
 
       {error ? (
-        <div className="rounded-3xl border border-[#00DFA5]/25 bg-[#141414] p-8 text-center">
-          <p className="text-sm font-semibold text-[#00DFA5]">
+        <div className="rounded-3xl border border-[#10B981]/25 bg-[#141414] p-8 text-center">
+          <p className="text-sm font-semibold text-[#10B981]">
             Impossible de charger les établissements.
           </p>
           <p className="mt-1 text-xs text-[#B0B0B0]/60">{error.message}</p>

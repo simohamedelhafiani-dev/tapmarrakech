@@ -84,7 +84,7 @@ export default function Onboarding() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[var(--kelyani-bg)] px-5 py-12 text-[var(--kelyani-text)]">
+    <main className="ky-site-bg flex min-h-screen items-center justify-center bg-[var(--kelyani-bg)] px-5 py-12 text-[var(--kelyani-text)]">
       <section className="w-full max-w-xl rounded-3xl border border-[var(--kelyani-border)] bg-[var(--kelyani-panel)] p-6 shadow-2xl sm:p-10">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--kelyani-accent)]">KELYANI · Première connexion</p>
         <h1 className="mt-4 font-display text-3xl text-[var(--kelyani-accent)] sm:text-4xl">Bienvenue dans votre espace.</h1>

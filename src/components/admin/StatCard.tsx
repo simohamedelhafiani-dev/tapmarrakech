@@ -12,9 +12,9 @@ type StatCardProps = {
 };
 
 const iconToneClasses: Record<NonNullable<StatCardProps['iconTone']>, string> = {
-  indigo: 'bg-[#686D76] text-[#00DFA5]',
-  emerald: 'bg-[#686D76] text-[#00DFA5]',
-  amber: 'bg-[#686D76] text-[#00DFA5]',
+  indigo: 'bg-[#475569] text-[#10B981]',
+  emerald: 'bg-[#475569] text-[#10B981]',
+  amber: 'bg-[#475569] text-[#10B981]',
 };
 
 function TrendIndicator({ value, label }: { value: number; label?: string }) {
@@ -22,7 +22,7 @@ function TrendIndicator({ value, label }: { value: number; label?: string }) {
   const Icon = positive ? TrendingUp : TrendingDown;
 
   return (
-    <div className={['mt-3 inline-flex items-center gap-1.5 text-xs font-semibold', positive ? 'text-[#00DFA5]' : 'text-[#B0B0B0]'].join(' ')}>
+    <div className={['mt-3 inline-flex items-center gap-1.5 text-xs font-semibold', positive ? 'text-[#10B981]' : 'text-[#B0B0B0]'].join(' ')}>
       <Icon size={14} strokeWidth={2.1} />
       <span>{positive ? '+' : ''}{value.toFixed(0)}%{label ? ` ${label}` : ' vs période précédente'}</span>
     </div>
@@ -32,7 +32,7 @@ function TrendIndicator({ value, label }: { value: number; label?: string }) {
 export default function StatCard({ label, value, icon: Icon, iconTone = 'indigo', trend, trendLabel, hint }: StatCardProps) {
   return (
     <article
-      className="group relative overflow-hidden rounded-2xl border border-[#00DFA5]/40 bg-[#686D76] p-6 shadow-[0_18px_45px_rgba(0,0,0,0.055),0_3px_10px_rgba(0,0,0,0.045)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-0.5 hover:border-[#00DFA5]/15 hover:shadow-[0_24px_55px_rgba(0,0,0,0.075),0_5px_14px_rgba(0,0,0,0.055)]"
+      className="group relative overflow-hidden rounded-2xl border border-[#10B981]/40 bg-[#475569] p-6 shadow-[0_18px_45px_rgba(0,0,0,0.055),0_3px_10px_rgba(0,0,0,0.045)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-0.5 hover:border-[#10B981]/15 hover:shadow-[0_24px_55px_rgba(0,0,0,0.075),0_5px_14px_rgba(0,0,0,0.055)]"
     >
       <div className="flex items-start justify-between gap-5">
         <div className="min-w-0">
@@ -49,7 +49,7 @@ export default function StatCard({ label, value, icon: Icon, iconTone = 'indigo'
           <Icon size={20} strokeWidth={1.9} />
         </div>
       </div>
-      <div className="pointer-events-none absolute -right-10 -top-10 h-24 w-24 rounded-full bg-[#686D76]/[0.025] blur-2xl transition-opacity duration-200 group-hover:opacity-100" />
+      <div className="pointer-events-none absolute -right-10 -top-10 h-24 w-24 rounded-full bg-[#475569]/[0.025] blur-2xl transition-opacity duration-200 group-hover:opacity-100" />
     </article>
   );
 }

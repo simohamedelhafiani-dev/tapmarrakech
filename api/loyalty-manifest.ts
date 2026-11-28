@@ -35,8 +35,8 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     start_url: startUrl,
     scope: '/',
     display: 'standalone',
-    background_color: '#f7f7f3',
-    theme_color: '#17352a',
+    background_color: '#050505',
+    theme_color: '#050505',
     icons: logo
       ? [
           {

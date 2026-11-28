@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { DashboardLayout } from '@/components/DashboardLayout';
+import { AppMotion } from '@/components/AppMotion';
 import SubscriptionGuard from '@/components/SubscriptionGuard';
 import type { SubscriptionFeature } from '@/lib/subscriptionAccess';
 import { supabase } from '@/lib/supabase';
@@ -235,6 +236,7 @@ function App() {
   return (
     <LanguageProvider>
       <BrowserRouter>
+        <AppMotion />
         <AuthProvider>
           <Routes>
           <Route path="/legal" element={<Legal />} />

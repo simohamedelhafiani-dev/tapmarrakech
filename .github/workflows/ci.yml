@@ -168,6 +168,7 @@ jobs:
             supabase/functions/google-wallet-publish-design/index.ts \
             supabase/functions/import-menu/index.ts \
             supabase/functions/send-loyalty-notification-push/index.ts \
+            supabase/functions/send-loyalty-wallet-message/index.ts \
             supabase/functions/smart-marketing-scan/index.ts \
             supabase/functions/smart-marketing-dispatch/index.ts \
             supabase/functions/smart-nearby-event/index.ts \

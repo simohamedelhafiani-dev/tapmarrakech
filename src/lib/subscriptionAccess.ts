@@ -36,17 +36,17 @@ export type SubscriptionTheme = {
 export function getSubscriptionTheme(access: SubscriptionAccess | null | undefined): SubscriptionTheme {
   // All plans use the KELYANI visual system; subscription status changes access, not brand identity.
   if (!access || access.subscription_status === 'trial') {
-    return { primary: '#050505', primaryHover: '#1A1A1A', accent: '#00DFA5', sidebar: '#050505' };
+    return { primary: '#050505', primaryHover: '#1A1A1A', accent: '#10B981', sidebar: '#050505' };
   }
 
   const name = access.plan_name.trim().toLowerCase();
   if (name === 'basic') {
-    return { primary: '#050505', primaryHover: '#1A1A1A', accent: '#00DFA5', sidebar: '#050505' };
+    return { primary: '#050505', primaryHover: '#1A1A1A', accent: '#10B981', sidebar: '#050505' };
   }
   if (name === 'enterprise') {
-    return { primary: '#050505', primaryHover: '#1A1A1A', accent: '#00DFA5', sidebar: '#050505' };
+    return { primary: '#050505', primaryHover: '#1A1A1A', accent: '#10B981', sidebar: '#050505' };
   }
-  return { primary: '#050505', primaryHover: '#1A1A1A', accent: '#00DFA5', sidebar: '#050505' };
+  return { primary: '#050505', primaryHover: '#1A1A1A', accent: '#10B981', sidebar: '#050505' };
 }
 
 const FEATURE_ALIASES: Record<SubscriptionFeature, string[]> = {

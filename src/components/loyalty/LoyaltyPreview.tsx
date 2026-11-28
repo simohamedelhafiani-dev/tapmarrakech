@@ -45,6 +45,9 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
             rewardName: config.rewardName ?? undefined,
             rewardDescription: config.rewardDescription ?? undefined,
             discountPercent: config.discountPercent ?? undefined,
+            discountPointsThreshold: config.discountPointsThreshold ?? undefined,
+            qr_size: config.qrSize,
+            qr_frame: config.qrFrame,
             show_qr: true,
             show_points: true,
           },
@@ -57,6 +60,8 @@ export default function LoyaltyPreview({ config }: LoyaltyPreviewProps) {
           stampGoal: config.visitGoal ?? 10,
           stampRewardName: config.rewardName ?? undefined,
           discountPercent: config.discountPercent ?? undefined,
+          rewardName: config.rewardName ?? undefined,
+          rewardPointsRequired: config.rewards?.[0]?.points_required ?? undefined,
           customerName: config.customerName || 'Votre client',
           cardUrl: config.qrValue ?? undefined,
         }}

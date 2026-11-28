@@ -1,0 +1,307 @@
+/* =========================================================================
+   KELYANI brand theme — same identity as www.kelyani.com.
+   Logo colors only: emerald #10B981, teal #14B8A6, cyan #06B6D4, slate #475569.
+   Visual layer only: no layout or behavior changes.
+   ========================================================================= */
+
+:root {
+  color-scheme: dark;
+  --ky-bg: #050505;
+  --ky-panel: #0B0C0C;
+  --ky-panel-raised: #111313;
+  --ky-line: rgba(255, 255, 255, .08);
+  --ky-line-strong: rgba(255, 255, 255, .14);
+  --ky-ink: #F4F7F6;
+  --ky-ink-2: rgba(244, 247, 246, .66);
+  --ky-ink-3: rgba(244, 247, 246, .46);
+  --ky-emerald: #10B981;
+  --ky-teal: #14B8A6;
+  --ky-cyan: #06B6D4;
+  --ky-slate: #475569;
+  --ky-gradient: linear-gradient(110deg, #10B981 0%, #14B8A6 52%, #06B6D4 100%);
+  --ky-glow: 0 0 0 1px rgba(16, 185, 129, .16), 0 18px 50px -18px rgba(16, 185, 129, .45);
+
+  /* Legacy tokens still read by components */
+  --primary: #10B981;
+  --secondary: #0B0C0C;
+  --accent: #10B981;
+  --kelyani-bg: var(--ky-bg);
+  --kelyani-panel: var(--ky-panel);
+  --kelyani-panel-raised: var(--ky-panel-raised);
+  --kelyani-steel: var(--ky-slate);
+  --kelyani-border: var(--ky-line);
+  --kelyani-text: var(--ky-ink);
+  --kelyani-muted: var(--ky-ink-2);
+  --kelyani-accent: var(--ky-emerald);
+  --kelyani-accent-soft: var(--ky-teal);
+  --kelyani-accent-cyan: var(--ky-cyan);
+  --kelyani-gradient: var(--ky-gradient);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+html, body, #root { min-height: 100%; background: var(--ky-bg); color: var(--ky-ink); }
+body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+::selection { color: #04120D; background: rgba(16, 185, 129, .75); }
+:focus-visible { outline: 2px solid var(--ky-emerald) !important; outline-offset: 3px; }
+
+/* ---------- Background: black, faint grid and logo-colored glow (like the site) ---------- */
+.dashboard-depth-shell,
+.admin-depth-shell {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--ky-bg) !important;
+  --depth-shadow: 0 20px 60px -24px rgba(0, 0, 0, .8);
+  --depth-shadow-hover: 0 28px 80px -26px rgba(0, 0, 0, .85);
+}
+.dashboard-depth-shell::before,
+.admin-depth-shell::before,
+.ky-site-bg::before {
+  content: '';
+  position: fixed;
+  inset: -20vh -20vw;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(40vw 32vh at 12% 4%, rgba(16, 185, 129, .17), transparent 70%),
+    radial-gradient(36vw 30vh at 92% 12%, rgba(6, 182, 212, .12), transparent 70%),
+    radial-gradient(46vw 34vh at 50% 110%, rgba(20, 184, 166, .11), transparent 70%);
+  animation: ky-aurora 26s ease-in-out infinite alternate;
+}
+.dashboard-depth-shell::after,
+.admin-depth-shell::after,
+.ky-site-bg::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .028) 1px, transparent 1px);
+  background-size: 64px 64px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 85%);
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 85%);
+}
+.ky-site-bg { position: relative; isolation: isolate; }
+@keyframes ky-aurora {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(2vw, -1.5vh, 0) scale(1.04); }
+  100% { transform: translate3d(-2vw, 1.5vh, 0) scale(1); }
+}
+
+/* ---------- Typography: Inter, heavy tight titles in the logo gradient ---------- */
+#root { color: var(--ky-ink); font-family: 'Inter', system-ui, sans-serif; }
+#root h1, #root h2, #root h3, #root h4, #root h5, #root h6 { color: var(--ky-ink); letter-spacing: -0.03em; }
+#root p, #root small, #root label, #root th { color: var(--ky-ink-2); }
+#root .font-display { font-family: 'Inter', system-ui, sans-serif; font-weight: 800; letter-spacing: -0.045em; }
+
+#root h1:not([style*="color"]),
+#root h2.font-display:not([style*="color"]),
+#root .ky-gradient-title {
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  background: linear-gradient(110deg, #10B981 0%, #14B8A6 35%, #06B6D4 60%, #14B8A6 80%, #10B981 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: ky-title-flow 7s ease-in-out infinite alternate;
+  display: inline-block;
+  max-width: 100%;
+  filter: drop-shadow(0 0 22px rgba(16, 185, 129, .22));
+}
+@keyframes ky-title-flow {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
+/* h1 titles are display-sized like on the site */
+#root h1:not([style*="color"]) { line-height: 1.02; }
+/* Spans inside titles keep the gradient instead of their old flat color */
+#root h1:not([style*="color"]) *,
+#root h2.font-display:not([style*="color"]) * { -webkit-text-fill-color: transparent; }
+#root h1 svg, #root h2 svg { -webkit-text-fill-color: initial; color: var(--ky-emerald); }
+
+/* Small uppercase labels (eyebrows) in emerald, like the site */
+#root [class*="uppercase"][class*="tracking-"]:is(p, span):not([style*="color"]) { color: var(--ky-emerald); }
+#root [class*="uppercase"][class*="tracking-"][class*="text-[#B0B0B0]"],
+#root [class*="uppercase"][class*="tracking-"][class*="text-white/"] { color: var(--ky-ink-3) !important; }
+
+/* Big numbers: tight Inter, like the site figures */
+#root [class*="text-2xl"][class*="font-semibold"],
+#root [class*="text-3xl"][class*="font-semibold"],
+#root [class*="text-4xl"][class*="font-semibold"] { letter-spacing: -0.04em; font-weight: 700; }
+
+/* Muted greys follow the site ink scale */
+#root [class~="text-[#B0B0B0]"], #root [class*="text-[#B0B0B0]/"],
+#root [class~="text-gray-400"], #root [class~="text-gray-500"],
+#root [class~="text-slate-400"], #root [class~="text-slate-500"],
+#root [class~="text-zinc-400"], #root [class~="text-neutral-400"] { color: var(--ky-ink-2) !important; }
+#root input::placeholder, #root textarea::placeholder { color: var(--ky-ink-3) !important; opacity: 1; }
+
+/* Accent texts stay in the logo palette (no more forced blue) */
+#root .text-forest, #root .text-electric { color: var(--ky-emerald) !important; }
+
+/* ---------- Cards: near-black glass, hairline border, emerald glow on hover ---------- */
+#root [class*="rounded-2xl"][class*="border"],
+#root [class*="rounded-3xl"][class*="border"],
+#root [class*="rounded-[22px]"][class*="border"],
+#root [class*="rounded-[24px]"][class*="border"],
+#root [class*="rounded-[28px]"][class*="border"] {
+  border-color: var(--ky-line);
+  box-shadow: var(--depth-shadow, 0 20px 60px -24px rgba(0, 0, 0, .8)), inset 0 1px 0 rgba(255, 255, 255, .045) !important;
+  transition: border-color 220ms ease, box-shadow 220ms ease, transform 220ms ease !important;
+}
+.dashboard-depth-shell [class*="rounded-2xl"][class*="border"]:is(article, section, div[class*="p-"]),
+.dashboard-depth-shell [class*="rounded-3xl"][class*="border"]:is(article, section, div[class*="p-"]),
+.dashboard-depth-shell [class*="rounded-[2"][class*="border"]:is(article, section, div[class*="p-"]),
+.admin-depth-shell [class*="rounded-2xl"][class*="border"]:is(article, section, div[class*="p-"]),
+.admin-depth-shell [class*="rounded-3xl"][class*="border"]:is(article, section, div[class*="p-"]) {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, 0) 60%);
+}
+@media (hover: hover) and (pointer: fine) {
+  #root article[class*="rounded-"][class*="border"]:hover,
+  #root section[class*="rounded-"][class*="border"]:hover,
+  #root div[class*="rounded-2xl"][class*="border"][class*="p-"]:hover,
+  #root div[class*="rounded-3xl"][class*="border"][class*="p-"]:hover {
+    border-color: rgba(16, 185, 129, .38) !important;
+    box-shadow: var(--depth-shadow-hover, 0 28px 80px -26px rgba(0, 0, 0, .85)), 0 0 0 1px rgba(16, 185, 129, .1), 0 22px 60px -30px rgba(16, 185, 129, .55), inset 0 1px 0 rgba(255, 255, 255, .06) !important;
+  }
+}
+/* Accent-bordered blocks keep a visible but soft emerald line */
+#root [class*="border-[#10B981]"],
+#root [class*="border-[#14B8A6]"],
+#root [class*="border-[#06B6D4]"],
+#root [class*="border-forest"] { border-color: rgba(16, 185, 129, .3) !important; }
+#root [class*="border-[#242424]"] { border-color: var(--ky-line) !important; }
+
+/* Solid grey fills become dark glass; tinted fills become a soft emerald tint */
+#root [class~="bg-[#475569]"]:not(button):not(a),
+#root [class~="bg-electric"]:not(button):not(a),
+#root .bg-cream, #root .bg-forest-light { background-color: var(--ky-panel-raised) !important; background-image: none !important; }
+#root [class*="bg-[#475569]/"],
+#root [class*="bg-[#10B981]/"],
+#root [class*="bg-[#14B8A6]/"],
+#root [class*="bg-[#06B6D4]/"],
+#root [class*="bg-forest/"] { background-color: rgba(16, 185, 129, .08) !important; background-image: none !important; }
+#root .bg-forest { background-color: var(--ky-bg) !important; }
+
+/* ---------- Buttons: site pill gradient with glow and light sweep ---------- */
+#root button[class*="bg-[#10B981]"]:not([class*="bg-[#10B981]/"]),
+#root a[class*="bg-[#10B981]"]:not([class*="bg-[#10B981]/"]),
+#root button[class~="bg-[#475569]"],
+#root a[class~="bg-[#475569]"],
+#root button[class*="bg-electric"],
+#root a[class*="bg-electric"],
+#root button[class*="from-[#10B981]"],
+#root button[class*="from-[#06B6D4]"],
+#root a[class*="from-[#10B981]"] {
+  background: var(--ky-gradient) !important;
+  color: #04120D !important;
+  border-color: transparent !important;
+  font-weight: 600;
+  box-shadow: 0 12px 32px -14px rgba(16, 185, 129, .8), inset 0 1px 0 rgba(255, 255, 255, .3) !important;
+}
+#root button[class*="bg-[#10B981]"]:not([class*="bg-[#10B981]/"]) *,
+#root a[class*="bg-[#10B981]"]:not([class*="bg-[#10B981]/"]) *,
+#root button[class~="bg-[#475569]"] *,
+#root a[class~="bg-[#475569]"] * { color: #04120D !important; }
+@media (hover: hover) and (pointer: fine) {
+  #root button[class*="bg-[#10B981]"]:not([class*="bg-[#10B981]/"]):hover,
+  #root a[class*="bg-[#10B981]"]:not([class*="bg-[#10B981]/"]):hover,
+  #root button[class~="bg-[#475569]"]:hover,
+  #root a[class~="bg-[#475569]"]:hover {
+    background:
+      linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, .35) 50%, transparent 70%) 0 0 / 220% 100% no-repeat,
+      var(--ky-gradient) !important;
+    animation: ky-sheen 900ms ease forwards;
+    transform: translateY(-1px);
+    box-shadow: 0 16px 40px -14px rgba(16, 185, 129, .95), inset 0 1px 0 rgba(255, 255, 255, .35) !important;
+  }
+}
+@keyframes ky-sheen {
+  from { background-position: 120% 0, 0 0; }
+  to { background-position: -20% 0, 0 0; }
+}
+
+/* ---------- Inputs: dark glass, emerald focus ---------- */
+#root input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+#root textarea,
+#root select {
+  color: var(--ky-ink) !important;
+  color-scheme: dark;
+}
+#root input[class*="border"]:not([type="checkbox"]):not([type="radio"]),
+#root textarea[class*="border"],
+#root select[class*="border"] {
+  background-color: rgba(255, 255, 255, .03) !important;
+  border-color: rgba(255, 255, 255, .1) !important;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+#root input[class*="border"]:focus,
+#root textarea[class*="border"]:focus,
+#root select[class*="border"]:focus {
+  border-color: rgba(16, 185, 129, .6) !important;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, .14) !important;
+  outline: none;
+}
+#root input[type="checkbox"], #root input[type="radio"] { accent-color: var(--ky-emerald); }
+
+/* ---------- Glass surfaces: menus, dialogs, top bar, bottom nav ---------- */
+.kelyani-nav-glass, [role="menu"], [role="dialog"],
+[data-radix-popper-content-wrapper] > * {
+  background: rgba(8, 9, 9, .9) !important;
+  border-color: var(--ky-line) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+}
+.dashboard-depth-topbar {
+  background: rgba(5, 5, 5, .72) !important;
+  border-bottom-color: var(--ky-line) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: 0 1px 0 rgba(16, 185, 129, .16), 0 14px 40px -28px rgba(6, 182, 212, .5);
+}
+#root nav[class*="fixed"][class*="bottom-"] > *,
+#root [class*="fixed"][class*="bottom-0"] { -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); }
+
+/* Tables */
+#root table { border-color: var(--ky-line); }
+#root thead th { color: var(--ky-ink-3) !important; letter-spacing: .12em; }
+#root tbody tr:hover { background: rgba(16, 185, 129, .04); }
+
+/* ---------- 3D sphere (auth pages) ---------- */
+.ky-hero-scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* ---------- Motion: gentle reveals and scroll progress ---------- */
+.ky-reveal:not(.ky-in) { opacity: 0; transform: translate3d(0, 16px, 0); }
+.ky-reveal {
+  transition: opacity 560ms cubic-bezier(.2, .7, .2, 1), transform 560ms cubic-bezier(.2, .7, .2, 1);
+  transition-delay: var(--ky-delay, 0ms);
+}
+.ky-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 2px;
+  z-index: 70;
+  pointer-events: none;
+  transform-origin: 0 50%;
+  transform: scaleX(var(--ky-progress, 0));
+  background: var(--ky-gradient);
+  box-shadow: 0 0 12px rgba(16, 185, 129, .6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-depth-shell::before,
+  .admin-depth-shell::before,
+  .ky-site-bg::before,
+  #root h1, #root h2.font-display, #root .ky-gradient-title { animation: none !important; }
+  .ky-reveal:not(.ky-in) { opacity: 1; transform: none; }
+  .ky-progress { display: none; }
+}

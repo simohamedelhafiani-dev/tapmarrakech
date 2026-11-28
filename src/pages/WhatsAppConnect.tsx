@@ -330,13 +330,13 @@ export default function WhatsAppConnect() {
 
   return (
     <main className="mx-auto w-full max-w-4xl p-4 text-white md:p-8">
-      <section className="rounded-2xl border border-[#686D76] bg-[#121212] p-6 md:p-8">
+      <section className="rounded-2xl border border-[#475569] bg-[#121212] p-6 md:p-8">
         <div className="mb-2 text-sm bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">KELYANI WhatAI</div>
         <h1 className="text-2xl font-semibold">Connecter WhatsApp Business</h1>
         <p className="mt-2 text-sm text-gray-400">
           Chaque établissement connecte son propre compte WhatsApp Business via Meta. Votre numéro personnel n’est pas utilisé.
         </p>
-        <a href={inboxPath} className="mt-4 inline-flex rounded-xl border border-[#686D76] px-4 py-2 text-sm text-[#60A5FA] hover:border-[#3B82F6]">Ouvrir la boîte WhatsApp →</a>
+        <a href={inboxPath} className="mt-4 inline-flex rounded-xl border border-[#475569] px-4 py-2 text-sm text-[#60A5FA] hover:border-[#06B6D4]">Ouvrir la boîte WhatsApp →</a>
         {loading ? (
           <p className="mt-6 text-gray-400">Chargement des établissements…</p>
         ) : establishments.length === 0 ? (
@@ -346,7 +346,7 @@ export default function WhatsAppConnect() {
             <label className="mt-6 block text-sm font-medium" htmlFor="establishment">Établissement</label>
             <select
               id="establishment"
-              className="mt-2 w-full rounded-xl border border-[#686D76] bg-[#202020] p-3"
+              className="mt-2 w-full rounded-xl border border-[#475569] bg-[#202020] p-3"
               value={selectedId}
               disabled={busy}
               onChange={(event) => setSelectedId(event.target.value)}
@@ -367,7 +367,7 @@ export default function WhatsAppConnect() {
             </button>
           </>
         )}
-        {message && <p role="status" className="mt-4 rounded-lg border border-[#686D76] p-3 text-sm">{message}</p>}
+        {message && <p role="status" className="mt-4 rounded-lg border border-[#475569] p-3 text-sm">{message}</p>}
         <p className="mt-6 text-xs text-gray-500">
           Le compte et ses identifiants sont enregistrés côté serveur. L’activation de l’envoi de messages nécessite encore la configuration Meta et les étapes d’onboarding requises.
         </p>

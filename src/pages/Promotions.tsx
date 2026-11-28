@@ -38,7 +38,33 @@ const emptyForm = {
   description: '',
   normal_price: '',
   promo_price: '',
+  start_date: '',
+  end_date: '',
 };
+
+/** 'YYYY-MM-DD' typed by the merchant -> start/end of that day in the browser's time zone. */
+function validityRange(startDate: string, endDate: string) {
+  return {
+    start_at: startDate ? new Date(`${startDate}T00:00:00`).toISOString() : null,
+    end_at: endDate ? new Date(`${endDate}T23:59:59`).toISOString() : null,
+  };
+}
+
+function toDateInput(value: string | null) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+function formatValidity(start: string | null, end: string | null) {
+  const fmt = (value: string) => new Date(value).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+  if (start && end) return `Du ${fmt(start)} au ${fmt(end)}`;
+  if (end) return `Jusqu’au ${fmt(end)}`;
+  if (start) return `À partir du ${fmt(start)}`;
+  return 'Sans date de fin';
+}
 
 export default function Promotions() {
   const { user } = useAuth();
@@ -118,6 +144,8 @@ export default function Promotions() {
       description: promotion.description ?? '',
       normal_price: promotion.normal_price == null ? '' : String(promotion.normal_price),
       promo_price: promotion.promo_price == null ? '' : String(promotion.promo_price),
+      start_date: toDateInput(promotion.start_at),
+      end_date: toDateInput(promotion.end_at),
     });
     setErrorMessage('');
   }
@@ -138,11 +166,15 @@ export default function Promotions() {
         (promoPrice !== null && (!Number.isFinite(promoPrice) || promoPrice < 0))) {
       setErrorMessage('Les prix doivent être des nombres positifs.'); return;
     }
+    if (form.start_date && form.end_date && form.end_date < form.start_date) {
+      setErrorMessage('La date de fin doit être après la date de début.'); return;
+    }
     setSaving(true);
     setErrorMessage('');
     const { error } = await supabase.from('promotions').update({
       name, description: form.description.trim() || null,
       normal_price: normalPrice, promo_price: promoPrice,
+      ...validityRange(form.start_date, form.end_date),
     }).eq('id', editingId).eq('establishment_id', establishmentId);
     if (error) { setErrorMessage(error.message); setSaving(false); return; }
     setEditingId(null); setForm(emptyForm);
@@ -155,6 +187,10 @@ export default function Promotions() {
 
     if (!establishmentId || !name) {
       setErrorMessage('Le nom de la promotion est obligatoire.');
+      return;
+    }
+    if (form.start_date && form.end_date && form.end_date < form.start_date) {
+      setErrorMessage('La date de fin doit être après la date de début.');
       return;
     }
 
@@ -183,6 +219,14 @@ export default function Promotions() {
       );
       setSaving(false);
       return;
+    }
+
+    const createdId = data?.promotion?.id ? String(data.promotion.id) : '';
+    if (createdId && (form.start_date || form.end_date)) {
+      const { error: validityError } = await supabase.from('promotions')
+        .update(validityRange(form.start_date, form.end_date))
+        .eq('id', createdId).eq('establishment_id', establishmentId);
+      if (validityError) setErrorMessage(`Promotion publiée, mais les dates n’ont pas pu être enregistrées : ${validityError.message}`);
     }
 
     setForm(emptyForm);
@@ -262,7 +306,7 @@ export default function Promotions() {
   if (establishments.length === 0) {
     return (
       <div className="rounded-3xl border border-ink/10 bg-[var(--kelyani-panel)] p-10 text-center">
-        <Gift className="mx-auto mb-4 text-[#00DFA5]" size={36} />
+        <Gift className="mx-auto mb-4 text-[#10B981]" size={36} />
         <h1 className="text-2xl font-semibold text-forest">Aucun établissement</h1>
         <p className="mt-2 text-sm text-ink/50">
           Crée d’abord ton établissement pour gérer ses promotions.
@@ -276,7 +320,7 @@ export default function Promotions() {
       <section className="rounded-[28px] bg-forest p-6 text-white shadow-xl md:p-8">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
-            <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#00DFA5]">
+            <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#10B981]">
               <Sparkles size={15} />
               Promotions
             </div>
@@ -311,7 +355,7 @@ export default function Promotions() {
 
       <section className="rounded-3xl border border-ink/10 bg-[var(--kelyani-panel)] p-6 shadow-sm md:p-8">
         <div className="flex items-start gap-4">
-          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#686D76]/10 text-[#00DFA5]">
+          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#475569]/10 text-[#10B981]">
             <ImageIcon size={19} />
           </div>
           <div>
@@ -366,6 +410,27 @@ export default function Promotions() {
               className="w-full rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-forest"
             />
           </label>
+
+          <label className="block">
+            <span className="mb-1.5 block text-xs font-semibold text-ink/60">Valable à partir du (facultatif)</span>
+            <input
+              value={form.start_date}
+              onChange={(event) => updateForm('start_date', event.target.value)}
+              type="date"
+              className="w-full rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-forest"
+            />
+          </label>
+
+          <label className="block">
+            <span className="mb-1.5 block text-xs font-semibold text-ink/60">Valable jusqu’au (facultatif)</span>
+            <input
+              value={form.end_date}
+              min={form.start_date || undefined}
+              onChange={(event) => updateForm('end_date', event.target.value)}
+              type="date"
+              className="w-full rounded-xl border border-ink/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-forest"
+            />
+          </label>
         </div>
 
         <div className="mt-5 flex flex-wrap justify-end gap-2">
@@ -389,7 +454,7 @@ export default function Promotions() {
       <section>
         <div className="mb-4 flex items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#00DFA5]">Publication</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#10B981]">Publication</p>
             <h2 className="mt-1 text-2xl font-semibold text-forest">Tes promotions</h2>
           </div>
           <span className="rounded-full bg-[var(--kelyani-panel)] px-3 py-1.5 text-xs font-semibold text-ink/45 ring-1 ring-ink/5">
@@ -399,7 +464,7 @@ export default function Promotions() {
 
         {promotions.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-ink/15 bg-[var(--kelyani-panel)] p-10 text-center">
-            <Plus className="mx-auto mb-3 text-[#00DFA5]" size={28} />
+            <Plus className="mx-auto mb-3 text-[#10B981]" size={28} />
             <p className="text-sm font-semibold text-forest">Aucune promotion publiée</p>
             <p className="mt-1 text-xs text-ink/45">
               La première promotion générée apparaîtra automatiquement sur la page publique.
@@ -438,10 +503,14 @@ export default function Promotions() {
                       {promotion.active ? 'Publiée' : 'Masquée'}
                     </span>
                   </div>
+                  <p className="mt-2 text-[11px] font-medium text-ink/45">
+                    {formatValidity(promotion.start_at, promotion.end_at)}
+                    {promotion.end_at && new Date(promotion.end_at).getTime() < Date.now() ? ' · expirée' : ''}
+                  </p>
 
                   <div className="mt-4 flex items-center justify-between gap-3">
                     <div>
-                      <span className="text-sm font-bold text-[#00DFA5]">
+                      <span className="text-sm font-bold text-[#10B981]">
                         {promotion.promo_price ?? '—'} MAD
                       </span>
                       {promotion.normal_price != null && (
@@ -459,7 +528,7 @@ export default function Promotions() {
                         type="button"
                         onClick={() => void regeneratePromotion(promotion)}
                         disabled={regeneratingId === promotion.id}
-                        className="inline-flex items-center gap-1.5 rounded-xl border border-[#00DFA5]/30 bg-[#686D76]/5 px-3 py-2 text-xs font-semibold text-[#00DFA5] disabled:opacity-50"
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-[#10B981]/30 bg-[#475569]/5 px-3 py-2 text-xs font-semibold text-[#10B981] disabled:opacity-50"
                       >
                         {regeneratingId === promotion.id ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
                         {regeneratingId === promotion.id ? 'Génération…' : 'Nouveau visuel'}

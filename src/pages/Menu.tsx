@@ -516,7 +516,7 @@ export default function Menu() {
   if (establishments.length === 0) {
     return (
       <div className="rounded-3xl border border-[#242424]/10 bg-[#111111] p-10 text-center">
-        <UtensilsCrossed className="mx-auto mb-4 text-[#00DFA5]" size={34} />
+        <UtensilsCrossed className="mx-auto mb-4 text-[#10B981]" size={34} />
         <h1 className="text-2xl font-semibold text-forest">
           Aucun établissement
         </h1>
@@ -533,7 +533,7 @@ export default function Menu() {
         <section className="rounded-2xl border border-[#242424]/10 bg-[#111111] p-5 shadow-sm">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#00DFA5]">Design du menu</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#10B981]">Design du menu</p>
               <h2 className="mt-1 text-lg font-semibold text-forest">Choisir un template</h2>
               <p className="mt-1 text-xs text-[#B0B0B0]/45">Les templates sont créés et publiés par l’Admin. Ici, tu choisis uniquement celui de ton établissement.</p>
             </div>
@@ -541,9 +541,9 @@ export default function Menu() {
           </div>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {menuTemplates.map((template) => (
-              <button key={template.id} type="button" onClick={() => void saveTemplate(template.id)} className={`rounded-2xl border p-4 text-left transition ${selectedTemplateId === template.id ? 'border-[#00DFA5] ring-2 ring-[#00DFA5]/15' : 'border-[#242424]/10 hover:border-[#00DFA5]/40'}`}>
-                <div className={`h-20 rounded-xl p-3 ${template.key === 'dark' ? 'bg-[#050505]' : template.key === 'luxury' ? 'bg-[#686D76]' : template.key === 'cards' ? 'bg-[#111111] border border-[#242424]/10' : 'bg-[#686D76]'}`}>
-                  <div className={`h-2 w-16 rounded-full ${template.key === 'dark' ? 'bg-[#686D76]' : 'bg-[#686D76]'}`} />
+              <button key={template.id} type="button" onClick={() => void saveTemplate(template.id)} className={`rounded-2xl border p-4 text-left transition ${selectedTemplateId === template.id ? 'border-[#10B981] ring-2 ring-[#10B981]/15' : 'border-[#242424]/10 hover:border-[#10B981]/40'}`}>
+                <div className={`h-20 rounded-xl p-3 ${template.key === 'dark' ? 'bg-[#050505]' : template.key === 'luxury' ? 'bg-[#475569]' : template.key === 'cards' ? 'bg-[#111111] border border-[#242424]/10' : 'bg-[#475569]'}`}>
+                  <div className={`h-2 w-16 rounded-full ${template.key === 'dark' ? 'bg-[#475569]' : 'bg-[#475569]'}`} />
                   <div className={`mt-3 h-2 w-3/4 rounded-full ${template.key === 'dark' ? 'bg-[#111111]/20' : 'bg-ink/10'}`} />
                   <div className={`mt-2 h-2 w-1/2 rounded-full ${template.key === 'dark' ? 'bg-[#111111]/10' : 'bg-ink/5'}`} />
                 </div>
@@ -558,7 +558,7 @@ export default function Menu() {
       <section className="rounded-[28px] bg-forest p-6 text-white shadow-xl md:p-8">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
-            <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#00DFA5]">
+            <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#10B981]">
               <UtensilsCrossed size={15} />
               Menu
             </div>
@@ -601,7 +601,7 @@ export default function Menu() {
             <button
               type="button"
               onClick={openNewCategory}
-              className="flex items-center justify-center gap-2 rounded-xl bg-[#686D76] px-4 py-3 text-sm font-semibold text-forest transition hover:brightness-105"
+              className="flex items-center justify-center gap-2 rounded-xl bg-[#475569] px-4 py-3 text-sm font-semibold text-forest transition hover:brightness-105"
             >
               <Plus size={17} />
               Nouvelle catégorie
@@ -619,7 +619,7 @@ export default function Menu() {
       <section className="space-y-4">
         {categories.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-[#242424]/15 bg-[#111111] p-12 text-center">
-            <UtensilsCrossed className="mx-auto mb-4 text-[#00DFA5]" size={36} />
+            <UtensilsCrossed className="mx-auto mb-4 text-[#10B981]" size={36} />
             <h2 className="text-xl font-semibold text-forest">
               Ton menu est vide
             </h2>
@@ -814,7 +814,7 @@ export default function Menu() {
                             </div>
 
                             <div className="flex items-center justify-between gap-3 md:justify-end">
-                              <p className="text-sm font-bold text-[#00DFA5]">
+                              <p className="text-sm font-bold text-[#10B981]">
                                 {item.price.toFixed(2)} MAD
                               </p>
 
@@ -868,7 +868,7 @@ export default function Menu() {
           <div className="w-full max-w-lg rounded-3xl bg-[#111111] p-6 shadow-2xl">
             <div className="mb-6 flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#00DFA5]">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#10B981]">
                   Menu
                 </p>
                 <h2 className="mt-1 text-xl font-semibold text-forest">
@@ -901,7 +901,7 @@ export default function Menu() {
                     }))
                   }
                   placeholder="Ex. Burgers"
-                  className="w-full rounded-xl border border-[#242424]/10 px-4 py-3 text-sm outline-none focus:border-[#00DFA5]"
+                  className="w-full rounded-xl border border-[#242424]/10 px-4 py-3 text-sm outline-none focus:border-[#10B981]"
                   autoFocus
                 />
               </label>
@@ -920,7 +920,7 @@ export default function Menu() {
                   }
                   rows={3}
                   placeholder="Une courte présentation de la catégorie"
-                  className="w-full resize-none rounded-xl border border-[#242424]/10 px-4 py-3 text-sm outline-none focus:border-[#00DFA5]"
+                  className="w-full resize-none rounded-xl border border-[#242424]/10 px-4 py-3 text-sm outline-none focus:border-[#10B981]"
                 />
               </label>
 
@@ -942,7 +942,7 @@ export default function Menu() {
           <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-[#111111] p-6 shadow-2xl">
             <div className="mb-6 flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#00DFA5]">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#10B981]">
                   Menu
                 </p>
                 <h2 className="mt-1 text-xl font-semibold text-forest">
@@ -972,7 +972,7 @@ export default function Menu() {
                       categoryId: event.target.value,
                     }))
                   }
-                  className="w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#00DFA5]"
+                  className="w-full rounded-xl border border-[#242424]/10 bg-[#111111] px-4 py-3 text-sm outline-none focus:border-[#10B981]"
                 >
                   <option value="">Choisir une catégorie</option>
                   {categories.map((category) => (
@@ -996,7 +996,7 @@ export default function Menu() {
                     }))
                   }
                   placeholder="Ex. Cheeseburger"
-                  className="w-full rounded-xl border border-[#242424]/10 px-4 py-3 text-sm outline-none focus:border-[#00DFA5]"
+                  className="w-full rounded-xl border border-[#242424]/10 px-4 py-3 text-sm outline-none focus:border-[#10B981]"
                   autoFocus
                 />
               </label>
@@ -1015,7 +1015,7 @@ export default function Menu() {
                   }
                   inputMode="decimal"
                   placeholder="69"
-                  className="w-full rounded-xl border border-[#242424]/10 px-4 py-3 text-sm outline-none focus:border-[#00DFA5]"
+                  className="w-full rounded-xl border border-[#242424]/10 px-4 py-3 text-sm outline-none focus:border-[#10B981]"
                 />
               </label>
 
@@ -1032,7 +1032,7 @@ export default function Menu() {
                     }))
                   }
                   placeholder="https://…"
-                  className="w-full rounded-xl border border-[#242424]/10 px-4 py-3 text-sm outline-none focus:border-[#00DFA5]"
+                  className="w-full rounded-xl border border-[#242424]/10 px-4 py-3 text-sm outline-none focus:border-[#10B981]"
                 />
               </label>
 
@@ -1050,7 +1050,7 @@ export default function Menu() {
                   }
                   rows={4}
                   placeholder="Décris le produit simplement. L’IA pourra aider à reformuler plus tard."
-                  className="w-full resize-none rounded-xl border border-[#242424]/10 px-4 py-3 text-sm outline-none focus:border-[#00DFA5]"
+                  className="w-full resize-none rounded-xl border border-[#242424]/10 px-4 py-3 text-sm outline-none focus:border-[#10B981]"
                 />
               </label>
 

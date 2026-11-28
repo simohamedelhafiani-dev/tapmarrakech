@@ -129,7 +129,7 @@ export default function Analytics() {
   return (
     <div>
       <div className="mb-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#00DFA5]">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#10B981]">
           Comprendre votre audience
         </p>
         <h1 className="mt-2 font-display text-4xl text-forest">Analytics</h1>
@@ -227,7 +227,7 @@ export default function Analytics() {
                 <Bar
                   dataKey="total"
                   name="Avis"
-                  fill="#686D76"
+                  fill="#475569"
                   radius={[5, 5, 0, 0]}
                 />
               </BarChart>
@@ -258,7 +258,7 @@ export default function Analytics() {
                     <Cell
                       key={i}
                       fill={
-                        ['#00DFA5', '#686D76', '#686D76', '#686D76', '#686D76'][i]
+                        ['#10B981', '#475569', '#475569', '#475569', '#475569'][i]
                       }
                     />
                   ))}
@@ -279,7 +279,7 @@ export default function Analytics() {
                     className="h-2 w-2 rounded-full"
                     style={{
                       background:
-                        ['#00DFA5', '#686D76', '#686D76', '#686D76', '#686D76'][i],
+                        ['#10B981', '#475569', '#475569', '#475569', '#475569'][i],
                     }}
                   />
                   {item.name}
@@ -334,7 +334,7 @@ function Metric({
 }) {
   return (
     <div className="rounded-2xl border border-ink/5 bg-white p-5 shadow-soft">
-      <Icon size={18} className="text-[#00DFA5]" />
+      <Icon size={18} className="text-[#10B981]" />
       <p className="mt-5 text-xs text-ink/45">{label}</p>
       <p className="mt-1 font-display text-3xl text-forest">{value}</p>
       <p className="mt-1 text-[11px] text-ink/40">{detail}</p>
